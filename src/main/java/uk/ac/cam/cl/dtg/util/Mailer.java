@@ -197,7 +197,8 @@ public class Mailer {
 
       // Configure the SMTP server settings:
       p.put("mail.smtp.host", smtpAddress);
-      p.put("mail.smtp.starttls.enable", "true");
+      p.put("mail.smtp.starttls.required", "true");
+      p.put("mail.smtp.ssl.checkserveridentity", "true");
 
       // Configure the email headers and routing:
       String envelopeFrom = mailAddress;
