@@ -80,6 +80,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.jetty.http.HttpCookie.SAME_SITE_LAX_COMMENT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 
 /**
@@ -512,7 +513,7 @@ public class UserAuthenticationManager {
             logoutCookie.setMaxAge(0);  // This will lead to it being removed by the browser immediately.
             logoutCookie.setHttpOnly(true);
             logoutCookie.setSecure(setSecureCookies);
-            // TODO - set sameSite=Lax at minimum when Jetty supports this (9.4.x)
+            logoutCookie.setComment(SAME_SITE_LAX_COMMENT);
 
             response.addCookie(logoutCookie);  // lgtm [java/insecure-cookie]  false positive due to conditional above!
         } catch (IllegalStateException e) {
@@ -932,7 +933,7 @@ public class UserAuthenticationManager {
             authCookie.setPath("/");
             authCookie.setHttpOnly(true);
             authCookie.setSecure(setSecureCookies);
-            // TODO - set sameSite=Lax at minimum when Jetty supports this (9.4.x)
+            authCookie.setComment(SAME_SITE_LAX_COMMENT);
 
             log.debug(String.format("Creating AuthCookie for user (%s) with value %s", userId, authCookie.getValue()));
 
