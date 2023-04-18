@@ -17,7 +17,6 @@ package uk.ac.cam.cl.dtg.isaac.api;
 
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.opencsv.CSVWriter;
@@ -561,32 +560,8 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             }
             Collections.addAll(totalsRow, ",Correct %".split(","));
 
-            Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = new HashMap<>();
+            Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = getUserQuestionMap(questionAttemptsForAllUsersOfInterest);
 
-            // FIXME vvv This is duplicated code vvv
-            // This is properly horrible, can someone rewrite this whole thing?
-            questionAttemptsForAllUsersOfInterest.forEach((user, attempts) -> {
-                Map<String, List<LightweightQuestionValidationResponse>> attemptsByQuestionId = new HashMap<>();
-                for (String pageId : attempts.keySet()) {
-                    Map<String, List<LightweightQuestionValidationResponse>> a = attempts.get(pageId);
-                    for (String questionId : a.keySet()) {
-                        List l = a.get(questionId);
-                        attemptsByQuestionId.put(questionId, l);
-                    }
-                }
-                Map<String, Integer> userAttemptsSummary = attemptsByQuestionId.entrySet().stream().collect(
-                        Collectors.toMap(
-                                Entry::getKey,
-                                e -> e.getValue().stream().map(LightweightQuestionValidationResponse::isCorrect)
-                                        .reduce(false, (a, b) -> a || b)
-                        )
-                ).entrySet().stream().collect(Collectors.toMap(
-                        Entry::getKey,
-                        e -> e.getValue() ? 1 : 0
-                ));
-                userQuestionDataMap.put(user, userAttemptsSummary);
-            });
-            // FIXME ^^^ This is duplicated code ^^^
             userQuestionDataMap.forEach((user, outcome) -> {
                 questionIds.forEach(questionId -> {
                     outcome.putIfAbsent(questionId, null);
@@ -746,32 +721,8 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             }
 
             for (GameboardDTO gameboard : gameboards) {
-                Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = new HashMap<>();
+                Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = getUserQuestionMap(questionAttemptsForAllUsersOfInterest);
 
-                // FIXME vvv This is duplicated code vvv
-                // This is properly horrible, can someone rewrite this whole thing?
-                questionAttemptsForAllUsersOfInterest.forEach((user, attempts) -> {
-                    Map<String, List<LightweightQuestionValidationResponse>> attemptsByQuestionId = new HashMap<>();
-                    for (String pageId : attempts.keySet()) {
-                        Map<String, List<LightweightQuestionValidationResponse>> a = attempts.get(pageId);
-                        for (String questionId : a.keySet()) {
-                            List l = a.get(questionId);
-                            attemptsByQuestionId.put(questionId, l);
-                        }
-                    }
-                    Map<String, Integer> userAttemptsSummary = attemptsByQuestionId.entrySet().stream().collect(
-                            Collectors.toMap(
-                                    Entry::getKey,
-                                    e -> e.getValue().stream().map(LightweightQuestionValidationResponse::isCorrect)
-                                            .reduce(false, (a, b) -> a || b)
-                            )
-                    ).entrySet().stream().collect(Collectors.toMap(
-                            Entry::getKey,
-                            e -> e.getValue() ? 1 : 0
-                    ));
-                    userQuestionDataMap.put(user, userAttemptsSummary);
-                });
-                // FIXME ^^^ This is duplicated code ^^^
                 for (RegisteredUserDTO student : userQuestionDataMap.keySet()) {
                     Map<GameboardDTO, Map<String, Integer>> entry = grandTable.get(student);
                     if (null == entry) {
@@ -1196,5 +1147,21 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             log.error("Database error while trying to delete assignment", e);
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unknown database error.").toResponse();
         }
+    }
+
+    private static Map<RegisteredUserDTO, Map<String, Integer>> getUserQuestionMap(
+            Map<RegisteredUserDTO, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> questionAttemptsForAllUsersOfInterest
+    ) {
+        return questionAttemptsForAllUsersOfInterest.entrySet().stream().collect(
+                Collectors.toMap(
+                        Entry::getKey,
+                        userQuestionPagesEntry -> userQuestionPagesEntry.getValue().values().stream().flatMap(p -> p.entrySet().stream()).collect(
+                                Collectors.toMap(
+                                        Entry::getKey,
+                                        pageQuestionsEntry -> pageQuestionsEntry.getValue().stream().anyMatch(LightweightQuestionValidationResponse::isCorrect) ? 1 : 0
+                                )
+                        )
+                )
+        );
     }
 }
