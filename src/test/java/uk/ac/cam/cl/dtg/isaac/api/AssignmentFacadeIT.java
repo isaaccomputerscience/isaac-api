@@ -450,10 +450,11 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
         String downloadAssignmentContents = downloadAssignmentResponse.getEntity().toString();
         
         // Note that the first two lines have a trailing whitespace. If your IDE automatically removes these from the expected file it may cause a mismatch
-        FileInputStream expectedFile = new FileInputStream("src/test/resources/expected_assignment_export.csv");
-        String expectedContents = IOUtils.toString(expectedFile);
+        try (FileInputStream expectedFile = new FileInputStream("src/test/resources/expected_assignment_export.csv");) {
+            String expectedContents = IOUtils.toString(expectedFile);
 
-        assertEquals(expectedContents, downloadAssignmentContents);
+            assertEquals(expectedContents, downloadAssignmentContents);
+        }
     }
 
     @Test public void getAssignmentProgressDownloadCSV_permissionDenied() throws Exception {
