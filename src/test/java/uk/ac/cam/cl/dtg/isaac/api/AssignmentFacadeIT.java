@@ -47,10 +47,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.*;
 
 import static java.lang.Thread.sleep;
 import static org.easymock.EasyMock.*;
@@ -66,7 +64,7 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
     @Before
     public void setUp() throws Exception {
         // mock the current date/time
-        Calendar mockCurrentDateTime = Calendar.getInstance();
+        Calendar mockCurrentDateTime = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
         mockCurrentDateTime.set(Calendar.DAY_OF_MONTH, 1);
         mockCurrentDateTime.set(Calendar.MONTH, 6);
         mockCurrentDateTime.set(Calendar.YEAR, 2049);
@@ -305,7 +303,7 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
         // build scheduled date
         Calendar scheduledDateCalendar = Calendar.getInstance();
         scheduledDateCalendar.set(Calendar.DAY_OF_MONTH, 2);
-        scheduledDateCalendar.set(Calendar.MONTH, 6);
+        scheduledDateCalendar.set(Calendar.MONTH, 11);
         scheduledDateCalendar.set(Calendar.YEAR, 2050);
 
         // log in as Teacher, create request
