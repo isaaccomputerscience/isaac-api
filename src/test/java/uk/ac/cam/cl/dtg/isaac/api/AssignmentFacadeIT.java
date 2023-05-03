@@ -43,6 +43,7 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 import java.io.FileInputStream;
+import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.PreparedStatement;
@@ -449,7 +450,7 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
         
         // Note that the first two lines have a trailing whitespace. If your IDE automatically removes these from the expected file it may cause a mismatch
         try (FileInputStream expectedFile = new FileInputStream("src/test/resources/expected_assignment_export.csv");) {
-            String expectedContents = IOUtils.toString(expectedFile);
+            String expectedContents = IOUtils.toString(expectedFile, (Charset) null);
 
             assertEquals(expectedContents, downloadAssignmentContents);
         }
