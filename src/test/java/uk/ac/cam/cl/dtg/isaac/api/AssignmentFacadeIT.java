@@ -32,28 +32,21 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import uk.ac.cam.cl.dtg.isaac.api.services.AssignmentService;
 import uk.ac.cam.cl.dtg.isaac.dto.AssignmentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.AssignmentStatusDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.AdditionalAuthenticationRequiredException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.AuthenticationProviderMappingException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.IncorrectCredentialsProvidedException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.MFARequiredButNotConfiguredException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.*;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 import java.io.FileInputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.*;
 
-import static java.lang.Thread.sleep;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Date.class, AssignmentFacade.class})
@@ -65,7 +58,7 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
     @Before
     public void setUp() throws Exception {
         // mock the current date/time
-        Calendar mockCurrentDateTime = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        Calendar mockCurrentDateTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         mockCurrentDateTime.set(Calendar.DAY_OF_MONTH, 1);
         mockCurrentDateTime.set(Calendar.MONTH, 6);
         mockCurrentDateTime.set(Calendar.YEAR, 2049);
@@ -447,10 +440,9 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
 
         Response downloadAssignmentResponse = assignmentFacade.getAssignmentProgressDownloadCSV(downloadAssignmentRequest, 4L, "excel");
         String downloadAssignmentContents = downloadAssignmentResponse.getEntity().toString();
-        
-        // Note that the first two lines have a trailing whitespace. If your IDE automatically removes these from the expected file it may cause a mismatch
-        try (FileInputStream expectedFile = new FileInputStream("src/test/resources/expected_assignment_export.csv");) {
-            String expectedContents = IOUtils.toString(expectedFile, (Charset) null);
+
+        try (FileInputStream expectedFile = new FileInputStream("src/test/resources/expected_assignment_progress_export.csv")) {
+            String expectedContents = IOUtils.toString(expectedFile, StandardCharsets.UTF_8);
 
             assertEquals(expectedContents, downloadAssignmentContents);
         }
@@ -464,8 +456,36 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
         replay(downloadAssignmentRequest);
 
         Response downloadAssignmentResponse = assignmentFacade.getAssignmentProgressDownloadCSV(downloadAssignmentRequest, 4L, "excel");
+
+        assertEquals(403, downloadAssignmentResponse.getStatus());
+    }
+
+    @Test public void getGroupAssignmentsProgressDownloadCSV_succeeds() throws Exception {
+        // log in as Test teacher, create request
+        LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
+                ITConstants.TEST_TEACHER_PASSWORD);
+        HttpServletRequest downloadAssignmentRequest = createRequestWithCookies(new Cookie[]{teacherLogin.cookie});
+        replay(downloadAssignmentRequest);
+
+        Response downloadAssignmentResponse = assignmentFacade.getGroupAssignmentsProgressDownloadCSV(downloadAssignmentRequest, 7L, "excel");
         String downloadAssignmentContents = downloadAssignmentResponse.getEntity().toString();
 
-        assertEquals("Error Code: 403 Error Message: 403 \nnull", downloadAssignmentContents);
+        try (FileInputStream expectedFile = new FileInputStream("src/test/resources/expected_group_progress_export.csv")) {
+            String expectedContents = IOUtils.toString(expectedFile, StandardCharsets.UTF_8);
+
+            assertEquals(expectedContents, downloadAssignmentContents);
+        }
+    }
+
+    @Test public void getGroupAssignmentsProgressDownloadCSV_permissionDenied() throws Exception {
+        // log in as Test teacher, create request
+        LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TUTOR_EMAIL,
+                ITConstants.TEST_TUTOR_PASSWORD);
+        HttpServletRequest downloadAssignmentRequest = createRequestWithCookies(new Cookie[]{teacherLogin.cookie});
+        replay(downloadAssignmentRequest);
+
+        Response downloadAssignmentResponse = assignmentFacade.getGroupAssignmentsProgressDownloadCSV(downloadAssignmentRequest, 7L, "excel");
+
+        assertEquals(403, downloadAssignmentResponse.getStatus());
     }
 }
