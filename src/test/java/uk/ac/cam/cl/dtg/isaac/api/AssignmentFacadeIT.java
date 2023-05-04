@@ -441,11 +441,11 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
         Response downloadAssignmentResponse = assignmentFacade.getAssignmentProgressDownloadCSV(downloadAssignmentRequest, 4L, "excel");
         String downloadAssignmentContents = downloadAssignmentResponse.getEntity().toString();
 
+        String expectedContents;
         try (FileInputStream expectedFile = new FileInputStream("src/test/resources/expected_assignment_progress_export.csv")) {
-            String expectedContents = IOUtils.toString(expectedFile, StandardCharsets.UTF_8);
-
-            assertEquals(expectedContents, downloadAssignmentContents);
+            expectedContents = IOUtils.toString(expectedFile, StandardCharsets.UTF_8);
         }
+        assertEquals(expectedContents, downloadAssignmentContents);
     }
 
     @Test public void getAssignmentProgressDownloadCSV_permissionDenied() throws Exception {
@@ -470,11 +470,11 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
         Response downloadAssignmentResponse = assignmentFacade.getGroupAssignmentsProgressDownloadCSV(downloadAssignmentRequest, 7L, "excel");
         String downloadAssignmentContents = downloadAssignmentResponse.getEntity().toString();
 
+        String expectedContents;
         try (FileInputStream expectedFile = new FileInputStream("src/test/resources/expected_group_progress_export.csv")) {
-            String expectedContents = IOUtils.toString(expectedFile, StandardCharsets.UTF_8);
-
-            assertEquals(expectedContents, downloadAssignmentContents);
+            expectedContents = IOUtils.toString(expectedFile, StandardCharsets.UTF_8);
         }
+        assertEquals(expectedContents, downloadAssignmentContents);
     }
 
     @Test public void getGroupAssignmentsProgressDownloadCSV_permissionDenied() throws Exception {
