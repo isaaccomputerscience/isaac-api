@@ -85,7 +85,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 public class PagesFacade extends AbstractIsaacFacade {
     private static final Logger log = LoggerFactory.getLogger(PagesFacade.class);
 
-    private final ContentService api;
+    public final ContentService api;
     private final MapperFacade mapper;
     private final UserAccountManager userManager;
     private final URIManager uriManager;
@@ -93,7 +93,7 @@ public class PagesFacade extends AbstractIsaacFacade {
     private final GitContentManager contentManager;
 
     private final GameManager gameManager;
-    private final String contentIndex;
+    public final String contentIndex;
 
     /**
      * Creates an instance of the pages controller which provides the REST endpoints for accessing page content.
@@ -856,8 +856,8 @@ public class PagesFacade extends AbstractIsaacFacade {
      *
      * @return A Response containing a single conceptPage or containing a SegueErrorResponse.
      */
-    private Response findSingleResult(final Map<String, List<String>> fieldsToMatch,
-                                      @Nullable final Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts) {
+    public Response findSingleResult(final Map<String, List<String>> fieldsToMatch,
+                                     @Nullable final Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts) {
         try {
             ResultsWrapper<ContentDTO> resultList = api.findMatchingContent(this.contentIndex,
                     ContentService.generateDefaultFieldToMatch(fieldsToMatch), null, null); // includes

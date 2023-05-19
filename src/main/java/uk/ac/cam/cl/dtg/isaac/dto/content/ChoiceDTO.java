@@ -15,6 +15,8 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dto.content;
 
+import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
+
 /**
  * Choice object The choice object is a specialized form of content and allows the storage of data relating to possible
  * answers to questions.
@@ -22,10 +24,25 @@ package uk.ac.cam.cl.dtg.isaac.dto.content;
  */
 public class ChoiceDTO extends ContentDTO {
 
+    private boolean correct;
+    private ContentBaseDTO explanation;
+
     /**
      * Default Constructor required for mappers.
      */
     public ChoiceDTO() {
 
+    }
+
+    public boolean isCorrect() {return correct;}
+
+    public void setCorrect(final boolean correct) {
+        this.correct = correct;
+    }
+
+    public ContentBaseDTO getExplanation() {return explanation;}
+
+    public void setExplanation(final ContentBaseDTO explanation) {
+        this.explanation = explanation;
     }
 }
