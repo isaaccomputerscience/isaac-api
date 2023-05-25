@@ -18,6 +18,7 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import io.netty.util.concurrent.SingleThreadEventExecutor;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.apache.commons.lang3.EnumUtils;
@@ -79,6 +80,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -112,6 +115,8 @@ public class UserAccountManager implements IUserAccountManager {
     private final Pattern restrictedSignupEmailRegex;
     private static final int USER_NAME_MAX_LENGTH = 255;
     private static final Pattern USER_NAME_FORBIDDEN_CHARS_REGEX = Pattern.compile("[*<>]");
+
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * Create an instance of the user manager class.
@@ -1339,16 +1344,26 @@ public class UserAccountManager implements IUserAccountManager {
      * @throws NoUserException
      *             - If no user found with provided email.
      */
-    public final void resetPasswordRequest(final RegisteredUserDTO userObject) throws InvalidKeySpecException,
-            NoSuchAlgorithmException, CommunicationException, SegueDatabaseException, NoUserException {
+    public final boolean resetPasswordRequest(final RegisteredUserDTO userObject)
+            throws SegueDatabaseException {
         RegisteredUser user = this.findUserByEmail(userObject.getEmail());
 
         if (null == user) {
-            throw new NoUserException("No user found with this email!");
+            return false;
         }
 
-        RegisteredUserDTO userDTO = this.convertUserDOToUserDTO(user);
-        this.userAuthenticationManager.resetPasswordRequest(user, userDTO);
+        executor.submit(() -> {
+            RegisteredUserDTO userDTO = this.convertUserDOToUserDTO(user);
+            try {
+                this.userAuthenticationManager.resetPasswordRequest(user, userDTO);
+                log.info("Password reset sent");
+            } catch (CommunicationException e) {
+                log.error("Error sending reset message.", e);
+            } catch (SegueDatabaseException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+                log.error("Error generating password reset token.", e);
+            }
+        });
+        return true;
     }
 
     /**

@@ -347,19 +347,14 @@ public class UsersFacade extends AbstractSegueFacade {
             return Response.ok().build();
 
         } catch (NoUserException e) {
-            log.warn("Password reset requested for account that does not exist: " + e.getMessage());
+            log.warn("Password reset requested for account that does not exist: " + userIdOfInterest);
             // Return OK so we don't leak account existence.
             return Response.ok().build();
         } catch (NoUserLoggedInException e) {
             return SegueErrorResponse.getNotLoggedInResponse();
-        } catch (CommunicationException e) {
+        } catch (SegueDatabaseException e) {
             SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-                    "Error sending reset message.", e);
-            log.error(error.getErrorMessage(), e);
-            return error.toResponse();
-        } catch (SegueDatabaseException | InvalidKeySpecException | NoSuchAlgorithmException e) {
-            SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-                    "Error generating password reset token.", e);
+                    "Error accessing database.", e);
             log.error(error.getErrorMessage(), e);
             return error.toResponse();
         } catch (SegueResourceMisuseException e) {
@@ -390,6 +385,7 @@ public class UsersFacade extends AbstractSegueFacade {
                   description = "The email address must be provided as a RegisteredUserDTO object, although only the 'email' field is required.")
     public Response generatePasswordResetToken(final RegisteredUserDTO userObject,
                                                @Context final HttpServletRequest request) {
+        long start = System.nanoTime();
         if (null == userObject || null == userObject.getEmail() || userObject.getEmail().isEmpty()) {
             log.debug("User is null");
             return new SegueErrorResponse(Status.BAD_REQUEST, "No account email address provided.").toResponse();
@@ -399,25 +395,20 @@ public class UsersFacade extends AbstractSegueFacade {
             String requestingIPAddress = RequestIPExtractor.getClientIpAddr(request);
             misuseMonitor.notifyEvent(userObject.getEmail(), PasswordResetByEmailMisuseHandler.class.getSimpleName());
             misuseMonitor.notifyEvent(requestingIPAddress, PasswordResetByIPMisuseHandler.class.getSimpleName());
-            userManager.resetPasswordRequest(userObject);
+            boolean userExists = userManager.resetPasswordRequest(userObject);
 
             this.getLogManager()
                     .logEvent(userManager.getCurrentUser(request), request, SegueServerLogType.PASSWORD_RESET_REQUEST_RECEIVED,
                             ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userObject.getEmail()));
 
+            if (userExists)
+                log.info("Password reset requested, time: " + (System.nanoTime()-start));
+            else
+                log.warn("Password reset requested for account that does not exist: (" + userObject.getEmail() + "), time: " + (System.nanoTime()-start));
             return Response.ok().build();
-        } catch (NoUserException e) {
-            log.warn("Password reset requested for account that does not exist: (" + userObject.getEmail() + ")");
-            // Return OK so we don't leak account existence.
-            return Response.ok().build();
-        } catch (CommunicationException e) {
+        } catch (SegueDatabaseException e) {
             SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-                    "Error sending reset message.", e);
-            log.error(error.getErrorMessage(), e);
-            return error.toResponse();
-        } catch (SegueDatabaseException | InvalidKeySpecException | NoSuchAlgorithmException e) {
-            SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-                    "Error generating password reset token.", e);
+                    "Error accessing database.", e);
             log.error(error.getErrorMessage(), e);
             return error.toResponse();
         } catch (SegueResourceMisuseException e) {
