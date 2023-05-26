@@ -129,6 +129,7 @@ public abstract class IsaacIntegrationTest {
 
     // Managers
     protected static EmailManager emailManager;
+    protected static AbstractUserPreferenceManager userPreferenceManager;
     protected static UserAuthenticationManager userAuthenticationManager;
     protected static UserAccountManager userAccountManager;
     protected static GameManager gameManager;
@@ -251,7 +252,7 @@ public abstract class IsaacIntegrationTest {
         providersToRegister.put(AuthenticationProvider.SEGUE, new SegueLocalAuthenticator(pgUsers, passwordDataManager, properties, algorithms, algorithms.get("SegueSCryptv1")));
 
         EmailCommunicator communicator = new EmailCommunicator("localhost", "587", null, null, "default@localhost", "Howdy!");
-        AbstractUserPreferenceManager userPreferenceManager = new PgUserPreferenceManager(postgresSqlDb);
+        userPreferenceManager = new PgUserPreferenceManager(postgresSqlDb);
 
         Git git = createNiceMock(Git.class);
         GitDb gitDb = new GitDb(git);

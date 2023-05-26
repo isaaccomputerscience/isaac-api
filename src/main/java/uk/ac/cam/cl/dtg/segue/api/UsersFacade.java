@@ -344,8 +344,9 @@ public class UsersFacade extends AbstractSegueFacade {
                                     LOCAL_AUTH_EMAIL_FIELDNAME, userOfInterest.getEmail(),
                                     LOCAL_AUTH_GROUP_MANAGER_EMAIL_FIELDNAME, currentUser.getEmail(),
                                     LOCAL_AUTH_GROUP_MANAGER_INITIATED_FIELDNAME, true));
-            return Response.ok().build();
 
+            log.info("Password reset requested for account: " + userIdOfInterest);
+            return Response.ok().build();
         } catch (NoUserException e) {
             log.warn("Password reset requested for account that does not exist: " + userIdOfInterest);
             // Return OK so we don't leak account existence.
@@ -385,7 +386,6 @@ public class UsersFacade extends AbstractSegueFacade {
                   description = "The email address must be provided as a RegisteredUserDTO object, although only the 'email' field is required.")
     public Response generatePasswordResetToken(final RegisteredUserDTO userObject,
                                                @Context final HttpServletRequest request) {
-        long start = System.nanoTime();
         if (null == userObject || null == userObject.getEmail() || userObject.getEmail().isEmpty()) {
             log.debug("User is null");
             return new SegueErrorResponse(Status.BAD_REQUEST, "No account email address provided.").toResponse();
@@ -402,9 +402,9 @@ public class UsersFacade extends AbstractSegueFacade {
                             ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userObject.getEmail()));
 
             if (userExists)
-                log.info("Password reset requested, time: " + (System.nanoTime()-start));
+                log.info("Password reset requested for email: (" + userObject.getEmail() + ")");
             else
-                log.warn("Password reset requested for account that does not exist: (" + userObject.getEmail() + "), time: " + (System.nanoTime()-start));
+                log.warn("Password reset requested for account that does not exist: (" + userObject.getEmail() + ")");
             return Response.ok().build();
         } catch (SegueDatabaseException e) {
             SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
