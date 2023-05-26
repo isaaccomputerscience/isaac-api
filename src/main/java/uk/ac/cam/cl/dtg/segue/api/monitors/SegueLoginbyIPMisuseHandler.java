@@ -15,14 +15,12 @@
  */
 package uk.ac.cam.cl.dtg.segue.api.monitors;
 
+import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-
-import com.google.inject.Inject;
 
 /**
  * Handler to detect bruteforce login attempts.
@@ -30,8 +28,8 @@ import com.google.inject.Inject;
  * Preventing users from overusing this endpoint is important as they may be trying to brute force someones password.
  *
  */
-public class SegueLoginMisuseHandler implements IMisuseHandler {
-    private static final Logger log = LoggerFactory.getLogger(SegueLoginMisuseHandler.class);
+public class SegueLoginbyIPMisuseHandler implements IMisuseHandler {
+    private static final Logger log = LoggerFactory.getLogger(SegueLoginbyIPMisuseHandler.class);
 
     public static final Integer SOFT_THRESHOLD = 5;
     public static final Integer HARD_THRESHOLD = 10;
@@ -47,7 +45,7 @@ public class SegueLoginMisuseHandler implements IMisuseHandler {
      *            - so that we can look up properties set.
      */
     @Inject
-    public SegueLoginMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties) {
+    public SegueLoginbyIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties) {
         this.properties = properties;
         this.emailManager = emailManager;
     }
