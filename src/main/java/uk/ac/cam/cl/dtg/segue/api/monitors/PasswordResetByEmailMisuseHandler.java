@@ -35,16 +35,23 @@ public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
     
     private static final Logger log = LoggerFactory.getLogger(PasswordResetByEmailMisuseHandler.class);
 
-    private static final Integer SOFT_THRESHOLD = 2;
-    private static final Integer HARD_THRESHOLD = 4;
-    private static final Integer ACCOUNTING_INTERVAL = 6 * NUMBER_SECONDS_IN_MINUTE;
+    private static Integer SOFT_THRESHOLD;
+    private static Integer HARD_THRESHOLD;
+    private static Integer ACCOUNTING_INTERVAL;
     
     /**
      * 
      */
     @Inject
     public PasswordResetByEmailMisuseHandler() {
+        this(2, 4, NUMBER_SECONDS_IN_MINUTE);
+    }
 
+    @Inject
+    public PasswordResetByEmailMisuseHandler(Integer softThreshold, Integer hardThreshold, Integer interval) {
+        this.SOFT_THRESHOLD = softThreshold;
+        this.HARD_THRESHOLD = hardThreshold;
+        this.ACCOUNTING_INTERVAL = interval;
     }
     
 

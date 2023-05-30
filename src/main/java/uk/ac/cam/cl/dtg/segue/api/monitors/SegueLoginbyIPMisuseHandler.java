@@ -22,6 +22,9 @@ import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
+import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_ONE_HOUR;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_TEN_MINUTES;
+
 /**
  * Handler to detect bruteforce login attempts.
  * 
@@ -31,9 +34,9 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 public class SegueLoginbyIPMisuseHandler implements IMisuseHandler {
     private static final Logger log = LoggerFactory.getLogger(SegueLoginbyIPMisuseHandler.class);
 
-    public static final Integer SOFT_THRESHOLD = 5;
-    public static final Integer HARD_THRESHOLD = 10;
-    public static final Integer ACCOUNTING_INTERVAL = Constants.NUMBER_SECONDS_IN_TEN_MINUTES;
+    public static Integer SOFT_THRESHOLD;
+    public static Integer HARD_THRESHOLD;
+    public static Integer ACCOUNTING_INTERVAL;
 
     private PropertiesLoader properties;
     private EmailManager emailManager;
@@ -46,8 +49,16 @@ public class SegueLoginbyIPMisuseHandler implements IMisuseHandler {
      */
     @Inject
     public SegueLoginbyIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties) {
+        this(emailManager, properties, 50, 300, NUMBER_SECONDS_IN_ONE_HOUR);
+    }
+
+    @Inject
+    public SegueLoginbyIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties, Integer softThreshold, Integer hardThreshold, Integer interval) {
         this.properties = properties;
         this.emailManager = emailManager;
+        this.SOFT_THRESHOLD = softThreshold;
+        this.HARD_THRESHOLD = hardThreshold;
+        this.ACCOUNTING_INTERVAL = interval;
     }
 
     @Override

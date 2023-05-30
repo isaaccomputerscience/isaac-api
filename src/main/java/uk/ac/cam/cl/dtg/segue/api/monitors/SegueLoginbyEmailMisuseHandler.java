@@ -15,27 +15,26 @@
  */
 package uk.ac.cam.cl.dtg.segue.api.monitors;
 
+import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-import com.google.inject.Inject;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_TEN_MINUTES;
 
 /**
  * Handler to detect bruteforce login attempts.
- * 
+ *
  * Preventing users from overusing this endpoint is important as they may be trying to brute force someones password.
  *
  */
 public class SegueLoginbyEmailMisuseHandler implements IMisuseHandler {
     private static final Logger log = LoggerFactory.getLogger(SegueLoginbyEmailMisuseHandler.class);
 
-    public static final Integer SOFT_THRESHOLD = 5;
-    public static final Integer HARD_THRESHOLD = 10;
-    public static final Integer ACCOUNTING_INTERVAL = Constants.NUMBER_SECONDS_IN_TEN_MINUTES;
+    public static Integer SOFT_THRESHOLD;
+    public static Integer HARD_THRESHOLD;
+    public static Integer ACCOUNTING_INTERVAL;
 
     private PropertiesLoader properties;
     private EmailManager emailManager;
@@ -48,8 +47,16 @@ public class SegueLoginbyEmailMisuseHandler implements IMisuseHandler {
      */
     @Inject
     public SegueLoginbyEmailMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties) {
+        this(emailManager, properties, 5, 10, NUMBER_SECONDS_IN_TEN_MINUTES);
+    }
+
+    @Inject
+    public SegueLoginbyEmailMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties, Integer softThreshold, Integer hardThreshold, Integer interval) {
         this.properties = properties;
         this.emailManager = emailManager;
+        this.SOFT_THRESHOLD = softThreshold;
+        this.HARD_THRESHOLD = hardThreshold;
+        this.ACCOUNTING_INTERVAL = interval;
     }
 
     @Override
@@ -59,7 +66,7 @@ public class SegueLoginbyEmailMisuseHandler implements IMisuseHandler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see uk.ac.cam.cl.dtg.segue.api.managers.IMisuseEvent#getHardThreshold()
      */
     @Override

@@ -38,9 +38,9 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PasswordResetByIPMisuseHandler.class);
 
-    private static final Integer SOFT_THRESHOLD = 50;
-    private static final Integer HARD_THRESHOLD = 300;
-    private static final Integer ACCOUNTING_INTERVAL = NUMBER_SECONDS_IN_ONE_HOUR;
+    private static Integer SOFT_THRESHOLD;
+    private static Integer HARD_THRESHOLD;
+    private static Integer ACCOUNTING_INTERVAL;
 
     private final PropertiesLoader properties;
     private final EmailManager emailManager;
@@ -50,8 +50,16 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
      */
     @Inject
     public PasswordResetByIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties) {
+        this(emailManager, properties, 50, 300, NUMBER_SECONDS_IN_ONE_HOUR);
+    }
+
+    @Inject
+    public PasswordResetByIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties, Integer softThreshold, Integer hardThreshold, Integer interval) {
         this.properties = properties;
         this.emailManager = emailManager;
+        this.SOFT_THRESHOLD = softThreshold;
+        this.HARD_THRESHOLD = hardThreshold;
+        this.ACCOUNTING_INTERVAL = interval;
     }
 
 

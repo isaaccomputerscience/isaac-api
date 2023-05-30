@@ -384,11 +384,11 @@ public class AuthenticationFacade extends AbstractSegueFacade {
                 + "Please try again after 10 minutes.";
 
         try {
+            String requestingIPAddress = RequestIPExtractor.getClientIpAddr(request);
             // Stop users logging in who have already locked their account.
             if (misuseMonitor.hasMisused(email.toLowerCase(), SegueLoginbyEmailMisuseHandler.class.getSimpleName())) {
                 throw new SegueResourceMisuseException("Too many login attempts for this account");
             }
-            String requestingIPAddress = RequestIPExtractor.getClientIpAddr(request);
             misuseMonitor.notifyEvent(requestingIPAddress, SegueLoginbyIPMisuseHandler.class.getSimpleName());
 
             // ok we need to hand over to user manager
