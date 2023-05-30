@@ -104,14 +104,16 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
         }
 
         RegisteredUser localUserAccount = userDataManager.getByEmail(usersEmailAddress);
+        LocalUserCredential luc;
         if (null == localUserAccount) {
-            throw new NoUserException("No user found with this email!");
-        }
-
-        LocalUserCredential luc = passwordDataManager.getLocalUserCredential(localUserAccount.getId());
-        if (null == luc || null == luc.getPassword() || null == luc.getSecureSalt()) {
-            log.debug(String.format("No credentials available for this account id (%s)", localUserAccount.getId()));
-            throw new NoCredentialsAvailableException("This user does not have any local credentials setup.");
+            // Default object so hashing & comparison is still called on non-existent accounts for more consistent return time
+            luc = new LocalUserCredential(-1L, "password", "salt", "SegueSCryptv1");
+        } else {
+            luc = passwordDataManager.getLocalUserCredential(localUserAccount.getId());
+            if (null == luc || null == luc.getPassword() || null == luc.getSecureSalt()) {
+                log.debug(String.format("No credentials available for this account id (%s)", localUserAccount.getId()));
+                throw new NoCredentialsAvailableException("This user does not have any local credentials setup.");
+            }
         }
 
         // work out what algorithm is being used.
