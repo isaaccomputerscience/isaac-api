@@ -406,7 +406,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             String errorMsg = "Unable to locate the provider specified";
             log.error(errorMsg, e);
             return new SegueErrorResponse(Status.BAD_REQUEST, errorMsg).toResponse();
-        } catch (IncorrectCredentialsProvidedException | NoUserException | NoCredentialsAvailableException e) {
+        } catch (IncorrectCredentialsProvidedException | NoCredentialsAvailableException e) {
             try {
                 misuseMonitor.notifyEvent(email.toLowerCase(), SegueLoginbyEmailMisuseHandler.class.getSimpleName());
                 log.info(String.format("Incorrect credentials received for (%s). Error: %s", email, e.getMessage()));

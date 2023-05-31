@@ -298,7 +298,7 @@ public class UserAuthenticationManager {
      */
     public final RegisteredUser getSegueUserFromCredentials(final String provider, final String email, 
                         final String plainTextPassword) throws AuthenticationProviderMappingException,
-            SegueDatabaseException, IncorrectCredentialsProvidedException, NoUserException,
+            SegueDatabaseException, IncorrectCredentialsProvidedException,
             NoCredentialsAvailableException, InvalidKeySpecException, NoSuchAlgorithmException {
         Validate.notBlank(email);
         Validate.notNull(plainTextPassword);

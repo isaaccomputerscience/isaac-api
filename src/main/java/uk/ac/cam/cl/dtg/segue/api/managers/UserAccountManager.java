@@ -355,7 +355,7 @@ public class UserAccountManager implements IUserAccountManager {
      */
     public final RegisteredUserDTO authenticateWithCredentials(final HttpServletRequest request,
             final HttpServletResponse response, final String provider, final String email, final String password, final boolean rememberMe)
-            throws AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, NoUserException,
+            throws AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
             NoCredentialsAvailableException, SegueDatabaseException, AdditionalAuthenticationRequiredException, MFARequiredButNotConfiguredException, InvalidKeySpecException, NoSuchAlgorithmException {
         Validate.notBlank(email);
         Validate.notBlank(password);

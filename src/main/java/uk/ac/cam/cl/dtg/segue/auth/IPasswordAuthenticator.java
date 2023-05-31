@@ -66,7 +66,7 @@ public interface IPasswordAuthenticator extends IAuthenticator {
      *             - If there is an internal database error.
      */
     RegisteredUser authenticate(String usersEmailAddress, String plainTextPassword)
-            throws IncorrectCredentialsProvidedException, NoUserException, NoCredentialsAvailableException,
+            throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException,
             SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException;
 
     /**

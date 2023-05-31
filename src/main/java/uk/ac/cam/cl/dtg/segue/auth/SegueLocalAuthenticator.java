@@ -96,7 +96,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
 
     @Override
     public RegisteredUser authenticate(final String usersEmailAddress, final String plainTextPassword)
-            throws IncorrectCredentialsProvidedException, NoUserException, NoCredentialsAvailableException,
+            throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException,
             SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
 
         if (null == usersEmailAddress || null == plainTextPassword) {
