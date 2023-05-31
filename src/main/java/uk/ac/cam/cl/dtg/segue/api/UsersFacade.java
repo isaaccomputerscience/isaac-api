@@ -87,6 +87,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 
 /**
  * User facade.
@@ -401,9 +402,9 @@ public class UsersFacade extends AbstractSegueFacade {
                             ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userObject.getEmail()));
 
             if (userExists)
-                log.info("Password reset requested for email: (" + userObject.getEmail() + ")");
+                log.info("Password reset requested for email: (" + sanitiseLogValue(userObject.getEmail()) + ")");
             else
-                log.warn("Password reset requested for account that does not exist: (" + userObject.getEmail() + ")");
+                log.warn("Password reset requested for account that does not exist: (" + sanitiseLogValue(userObject.getEmail()) + ")");
             return Response.ok().build();
         } catch (SegueDatabaseException e) {
             SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
@@ -413,7 +414,7 @@ public class UsersFacade extends AbstractSegueFacade {
         } catch (SegueResourceMisuseException e) {
             String message = "You have exceeded the number of requests allowed for this endpoint. "
                     + "Please try again later.";
-            log.error("Password reset request blocked for email: (" + userObject.getEmail() + ")", e.toString());
+            log.error("Password reset request blocked for email: (" + sanitiseLogValue(userObject.getEmail()) + ")", e.toString());
             return SegueErrorResponse.getRateThrottledResponse(message);
         }
     }

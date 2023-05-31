@@ -75,6 +75,7 @@ import java.util.Map;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.REDIRECT_URL;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 
 /**
  * AuthenticationFacade.
@@ -409,21 +410,21 @@ public class AuthenticationFacade extends AbstractSegueFacade {
         } catch (IncorrectCredentialsProvidedException | NoCredentialsAvailableException e) {
             try {
                 misuseMonitor.notifyEvent(email.toLowerCase(), SegueLoginbyEmailMisuseHandler.class.getSimpleName());
-                log.info(String.format("Incorrect credentials received for (%s). Error: %s", email, e.getMessage()));
+                log.info(String.format("Incorrect credentials received for (%s). Error: %s", sanitiseLogValue(email), e.getMessage()));
                 return new SegueErrorResponse(Status.UNAUTHORIZED, "Incorrect credentials provided.").toResponse();
             } catch (SegueResourceMisuseException e1) {
-                log.error(String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", email));
+                log.error(String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", sanitiseLogValue(email)));
                 return SegueErrorResponse.getRateThrottledResponse(rateThrottleMessage);
             }
         } catch (MFARequiredButNotConfiguredException e) {
-            log.warn(String.format("Login blocked for ADMIN account (%s) which does not have 2FA configured.", email));
+            log.warn(String.format("Login blocked for ADMIN account (%s) which does not have 2FA configured.", sanitiseLogValue(email)));
             return new SegueErrorResponse(Status.UNAUTHORIZED, e.getMessage()).toResponse();
         } catch (SegueDatabaseException e) {
             String errorMsg = "Internal Database error has occurred during authentication.";
             log.error(errorMsg, e);
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
         } catch (SegueResourceMisuseException e) {
-            log.error(String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", email));
+            log.error(String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", sanitiseLogValue(email)));
             return SegueErrorResponse.getRateThrottledResponse(rateThrottleMessage);
         }
     }
