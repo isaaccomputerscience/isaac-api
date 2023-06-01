@@ -244,8 +244,13 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
             throw new InvalidPasswordException("Invalid password. You cannot have an empty password.");
         }
 
-        if (password.length() < 6) {
-            throw new InvalidPasswordException("Password must be at least 6 characters in length.");
+        if (password.length() < 12) {
+            throw new InvalidPasswordException("Password must be at least 12 characters in length.");
+        }
+
+        //  Special characters: !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+        if (password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[ !\"#$%&'()*+,\\-./:;<=>?@\\[\\\\]\\^_`\\{\\|\\}~)")) {
+            throw new InvalidPasswordException("Password must contain at least one of each of: uppercase character, lowercase character, number, special character.");
         }
     }
 
