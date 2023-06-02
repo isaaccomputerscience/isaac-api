@@ -111,7 +111,8 @@ public class UserAccountManager implements IUserAccountManager {
 
     private final Pattern restrictedSignupEmailRegex;
     private static final int USER_NAME_MAX_LENGTH = 255;
-    private static final Pattern USER_NAME_FORBIDDEN_CHARS_REGEX = Pattern.compile("[*<>]");
+    private static final Pattern USER_NAME_FORBIDDEN_CHARS_REGEX = Pattern.compile("[*<>/:\"\\(\\);\\[\\]]");
+    private static final Pattern EMAIL_FORBIDDEN_CHARS_REGEX = Pattern.compile("[*<>/:\"\\(\\);\\[\\]]");
 
     /**
      * Create an instance of the user manager class.
@@ -1854,8 +1855,11 @@ public class UserAccountManager implements IUserAccountManager {
      * @return true if it meets the internal storage requirements, false if not.
      */
     private boolean isUserValid(final RegisteredUser userToValidate) {
-        if (userToValidate.getEmail() == null || userToValidate.getEmail().isEmpty()
-                || !userToValidate.getEmail().matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")) {
+        if (userToValidate.getEmail() == null
+                || userToValidate.getEmail().isEmpty()
+                || !userToValidate.getEmail().matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")
+                || EMAIL_FORBIDDEN_CHARS_REGEX.matcher(userToValidate.getEmail()).find()
+        ) {
             return false;
         }
         return true;
@@ -1869,8 +1873,11 @@ public class UserAccountManager implements IUserAccountManager {
      * @return true if the name is valid, false otherwise.
      */
     public static final boolean isUserNameValid(final String name) {
-        if (null == name || name.length() > USER_NAME_MAX_LENGTH || USER_NAME_FORBIDDEN_CHARS_REGEX.matcher(name).find()
-                || name.isEmpty()) {
+        if (null == name
+                || name.isEmpty()
+                || name.length() > USER_NAME_MAX_LENGTH
+                || USER_NAME_FORBIDDEN_CHARS_REGEX.matcher(name).find()
+        ) {
             return false;
         }
         return true;
