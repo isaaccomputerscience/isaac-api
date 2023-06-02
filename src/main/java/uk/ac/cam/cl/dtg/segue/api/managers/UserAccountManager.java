@@ -111,8 +111,9 @@ public class UserAccountManager implements IUserAccountManager {
 
     private final Pattern restrictedSignupEmailRegex;
     private static final int USER_NAME_MAX_LENGTH = 255;
-    private static final Pattern USER_NAME_FORBIDDEN_CHARS_REGEX = Pattern.compile("[*<>/:\"\\(\\);\\[\\]]");
-    private static final Pattern EMAIL_FORBIDDEN_CHARS_REGEX = Pattern.compile("[*<>/:\"\\(\\);\\[\\]]");
+    private static final Pattern USER_NAME_PERMITTED_CHARS_REGEX = Pattern.compile("^\\w+$");
+    private static final Pattern EMAIL_PERMITTED_CHARS_REGEX = Pattern.compile("^[a-zA-Z0-9!#$%&'+\\-=?^_`.{|}~@]+$");
+    private static final Pattern EMAIL_CONSECUTIVE_FULL_STOP_REGEX = Pattern.compile("\\.\\.");
 
     /**
      * Create an instance of the user manager class.
@@ -1855,10 +1856,16 @@ public class UserAccountManager implements IUserAccountManager {
      * @return true if it meets the internal storage requirements, false if not.
      */
     private boolean isUserValid(final RegisteredUser userToValidate) {
-        if (userToValidate.getEmail() == null
-                || userToValidate.getEmail().isEmpty()
-                || !userToValidate.getEmail().matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")
-                || EMAIL_FORBIDDEN_CHARS_REGEX.matcher(userToValidate.getEmail()).find()
+        if (null == userToValidate.getEmail()) return false;
+        else return isEmailValid(userToValidate.getEmail());
+    }
+
+    public static final boolean isEmailValid(String email) {
+        if (email == null
+                || email.isEmpty()
+                || !email.matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")
+                || !EMAIL_PERMITTED_CHARS_REGEX.matcher(email).matches()
+                || EMAIL_CONSECUTIVE_FULL_STOP_REGEX.matcher(email).find()
         ) {
             return false;
         }
@@ -1876,7 +1883,7 @@ public class UserAccountManager implements IUserAccountManager {
         if (null == name
                 || name.isEmpty()
                 || name.length() > USER_NAME_MAX_LENGTH
-                || USER_NAME_FORBIDDEN_CHARS_REGEX.matcher(name).find()
+                || !USER_NAME_PERMITTED_CHARS_REGEX.matcher(name).matches()
         ) {
             return false;
         }
