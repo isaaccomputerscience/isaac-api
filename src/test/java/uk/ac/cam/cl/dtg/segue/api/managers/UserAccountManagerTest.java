@@ -39,6 +39,9 @@ public class UserAccountManagerTest {
                 Arguments.of(true, "TestName"), // Mixture of cases is valid
                 Arguments.of(true, "TestName123"), // Numbers are valid
                 Arguments.of(true, "Test_Name"), // Underscores are valid
+                Arguments.of(true, "Test Name"), // Double-barrelled names with spaces are valid
+                Arguments.of(true, "Test-Name"), // Double-barrelled names with hyphens are valid
+                Arguments.of(true, "O'Name"), // Apostraphes are valid
                 Arguments.of(false, null), // Null is not valid
                 Arguments.of(false, ""), // Empty string is not valid
                 // Names exceeding the maximum length of 255 characters are not valid
