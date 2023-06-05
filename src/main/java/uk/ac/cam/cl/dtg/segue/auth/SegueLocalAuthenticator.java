@@ -249,7 +249,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
         }
 
         //  Special characters: !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
-        if (password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[ !\"#$%&'()*+,\\-./:;<=>?@\\[\\\\]\\^_`\\{\\|\\}~)")) {
+        if (!password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[ !\"#$%&'()*+,\\-./:;<=>?@\\[\\]\\^_`\\{\\|\\}~]).{12,}$")) {
             throw new InvalidPasswordException("Password must contain at least one of each of: uppercase character, lowercase character, number, special character.");
         }
     }
