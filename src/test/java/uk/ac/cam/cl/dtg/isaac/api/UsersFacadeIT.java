@@ -42,7 +42,6 @@ public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
     @ParameterizedTest
     @MethodSource("validRegistrationParameters")
     public void createUser_validRegistrationParameters(String email, String password, String dob, String familyName, String givenName) {
-        System.out.println("ParameterizedTest");
         HttpSession mockSession = createNiceMock(HttpSession.class);
         expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
         expect(mockSession.getId()).andReturn("sessionIdFailure");
@@ -78,7 +77,6 @@ public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
     @ParameterizedTest
     @MethodSource("invalidRegistrationParameters")
     public void createUser_invalidRegistrationParameters(String email, String password, String dob, String familyName, String givenName) {
-        System.out.println("ParameterizedTest");
         HttpSession mockSession = createNiceMock(HttpSession.class);
         expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
         expect(mockSession.getId()).andReturn("sessionIdFailure");
