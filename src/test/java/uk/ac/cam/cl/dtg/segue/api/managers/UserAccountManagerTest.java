@@ -1,27 +1,14 @@
 package uk.ac.cam.cl.dtg.segue.api.managers;
 
-import ma.glasnost.orika.MapperFacade;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import uk.ac.cam.cl.dtg.isaac.dos.AbstractUserPreferenceManager;
-import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
-import uk.ac.cam.cl.dtg.segue.auth.IAuthenticator;
-import uk.ac.cam.cl.dtg.segue.auth.ISecondFactorAuthenticator;
-import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
-import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
-import uk.ac.cam.cl.dtg.segue.dao.users.IAnonymousUserDataManager;
-import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
-import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.easymock.EasyMock.createMock;
 import static org.junit.Assert.assertEquals;
-import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.*;
+import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isEmailValid;
+import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isUserNameValid;
 
 public class UserAccountManagerTest {
 
