@@ -112,6 +112,7 @@ public class UserAccountManager implements IUserAccountManager {
     private final Pattern restrictedSignupEmailRegex;
     private static final int USER_NAME_MAX_LENGTH = 255;
     private static final Pattern USER_NAME_FORBIDDEN_CHARS_REGEX = Pattern.compile("[*<>]");
+    private static final Pattern EMAIL_CONSECUTIVE_FULL_STOP_REGEX = Pattern.compile("\\.\\.");
 
     /**
      * Create an instance of the user manager class.
@@ -1855,7 +1856,8 @@ public class UserAccountManager implements IUserAccountManager {
      */
     private boolean isUserValid(final RegisteredUser userToValidate) {
         if (userToValidate.getEmail() == null || userToValidate.getEmail().isEmpty()
-                || !userToValidate.getEmail().matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")) {
+                || !userToValidate.getEmail().matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")
+                || EMAIL_CONSECUTIVE_FULL_STOP_REGEX.matcher(userToValidate.getEmail()).find()) {
             return false;
         }
         return true;

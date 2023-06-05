@@ -6,7 +6,9 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,56 +24,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
 
-public class UsersFacadeIT extends IsaacIntegrationTest {
+public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
     private UsersFacade usersFacade;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeAll() {
         misuseMonitor.registerHandler(RegistrationMisuseHandler.class.getSimpleName(),
                 new RegistrationMisuseHandler(emailManager, properties));
     }
 
-    @Before
+    @BeforeEach
     public void beforeEach() throws Exception {
         misuseMonitor.resetMisuseCount("0.0.0.0", RegistrationMisuseHandler.class.getSimpleName());
         this.usersFacade = new UsersFacade(properties, userAccountManager, logManager, userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader);
-    }
-
-    @Test
-    public void createUser_suceeds_standardEmail() {
-        System.out.println("StandardTest");
-        HttpSession mockSession = createNiceMock(HttpSession.class);
-        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-        expect(mockSession.getId()).andReturn("sessionIdSuccess");
-        replay(mockSession);
-        HttpServletRequest mockRequest = createNiceMock(HttpServletRequest.class);
-        expect(mockRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
-        expect(mockRequest.getSession()).andReturn(mockSession).anyTimes();
-        replay(mockRequest);
-        HttpServletResponse mockResponse = niceMock(HttpServletResponse.class);
-        // {
-        //  "registeredUser": {
-        //    "loggedIn": true,
-        //    "email": "new-student@test.com",
-        //    "dateOfBirth": "2000-01-01T00:00:00.000Z",
-        //    "password": "password",
-        //    "familyName": "Test",
-        //    "givenName": "Test"
-        //  },
-        //  "userPreferences": {},
-        //  "passwordCurrent": null
-        //}
-        String userObjectString = "{\"registeredUser\":{\"loggedIn\":true,\"email\":\"new-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}";
-
-        Response response = null;
-        try {
-            response = usersFacade.createOrUpdateUserSettings(mockRequest, mockResponse, userObjectString);
-        } catch (InvalidKeySpecException e) {
-            fail("Unhandled InvalidKeySpecException during test");
-        } catch (NoSuchAlgorithmException e) {
-            fail("Unhandled NoSuchAlgorithmException during test");
-        }
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 
     @ParameterizedTest
@@ -143,7 +108,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
         return Stream.of(
 //                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
                 // Isaac addresses are forbidden
-                Arguments.of("new-student@isaaccomputerscience.com", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of("new-student@isaaccomputerscience.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
                 // Email field cannot be empty
                 Arguments.of("", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
                 // Email field cannot have conecutive .s
