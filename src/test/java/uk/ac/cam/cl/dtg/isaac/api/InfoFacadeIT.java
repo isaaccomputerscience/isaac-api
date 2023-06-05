@@ -1,13 +1,13 @@
 package uk.ac.cam.cl.dtg.isaac.api;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
-import org.junit.Test;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.segue.api.InfoFacade;
 import uk.ac.cam.cl.dtg.segue.scheduler.SegueJobService;
 
-import jakarta.ws.rs.core.Request;
-import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 
 import static junit.framework.TestCase.assertEquals;
@@ -15,11 +15,11 @@ import static junit.framework.TestCase.assertNotNull;
 import static org.easymock.EasyMock.createNiceMock;
 
 // NOTE: This was a proof of concept but I'm not too sure we actually need this entire test suite.
-public class InfoFacadeIT extends IsaacIntegrationTest {
+public class InfoFacadeIT extends IsaacIntegrationJupiterTest {
 
     public InfoFacade infoFacade;
 
-    @Before
+    @BeforeEach
     public void setUp() throws RuntimeException, IOException {
         SegueJobService segueJobService = createNiceMock(SegueJobService.class); // new SegueJobService(new ArrayList<>(), postgresSqlDb);
         infoFacade = new InfoFacade(properties, contentManager, segueJobService, logManager);

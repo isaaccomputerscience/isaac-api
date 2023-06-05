@@ -114,6 +114,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
  *
  * Subclasses should be named "*IT.java" so Maven Failsafe detects them. They are runnable via the "verify" Maven target.
  */
+@Deprecated
 public abstract class IsaacIntegrationTest {
 
     protected static HttpSession httpSession;

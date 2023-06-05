@@ -1,11 +1,11 @@
 package uk.ac.cam.cl.dtg.isaac.api;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.eclipse.jetty.http.HttpCookie.SAME_SITE_LAX_COMMENT;
 import static org.junit.Assert.assertEquals;
 
-public class AuthenticationFacadeIT extends IsaacIntegrationTest {
+public class AuthenticationFacadeIT extends IsaacIntegrationJupiterTest {
 
     @Test
     public void login_cookie_samesite() throws Exception {
