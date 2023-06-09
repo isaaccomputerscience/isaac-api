@@ -155,7 +155,7 @@ public abstract class IsaacIntegrationTest {
     // Services
     protected static AssignmentService assignmentService;
 
-    protected class LoginResult {
+    protected static class LoginResult {
         public RegisteredUserDTO user;
         public Cookie cookie;
 
