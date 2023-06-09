@@ -38,11 +38,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class for the SegueLocalAuthenticator class.
- * 
+ *
  */
 public class SegueLocalAuthenticatorTest {
 
@@ -83,18 +83,18 @@ public class SegueLocalAuthenticatorTest {
 		RegisteredUser someUser = new RegisteredUser();
 		someUser.setEmail("test@test.com");
 		someUser.setId(533L);
-		
+
 		replay(userDataManager);
-		
+
 		SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(this.userDataManager, this.passwordDataManager,
 		        this.propertiesLoader, possibleAlgorithms, preferredAlgorithm);
-		
+
 		try {
 			segueAuthenticator.setOrChangeUsersPassword(someUser, null);
 			fail("Expected InvalidPasswordException to be thrown as a null password was given.");
 		} catch (InvalidPasswordException e) {
 			// this is a pass
-			
+
 		} catch (SegueDatabaseException e) {
 			e.printStackTrace();
 		}
@@ -104,12 +104,12 @@ public class SegueLocalAuthenticatorTest {
 			fail("Expected InvalidPasswordException to be thrown as a empty password was given.");
 		} catch (InvalidPasswordException e) {
 			// this is a pass
-			
+
 		} catch (SegueDatabaseException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Verify that setOrChangeUsersPassword works with correct input and the
 	 * result is a user object with base64 encoded passwords and a secure salt.
@@ -121,27 +121,27 @@ public class SegueLocalAuthenticatorTest {
 		someUser.setId(533L);
 		String somePassword = "test5eguePassw0rd!";
 		replay(userDataManager);
-		
+
 		SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(this.userDataManager, this.passwordDataManager,
 				this.propertiesLoader, possibleAlgorithms, preferredAlgorithm);
-		
+
 		try {
 			segueAuthenticator.setOrChangeUsersPassword(someUser, somePassword);
-			
+
 			//TODO write test
-			
+
 		} catch (InvalidPasswordException e) {
 			fail("This should be a valid password");
 		} catch (SegueDatabaseException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Verify that setOrChangeUsersPassword fails on a bad password.
-	 * @throws SegueDatabaseException 
-	 * @throws NoCredentialsAvailableException 
-	 * @throws NoUserException 
+	 * @throws SegueDatabaseException
+	 * @throws NoCredentialsAvailableException
+	 * @throws NoUserException
 	 */
 	@Test
 	public final void segueLocalAuthenticator_authenticate_correctEmailAndIncorrectPasswordProvided()
@@ -149,7 +149,7 @@ public class SegueLocalAuthenticatorTest {
 		String someCorrectPasswordHashFromDB = "q41e8iZsi0TO5xB1MWwC06jkaWx8MTnSHMp3eP/FNOTBCwpTnPX5a/KsUTUJ2cwnCiXZeATVqWEF2FCbSQp9Fg==";
 		String someCorrectSecureSaltFromDB = "P77Fhqu2/SAVGDCtu9IkHg==";
 		String usersEmailAddress = "test@test.com";
-		
+
 		RegisteredUser userFromDatabase = new RegisteredUser();
 		userFromDatabase.setId(533L);
 		userFromDatabase.setEmail(usersEmailAddress);
@@ -169,61 +169,61 @@ public class SegueLocalAuthenticatorTest {
         expect(passwordDataManager.getLocalUserCredential(anyLong())).andReturn(luc).atLeastOnce();
 
 		replay(userDataManager, passwordDataManager);
-		
+
 		SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(this.userDataManager, this.passwordDataManager,
 				this.propertiesLoader, possibleAlgorithms, preferredAlgorithm);
 		try {
 			RegisteredUser authenticatedUser = segueAuthenticator.authenticate(usersEmailAddress, someIncorrectPassword);
 			fail("This should fail as a bad password has been provided.");
-			
+
 		} catch (IncorrectCredentialsProvidedException e) {
 			// success
-			
-		}		
+
+		}
 	}
-	
+
 	/**
 	 * Verify that setOrChangeUsersPassword fails on a bad e-mail and password.
-	 * @throws SegueDatabaseException 
-	 * @throws IncorrectCredentialsProvidedException 
-	 * @throws NoCredentialsAvailableException 
-	 * @throws NoUserException 
+	 * @throws SegueDatabaseException
+	 * @throws IncorrectCredentialsProvidedException
+	 * @throws NoCredentialsAvailableException
+	 * @throws NoUserException
 	 */
 	@Test
 	public final void segueLocalAuthenticator_authenticate_badEmailAndIncorrectPasswordProvided()
 			throws SegueDatabaseException, IncorrectCredentialsProvidedException,
 			NoCredentialsAvailableException, InvalidKeySpecException, NoSuchAlgorithmException {
 		String usersEmailAddress = "test@test.com";
-		
+
 		RegisteredUser userFromDatabase = new RegisteredUser();
 		userFromDatabase.setId(533L);
 		userFromDatabase.setEmail(usersEmailAddress);
-		
+
 		String someBadEmail = "badtest@test.com";
 		String someIncorrectPassword = "password";
-		
+
 		expect(userDataManager.getByEmail(someBadEmail)).andReturn(null).once();
-		
+
 		replay(userDataManager);
-		
+
 		SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(this.userDataManager, this.passwordDataManager,
 				this.propertiesLoader, possibleAlgorithms, preferredAlgorithm);
 		try {
 			RegisteredUser authenticatedUser = segueAuthenticator.authenticate(someBadEmail, someIncorrectPassword);
 			fail("This should fail as a bad email and password has been provided.");
-			
+
 		} catch (NoUserException e) {
 			// success. This is what we expect.
-		} 
+		}
 	}
-	
+
 	/**
 	 * Verify that the authenticator creates and authenticates correctly..
-	 * @throws SegueDatabaseException 
-	 * @throws IncorrectCredentialsProvidedException 
-	 * @throws NoCredentialsAvailableException 
-	 * @throws InvalidPasswordException 
-	 * @throws NoUserException 
+	 * @throws SegueDatabaseException
+	 * @throws IncorrectCredentialsProvidedException
+	 * @throws NoCredentialsAvailableException
+	 * @throws InvalidPasswordException
+	 * @throws NoUserException
 	 */
 	@Test
 	public final void segueLocalAuthenticator_setPasswordAndImmediateAuthenticate_correctEmailAndPasswordProvided()
@@ -248,20 +248,20 @@ public class SegueLocalAuthenticatorTest {
 		expect(passwordDataManager.createOrUpdateLocalUserCredential(anyObject())).andReturn(luc).atLeastOnce();
 
 		replay(userDataManager, passwordDataManager);
-		
+
 		SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(this.userDataManager, this.passwordDataManager,
 				this.propertiesLoader, possibleAlgorithms, preferredAlgorithm);
 		try {
 			// first try and mutate the user object using the the set method.
 			// this should set the password and secure hash on the user object.
 			segueAuthenticator.setOrChangeUsersPassword(userFromDatabase, someCorrectPasswordPlainText);
-			
+
 			// now try and authenticate using the password we just created.
 			RegisteredUser authenticatedUser = segueAuthenticator.authenticate(usersEmailAddress, someCorrectPasswordPlainText);
 
 		} catch (NoUserException e) {
 			fail("We expect a user to be returned");
-		} 
+		}
 	}
 
 	@Test

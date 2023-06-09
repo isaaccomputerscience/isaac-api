@@ -50,6 +50,7 @@ import com.google.inject.Inject;
 public class SegueLocalAuthenticator implements IPasswordAuthenticator {
     private static final Logger log = LoggerFactory.getLogger(SegueLocalAuthenticator.class);
     private static final Integer SHORT_KEY_LENGTH = 128;
+    private static final Integer MINIMUM_PASSWORD_LENGTH = 12;
 
     private final IPasswordDataManager passwordDataManager;
     private final IUserDataManager userDataManager;
@@ -244,12 +245,11 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
             throw new InvalidPasswordException("Invalid password. You cannot have an empty password.");
         }
 
-        if (password.length() < 12) {
+        if (password.length() < MINIMUM_PASSWORD_LENGTH) {
             throw new InvalidPasswordException("Password must be at least 12 characters in length.");
         }
-
-        //  Special characters: !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
-        if (!password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[ !\"#$%&'()*+,\\-./:;<=>?@\\[\\]\\^_`\\{\\|\\}~]).{12,}$")) {
+        
+        if (!password.matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[ !\"#$%&'()*+,\\-./:;<=>?@\\[\\]\\^_`\\{\\|\\}~]).{" + MINIMUM_PASSWORD_LENGTH + ",}$")) {
             throw new InvalidPasswordException("Password must contain at least one of each of: uppercase character, lowercase character, number, special character.");
         }
     }
