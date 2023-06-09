@@ -29,6 +29,9 @@ public class UserAccountManagerTest {
                 Arguments.of(true, "Test Name"), // Double-barrelled names with spaces are valid
                 Arguments.of(true, "Test-Name"), // Double-barrelled names with hyphens are valid
                 Arguments.of(true, "O'Name"), // Apostrophes are valid
+                // Accented and non-English characters are valid.
+                // Please note, this is not an exhustive test - unicode supports thousands of such characters
+                Arguments.of(true, "ÃëóûÿĉĐŗǥȕḍṦμϱнӯ"),
                 Arguments.of(false, null), // Null is not valid
                 Arguments.of(false, ""), // Empty string is not valid
                 Arguments.of(false, " "), // Only whitespace is not valid
