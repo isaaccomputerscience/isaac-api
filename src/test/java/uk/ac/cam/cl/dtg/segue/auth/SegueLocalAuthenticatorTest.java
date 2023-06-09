@@ -146,7 +146,6 @@ public class SegueLocalAuthenticatorTest {
 	@Test
 	public final void segueLocalAuthenticator_authenticate_correctEmailAndIncorrectPasswordProvided()
 			throws SegueDatabaseException, NoUserException, NoCredentialsAvailableException, InvalidKeySpecException, NoSuchAlgorithmException {
-		String someCorrectPasswordPlainText = "test5eguePassw0rd!";
 		String someCorrectPasswordHashFromDB = "q41e8iZsi0TO5xB1MWwC06jkaWx8MTnSHMp3eP/FNOTBCwpTnPX5a/KsUTUJ2cwnCiXZeATVqWEF2FCbSQp9Fg==";
 		String someCorrectSecureSaltFromDB = "P77Fhqu2/SAVGDCtu9IkHg==";
 		String usersEmailAddress = "test@test.com";
@@ -194,9 +193,6 @@ public class SegueLocalAuthenticatorTest {
 	public final void segueLocalAuthenticator_authenticate_badEmailAndIncorrectPasswordProvided()
 			throws SegueDatabaseException, IncorrectCredentialsProvidedException,
 			NoCredentialsAvailableException, InvalidKeySpecException, NoSuchAlgorithmException {
-		String someCorrectPasswordPlainText = "test5eguePassw0rd!";
-		String someCorrectPasswordHashFromDB = "q41e8iZsi0TO5xB1MWwC06jkaWx8MTnSHMp3eP/FNOTBCwpTnPX5a/KsUTUJ2cwnCiXZeATVqWEF2FCbSQp9Fg==";
-		String someCorrectSecureSaltFromDB = "P77Fhqu2/SAVGDCtu9IkHg==";
 		String usersEmailAddress = "test@test.com";
 		
 		RegisteredUser userFromDatabase = new RegisteredUser();
