@@ -6,7 +6,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isEmailValid;
 import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isUserNameValid;
 
@@ -28,11 +28,11 @@ public class UserAccountManagerTest {
                 Arguments.of(true, "Test_Name"), // Underscores are valid
                 Arguments.of(true, "Test Name"), // Double-barrelled names with spaces are valid
                 Arguments.of(true, "Test-Name"), // Double-barrelled names with hyphens are valid
-                Arguments.of(true, "O'Name"), // Apostraphes are valid
+                Arguments.of(true, "O'Name"), // Apostrophes are valid
                 Arguments.of(false, null), // Null is not valid
                 Arguments.of(false, ""), // Empty string is not valid
-                // Names exceeding the maximum length of 255 characters are not valid
-                Arguments.of(false, "TestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestNameTestName"),
+                Arguments.of(false, " "), // Only whitespace is not valid
+                Arguments.of(false, "a".repeat(256)), // Names exceeding the maximum length of 255 characters are not valid
                 // Other special characters are not permitted
                 Arguments.of(false, "Test!Name"),
                 Arguments.of(false, "Test?Name"),
@@ -66,6 +66,7 @@ public class UserAccountManagerTest {
                 Arguments.of(true, "testemail@test.co.uk"), // Multiple seperated .s are valid
                 Arguments.of(false, null), // Null is not valid
                 Arguments.of(false, ""), // Empty string is not valid
+                Arguments.of(false, " "), // Only whitespace is not valid
                 Arguments.of(false, "test.email@testcom"), // Email must have at least one . after the @
                 Arguments.of(false, "testemailtest.com"), // Standard email must include an @
                 Arguments.of(false, "testemail@test."), // Email must have be at least character after the last .

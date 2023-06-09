@@ -1872,8 +1872,7 @@ public class UserAccountManager implements IUserAccountManager {
      * @return true if it meets the internal storage requirements, false if not.
      */
     private boolean isUserValid(final RegisteredUser userToValidate) {
-        if (null == userToValidate.getEmail()) return false;
-        else return isEmailValid(userToValidate.getEmail());
+        return (userToValidate.getEmail() != null) && isEmailValid(userToValidate.getEmail());
     }
 
     public static final boolean isEmailValid(String email) {
@@ -1898,6 +1897,7 @@ public class UserAccountManager implements IUserAccountManager {
     public static final boolean isUserNameValid(final String name) {
         if (null == name
                 || name.isEmpty()
+                || name.isBlank()
                 || name.length() > USER_NAME_MAX_LENGTH
                 || !USER_NAME_PERMITTED_CHARS_REGEX.matcher(name).matches()
         ) {
