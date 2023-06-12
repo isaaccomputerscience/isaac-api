@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -79,11 +80,9 @@ public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("invalidRegistrationParameters")
-    public void createUser_invalidRegistrationParameters(String email, String password, String dob, String familyName, String givenName) {
-        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"%1$s\",\"dateOfBirth\":\"%3$s\",\"password\":\"%2$s\",\"familyName\":\"%4$s\",\"givenName\":\"%5$s\"},\"userPreferences\":{},\"passwordCurrent\":null}",
-                email, password, dob, familyName, givenName);
+    @Test
+    public void createUser_existingAccount() {
+        String userObjectString = "{\"registeredUser\":{\"loggedIn\":true,\"email\":\"test-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}";
 
         Response response = null;
         try {
@@ -96,40 +95,114 @@ public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
-    private static Stream<Arguments> invalidRegistrationParameters() {
+    @ParameterizedTest
+    @MethodSource("invalidEmails")
+    public void createUser_invalidEmail(String email) {
+        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"%1$s\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}",
+                email);
+
+        Response response = null;
+        try {
+            response = usersFacade.createOrUpdateUserSettings(mockRequest, mockResponse, userObjectString);
+        } catch (InvalidKeySpecException e) {
+            fail("Unhandled InvalidKeySpecException during test");
+        } catch (NoSuchAlgorithmException e) {
+            fail("Unhandled NoSuchAlgorithmException during test");
+        }
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidPasswords")
+    public void createUser_invalidPassword(String password) {
+        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"new-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"%1$s\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}",
+                password);
+
+        Response response = null;
+        try {
+            response = usersFacade.createOrUpdateUserSettings(mockRequest, mockResponse, userObjectString);
+        } catch (InvalidKeySpecException e) {
+            fail("Unhandled InvalidKeySpecException during test");
+        } catch (NoSuchAlgorithmException e) {
+            fail("Unhandled NoSuchAlgorithmException during test");
+        }
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidNames")
+    public void createUser_invalidFamilyName(String familyName) {
+        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"new-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"%1$s\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}",
+                familyName);
+
+        Response response = null;
+        try {
+            response = usersFacade.createOrUpdateUserSettings(mockRequest, mockResponse, userObjectString);
+        } catch (InvalidKeySpecException e) {
+            fail("Unhandled InvalidKeySpecException during test");
+        } catch (NoSuchAlgorithmException e) {
+            fail("Unhandled NoSuchAlgorithmException during test");
+        }
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidNames")
+    public void createUser_invalidGivenName(String givenName) {
+        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"new-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"Test\",\"givenName\":\"%1$s\"},\"userPreferences\":{},\"passwordCurrent\":null}",
+                givenName);
+
+        Response response = null;
+        try {
+            response = usersFacade.createOrUpdateUserSettings(mockRequest, mockResponse, userObjectString);
+        } catch (InvalidKeySpecException e) {
+            fail("Unhandled InvalidKeySpecException during test");
+        } catch (NoSuchAlgorithmException e) {
+            fail("Unhandled NoSuchAlgorithmException during test");
+        }
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+
+    private static Stream<Arguments> invalidEmails() {
         // Email, Password, DOB, familyName, givenName
         return Stream.of(
                 // Isaac addresses are forbidden
-                Arguments.of("new-student@isaaccomputerscience.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
-                Arguments.of("new-student@isaacphysics.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
-                Arguments.of("new-student@isaacchemistry.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
-                Arguments.of("new-student@isaacmaths.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
-                Arguments.of("new-student@isaacbiology.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
-                Arguments.of("new-student@isaacscience.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of("new-student@isaaccomputerscience.org"),
+                Arguments.of("new-student@isaacphysics.org"),
+                Arguments.of("new-student@isaacchemistry.org"),
+                Arguments.of("new-student@isaacmaths.org"),
+                Arguments.of("new-student@isaacbiology.org"),
+                Arguments.of("new-student@isaacscience.org"),
                 // Email field cannot be empty
-                Arguments.of("", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of(""),
                 // Email field cannot have conecutive .s
-                Arguments.of("new-student@test..com", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of("new-student@test..com"),
                 // Email field must contain an @
-                Arguments.of("new-student.test.com", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of("new-student.test.com"),
                 // Email field must match an @x.y pattern
-                Arguments.of("new-student@testcom", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
-                // Family name cannot be empty
-                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "", "Test"),
-                // Family name cannot exceed maximum length
-                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "a".repeat(256), "Test"),
-                // Family name cannot contain forbidden characters
-                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Te*st", "Test"),
-                // Given name cannot be empty
-                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Test", ""),
-                // Given name cannot exceed maximum length
-                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Test", "a".repeat(256)),
-                // Given name cannot contain forbidden characters
-                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Test", "Te*st"),
+                Arguments.of("new-student@testcom")
+        );
+    }
+
+    private static Stream<Arguments> invalidPasswords() {
+        // Email, Password, DOB, familyName, givenName
+        return Stream.of(
                 // Password cannot be empty
-                Arguments.of("new-student@test.com", "", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of(""),
                 // Password must be at least minimum length
-                Arguments.of("new-student@test.com", "pass", "2000-01-01T00:00:00.000Z", "Test", "Test")
+                Arguments.of("pass")
+        );
+    }
+
+    private static Stream<Arguments> invalidNames() {
+        // Email, Password, DOB, familyName, givenName
+        return Stream.of(
+                // Names cannot be empty
+                Arguments.of(""),
+                // Names cannot exceed maximum length
+                Arguments.of("a".repeat(256)),
+                // Names cannot contain forbidden characters
+                Arguments.of("Te*st")
         );
     }
 }
