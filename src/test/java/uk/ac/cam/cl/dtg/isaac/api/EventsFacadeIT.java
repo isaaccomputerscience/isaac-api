@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.replay;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EventsFacadeIT extends IsaacIntegrationJupiterTest {
 

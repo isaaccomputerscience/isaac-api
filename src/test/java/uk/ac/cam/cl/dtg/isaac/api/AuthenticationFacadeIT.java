@@ -3,7 +3,7 @@ package uk.ac.cam.cl.dtg.isaac.api;
 import org.junit.jupiter.api.Test;
 
 import static org.eclipse.jetty.http.HttpCookie.SAME_SITE_LAX_COMMENT;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AuthenticationFacadeIT extends IsaacIntegrationJupiterTest {
 

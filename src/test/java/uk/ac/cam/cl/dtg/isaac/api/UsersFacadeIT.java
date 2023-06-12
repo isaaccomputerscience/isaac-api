@@ -16,16 +16,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.stream.Stream;
 
-import static org.easymock.EasyMock.createNiceMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.niceMock;
-import static org.easymock.EasyMock.replay;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.easymock.EasyMock.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
 
 public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
     private UsersFacade usersFacade;
+    private HttpServletRequest mockRequest;
+    private HttpServletResponse mockResponse;
 
     @BeforeAll
     public static void beforeAll() {
@@ -34,26 +33,30 @@ public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
     }
 
     @BeforeEach
-    public void beforeEach() throws Exception {
+    public void beforeEach() {
         misuseMonitor.resetMisuseCount("0.0.0.0", RegistrationMisuseHandler.class.getSimpleName());
         this.usersFacade = new UsersFacade(properties, userAccountManager, logManager, userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader);
+        mockRequest = createMockRequestObject();
+        mockResponse = niceMock(HttpServletResponse.class);
     }
 
-    @ParameterizedTest
-    @MethodSource("validRegistrationParameters")
-    public void createUser_validRegistrationParameters(String email, String password, String dob, String familyName, String givenName) {
+    private static HttpServletRequest createMockRequestObject() {
         HttpSession mockSession = createNiceMock(HttpSession.class);
         expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-        expect(mockSession.getId()).andReturn("sessionIdFailure");
+        expect(mockSession.getId()).andReturn("sessionId").anyTimes();
         replay(mockSession);
         HttpServletRequest mockRequest = createNiceMock(HttpServletRequest.class);
         expect(mockRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
         expect(mockRequest.getSession()).andReturn(mockSession).anyTimes();
         replay(mockRequest);
-        HttpServletResponse mockResponse = niceMock(HttpServletResponse.class);
+        return mockRequest;
+    }
 
-        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"%1$s\",\"dateOfBirth\":\"%3$s\",\"password\":\"%2$s\",\"familyName\":\"%4$s\",\"givenName\":\"%5$s\"},\"userPreferences\":{},\"passwordCurrent\":null}",
-                email, password, dob, familyName, givenName);
+    @ParameterizedTest
+    @MethodSource("validEmailProviders")
+    public void createUser_validRegistrationParameters(String email) {
+        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"%1$s\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}",
+                email);
 
         Response response = null;
         try {
@@ -66,27 +69,19 @@ public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 
-    private static Stream<Arguments> validRegistrationParameters() {
+    private static Stream<Arguments> validEmailProviders() {
         // Email, Password, DOB, familyName, givenName
         return Stream.of(
-                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
-                Arguments.of("new-student-google", "password", "2000-01-01T00:00:00.000Z", "Test", "Test")
+                Arguments.of("new-student@test.com"),
+                Arguments.of("new-student-google"),
+                Arguments.of("new-student-twitter"),
+                Arguments.of("new-student-facebook")
         );
     }
 
     @ParameterizedTest
     @MethodSource("invalidRegistrationParameters")
     public void createUser_invalidRegistrationParameters(String email, String password, String dob, String familyName, String givenName) {
-        HttpSession mockSession = createNiceMock(HttpSession.class);
-        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-        expect(mockSession.getId()).andReturn("sessionIdFailure");
-        replay(mockSession);
-        HttpServletRequest mockRequest = createNiceMock(HttpServletRequest.class);
-        expect(mockRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
-        expect(mockRequest.getSession()).andReturn(mockSession).anyTimes();
-        replay(mockRequest);
-        HttpServletResponse mockResponse = niceMock(HttpServletResponse.class);
-
         String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"%1$s\",\"dateOfBirth\":\"%3$s\",\"password\":\"%2$s\",\"familyName\":\"%4$s\",\"givenName\":\"%5$s\"},\"userPreferences\":{},\"passwordCurrent\":null}",
                 email, password, dob, familyName, givenName);
 
@@ -104,9 +99,13 @@ public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
     private static Stream<Arguments> invalidRegistrationParameters() {
         // Email, Password, DOB, familyName, givenName
         return Stream.of(
-//                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
                 // Isaac addresses are forbidden
                 Arguments.of("new-student@isaaccomputerscience.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of("new-student@isaacphysics.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of("new-student@isaacchemistry.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of("new-student@isaacmaths.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of("new-student@isaacbiology.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
+                Arguments.of("new-student@isaacscience.org", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
                 // Email field cannot be empty
                 Arguments.of("", "password", "2000-01-01T00:00:00.000Z", "Test", "Test"),
                 // Email field cannot have conecutive .s
@@ -118,13 +117,13 @@ public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
                 // Family name cannot be empty
                 Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "", "Test"),
                 // Family name cannot exceed maximum length
-                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "01abcdefghijklmn02abcdefghijklmn03abcdefghijklmn04abcdefghijklmn05abcdefghijklmn06abcdefghijklmn07abcdefghijklmn08abcdefghijklmn09abcdefghijklmn10abcdefghijklmn11abcdefghijklmn12abcdefghijklmn13abcdefghijklmn14abcdefghijklmn15abcdefghijklmn16abcdefghijklmn", "Test"),
+                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "a".repeat(256), "Test"),
                 // Family name cannot contain forbidden characters
                 Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Te*st", "Test"),
                 // Given name cannot be empty
                 Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Test", ""),
                 // Given name cannot exceed maximum length
-                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Test", "01abcdefghijklmn02abcdefghijklmn03abcdefghijklmn04abcdefghijklmn05abcdefghijklmn06abcdefghijklmn07abcdefghijklmn08abcdefghijklmn09abcdefghijklmn10abcdefghijklmn11abcdefghijklmn12abcdefghijklmn13abcdefghijklmn14abcdefghijklmn15abcdefghijklmn16abcdefghijklmn"),
+                Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Test", "a".repeat(256)),
                 // Given name cannot contain forbidden characters
                 Arguments.of("new-student@test.com", "password", "2000-01-01T00:00:00.000Z", "Test", "Te*st"),
                 // Password cannot be empty
