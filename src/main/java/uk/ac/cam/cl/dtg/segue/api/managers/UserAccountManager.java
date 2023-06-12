@@ -18,7 +18,9 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import io.netty.util.concurrent.SingleThreadEventExecutor;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.Response;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.apache.commons.lang3.EnumUtils;
@@ -28,12 +30,47 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.dos.AbstractUserPreferenceManager;
+import uk.ac.cam.cl.dtg.isaac.dos.UserPreference;
+import uk.ac.cam.cl.dtg.isaac.dos.users.AnonymousUser;
+import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.users.Gender;
+import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
+import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
+import uk.ac.cam.cl.dtg.isaac.dos.users.TOTPSharedSecret;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserAuthenticationSettings;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserFromAuthProvider;
+import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
+import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserAuthenticationSettingsDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 import uk.ac.cam.cl.dtg.segue.auth.IAuthenticator;
 import uk.ac.cam.cl.dtg.segue.auth.IPasswordAuthenticator;
 import uk.ac.cam.cl.dtg.segue.auth.ISecondFactorAuthenticator;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.*;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.AdditionalAuthenticationRequiredException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.AuthenticationCodeException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.AuthenticationProviderMappingException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.AuthenticatorSecurityException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.CodeExchangeException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.CrossSiteRequestForgeryException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.DuplicateAccountException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.FailedToHashPasswordException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.IncorrectCredentialsProvidedException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidNameException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidPasswordException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidTokenException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.MFARequiredButNotConfiguredException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.MissingRequiredFieldException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
 import uk.ac.cam.cl.dtg.segue.comm.CommunicationException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailMustBeVerifiedException;
@@ -43,30 +80,8 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IAnonymousUserDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
-import uk.ac.cam.cl.dtg.isaac.dos.AbstractUserPreferenceManager;
-import uk.ac.cam.cl.dtg.isaac.dos.UserPreference;
-import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
-import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
-import uk.ac.cam.cl.dtg.isaac.dos.users.AnonymousUser;
-import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
-import uk.ac.cam.cl.dtg.isaac.dos.users.Gender;
-import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
-import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
-import uk.ac.cam.cl.dtg.isaac.dos.users.TOTPSharedSecret;
-import uk.ac.cam.cl.dtg.isaac.dos.users.UserAuthenticationSettings;
-import uk.ac.cam.cl.dtg.isaac.dos.users.UserFromAuthProvider;
-import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.UserAuthenticationSettingsDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
@@ -1333,16 +1348,8 @@ public class UserAccountManager implements IUserAccountManager {
      *
      * @param userObject
      *            - A user object containing the email address of the user to reset the password for.
-     * @throws NoSuchAlgorithmException
-     *             - if the configured algorithm is not valid.
-     * @throws InvalidKeySpecException
-     *             - if the preconfigured key spec is invalid.
-     * @throws CommunicationException
-     *             - if a fault occurred whilst sending the communique
      * @throws SegueDatabaseException
      *             - If there is an internal database error.
-     * @throws NoUserException
-     *             - If no user found with provided email.
      */
     public final boolean resetPasswordRequest(final RegisteredUserDTO userObject)
             throws SegueDatabaseException {

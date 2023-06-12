@@ -18,26 +18,23 @@ package uk.ac.cam.cl.dtg.segue.api.monitors;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_ONE_HOUR;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_TEN_MINUTES;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 
 /**
  * Handler to detect bruteforce login attempts.
- * 
+ *
  * Preventing users from overusing this endpoint is important as they may be trying to brute force someones password.
  *
  */
-public class SegueLoginbyIPMisuseHandler implements IMisuseHandler {
-    private static final Logger log = LoggerFactory.getLogger(SegueLoginbyIPMisuseHandler.class);
+public class SegueLoginByEmailMisuseHandler implements IMisuseHandler {
+    private static final Logger log = LoggerFactory.getLogger(SegueLoginByEmailMisuseHandler.class);
 
-    public static Integer SOFT_THRESHOLD;
-    public static Integer HARD_THRESHOLD;
-    public static Integer ACCOUNTING_INTERVAL;
+    public final Integer SOFT_THRESHOLD;
+    public final Integer HARD_THRESHOLD;
+    public final Integer ACCOUNTING_INTERVAL;
 
     private PropertiesLoader properties;
     private EmailManager emailManager;
@@ -49,12 +46,12 @@ public class SegueLoginbyIPMisuseHandler implements IMisuseHandler {
      *            - so that we can look up properties set.
      */
     @Inject
-    public SegueLoginbyIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties) {
-        this(emailManager, properties, 50, 300, NUMBER_SECONDS_IN_ONE_HOUR);
+    public SegueLoginByEmailMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties) {
+        this(emailManager, properties, 5, 10, NUMBER_SECONDS_IN_TEN_MINUTES);
     }
 
     @Inject
-    public SegueLoginbyIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties, Integer softThreshold, Integer hardThreshold, Integer interval) {
+    public SegueLoginByEmailMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties, Integer softThreshold, Integer hardThreshold, Integer interval) {
         this.properties = properties;
         this.emailManager = emailManager;
         this.SOFT_THRESHOLD = softThreshold;
@@ -69,7 +66,7 @@ public class SegueLoginbyIPMisuseHandler implements IMisuseHandler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see uk.ac.cam.cl.dtg.segue.api.managers.IMisuseEvent#getHardThreshold()
      */
     @Override
@@ -84,11 +81,11 @@ public class SegueLoginbyIPMisuseHandler implements IMisuseHandler {
 
     @Override
     public void executeSoftThresholdAction(final String message) {
-        log.warn("Soft threshold limit: " + sanitiseLogValue(message));
+        log.warn("Soft threshold limit: " + message);
     }
 
     @Override
     public void executeHardThresholdAction(final String message) {
-        log.warn("Hard threshold limit: " + sanitiseLogValue(message));
+        log.warn("Hard threshold limit: " + message);
     }
 }

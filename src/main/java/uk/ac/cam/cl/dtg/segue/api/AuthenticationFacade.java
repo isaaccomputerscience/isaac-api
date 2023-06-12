@@ -45,8 +45,8 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.SegueResourceMisuseException;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.api.monitors.IMisuseMonitor;
-import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginbyEmailMisuseHandler;
-import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginbyIPMisuseHandler;
+import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByEmailMisuseHandler;
+import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.AccountAlreadyLinkedException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.AdditionalAuthenticationRequiredException;
@@ -387,10 +387,10 @@ public class AuthenticationFacade extends AbstractSegueFacade {
         try {
             String requestingIPAddress = RequestIPExtractor.getClientIpAddr(request);
             // Stop users logging in who have already locked their account.
-            if (misuseMonitor.hasMisused(email.toLowerCase(), SegueLoginbyEmailMisuseHandler.class.getSimpleName())) {
+            if (misuseMonitor.hasMisused(email.toLowerCase(), SegueLoginByEmailMisuseHandler.class.getSimpleName())) {
                 throw new SegueResourceMisuseException("Too many login attempts for this account");
             }
-            misuseMonitor.notifyEvent(requestingIPAddress, SegueLoginbyIPMisuseHandler.class.getSimpleName());
+            misuseMonitor.notifyEvent(requestingIPAddress, SegueLoginByIPMisuseHandler.class.getSimpleName());
 
             // ok we need to hand over to user manager
             RegisteredUserDTO userToReturn = userManager.authenticateWithCredentials(request, response, signinProvider, email, password, rememberMe);
@@ -409,7 +409,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             return new SegueErrorResponse(Status.BAD_REQUEST, errorMsg).toResponse();
         } catch (IncorrectCredentialsProvidedException | NoCredentialsAvailableException e) {
             try {
-                misuseMonitor.notifyEvent(email.toLowerCase(), SegueLoginbyEmailMisuseHandler.class.getSimpleName());
+                misuseMonitor.notifyEvent(email.toLowerCase(), SegueLoginByEmailMisuseHandler.class.getSimpleName());
                 log.info(String.format("Incorrect credentials received for (%s). Error: %s", sanitiseLogValue(email), e.getMessage()));
                 return new SegueErrorResponse(Status.UNAUTHORIZED, "Incorrect credentials provided.").toResponse();
             } catch (SegueResourceMisuseException e1) {
@@ -519,7 +519,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             partiallyLoggedInUser = this.userManager.getPartiallyIdentifiedUser(request);
 
             if (misuseMonitor.hasMisused(partiallyLoggedInUser.getEmail().toLowerCase(),
-                    SegueLoginbyEmailMisuseHandler.class.getSimpleName())) {
+                    SegueLoginByEmailMisuseHandler.class.getSimpleName())) {
 
                 log.error("Segue Login Blocked for (" + partiallyLoggedInUser.getEmail()
                         + ") during 2FA step. Rate limited - too many logins.");
@@ -539,7 +539,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
                     + "). Error reason: " + e.getMessage());
             try {
                 misuseMonitor.notifyEvent(partiallyLoggedInUser.getEmail().toLowerCase(),
-                        SegueLoginbyEmailMisuseHandler.class.getSimpleName());
+                        SegueLoginByEmailMisuseHandler.class.getSimpleName());
 
                 return new SegueErrorResponse(Status.UNAUTHORIZED, "Incorrect code provided.").toResponse();
             } catch (SegueResourceMisuseException e1) {

@@ -15,31 +15,31 @@
  */
 package uk.ac.cam.cl.dtg.segue.auth;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.*;
-
+import com.google.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import uk.ac.cam.cl.dtg.isaac.dos.users.LocalUserCredential;
+import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAuthenticationManager;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.IncorrectCredentialsProvidedException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidPasswordException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IPasswordDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
-import uk.ac.cam.cl.dtg.isaac.dos.users.LocalUserCredential;
-import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-import com.google.inject.Inject;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
+
+import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 
 /**
  * Segue Local Authenticator. This provides a mechanism for users to create an account on the Segue CMS without the need
@@ -106,7 +106,10 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
         RegisteredUser localUserAccount = userDataManager.getByEmail(usersEmailAddress);
         LocalUserCredential luc;
         if (null == localUserAccount) {
-            // Default object so hashing & comparison is still called on non-existent accounts for more consistent return time
+            // For security reasons, this method should return in approximately the same amount of time regardless of
+            // whether the account actually exists. As the hashing & comparison process takes up a significant fraction
+            // of the execution time, a default credentials object is provided here to allow it to be performed when a
+            // user is not found. This default object should never result in a successful match.
             luc = new LocalUserCredential(-1L, "password", "salt", "SegueSCryptv1");
         } else {
             luc = passwordDataManager.getLocalUserCredential(localUserAccount.getId());

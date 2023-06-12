@@ -8,13 +8,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.ac.cam.cl.dtg.isaac.dto.LocalAuthDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.api.AuthenticationFacade;
-import uk.ac.cam.cl.dtg.segue.api.UsersFacade;
-import uk.ac.cam.cl.dtg.segue.api.monitors.PasswordResetByEmailMisuseHandler;
-import uk.ac.cam.cl.dtg.segue.api.monitors.PasswordResetByIPMisuseHandler;
-import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginbyEmailMisuseHandler;
-import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginbyIPMisuseHandler;
+import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByEmailMisuseHandler;
+import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 
 import java.security.NoSuchAlgorithmException;
@@ -28,20 +24,36 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_MINUTE;
 
 public class AuthenticationFacadeIT extends IsaacIntegrationTest {
     private AuthenticationFacade authenticationFacade;
+    private HttpServletRequest mockRequest;
+    private HttpServletResponse mockResponse;
 
     @BeforeClass
     public static void beforeAll() {
-        misuseMonitor.registerHandler(SegueLoginbyEmailMisuseHandler.class.getSimpleName(),
-                new SegueLoginbyEmailMisuseHandler(emailManager, properties, 1, 2, NUMBER_SECONDS_IN_MINUTE));
-        misuseMonitor.registerHandler(SegueLoginbyIPMisuseHandler.class.getSimpleName(),
-                new SegueLoginbyIPMisuseHandler(emailManager, properties, 1, 2, NUMBER_SECONDS_IN_MINUTE));
+        misuseMonitor.registerHandler(SegueLoginByEmailMisuseHandler.class.getSimpleName(),
+                new SegueLoginByEmailMisuseHandler(emailManager, properties, 1, 2, NUMBER_SECONDS_IN_MINUTE));
+        misuseMonitor.registerHandler(SegueLoginByIPMisuseHandler.class.getSimpleName(),
+                new SegueLoginByIPMisuseHandler(emailManager, properties, 1, 2, NUMBER_SECONDS_IN_MINUTE));
     }
 
     @Before
-    public void beforeEach() throws Exception {
-        misuseMonitor.resetMisuseCount("test-student@test.com", SegueLoginbyEmailMisuseHandler.class.getSimpleName());
-        misuseMonitor.resetMisuseCount("0.0.0.0", SegueLoginbyIPMisuseHandler.class.getSimpleName());
+    public void beforeEach(){
+        misuseMonitor.resetMisuseCount("test-student@test.com", SegueLoginByEmailMisuseHandler.class.getSimpleName());
+        misuseMonitor.resetMisuseCount("0.0.0.0", SegueLoginByIPMisuseHandler.class.getSimpleName());
         this.authenticationFacade = new AuthenticationFacade(properties, userAccountManager, logManager, misuseMonitor);
+        mockRequest = createMockRequestObject();
+        mockResponse = niceMock(HttpServletResponse.class);
+    }
+
+    private static HttpServletRequest createMockRequestObject() {
+        HttpSession mockSession = createNiceMock(HttpSession.class);
+        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
+        expect(mockSession.getId()).andReturn("sessionId").anyTimes();
+        replay(mockSession);
+        HttpServletRequest mockRequest = createNiceMock(HttpServletRequest.class);
+        expect(mockRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
+        expect(mockRequest.getSession()).andReturn(mockSession).anyTimes();
+        replay(mockRequest);
+        return mockRequest;
     }
 
     @Test
@@ -56,55 +68,55 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 
     @Test
     public void resetPassword_emailRateLimits() throws InvalidKeySpecException, NoSuchAlgorithmException {
-        HttpSession mockSession = createNiceMock(HttpSession.class);
-        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-        expect(mockSession.getId()).andReturn("sessionIdEmail1").andReturn("sessionIdEmail2").andReturn("sessionIdEmail3");
-        replay(mockSession);
-        HttpServletRequest mockAuthRequest = createNiceMock(HttpServletRequest.class);
-        expect(mockAuthRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
-        expect(mockAuthRequest.getSession()).andReturn(mockSession).anyTimes();
-        replay(mockAuthRequest);
-        HttpServletResponse  mockAuthResponse = createNiceMock(HttpServletResponse.class);
+//        HttpSession mockSession = createNiceMock(HttpSession.class);
+//        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
+//        expect(mockSession.getId()).andReturn("sessionId").anyTimes();
+//        replay(mockSession);
+//        HttpServletRequest mockAuthRequest = createNiceMock(HttpServletRequest.class);
+//        expect(mockAuthRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
+//        expect(mockAuthRequest.getSession()).andReturn(mockSession).anyTimes();
+//        replay(mockAuthRequest);
+//        HttpServletResponse  mockAuthResponse = createNiceMock(HttpServletResponse.class);
 
         LocalAuthDTO targetUser = new LocalAuthDTO();
         targetUser.setEmail("test-student@test.com");
         targetUser.setPassword("123");
 
-        Response firstResetResponse = authenticationFacade.authenticateWithCredentials(mockAuthRequest, mockAuthResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
+        Response firstResetResponse = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), firstResetResponse.getStatus());
 
-        Response secondResetResponse = authenticationFacade.authenticateWithCredentials(mockAuthRequest, mockAuthResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
+        Response secondResetResponse = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), secondResetResponse.getStatus());
 
-        Response thirdResetResponse = authenticationFacade.authenticateWithCredentials(mockAuthRequest, mockAuthResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
+        Response thirdResetResponse = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
         assertEquals(Response.Status.TOO_MANY_REQUESTS.getStatusCode(), thirdResetResponse.getStatus());
     }
 
     @Test
     public void resetPassword_ipRateLimits() throws InvalidKeySpecException, NoSuchAlgorithmException {
-        HttpSession mockSession = createNiceMock(HttpSession.class);
-        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-        expect(mockSession.getId()).andReturn("sessionIdIp1").andReturn("sessionIdIp2").andReturn("sessionIdIp3");
-        replay(mockSession);
-        HttpServletRequest mockAuthRequest = createNiceMock(HttpServletRequest.class);
-        expect(mockAuthRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
-        expect(mockAuthRequest.getSession()).andReturn(mockSession).anyTimes();
-        replay(mockAuthRequest);
-        HttpServletResponse  mockAuthResponse = createNiceMock(HttpServletResponse.class);
+//        HttpSession mockSession = createNiceMock(HttpSession.class);
+//        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
+//        expect(mockSession.getId()).andReturn("sessionId").anyTimes();
+//        replay(mockSession);
+//        HttpServletRequest mockAuthRequest = createNiceMock(HttpServletRequest.class);
+//        expect(mockAuthRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
+//        expect(mockAuthRequest.getSession()).andReturn(mockSession).anyTimes();
+//        replay(mockAuthRequest);
+//        HttpServletResponse  mockAuthResponse = createNiceMock(HttpServletResponse.class);
 
         LocalAuthDTO targetUser = new LocalAuthDTO();
         targetUser.setPassword("123");
 
         targetUser.setEmail("test-student@test.com");
-        Response firstResetResponse = authenticationFacade.authenticateWithCredentials(mockAuthRequest, mockAuthResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
+        Response firstResetResponse = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), firstResetResponse.getStatus());
 
         targetUser.setEmail("test-student2@test.com");
-        Response secondResetResponse = authenticationFacade.authenticateWithCredentials(mockAuthRequest, mockAuthResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
+        Response secondResetResponse = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), secondResetResponse.getStatus());
 
         targetUser.setEmail("test-student3@test.com");
-        Response thirdResetResponse = authenticationFacade.authenticateWithCredentials(mockAuthRequest, mockAuthResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
+        Response thirdResetResponse = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
         assertEquals(Response.Status.TOO_MANY_REQUESTS.getStatusCode(), thirdResetResponse.getStatus());
     }
 }

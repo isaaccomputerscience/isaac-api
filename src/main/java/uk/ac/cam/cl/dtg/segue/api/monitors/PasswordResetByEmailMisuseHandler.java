@@ -15,10 +15,9 @@
  */
 package uk.ac.cam.cl.dtg.segue.api.monitors;
 
+import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.inject.Inject;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_MINUTE;
 
@@ -35,9 +34,9 @@ public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
     
     private static final Logger log = LoggerFactory.getLogger(PasswordResetByEmailMisuseHandler.class);
 
-    private static Integer SOFT_THRESHOLD;
-    private static Integer HARD_THRESHOLD;
-    private static Integer ACCOUNTING_INTERVAL;
+    private final Integer SOFT_THRESHOLD;
+    private final Integer HARD_THRESHOLD;
+    private final Integer ACCOUNTING_INTERVAL;
     
     /**
      * 

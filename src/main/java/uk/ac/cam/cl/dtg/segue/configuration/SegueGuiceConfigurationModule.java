@@ -94,8 +94,8 @@ import uk.ac.cam.cl.dtg.segue.api.monitors.PasswordResetByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.PrometheusMetricsExporter;
 import uk.ac.cam.cl.dtg.segue.api.monitors.QuestionAttemptMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.RegistrationMisuseHandler;
-import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginbyEmailMisuseHandler;
-import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginbyIPMisuseHandler;
+import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByEmailMisuseHandler;
+import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.SendEmailMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.TeacherPasswordResetMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.TokenOwnerLookupMisuseHandler;
@@ -169,7 +169,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.EnvironmentType.*;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.EnvironmentType.DEV;
 
 /**
  * This class is responsible for injecting configuration values for persistence related classes.
@@ -843,11 +843,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
             misuseMonitor.registerHandler(RegistrationMisuseHandler.class.getSimpleName(),
                     new RegistrationMisuseHandler(emailManager, properties));
 
-            misuseMonitor.registerHandler(SegueLoginbyEmailMisuseHandler.class.getSimpleName(),
-                    new SegueLoginbyEmailMisuseHandler(emailManager, properties));
+            misuseMonitor.registerHandler(SegueLoginByEmailMisuseHandler.class.getSimpleName(),
+                    new SegueLoginByEmailMisuseHandler(emailManager, properties));
 
-            misuseMonitor.registerHandler(SegueLoginbyIPMisuseHandler.class.getSimpleName(),
-                    new SegueLoginbyIPMisuseHandler(emailManager, properties));
+            misuseMonitor.registerHandler(SegueLoginByIPMisuseHandler.class.getSimpleName(),
+                    new SegueLoginByIPMisuseHandler(emailManager, properties));
 
             misuseMonitor.registerHandler(LogEventMisuseHandler.class.getSimpleName(),
                     new LogEventMisuseHandler(emailManager, properties));
