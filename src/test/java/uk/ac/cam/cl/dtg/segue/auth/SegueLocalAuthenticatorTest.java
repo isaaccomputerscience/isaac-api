@@ -77,6 +77,8 @@ public class SegueLocalAuthenticatorTest {
 
 	/**
 	 * Verify that setOrChangeUsersPassword fails with bad input.
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchAlgorithmException
 	 */
 	@Test
 	public final void segueLocalAuthenticator_setOrChangeUsersPasswordEmptyPassword_exceptionsShouldBeThrown() throws InvalidKeySpecException, NoSuchAlgorithmException {
@@ -113,6 +115,8 @@ public class SegueLocalAuthenticatorTest {
 	/**
 	 * Verify that setOrChangeUsersPassword works with correct input and the
 	 * result is a user object with base64 encoded passwords and a secure salt.
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchAlgorithmException
 	 */
 	@Test
 	public final void segueLocalAuthenticator_setOrChangeUsersPasswordValidPassword_passwordAndHashShouldBePopulatedAsBase64() throws InvalidKeySpecException, NoSuchAlgorithmException {
@@ -142,6 +146,8 @@ public class SegueLocalAuthenticatorTest {
 	 * @throws SegueDatabaseException
 	 * @throws NoCredentialsAvailableException
 	 * @throws NoUserException
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchAlgorithmException
 	 */
 	@Test
 	public final void segueLocalAuthenticator_authenticate_correctEmailAndIncorrectPasswordProvided()
@@ -187,7 +193,8 @@ public class SegueLocalAuthenticatorTest {
 	 * @throws SegueDatabaseException
 	 * @throws IncorrectCredentialsProvidedException
 	 * @throws NoCredentialsAvailableException
-	 * @throws NoUserException
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchAlgorithmException
 	 */
 	@Test
 	public final void segueLocalAuthenticator_authenticate_badEmailAndIncorrectPasswordProvided()
@@ -223,7 +230,8 @@ public class SegueLocalAuthenticatorTest {
 	 * @throws IncorrectCredentialsProvidedException
 	 * @throws NoCredentialsAvailableException
 	 * @throws InvalidPasswordException
-	 * @throws NoUserException
+	 * @throws InvalidKeySpecException
+	 * @throws NoSuchAlgorithmException
 	 */
 	@Test
 	public final void segueLocalAuthenticator_setPasswordAndImmediateAuthenticate_correctEmailAndPasswordProvided()
