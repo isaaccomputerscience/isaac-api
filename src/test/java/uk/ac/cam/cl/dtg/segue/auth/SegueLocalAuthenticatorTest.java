@@ -283,6 +283,17 @@ public class SegueLocalAuthenticatorTest {
 		}
 	}
 
+	@Test
+	public void ensureValidPassword_validSpecialCharacters() {
+		SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(this.userDataManager, this.passwordDataManager,
+				this.propertiesLoader, possibleAlgorithms, preferredAlgorithm);
+		try {
+			segueAuthenticator.ensureValidPassword("Password123 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
+		} catch (InvalidPasswordException e) {
+			fail("We expect all of these special characters to be permitted");
+		}
+	}
+
 	@ParameterizedTest
 	@MethodSource("ensureValidPassword_invalidStrings")
 	public void ensureValidPassword_invalidStrings(String password, String expectedMessage) {
