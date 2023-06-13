@@ -48,7 +48,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.*;
 
-public class QuizFacadeIT extends IsaacIntegrationJupiterTest {
+public class QuizFacadeIT extends IsaacIntegrationTest {
 
     private QuizFacade quizFacade;
 

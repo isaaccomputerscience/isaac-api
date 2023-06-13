@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.eclipse.jetty.http.HttpCookie.SAME_SITE_LAX_COMMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AuthenticationFacadeIT extends IsaacIntegrationJupiterTest {
+public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 
     @Test
     public void login_cookie_samesite() throws Exception {

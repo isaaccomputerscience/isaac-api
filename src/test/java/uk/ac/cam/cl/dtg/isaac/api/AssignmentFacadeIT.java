@@ -54,7 +54,7 @@ import static org.easymock.EasyMock.reset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class AssignmentFacadeIT extends IsaacIntegrationJupiterTest {
+public class AssignmentFacadeIT extends IsaacIntegrationTest {
 
     private AssignmentFacade assignmentFacade;
     private String instantExpected = "2049-07-01T12:05:30Z";

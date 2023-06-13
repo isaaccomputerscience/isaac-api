@@ -48,7 +48,7 @@ import static org.junit.Assert.assertEquals;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.*;
 
 
-public class GroupsFacadeIT extends IsaacIntegrationJupiterTest {
+public class GroupsFacadeIT extends IsaacIntegrationTest {
 
     private GroupsFacade groupsFacade;
 

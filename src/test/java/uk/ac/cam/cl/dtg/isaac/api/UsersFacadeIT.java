@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
 
-public class UsersFacadeIT extends IsaacIntegrationJupiterTest {
+public class UsersFacadeIT extends IsaacIntegrationTest {
     private UsersFacade usersFacade;
     private HttpServletRequest mockRequest;
     private HttpServletResponse mockResponse;

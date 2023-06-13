@@ -15,7 +15,7 @@ import static junit.framework.TestCase.assertNotNull;
 import static org.easymock.EasyMock.createNiceMock;
 
 // NOTE: This was a proof of concept but I'm not too sure we actually need this entire test suite.
-public class InfoFacadeIT extends IsaacIntegrationJupiterTest {
+public class InfoFacadeIT extends IsaacIntegrationTest {
 
     public InfoFacade infoFacade;
 

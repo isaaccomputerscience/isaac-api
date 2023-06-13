@@ -32,7 +32,7 @@ import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.replay;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EventsFacadeIT extends IsaacIntegrationJupiterTest {
+public class EventsFacadeIT extends IsaacIntegrationTest {
 
     private EventsFacade eventsFacade;
 
