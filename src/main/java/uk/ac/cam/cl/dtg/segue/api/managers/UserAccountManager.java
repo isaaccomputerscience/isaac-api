@@ -357,8 +357,6 @@ public class UserAccountManager implements IUserAccountManager {
      *             - if we cannot find an authenticator
      * @throws IncorrectCredentialsProvidedException
      *             - if the password is incorrect
-     * @throws NoUserException
-     *             - if the user does not exist
      * @throws NoCredentialsAvailableException
      *             - If the account exists but does not have a local password
      * @throws AdditionalAuthenticationRequiredException

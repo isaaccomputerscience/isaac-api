@@ -58,12 +58,14 @@ public interface IPasswordAuthenticator extends IAuthenticator {
      * @return the user object or Authenticator Security Exception.
      * @throws IncorrectCredentialsProvidedException
      *             - if invalid credentials are provided.
-     * @throws NoUserException
-     *             - if we cannot find the user specified.
      * @throws NoCredentialsAvailableException
      *             - No credentials are configured on this account so we cannot authenticate the user.
      * @throws SegueDatabaseException
      *             - If there is an internal database error.
+     * @throws NoSuchAlgorithmException
+     *             - if the configured algorithm is not valid.
+     * @throws InvalidKeySpecException
+     *             - if the preconfigured key spec is invalid.
      */
     RegisteredUser authenticate(String usersEmailAddress, String plainTextPassword)
             throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException,
