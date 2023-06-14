@@ -18,6 +18,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_MINUTE;
 
 public class UsersFacadeIT extends IsaacIntegrationTest {
     private UsersFacade usersFacade;
+    private HttpServletRequest mockRequest;
 
     @BeforeClass
     public static void beforeAll() {
@@ -32,55 +33,68 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
         misuseMonitor.resetMisuseCount("test-student@test.com", PasswordResetByEmailMisuseHandler.class.getSimpleName());
         misuseMonitor.resetMisuseCount("0.0.0.0", PasswordResetByIPMisuseHandler.class.getSimpleName());
         this.usersFacade = new UsersFacade(properties, userAccountManager, logManager, userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader);
+        mockRequest = createMockRequestObject();
+    }
+
+    private static HttpServletRequest createMockRequestObject() {
+        HttpSession mockSession = createNiceMock(HttpSession.class);
+        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
+        expect(mockSession.getId()).andReturn("sessionId").anyTimes();
+        replay(mockSession);
+        HttpServletRequest mockRequest = createNiceMock(HttpServletRequest.class);
+        expect(mockRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
+        expect(mockRequest.getSession()).andReturn(mockSession).anyTimes();
+        replay(mockRequest);
+        return mockRequest;
     }
 
     @Test
     public void resetPassword_emailRateLimits() {
-        HttpSession mockSession = createNiceMock(HttpSession.class);
-        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-        expect(mockSession.getId()).andReturn("sessionIdEmail1").andReturn("sessionIdEmail2").andReturn("sessionIdEmail3");
-        replay(mockSession);
-        HttpServletRequest mockResetRequest = createNiceMock(HttpServletRequest.class);
-        expect(mockResetRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
-        expect(mockResetRequest.getSession()).andReturn(mockSession).anyTimes();
-        replay(mockResetRequest);
+//        HttpSession mockSession = createNiceMock(HttpSession.class);
+//        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
+//        expect(mockSession.getId()).andReturn("sessionIdEmail1").andReturn("sessionIdEmail2").andReturn("sessionIdEmail3");
+//        replay(mockSession);
+//        HttpServletRequest mockResetRequest = createNiceMock(HttpServletRequest.class);
+//        expect(mockResetRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
+//        expect(mockResetRequest.getSession()).andReturn(mockSession).anyTimes();
+//        replay(mockResetRequest);
 
         RegisteredUserDTO targetUser = new RegisteredUserDTO();
         targetUser.setEmail("test-student@test.com");
 
-        Response firstResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
+        Response firstResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
         assertEquals(Response.Status.OK.getStatusCode(), firstResetResponse.getStatus());
 
-        Response secondResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
+        Response secondResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
         assertEquals(Response.Status.OK.getStatusCode(), secondResetResponse.getStatus());
 
-        Response thirdResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
+        Response thirdResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
         assertEquals(Response.Status.TOO_MANY_REQUESTS.getStatusCode(), thirdResetResponse.getStatus());
     }
 
     @Test
     public void resetPassword_ipRateLimits() {
-        HttpSession mockSession = createNiceMock(HttpSession.class);
-        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-        expect(mockSession.getId()).andReturn("sessionIdIp1").andReturn("sessionIdIp2").andReturn("sessionIdIp3");
-        replay(mockSession);
-        HttpServletRequest mockResetRequest = createNiceMock(HttpServletRequest.class);
-        expect(mockResetRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
-        expect(mockResetRequest.getSession()).andReturn(mockSession).anyTimes();
-        replay(mockResetRequest);
+//        HttpSession mockSession = createNiceMock(HttpSession.class);
+//        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
+//        expect(mockSession.getId()).andReturn("sessionIdIp1").andReturn("sessionIdIp2").andReturn("sessionIdIp3");
+//        replay(mockSession);
+//        HttpServletRequest mockResetRequest = createNiceMock(HttpServletRequest.class);
+//        expect(mockResetRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
+//        expect(mockResetRequest.getSession()).andReturn(mockSession).anyTimes();
+//        replay(mockResetRequest);
 
         RegisteredUserDTO targetUser = new RegisteredUserDTO();
 
         targetUser.setEmail("test-student@test.com");
-        Response firstResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
+        Response firstResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
         assertEquals(Response.Status.OK.getStatusCode(), firstResetResponse.getStatus());
 
         targetUser.setEmail("test-student2@test.com");
-        Response secondResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
+        Response secondResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
         assertEquals(Response.Status.OK.getStatusCode(), secondResetResponse.getStatus());
 
         targetUser.setEmail("test-student3@test.com");
-        Response thirdResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
+        Response thirdResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
         assertEquals(Response.Status.TOO_MANY_REQUESTS.getStatusCode(), thirdResetResponse.getStatus());
     }
 }
