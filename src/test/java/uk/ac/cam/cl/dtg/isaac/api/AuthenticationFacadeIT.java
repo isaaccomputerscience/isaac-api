@@ -30,13 +30,13 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
     @BeforeClass
     public static void beforeAll() {
         misuseMonitor.registerHandler(SegueLoginByEmailMisuseHandler.class.getSimpleName(),
-                new SegueLoginByEmailMisuseHandler(emailManager, properties, 1, 2, NUMBER_SECONDS_IN_MINUTE));
+                new SegueLoginByEmailMisuseHandler(1, 2, NUMBER_SECONDS_IN_MINUTE));
         misuseMonitor.registerHandler(SegueLoginByIPMisuseHandler.class.getSimpleName(),
-                new SegueLoginByIPMisuseHandler(emailManager, properties, 1, 2, NUMBER_SECONDS_IN_MINUTE));
+                new SegueLoginByIPMisuseHandler(1, 2, NUMBER_SECONDS_IN_MINUTE));
     }
 
     @Before
-    public void beforeEach(){
+    public void beforeEach() {
         misuseMonitor.resetMisuseCount("test-student@test.com", SegueLoginByEmailMisuseHandler.class.getSimpleName());
         misuseMonitor.resetMisuseCount("0.0.0.0", SegueLoginByIPMisuseHandler.class.getSimpleName());
         this.authenticationFacade = new AuthenticationFacade(properties, userAccountManager, logManager, misuseMonitor);

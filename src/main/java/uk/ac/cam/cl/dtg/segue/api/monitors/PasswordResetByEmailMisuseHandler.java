@@ -20,27 +20,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_MINUTE;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 
 /**
  * Handler to deal with email verification requests.
- * 
+ * <p>
  * Preventing users from overusing this endpoint is important as some email address information is exposed for email
  * verification purposes.
- * 
- * @author Alistair Stead
  *
+ * @author Alistair Stead
  */
 public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
-    
+
     private static final Logger log = LoggerFactory.getLogger(PasswordResetByEmailMisuseHandler.class);
 
     private final Integer SOFT_THRESHOLD;
     private final Integer HARD_THRESHOLD;
     private final Integer ACCOUNTING_INTERVAL;
-    
-    /**
-     * 
-     */
+
     @Inject
     public PasswordResetByEmailMisuseHandler() {
         this(2, 4, NUMBER_SECONDS_IN_MINUTE);
@@ -52,7 +49,6 @@ public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
         this.HARD_THRESHOLD = hardThreshold;
         this.ACCOUNTING_INTERVAL = interval;
     }
-    
 
     @Override
     public Integer getSoftThreshold() {
@@ -61,7 +57,7 @@ public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see uk.ac.cam.cl.dtg.segue.api.managers.IMisuseEvent#getHardThreshold()
      */
     @Override
@@ -76,12 +72,12 @@ public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
 
     @Override
     public void executeSoftThresholdAction(final String message) {
-        log.warn("Soft threshold limit: " + message);
+        log.warn("Soft threshold limit: " + sanitiseLogValue(message));
     }
 
     @Override
     public void executeHardThresholdAction(final String message) {
-        log.error("Hard threshold limit: " + message);
+        log.error("Hard threshold limit: " + sanitiseLogValue(message));
     }
 
 }
