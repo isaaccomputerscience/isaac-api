@@ -62,6 +62,9 @@ public class SegueLocalAuthenticatorTest {
             oldAlgorithm3.hashingAlgorithmName(), oldAlgorithm3
     );
 
+	private static final String PASSWORD_REQUIREMENTS_ERROR_MESSAGE = "Password must be at least 12 characters in length and contain at least one of each of: uppercase character, lowercase character, number and ascii punctuation character.";
+
+
 	/**
 	 * Initial configuration of tests.
 	 *
@@ -307,15 +310,15 @@ public class SegueLocalAuthenticatorTest {
 		return Stream.of(
 				Arguments.of(null, "Invalid password. You cannot have an empty password."), // Null is invalid
 				Arguments.of("", "Invalid password. You cannot have an empty password."), // Empty string is invalid
-				Arguments.of("password123", "Password must be at least 12 characters in length."), // Password must equal or exceed the minimum length
+				Arguments.of("password123", PASSWORD_REQUIREMENTS_ERROR_MESSAGE), // Password must equal or exceed the minimum length
 				// Password must contain an upper case letter
-				Arguments.of("password123!", "Password must contain at least one of each of: uppercase character, lowercase character, number, special character."),
+				Arguments.of("password123!", PASSWORD_REQUIREMENTS_ERROR_MESSAGE),
 				// Password must contain a lower case letter
-				Arguments.of("PASSWORD123!", "Password must contain at least one of each of: uppercase character, lowercase character, number, special character."),
+				Arguments.of("PASSWORD123!", PASSWORD_REQUIREMENTS_ERROR_MESSAGE),
 				// Password must contain a number
-				Arguments.of("Passwordabc!", "Password must contain at least one of each of: uppercase character, lowercase character, number, special character."),
+				Arguments.of("Passwordabc!", PASSWORD_REQUIREMENTS_ERROR_MESSAGE),
 				// Password must contain a special character
-				Arguments.of("Password1234", "Password must contain at least one of each of: uppercase character, lowercase character, number, special character.")
+				Arguments.of("Password1234", PASSWORD_REQUIREMENTS_ERROR_MESSAGE)
 		);
 	}
 }
