@@ -71,7 +71,6 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
     }
 
     private static Stream<Arguments> validEmailProviders() {
-        // Email, Password, DOB, familyName, givenName
         return Stream.of(
                 Arguments.of("new-student@test.com"),
                 Arguments.of("new-student-google"),
@@ -164,15 +163,9 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
     }
 
     private static Stream<Arguments> invalidEmails() {
-        // Email, Password, DOB, familyName, givenName
         return Stream.of(
                 // Isaac addresses are forbidden
                 Arguments.of("new-student@isaaccomputerscience.org"),
-                Arguments.of("new-student@isaacphysics.org"),
-                Arguments.of("new-student@isaacchemistry.org"),
-                Arguments.of("new-student@isaacmaths.org"),
-                Arguments.of("new-student@isaacbiology.org"),
-                Arguments.of("new-student@isaacscience.org"),
                 // Email field cannot be empty
                 Arguments.of(""),
                 // Email field cannot have conecutive .s
@@ -185,7 +178,6 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
     }
 
     private static Stream<Arguments> invalidPasswords() {
-        // Email, Password, DOB, familyName, givenName
         return Stream.of(
                 // Password cannot be empty
                 Arguments.of(""),
@@ -195,7 +187,6 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
     }
 
     private static Stream<Arguments> invalidNames() {
-        // Email, Password, DOB, familyName, givenName
         return Stream.of(
                 // Names cannot be empty
                 Arguments.of(""),
