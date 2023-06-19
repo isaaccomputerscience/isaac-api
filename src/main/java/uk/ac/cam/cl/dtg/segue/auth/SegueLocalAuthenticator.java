@@ -16,6 +16,7 @@
 package uk.ac.cam.cl.dtg.segue.auth;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.PASSWORD_REQUIREMENTS_ERROR_MESSAGE;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -246,7 +247,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
         }
         
         if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\\p{P}).{" + MINIMUM_PASSWORD_LENGTH + ",}$")) {
-            throw new InvalidPasswordException("Password must be at least 12 characters in length and contain at least one of each of: uppercase character, lowercase character, number and ascii punctuation character.");
+            throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
         }
     }
 

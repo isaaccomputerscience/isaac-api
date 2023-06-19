@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.PASSWORD_REQUIREMENTS_ERROR_MESSAGE;
 
 /**
  * Test class for the SegueLocalAuthenticator class.
@@ -61,9 +62,6 @@ public class SegueLocalAuthenticatorTest {
             oldAlgorithm2.hashingAlgorithmName(), oldAlgorithm2,
             oldAlgorithm3.hashingAlgorithmName(), oldAlgorithm3
     );
-
-	private static final String PASSWORD_REQUIREMENTS_ERROR_MESSAGE = "Password must be at least 12 characters in length and contain at least one of each of: uppercase character, lowercase character, number and ascii punctuation character.";
-
 
 	/**
 	 * Initial configuration of tests.
