@@ -10,8 +10,11 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
+import org.jboss.resteasy.core.interception.jaxrs.ContainerResponseContextImpl;
+import org.jboss.resteasy.core.interception.jaxrs.ResponseContainerRequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAuthenticationManager;
@@ -19,10 +22,10 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 
-import static java.lang.Integer.parseInt;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 
 @Provider
@@ -39,10 +42,9 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
 
     @Inject
     public SessionValidator(final UserAuthenticationManager userAuthenticationManager, PropertiesLoader properties) {
-        log.info("Initialising session validator");
         this.userAuthenticationManager = userAuthenticationManager;
         this.properties = properties;
-        this.sessionExpirySeconds = Integer.parseInt(properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
+        this.sessionExpirySeconds = Integer.parseInt(this.properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
     }
 
     @Override
@@ -50,36 +52,46 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
         Cookie authCookie = containerRequestContext.getCookies().get(SEGUE_AUTH_COOKIE);
         if (authCookie != null) {
             if (!userAuthenticationManager.isSessionValid(httpServletRequest)) {
-                log.warn("Request rejected");
+                log.warn("Request made with invalid segue auth cookie - closing session");
                 httpServletRequest.getSession().invalidate();
-//                .cookie(userAuthenticationManager.createExpiringJakartaCookie())
-                containerRequestContext.abortWith(Response.status(Response.Status.BAD_REQUEST).entity("Session is invalid").build());
+                containerRequestContext.abortWith(Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity("Authentication cookie is invalid")
+                        .cookie(userAuthenticationManager.createJakartaLogoutCookie())
+                        .build()
+                );
             }
-            log.info("Request validated");
         }
-        log.info("Anonymous request");
     }
 
     @Override
     public void filter(ContainerRequestContext containerRequestContext, ContainerResponseContext containerResponseContext) throws IOException {
         Cookie authCookie = containerRequestContext.getCookies().get(SEGUE_AUTH_COOKIE);
-        if (containerResponseContext.getCookies().get(SEGUE_AUTH_COOKIE) != null) {
-            log.info(String.valueOf(containerResponseContext.getCookies().get(SEGUE_AUTH_COOKIE)));
-        }
-        if (authCookie != null) {
-            SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, sessionExpirySeconds);
-            String sessionExpiryDate = sessionDateFormat.format(calendar.getTime());
-
+        if (authCookie != null && !isLogoutCookiePresent(httpServletResponse) && !wasRequestInvalidated(containerResponseContext)) {
             Map<String, String> sessionInformation = userAuthenticationManager.decodeCookie(authCookie);
-            sessionInformation.replace(DATE_EXPIRES, sessionExpiryDate);
+            String sessionExpiryDate = getFutureDateString(sessionExpirySeconds);
+            sessionInformation.put(DATE_EXPIRES, sessionExpiryDate);
             String updatedHMAC = userAuthenticationManager.calculateUpdatedHMAC(sessionInformation);
             sessionInformation.put(HMAC, updatedHMAC);
 
-            jakarta.servlet.http.Cookie newAuthCookie = userAuthenticationManager.createAuthNewCookie(sessionInformation, sessionExpirySeconds);
+            jakarta.servlet.http.Cookie newAuthCookie = userAuthenticationManager.createNewAuthCookie(sessionInformation, sessionExpirySeconds);
             httpServletResponse.addCookie(newAuthCookie);
         }
+    }
 
+    private static boolean isLogoutCookiePresent(HttpServletResponse response) {
+        ArrayList<String> cookies = (ArrayList<String>) response.getHeaders("Set-Cookie");
+        return cookies.stream().anyMatch(cookie -> cookie.contains(SEGUE_AUTH_COOKIE) && cookie.contains("Max-Age=0"));
+    }
+
+    private static String getFutureDateString(Integer secondsinFuture) {
+        SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, secondsinFuture);
+        return sessionDateFormat.format(calendar.getTime());
+    }
+
+    private static boolean wasRequestInvalidated(ContainerResponseContext containerResponseContext) {
+        return ((ContainerResponseContextImpl) containerResponseContext).getJaxrsResponse().getStatus() != Response.Status.OK.getStatusCode();
     }
 }

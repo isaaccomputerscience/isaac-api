@@ -25,7 +25,6 @@ import jakarta.annotation.Nullable;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.core.NewCookie;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.Validate;
@@ -76,7 +75,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -1209,7 +1207,7 @@ public class UserAuthenticationManager {
         return sessionHMAC;
     }
 
-    public Cookie createAuthNewCookie(Map<String, String> sessionInformation, int sessionExpiryTimeInSeconds) throws JsonProcessingException {
+    public Cookie createNewAuthCookie(Map<String, String> sessionInformation, int sessionExpiryTimeInSeconds) throws JsonProcessingException {
         jakarta.servlet.http.Cookie authCookie = new jakarta.servlet.http.Cookie(SEGUE_AUTH_COOKIE,
                 Base64.encodeBase64String(serializationMapper.writeValueAsString(sessionInformation).getBytes()));
         authCookie.setMaxAge(sessionExpiryTimeInSeconds);
@@ -1220,7 +1218,7 @@ public class UserAuthenticationManager {
         return authCookie;
     }
 
-    public Cookie createExpiringAuthCookie() {
+    public Cookie createLogoutAuthCookie() {
         Cookie logoutCookie = new Cookie(SEGUE_AUTH_COOKIE, "");
         logoutCookie.setPath("/");
         logoutCookie.setMaxAge(0);  // This will lead to it being removed by the browser immediately.
@@ -1230,13 +1228,16 @@ public class UserAuthenticationManager {
         return logoutCookie;
     }
 
-    public NewCookie createExpiringJakartaCookie() {
-        NewCookie logoutCookie = new NewCookie(SEGUE_AUTH_COOKIE, "", "/", "", SAME_SITE_LAX_COMMENT, 0, setSecureCookies, true);
-//        logoutCookie.setPath("/");
-//        logoutCookie.setMaxAge(0);  // This will lead to it being removed by the browser immediately.
-//        logoutCookie.setHttpOnly(true);
-//        logoutCookie.setSecure(setSecureCookies);
-//        logoutCookie.setComment(SAME_SITE_LAX_COMMENT);
+    public NewCookie createJakartaLogoutCookie() {
+//        NewCookie logoutCookie = new NewCookie(SEGUE_AUTH_COOKIE, "", "/", "", SAME_SITE_LAX_COMMENT, 0, setSecureCookies, true);
+        NewCookie logoutCookie = new NewCookie.Builder(SEGUE_AUTH_COOKIE)
+                .value("")
+                .path("/")
+                .maxAge(0)
+                .httpOnly(true)
+                .secure(setSecureCookies)
+                .comment(SAME_SITE_LAX_COMMENT)
+                .build();
         return logoutCookie;
     }
 
