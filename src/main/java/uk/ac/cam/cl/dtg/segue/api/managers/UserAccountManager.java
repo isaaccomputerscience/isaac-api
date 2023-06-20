@@ -129,7 +129,9 @@ public class UserAccountManager implements IUserAccountManager {
 
     private final Pattern restrictedSignupEmailRegex;
     private static final int USER_NAME_MAX_LENGTH = 255;
-    private static final Pattern USER_NAME_FORBIDDEN_CHARS_REGEX = Pattern.compile("[*<>]");
+    private static final Pattern USER_NAME_PERMITTED_CHARS_REGEX = Pattern.compile("^[\\p{L}\\d_\\-' ]+$", Pattern.CANON_EQ);
+    private static final Pattern EMAIL_PERMITTED_CHARS_REGEX = Pattern.compile("^[a-zA-Z0-9!#$%&'+\\-=?^_`.{|}~@]+$");
+    private static final Pattern EMAIL_CONSECUTIVE_FULL_STOP_REGEX = Pattern.compile("\\.\\.");
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -1026,16 +1028,12 @@ public class UserAccountManager implements IUserAccountManager {
      *             (i.e. an @isaacphysics.org or @isaacchemistry.org address).
      */
     public RegisteredUserDTO createUserObjectAndSession(final HttpServletRequest request,
-            final HttpServletResponse response, final RegisteredUser user, final String newPassword,
+                                                        final HttpServletResponse response, final RegisteredUser user, final String newPassword,
                                                         final boolean rememberMe) throws InvalidPasswordException,
             MissingRequiredFieldException, SegueDatabaseException,
             EmailMustBeVerifiedException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException {
         Validate.isTrue(user.getId() == null,
                 "When creating a new user the user id must not be set.");
-
-        if (this.findUserByEmail(user.getEmail()) != null) {
-            throw new DuplicateAccountException("An account with that e-mail address already exists.");
-        }
 
         // Ensure nobody registers with Isaac email addresses. Users can change emails to restricted ones by verifying them, however.
         if (null != restrictedSignupEmailRegex && restrictedSignupEmailRegex.matcher(user.getEmail()).find()) {
@@ -1081,6 +1079,10 @@ public class UserAccountManager implements IUserAccountManager {
         // FIXME: Before creating the user object, ensure password is valid. This should really be in a transaction.
         authenticator.ensureValidPassword(newPassword);
 
+        if (this.findUserByEmail(user.getEmail()) != null) {
+            throw new DuplicateAccountException("An account with that e-mail address already exists.");
+        }
+
         // save the user to get the userId
         RegisteredUser userToReturn = this.database.createOrUpdateUser(userToSave);
 
@@ -1089,7 +1091,7 @@ public class UserAccountManager implements IUserAccountManager {
 
         // send an email confirmation and set up verification
         try {
-        	RegisteredUserDTO userToReturnDTO = this.getUserDTOById(userToReturn.getId());
+            RegisteredUserDTO userToReturnDTO = this.getUserDTOById(userToReturn.getId());
 
             ImmutableMap<String, Object> emailTokens = ImmutableMap.of("verificationURL",
                     generateEmailVerificationURL(userToReturnDTO, userToReturn.getEmailVerificationToken()));
@@ -1102,7 +1104,7 @@ public class UserAccountManager implements IUserAccountManager {
             log.error("Registration email could not be sent due to content issue: " + e.getMessage());
         } catch (NoUserException e) {
             log.error("Registration email could not be sent due to not being able to locate the user: " + e.getMessage());
-		}
+        }
 
         // save the user again with updated token
         //TODO: do we need this?
@@ -1874,8 +1876,16 @@ public class UserAccountManager implements IUserAccountManager {
      * @return true if it meets the internal storage requirements, false if not.
      */
     private boolean isUserValid(final RegisteredUser userToValidate) {
-        if (userToValidate.getEmail() == null || userToValidate.getEmail().isEmpty()
-                || !userToValidate.getEmail().matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")) {
+        return (userToValidate.getEmail() != null) && isEmailValid(userToValidate.getEmail());
+    }
+
+    public static final boolean isEmailValid(String email) {
+        if (email == null
+                || email.isEmpty()
+                || !email.matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")
+                || !EMAIL_PERMITTED_CHARS_REGEX.matcher(email).matches()
+                || EMAIL_CONSECUTIVE_FULL_STOP_REGEX.matcher(email).find()
+        ) {
             return false;
         }
         return true;
@@ -1889,8 +1899,12 @@ public class UserAccountManager implements IUserAccountManager {
      * @return true if the name is valid, false otherwise.
      */
     public static final boolean isUserNameValid(final String name) {
-        if (null == name || name.length() > USER_NAME_MAX_LENGTH || USER_NAME_FORBIDDEN_CHARS_REGEX.matcher(name).find()
-                || name.isEmpty()) {
+        if (null == name
+                || name.isEmpty()
+                || name.isBlank()
+                || name.length() > USER_NAME_MAX_LENGTH
+                || !USER_NAME_PERMITTED_CHARS_REGEX.matcher(name).matches()
+        ) {
             return false;
         }
         return true;

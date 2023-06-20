@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dto.LocalAuthDTO;
 import uk.ac.cam.cl.dtg.segue.api.AuthenticationFacade;
 import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByEmailMisuseHandler;
@@ -18,7 +18,7 @@ import java.security.spec.InvalidKeySpecException;
 
 import static org.easymock.EasyMock.*;
 import static org.eclipse.jetty.http.HttpCookie.SAME_SITE_LAX_COMMENT;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_MINUTE;
 

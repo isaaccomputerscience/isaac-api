@@ -16,6 +16,13 @@
 package uk.ac.cam.cl.dtg.segue.auth;
 
 import com.google.inject.Inject;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.PASSWORD_REQUIREMENTS_ERROR_MESSAGE;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.*;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -50,6 +57,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 public class SegueLocalAuthenticator implements IPasswordAuthenticator {
     private static final Logger log = LoggerFactory.getLogger(SegueLocalAuthenticator.class);
     private static final Integer SHORT_KEY_LENGTH = 128;
+    private static final Integer MINIMUM_PASSWORD_LENGTH = 12;
 
     private final IPasswordDataManager passwordDataManager;
     private final IUserDataManager userDataManager;
@@ -247,8 +255,8 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
             throw new InvalidPasswordException("Invalid password. You cannot have an empty password.");
         }
 
-        if (password.length() < 6) {
-            throw new InvalidPasswordException("Password must be at least 6 characters in length.");
+        if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\\p{P}).{" + MINIMUM_PASSWORD_LENGTH + ",}$")) {
+            throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
         }
     }
 

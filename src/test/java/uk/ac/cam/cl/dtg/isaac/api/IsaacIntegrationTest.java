@@ -11,7 +11,7 @@ import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.SystemUtils;
 import org.easymock.Capture;
 import org.eclipse.jgit.api.Git;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.reflections.Reflections;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
@@ -143,7 +143,7 @@ public abstract class IsaacIntegrationTest {
     // Services
     protected static AssignmentService assignmentService;
 
-    protected class LoginResult {
+    protected static class LoginResult {
         public RegisteredUserDTO user;
         public Cookie cookie;
 
@@ -153,7 +153,7 @@ public abstract class IsaacIntegrationTest {
         }
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() {
         postgres = new PostgreSQLContainer<>("postgres:12")
                 .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust")
