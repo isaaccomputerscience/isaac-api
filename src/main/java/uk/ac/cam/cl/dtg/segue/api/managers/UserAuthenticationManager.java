@@ -25,6 +25,8 @@ import jakarta.annotation.Nullable;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.ws.rs.core.NewCookie;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.Validate;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
@@ -74,6 +76,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -1086,6 +1089,7 @@ public class UserAuthenticationManager {
     private Map<String, String> getSegueSessionFromRequest(final HttpServletRequest request) throws IOException,
             InvalidSessionException {
         // WARNING: There are two getSegueSessionFromRequest methods: ensure you update both!
+        log.info("Retrieving session (Standard)");
         Cookie segueAuthCookie = null;
         if (request.getCookies() == null) {
             throw new InvalidSessionException("There are no cookies set.");
@@ -1116,6 +1120,7 @@ public class UserAuthenticationManager {
     private Map<String, String> getSegueSessionFromRequest(final UpgradeRequest request) throws IOException,
             InvalidSessionException {
         // WARNING: There are two getSegueSessionFromRequest methods: ensure you update both!
+        log.info("Retrieving session (Socket Upgrade)");
         HttpCookie segueAuthCookie = null;
         if (request.getCookies() == null) {
             throw new InvalidSessionException("There are no cookies set.");
@@ -1165,4 +1170,118 @@ public class UserAuthenticationManager {
             throw new IllegalArgumentException();
         }
     }
+
+    public boolean isSessionValid(HttpServletRequest request) {
+        try {
+        Map<String, String> currentSessionInformation = this.getSegueSessionFromRequest(request);
+        long currentUserId = Long.parseLong(currentSessionInformation.get(SESSION_USER_ID));
+        RegisteredUser userToReturn =  database.getById(currentUserId);
+        if (null == userToReturn || !this.isValidUsersSession(currentSessionInformation, userToReturn)) {
+            log.debug("User session has failed validation. Treating as logged out. Session: " + currentSessionInformation);
+            return false;
+        }
+        return true;
+        } catch (InvalidSessionException e) {
+            log.warn("User session has failed validation.");
+            return false;
+        } catch (SegueDatabaseException e) {
+            log.warn("User session has failed validation.");
+            return false;
+        } catch (IOException e) {
+            log.warn("User session has failed validation.");
+            return false;
+        }
+    }
+
+    public Map<String, String> decodeCookie(jakarta.ws.rs.core.Cookie segueAuthCookie) throws IOException {
+        return this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()),
+                HashMap.class);
+    }
+
+    public String calculateUpdatedHMAC(Map<String, String> sessionInformation) throws IOException {
+        String hmacKey = properties.getProperty(HMAC_SALT);
+        String userId = sessionInformation.get(SESSION_USER_ID);
+        String sessionExpiryDate = sessionInformation.get(DATE_EXPIRES);
+        String userSessionToken = sessionInformation.get(SESSION_TOKEN);
+        String partialLoginFlagString = sessionInformation.get(PARTIAL_LOGIN_FLAG);
+
+        String sessionHMAC = calculateSessionHMAC(hmacKey, userId, sessionExpiryDate, userSessionToken, partialLoginFlagString);
+        return sessionHMAC;
+    }
+
+    public Cookie createAuthNewCookie(Map<String, String> sessionInformation, int sessionExpiryTimeInSeconds) throws JsonProcessingException {
+        jakarta.servlet.http.Cookie authCookie = new jakarta.servlet.http.Cookie(SEGUE_AUTH_COOKIE,
+                Base64.encodeBase64String(serializationMapper.writeValueAsString(sessionInformation).getBytes()));
+        authCookie.setMaxAge(sessionExpiryTimeInSeconds);
+        authCookie.setPath("/");
+        authCookie.setHttpOnly(true);
+        authCookie.setSecure(setSecureCookies);
+        authCookie.setComment(SAME_SITE_LAX_COMMENT);
+        return authCookie;
+    }
+
+    public Cookie createExpiringAuthCookie() {
+        Cookie logoutCookie = new Cookie(SEGUE_AUTH_COOKIE, "");
+        logoutCookie.setPath("/");
+        logoutCookie.setMaxAge(0);  // This will lead to it being removed by the browser immediately.
+        logoutCookie.setHttpOnly(true);
+        logoutCookie.setSecure(setSecureCookies);
+        logoutCookie.setComment(SAME_SITE_LAX_COMMENT);
+        return logoutCookie;
+    }
+
+    public NewCookie createExpiringJakartaCookie() {
+        NewCookie logoutCookie = new NewCookie(SEGUE_AUTH_COOKIE, "", "/", "", SAME_SITE_LAX_COMMENT, 0, setSecureCookies, true);
+//        logoutCookie.setPath("/");
+//        logoutCookie.setMaxAge(0);  // This will lead to it being removed by the browser immediately.
+//        logoutCookie.setHttpOnly(true);
+//        logoutCookie.setSecure(setSecureCookies);
+//        logoutCookie.setComment(SAME_SITE_LAX_COMMENT);
+        return logoutCookie;
+    }
+
+//    public void refreshSession(HttpServletRequest request, HttpServletResponse response) {
+//        Validate.notNull(request);
+//
+//        Map<String, String> currentSessionInformation = null;
+//        try {
+//            currentSessionInformation = this.getSegueSessionFromRequest(request);
+//
+//            // Get the user the cookie claims to belong to from the session information:
+//            long currentUserId = Long.parseLong(currentSessionInformation.get(SESSION_USER_ID));
+//            RegisteredUser userToReturn = database.getById(currentUserId);
+//
+//            // Check that the user's session is indeed valid:
+//            if (null == userToReturn || !this.isValidUsersSession(currentSessionInformation, userToReturn)) {
+//                log.debug("User session has failed validation. Treating as logged out. Session: " + currentSessionInformation);
+//                return;
+//            }
+//
+//            SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
+//            Calendar calendar = Calendar.getInstance();
+//            calendar.add(Calendar.SECOND, sessionExpiryTimeInSeconds);
+//            String sessionExpiryDate = sessionDateFormat.format(calendar.getTime());
+//
+//            Cookie[] requestCookies = request.getCookies();
+//            Cookie authCookie = Arrays.stream(requestCookies).filter(c -> c.getName() == SEGUE_AUTH_COOKIE).findFirst().get();
+//            authCookie.setMaxAge(sessionExpiryTimeInSeconds);
+//
+//
+//        } catch (IOException e) {
+//            log.debug("Error parsing session information to retrieve user.");
+//            return;
+//        } catch (InvalidSessionException e) {
+//            log.debug("We cannot read the session information. It probably doesn't exist");
+//            // assuming that no user is logged in.
+//            return;
+//        } catch (SegueDatabaseException e) {
+//            log.error("Internal Database error. Failed to resolve current user.", e);
+//            return;
+//        } catch (NumberFormatException e) {
+//            log.info("Invalid user id detected in session. " + currentSessionInformation.get(SESSION_USER_ID));
+//            return;
+//        }
+//
+//
+//    };
 }
