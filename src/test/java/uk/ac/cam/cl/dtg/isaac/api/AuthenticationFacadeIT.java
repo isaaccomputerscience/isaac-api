@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.core.Response;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dto.LocalAuthDTO;
 import uk.ac.cam.cl.dtg.segue.api.AuthenticationFacade;
@@ -27,7 +27,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
     private HttpServletRequest mockRequest;
     private HttpServletResponse mockResponse;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeAll() {
         misuseMonitor.registerHandler(SegueLoginByEmailMisuseHandler.class.getSimpleName(),
                 new SegueLoginByEmailMisuseHandler(1, 2, NUMBER_SECONDS_IN_MINUTE));
@@ -35,7 +35,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
                 new SegueLoginByIPMisuseHandler(1, 2, NUMBER_SECONDS_IN_MINUTE));
     }
 
-    @Before
+    @BeforeEach
     public void beforeEach() {
         misuseMonitor.resetMisuseCount("test-student@test.com", SegueLoginByEmailMisuseHandler.class.getSimpleName());
         misuseMonitor.resetMisuseCount("0.0.0.0", SegueLoginByIPMisuseHandler.class.getSimpleName());
@@ -68,16 +68,6 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 
     @Test
     public void resetPassword_emailRateLimits() throws InvalidKeySpecException, NoSuchAlgorithmException {
-//        HttpSession mockSession = createNiceMock(HttpSession.class);
-//        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-//        expect(mockSession.getId()).andReturn("sessionId").anyTimes();
-//        replay(mockSession);
-//        HttpServletRequest mockAuthRequest = createNiceMock(HttpServletRequest.class);
-//        expect(mockAuthRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
-//        expect(mockAuthRequest.getSession()).andReturn(mockSession).anyTimes();
-//        replay(mockAuthRequest);
-//        HttpServletResponse  mockAuthResponse = createNiceMock(HttpServletResponse.class);
-
         LocalAuthDTO targetUser = new LocalAuthDTO();
         targetUser.setEmail("test-student@test.com");
         targetUser.setPassword("123");
@@ -94,16 +84,6 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 
     @Test
     public void resetPassword_ipRateLimits() throws InvalidKeySpecException, NoSuchAlgorithmException {
-//        HttpSession mockSession = createNiceMock(HttpSession.class);
-//        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-//        expect(mockSession.getId()).andReturn("sessionId").anyTimes();
-//        replay(mockSession);
-//        HttpServletRequest mockAuthRequest = createNiceMock(HttpServletRequest.class);
-//        expect(mockAuthRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
-//        expect(mockAuthRequest.getSession()).andReturn(mockSession).anyTimes();
-//        replay(mockAuthRequest);
-//        HttpServletResponse  mockAuthResponse = createNiceMock(HttpServletResponse.class);
-
         LocalAuthDTO targetUser = new LocalAuthDTO();
         targetUser.setPassword("123");
 

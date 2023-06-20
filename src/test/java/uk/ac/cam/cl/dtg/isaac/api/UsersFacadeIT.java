@@ -11,16 +11,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
-
 import uk.ac.cam.cl.dtg.segue.api.UsersFacade;
-import uk.ac.cam.cl.dtg.segue.api.monitors.RegistrationMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.PasswordResetByEmailMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.PasswordResetByIPMisuseHandler;
+import uk.ac.cam.cl.dtg.segue.api.monitors.RegistrationMisuseHandler;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.stream.Stream;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -79,44 +78,44 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
 
     @Test
     public void resetPassword_emailRateLimits() {
-        HttpServletRequest mockRequest = createMockRequestObject(List.of("sessionIdEmail1", "sessionIdEmail2", "sessionIdEmail3"));
+        HttpServletRequest mockResetRequest = createMockRequestObject(List.of("sessionIdEmail1", "sessionIdEmail2", "sessionIdEmail3"));
 
         RegisteredUserDTO targetUser = new RegisteredUserDTO();
         targetUser.setEmail("test-student@test.com");
 
-        Response firstResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
+        Response firstResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
         assertEquals(Response.Status.OK.getStatusCode(), firstResetResponse.getStatus());
 
-        Response secondResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
+        Response secondResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
         assertEquals(Response.Status.OK.getStatusCode(), secondResetResponse.getStatus());
 
-        Response thirdResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
+        Response thirdResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
         assertEquals(Response.Status.TOO_MANY_REQUESTS.getStatusCode(), thirdResetResponse.getStatus());
     }
 
     @Test
     public void resetPassword_ipRateLimits() {
-        HttpServletRequest mockRequest = createMockRequestObject(List.of("sessionIdIp1", "sessionIdIp2", "sessionIdIp3"));
+        HttpServletRequest mockResetRequest = createMockRequestObject(List.of("sessionIdIp1", "sessionIdIp2", "sessionIdIp3"));
 
         RegisteredUserDTO targetUser = new RegisteredUserDTO();
 
-        targetUser.setEmail("test-student@test.com");
-        Response firstResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
+        targetUser.setEmail("test-student1@test.com");
+        Response firstResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
         assertEquals(Response.Status.OK.getStatusCode(), firstResetResponse.getStatus());
 
         targetUser.setEmail("test-student2@test.com");
-        Response secondResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
+        Response secondResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
         assertEquals(Response.Status.OK.getStatusCode(), secondResetResponse.getStatus());
 
         targetUser.setEmail("test-student3@test.com");
-        Response thirdResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockRequest);
+        Response thirdResetResponse = usersFacade.generatePasswordResetToken(targetUser, mockResetRequest);
         assertEquals(Response.Status.TOO_MANY_REQUESTS.getStatusCode(), thirdResetResponse.getStatus());
     }
 
     @ParameterizedTest
     @MethodSource("validEmailProviders")
     public void createUser_validRegistrationParameters(String email) {
-        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"%1$s\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}",
+        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"%1$s\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"Password123!\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}",
                 email);
 
         Response response = null;
@@ -141,7 +140,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
 
     @Test
     public void createUser_existingAccount() {
-        String userObjectString = "{\"registeredUser\":{\"loggedIn\":true,\"email\":\"test-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}";
+        String userObjectString = "{\"registeredUser\":{\"loggedIn\":true,\"email\":\"test-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"Password123!\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}";
 
         Response response = null;
         try {
@@ -157,7 +156,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
     @ParameterizedTest
     @MethodSource("invalidEmails")
     public void createUser_invalidEmail(String email) {
-        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"%1$s\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}",
+        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"%1$s\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"Password123!\",\"familyName\":\"Test\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}",
                 email);
 
         Response response = null;
@@ -191,7 +190,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
     @ParameterizedTest
     @MethodSource("invalidNames")
     public void createUser_invalidFamilyName(String familyName) {
-        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"new-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"%1$s\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}",
+        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"new-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"Password123!\",\"familyName\":\"%1$s\",\"givenName\":\"Test\"},\"userPreferences\":{},\"passwordCurrent\":null}",
                 familyName);
 
         Response response = null;
@@ -208,7 +207,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
     @ParameterizedTest
     @MethodSource("invalidNames")
     public void createUser_invalidGivenName(String givenName) {
-        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"new-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"password\",\"familyName\":\"Test\",\"givenName\":\"%1$s\"},\"userPreferences\":{},\"passwordCurrent\":null}",
+        String userObjectString = String.format("{\"registeredUser\":{\"loggedIn\":true,\"email\":\"new-student@test.com\",\"dateOfBirth\":\"2000-01-01T00:00:00.000Z\",\"password\":\"Password123!\",\"familyName\":\"Test\",\"givenName\":\"%1$s\"},\"userPreferences\":{},\"passwordCurrent\":null}",
                 givenName);
 
         Response response = null;

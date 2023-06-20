@@ -38,9 +38,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.PASSWORD_REQUIREMENTS_ERROR_MESSAGE;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.PASSWORD_REQUIREMENTS_ERROR_MESSAGE;
 
 /**
  * Test class for the SegueLocalAuthenticator class.

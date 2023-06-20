@@ -16,13 +16,6 @@
 package uk.ac.cam.cl.dtg.segue.auth;
 
 import com.google.inject.Inject;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.PASSWORD_REQUIREMENTS_ERROR_MESSAGE;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.*;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -47,6 +40,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.PASSWORD_REQUIREMENTS_ERROR_MESSAGE;
 
 /**
  * Segue Local Authenticator. This provides a mechanism for users to create an account on the Segue CMS without the need
