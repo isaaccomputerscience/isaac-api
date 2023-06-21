@@ -94,7 +94,8 @@ import uk.ac.cam.cl.dtg.segue.api.monitors.PasswordResetByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.PrometheusMetricsExporter;
 import uk.ac.cam.cl.dtg.segue.api.monitors.QuestionAttemptMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.RegistrationMisuseHandler;
-import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginMisuseHandler;
+import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByEmailMisuseHandler;
+import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.SendEmailMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.TeacherPasswordResetMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.TokenOwnerLookupMisuseHandler;
@@ -159,6 +160,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -168,7 +170,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.EnvironmentType.*;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.EnvironmentType.DEV;
 
 /**
  * This class is responsible for injecting configuration values for persistence related classes.
@@ -842,8 +844,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
             misuseMonitor.registerHandler(RegistrationMisuseHandler.class.getSimpleName(),
                     new RegistrationMisuseHandler(emailManager, properties));
 
-            misuseMonitor.registerHandler(SegueLoginMisuseHandler.class.getSimpleName(),
-                    new SegueLoginMisuseHandler(emailManager, properties));
+            misuseMonitor.registerHandler(SegueLoginByEmailMisuseHandler.class.getSimpleName(),
+                    new SegueLoginByEmailMisuseHandler());
+
+            misuseMonitor.registerHandler(SegueLoginByIPMisuseHandler.class.getSimpleName(),
+                    new SegueLoginByIPMisuseHandler());
 
             misuseMonitor.registerHandler(LogEventMisuseHandler.class.getSimpleName(),
                     new LogEventMisuseHandler(emailManager, properties));
@@ -1315,5 +1320,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
             injector = Guice.createInjector(new SegueGuiceConfigurationModule());
         }
         return injector;
+    }
+
+    @Provides
+    @Singleton
+    public static Clock getDefaultClock() {
+        return Clock.systemUTC();
     }
 }
