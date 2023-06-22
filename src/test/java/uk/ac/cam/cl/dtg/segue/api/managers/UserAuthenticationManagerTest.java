@@ -27,7 +27,7 @@ import static org.easymock.EasyMock.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 
-class UserAuthenticationManagerTest {
+public class UserAuthenticationManagerTest {
     private UserAuthenticationManager userAuthenticationManager;
     private IUserDataManager dummyDatabase;
     private PropertiesLoader dummyPropertiesLoader;
