@@ -21,8 +21,8 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Map;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
@@ -79,7 +79,7 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
     }
 
     private static boolean isLogoutCookiePresent(HttpServletResponse response) {
-        ArrayList<String> cookies = (ArrayList<String>) response.getHeaders("Set-Cookie");
+        Collection<String> cookies = response.getHeaders("Set-Cookie");
         return cookies.stream().anyMatch(cookie -> cookie.contains(SEGUE_AUTH_COOKIE) && cookie.contains("Max-Age=0"));
     }
 

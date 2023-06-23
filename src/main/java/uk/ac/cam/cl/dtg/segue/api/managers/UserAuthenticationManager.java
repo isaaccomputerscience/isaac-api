@@ -1177,6 +1177,9 @@ public class UserAuthenticationManager {
         } catch (IOException e) {
             log.warn("User session has failed validation.");
             return false;
+        } catch (NumberFormatException e) {
+            log.warn("User session has failed validation.");
+            return false;
         }
     }
 

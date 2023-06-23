@@ -117,13 +117,13 @@ public class UserAuthenticationManagerTest {
 
     @Test
     public void calculateUpdatedHMAC_noPartialLogin() {
-        String expectedHMAC = "lgskryXMwRF+Ef/jiVp4LQX2g66JoUlFg/ixxjYZIrs=";
+        String expectedHMAC = "dwHtgxiiU7r7xH/BNet7bZb4PQMK0CrOfSVnn+ctWXQ=";
         Date cookieExpiryDate = Date.from(LocalDateTime.of(2020, 1, 1, 0, 0,0).toInstant(UTC));
         String cookieExpiryDateString = new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(cookieExpiryDate);
         Map<String, String> sessionInformation = Map.of(
                 SESSION_USER_ID, "1",
                 SESSION_TOKEN, "1",
-                DATE_EXPIRES, ""
+                DATE_EXPIRES, cookieExpiryDateString
         );
 
         assertEquals(expectedHMAC, userAuthenticationManager.calculateUpdatedHMAC(sessionInformation));
@@ -131,13 +131,13 @@ public class UserAuthenticationManagerTest {
 
     @Test
     public void calculateUpdatedHMAC_PartialLogin() {
-        String expectedHMAC = "t3joONtilIM07Or8/2TjXf+IamSB5xrzFphjnM5Pi9k=";
+        String expectedHMAC = "/reauAoeghGgfvoMxC+zpQTVlOytSKncUpOrgzwjomw=";
         Date cookieExpiryDate = Date.from(LocalDateTime.of(2020, 1, 1, 0, 0,0).toInstant(UTC));
         String cookieExpiryDateString = new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(cookieExpiryDate);
         Map<String, String> sessionInformation = Map.of(
                 SESSION_USER_ID, "1",
                 SESSION_TOKEN, "1",
-                DATE_EXPIRES, "",
+                DATE_EXPIRES, cookieExpiryDateString,
                 PARTIAL_LOGIN_FLAG, "true"
         );
 
