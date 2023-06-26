@@ -45,23 +45,30 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
     public SessionValidator(final UserAuthenticationManager userAuthenticationManager, PropertiesLoader properties) {
         this.userAuthenticationManager = userAuthenticationManager;
         this.properties = properties;
-        this.sessionExpirySeconds = Integer.parseInt(this.properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
+        this.sessionExpirySeconds = getSessionExpirySeconds();
+    }
+
+    private Integer getSessionExpirySeconds() {
+        try {
+            return Integer.parseInt(this.properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
+        } catch (NumberFormatException e) {
+            log.error("Could not read session expiry time from property configuration. Defaulting to 1800 seconds.", e);
+            return 1800;
+        }
     }
 
     @Override
     public void filter(ContainerRequestContext containerRequestContext) throws IOException {
         Cookie authCookie = containerRequestContext.getCookies().get(SEGUE_AUTH_COOKIE);
-        if (authCookie != null) {
-            if (!userAuthenticationManager.isSessionValid(httpServletRequest)) {
-                log.warn("Request made with invalid segue auth cookie - closing session");
-                httpServletRequest.getSession().invalidate();
-                containerRequestContext.abortWith(Response
-                        .status(Response.Status.BAD_REQUEST)
-                        .entity("Authentication cookie is invalid")
-                        .cookie(userAuthenticationManager.createAuthLogoutNewCookie())
-                        .build()
-                );
-            }
+        if (authCookie != null && !userAuthenticationManager.isSessionValid(httpServletRequest)) {
+            log.warn("Request made with invalid segue auth cookie - closing session");
+            httpServletRequest.getSession().invalidate();
+            containerRequestContext.abortWith(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Authentication cookie is invalid")
+                    .cookie(userAuthenticationManager.createAuthLogoutNewCookie())
+                    .build()
+            );
         }
     }
 
