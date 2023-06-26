@@ -457,6 +457,8 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             String errorMsg = "Internal Database error has occurred during logout.";
             log.error(errorMsg, e);
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
+        } catch (NoUserLoggedInException e) {
+            return SegueErrorResponse.getNotLoggedInResponse();
         }
     }
 

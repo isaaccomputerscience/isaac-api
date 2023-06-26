@@ -21,17 +21,18 @@ import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.Validate;
-import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
-import uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager;
-import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Gender;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserAuthenticationSettings;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
+import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
+import uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
+import java.security.SecureRandom;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -47,12 +48,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.SchoolInfoStatus;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval;
 
 /**
  * @author Stephen Cummins
@@ -666,14 +669,23 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     }
 
     @Override
-    public void incrementSessionToken(RegisteredUser user) throws SegueDatabaseException {
+    public Integer regenerateSessionToken(RegisteredUser user) throws SegueDatabaseException {
+        Random random = new SecureRandom();
+        Integer newSessionToken = random.nextInt();
+        this.updateSessionToken(user, newSessionToken);
+        return newSessionToken;
+    }
+
+    @Override
+    public void updateSessionToken(RegisteredUser user, Integer newTokenValue) throws SegueDatabaseException {
         Validate.notNull(user);
 
-        String query = "UPDATE users SET session_token = session_token + 1 WHERE id = ?";
+        String query = "UPDATE users SET session_token = ? WHERE id = ?";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {
-            pst.setLong(1, user.getId());
+            pst.setInt(1, newTokenValue);
+            pst.setLong(2, user.getId());
             pst.execute();
         } catch (SQLException e) {
             throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);

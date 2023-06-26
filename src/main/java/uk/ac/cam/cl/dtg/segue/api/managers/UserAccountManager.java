@@ -996,7 +996,7 @@ public class UserAccountManager implements IUserAccountManager {
      * @param response
      *            to destroy the segue cookie.
      */
-    public void logUserOut(final HttpServletRequest request, final HttpServletResponse response) {
+    public void logUserOut(final HttpServletRequest request, final HttpServletResponse response) throws NoUserLoggedInException, SegueDatabaseException {
         Validate.notNull(request);
         this.userAuthenticationManager.destroyUserSession(request, response);
     }
@@ -2053,11 +2053,6 @@ public class UserAccountManager implements IUserAccountManager {
      */
     public void logoutEverywhere(final HttpServletRequest request, final HttpServletResponse response)
             throws SegueDatabaseException, NoUserLoggedInException {
-        RegisteredUser user = this.getCurrentRegisteredUserDO(request);
-        if (null == user) {
-            throw new NoUserLoggedInException();
-        }
-        this.database.incrementSessionToken(user);
         logUserOut(request, response);
     }
 

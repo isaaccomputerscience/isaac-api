@@ -54,6 +54,7 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidTokenException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.MissingRequiredFieldException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
 import uk.ac.cam.cl.dtg.segue.comm.CommunicationException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
@@ -506,10 +507,11 @@ public class UserAuthenticationManager {
      * @param response
      *            to destroy the segue cookie.
      */
-    public void destroyUserSession(final HttpServletRequest request, final HttpServletResponse response) {
+    public void destroyUserSession(final HttpServletRequest request, final HttpServletResponse response) throws NoUserLoggedInException, SegueDatabaseException  {
         Validate.notNull(request);
         try {
             request.getSession().invalidate();
+            invalidateSessionToken(request);
             Cookie logoutCookie = new Cookie(SEGUE_AUTH_COOKIE, "");
             logoutCookie.setPath("/");
             logoutCookie.setMaxAge(0);  // This will lead to it being removed by the browser immediately.
@@ -517,12 +519,21 @@ public class UserAuthenticationManager {
             logoutCookie.setSecure(setSecureCookies);
             logoutCookie.setComment(SAME_SITE_LAX_COMMENT);
 
-            response.addCookie(logoutCookie);  // lgtm [java/insecure-cookie]  false positive due to conditional above!
+            response.addCookie(logoutCookie);
         } catch (IllegalStateException e) {
             log.info("The session has already been invalidated. " + "Unable to logout again...", e);
         }
     }
-    
+
+    public void invalidateSessionToken(final HttpServletRequest request) throws NoUserLoggedInException, SegueDatabaseException {
+        Validate.notNull(request);
+        RegisteredUser currentUser = this.getUserFromSession(request, false);
+        if (null == currentUser) {
+            throw new NoUserLoggedInException();
+        }
+        this.database.regenerateSessionToken(currentUser);
+    }
+
     /**
      * Attempts to map a string to a known provider.
      * 
