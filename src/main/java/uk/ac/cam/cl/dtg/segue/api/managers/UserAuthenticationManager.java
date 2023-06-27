@@ -117,7 +117,6 @@ public class UserAuthenticationManager {
                                      final EmailManager emailQueue) {
         Validate.notNull(properties.getProperty(HMAC_SALT));
         Validate.notNull(properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
-        Validate.notNull(properties.getProperty(SESSION_EXPIRY_SECONDS_REMEMBERED));
         Validate.notNull(properties.getProperty(HOST_NAME));
 
         this.database = database;
@@ -475,12 +474,11 @@ public class UserAuthenticationManager {
      * @param request - for creating the session
      * @param response - for creating the session
      * @param user - the user who should be logged in.
-     * @param rememberMe - Boolean to indicate whether or not this cookie expiry duration should be long or short
      * @return the request and response will be modified and the original userDO will be returned for convenience.
      */
     public RegisteredUser createUserSession(final HttpServletRequest request, final HttpServletResponse response,
-            final RegisteredUser user, final boolean rememberMe) {
-        this.createSession(request, response, user, false, rememberMe);
+            final RegisteredUser user) {
+        this.createSession(request, response, user, false);
         return user;
     }
 
@@ -490,12 +488,11 @@ public class UserAuthenticationManager {
      * @param request - for creating the session
      * @param response - for creating the session
      * @param user - the user who should be logged in.
-     * @param rememberMe - Boolean to indicate whether or not this cookie expiry duration should be long or short
      * @return the request and response will be modified and the original userDO will be returned for convenience.
      */
     public RegisteredUser createIncompleteLoginUserSession(final HttpServletRequest request, final HttpServletResponse response,
-                                            final RegisteredUser user, final boolean rememberMe) {
-        this.createSession(request, response, user, true, rememberMe);
+                                            final RegisteredUser user) {
+        this.createSession(request, response, user, true);
         return user;
     }
 
@@ -862,13 +859,11 @@ public class UserAuthenticationManager {
      *            account to associate the session with.
      * @param partialLoginFlag
      *            Boolean to indicate whether or not this cookie represents a partial login (true) or full (false)
-     * @param rememberMe
-     *            Boolean to indicate whether or not this cookie expiry duration should be long or short
      */
     private void createSession(final HttpServletRequest request, final HttpServletResponse response,
-                               final RegisteredUser user, final boolean partialLoginFlag, final boolean rememberMe) {
-        int sessionExpiryTimeInSeconds = Integer.parseInt(properties.getProperty(rememberMe ? SESSION_EXPIRY_SECONDS_REMEMBERED : SESSION_EXPIRY_SECONDS_DEFAULT));
-        createSession(request, response, user, sessionExpiryTimeInSeconds, partialLoginFlag, rememberMe);
+                               final RegisteredUser user, final boolean partialLoginFlag) {
+        int sessionExpiryTimeInSeconds = Integer.parseInt(properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
+        createSession(request, response, user, sessionExpiryTimeInSeconds, partialLoginFlag);
     }
 
     /**
@@ -884,11 +879,9 @@ public class UserAuthenticationManager {
      *            max age of the cookie if not a partial login.
      * @param partialLoginFlag
      *            Boolean to indicate whether or not this cookie represents a partial login (true) or full (false)
-     * @param rememberMe
-     *            Boolean to indicate whether or not this cookie expiry duration should be long or short
      */
     private void createSession(final HttpServletRequest request, final HttpServletResponse response,
-            final RegisteredUser user, int sessionExpiryTimeInSeconds, final boolean partialLoginFlag, final boolean rememberMe) {
+            final RegisteredUser user, int sessionExpiryTimeInSeconds, final boolean partialLoginFlag) {
         Validate.notNull(response);
         Validate.notNull(user);
         Validate.notNull(user.getId());

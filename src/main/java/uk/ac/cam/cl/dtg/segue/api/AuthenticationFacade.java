@@ -306,8 +306,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             @Context final HttpServletResponse response, @PathParam("provider") final String signinProvider) {
 
         try {
-            // TODO - review if rememberMe should default to true for SSO logins:
-            RegisteredUserDTO userToReturn = userManager.authenticateCallback(request, response, signinProvider, true);
+            RegisteredUserDTO userToReturn = userManager.authenticateCallback(request, response, signinProvider);
             this.getLogManager().logEvent(userToReturn, request, SegueServerLogType.LOG_IN, Maps.newHashMap());
             return Response.ok(userToReturn).build();
         } catch (IOException e) {
@@ -354,15 +353,14 @@ public class AuthenticationFacade extends AbstractSegueFacade {
      *            - string representing the supported auth provider so that we know who to redirect the user to.
      * @param localAuthDTO
      *            - for local authentication only, credentials should be specified within a LocalAuthDTO object.
-     *            e.g. email, password and optionally a rememberMe flag.
+     *            e.g. email and password.
      * @return The users DTO or a SegueErrorResponse
      */
     @POST
     @Path("/{provider}/authenticate")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Initiate login with an email address and password.",
-                  description = "Optionally, a rememberMe flag can be provided for a longer session duration.")
+    @Operation(summary = "Initiate login with an email address and password.")
     public final Response authenticateWithCredentials(@Context final HttpServletRequest request,
             @Context final HttpServletResponse response, @PathParam("provider") final String signinProvider,
             final LocalAuthDTO localAuthDTO) throws InvalidKeySpecException, NoSuchAlgorithmException {
@@ -378,7 +376,6 @@ public class AuthenticationFacade extends AbstractSegueFacade {
         
         String email = localAuthDTO.getEmail();
         String password = localAuthDTO.getPassword();
-        boolean rememberMe = localAuthDTO.getRememberMe() != null && localAuthDTO.getRememberMe();
         SegueMetrics.LOG_IN_ATTEMPT.inc();
 
         final String rateThrottleMessage = "There have been too many attempts to login to this account. "
@@ -393,7 +390,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             misuseMonitor.notifyEvent(requestingIPAddress, SegueLoginByIPMisuseHandler.class.getSimpleName());
 
             // ok we need to hand over to user manager
-            RegisteredUserDTO userToReturn = userManager.authenticateWithCredentials(request, response, signinProvider, email, password, rememberMe);
+            RegisteredUserDTO userToReturn = userManager.authenticateWithCredentials(request, response, signinProvider, email, password);
 
             this.getLogManager().logEvent(userToReturn, request, SegueServerLogType.LOG_IN, Maps.newHashMap());
             SegueMetrics.LOG_IN.inc();
@@ -526,7 +523,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
                 return SegueErrorResponse.getRateThrottledResponse(rateThrottleMessage);
             }
 
-            RegisteredUserDTO userToReturn = this.userManager.authenticateMFA(request, response, verificationCode, mfaResponse.getRememberMe());
+            RegisteredUserDTO userToReturn = this.userManager.authenticateMFA(request, response, verificationCode);
 
             this.getLogManager().logEvent(userToReturn, request, SegueServerLogType.LOG_IN, Maps.newHashMap());
             SegueMetrics.LOG_IN.inc();

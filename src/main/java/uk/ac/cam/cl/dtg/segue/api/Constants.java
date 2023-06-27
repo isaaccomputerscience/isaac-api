@@ -170,11 +170,6 @@ public final class Constants {
     public static final String SESSION_EXPIRY_SECONDS_DEFAULT = "SESSION_EXPIRY_SECONDS_DEFAULT";
 
     /**
-     * Constant representing the property name for the session expiry in seconds when remember me is set - used in HMAC calculations.
-     */
-    public static final String SESSION_EXPIRY_SECONDS_REMEMBERED = "SESSION_EXPIRY_SECONDS_REMEMBERED";
-
-    /**
      * Constant representing the key for the SESSION USER ID - used in HMAC calculations.
      */
     public static final String SESSION_USER_ID = "id";

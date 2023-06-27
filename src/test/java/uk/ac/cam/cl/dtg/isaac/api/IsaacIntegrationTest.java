@@ -328,7 +328,7 @@ public abstract class IsaacIntegrationTest {
         expectLastCall().atLeastOnce(); // This is how you expect void methods, apparently...
         replay(userLoginResponse);
 
-        RegisteredUserDTO user = userAccountManager.authenticateWithCredentials(userLoginRequest, userLoginResponse, AuthenticationProvider.SEGUE.toString(), username, password, false);
+        RegisteredUserDTO user = userAccountManager.authenticateWithCredentials(userLoginRequest, userLoginResponse, AuthenticationProvider.SEGUE.toString(), username, password);
 
         return new LoginResult(user, capturedUserCookie.getValue());
     }

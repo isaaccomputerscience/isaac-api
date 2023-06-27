@@ -49,8 +49,6 @@ public class UserAuthenticationManagerTest {
         expect(this.dummyPropertiesLoader.getProperty(HOST_NAME)).andReturn(dummyHostName).anyTimes();
         expect(this.dummyPropertiesLoader.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT)).andReturn("60")
                 .anyTimes();
-        expect(this.dummyPropertiesLoader.getProperty(SESSION_EXPIRY_SECONDS_REMEMBERED)).andReturn("360")
-                .anyTimes();
         expect(this.dummyPropertiesLoader.getProperty(Constants.SEGUE_APP_ENVIRONMENT)).andReturn("DEV").anyTimes();
         replay(this.dummyPropertiesLoader);
 
