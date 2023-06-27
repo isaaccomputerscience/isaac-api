@@ -45,16 +45,8 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
     public SessionValidator(final UserAuthenticationManager userAuthenticationManager, PropertiesLoader properties) {
         this.userAuthenticationManager = userAuthenticationManager;
         this.properties = properties;
-        this.sessionExpirySeconds = getSessionExpirySeconds();
-    }
-
-    private Integer getSessionExpirySeconds() {
-        try {
-            return Integer.parseInt(this.properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
-        } catch (NumberFormatException e) {
-            log.error("Could not read session expiry time from property configuration. Defaulting to 1800 seconds.", e);
-            return 1800;
-        }
+        this.sessionExpirySeconds = this.properties.getIntegerPropertyOrFallback(
+                SESSION_EXPIRY_SECONDS_DEFAULT, SESSION_EXPIRY_SECONDS_FALLBACK);
     }
 
     @Override

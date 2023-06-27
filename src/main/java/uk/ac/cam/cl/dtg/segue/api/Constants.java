@@ -165,9 +165,14 @@ public final class Constants {
     public static final String HMAC = "HMAC";
 
     /**
-     * Constant representing the property name for the session expiry in seconds when remember me is not set - used in HMAC calculations.
+     * Constant representing the property name for the session expiry in seconds is not set - used in HMAC calculations.
      */
     public static final String SESSION_EXPIRY_SECONDS_DEFAULT = "SESSION_EXPIRY_SECONDS_DEFAULT";
+
+    /**
+     * Constant representing the value to be used for the session expiry in seconds in the event that parsing the config value throws an exception.
+     */
+    public static final Integer SESSION_EXPIRY_SECONDS_FALLBACK = 1800;
 
     /**
      * Constant representing the key for the SESSION USER ID - used in HMAC calculations.

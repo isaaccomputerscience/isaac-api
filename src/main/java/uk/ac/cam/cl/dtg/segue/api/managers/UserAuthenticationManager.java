@@ -862,7 +862,7 @@ public class UserAuthenticationManager {
      */
     private void createSession(final HttpServletRequest request, final HttpServletResponse response,
                                final RegisteredUser user, final boolean partialLoginFlag) {
-        int sessionExpiryTimeInSeconds = Integer.parseInt(properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
+        int sessionExpiryTimeInSeconds = properties.getIntegerPropertyOrFallback(SESSION_EXPIRY_SECONDS_DEFAULT, SESSION_EXPIRY_SECONDS_FALLBACK);
         createSession(request, response, user, sessionExpiryTimeInSeconds, partialLoginFlag);
     }
 
