@@ -73,8 +73,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.REDIRECT_URL;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 
 /**
@@ -365,30 +364,22 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             @Context final HttpServletResponse response, @PathParam("provider") final String signinProvider,
             final LocalAuthDTO localAuthDTO) throws InvalidKeySpecException, NoSuchAlgorithmException {
 
-        
         // In this case we expect a username and password in the JSON request body:
-        if (null == localAuthDTO || null == localAuthDTO.getEmail() || localAuthDTO.getEmail().isEmpty()
-                || null == localAuthDTO.getPassword() || localAuthDTO.getPassword().isEmpty()) {
-            SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-                    "You must specify an email and password when logging in.");
-            return error.toResponse();
-        }
+        if (areCredentialsMissing(localAuthDTO))
+            return new SegueErrorResponse(Status.BAD_REQUEST, LOGIN_MISSING_CREDENTIALS_MESSAGE).toResponse();
         
         String email = localAuthDTO.getEmail();
         String password = localAuthDTO.getPassword();
         SegueMetrics.LOG_IN_ATTEMPT.inc();
 
-        final String rateThrottleMessage = "There have been too many attempts to login to this account. "
-                + "Please try again after 10 minutes.";
+        try {
+            notifySegueLoginRateLimiter(request, email);
+        } catch (SegueResourceMisuseException e) {
+            log.error(String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", sanitiseLogValue(email)));
+            return SegueErrorResponse.getRateThrottledResponse(LOGIN_RATE_THROTTLE_MESSAGE);
+        }
 
         try {
-            String requestingIPAddress = RequestIPExtractor.getClientIpAddr(request);
-            // Stop users logging in who have already locked their account.
-            if (misuseMonitor.hasMisused(email.toLowerCase(), SegueLoginByEmailMisuseHandler.class.getSimpleName())) {
-                throw new SegueResourceMisuseException("Too many login attempts for this account");
-            }
-            misuseMonitor.notifyEvent(requestingIPAddress, SegueLoginByIPMisuseHandler.class.getSimpleName());
-
             // ok we need to hand over to user manager
             RegisteredUserDTO userToReturn = userManager.authenticateWithCredentials(request, response, signinProvider, email, password);
 
@@ -401,9 +392,8 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             // The password challenge has completed successfully but they must complete the second step of the flow
             return Response.accepted(ImmutableMap.of("2FA_REQUIRED", true)).build();
         } catch (AuthenticationProviderMappingException e) {
-            String errorMsg = "Unable to locate the provider specified";
-            log.error(errorMsg, e);
-            return new SegueErrorResponse(Status.BAD_REQUEST, errorMsg).toResponse();
+            log.error(LOGIN_UNKNOWN_PROVIDER_MESSAGE, e);
+            return new SegueErrorResponse(Status.BAD_REQUEST, LOGIN_UNKNOWN_PROVIDER_MESSAGE).toResponse();
         } catch (IncorrectCredentialsProvidedException | NoCredentialsAvailableException e) {
             try {
                 misuseMonitor.notifyEvent(email.toLowerCase(), SegueLoginByEmailMisuseHandler.class.getSimpleName());
@@ -411,19 +401,29 @@ public class AuthenticationFacade extends AbstractSegueFacade {
                 return new SegueErrorResponse(Status.UNAUTHORIZED, "Incorrect credentials provided.").toResponse();
             } catch (SegueResourceMisuseException e1) {
                 log.error(String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", sanitiseLogValue(email)));
-                return SegueErrorResponse.getRateThrottledResponse(rateThrottleMessage);
+                return SegueErrorResponse.getRateThrottledResponse(LOGIN_RATE_THROTTLE_MESSAGE);
             }
         } catch (MFARequiredButNotConfiguredException e) {
             log.warn(String.format("Login blocked for ADMIN account (%s) which does not have 2FA configured.", sanitiseLogValue(email)));
             return new SegueErrorResponse(Status.UNAUTHORIZED, e.getMessage()).toResponse();
         } catch (SegueDatabaseException e) {
-            String errorMsg = "Internal Database error has occurred during authentication.";
-            log.error(errorMsg, e);
-            return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
-        } catch (SegueResourceMisuseException e) {
-            log.error(String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", sanitiseLogValue(email)));
-            return SegueErrorResponse.getRateThrottledResponse(rateThrottleMessage);
+            log.error(LOGIN_DATABASE_ERROR_MESSAGE, e);
+            return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, LOGIN_DATABASE_ERROR_MESSAGE).toResponse();
         }
+    }
+
+    private void notifySegueLoginRateLimiter(HttpServletRequest request, String email) throws SegueResourceMisuseException {
+        String requestingIPAddress = RequestIPExtractor.getClientIpAddr(request);
+        // Stop users logging in who have already locked their account.
+        if (misuseMonitor.hasMisused(email.toLowerCase(), SegueLoginByEmailMisuseHandler.class.getSimpleName())) {
+            throw new SegueResourceMisuseException("Too many login attempts for this account");
+        }
+        misuseMonitor.notifyEvent(requestingIPAddress, SegueLoginByIPMisuseHandler.class.getSimpleName());
+    }
+
+    private static boolean areCredentialsMissing(LocalAuthDTO localAuthDTO) {
+        return null == localAuthDTO || null == localAuthDTO.getEmail() || localAuthDTO.getEmail().isEmpty()
+                || null == localAuthDTO.getPassword() || localAuthDTO.getPassword().isEmpty();
     }
 
     /**
@@ -510,7 +510,6 @@ public class AuthenticationFacade extends AbstractSegueFacade {
         }
 
         UserSummaryWithEmailAddressDTO partiallyLoggedInUser = null;
-        final String rateThrottleMessage = "There have been too many attempts to login to this account. Try again later.";
         try {
             final Integer verificationCode = Integer.parseInt(mfaResponse.getMfaVerificationCode());
             partiallyLoggedInUser = this.userManager.getPartiallyIdentifiedUser(request);
@@ -520,7 +519,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
 
                 log.error("Segue Login Blocked for (" + partiallyLoggedInUser.getEmail()
                         + ") during 2FA step. Rate limited - too many logins.");
-                return SegueErrorResponse.getRateThrottledResponse(rateThrottleMessage);
+                return SegueErrorResponse.getRateThrottledResponse(LOGIN_RATE_THROTTLE_MESSAGE);
             }
 
             RegisteredUserDTO userToReturn = this.userManager.authenticateMFA(request, response, verificationCode);
@@ -542,7 +541,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             } catch (SegueResourceMisuseException e1) {
                 log.error("Segue 2FA verification Blocked for (" + partiallyLoggedInUser.getEmail()
                         + "). Rate limited - too many logins.");
-                return SegueErrorResponse.getRateThrottledResponse(rateThrottleMessage);
+                return SegueErrorResponse.getRateThrottledResponse(LOGIN_RATE_THROTTLE_MESSAGE);
             }
         } catch (SegueDatabaseException e) {
             String errorMsg = "Internal Database error has occurred during mfa challenge.";

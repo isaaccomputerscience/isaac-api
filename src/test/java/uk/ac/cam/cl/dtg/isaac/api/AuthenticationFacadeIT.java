@@ -38,8 +38,7 @@ import static org.easymock.EasyMock.*;
 import static org.eclipse.jetty.http.HttpCookie.SAME_SITE_LAX_COMMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_MINUTE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 
 public class AuthenticationFacadeIT extends IsaacIntegrationTest {
     private AuthenticationFacade authenticationFacade;
@@ -136,7 +135,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
     public void authenticateWithCredentials_local_nullAuthDTO() throws InvalidKeySpecException, NoSuchAlgorithmException {
         Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", null);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("You must specify an email and password when logging in.", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        assertEquals(LOGIN_MISSING_CREDENTIALS_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
     }
 
     @ParameterizedTest
@@ -148,7 +147,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 
         Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("You must specify an email and password when logging in.", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        assertEquals(LOGIN_MISSING_CREDENTIALS_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
     }
 
     private static Stream<Arguments> invalidAuthDTO() {
@@ -248,7 +247,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 //
 //        Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
 //        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
-//        assertEquals("Internal Database error has occurred during authentication.", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+//        assertEquals(LOGIN_DATABASE_ERROR_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
 //    }
 
     @Test
@@ -261,7 +260,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
         misuseMonitor.notifyEvent("0.0.0.0", SegueLoginByIPMisuseHandler.class.getSimpleName());
         Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
         assertEquals(Response.Status.TOO_MANY_REQUESTS.getStatusCode(), response.getStatus());
-        assertEquals("There have been too many attempts to login to this account. Please try again after 10 minutes.", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        assertEquals(LOGIN_RATE_THROTTLE_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
     }
 
     @Test
@@ -274,6 +273,6 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
         misuseMonitor.notifyEvent("test-student@test.com", SegueLoginByEmailMisuseHandler.class.getSimpleName());
         Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
         assertEquals(Response.Status.TOO_MANY_REQUESTS.getStatusCode(), response.getStatus());
-        assertEquals("There have been too many attempts to login to this account. Please try again after 10 minutes.", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        assertEquals(LOGIN_RATE_THROTTLE_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
     }
 }
