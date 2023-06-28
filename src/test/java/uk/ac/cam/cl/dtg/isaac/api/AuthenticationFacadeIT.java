@@ -214,16 +214,28 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
         assertEquals("Your account type requires 2FA, but none has been configured! Please ask an admin to demote your account to regain access.", response.readEntity(SegueErrorResponse.class).getErrorMessage());
     }
 
-//    @Test
-//    public void authenticateWithCredentials_local_incompleteMFA() throws InvalidKeySpecException, NoSuchAlgorithmException {
-//        LocalAuthDTO testLocalAuthDTO = new LocalAuthDTO();
-//        testLocalAuthDTO.setEmail("test-mfa@test.com");
-//        testLocalAuthDTO.setPassword("Password123!");
-//
-//        Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
-//        assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
-//        assertEquals(Map.of("2FA_REQUIRED", true), response.getEntity());
-//    }
+    @Test
+    public void authenticateWithCredentials_local_incompleteMFA() throws InvalidKeySpecException, NoSuchAlgorithmException, SegueDatabaseException {
+        reset(secondFactorManager);
+        expect(secondFactorManager.has2FAConfigured(anyObject(RegisteredUserDTO.class))).andReturn(true).atLeastOnce();
+        replay(secondFactorManager);
+        LocalAuthDTO testLocalAuthDTO = new LocalAuthDTO();
+        testLocalAuthDTO.setEmail("test-student@test.com");
+        testLocalAuthDTO.setPassword("test1234");
+
+        Response response;
+        try {
+            response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
+        } finally {
+            // Make sure to restore the mfa mock afterwards!
+            reset(secondFactorManager);
+            expect(secondFactorManager.has2FAConfigured(anyObject())).andReturn(false).atLeastOnce();
+            replay(secondFactorManager);
+        }
+
+        assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
+        assertEquals(Map.of("2FA_REQUIRED", true), response.getEntity());
+    }
 
 //    @Test
 //    public void authenticateWithCredentials_local_databaseError() throws InvalidKeySpecException, NoSuchAlgorithmException, NoCredentialsAvailableException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException {

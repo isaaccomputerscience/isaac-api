@@ -120,6 +120,7 @@ public abstract class IsaacIntegrationTest {
     protected static EmailManager emailManager;
     protected static AbstractUserPreferenceManager userPreferenceManager;
     protected static UserAuthenticationManager userAuthenticationManager;
+    protected static ISecondFactorAuthenticator secondFactorManager;
     protected static UserAccountManager userAccountManager;
     protected static GameManager gameManager;
     protected static GroupManager groupManager;
@@ -251,7 +252,7 @@ public abstract class IsaacIntegrationTest {
         emailManager = new EmailManager(communicator, userPreferenceManager, properties, contentManager, logManager, globalTokens);
 
         userAuthenticationManager = new UserAuthenticationManager(pgUsers, properties, providersToRegister, emailManager);
-        ISecondFactorAuthenticator secondFactorManager = createMock(SegueTOTPAuthenticator.class);
+        secondFactorManager = createMock(SegueTOTPAuthenticator.class);
         // We don't care for MFA here so we can safely disable it
         try {
             expect(secondFactorManager.has2FAConfigured(anyObject())).andReturn(false).atLeastOnce();
