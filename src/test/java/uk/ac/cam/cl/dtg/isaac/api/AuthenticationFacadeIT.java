@@ -1,9 +1,13 @@
 package uk.ac.cam.cl.dtg.isaac.api;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
+import org.easymock.Capture;
+import org.easymock.EasyMock;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,14 +17,16 @@ import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByEmailMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.easymock.EasyMock.*;
 import static org.eclipse.jetty.http.HttpCookie.SAME_SITE_LAX_COMMENT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_MINUTE;
+import static org.junit.jupiter.api.Assertions.*;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 
 public class AuthenticationFacadeIT extends IsaacIntegrationTest {
     private AuthenticationFacade authenticationFacade;
@@ -98,5 +104,42 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
         targetUser.setEmail("test-student3@test.com");
         Response thirdResetResponse = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
         assertEquals(Response.Status.TOO_MANY_REQUESTS.getStatusCode(), thirdResetResponse.getStatus());
+    }
+
+    @Test
+    public void userLogout_sessionDeauthentication() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        LocalAuthDTO targetUser = new LocalAuthDTO();
+        targetUser.setEmail("test-student@test.com");
+        targetUser.setPassword("test1234");
+
+//        Map<String, NewCookie> firstResponseCookies = new HashMap();
+        Capture<Cookie> firstResponseCookies = newCapture();
+        HttpServletResponse firstLoginResponse = createMock(HttpServletResponse.class);
+        firstLoginResponse.addCookie(capture(firstResponseCookies));
+        replay(firstLoginResponse);
+
+        authenticationFacade.authenticateWithCredentials(mockRequest, firstLoginResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
+//        NewCookie firstLoginAuthCookie = firstLoginResponse.getCookies().get(SEGUE_AUTH_COOKIE);
+        Cookie firstLoginAuthCookie = firstResponseCookies.getValues().get(0);
+        Map<String, String> firstLoginSessionInformation = userAuthenticationManager.decodeCookie(firstLoginAuthCookie);
+        // Session should be valid
+        assertTrue(userAuthenticationManager.isSessionValid(firstLoginSessionInformation));
+
+//        Response logoutResponse = authenticationFacade.userLogout(mockRequest, mockResponse);
+//        NewCookie logoutCookie = firstLoginResponse.getCookies().get(SEGUE_AUTH_COOKIE);
+//        // Should be no session associated with logout
+//        assertEquals("", logoutCookie.getValue());
+//        // Session should have been invalidated
+//        assertFalse(userAuthenticationManager.isSessionValid(firstLoginSessionInformation));
+//
+//        Response secondLoginResponse = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, AuthenticationProvider.SEGUE.toString(), targetUser);
+//        NewCookie secondLoginAuthCookie = secondLoginResponse.getCookies().get(SEGUE_AUTH_COOKIE);
+//        Map<String, String> secondLoginSessionInformation = userAuthenticationManager.decodeCookie(secondLoginAuthCookie);
+//        // New session should be valid
+//        assertTrue(userAuthenticationManager.isSessionValid(secondLoginSessionInformation));
+//        // Previous session should still be invalid
+//        assertFalse(userAuthenticationManager.isSessionValid(firstLoginSessionInformation));
+//        // Sessions should have different tokens
+//        assertNotEquals(firstLoginSessionInformation.get(SESSION_TOKEN), secondLoginSessionInformation.get(SESSION_TOKEN));
     }
 }

@@ -1178,4 +1178,27 @@ public class UserAuthenticationManager {
             throw new IllegalArgumentException();
         }
     }
+
+    public boolean isSessionValid(Map<String, String> currentSessionInformation) {
+        try {
+            long currentUserId = Long.parseLong(currentSessionInformation.get(SESSION_USER_ID));
+            RegisteredUser userToReturn =  database.getById(currentUserId);
+            if (null == userToReturn || !this.isValidUsersSession(currentSessionInformation, userToReturn)) {
+                log.debug("User session has failed validation. Treating as logged out. Session: " + currentSessionInformation);
+                return false;
+            }
+            return true;
+        } catch (SegueDatabaseException e) {
+            log.warn("User session has failed validation.");
+            return false;
+        } catch (NumberFormatException e) {
+            log.warn("User session has failed validation.");
+            return false;
+        }
+    }
+
+    public Map<String, String> decodeCookie(Cookie segueAuthCookie) throws IOException {
+        return this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()),
+                HashMap.class);
+    }
 }
