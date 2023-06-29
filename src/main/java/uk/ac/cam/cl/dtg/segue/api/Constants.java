@@ -328,6 +328,8 @@ public final class Constants {
     public static final String LOGIN_RATE_THROTTLE_MESSAGE = "There have been too many attempts to login to this account. Please try again later.";
     public static final String LOGIN_DATABASE_ERROR_MESSAGE = "Internal database error has occurred during authentication.";
     public static final String LOGIN_UNKNOWN_PROVIDER_MESSAGE = "Unable to locate the provider specified.";
+    public static final String LOGIN_INCORRECT_CREDENTIALS_MESSAGE = "Incorrect credentials provided.";
+    public static final String LOGIN_2FA_REQUIRED_MESSAGE = "Your account type requires 2FA, but none has been configured! Please ask an admin to demote your account to regain access.";
 
     // Database properties
     public static final String SEGUE_DB_NAME = "SEGUE_DB_NAME";

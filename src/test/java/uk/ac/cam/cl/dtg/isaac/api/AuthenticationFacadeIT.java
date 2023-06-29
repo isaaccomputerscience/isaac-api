@@ -17,12 +17,14 @@ import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.api.AuthenticationFacade;
 import uk.ac.cam.cl.dtg.segue.api.managers.SegueResourceMisuseException;
-import uk.ac.cam.cl.dtg.segue.api.managers.UserAuthenticationManager;
+import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByEmailMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.AdditionalAuthenticationRequiredException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.AuthenticationProviderMappingException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.IncorrectCredentialsProvidedException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.MFARequiredButNotConfiguredException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
@@ -167,7 +169,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 
         Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
-        assertEquals("Incorrect credentials provided.", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        assertEquals(LOGIN_INCORRECT_CREDENTIALS_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
     }
 
     @Test
@@ -178,7 +180,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 
         Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
-        assertEquals("Incorrect credentials provided.", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        assertEquals(LOGIN_INCORRECT_CREDENTIALS_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
     }
 
     @Test
@@ -199,7 +201,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 
         Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "OtherProvider", testLocalAuthDTO);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-        assertEquals("Unable to locate the provider specified", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        assertEquals(LOGIN_UNKNOWN_PROVIDER_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
     }
 
     @Test
@@ -210,7 +212,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 
         Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
-        assertEquals("Your account type requires 2FA, but none has been configured! Please ask an admin to demote your account to regain access.", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        assertEquals(LOGIN_2FA_REQUIRED_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
     }
 
     @Test
@@ -237,15 +239,17 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
     }
 
 //    @Test
-//    public void authenticateWithCredentials_local_databaseError() throws InvalidKeySpecException, NoSuchAlgorithmException, NoCredentialsAvailableException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException {
-//        userAuthenticationManager = createMock(UserAuthenticationManager.class);
-//        expect(userAuthenticationManager.getSegueUserFromCredentials("SEGUE","test-student@test.com" ,"test1234")).andThrow(new SegueDatabaseException("Postgres exception"));
-//        replay(userAuthenticationManager);
+//    public void authenticateWithCredentials_local_databaseError() throws InvalidKeySpecException, NoSuchAlgorithmException, NoCredentialsAvailableException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, MFARequiredButNotConfiguredException {
 //        LocalAuthDTO testLocalAuthDTO = new LocalAuthDTO();
 //        testLocalAuthDTO.setEmail("test-student@test.com");
 //        testLocalAuthDTO.setPassword("test1234");
 //
-//        Response response = authenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
+//        UserAccountManager mockUserAccountManager = createNiceMock(UserAccountManager.class);
+//        expect(mockUserAccountManager.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", "test-student@test.com", "test1234")).andThrow(new SegueDatabaseException("Postgres exception")).atLeastOnce();
+//        replay(mockUserAccountManager);
+//        AuthenticationFacade failingDatabaseauthenticationFacade = new AuthenticationFacade(properties, mockUserAccountManager, logManager, misuseMonitor);
+//
+//        Response response = failingDatabaseauthenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
 //        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
 //        assertEquals(LOGIN_DATABASE_ERROR_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
 //    }

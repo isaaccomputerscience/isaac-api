@@ -388,9 +388,7 @@ public class UserAccountManager implements IUserAccountManager {
             throw new AdditionalAuthenticationRequiredException();
         } else if (Role.ADMIN.equals(user.getRole())) {
             // Admins MUST have 2FA enabled to use password login, so if we reached this point login cannot proceed.
-            String message = "Your account type requires 2FA, but none has been configured! " +
-                    "Please ask an admin to demote your account to regain access.";
-            throw new MFARequiredButNotConfiguredException(message);
+            throw new MFARequiredButNotConfiguredException(LOGIN_2FA_REQUIRED_MESSAGE);
         } else {
             return this.logUserIn(request, response, user);
         }

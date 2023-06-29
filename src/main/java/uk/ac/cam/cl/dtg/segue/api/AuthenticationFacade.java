@@ -373,7 +373,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
         SegueMetrics.LOG_IN_ATTEMPT.inc();
 
         try {
-            notifySegueLoginRateLimiter(request, email);
+            notifySegueLoginRateLimiters(request, email);
         } catch (SegueResourceMisuseException e) {
             log.error(String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", sanitiseLogValue(email)));
             return SegueErrorResponse.getRateThrottledResponse(LOGIN_RATE_THROTTLE_MESSAGE);
@@ -395,14 +395,8 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             log.error(LOGIN_UNKNOWN_PROVIDER_MESSAGE, e);
             return new SegueErrorResponse(Status.BAD_REQUEST, LOGIN_UNKNOWN_PROVIDER_MESSAGE).toResponse();
         } catch (IncorrectCredentialsProvidedException | NoCredentialsAvailableException e) {
-            try {
-                misuseMonitor.notifyEvent(email.toLowerCase(), SegueLoginByEmailMisuseHandler.class.getSimpleName());
-                log.info(String.format("Incorrect credentials received for (%s). Error: %s", sanitiseLogValue(email), e.getMessage()));
-                return new SegueErrorResponse(Status.UNAUTHORIZED, "Incorrect credentials provided.").toResponse();
-            } catch (SegueResourceMisuseException e1) {
-                log.error(String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", sanitiseLogValue(email)));
-                return SegueErrorResponse.getRateThrottledResponse(LOGIN_RATE_THROTTLE_MESSAGE);
-            }
+            log.info(String.format("Incorrect credentials received for (%s). Error: %s", sanitiseLogValue(email), e.getMessage()));
+            return new SegueErrorResponse(Status.UNAUTHORIZED, LOGIN_INCORRECT_CREDENTIALS_MESSAGE).toResponse();
         } catch (MFARequiredButNotConfiguredException e) {
             log.warn(String.format("Login blocked for ADMIN account (%s) which does not have 2FA configured.", sanitiseLogValue(email)));
             return new SegueErrorResponse(Status.UNAUTHORIZED, e.getMessage()).toResponse();
@@ -412,12 +406,10 @@ public class AuthenticationFacade extends AbstractSegueFacade {
         }
     }
 
-    private void notifySegueLoginRateLimiter(HttpServletRequest request, String email) throws SegueResourceMisuseException {
+    private void notifySegueLoginRateLimiters(HttpServletRequest request, String email) throws SegueResourceMisuseException {
         String requestingIPAddress = RequestIPExtractor.getClientIpAddr(request);
         // Stop users logging in who have already locked their account.
-        if (misuseMonitor.hasMisused(email.toLowerCase(), SegueLoginByEmailMisuseHandler.class.getSimpleName())) {
-            throw new SegueResourceMisuseException("Too many login attempts for this account");
-        }
+        misuseMonitor.notifyEvent(email.toLowerCase(), SegueLoginByEmailMisuseHandler.class.getSimpleName());
         misuseMonitor.notifyEvent(requestingIPAddress, SegueLoginByIPMisuseHandler.class.getSimpleName());
     }
 
