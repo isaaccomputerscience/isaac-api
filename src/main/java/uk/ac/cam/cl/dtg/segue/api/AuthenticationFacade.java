@@ -480,7 +480,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
                                                @Context final HttpServletResponse response) {
         try {
             AbstractSegueUserDTO user = this.userManager.getCurrentUser(request);
-            userManager.logoutEverywhere(request, response);
+            userManager.logUserOut(request, response);
 
             this.getLogManager().logEvent(user, request, SegueServerLogType.LOG_OUT_EVERYWHERE, Maps.newHashMap());
             SegueMetrics.LOG_OUT_EVERYWHERE.inc();

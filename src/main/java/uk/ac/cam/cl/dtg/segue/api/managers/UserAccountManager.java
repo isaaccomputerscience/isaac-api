@@ -2039,24 +2039,6 @@ public class UserAccountManager implements IUserAccountManager {
     }
 
     /**
-     * Logout user from all sessions.
-     * Increment the users' session token field to invalidate all other sessions.
-     *
-     * @param request
-     *            - request containing session information.
-     * @param response
-     *            to destroy the segue cookie.
-     * @throws NoUserLoggedInException
-     *            - when the request doesn't have an auth cookie.
-     * @throws SegueDatabaseException
-     *             - if an error occurs with the update.
-     */
-    public void logoutEverywhere(final HttpServletRequest request, final HttpServletResponse response)
-            throws SegueDatabaseException, NoUserLoggedInException {
-        logUserOut(request, response);
-    }
-
-    /**
      * @param userDTO the userDTO of interest
      * @param emailVerificationToken the verifcation token
      * @return verification URL
