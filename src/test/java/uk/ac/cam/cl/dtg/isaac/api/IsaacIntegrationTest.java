@@ -114,6 +114,7 @@ public abstract class IsaacIntegrationTest {
     protected static ElasticSearchProvider elasticSearchProvider;
     protected static SchoolListReader schoolListReader;
     protected static MapperFacade mapperFacade;
+    protected static Map<AuthenticationProvider, IAuthenticator> providersToRegister;
     protected static IMisuseMonitor misuseMonitor;
 
     // Managers
@@ -237,7 +238,7 @@ public abstract class IsaacIntegrationTest {
         mapperFacade = contentMapper.getAutoMapper();
 
         // The following may need some actual authentication providers...
-        Map<AuthenticationProvider, IAuthenticator> providersToRegister = new HashMap<>();
+        providersToRegister = new HashMap<>();
         Map<String, ISegueHashingAlgorithm> algorithms = new HashMap<>(Map.of("SeguePBKDF2v3", new SeguePBKDF2v3(), "SegueSCryptv1", new SegueSCryptv1()));
         providersToRegister.put(AuthenticationProvider.SEGUE, new SegueLocalAuthenticator(pgUsers, passwordDataManager, properties, algorithms, algorithms.get("SegueSCryptv1")));
 

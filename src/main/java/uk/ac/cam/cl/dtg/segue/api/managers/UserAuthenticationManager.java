@@ -1153,25 +1153,19 @@ public class UserAuthenticationManager {
 
     public boolean isSessionValid(HttpServletRequest request) {
         try {
-        Map<String, String> currentSessionInformation = this.getSegueSessionFromRequest(request);
-        long currentUserId = Long.parseLong(currentSessionInformation.get(SESSION_USER_ID));
-        RegisteredUser userToReturn =  database.getById(currentUserId);
-        if (null == userToReturn || !this.isValidUsersSession(currentSessionInformation, userToReturn)) {
-            log.debug("User session has failed validation. Treating as logged out. Session: " + currentSessionInformation);
-            return false;
-        }
-        return true;
-        } catch (InvalidSessionException e) {
-            log.warn("User session has failed validation.");
+            Map<String, String> currentSessionInformation = this.getSegueSessionFromRequest(request);
+            long currentUserId = Long.parseLong(currentSessionInformation.get(SESSION_USER_ID));
+            RegisteredUser userToReturn = database.getById(currentUserId);
+            if (null == userToReturn || !this.isValidUsersSession(currentSessionInformation, userToReturn)) {
+                log.warn("User session has failed validation. Validation checks did not pass.");
+                return false;
+            }
+            return true;
+        } catch (InvalidSessionException | IOException | NumberFormatException e) {
+            log.warn("User session has failed validation. Could not parse session information.");
             return false;
         } catch (SegueDatabaseException e) {
-            log.warn("User session has failed validation.");
-            return false;
-        } catch (IOException e) {
-            log.warn("User session has failed validation.");
-            return false;
-        } catch (NumberFormatException e) {
-            log.warn("User session has failed validation.");
+            log.warn("User session has failed validation. Error accessing database.");
             return false;
         }
     }

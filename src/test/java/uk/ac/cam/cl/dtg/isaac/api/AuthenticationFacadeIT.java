@@ -17,15 +17,9 @@ import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.api.AuthenticationFacade;
 import uk.ac.cam.cl.dtg.segue.api.managers.SegueResourceMisuseException;
-import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByEmailMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.AdditionalAuthenticationRequiredException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.AuthenticationProviderMappingException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.IncorrectCredentialsProvidedException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.MFARequiredButNotConfiguredException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 import java.security.NoSuchAlgorithmException;
@@ -237,22 +231,6 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
         assertEquals(Map.of("2FA_REQUIRED", true), response.getEntity());
     }
-
-//    @Test
-//    public void authenticateWithCredentials_local_databaseError() throws InvalidKeySpecException, NoSuchAlgorithmException, NoCredentialsAvailableException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, MFARequiredButNotConfiguredException {
-//        LocalAuthDTO testLocalAuthDTO = new LocalAuthDTO();
-//        testLocalAuthDTO.setEmail("test-student@test.com");
-//        testLocalAuthDTO.setPassword("test1234");
-//
-//        UserAccountManager mockUserAccountManager = createNiceMock(UserAccountManager.class);
-//        expect(mockUserAccountManager.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", "test-student@test.com", "test1234")).andThrow(new SegueDatabaseException("Postgres exception")).atLeastOnce();
-//        replay(mockUserAccountManager);
-//        AuthenticationFacade failingDatabaseauthenticationFacade = new AuthenticationFacade(properties, mockUserAccountManager, logManager, misuseMonitor);
-//
-//        Response response = failingDatabaseauthenticationFacade.authenticateWithCredentials(mockRequest, mockResponse, "SEGUE", testLocalAuthDTO);
-//        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
-//        assertEquals(LOGIN_DATABASE_ERROR_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
-//    }
 
     @Test
     public void authenticateWithCredentials_local_rateThrottleByIP() throws InvalidKeySpecException, NoSuchAlgorithmException, SegueResourceMisuseException {
