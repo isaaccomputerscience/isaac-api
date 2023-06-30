@@ -1163,8 +1163,18 @@ public class UserAuthenticationManager {
     }
 
     public boolean isSessionValid(HttpServletRequest request) {
+        Map<String, String> currentSessionInformation;
         try {
-            Map<String, String> currentSessionInformation = this.getSegueSessionFromRequest(request);
+            currentSessionInformation = this.getSegueSessionFromRequest(request);
+        } catch (InvalidSessionException | IOException e) {
+            log.warn("User session has failed validation. Could not parse session information.");
+            return false;
+        }
+        return isSessionValid((currentSessionInformation));
+    }
+
+    public boolean isSessionValid(Map<String, String> currentSessionInformation) {
+        try {
             long currentUserId = Long.parseLong(currentSessionInformation.get(SESSION_USER_ID));
             RegisteredUser userToReturn = database.getById(currentUserId);
             if (null == userToReturn || !this.isValidUsersSession(currentSessionInformation, userToReturn)) {
@@ -1172,7 +1182,7 @@ public class UserAuthenticationManager {
                 return false;
             }
             return true;
-        } catch (InvalidSessionException | IOException | NumberFormatException e) {
+        } catch (NumberFormatException e) {
             log.warn("User session has failed validation. Could not parse session information.");
             return false;
         } catch (SegueDatabaseException e) {
@@ -1182,8 +1192,11 @@ public class UserAuthenticationManager {
     }
 
     public Map<String, String> decodeCookie(jakarta.ws.rs.core.Cookie segueAuthCookie) throws IOException {
-        return this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()),
-                HashMap.class);
+        return this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()), HashMap.class);
+    }
+
+    public Map<String, String> decodeCookie(Cookie segueAuthCookie) throws IOException {
+        return this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()), HashMap.class);
     }
 
     public String calculateUpdatedHMAC(Map<String, String> sessionInformation) {
@@ -1198,8 +1211,7 @@ public class UserAuthenticationManager {
     }
 
     public Cookie createAuthCookie(Map<String, String> sessionInformation, int sessionExpiryTimeInSeconds) throws JsonProcessingException {
-        Cookie authCookie = new Cookie(SEGUE_AUTH_COOKIE,
-                Base64.encodeBase64String(serializationMapper.writeValueAsString(sessionInformation).getBytes()));
+        Cookie authCookie = new Cookie(SEGUE_AUTH_COOKIE, Base64.encodeBase64String(serializationMapper.writeValueAsString(sessionInformation).getBytes()));
         authCookie.setMaxAge(sessionExpiryTimeInSeconds);
         authCookie.setPath("/");
         authCookie.setHttpOnly(true);
@@ -1220,37 +1232,7 @@ public class UserAuthenticationManager {
     }
 
     public NewCookie createAuthLogoutNewCookie() {
-        NewCookie logoutCookie = new NewCookie.Builder(SEGUE_AUTH_COOKIE)
-                .value("")
-                .path("/")
-                .maxAge(0)
-                .httpOnly(true)
-                .secure(setSecureCookies)
-                .comment(SAME_SITE_LAX_COMMENT)
-                .build();
+        NewCookie logoutCookie = new NewCookie.Builder(SEGUE_AUTH_COOKIE).value("").path("/").maxAge(0).httpOnly(true).secure(setSecureCookies).comment(SAME_SITE_LAX_COMMENT).build();
         return logoutCookie;
-    }
-
-    public boolean isSessionValid(Map<String, String> currentSessionInformation) {
-        try {
-            long currentUserId = Long.parseLong(currentSessionInformation.get(SESSION_USER_ID));
-            RegisteredUser userToReturn =  database.getById(currentUserId);
-            if (null == userToReturn || !this.isValidUsersSession(currentSessionInformation, userToReturn)) {
-                log.debug("User session has failed validation. Treating as logged out. Session: " + currentSessionInformation);
-                return false;
-            }
-            return true;
-        } catch (SegueDatabaseException e) {
-            log.warn("User session has failed validation.");
-            return false;
-        } catch (NumberFormatException e) {
-            log.warn("User session has failed validation.");
-            return false;
-        }
-    }
-
-    public Map<String, String> decodeCookie(Cookie segueAuthCookie) throws IOException {
-        return this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()),
-                HashMap.class);
     }
 }
