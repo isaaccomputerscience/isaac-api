@@ -499,11 +499,11 @@ public class UserAuthenticationManager {
 
     /**
      * Destroy a session attached to the request.
-     * 
-     * @param request
-     *            containing the tomcat session to destroy
-     * @param response
-     *            to destroy the segue cookie.
+     *
+     * @param request  containing the tomcat session to destroy
+     * @param response to destroy the segue cookie.
+     * @throws NoUserLoggedInException - if a user cannot be retrieved from the session information
+     * @throws SegueDatabaseException  - if accessing the database fails
      */
     public void destroyUserSession(final HttpServletRequest request, final HttpServletResponse response) throws NoUserLoggedInException, SegueDatabaseException  {
         Validate.notNull(request);
@@ -518,6 +518,13 @@ public class UserAuthenticationManager {
         }
     }
 
+    /**
+     * Takes a request holding an authentication cookie and invalidates the associated session token stored in the database
+     *
+     * @param request - a servlet request holding an auth cookie for the user session to be invalidated
+     * @throws NoUserLoggedInException - if a user cannot be retrieved from the session information
+     * @throws SegueDatabaseException  - if accessing the database fails
+     */
     public void invalidateSessionToken(final HttpServletRequest request) throws NoUserLoggedInException, SegueDatabaseException {
         Validate.notNull(request);
         RegisteredUser currentUser = this.getUserFromSession(request, false);
