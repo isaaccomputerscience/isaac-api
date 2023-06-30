@@ -15,9 +15,13 @@ public class ServletTestUtils {
     }
 
     public static HttpSession createMockSession() {
+        return createMockSession("sessionId");
+    }
+
+    public static HttpSession createMockSession(String sessionId) {
         HttpSession mockSession = createNiceMock(HttpSession.class);
         expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-        expect(mockSession.getId()).andReturn("sessionId").anyTimes();
+        expect(mockSession.getId()).andReturn(sessionId).anyTimes();
         return mockSession;
     }
 

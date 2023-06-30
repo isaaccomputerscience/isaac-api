@@ -27,6 +27,8 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -250,7 +252,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void userLogout_sessionDeauthentication() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    public void userLogout_sessionDeauthentication() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException, SQLException {
         LocalAuthDTO targetUser = new LocalAuthDTO();
         targetUser.setEmail("test-student@test.com");
         targetUser.setPassword("test1234");
@@ -298,5 +300,30 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
         assertFalse(userAuthenticationManager.isSessionValid(firstLoginSessionInformation));
         // Sessions should have different tokens
         assertNotEquals(firstLoginSessionInformation.get(SESSION_TOKEN), secondLoginSessionInformation.get(SESSION_TOKEN));
+    }
+
+    @Test
+    public void userLogout_noSession() throws SQLException {
+        HttpSession logoutSession = createMockSession();
+        replay(logoutSession);
+        HttpServletRequest logoutRequest = createMockServletRequest(logoutSession);
+        expect(logoutRequest.getCookies()).andReturn(new Cookie[]{}).anyTimes();
+        replay(logoutRequest);
+
+        Response response;
+        try {
+            response = authenticationFacade.userLogout(logoutRequest, mockResponse);
+        } finally {
+            removeAnonymousUser("sessionId");
+        }
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        assertEquals(LOGOUT_NO_ACTIVE_SESSION_MESSAGE, response.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    private void removeAnonymousUser(String sessionId) throws SQLException {
+        PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
+                "DELETE FROM temporary_user_store WHERE id = ?");
+        pst.setString(1, sessionId);
+        pst.executeUpdate();
     }
 }

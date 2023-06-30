@@ -332,6 +332,7 @@ public final class Constants {
     public static final String LOGIN_2FA_REQUIRED_MESSAGE = "Your account type requires 2FA, but none has been configured! Please ask an admin to demote your account to regain access.";
     public static final String LOGOUT_DATABASE_ERROR_MESSAGE = "Internal database error has occurred during logout.";
     public static final String LOGOUT_SESSION_ARLEADY_INVALIDATED_MESSAGE = "The session has already been invalidated. Unable to logout again...";
+    public static final String LOGOUT_NO_ACTIVE_SESSION_MESSAGE = "No active user session found. You must be logged in to log out...";
 
     // Database properties
     public static final String SEGUE_DB_NAME = "SEGUE_DB_NAME";

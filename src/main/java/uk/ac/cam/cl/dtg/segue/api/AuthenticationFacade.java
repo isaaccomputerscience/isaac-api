@@ -444,7 +444,8 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             log.error(LOGOUT_DATABASE_ERROR_MESSAGE, e);
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, LOGOUT_DATABASE_ERROR_MESSAGE).toResponse();
         } catch (NoUserLoggedInException e) {
-            return SegueErrorResponse.getNotLoggedInResponse();
+            log.warn(LOGOUT_NO_ACTIVE_SESSION_MESSAGE);
+            return new SegueErrorResponse(Status.BAD_REQUEST, LOGOUT_NO_ACTIVE_SESSION_MESSAGE).toResponse();
         }
     }
 
@@ -474,7 +475,8 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             log.error(LOGOUT_DATABASE_ERROR_MESSAGE, e);
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, LOGOUT_DATABASE_ERROR_MESSAGE).toResponse();
         } catch (NoUserLoggedInException e) {
-            return SegueErrorResponse.getNotLoggedInResponse();
+            log.warn(LOGOUT_NO_ACTIVE_SESSION_MESSAGE);
+            return new SegueErrorResponse(Status.BAD_REQUEST, LOGOUT_NO_ACTIVE_SESSION_MESSAGE).toResponse();
         }
     }
 
