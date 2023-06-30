@@ -514,7 +514,7 @@ public class UserAuthenticationManager {
 
             response.addCookie(logoutCookie);
         } catch (IllegalStateException e) {
-            log.info("The session has already been invalidated. " + "Unable to logout again...", e);
+            log.info(LOGOUT_SESSION_ARLEADY_INVALIDATED_MESSAGE, e);
         }
     }
 

@@ -37,6 +37,7 @@ import static org.easymock.EasyMock.*;
 import static org.eclipse.jetty.http.HttpCookie.SAME_SITE_LAX_COMMENT;
 import static org.junit.jupiter.api.Assertions.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.ServletTestUtils.*;
 
 public class AuthenticationFacadeIT extends IsaacIntegrationTest {
     private AuthenticationFacade authenticationFacade;
@@ -56,30 +57,8 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
         misuseMonitor.resetMisuseCount("test-student@test.com", SegueLoginByEmailMisuseHandler.class.getSimpleName());
         misuseMonitor.resetMisuseCount("0.0.0.0", SegueLoginByIPMisuseHandler.class.getSimpleName());
         this.authenticationFacade = new AuthenticationFacade(properties, userAccountManager, logManager, misuseMonitor);
-        mockRequest = replayMockRequest();
+        mockRequest = replayMockServletRequest();
         mockResponse = niceMock(HttpServletResponse.class);
-    }
-
-    private static HttpServletRequest createMockRequestObject(HttpSession mockSession) {
-        HttpServletRequest mockRequest = createNiceMock(HttpServletRequest.class);
-        expect(mockRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();
-        expect(mockRequest.getSession()).andReturn(mockSession).anyTimes();
-        return mockRequest;
-    }
-
-    private static HttpSession createMockSession() {
-        HttpSession mockSession = createNiceMock(HttpSession.class);
-        expect(mockSession.getAttribute(ANONYMOUS_USER)).andReturn(null).anyTimes();
-        expect(mockSession.getId()).andReturn("sessionId").anyTimes();
-        return mockSession;
-    }
-
-    private static HttpServletRequest replayMockRequest() {
-        HttpSession mockSession = createMockSession();
-        replay(mockSession);
-        HttpServletRequest mockRequest = createMockRequestObject(mockSession);
-        replay(mockRequest);
-        return mockRequest;
     }
 
     @Test
@@ -294,7 +273,7 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
 
         HttpSession logoutSession = createMockSession();
         replay(logoutSession);
-        HttpServletRequest logoutRequest = createMockRequestObject(logoutSession);
+        HttpServletRequest logoutRequest = createMockServletRequest(logoutSession);
         expect(logoutRequest.getCookies()).andReturn(new Cookie[]{firstLoginAuthCookie}).anyTimes();
         replay(logoutRequest);
 
