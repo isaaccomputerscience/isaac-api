@@ -321,9 +321,11 @@ public class AuthenticationFacadeIT extends IsaacIntegrationTest {
     }
 
     private void removeAnonymousUser(String sessionId) throws SQLException {
-        PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
-                "DELETE FROM temporary_user_store WHERE id = ?");
-        pst.setString(1, sessionId);
-        pst.executeUpdate();
+        try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection()
+                .prepareStatement("DELETE FROM temporary_user_store WHERE id = ?")
+        ) {
+            pst.setString(1, sessionId);
+            pst.executeUpdate();
+        }
     }
 }
