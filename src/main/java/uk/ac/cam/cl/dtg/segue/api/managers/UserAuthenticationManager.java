@@ -1218,7 +1218,8 @@ public class UserAuthenticationManager {
     }
 
     public Cookie createAuthCookie(Map<String, String> sessionInformation, int sessionExpiryTimeInSeconds) throws JsonProcessingException {
-        Cookie authCookie = new Cookie(SEGUE_AUTH_COOKIE, Base64.encodeBase64String(serializationMapper.writeValueAsString(sessionInformation).getBytes()));
+        Cookie authCookie = new Cookie(SEGUE_AUTH_COOKIE,
+                Base64.encodeBase64String(serializationMapper.writeValueAsString(sessionInformation).getBytes()));
         authCookie.setMaxAge(sessionExpiryTimeInSeconds);
         authCookie.setPath("/");
         authCookie.setHttpOnly(true);
@@ -1239,7 +1240,14 @@ public class UserAuthenticationManager {
     }
 
     public NewCookie createAuthLogoutNewCookie() {
-        NewCookie logoutCookie = new NewCookie.Builder(SEGUE_AUTH_COOKIE).value("").path("/").maxAge(0).httpOnly(true).secure(setSecureCookies).comment(SAME_SITE_LAX_COMMENT).build();
+        NewCookie logoutCookie = new NewCookie.Builder(SEGUE_AUTH_COOKIE)
+                .value("")
+                .path("/")
+                .maxAge(0)
+                .httpOnly(true)
+                .secure(setSecureCookies)
+                .comment(SAME_SITE_LAX_COMMENT)
+                .build();
         return logoutCookie;
     }
 }
