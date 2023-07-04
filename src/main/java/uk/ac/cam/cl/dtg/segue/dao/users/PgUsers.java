@@ -721,10 +721,13 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
             userToCreate.setEmailVerificationStatus(EmailVerificationStatus.NOT_VERIFIED);
         }
 
+        Integer newSessionToken = generateRandomTokenInteger();
+        userToCreate.setSessionToken(newSessionToken);
+
         String query = "INSERT INTO users(family_name, given_name, email, role, date_of_birth, gender," +
                 " registration_date, school_id, school_other, last_updated, email_verification_status, last_seen," +
-                " email_verification_token, email_to_verify, registered_contexts, registered_contexts_last_confirmed)" +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                " email_verification_token, email_to_verify, session_token, registered_contexts, registered_contexts_last_confirmed)" +
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {
@@ -751,8 +754,9 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
             setValueHelper(pst, 12, userToCreate.getLastSeen());
             setValueHelper(pst, 13, userToCreate.getEmailVerificationToken());
             setValueHelper(pst, 14, userToCreate.getEmailToVerify());
-            pst.setArray(15, userContexts);
-            setValueHelper(pst, 16, userToCreate.getRegisteredContextsLastConfirmed());
+            setValueHelper(pst, 15, userToCreate.getSessionToken());
+            pst.setArray(16, userContexts);
+            setValueHelper(pst, 17, userToCreate.getRegisteredContextsLastConfirmed());
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save user.");
