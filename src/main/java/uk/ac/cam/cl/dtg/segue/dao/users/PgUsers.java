@@ -40,7 +40,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -671,30 +670,22 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
 
     @Override
     public Integer regenerateSessionToken(RegisteredUser user) throws SegueDatabaseException {
-        Integer newSessionToken = getSecureRandomInt();
+        Integer newSessionToken = generateRandomTokenInteger();
         this.updateSessionToken(user, newSessionToken);
         return newSessionToken;
     }
 
-    private static Integer getSecureRandomInt() {
+    private static Integer generateRandomTokenInteger() {
         Random random = new SecureRandom();
-        return random.nextInt();
+        Integer newValue = random.nextInt();
+        // -1 is reserved for 'no assigned token', used for when a user is logged out for example
+        if (newValue != -1) return newValue;
+        else return generateRandomTokenInteger();
     }
 
     public void invalidateSessionToken(RegisteredUser user) throws SegueDatabaseException {
+        // -1 is reserved for 'no assigned token', used for when a user is logged out for example
         this.updateSessionToken(user, -1);
-//        Validate.notNull(user);
-//
-//        String query = "UPDATE users SET session_token = ? WHERE id = ?";
-//        try (Connection conn = database.getDatabaseConnection();
-//             PreparedStatement pst = conn.prepareStatement(query);
-//        ) {
-//            pst.setNull(1, Types.INTEGER);
-//            pst.setLong(2, user.getId());
-//            pst.execute();
-//        } catch (SQLException e) {
-//            throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
-//        }
     }
 
     @Override

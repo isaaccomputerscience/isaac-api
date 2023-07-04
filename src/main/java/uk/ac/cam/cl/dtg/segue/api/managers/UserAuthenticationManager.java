@@ -1001,7 +1001,7 @@ public class UserAuthenticationManager {
         }
 
         // Check that the session token is still valid:
-        if (userFromDatabase.getSessionToken() < 0 || !userFromDatabase.getSessionToken().toString().equals(userSessionToken)) {
+        if (userFromDatabase.getSessionToken() == -1 || !userFromDatabase.getSessionToken().toString().equals(userSessionToken)) {
             log.debug("Invalid session token detected for user id " + userId);
             return false;
         }
