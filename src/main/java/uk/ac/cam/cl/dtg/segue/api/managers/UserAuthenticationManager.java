@@ -531,6 +531,10 @@ public class UserAuthenticationManager {
         if (null == currentUser) {
             throw new NoUserLoggedInException();
         }
+        // By regenerating the token in the database, all previously existing authentication cookies and their
+        // associated sessions will be invalidated as their token value will no longer match the database value.
+        // Any cookies created or updated with the new value would be valid and so should not be issued without
+        // reauthenticating the user.
         this.database.regenerateSessionToken(currentUser);
     }
 
