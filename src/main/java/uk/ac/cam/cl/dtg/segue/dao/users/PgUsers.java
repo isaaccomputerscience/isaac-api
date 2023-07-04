@@ -677,12 +677,13 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
 
     private static Integer generateRandomTokenInteger() {
         Random random = new SecureRandom();
-        Integer newValue = random.nextInt();
+        int newValue = random.nextInt();
         // -1 is reserved for 'no assigned token', used for when a user is logged out for example
         if (newValue != -1) return newValue;
         else return generateRandomTokenInteger();
     }
 
+    @Override
     public void invalidateSessionToken(RegisteredUser user) throws SegueDatabaseException {
         // -1 is reserved for 'no assigned token', used for when a user is logged out for example
         this.updateSessionToken(user, -1);

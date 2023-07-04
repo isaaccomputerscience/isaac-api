@@ -290,7 +290,7 @@ public interface IUserDataManager {
      * @param user - the user object to update the session token of.
      * @throws SegueDatabaseException - If there is an internal database error.
      */
-    void invalidateSessionToken(RegisteredUser currentUser) throws SegueDatabaseException;
+    void invalidateSessionToken(RegisteredUser user) throws SegueDatabaseException;
 
     /**
      * Update the session token of a user object in the data store to a specified value.
