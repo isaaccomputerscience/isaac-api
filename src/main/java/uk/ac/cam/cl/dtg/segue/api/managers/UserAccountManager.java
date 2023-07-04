@@ -1704,7 +1704,7 @@ public class UserAccountManager implements IUserAccountManager {
      * @param user - user of interest
      */
     private void partialLogInForMFA(final HttpServletRequest request, final HttpServletResponse response,
-                                                 final RegisteredUser user) {
+                                                 final RegisteredUser user) throws SegueDatabaseException {
         this.userAuthenticationManager.createIncompleteLoginUserSession(request, response, user);
     }
 

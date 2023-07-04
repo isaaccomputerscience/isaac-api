@@ -285,11 +285,18 @@ public interface IUserDataManager {
     Integer regenerateSessionToken(RegisteredUser user) throws SegueDatabaseException;
 
     /**
+     * Update the session token of a user object in the data store to null.
+     *
+     * @param user - the user object to update the session token of.
+     * @throws SegueDatabaseException - If there is an internal database error.
+     */
+    void invalidateSessionToken(RegisteredUser currentUser) throws SegueDatabaseException;
+
+    /**
      * Update the session token of a user object in the data store to a specified value.
      *
      * @param user - the user object to update the session token of.
      * @param newTokenValue - the new value to set as the session token
-     * @return
      * @throws SegueDatabaseException - If there is an internal database error.
      */
     void updateSessionToken(RegisteredUser user, Integer newTokenValue) throws SegueDatabaseException;

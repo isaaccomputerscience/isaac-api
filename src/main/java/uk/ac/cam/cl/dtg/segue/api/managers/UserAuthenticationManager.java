@@ -478,7 +478,7 @@ public class UserAuthenticationManager {
      * @return the request and response will be modified and the original userDO will be returned for convenience.
      */
     public RegisteredUser createUserSession(final HttpServletRequest request, final HttpServletResponse response,
-            final RegisteredUser user) {
+            final RegisteredUser user) throws SegueDatabaseException {
         this.createSession(request, response, user, false);
         return user;
     }
@@ -492,7 +492,7 @@ public class UserAuthenticationManager {
      * @return the request and response will be modified and the original userDO will be returned for convenience.
      */
     public RegisteredUser createIncompleteLoginUserSession(final HttpServletRequest request, final HttpServletResponse response,
-                                            final RegisteredUser user) {
+                                            final RegisteredUser user) throws SegueDatabaseException {
         this.createSession(request, response, user, true);
         return user;
     }
@@ -531,11 +531,10 @@ public class UserAuthenticationManager {
         if (null == currentUser) {
             throw new NoUserLoggedInException();
         }
-        // By regenerating the token in the database, all previously existing authentication cookies and their
+        // By nullifying the token in the database, all previously existing authentication cookies and their
         // associated sessions will be invalidated as their token value will no longer match the database value.
-        // Any cookies created or updated with the new value would be valid and so should not be issued without
-        // reauthenticating the user.
-        this.database.regenerateSessionToken(currentUser);
+        // A new session token will need to generated and assigned when reauthenticating the user.
+        this.database.invalidateSessionToken(currentUser);
     }
 
     /**
@@ -883,7 +882,7 @@ public class UserAuthenticationManager {
      *            Boolean to indicate whether or not this cookie represents a partial login (true) or full (false)
      */
     private void createSession(final HttpServletRequest request, final HttpServletResponse response,
-                               final RegisteredUser user, final boolean partialLoginFlag) {
+                               final RegisteredUser user, final boolean partialLoginFlag) throws SegueDatabaseException {
         int sessionExpiryTimeInSeconds = properties.getIntegerPropertyOrFallback(SESSION_EXPIRY_SECONDS_DEFAULT, SESSION_EXPIRY_SECONDS_FALLBACK);
         createSession(request, response, user, sessionExpiryTimeInSeconds, partialLoginFlag);
     }
@@ -903,15 +902,15 @@ public class UserAuthenticationManager {
      *            Boolean to indicate whether or not this cookie represents a partial login (true) or full (false)
      */
     private void createSession(final HttpServletRequest request, final HttpServletResponse response,
-            final RegisteredUser user, int sessionExpiryTimeInSeconds, final boolean partialLoginFlag) {
+            final RegisteredUser user, int sessionExpiryTimeInSeconds, final boolean partialLoginFlag) throws SegueDatabaseException {
         Validate.notNull(response);
         Validate.notNull(user);
         Validate.notNull(user.getId());
         SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
         final int PARTIAL_EXPIRY_TIME_IN_SECONDS = 1200; // 20 mins
 
+        String newUserSessionToken = this.database.regenerateSessionToken(user).toString();
         String userId = user.getId().toString();
-        String userSessionToken = user.getSessionToken().toString();
         String hmacKey = properties.getProperty(HMAC_SALT);
         String partialLoginFlagString = null;
 
@@ -927,7 +926,7 @@ public class UserAuthenticationManager {
 
             ImmutableMap.Builder<String, String> sessionInformationBuilder = new ImmutableMap.Builder<>();
             sessionInformationBuilder.put(SESSION_USER_ID, userId);
-            sessionInformationBuilder.put(SESSION_TOKEN, userSessionToken);
+            sessionInformationBuilder.put(SESSION_TOKEN, newUserSessionToken);
             sessionInformationBuilder.put(DATE_EXPIRES, sessionExpiryDate);
 
             if (partialLoginFlag) {
@@ -935,7 +934,7 @@ public class UserAuthenticationManager {
                 sessionInformationBuilder.put(PARTIAL_LOGIN_FLAG, partialLoginFlagString);
             }
 
-            String sessionHMAC = calculateSessionHMAC(hmacKey, userId, sessionExpiryDate, userSessionToken, partialLoginFlagString);
+            String sessionHMAC = calculateSessionHMAC(hmacKey, userId, sessionExpiryDate, newUserSessionToken, partialLoginFlagString);
             sessionInformationBuilder.put(HMAC, sessionHMAC);
 
             Map<String, String> sessionInformation = sessionInformationBuilder.build();
@@ -1002,7 +1001,7 @@ public class UserAuthenticationManager {
         }
 
         // Check that the session token is still valid:
-        if (!userFromDatabase.getSessionToken().toString().equals(userSessionToken)) {
+        if (userFromDatabase.getSessionToken() < 0 || !userFromDatabase.getSessionToken().toString().equals(userSessionToken)) {
             log.debug("Invalid session token detected for user id " + userId);
             return false;
         }

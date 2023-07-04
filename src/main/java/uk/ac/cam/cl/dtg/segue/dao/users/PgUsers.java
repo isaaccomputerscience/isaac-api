@@ -40,6 +40,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -670,10 +671,30 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
 
     @Override
     public Integer regenerateSessionToken(RegisteredUser user) throws SegueDatabaseException {
-        Random random = new SecureRandom();
-        Integer newSessionToken = random.nextInt();
+        Integer newSessionToken = getSecureRandomInt();
         this.updateSessionToken(user, newSessionToken);
         return newSessionToken;
+    }
+
+    private static Integer getSecureRandomInt() {
+        Random random = new SecureRandom();
+        return random.nextInt();
+    }
+
+    public void invalidateSessionToken(RegisteredUser user) throws SegueDatabaseException {
+        this.updateSessionToken(user, -1);
+//        Validate.notNull(user);
+//
+//        String query = "UPDATE users SET session_token = ? WHERE id = ?";
+//        try (Connection conn = database.getDatabaseConnection();
+//             PreparedStatement pst = conn.prepareStatement(query);
+//        ) {
+//            pst.setNull(1, Types.INTEGER);
+//            pst.setLong(2, user.getId());
+//            pst.execute();
+//        } catch (SQLException e) {
+//            throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
+//        }
     }
 
     @Override
