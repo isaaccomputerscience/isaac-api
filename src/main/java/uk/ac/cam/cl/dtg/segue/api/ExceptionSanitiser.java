@@ -24,7 +24,7 @@ public class ExceptionSanitiser implements ContainerResponseFilter {
             containerResponseContext.setEntity(new SegueErrorResponse(
                     error.getResponseCode(),
                     error.getResponseCodeType(),
-                    error.getErrorMessage() + "\nPlease report this ID if you contact support: " + generatedUUID,
+                    error.getErrorMessage() + "\nPlease report this ID if you contact support: " + generatedUUID + ".",
                     null
             ));
         }
