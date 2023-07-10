@@ -64,4 +64,8 @@
         <param-value>false</param-value>
     </context-param>
 
+    <error-page>
+        <location>/error</location>
+    </error-page>
+
 </web-app>
