@@ -44,6 +44,7 @@ public class RegisteredUser extends AbstractSegueUser {
     private String emailVerificationToken;
     private String emailToVerify;
     private EmailVerificationStatus emailVerificationStatus;
+    private Boolean teacherPending;
 
     private Date lastUpdated;
     private Date lastSeen;
@@ -429,6 +430,20 @@ public class RegisteredUser extends AbstractSegueUser {
         this.sessionToken = sessionToken;
     }
 
+    /**
+     * Gets the teacherPending flag
+     * @return the teacherPending flag
+     */
+    public Boolean getTeacherPending() {return teacherPending;}
+
+    /**
+     * Sets the teacherPending flag
+     * @param teacherPending the teacherPending flag value to set
+     */
+    public void setTeacherPending(boolean teacherPending) {
+        this.teacherPending = teacherPending;
+    }
+
     public List<UserContext> getRegisteredContexts() {
         return registeredContexts;
     }
@@ -491,6 +506,7 @@ public class RegisteredUser extends AbstractSegueUser {
                 ", emailVerificationToken='" + emailVerificationToken + '\'' +
                 ", emailToVerify='" + emailToVerify + '\'' +
                 ", emailVerificationStatus=" + emailVerificationStatus +
+                ", teacherPending=" + teacherPending +
                 ", lastUpdated=" + lastUpdated +
                 ", lastSeen=" + lastSeen +
                 '}';

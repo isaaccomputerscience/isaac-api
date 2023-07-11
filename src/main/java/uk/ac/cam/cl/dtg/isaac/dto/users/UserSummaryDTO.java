@@ -32,6 +32,7 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
     private Role role;
     private boolean authorisedFullAccess;
     private EmailVerificationStatus emailVerificationStatus;
+    private Boolean teacherPending;
     private List<UserContext> registeredContexts;
 
     /**
@@ -155,6 +156,20 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
         this.emailVerificationStatus = emailVerificationStatus;
     }
 
+    /**
+     * Gets the teacherPending flag
+     * @return the teacherPending flag
+     */
+    public Boolean getTeacherPending() {return teacherPending;}
+
+    /**
+     * Sets the teacherPending flag
+     * @param teacherPending the teacherPending flag value to set
+     */
+    public void setTeacherPending(boolean teacherPending) {
+        this.teacherPending = teacherPending;
+    }
+
     public List<UserContext> getRegisteredContexts() {
         return registeredContexts;
     }
@@ -172,6 +187,7 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
                 ", role=" + role +
                 ", authorisedFullAccess=" + authorisedFullAccess +
                 ", emailVerificationStatus=" + emailVerificationStatus +
+                ", teacherPending=" + teacherPending +
                 ", registeredContexts=" + registeredContexts +
                 ']';
     }
