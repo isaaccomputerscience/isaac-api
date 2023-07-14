@@ -97,7 +97,8 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
 
     private boolean isPartialLoginCookie(Cookie authCookie) throws IOException {
         Map<String, String> sessionInformation = userAuthenticationManager.decodeCookie(authCookie);
-        return sessionInformation.get(PARTIAL_LOGIN_FLAG) == String.valueOf(true);
+        String partialLoginFlag = sessionInformation.get(PARTIAL_LOGIN_FLAG);
+        return partialLoginFlag != null && partialLoginFlag.equals(String.valueOf(true));
     }
 
     private static boolean wasRequestValid(ContainerResponseContext containerResponseContext) {
