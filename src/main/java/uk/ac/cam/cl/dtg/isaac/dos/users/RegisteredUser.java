@@ -80,7 +80,8 @@ public class RegisteredUser extends AbstractSegueUser {
      *            - whether the user has verified their email or not
      */
     @JsonCreator
-    public RegisteredUser(@JsonProperty("id") final Long id,
+    public RegisteredUser(
+            @JsonProperty("id") final Long id,
             @JsonProperty("givenName") final String givenName, @JsonProperty("familyName") final String familyName,
             @JsonProperty("email") final String email, @JsonProperty("role") final Role role,
             @JsonProperty("dateOfBirth") final Date dateOfBirth, @JsonProperty("gender") final Gender gender,
@@ -88,7 +89,9 @@ public class RegisteredUser extends AbstractSegueUser {
             @JsonProperty("lastUpdated") final Date lastUpdated,
             @JsonProperty("emailToVerify") final String emailToVerify,
             @JsonProperty("emailVerificationToken") final String emailVerificationToken,
-            @JsonProperty("emailVerificationStatus") final EmailVerificationStatus emailVerificationStatus) {
+            @JsonProperty("emailVerificationStatus") final EmailVerificationStatus emailVerificationStatus,
+            @JsonProperty("teacherPending") final Boolean teacherPending
+    ) {
         this.id = id;
         this.familyName = familyName;
         this.givenName = givenName;
@@ -101,6 +104,7 @@ public class RegisteredUser extends AbstractSegueUser {
         this.emailToVerify = emailToVerify;
         this.emailVerificationToken = emailVerificationToken;
         this.emailVerificationStatus = emailVerificationStatus;
+        this.teacherPending = teacherPending;
     }
 
     /**
