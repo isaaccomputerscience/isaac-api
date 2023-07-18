@@ -78,7 +78,9 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
             @JsonProperty("verificationStatus") final EmailVerificationStatus emailVerificationStatus,
             @JsonProperty("dateOfBirth") final Date dateOfBirth,
             @JsonProperty("gender") final Gender gender, @JsonProperty("registrationDate") final Date registrationDate,
-            @JsonProperty("schoolId") final String schoolId) {
+            @JsonProperty("schoolId") final String schoolId
+            , @JsonProperty("teacherPending") final Boolean teacherPending
+    ) {
         this.familyName = familyName;
         this.givenName = givenName;
         this.email = email;
@@ -87,6 +89,7 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
         this.registrationDate = registrationDate;
         this.schoolId = schoolId;
         this.emailVerificationStatus = emailVerificationStatus;
+        this.teacherPending = teacherPending;
     }
 
 
