@@ -89,8 +89,8 @@ public class RegisteredUser extends AbstractSegueUser {
             @JsonProperty("lastUpdated") final Date lastUpdated,
             @JsonProperty("emailToVerify") final String emailToVerify,
             @JsonProperty("emailVerificationToken") final String emailVerificationToken,
-            @JsonProperty("emailVerificationStatus") final EmailVerificationStatus emailVerificationStatus,
-            @JsonProperty("teacherPending") final Boolean teacherPending
+            @JsonProperty("emailVerificationStatus") final EmailVerificationStatus emailVerificationStatus
+//            @JsonProperty("teacherPending") final Boolean teacherPending
     ) {
         this.id = id;
         this.familyName = familyName;
@@ -104,7 +104,7 @@ public class RegisteredUser extends AbstractSegueUser {
         this.emailToVerify = emailToVerify;
         this.emailVerificationToken = emailVerificationToken;
         this.emailVerificationStatus = emailVerificationStatus;
-        this.teacherPending = teacherPending;
+//        this.teacherPending = teacherPending;
     }
 
     /**
@@ -444,7 +444,7 @@ public class RegisteredUser extends AbstractSegueUser {
      * Sets the teacherPending flag
      * @param teacherPending the teacherPending flag value to set
      */
-    public void setTeacherPending(boolean teacherPending) {
+    public void setTeacherPending(Boolean teacherPending) {
         this.teacherPending = teacherPending;
     }
 

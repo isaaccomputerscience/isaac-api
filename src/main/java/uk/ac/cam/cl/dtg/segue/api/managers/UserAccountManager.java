@@ -1929,8 +1929,7 @@ public class UserAccountManager implements IUserAccountManager {
             return new ArrayList<>();
         }
 
-        List<RegisteredUserDTO> userDTOs = users.parallelStream().map(user -> this.dtoMapper.map(user, RegisteredUserDTO.class)).collect(Collectors.toList());
-        return userDTOs;
+        return users.parallelStream().map(user -> this.dtoMapper.map(user, RegisteredUserDTO.class)).collect(Collectors.toList());
     }
 
     /**

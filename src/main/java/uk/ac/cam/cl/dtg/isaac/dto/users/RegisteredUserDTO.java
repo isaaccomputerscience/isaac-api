@@ -73,13 +73,15 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
      */
     @JsonCreator
     public RegisteredUserDTO(
-            @JsonProperty("givenName") final String givenName, @JsonProperty("familyName") final String familyName,
+            @JsonProperty("givenName") final String givenName,
+            @JsonProperty("familyName") final String familyName,
             @JsonProperty("email") final String email, 
             @JsonProperty("verificationStatus") final EmailVerificationStatus emailVerificationStatus,
             @JsonProperty("dateOfBirth") final Date dateOfBirth,
-            @JsonProperty("gender") final Gender gender, @JsonProperty("registrationDate") final Date registrationDate,
+            @JsonProperty("gender") final Gender gender,
+            @JsonProperty("registrationDate") final Date registrationDate,
             @JsonProperty("schoolId") final String schoolId
-            , @JsonProperty("teacherPending") final Boolean teacherPending
+//            @JsonProperty("teacherPending") final Boolean teacherPending
     ) {
         this.familyName = familyName;
         this.givenName = givenName;
@@ -89,7 +91,7 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
         this.registrationDate = registrationDate;
         this.schoolId = schoolId;
         this.emailVerificationStatus = emailVerificationStatus;
-        this.teacherPending = teacherPending;
+//        this.teacherPending = teacherPending;
     }
 
 
@@ -394,7 +396,7 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
      * Sets the teacherPending flag
      * @param teacherPending the teacherPending flag value to set
      */
-    public void setTeacherPending(boolean teacherPending) {
+    public void setTeacherPending(Boolean teacherPending) {
         this.teacherPending = teacherPending;
     }
 
