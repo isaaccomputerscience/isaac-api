@@ -166,7 +166,7 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
      * Sets the teacherPending flag
      * @param teacherPending the teacherPending flag value to set
      */
-    public void setTeacherPending(boolean teacherPending) {
+    public void setTeacherPending(Boolean teacherPending) {
         this.teacherPending = teacherPending;
     }
 
