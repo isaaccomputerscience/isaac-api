@@ -59,8 +59,14 @@
         </param-value>
     </context-param>
 
+    <context-param>
+        <param-name>org.eclipse.jetty.servlet.Default.dirAllowed</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
     <error-page>
-        <location>/error</location>
+        <error-code>404</error-code>
+        <location>/404.html</location>
     </error-page>
 
 </web-app>
