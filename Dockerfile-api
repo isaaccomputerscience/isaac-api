@@ -15,8 +15,6 @@ RUN chown jetty /var/lib/jetty/webapps/*
 
 COPY resources/jetty.xml /usr/local/jetty/etc/
 
-COPY target/classes /usr/local/jetty/webapps/ROOT/WEB-INF/classes
-
 # prepare things so that jetty runs in the docker entrypoint
 USER jetty
 WORKDIR $JETTY_BASE
