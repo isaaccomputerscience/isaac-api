@@ -81,12 +81,6 @@
       <Set name="useOutputDirectByteBuffers" property="jetty.httpConfig.useOutputDirectByteBuffers"/>
     </New>
 
-    <Call name="addBean">
-        <Arg>
-            <New class="uk.ac.cam.cl.dtg.isaac.CustomErrorHandler"/>
-        </Arg>
-    </Call>
-
     <!-- =========================================================== -->
     <!-- Set the default handler structure for the Server            -->
     <!-- A handler list is used to pass received requests to         -->
@@ -102,7 +96,9 @@
              <New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection"/>
            </Item>
            <Item>
-             <New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>
+             <New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">
+                 <Set name="showContexts">false</Set>
+             </New>
            </Item>
          </Array>
         </Set>
