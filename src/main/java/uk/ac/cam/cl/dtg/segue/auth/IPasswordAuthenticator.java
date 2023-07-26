@@ -19,7 +19,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.IncorrectCredentialsProvidedException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidPasswordException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 import java.security.NoSuchAlgorithmException;

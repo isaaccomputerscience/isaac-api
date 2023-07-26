@@ -15,21 +15,17 @@
  */
 package uk.ac.cam.cl.dtg.util;
 
+import com.google.inject.Inject;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
-
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.inject.Inject;
-
-import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_EXPIRY_SECONDS_DEFAULT;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_EXPIRY_SECONDS_FALLBACK;
 
 /**
  * A simple helper class for loading properties files and retrieving values from them.

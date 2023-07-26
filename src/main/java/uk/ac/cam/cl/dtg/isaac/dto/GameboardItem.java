@@ -16,12 +16,12 @@
 package uk.ac.cam.cl.dtg.isaac.dto;
 
 import com.google.common.collect.Lists;
-import uk.ac.cam.cl.dtg.isaac.api.Constants;
-import uk.ac.cam.cl.dtg.isaac.api.Constants.*;
-import uk.ac.cam.cl.dtg.isaac.dos.GameboardContentDescriptor;
-import uk.ac.cam.cl.dtg.isaac.dos.AudienceContext;
-
 import jakarta.annotation.Nullable;
+import uk.ac.cam.cl.dtg.isaac.api.Constants;
+import uk.ac.cam.cl.dtg.isaac.api.Constants.GameboardItemState;
+import uk.ac.cam.cl.dtg.isaac.dos.AudienceContext;
+import uk.ac.cam.cl.dtg.isaac.dos.GameboardContentDescriptor;
+
 import java.util.List;
 
 /**

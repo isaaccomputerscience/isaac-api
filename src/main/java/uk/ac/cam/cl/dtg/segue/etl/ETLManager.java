@@ -6,10 +6,12 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.segue.database.GitDb;
 import uk.ac.cam.cl.dtg.util.PropertiesManager;
-import java.lang.Long;
-import java.lang.NumberFormatException;
-import java.util.concurrent.*;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Ian on 01/11/2016.

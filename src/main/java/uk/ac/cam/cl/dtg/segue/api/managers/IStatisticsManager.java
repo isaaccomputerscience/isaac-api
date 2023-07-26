@@ -1,14 +1,13 @@
 package uk.ac.cam.cl.dtg.segue.api.managers;
 
 import org.joda.time.LocalDate;
+import uk.ac.cam.cl.dtg.isaac.dos.users.School;
+import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
-import uk.ac.cam.cl.dtg.isaac.dos.users.School;
-import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
-import uk.ac.cam.cl.dtg.util.locations.Location;
 
 import java.util.Collection;
 import java.util.Date;

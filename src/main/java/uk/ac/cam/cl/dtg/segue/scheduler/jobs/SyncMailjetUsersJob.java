@@ -15,7 +15,6 @@
  */
 package uk.ac.cam.cl.dtg.segue.scheduler.jobs;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

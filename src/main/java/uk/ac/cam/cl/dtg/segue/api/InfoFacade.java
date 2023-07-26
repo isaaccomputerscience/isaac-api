@@ -20,6 +20,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -33,19 +41,10 @@ import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.scheduler.SegueJobService;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.EntityTag;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Request;
-import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.CONTENT_INDEX;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_THIRTY_DAYS;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_APP_ENVIRONMENT;
 

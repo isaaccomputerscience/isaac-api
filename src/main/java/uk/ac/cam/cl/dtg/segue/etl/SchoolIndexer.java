@@ -8,13 +8,17 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.dos.users.School;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
-import uk.ac.cam.cl.dtg.isaac.dos.users.School;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -22,8 +26,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Maps.*;
-
+import static com.google.common.collect.Maps.immutableEntry;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOLS_INDEX_BASE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOLS_INDEX_TYPE;
 
