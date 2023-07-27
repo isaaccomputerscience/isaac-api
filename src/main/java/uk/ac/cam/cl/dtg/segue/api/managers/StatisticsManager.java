@@ -705,7 +705,7 @@ public class StatisticsManager implements IStatisticsManager {
     }
 
     @Override
-    public Map<String, Object> getDetailedUserStatistics(RegisteredUserDTO userOfInterest) {
+    public Map<String, Object> getDetailedUserStatistics(final RegisteredUserDTO userOfInterest) {
 
         // user streak info
         Map<String, Object> userStreakRecord = userStreaksManager.getCurrentStreakRecord(userOfInterest);

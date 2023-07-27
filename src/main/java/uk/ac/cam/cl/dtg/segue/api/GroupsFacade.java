@@ -87,7 +87,7 @@ public class GroupsFacade extends AbstractSegueFacade {
     private final GroupManager groupManager;
     private final UserAssociationManager associationManager;
     private final UserBadgeManager userBadgeManager;
-    private IMisuseMonitor misuseMonitor;
+    private final IMisuseMonitor misuseMonitor;
 
     /**
      * Create an instance of the authentication Facade.
@@ -99,9 +99,12 @@ public class GroupsFacade extends AbstractSegueFacade {
      * @param associationsManager - so we can decide what information is allowed to be exposed.
      */
     @Inject
-    public GroupsFacade(final PropertiesLoader properties, final UserAccountManager userManager,
-                        final ILogManager logManager, AssignmentManager assignmentManager,
-                        final GameManager gameManager, final GroupManager groupManager,
+    public GroupsFacade(final PropertiesLoader properties,
+                        final UserAccountManager userManager,
+                        final ILogManager logManager,
+                        final AssignmentManager assignmentManager,
+                        final GameManager gameManager,
+                        final GroupManager groupManager,
                         final UserAssociationManager associationsManager,
                         final UserBadgeManager userBadgeManager,
                         final IMisuseMonitor misuseMonitor) {
@@ -187,10 +190,10 @@ public class GroupsFacade extends AbstractSegueFacade {
     @GET
     @Path("/membership/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getGroupMembershipSpecificUser(@Context final HttpServletRequest request,
-                                                   @Context final Request cacheRequest,
-                                                   @PathParam("userId") Long userId,
-                                                   @QueryParam("archived_groups_only") final boolean archivedGroupsOnly) throws NoUserException {
+    public Response getGroupMembershipSpecificUser(
+            @Context final HttpServletRequest request, @Context final Request cacheRequest,
+            @PathParam("userId") final Long userId, @QueryParam("archived_groups_only") final boolean archivedGroupsOnly)
+            throws NoUserException {
         try {
             RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
 

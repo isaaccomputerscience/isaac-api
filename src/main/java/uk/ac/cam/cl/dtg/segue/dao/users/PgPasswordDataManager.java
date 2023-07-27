@@ -45,7 +45,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
     }
 
     @Override
-    public LocalUserCredential getLocalUserCredential(Long userId) throws SegueDatabaseException {
+    public LocalUserCredential getLocalUserCredential(final Long userId) throws SegueDatabaseException {
         if (null == userId) {
             return null;
         }
@@ -81,7 +81,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
     }
 
     @Override
-    public LocalUserCredential createOrUpdateLocalUserCredential(LocalUserCredential credsToSave) throws SegueDatabaseException {
+    public LocalUserCredential createOrUpdateLocalUserCredential(final LocalUserCredential credsToSave) throws SegueDatabaseException {
         // determine if it is a create or update
         LocalUserCredential lc = this.getLocalUserCredential(credsToSave.getUserId());
 
@@ -96,7 +96,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
         return lc;
     }
 
-    private LocalUserCredential createCredentials(LocalUserCredential credsToSave) throws SegueDatabaseException {
+    private LocalUserCredential createCredentials(final LocalUserCredential credsToSave) throws SegueDatabaseException {
         String query = "INSERT INTO user_credentials(user_id, password, security_scheme, secure_salt, reset_token, reset_expiry, last_updated)"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
@@ -120,7 +120,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
         }
     }
 
-    private LocalUserCredential updateCredentials(LocalUserCredential credsToSave) throws SegueDatabaseException {
+    private LocalUserCredential updateCredentials(final LocalUserCredential credsToSave) throws SegueDatabaseException {
         LocalUserCredential existingRecord = this.getLocalUserCredential(credsToSave.getUserId());
         if (null == existingRecord) {
             throw new SegueDatabaseException("The credentials you have tried to update do not exist.");
@@ -187,7 +187,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
      * @return localUserCredential object
      * @throws SQLException if we can't get a value required.
      */
-    private LocalUserCredential buildCredential(ResultSet results) throws SQLException {
+    private LocalUserCredential buildCredential(final ResultSet results) throws SQLException {
         LocalUserCredential toReturn = new LocalUserCredential();
         toReturn.setUserId(results.getLong("user_id"));
         toReturn.setPassword(results.getString("password"));

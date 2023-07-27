@@ -142,7 +142,7 @@ public class AuthorisationFacade extends AbstractSegueFacade {
     @Produces(MediaType.APPLICATION_JSON)
     @GZIP
     @Operation(summary = "List all users granted access to the specified user's data.")
-    public Response getUsersWithAccessSpecificUser(@Context final HttpServletRequest request, @PathParam("userId") Long userId) throws NoUserException {
+    public Response getUsersWithAccessSpecificUser(@Context final HttpServletRequest request, @PathParam("userId") final Long userId) throws NoUserException {
         try {
             RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
 
@@ -364,7 +364,7 @@ public class AuthorisationFacade extends AbstractSegueFacade {
     @Produces(MediaType.APPLICATION_JSON)
     @GZIP
     @Operation(summary = "List all users the specified user has been granted access by.")
-    public Response getCurrentAccessRightsForSpecificUser(@Context final HttpServletRequest request, @PathParam("userId") Long userId) throws NoUserException {
+    public Response getCurrentAccessRightsForSpecificUser(@Context final HttpServletRequest request, @PathParam("userId") final Long userId) throws NoUserException {
         try {
             RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
 

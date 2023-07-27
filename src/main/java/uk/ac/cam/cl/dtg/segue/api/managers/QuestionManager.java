@@ -177,7 +177,7 @@ public class QuestionManager {
      * @return a Validator
      */
     @SuppressWarnings("unchecked")
-    private ISpecifier locateSpecifier(Class<? extends ChoiceDTO> choiceClass) {
+    private ISpecifier locateSpecifier(final Class<? extends ChoiceDTO> choiceClass) {
         // check we haven't gone too high up the superclass tree
         if (!ChoiceDTO.class.isAssignableFrom(choiceClass)) {
             return null;
@@ -450,7 +450,7 @@ public class QuestionManager {
      * @throws SegueDatabaseException
      *             - if there is a problem with the database.
      */
-    public Map<Role, Long> getAnsweredQuestionRolesOverPrevious(TimeInterval timeInterval)
+    public Map<Role, Long> getAnsweredQuestionRolesOverPrevious(final TimeInterval timeInterval)
             throws SegueDatabaseException {
         return this.questionAttemptPersistenceManager.getAnsweredQuestionRolesOverPrevious(timeInterval);
     }
@@ -486,7 +486,7 @@ public class QuestionManager {
      *            - The contentDTO which may have question objects as children.
      * @return A list of QuestionDTO found in the content.
      */
-    public static List<QuestionDTO> extractQuestionObjects(ContentDTO content) {
+    public static List<QuestionDTO> extractQuestionObjects(final ContentDTO content) {
         return QuestionManager.extractQuestionObjectsRecursively(content,
             new ArrayList<>());
     }
@@ -600,11 +600,11 @@ public class QuestionManager {
             mapper.getAutoMapper().map(results, ResultsWrapper.class)).build();
     }
 
-    public static String extractPageIdFromQuestionId(String questionId) {
+    public static String extractPageIdFromQuestionId(final String questionId) {
         return questionId.split(Constants.ESCAPED_ID_SEPARATOR)[0];
     }
 
-    public ChoiceDTO convertJsonAnswerToChoice(String jsonAnswer) throws ErrorResponseWrapper {
+    public ChoiceDTO convertJsonAnswerToChoice(final String jsonAnswer) throws ErrorResponseWrapper {
         ChoiceDTO answerFromClientDTO;
         try {
             // convert submitted JSON into a Choice:

@@ -580,9 +580,10 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
      * 		- if the resource has not been found
      *
      */
-    public EmailCommunicationMessage constructMultiPartEmail(@Nullable final Long userId, final String userEmail,
-                                                             EmailTemplateDTO emailContent, Properties contentProperties,
-                                                             final EmailType emailType)
+    public EmailCommunicationMessage constructMultiPartEmail(
+            @Nullable final Long userId, final String userEmail,
+            final EmailTemplateDTO emailContent, final Properties contentProperties,
+            final EmailType emailType)
             throws ContentManagerException, ResourceNotFoundException {
         return this.constructMultiPartEmail(userId, userEmail, emailContent, contentProperties, emailType, null);
     }
@@ -606,10 +607,11 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
      * 		- if the resource has not been found
      * 	
      */
-    public EmailCommunicationMessage constructMultiPartEmail(@Nullable final Long userId, final String userEmail,
-                                         EmailTemplateDTO emailContent, Properties contentProperties,
-                                         final EmailType emailType, @Nullable final List<EmailAttachment> attachments)
-                    throws ContentManagerException, ResourceNotFoundException {
+    public EmailCommunicationMessage constructMultiPartEmail(
+            @Nullable final Long userId, final String userEmail,
+            final EmailTemplateDTO emailContent, final Properties contentProperties,
+            final EmailType emailType, @Nullable final List<EmailAttachment> attachments)
+            throws ContentManagerException, ResourceNotFoundException {
         Validate.notNull(userEmail);
         Validate.notEmpty(userEmail);
 

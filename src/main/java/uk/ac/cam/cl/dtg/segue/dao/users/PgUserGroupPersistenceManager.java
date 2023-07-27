@@ -250,7 +250,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
     }
 
     @Override
-    public UserGroup findGroupById(final Long groupId, boolean includeDeletedGroups) throws SegueDatabaseException {
+    public UserGroup findGroupById(final Long groupId, final boolean includeDeletedGroups) throws SegueDatabaseException {
         // FIXME: try-with-resources!
         try (Connection conn = database.getDatabaseConnection()) {
             PreparedStatement pst;
@@ -285,7 +285,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
     }
 
     @Override
-    public void deleteGroup(final Long groupId, boolean markAsDeleted) throws SegueDatabaseException {
+    public void deleteGroup(final Long groupId, final boolean markAsDeleted) throws SegueDatabaseException {
         if (null == groupId) {
             throw new SegueDatabaseException("Unable to locate the group requested to delete.");
         }

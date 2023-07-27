@@ -52,7 +52,7 @@ public class SyncMailjetUsersJob implements Job {
     }
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(final JobExecutionContext context) throws JobExecutionException {
         try {
             externalAccountManager.synchroniseChangedUsers();
             log.info("Success: synchronised users");

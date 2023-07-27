@@ -21,8 +21,8 @@ public class AudienceOrikaConverter
 
     @Override
     public List<Map<String, List<String>>> convert(
-            List<Map<String, List<String>>> maps, Type<? extends List<Map<String, List<String>>>> type,
-            MappingContext _context) {
+            final List<Map<String, List<String>>> maps, final Type<? extends List<Map<String, List<String>>>> type,
+            final MappingContext _context) {
         if (maps == null) {
             return null;
         }

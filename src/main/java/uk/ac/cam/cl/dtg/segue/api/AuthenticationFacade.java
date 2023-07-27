@@ -407,14 +407,14 @@ public class AuthenticationFacade extends AbstractSegueFacade {
         }
     }
 
-    private void notifySegueLoginRateLimiters(HttpServletRequest request, String email) throws SegueResourceMisuseException {
+    private void notifySegueLoginRateLimiters(final HttpServletRequest request, final String email) throws SegueResourceMisuseException {
         String requestingIPAddress = RequestIPExtractor.getClientIpAddr(request);
         // Stop users logging in who have already locked their account.
         misuseMonitor.notifyEvent(email.toLowerCase(), SegueLoginByEmailMisuseHandler.class.getSimpleName());
         misuseMonitor.notifyEvent(requestingIPAddress, SegueLoginByIPMisuseHandler.class.getSimpleName());
     }
 
-    private static boolean areCredentialsMissing(LocalAuthDTO localAuthDTO) {
+    private static boolean areCredentialsMissing(final LocalAuthDTO localAuthDTO) {
         return null == localAuthDTO || null == localAuthDTO.getEmail() || localAuthDTO.getEmail().isEmpty()
                 || null == localAuthDTO.getPassword() || localAuthDTO.getPassword().isEmpty();
     }

@@ -189,7 +189,7 @@ public class GroupManager {
      * @throws SegueDatabaseException
      *              - If an error occurred while interacting with the database.
      */
-    public Map<Long, GroupMembershipDTO> getUserMembershipMapForGroup(Long groupId) throws SegueDatabaseException {
+    public Map<Long, GroupMembershipDTO> getUserMembershipMapForGroup(final Long groupId) throws SegueDatabaseException {
         Map<Long, GroupMembershipDTO> result = Maps.newHashMap();
         for (Map.Entry<Long, GroupMembership> entry : this.groupDatabase.getGroupMembershipMap(groupId).entrySet()) {
             result.put(entry.getKey(), dtoMapper.map(entry.getValue(), GroupMembershipDTO.class));
@@ -203,7 +203,7 @@ public class GroupManager {
      * @param groupId - groupId
      * @return the membership status
      */
-    public GroupMembershipStatus getGroupMembershipStatus(Long userId, Long groupId) throws SegueDatabaseException {
+    public GroupMembershipStatus getGroupMembershipStatus(final Long userId, final Long groupId) throws SegueDatabaseException {
         return this.getUserMembershipMapForGroup(groupId).get(userId).getStatus();
     }
 
@@ -250,7 +250,8 @@ public class GroupManager {
      * @return List of groups or empty list.
      * @throws SegueDatabaseException - if there is a db error
      */
-    public List<UserGroupDTO> getAllGroupsOwnedAndManagedByUser(final RegisteredUserDTO ownerUser, boolean archivedGroupsOnly) throws SegueDatabaseException {
+    public List<UserGroupDTO> getAllGroupsOwnedAndManagedByUser(final RegisteredUserDTO ownerUser, final boolean archivedGroupsOnly)
+            throws SegueDatabaseException {
         Validate.notNull(ownerUser);
         List<UserGroupDTO> combinedResults = Lists.newArrayList();
         combinedResults.addAll(convertGroupsToDTOs(groupDatabase.getGroupsByOwner(ownerUser.getId(), archivedGroupsOnly)));
@@ -269,7 +270,7 @@ public class GroupManager {
      * @return List of groups or empty list.
      * @throws SegueDatabaseException if there is a db error
      */
-    public List<UserGroupDTO> getGroupsByOwner(final RegisteredUserDTO ownerUser, boolean archivedGroupsOnly) throws SegueDatabaseException {
+    public List<UserGroupDTO> getGroupsByOwner(final RegisteredUserDTO ownerUser, final boolean archivedGroupsOnly) throws SegueDatabaseException {
         Validate.notNull(ownerUser);
         return convertGroupsToDTOs(groupDatabase.getGroupsByOwner(ownerUser.getId(), archivedGroupsOnly));
     }
@@ -347,7 +348,7 @@ public class GroupManager {
      * @throws SegueDatabaseException
      *             - If an error occurred while interacting with the database.
      */
-    public void setMembershipStatus(final UserGroupDTO group, final RegisteredUserDTO user, GroupMembershipStatus newStatus)
+    public void setMembershipStatus(final UserGroupDTO group, final RegisteredUserDTO user, final GroupMembershipStatus newStatus)
             throws SegueDatabaseException {
         Validate.notNull(group);
         Validate.notNull(user);
@@ -666,7 +667,8 @@ public class GroupManager {
      * @param summarisedMemberInfo - the list containing summarised user objects - this will be replaced with summarised user objects that include membership information
      * @throws SegueDatabaseException - if there is an error.
      */
-    public void convertToUserSummaryGroupMembership(UserGroupDTO group, List<UserSummaryDTO> summarisedMemberInfo) throws SegueDatabaseException {
+    public void convertToUserSummaryGroupMembership(final UserGroupDTO group, final List<UserSummaryDTO> summarisedMemberInfo)
+            throws SegueDatabaseException {
         List<UserSummaryWithGroupMembershipDTO> result = Lists.newArrayList();
         Map<Long, GroupMembershipDTO> userMembershipMapforMap = this.getUserMembershipMapForGroup(group.getId());
 
@@ -691,8 +693,8 @@ public class GroupManager {
      * @throws SegueDatabaseException
      * @throws ContentManagerException
      */
-    public List<UserGameboardProgressSummaryDTO> getGroupProgressSummary(List<RegisteredUserDTO> groupMembers,
-                                                                         Collection<AssignmentDTO> assignments)
+    public List<UserGameboardProgressSummaryDTO> getGroupProgressSummary(
+            final List<RegisteredUserDTO> groupMembers, final Collection<AssignmentDTO> assignments)
             throws SegueDatabaseException, ContentManagerException {
 
         List<UserGameboardProgressSummaryDTO> groupProgressSummary = new ArrayList<>();
@@ -758,7 +760,8 @@ public class GroupManager {
         return groupProgressSummary;
     }
 
-    public <T extends IAssignmentLike> List<T> filterItemsBasedOnMembershipContext(List<T> assignments, Long userId) throws SegueDatabaseException {
+    public <T extends IAssignmentLike> List<T> filterItemsBasedOnMembershipContext(final List<T> assignments, final Long userId)
+            throws SegueDatabaseException {
         Map<Long, Map<Long, GroupMembershipDTO>> groupIdToUserMembershipInfoMap = Maps.newHashMap();
         List<T> results = Lists.newArrayList();
 

@@ -44,7 +44,7 @@ public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
     }
 
     @Inject
-    public PasswordResetByEmailMisuseHandler(Integer softThreshold, Integer hardThreshold, Integer interval) {
+    public PasswordResetByEmailMisuseHandler(final Integer softThreshold, final Integer hardThreshold, final Integer interval) {
         this.SOFT_THRESHOLD = softThreshold;
         this.HARD_THRESHOLD = hardThreshold;
         this.ACCOUNTING_INTERVAL = interval;

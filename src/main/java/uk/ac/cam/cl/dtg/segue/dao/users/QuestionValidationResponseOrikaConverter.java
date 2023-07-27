@@ -45,7 +45,7 @@ public class QuestionValidationResponseOrikaConverter extends
     @Override
     public QuestionValidationResponseDTO convertTo(final QuestionValidationResponse source,
                                                    final Type<QuestionValidationResponseDTO> destinationType,
-                                                   MappingContext _context) {
+                                                   final MappingContext _context) {
         if (null == source) {
             return null;
         }
@@ -66,7 +66,7 @@ public class QuestionValidationResponseOrikaConverter extends
     @Override
     public QuestionValidationResponse convertFrom(final QuestionValidationResponseDTO source,
                                                   final Type<QuestionValidationResponse> destinationType,
-                                                  MappingContext _context) {
+                                                  final MappingContext _context) {
         if (null == source) {
             return null;
         }

@@ -325,7 +325,7 @@ public class UserAuthenticationManager {
      * @param user - to check
      * @return true means the user should have a means of authenticating with their account as far as we are concerned
      */
-    public boolean hasLocalCredentials(RegisteredUser user) throws SegueDatabaseException {
+    public boolean hasLocalCredentials(final RegisteredUser user) throws SegueDatabaseException {
         IPasswordAuthenticator passwordAuthenticator = (IPasswordAuthenticator) this.registeredAuthProviders
                 .get(AuthenticationProvider.SEGUE);
 
@@ -904,7 +904,8 @@ public class UserAuthenticationManager {
      *            Boolean to indicate whether or not this cookie represents a partial login (true) or full (false)
      */
     private void createSession(final HttpServletRequest request, final HttpServletResponse response,
-            final RegisteredUser user, int sessionExpiryTimeInSeconds, final boolean partialLoginFlag) throws SegueDatabaseException {
+            final RegisteredUser user, int sessionExpiryTimeInSeconds, final boolean partialLoginFlag)
+            throws SegueDatabaseException {
         Validate.notNull(response);
         Validate.notNull(user);
         Validate.notNull(user.getId());
@@ -1174,7 +1175,7 @@ public class UserAuthenticationManager {
         }
     }
 
-    public boolean isSessionValid(HttpServletRequest request) {
+    public boolean isSessionValid(final HttpServletRequest request) {
         Map<String, String> currentSessionInformation;
         try {
             currentSessionInformation = this.getSegueSessionFromRequest(request);
@@ -1185,7 +1186,7 @@ public class UserAuthenticationManager {
         return isSessionValid(currentSessionInformation);
     }
 
-    public boolean isSessionValid(Map<String, String> currentSessionInformation) {
+    public boolean isSessionValid(final Map<String, String> currentSessionInformation) {
         try {
             long currentUserId = Long.parseLong(currentSessionInformation.get(SESSION_USER_ID));
             RegisteredUser userToReturn = database.getById(currentUserId);
@@ -1203,15 +1204,15 @@ public class UserAuthenticationManager {
         }
     }
 
-    public Map<String, String> decodeCookie(jakarta.ws.rs.core.Cookie segueAuthCookie) throws IOException {
+    public Map<String, String> decodeCookie(final jakarta.ws.rs.core.Cookie segueAuthCookie) throws IOException {
         return this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()), HashMap.class);
     }
 
-    public Map<String, String> decodeCookie(Cookie segueAuthCookie) throws IOException {
+    public Map<String, String> decodeCookie(final Cookie segueAuthCookie) throws IOException {
         return this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()), HashMap.class);
     }
 
-    public String calculateUpdatedHMAC(Map<String, String> sessionInformation) {
+    public String calculateUpdatedHMAC(final Map<String, String> sessionInformation) {
         String hmacKey = properties.getProperty(HMAC_SALT);
         String userId = sessionInformation.get(SESSION_USER_ID);
         String sessionExpiryDate = sessionInformation.get(DATE_EXPIRES);
@@ -1222,7 +1223,7 @@ public class UserAuthenticationManager {
         return sessionHMAC;
     }
 
-    public Cookie createAuthCookie(Map<String, String> sessionInformation, int sessionExpiryTimeInSeconds) throws JsonProcessingException {
+    public Cookie createAuthCookie(final Map<String, String> sessionInformation, final int sessionExpiryTimeInSeconds) throws JsonProcessingException {
         Cookie authCookie = new Cookie(SEGUE_AUTH_COOKIE,
                 Base64.encodeBase64String(serializationMapper.writeValueAsString(sessionInformation).getBytes()));
         authCookie.setMaxAge(sessionExpiryTimeInSeconds);

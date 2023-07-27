@@ -31,10 +31,14 @@ public class InteractiveCodeSnippetDTO extends CodeSnippetDTO {
     protected Boolean wrapCodeInMain;
 
     @JsonCreator
-    public InteractiveCodeSnippetDTO(@JsonProperty("language") String language, @JsonProperty("code") String code,
-                                     @JsonProperty("disableHighlighting") Boolean disableHighlighting, @JsonProperty("url") String url,
-                                     @JsonProperty("setupCode") String setupCode, @JsonProperty("testCode") String testCode,
-                                     @JsonProperty("expectedResult") String expectedResult, @JsonProperty("wrapCodeInMain") Boolean wrapCodeInMain) {
+    public InteractiveCodeSnippetDTO(@JsonProperty("language") final String language,
+                                     @JsonProperty("code") final String code,
+                                     @JsonProperty("disableHighlighting") final Boolean disableHighlighting,
+                                     @JsonProperty("url") final String url,
+                                     @JsonProperty("setupCode") final String setupCode,
+                                     @JsonProperty("testCode") final String testCode,
+                                     @JsonProperty("expectedResult") final String expectedResult,
+                                     @JsonProperty("wrapCodeInMain") final Boolean wrapCodeInMain) {
         super(language, code, disableHighlighting, url);
         this.setupCode = setupCode;
         this.testCode = testCode;
@@ -46,7 +50,7 @@ public class InteractiveCodeSnippetDTO extends CodeSnippetDTO {
         return setupCode;
     }
 
-    public void setSetupCode(String setupCode) {
+    public void setSetupCode(final String setupCode) {
         this.setupCode = setupCode;
     }
 
@@ -54,7 +58,7 @@ public class InteractiveCodeSnippetDTO extends CodeSnippetDTO {
         return testCode;
     }
 
-    public void setTestCode(String testCode) {
+    public void setTestCode(final String testCode) {
         this.testCode = testCode;
     }
 
@@ -62,7 +66,7 @@ public class InteractiveCodeSnippetDTO extends CodeSnippetDTO {
         return expectedResult;
     }
 
-    public void setExpectedResult(String expectedResult) {
+    public void setExpectedResult(final String expectedResult) {
         this.expectedResult = expectedResult;
     }
 
@@ -70,7 +74,7 @@ public class InteractiveCodeSnippetDTO extends CodeSnippetDTO {
         return wrapCodeInMain;
     }
 
-    public void setWrapCodeInMain(Boolean wrapCodeInMain) {
+    public void setWrapCodeInMain(final Boolean wrapCodeInMain) {
         this.wrapCodeInMain = wrapCodeInMain;
     }
 }

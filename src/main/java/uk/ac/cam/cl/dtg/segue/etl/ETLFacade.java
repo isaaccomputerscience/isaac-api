@@ -32,7 +32,7 @@ public class ETLFacade extends AbstractSegueFacade {
      * @param properties the propertiesLoader.
      */
     @Inject
-    public ETLFacade(PropertiesLoader properties, ETLManager manager) {
+    public ETLFacade(final PropertiesLoader properties, final ETLManager manager) {
         super(properties, null);
         this.etlManager = manager;
     }

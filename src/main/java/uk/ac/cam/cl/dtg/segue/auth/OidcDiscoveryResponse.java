@@ -77,7 +77,7 @@ public class OidcDiscoveryResponse extends GenericJson {
      * @return A configured {@link OidcDiscoveryResponse}.
      * @throws IOException
      */
-    public static OidcDiscoveryResponse load(JsonFactory jsonFactory, Reader reader)
+    public static OidcDiscoveryResponse load(final JsonFactory jsonFactory, final Reader reader)
             throws IOException {
         return jsonFactory.fromReader(reader, OidcDiscoveryResponse.class);
     }

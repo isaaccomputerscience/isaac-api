@@ -39,7 +39,7 @@ class SchoolIndexer {
     private ContentMapper mapper;
     private String schoolsListPath;
 
-    SchoolIndexer(ElasticSearchIndexer es, ContentMapper mapper, String schoolsListPath) {
+    SchoolIndexer(final ElasticSearchIndexer es, final ContentMapper mapper, final String schoolsListPath) {
         this.es = es;
         this.mapper = mapper;
         this.schoolsListPath = schoolsListPath;

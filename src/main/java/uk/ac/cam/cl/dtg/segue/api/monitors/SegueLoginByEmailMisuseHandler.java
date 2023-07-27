@@ -40,7 +40,7 @@ public class SegueLoginByEmailMisuseHandler implements IMisuseHandler {
     }
 
     @Inject
-    public SegueLoginByEmailMisuseHandler(Integer softThreshold, Integer hardThreshold, Integer interval) {
+    public SegueLoginByEmailMisuseHandler(final Integer softThreshold, final Integer hardThreshold, final Integer interval) {
         this.SOFT_THRESHOLD = softThreshold;
         this.HARD_THRESHOLD = hardThreshold;
         this.ACCOUNTING_INTERVAL = interval;

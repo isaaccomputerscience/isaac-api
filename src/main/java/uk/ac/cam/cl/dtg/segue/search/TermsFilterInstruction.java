@@ -26,7 +26,7 @@ import java.util.Collection;
 public class TermsFilterInstruction extends AbstractFilterInstruction {
     private final Collection<String> matchValues;
 
-    public TermsFilterInstruction(Collection<String> matchValues) {
+    public TermsFilterInstruction(final Collection<String> matchValues) {
         this.matchValues = matchValues;
     }
 

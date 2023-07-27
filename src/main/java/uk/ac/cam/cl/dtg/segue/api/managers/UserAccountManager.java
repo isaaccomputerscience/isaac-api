@@ -1621,7 +1621,7 @@ public class UserAccountManager implements IUserAccountManager {
      * @return UserSummaryDTO of the partially logged in user or will throw an exception if cannot be found.
      * @throws NoUserLoggedInException if they haven't started the flow.
      */
-    public UserSummaryWithEmailAddressDTO getPartiallyIdentifiedUser(HttpServletRequest request) throws NoUserLoggedInException {
+    public UserSummaryWithEmailAddressDTO getPartiallyIdentifiedUser(final HttpServletRequest request) throws NoUserLoggedInException {
         RegisteredUser registeredUser = this.retrievePartialLogInForMFA(request);
         if (null == registeredUser) {
             throw new NoUserLoggedInException();
@@ -1874,7 +1874,7 @@ public class UserAccountManager implements IUserAccountManager {
         return userToValidate.getEmail() != null && isEmailValid(userToValidate.getEmail());
     }
 
-    public static final boolean isEmailValid(String email) {
+    public static boolean isEmailValid(final String email) {
         if (email == null
                 || email.isEmpty()
                 || !email.matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")
@@ -2064,7 +2064,7 @@ public class UserAccountManager implements IUserAccountManager {
      * @throws SegueDatabaseException
      *             - if there is a problem with the database.
      */
-    public Map<Role, Long> getActiveRolesOverPrevious(TimeInterval timeInterval) throws SegueDatabaseException {
+    public Map<Role, Long> getActiveRolesOverPrevious(final TimeInterval timeInterval) throws SegueDatabaseException {
         return this.database.getRolesLastSeenOver(timeInterval);
     }
 

@@ -238,24 +238,24 @@ public class ElasticSearchProvider implements ISearchProvider {
 
     @Override
     public ResultsWrapper<String> termSearch(final String indexBase, final String indexType,
-                                             final String searchTerm, final String field, final int startIndex, final int limit,
+                                             final String searchTerms, final String field, final int startIndex, final int limit,
                                              @Nullable final Map<String, AbstractFilterInstruction> filterInstructions)
             throws SegueSearchException {
-        if (null == indexBase || null == indexType || null == searchTerm && null != field) {
+        if (null == indexBase || null == indexType || null == searchTerms && null != field) {
             log.error("A required field or field combination is missing. Unable to execute search.");
             return null;
         }
 
         BoolQueryBuilder query = QueryBuilders.boolQuery();
-        if (searchTerm != null) {
-            query.must(QueryBuilders.termQuery(field, searchTerm));
+        if (searchTerms != null) {
+            query.must(QueryBuilders.termQuery(field, searchTerms));
         }
 
         if (filterInstructions != null) {
             query.filter(generateFilterQuery(filterInstructions));
         }
 
-        if (null == searchTerm && null == filterInstructions) {
+        if (null == searchTerms && null == filterInstructions) {
             throw new SegueSearchException("This method requires either searchTerm or filter instructions.");
         }
 
@@ -318,13 +318,13 @@ public class ElasticSearchProvider implements ISearchProvider {
 
     @Override
     public ResultsWrapper<String> findByExactMatch(final String indexBase, final String indexType,
-                                                   final String fieldname, final String needle, final int startIndex,
+                                                   final String fieldName, final String needle, final int startIndex,
                                                    final int limit,
                                                    final Map<String, AbstractFilterInstruction> filterInstructions)
             throws SegueSearchException {
         ResultsWrapper<String> resultList;
 
-        QueryBuilder query = QueryBuilders.matchQuery(fieldname, needle);
+        QueryBuilder query = QueryBuilders.matchQuery(fieldName, needle);
 
         if (filterInstructions != null) {
             query = QueryBuilders.boolQuery().must(query).filter(generateFilterQuery(filterInstructions));

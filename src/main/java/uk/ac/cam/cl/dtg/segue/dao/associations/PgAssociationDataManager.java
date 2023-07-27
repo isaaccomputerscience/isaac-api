@@ -144,12 +144,12 @@ public class PgAssociationDataManager implements IAssociationDataManager {
     }
 
     @Override
-    public void deleteAssociationsByOwner(Long ownerUserId) throws SegueDatabaseException {
+    public void deleteAssociationsByOwner(final Long ownerUserId) throws SegueDatabaseException {
         this.deleteAssociations(ownerUserId, true);
     }
 
     @Override
-    public void deleteAssociationsByRecipient(Long recipientUserId) throws SegueDatabaseException {
+    public void deleteAssociationsByRecipient(final Long recipientUserId) throws SegueDatabaseException {
         this.deleteAssociations(recipientUserId, false);
     }
 

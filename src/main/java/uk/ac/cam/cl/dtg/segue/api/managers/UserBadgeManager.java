@@ -54,10 +54,10 @@ public class UserBadgeManager {
      * @param contentIndex specifies content version
      */
     @Inject
-    public UserBadgeManager(IUserBadgePersistenceManager userBadgePersistenceManager, GroupManager groupManager,
-                            EventBookingManager bookingManager, AssignmentManager assignmentManager, GameManager gameManager,
-                            GitContentManager contentManager, @Named(CONTENT_INDEX) String contentIndex,
-                            ITransactionManager transactionManager) {
+    public UserBadgeManager(final IUserBadgePersistenceManager userBadgePersistenceManager, final GroupManager groupManager,
+                            final EventBookingManager bookingManager, final AssignmentManager assignmentManager,
+                            final GameManager gameManager, final GitContentManager contentManager,
+                            @Named(CONTENT_INDEX) final String contentIndex, final ITransactionManager transactionManager) {
 
         this.userBadgePersistenceManager = userBadgePersistenceManager;
         this.transactionManager = transactionManager;
@@ -77,7 +77,7 @@ public class UserBadgeManager {
      * @return user badge object
      * @throws SegueDatabaseException
      */
-    public UserBadge getOrCreateBadge(RegisteredUserDTO user, Badge badgeName)
+    public UserBadge getOrCreateBadge(final RegisteredUserDTO user, final Badge badgeName)
             throws SegueDatabaseException {
 
         // start database transaction to ensure atomicity of badge state update (if required)
@@ -103,7 +103,7 @@ public class UserBadgeManager {
      * @return user badge object
      * @throws SegueDatabaseException
      */
-    public UserBadge updateBadge(RegisteredUserDTO user, Badge badgeName, String event)
+    public UserBadge updateBadge(final RegisteredUserDTO user, final Badge badgeName, final String event)
             throws SegueDatabaseException {
 
         // start a database transaction as an update occurs across two queries
@@ -144,7 +144,7 @@ public class UserBadgeManager {
      * @param user the user of interest
      * @return a map of badge names to values
      */
-    public Map<String, Object> getAllUserBadges(RegisteredUserDTO user) {
+    public Map<String, Object> getAllUserBadges(final RegisteredUserDTO user) {
 
         Map<String, Object> badges = Maps.newHashMap();
 

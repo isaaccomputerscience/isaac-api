@@ -138,7 +138,7 @@ public class InMemoryMisuseMonitor implements IMisuseMonitor {
     }
 
     @Override
-    public boolean willHaveMisused(String agentIdentifier, String eventToCheck, Integer adjustmentValue) {
+    public boolean willHaveMisused(final String agentIdentifier, final String eventToCheck, final Integer adjustmentValue) {
         Map<String, Entry<Date, Integer>> existingHistory = nonPersistentDatabase.getIfPresent(agentIdentifier);
 
         if (null == existingHistory || existingHistory.get(eventToCheck) == null) {

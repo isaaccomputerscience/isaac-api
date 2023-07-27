@@ -49,7 +49,8 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
     }
 
     @Inject
-    public PasswordResetByIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties, Integer softThreshold, Integer hardThreshold, Integer interval) {
+    public PasswordResetByIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties,
+                                          final Integer softThreshold, final Integer hardThreshold, final Integer interval) {
         this.properties = properties;
         this.emailManager = emailManager;
         this.SOFT_THRESHOLD = softThreshold;

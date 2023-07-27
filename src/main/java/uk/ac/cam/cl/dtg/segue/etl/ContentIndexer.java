@@ -84,14 +84,14 @@ public class ContentIndexer {
     private static final int NANOSECONDS_IN_A_MILLISECOND = 1000000;
 
     @Inject
-    public ContentIndexer(GitDb database, ElasticSearchIndexer es, ContentMapper mapper) {
+    public ContentIndexer(final GitDb database, final ElasticSearchIndexer es, final ContentMapper mapper) {
         this.database = database;
         this.es = es;
         this.mapper = mapper;
     }
 
 
-    void loadAndIndexContent(String version) throws Exception, VersionLockedException {
+    void loadAndIndexContent(final String version) throws Exception, VersionLockedException {
 
         // Take version lock or fail
         Boolean alreadyLocked = versionLocks.putIfAbsent(version, true);
@@ -158,7 +158,7 @@ public class ContentIndexer {
 
     }
 
-    void setNamedVersion(String alias, String version) {
+    void setNamedVersion(final String alias, final String version) {
         List<String> allContentTypes = Arrays.stream(CONTENT_INDEX_TYPE.values())
                 .map((contentIndexType) -> contentIndexType.toString()).collect(Collectors.toList());
         es.addOrMoveIndexAlias(alias, version, allContentTypes);
@@ -551,7 +551,7 @@ public class ContentIndexer {
      * @param message
      *            - Error message to associate with the problem file / content.
      */
-    private synchronized void registerContentProblem(final Content c, final String message, Map<Content, List<String>> indexProblemCache) {
+    private synchronized void registerContentProblem(final Content c, final String message, final Map<Content, List<String>> indexProblemCache) {
         Validate.notNull(c);
 
         // try and make sure each dummy content object has a title
@@ -573,7 +573,7 @@ public class ContentIndexer {
      * @param tags
      *            - set of tags to register.
      */
-    private synchronized void registerTags(final Set<String> tags, Set<String> tagsList) {
+    private synchronized void registerTags(final Set<String> tags, final Set<String> tagsList) {
 
         if (null == tags || tags.isEmpty()) {
             // don't do anything.
@@ -596,7 +596,7 @@ public class ContentIndexer {
      * @param q
      *            - numeric question from which to extract units.
      */
-    private synchronized void registerUnits(final IsaacNumericQuestion q, Map<String, String> allUnits, Map<String, String> publishedUnits) {
+    private synchronized void registerUnits(final IsaacNumericQuestion q, final Map<String, String> allUnits, final Map<String, String> publishedUnits) {
 
         HashMap<String, String> newUnits = Maps.newHashMap();
 
@@ -736,7 +736,7 @@ public class ContentIndexer {
      *            Data structure containing all content for a given sha.
      */
     private void recordContentErrors(final String sha, final Map<String, Content> gitCache,
-                                          Map<Content, List<String>> indexProblemCache) {
+                                     final Map<Content, List<String>> indexProblemCache) {
 
         Set<Content> allObjectsSeen = new HashSet<>();
         Set<String> expectedIds = new HashSet<>();
@@ -861,7 +861,7 @@ public class ContentIndexer {
 
     // GitContentManager ensureCache
 
-    private String collateExpandableChildren(Content content) {
+    private String collateExpandableChildren(final Content content) {
         StringBuilder ret = new StringBuilder();
         for (Content child : flattenContentObjects(content)) {
             if (child != content && null != child.getExpandable() && child.getExpandable()) {

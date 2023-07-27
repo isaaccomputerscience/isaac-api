@@ -350,7 +350,7 @@ public final class Constants {
 
         private final PGInterval interval;
 
-        TimeInterval(int years, int months, int days, int hours, int minutes, double seconds) {
+        TimeInterval(final int years, final int months, final int days, final int hours, final int minutes, final double seconds) {
             this.interval = new PGInterval(years, months, days, hours, minutes, seconds);
         }
         public PGInterval getPGInterval() {

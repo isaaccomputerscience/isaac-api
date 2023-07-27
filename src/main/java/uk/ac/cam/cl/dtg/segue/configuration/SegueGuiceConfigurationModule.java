@@ -790,8 +790,9 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     @Inject
     @Provides
     @Singleton
-    private IGroupObserver getGroupObserver(EmailManager emailManager, GroupManager groupManager, UserAccountManager userManager,
-                                            AssignmentManager assignmentManager, QuizAssignmentManager quizAssignmentManager) {
+    private IGroupObserver getGroupObserver(
+            final EmailManager emailManager, final GroupManager groupManager, final UserAccountManager userManager,
+            final AssignmentManager assignmentManager, final QuizAssignmentManager quizAssignmentManager) {
         if (null == groupObserver) {
             groupObserver = new GroupChangedService(emailManager, groupManager, userManager, assignmentManager, quizAssignmentManager);
             log.info("Creating singleton of GroupObserver");
@@ -1184,7 +1185,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     @Provides
     @Singleton
     @Inject
-    private static IsaacSymbolicValidator getSymbolicValidator(PropertiesLoader properties) {
+    private static IsaacSymbolicValidator getSymbolicValidator(final PropertiesLoader properties) {
 
         return new IsaacSymbolicValidator(properties.getProperty(Constants.EQUALITY_CHECKER_HOST),
                 properties.getProperty(Constants.EQUALITY_CHECKER_PORT));
@@ -1198,7 +1199,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     @Provides
     @Singleton
     @Inject
-    private static IsaacSymbolicChemistryValidator getSymbolicChemistryValidator(PropertiesLoader properties) {
+    private static IsaacSymbolicChemistryValidator getSymbolicChemistryValidator(final PropertiesLoader properties) {
 
         return new IsaacSymbolicChemistryValidator(properties.getProperty(Constants.CHEMISTRY_CHECKER_HOST),
                 properties.getProperty(Constants.CHEMISTRY_CHECKER_PORT));
@@ -1212,7 +1213,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     @Provides
     @Singleton
     @Inject
-    private static IsaacSymbolicLogicValidator getSymbolicLogicValidator(PropertiesLoader properties) {
+    private static IsaacSymbolicLogicValidator getSymbolicLogicValidator(final PropertiesLoader properties) {
 
         return new IsaacSymbolicLogicValidator(properties.getProperty(Constants.EQUALITY_CHECKER_HOST),
                 properties.getProperty(Constants.EQUALITY_CHECKER_PORT));

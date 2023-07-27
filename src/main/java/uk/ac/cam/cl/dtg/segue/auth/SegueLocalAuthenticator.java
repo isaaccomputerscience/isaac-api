@@ -139,7 +139,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
     }
 
     @Override
-    public boolean hasPasswordRegistered(RegisteredUser userToCheck) throws SegueDatabaseException {
+    public boolean hasPasswordRegistered(final RegisteredUser userToCheck) throws SegueDatabaseException {
         if (null == userToCheck) {
             return false;
         }
@@ -254,7 +254,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
     }
 
     @Override
-    public RegisteredUser getRegisteredUserByToken(String token) throws SegueDatabaseException {
+    public RegisteredUser getRegisteredUserByToken(final String token) throws SegueDatabaseException {
         LocalUserCredential luc = passwordDataManager.getLocalUserCredentialByResetToken(token);
         if (!this.isValidResetToken(token)) {
             // if we cannot find it then it is not valid.

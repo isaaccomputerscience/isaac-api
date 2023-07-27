@@ -24,7 +24,7 @@ package uk.ac.cam.cl.dtg.segue.search;
 public class SimpleFilterInstruction extends AbstractFilterInstruction {
     private final String mustMatchValue;
 
-    public SimpleFilterInstruction(String mustMatchValue) {
+    public SimpleFilterInstruction(final String mustMatchValue) {
 
         this.mustMatchValue = mustMatchValue;
     }

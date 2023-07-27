@@ -156,7 +156,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     }
 
     @Override
-    public UserAuthenticationSettings getUserAuthenticationSettings(Long userId) throws SegueDatabaseException {
+    public UserAuthenticationSettings getUserAuthenticationSettings(final Long userId) throws SegueDatabaseException {
 
         String query = "SELECT users.id, password IS NOT NULL AS has_segue_account, user_totp.shared_secret IS NOT NULL AS mfa_status, array_agg(provider) AS linked_accounts "
                 + "FROM (users LEFT OUTER JOIN user_credentials ON user_credentials.user_id=users.id) "
@@ -192,7 +192,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
 
 
     @Override
-    public Map<RegisteredUser, Boolean> getSegueAccountExistenceByUsers(List<RegisteredUser> users) throws SegueDatabaseException {
+    public Map<RegisteredUser, Boolean> getSegueAccountExistenceByUsers(final List<RegisteredUser> users) throws SegueDatabaseException {
         StringBuilder sb = new StringBuilder("SELECT * FROM user_credentials WHERE user_id IN (");
         List<String> questionMarks = IntStream.range(0, users.size()).mapToObj(i -> "?").collect(Collectors.toList());
         sb.append(String.join(",", questionMarks)).append(");");
@@ -494,7 +494,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     }
 
     @Override
-    public Map<Role, Long> getRolesLastSeenOver(TimeInterval timeInterval) throws SegueDatabaseException {
+    public Map<Role, Long> getRolesLastSeenOver(final TimeInterval timeInterval) throws SegueDatabaseException {
         String query = "SELECT role, count(1) FROM users WHERE NOT deleted AND last_seen >= now() - ? GROUP BY role";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
@@ -669,7 +669,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     }
 
     @Override
-    public Integer regenerateSessionToken(RegisteredUser user) throws SegueDatabaseException {
+    public Integer regenerateSessionToken(final RegisteredUser user) throws SegueDatabaseException {
         Integer newSessionToken = generateRandomTokenInteger();
         this.updateSessionToken(user, newSessionToken);
         return newSessionToken;
@@ -687,13 +687,13 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     }
 
     @Override
-    public void invalidateSessionToken(RegisteredUser user) throws SegueDatabaseException {
+    public void invalidateSessionToken(final RegisteredUser user) throws SegueDatabaseException {
         // -1 is reserved for 'no assigned token', used for when a user is logged out for example
         this.updateSessionToken(user, -1);
     }
 
     @Override
-    public void updateSessionToken(RegisteredUser user, Integer newTokenValue) throws SegueDatabaseException {
+    public void updateSessionToken(final RegisteredUser user, final Integer newTokenValue) throws SegueDatabaseException {
         Validate.notNull(user);
 
         String query = "UPDATE users SET session_token = ? WHERE id = ?";
@@ -813,7 +813,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
      * @return the user as from the database
      * @throws SQLException - if there is a database problem
      */
-    private RegisteredUser updateUser(Connection conn, final RegisteredUser userToCreate) throws SegueDatabaseException, SQLException, JsonProcessingException {
+    private RegisteredUser updateUser(final Connection conn, final RegisteredUser userToCreate) throws SegueDatabaseException, SQLException, JsonProcessingException {
         RegisteredUser existingUserRecord = this.getById(userToCreate.getId());
         if (null == existingUserRecord) {
             throw new SegueDatabaseException("The user you have tried to update does not exist.");
@@ -976,7 +976,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
      *
      * @return User object to be persisted that no longer has PII
      */
-    private static RegisteredUser removePIIFromUserDO(RegisteredUser user) {
+    private static RegisteredUser removePIIFromUserDO(final RegisteredUser user) {
         user.setFamilyName(null);
         user.setGivenName(null);
         user.setEmail(UUID.randomUUID().toString());

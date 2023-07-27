@@ -49,7 +49,7 @@ public class AnonymousUserQuestionAttemptsOrikaConverter
     public Map<String, Map<String, List<QuestionValidationResponseDTO>>> convert(
             final Map<String, Map<String, List<QuestionValidationResponse>>> source,
             final Type<? extends Map<String, Map<String, List<QuestionValidationResponseDTO>>>> destinationType,
-            MappingContext _context) {
+            final MappingContext _context) {
         // convert in one direction
         if (null == source) {
             return null;

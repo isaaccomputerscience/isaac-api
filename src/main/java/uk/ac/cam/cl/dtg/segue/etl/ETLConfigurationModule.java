@@ -128,7 +128,7 @@ class ETLConfigurationModule extends AbstractModule {
     @Inject
     @Provides
     @Singleton
-    private static ETLManager getETLManager(ContentIndexer contentIndexer, SchoolIndexer schoolIndexer, GitDb db) throws IOException {
+    private static ETLManager getETLManager(final ContentIndexer contentIndexer, final SchoolIndexer schoolIndexer, final GitDb db) throws IOException {
         if (null == etlManager) {
             PropertiesManager contentIndicesStore = getContentIndicesStore();
             etlManager = new ETLManager(contentIndexer, schoolIndexer, db, contentIndicesStore);

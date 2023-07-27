@@ -31,8 +31,8 @@ public class SegueScheduledDatabaseScriptJob extends SegueScheduledJob {
 
     private static final Logger log = LoggerFactory.getLogger(SegueScheduledDatabaseScriptJob.class);
 
-    public SegueScheduledDatabaseScriptJob(String jobKey, String jobGroupName, String description,
-                                           String cronString, String SQLFilePath) {
+    public SegueScheduledDatabaseScriptJob(final String jobKey, final String jobGroupName, final String description,
+                                           final String cronString, final String SQLFilePath) {
         super(jobKey, jobGroupName, description, cronString);
 
         this.SQLFile = SQLFilePath;

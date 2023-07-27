@@ -44,7 +44,7 @@ public class InteractiveCodeSnippet extends CodeSnippet {
         return setupCode;
     }
 
-    public void setSetupCode(String setupCode) {
+    public void setSetupCode(final String setupCode) {
         this.setupCode = setupCode;
     }
 
@@ -52,7 +52,7 @@ public class InteractiveCodeSnippet extends CodeSnippet {
         return testCode;
     }
 
-    public void setTestCode(String testCode) {
+    public void setTestCode(final String testCode) {
         this.testCode = testCode;
     }
 
@@ -60,7 +60,7 @@ public class InteractiveCodeSnippet extends CodeSnippet {
         return expectedResult;
     }
 
-    public void setExpectedResult(String expectedResult) {
+    public void setExpectedResult(final String expectedResult) {
         this.expectedResult = expectedResult;
     }
 
@@ -68,7 +68,7 @@ public class InteractiveCodeSnippet extends CodeSnippet {
         return wrapCodeInMain;
     }
 
-    public void setWrapCodeInMain(Boolean wrapCodeInMain) {
+    public void setWrapCodeInMain(final Boolean wrapCodeInMain) {
         this.wrapCodeInMain = wrapCodeInMain;
     }
 }

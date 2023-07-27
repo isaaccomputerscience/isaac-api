@@ -21,19 +21,19 @@ public class TeacherAssignmentsBadgePolicy implements IUserBadgePolicy {
     protected final AssignmentManager assignmentManager;
     protected final GameManager gameManager;
 
-    public TeacherAssignmentsBadgePolicy(AssignmentManager assignmentManager,
-                                         GameManager gameManager) {
+    public TeacherAssignmentsBadgePolicy(final AssignmentManager assignmentManager,
+                                         final GameManager gameManager) {
         this.assignmentManager = assignmentManager;
         this.gameManager = gameManager;
     }
 
     @Override
-    public int getLevel(JsonNode state) {
+    public int getLevel(final JsonNode state) {
         return state.get("assignments").size();
     }
 
     @Override
-    public JsonNode initialiseState(RegisteredUserDTO user, ITransaction transaction) {
+    public JsonNode initialiseState(final RegisteredUserDTO user, final ITransaction transaction) {
 
         ArrayNode assignments = JsonNodeFactory.instance.arrayNode();
 
@@ -49,7 +49,7 @@ public class TeacherAssignmentsBadgePolicy implements IUserBadgePolicy {
     }
 
     @Override
-    public JsonNode updateState(RegisteredUserDTO user, JsonNode state, String event) {
+    public JsonNode updateState(final RegisteredUserDTO user, final JsonNode state, final String event) {
 
         Iterator<JsonNode> iter = ((ArrayNode) state.get("assignments")).elements();
 
@@ -70,7 +70,7 @@ public class TeacherAssignmentsBadgePolicy implements IUserBadgePolicy {
      * @param assignmentId a new assignment ID to add
      * @return the updated arrayNode
      */
-    protected ArrayNode updateAssignments(ArrayNode assignments, String assignmentId) throws SegueDatabaseException {
+    protected ArrayNode updateAssignments(final ArrayNode assignments, final String assignmentId) throws SegueDatabaseException {
 
         if (assignments.has(assignmentId)) {
             return assignments;

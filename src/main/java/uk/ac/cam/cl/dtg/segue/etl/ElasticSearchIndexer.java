@@ -304,7 +304,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
      * @param typedIndex
      *            - type suffixed index to send the mapping corrections to.
      */
-    private void sendMappingCorrections(final String typedIndex, String indexType) {
+    private void sendMappingCorrections(final String typedIndex, final String indexType) {
         try {
             // Specify index settings
             CreateIndexRequest indexRequest = new CreateIndexRequest(typedIndex).settings(
