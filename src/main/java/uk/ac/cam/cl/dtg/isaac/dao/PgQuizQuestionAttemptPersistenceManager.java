@@ -59,8 +59,8 @@ public class PgQuizQuestionAttemptPersistenceManager implements IQuizQuestionAtt
     @Override
     public void registerQuestionAttempt(Long quizAttemptId, QuestionValidationResponse questionResponse) throws SegueDatabaseException {
 
-        String query = "INSERT INTO quiz_question_attempts(quiz_attempt_id, question_id, question_attempt, correct, \"timestamp\")" +
-                " VALUES (?, ?, ?::text::jsonb, ?, ?);";
+        String query = "INSERT INTO quiz_question_attempts(quiz_attempt_id, question_id, question_attempt, correct, \"timestamp\")"
+                + " VALUES (?, ?, ?::text::jsonb, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {
@@ -116,9 +116,9 @@ public class PgQuizQuestionAttemptPersistenceManager implements IQuizQuestionAtt
 
     @Override
     public Map<Long, Map<String, List<QuestionValidationResponse>>> getAllAnswersForQuizAssignment(Long quizAssignmentId) throws SegueDatabaseException {
-        String query = "SELECT user_id, question_id, question_attempt FROM quiz_question_attempts" +
-                    " INNER JOIN quiz_attempts ON (quiz_attempts.id = quiz_question_attempts.quiz_attempt_id)" +
-                    " WHERE quiz_assignment_id = ? ORDER BY quiz_attempt_id, timestamp";
+        String query = "SELECT user_id, question_id, question_attempt FROM quiz_question_attempts"
+                + " INNER JOIN quiz_attempts ON (quiz_attempts.id = quiz_question_attempts.quiz_attempt_id)"
+                + " WHERE quiz_assignment_id = ? ORDER BY quiz_attempt_id, timestamp";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {

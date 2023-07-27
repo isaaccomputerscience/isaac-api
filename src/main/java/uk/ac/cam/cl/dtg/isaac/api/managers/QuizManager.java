@@ -181,7 +181,7 @@ public class QuizManager {
                     throw new ContentManagerException("Test id " + quiz.getId() + " contains top-level non-section: " + content);
                 }
             }
-            return quiz.getChildren().stream().map(c -> ((IsaacQuizSectionDTO) c)).collect(Collectors.toList());
+            return quiz.getChildren().stream().map(c -> (IsaacQuizSectionDTO) c).collect(Collectors.toList());
         } else {
             return quiz.getChildren().stream().flatMap(c -> {
                 if (c instanceof IsaacQuizSectionDTO) {

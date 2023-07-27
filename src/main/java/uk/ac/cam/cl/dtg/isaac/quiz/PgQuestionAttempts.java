@@ -88,8 +88,8 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
 
             userAttempts.get(questionPageId).get(fullQuestionId).add(questionAttempt);
 
-            String query = "UPDATE temporary_user_store SET temporary_app_data = " +
-                    "jsonb_set(temporary_app_data, ?::text[], ?::text::jsonb) WHERE id = ?;";
+            String query = "UPDATE temporary_user_store SET temporary_app_data = "
+                    + "jsonb_set(temporary_app_data, ?::text[], ?::text::jsonb) WHERE id = ?;";
             try (PreparedStatement pst = conn.prepareStatement(query)) {
                 pst.setString(1, "{questionAttempts}");
                 pst.setString(2, objectMapper.writeValueAsString(userAttempts));
@@ -161,8 +161,8 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
     public void registerQuestionAttempt(final Long userId, final String questionPageId, final String fullQuestionId,
             final QuestionValidationResponse questionAttempt) throws SegueDatabaseException {
 
-        String query = "INSERT INTO question_attempts(user_id, question_id, question_attempt, correct, \"timestamp\")" +
-                " VALUES (?, ?, ?::text::jsonb, ?, ?);";
+        String query = "INSERT INTO question_attempts(user_id, question_id, question_attempt, correct, \"timestamp\")"
+                + " VALUES (?, ?, ?::text::jsonb, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {
@@ -396,8 +396,8 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
 
     @Override
     public Map<Role, Long> getAnsweredQuestionRolesOverPrevious(TimeInterval timeInterval) throws SegueDatabaseException {
-        String query = "SELECT role, count(DISTINCT users.id) FROM question_attempts" +
-                " JOIN users ON user_id=users.id AND NOT deleted WHERE timestamp > now() - ? GROUP BY role";
+        String query = "SELECT role, count(DISTINCT users.id) FROM question_attempts"
+                + " JOIN users ON user_id=users.id AND NOT deleted WHERE timestamp > now() - ? GROUP BY role";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {

@@ -258,7 +258,7 @@ public class IsaacNumericValidator implements IValidator {
                 // What sort of match do we have:
                 if (numericValuesMatched && unitsFromUser.equals(unitsFromChoice)) {
                     // Exact match: nothing else can do better, but previous match may tell us if units are also correct:
-                    Boolean unitsCorrect = (null != bestResponse && bestResponse.getCorrectUnits()) || quantityFromQuestion.isCorrect();
+                    Boolean unitsCorrect = null != bestResponse && bestResponse.getCorrectUnits() || quantityFromQuestion.isCorrect();
                     bestResponse = new QuantityValidationResponse(isaacNumericQuestion.getId(), answerFromUser,
                             quantityFromQuestion.isCorrect(), (Content) quantityFromQuestion.getExplanation(),
                             quantityFromQuestion.isCorrect(), unitsCorrect, new Date());

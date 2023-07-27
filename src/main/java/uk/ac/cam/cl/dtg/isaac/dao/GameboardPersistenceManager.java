@@ -387,8 +387,8 @@ public class GameboardPersistenceManager {
         List<GameboardDO> listOfResults = Lists.newArrayList();
         Map<String, Date> lastVisitedDate = Maps.newHashMap();
 
-        String query = "SELECT * FROM gameboards INNER JOIN user_gameboards" +
-                " ON gameboards.id = user_gameboards.gameboard_id WHERE user_gameboards.user_id = ?";
+        String query = "SELECT * FROM gameboards INNER JOIN user_gameboards"
+                + " ON gameboards.id = user_gameboards.gameboard_id WHERE user_gameboards.user_id = ?";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {

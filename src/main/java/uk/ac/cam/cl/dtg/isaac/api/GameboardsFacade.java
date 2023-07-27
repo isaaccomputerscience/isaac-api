@@ -192,7 +192,7 @@ public class GameboardsFacade extends AbstractIsaacFacade {
             GameboardDTO gameboard;
 
             gameboard = gameManager.generateRandomGameboard(title, subjectsList, fieldsList, topicsList, levelsList,
-                    conceptsList, questionCategoriesList, stagesList, difficultiesList, examBoardsList,boardOwner);
+                    conceptsList, questionCategoriesList, stagesList, difficultiesList, examBoardsList, boardOwner);
 
             if (null == gameboard) {
                 return new SegueErrorResponse(Status.NO_CONTENT,

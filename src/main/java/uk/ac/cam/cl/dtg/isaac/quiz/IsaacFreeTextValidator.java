@@ -98,17 +98,25 @@ public class IsaacFreeTextValidator implements IValidator {
 
     private static String evaluateMatchingOptions(final FreeTextRule rule) {
         StringBuilder result = new StringBuilder();
-        if (rule.getAllowsMisspelling()) { result.append("m"); }
-        if (rule.getAllowsAnyOrder()) { result.append("o"); }
-        if (rule.getAllowsExtraWords()) { result.append("w"); }
-        if (rule.getWordProximity() != null) { result.append("p").append(rule.getWordProximity()); }
+        if (rule.getAllowsMisspelling()) {
+            result.append("m");
+        }
+        if (rule.getAllowsAnyOrder()) {
+            result.append("o");
+        }
+        if (rule.getAllowsExtraWords()) {
+            result.append("w");
+        }
+        if (rule.getWordProximity() != null) {
+            result.append("p").append(rule.getWordProximity());
+        }
         return result.toString();
     }
 
     @Override
     public final QuestionValidationResponse validateQuestionResponse(final Question question, final Choice answer) {
         validateInputs(question, answer);
-        IsaacFreeTextQuestion freeTextQuestion = (IsaacFreeTextQuestion)question;
+        IsaacFreeTextQuestion freeTextQuestion = (IsaacFreeTextQuestion) question;
 
         boolean isCorrectResponse = false;
         Content feedback = null;

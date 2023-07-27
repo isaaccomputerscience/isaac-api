@@ -765,14 +765,14 @@ public class EventsFacade extends AbstractIsaacFacade {
             String message = "Database error occurred while trying to retrieve all event booking information.";
             log.error(message, e);
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, message).toResponse();
-        }   catch (ContentManagerException e) {
+        } catch (ContentManagerException e) {
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
                     "Content Database error occurred while trying to retrieve event booking information.")
                     .toResponse();
         } catch (UnableToIndexSchoolsException e) {
-        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error while looking up schools", e)
-                .toResponse();
-    }
+            return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error while looking up schools", e)
+                    .toResponse();
+        }
     }
 
     /**
@@ -970,7 +970,7 @@ public class EventsFacade extends AbstractIsaacFacade {
             List<RegisteredUserDTO> validUsers = new ArrayList<>();
             for (Long userId : userIds) {
                 RegisteredUserDTO userOwningBooking = userManager.getUserDTOById(userId);
-                if (userIsAbleToManageEvent || (bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event) && userAssociationManager.hasPermission(userLoggedIn, userOwningBooking))) {
+                if (userIsAbleToManageEvent || bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event) && userAssociationManager.hasPermission(userLoggedIn, userOwningBooking)) {
                     if (bookingManager.hasBookingWithAnyOfStatuses(eventId, userId, new HashSet<>(Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.WAITING_LIST, BookingStatus.RESERVED)))) {
                         validUsers.add(userOwningBooking);
                     } else {
@@ -1168,7 +1168,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     @Operation(summary = "Cancel the current user's booking on an event.")
     public final Response cancelBooking(@Context final HttpServletRequest request,
                                         @PathParam("event_id") final String eventId) {
-                                    return this.cancelBooking(request, eventId, null);
+        return this.cancelBooking(request, eventId, null);
     }
 
     /**
@@ -1209,8 +1209,8 @@ public class EventsFacade extends AbstractIsaacFacade {
 
             // if the user id is null then it means they are changing their own booking.
             if (userId != null) {
-                if (!(bookingManager.isUserAbleToManageEvent(userLoggedIn, event) ||
-                      bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event))) {
+                if (!(bookingManager.isUserAbleToManageEvent(userLoggedIn, event)
+                        || bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event))) {
                     return SegueErrorResponse.getIncorrectRoleResponse();
                 }
             }
@@ -1630,7 +1630,7 @@ public class EventsFacade extends AbstractIsaacFacade {
                 }
 
                 IsaacEventPageDTO e = (IsaacEventPageDTO) c;
-                if (null == e.getLocation() || (null == e.getLocation().getLatitude() && null == e.getLocation().getLongitude())) {
+                if (null == e.getLocation() || null == e.getLocation().getLatitude() && null == e.getLocation().getLongitude()) {
                     // Ignore events without locations.
                     continue;
                 }

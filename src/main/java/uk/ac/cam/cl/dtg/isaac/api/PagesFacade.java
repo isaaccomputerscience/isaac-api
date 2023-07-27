@@ -337,13 +337,15 @@ public class PagesFacade extends AbstractIsaacFacade {
             etagCodeBuilder.append(ids);
         }
 
-        Map<String, String> fieldNameToValues = new HashMap<String, String>() {{
-            this.put(TAGS_FIELDNAME, tags);
-            this.put(LEVEL_FIELDNAME, level);
-            this.put(STAGE_FIELDNAME, stages);
-            this.put(DIFFICULTY_FIELDNAME, difficulties);
-            this.put(EXAM_BOARD_FIELDNAME, examBoards);
-        }};
+        Map<String, String> fieldNameToValues = new HashMap<String, String>() {
+            {
+                this.put(TAGS_FIELDNAME, tags);
+                this.put(LEVEL_FIELDNAME, level);
+                this.put(STAGE_FIELDNAME, stages);
+                this.put(DIFFICULTY_FIELDNAME, difficulties);
+                this.put(EXAM_BOARD_FIELDNAME, examBoards);
+            }
+        };
         for (Map.Entry<String, String> entry : fieldNameToValues.entrySet()) {
             String fieldName = entry.getKey();
             String queryStringValue = entry.getValue();

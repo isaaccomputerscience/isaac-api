@@ -153,7 +153,7 @@ public class GameManager {
             final List<Integer> levels, final List<String> concepts, final List<String> questionCategories,
             final List<String> stages, final List<String> difficulties, final List<String> examBoards,
             final AbstractSegueUserDTO boardOwner)
-    throws NoWildcardException, SegueDatabaseException, ContentManagerException {
+            throws NoWildcardException, SegueDatabaseException, ContentManagerException {
 
         Long boardOwnerId;
         if (boardOwner instanceof RegisteredUserDTO) {
@@ -1029,7 +1029,7 @@ public class GameManager {
             // Only keep questions that have not been superseded.
             // Yes, this should probably be done in the fieldsToMap filter above, but this is simpler.
             if (c instanceof IsaacQuestionPageDTO) {
-                IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO)c;
+                IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO) c;
                 if (qp.getSupersededBy() != null && !qp.getSupersededBy().equals("")) {
                     // This question has been superseded. Don't include it.
                     continue;
@@ -1406,8 +1406,8 @@ public class GameManager {
         }
 
         if (gameboardDTO.getGameFilter() == null || !validateFilterQuery(gameboardDTO.getGameFilter())) {
-            throw new InvalidGameboardException("Your gameboard must have some valid filter information " +
-                    "e.g. subject must be set.");
+            throw new InvalidGameboardException("Your gameboard must have some valid filter information "
+                    + "e.g. subject must be set.");
         }
 
         List<String> badQuestions = this.gameboardPersistenceManager.getInvalidQuestionIdsFromGameboard(gameboardDTO);

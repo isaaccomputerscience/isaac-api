@@ -64,8 +64,8 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
     public Long saveAssignment(final QuizAssignmentDTO assignment) throws SegueDatabaseException {
         QuizAssignmentDO assignmentToSave = mapper.map(assignment, QuizAssignmentDO.class);
 
-        String query = "INSERT INTO quiz_assignments(quiz_id, group_id, owner_user_id, creation_date, due_date, quiz_feedback_mode)" +
-                " VALUES (?, ?, ?, ?, ?, ?);";
+        String query = "INSERT INTO quiz_assignments(quiz_id, group_id, owner_user_id, creation_date, due_date, quiz_feedback_mode)"
+                + " VALUES (?, ?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {
@@ -206,8 +206,8 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
 
     @Override
     public void updateAssignment(Long quizAssignmentId, QuizAssignmentDTO updates) throws SegueDatabaseException {
-        String query = "UPDATE quiz_assignments SET quiz_feedback_mode = COALESCE(?, quiz_feedback_mode)," +
-                "due_date = COALESCE(?, due_date) WHERE id = ?";
+        String query = "UPDATE quiz_assignments SET quiz_feedback_mode = COALESCE(?, quiz_feedback_mode),"
+                + "due_date = COALESCE(?, due_date) WHERE id = ?";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {

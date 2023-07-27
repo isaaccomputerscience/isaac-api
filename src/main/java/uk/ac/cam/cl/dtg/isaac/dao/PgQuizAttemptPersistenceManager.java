@@ -226,9 +226,9 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
             builder.append("?,");
         }
         String quizAssignmentIdsHoles = builder.deleteCharAt(builder.length() - 1).append(")").toString();
-        String query = "SELECT quiz_attempts.* FROM quiz_attempts INNER JOIN quiz_assignments" +
-                " ON quiz_attempts.quiz_assignment_id = quiz_assignments.id" +
-                " WHERE quiz_attempts.user_id = ? AND quiz_assignments.id IN " + quizAssignmentIdsHoles;
+        String query = "SELECT quiz_attempts.* FROM quiz_attempts INNER JOIN quiz_assignments"
+                + " ON quiz_attempts.quiz_assignment_id = quiz_assignments.id"
+                + " WHERE quiz_attempts.user_id = ? AND quiz_assignments.id IN " + quizAssignmentIdsHoles;
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {

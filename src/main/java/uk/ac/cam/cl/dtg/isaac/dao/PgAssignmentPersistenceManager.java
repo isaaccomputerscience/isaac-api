@@ -15,6 +15,16 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dao;
 
+import com.google.api.client.util.Lists;
+import com.google.inject.Inject;
+import ma.glasnost.orika.MapperFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.dos.AssignmentDO;
+import uk.ac.cam.cl.dtg.isaac.dto.AssignmentDTO;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,19 +35,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import ma.glasnost.orika.MapperFacade;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.api.client.util.Lists;
-import com.google.inject.Inject;
-
-import uk.ac.cam.cl.dtg.isaac.dos.AssignmentDO;
-import uk.ac.cam.cl.dtg.isaac.dto.AssignmentDTO;
-import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
 /**
  * This class is responsible for managing and persisting user data.
@@ -67,8 +64,8 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
     public Long saveAssignment(final AssignmentDTO assignment) throws SegueDatabaseException {
         AssignmentDO assignmentToSave = mapper.map(assignment, AssignmentDO.class);
 
-        String query = "INSERT INTO assignments(gameboard_id, group_id, owner_user_id, creation_date, due_date, notes, scheduled_start_date)" +
-                " VALUES (?, ?, ?, ?, ?, ?, ?);";
+        String query = "INSERT INTO assignments(gameboard_id, group_id, owner_user_id, creation_date, due_date, notes, scheduled_start_date)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {

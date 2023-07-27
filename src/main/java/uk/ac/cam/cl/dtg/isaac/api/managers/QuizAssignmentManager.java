@@ -114,7 +114,7 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
 
         String quizURL = getAssignmentLikeUrl(newAssignment);
 
-        emailService.sendAssignmentEmailToGroup(newAssignment, quiz, ImmutableMap.of("quizURL", quizURL) ,
+        emailService.sendAssignmentEmailToGroup(newAssignment, quiz, ImmutableMap.of("quizURL", quizURL),
             "email-template-group-quiz-assignment");
 
         return newAssignment;

@@ -188,11 +188,13 @@ public final class Constants {
     }
     public static final Set<String> ISAAC_CLIENT_LOG_TYPES = Arrays.stream(IsaacClientLogType.values()).map(IsaacClientLogType::name).collect(Collectors.toSet());
 
-    public static final Set<String> ALL_ACCEPTED_LOG_TYPES = new HashSet<String>() {{
-        addAll(SEGUE_SERVER_LOG_TYPES);
-        addAll(ISAAC_SERVER_LOG_TYPES);
-        addAll(ISAAC_CLIENT_LOG_TYPES);
-    }};
+    public static final Set<String> ALL_ACCEPTED_LOG_TYPES = new HashSet<String>() {
+        {
+            addAll(SEGUE_SERVER_LOG_TYPES);
+            addAll(ISAAC_SERVER_LOG_TYPES);
+            addAll(ISAAC_CLIENT_LOG_TYPES);
+        }
+    };
 
     public enum IsaacUserPreferences {
         SUBJECT_INTEREST, BETA_FEATURE, EXAM_BOARD, PROGRAMMING_LANGUAGE, BOOLEAN_NOTATION, DISPLAY_SETTING
