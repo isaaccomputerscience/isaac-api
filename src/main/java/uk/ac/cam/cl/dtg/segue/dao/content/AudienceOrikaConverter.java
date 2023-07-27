@@ -23,7 +23,9 @@ public class AudienceOrikaConverter
     public List<Map<String, List<String>>> convert(
             List<Map<String, List<String>>> maps, Type<? extends List<Map<String, List<String>>>> type,
             MappingContext _context) {
-        if (maps == null) {return null;}
+        if (maps == null) {
+            return null;
+        }
 
         // This is horrible to read but it is a deep copy of the data structure - better safe than sorry.
         return maps.stream().map(m -> m.entrySet().stream()

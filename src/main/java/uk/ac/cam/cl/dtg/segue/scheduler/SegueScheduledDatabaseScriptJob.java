@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Specialised class for capturing information needed to execute an SQL file on the database where segue is running.
  */
-public class SegueScheduledDatabaseScriptJob extends SegueScheduledJob{
+public class SegueScheduledDatabaseScriptJob extends SegueScheduledJob {
     private final String SQLFile;
     Map<String, Object> executionContext;
 

@@ -93,7 +93,7 @@ public class PerformanceMonitor implements ContainerRequestFilter, ContainerResp
                         requestContext.getMethod(),
                         monitorService.getPathWithoutPathParamValues(request.getUri()),
                         String.valueOf(responseContext.getStatus())
-                ).observe((double)timeInMs / NUMBER_OF_MILLISECONDS_IN_A_SECOND);
+                ).observe((double) timeInMs / NUMBER_OF_MILLISECONDS_IN_A_SECOND);
     }
 
 

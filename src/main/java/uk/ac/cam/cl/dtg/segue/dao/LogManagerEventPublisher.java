@@ -140,7 +140,7 @@ public abstract class LogManagerEventPublisher implements ILogManager {
 
     @Override
     public Collection<LogEvent> getLogsByType(String type, Date fromDate, Date toDate, List<RegisteredUserDTO> usersOfInterest)
-            throws SegueDatabaseException{
+            throws SegueDatabaseException {
 
         return this.logManager.getLogsByType(type, fromDate, toDate, usersOfInterest);
 
@@ -148,21 +148,21 @@ public abstract class LogManagerEventPublisher implements ILogManager {
 
     @Override
     public Map<String, Map<LocalDate, Long>> getLogCountByDate(Collection<String> eventTypes, Date fromDate, Date toDate,
-                                                               List<RegisteredUserDTO> usersOfInterest, boolean binDataByMonth) throws SegueDatabaseException{
+                                                               List<RegisteredUserDTO> usersOfInterest, boolean binDataByMonth) throws SegueDatabaseException {
 
         return this.logManager.getLogCountByDate(eventTypes, fromDate, toDate, usersOfInterest, binDataByMonth);
 
     }
 
     @Override
-    public Set<String> getAllIpAddresses(){
+    public Set<String> getAllIpAddresses() {
 
         return this.logManager.getAllIpAddresses();
 
     }
 
     @Override
-    public Map<String, Date> getLastLogDateForAllUsers(final String qualifyingLogEventType) throws SegueDatabaseException{
+    public Map<String, Date> getLastLogDateForAllUsers(final String qualifyingLogEventType) throws SegueDatabaseException {
 
         return this.logManager.getLastLogDateForAllUsers(qualifyingLogEventType);
 

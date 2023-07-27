@@ -799,8 +799,8 @@ public class AdminFacade extends AbstractSegueFacade {
 
             if (null != familyName && !familyName.isEmpty()) {
                 // Event managers aren't allowed to do short wildcard searches, but need surnames less than 4 chars too.
-                if (currentUser.getRole().equals(Role.EVENT_MANAGER) && (familyName.replaceAll("[^A-z]", "").length() < 4)
-                        && (familyName.length() != familyName.replaceAll("[^A-z]", "").length())) {
+                if (currentUser.getRole().equals(Role.EVENT_MANAGER) && familyName.replaceAll("[^A-z]", "").length() < 4
+                        && familyName.length() != familyName.replaceAll("[^A-z]", "").length()) {
                     return new SegueErrorResponse(Status.FORBIDDEN, "You do not have permission to do wildcard searches with less than 4 characters.")
                             .toResponse();
                 }

@@ -97,8 +97,8 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
     }
 
     private LocalUserCredential createCredentials(LocalUserCredential credsToSave) throws SegueDatabaseException {
-        String query = "INSERT INTO user_credentials(user_id, password, security_scheme, secure_salt, reset_token, reset_expiry, last_updated)" +
-                " VALUES (?, ?, ?, ?, ?, ?, ?);";
+        String query = "INSERT INTO user_credentials(user_id, password, security_scheme, secure_salt, reset_token, reset_expiry, last_updated)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {
@@ -126,8 +126,8 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
             throw new SegueDatabaseException("The credentials you have tried to update do not exist.");
         }
 
-        String query = "UPDATE user_credentials SET password = ?, security_scheme = ?, secure_salt = ?," +
-                " reset_token = ?, reset_expiry = ?, last_updated = ? WHERE user_id = ?;";
+        String query = "UPDATE user_credentials SET password = ?, security_scheme = ?, secure_salt = ?,"
+                + " reset_token = ?, reset_expiry = ?, last_updated = ? WHERE user_id = ?;";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {
@@ -187,7 +187,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
      * @return localUserCredential object
      * @throws SQLException if we can't get a value required.
      */
-    private LocalUserCredential buildCredential(ResultSet results) throws SQLException{
+    private LocalUserCredential buildCredential(ResultSet results) throws SQLException {
         LocalUserCredential toReturn = new LocalUserCredential();
         toReturn.setUserId(results.getLong("user_id"));
         toReturn.setPassword(results.getString("password"));

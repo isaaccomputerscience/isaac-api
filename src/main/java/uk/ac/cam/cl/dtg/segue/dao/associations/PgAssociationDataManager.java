@@ -15,6 +15,16 @@
  */
 package uk.ac.cam.cl.dtg.segue.dao.associations;
 
+import com.google.api.client.util.Lists;
+import com.google.inject.Inject;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.dos.AssociationToken;
+import uk.ac.cam.cl.dtg.isaac.dos.UserAssociation;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,18 +32,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.isaac.dos.AssociationToken;
-import uk.ac.cam.cl.dtg.isaac.dos.UserAssociation;
-
-import com.google.api.client.util.Lists;
-import com.google.inject.Inject;
 
 /**
  * MongoAssociationDataManager.
@@ -108,8 +106,8 @@ public class PgAssociationDataManager implements IAssociationDataManager {
             throws SegueDatabaseException {
         Validate.notNull(userIdReceivingAccess);
 
-        String query = "INSERT INTO user_associations(user_id_granting_permission, user_id_receiving_permission," +
-                " created) VALUES (?, ?, ?);";
+        String query = "INSERT INTO user_associations(user_id_granting_permission, user_id_receiving_permission,"
+                + " created) VALUES (?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {
@@ -158,8 +156,8 @@ public class PgAssociationDataManager implements IAssociationDataManager {
     @Override
     public boolean hasValidAssociation(final Long userIdRequestingAccess, final Long ownerUserId)
             throws SegueDatabaseException {
-        String query = "SELECT COUNT(1) AS TOTAL FROM user_associations" +
-                " WHERE user_id_receiving_permission = ? AND user_id_granting_permission = ?;";
+        String query = "SELECT COUNT(1) AS TOTAL FROM user_associations"
+                + " WHERE user_id_receiving_permission = ? AND user_id_granting_permission = ?;";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {
@@ -316,7 +314,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
      */
     private void deleteAssociations(final Long userIdOfInterest, final boolean isOwner)
             throws SegueDatabaseException {
-        if (null == userIdOfInterest ) {
+        if (null == userIdOfInterest) {
             throw new SegueDatabaseException("No user Id specified for requested delete association operation.");
         }
 

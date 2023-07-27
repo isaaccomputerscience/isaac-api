@@ -490,8 +490,8 @@ public class PgLogManager implements ILogManager {
             LOG_EVENT.labels(eventType).inc();
         }
 
-        String query = "INSERT INTO logged_events(user_id, anonymous_user, event_type, event_details_type," +
-                " event_details, ip_address, timestamp) VALUES (?, ?, ?, ?, ?::text::jsonb, ?::inet, ?);";
+        String query = "INSERT INTO logged_events(user_id, anonymous_user, event_type, event_details_type,"
+                + " event_details, ip_address, timestamp) VALUES (?, ?, ?, ?, ?::text::jsonb, ?::inet, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {

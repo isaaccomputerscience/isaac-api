@@ -39,11 +39,11 @@ class ETLManager {
         long taskPeriodSeconds = 300;
         String configuredPeriod = contentIndicesStore.getProperty(TASK_PERIOD_SECONDS);
         if (configuredPeriod != null) {
-          try {
-            taskPeriodSeconds = Long.parseLong(configuredPeriod);
-          } catch (NumberFormatException e) {
-            log.warn("Failed to parse ETL task period seconds. Using default value.");
-          }
+            try {
+                taskPeriodSeconds = Long.parseLong(configuredPeriod);
+            } catch (NumberFormatException e) {
+                log.warn("Failed to parse ETL task period seconds. Using default value.");
+            }
         } else {
             log.info("ETL task period seconds not configured. Using default value.");
         }
@@ -66,10 +66,10 @@ class ETLManager {
         Map<String, String> aliasVersions = new HashMap<>();
         String latestSha = database.fetchLatestFromRemote();
         aliasVersions.put(LATEST_INDEX_ALIAS, latestSha);
-        for (String configKey: contentIndicesStore.stringPropertyNames()) {
-          if (!configKey.equals(TASK_PERIOD_SECONDS)) {
-            aliasVersions.put(configKey, contentIndicesStore.getProperty(configKey));
-          }
+        for (String configKey : contentIndicesStore.stringPropertyNames()) {
+            if (!configKey.equals(TASK_PERIOD_SECONDS)) {
+                aliasVersions.put(configKey, contentIndicesStore.getProperty(configKey));
+            }
         }
 
         for (var entry : aliasVersions.entrySet()) {
@@ -97,9 +97,9 @@ class ETLManager {
         public void run() {
             log.info("Starting content indexer thread.");
             try {
-              indexContent();
+                indexContent();
             } catch (Exception e) {
-              log.error("ContentIndexerTask failed.", e);
+                log.error("ContentIndexerTask failed.", e);
             }
             log.info("Content indexer thread complete, waiting for next scheduled run.");
         }

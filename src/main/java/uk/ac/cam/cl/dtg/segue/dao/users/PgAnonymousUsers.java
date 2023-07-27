@@ -46,8 +46,8 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
 
     @Override
     public AnonymousUser storeAnonymousUser(final AnonymousUser user) throws SegueDatabaseException {
-        String query = "INSERT INTO temporary_user_store (id, temporary_app_data, created, last_updated)" +
-                " VALUES (?,?::text::jsonb,?,?);";
+        String query = "INSERT INTO temporary_user_store (id, temporary_app_data, created, last_updated)"
+                + " VALUES (?,?::text::jsonb,?,?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {

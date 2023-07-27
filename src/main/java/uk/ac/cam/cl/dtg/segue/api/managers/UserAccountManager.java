@@ -366,7 +366,8 @@ public class UserAccountManager implements IUserAccountManager {
     public final RegisteredUserDTO authenticateWithCredentials(final HttpServletRequest request,
             final HttpServletResponse response, final String provider, final String email, final String password)
             throws AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-            NoCredentialsAvailableException, SegueDatabaseException, AdditionalAuthenticationRequiredException, MFARequiredButNotConfiguredException, InvalidKeySpecException, NoSuchAlgorithmException {
+            NoCredentialsAvailableException, SegueDatabaseException, AdditionalAuthenticationRequiredException,
+            MFARequiredButNotConfiguredException, InvalidKeySpecException, NoSuchAlgorithmException {
         Validate.notBlank(email);
         Validate.notBlank(password);
 
@@ -1015,8 +1016,9 @@ public class UserAccountManager implements IUserAccountManager {
      *             - if a user attempts to sign up with an email that must be verified before it can be used
      *             (i.e. an @isaacphysics.org or @isaacchemistry.org address).
      */
-    public RegisteredUserDTO createUserObjectAndSession(final HttpServletRequest request,
-                                                        final HttpServletResponse response, final RegisteredUser user, final String newPassword, final List<UserContext> registeredUserContexts) throws InvalidPasswordException,
+    public RegisteredUserDTO createUserObjectAndSession(
+            final HttpServletRequest request, final HttpServletResponse response, final RegisteredUser user,
+            final String newPassword, final List<UserContext> registeredUserContexts) throws InvalidPasswordException,
             MissingRequiredFieldException, SegueDatabaseException,
             EmailMustBeVerifiedException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException {
         Validate.isTrue(user.getId() == null,
@@ -1300,7 +1302,7 @@ public class UserAccountManager implements IUserAccountManager {
      */
     public void deleteUserAccount(final RegisteredUserDTO userToDelete) throws NoUserException, SegueDatabaseException {
         // check the user exists
-        if(null == userToDelete) {
+        if (null == userToDelete) {
             throw new NoUserException("Unable to delete the user as no user was provided.");
         }
 
@@ -1570,7 +1572,8 @@ public class UserAccountManager implements IUserAccountManager {
      *            - The level of detail required for the conversion
      * @return a summarised object with reduced personal information
      */
-    public UserSummaryWithEmailAddressDTO convertToDetailedUserSummaryObject(final RegisteredUserDTO userToConvert, final Class<? extends UserSummaryWithEmailAddressDTO> detailedDTOClass) {
+    public UserSummaryWithEmailAddressDTO convertToDetailedUserSummaryObject(
+            final RegisteredUserDTO userToConvert, final Class<? extends UserSummaryWithEmailAddressDTO> detailedDTOClass) {
         return this.dtoMapper.map(userToConvert, detailedDTOClass);
     }
 
@@ -1599,7 +1602,8 @@ public class UserAccountManager implements IUserAccountManager {
      *            - The level of detail required for the conversion
      * @return a list of summarised objects with reduced personal information
      */
-    public List<UserSummaryWithEmailAddressDTO> convertToDetailedUserSummaryObjectList(final List<RegisteredUserDTO> userListToConvert, final Class<? extends UserSummaryWithEmailAddressDTO> detailedDTO) {
+    public List<UserSummaryWithEmailAddressDTO> convertToDetailedUserSummaryObjectList(
+            final List<RegisteredUserDTO> userListToConvert, final Class<? extends UserSummaryWithEmailAddressDTO> detailedDTO) {
         Validate.notNull(userListToConvert);
         List<UserSummaryWithEmailAddressDTO> resultList = Lists.newArrayList();
         for (RegisteredUserDTO user : userListToConvert) {
@@ -1846,8 +1850,8 @@ public class UserAccountManager implements IUserAccountManager {
         }
 
         // since the federated providers didn't always provide email addresses - we have to check and update accordingly.
-        if (!localUserInformation.getEmail().contains("@") &&
-                !EmailVerificationStatus.DELIVERY_FAILED.equals(localUserInformation.getEmailVerificationStatus())) {
+        if (!localUserInformation.getEmail().contains("@")
+                && !EmailVerificationStatus.DELIVERY_FAILED.equals(localUserInformation.getEmailVerificationStatus())) {
             this.updateUserEmailVerificationStatus(localUserInformation.getEmail(),
                     EmailVerificationStatus.DELIVERY_FAILED);
         }

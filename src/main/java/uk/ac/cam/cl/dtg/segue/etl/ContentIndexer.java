@@ -564,7 +564,7 @@ public class ContentIndexer {
         }
 
         log.debug(message);
-        indexProblemCache.get(c).add(message);//.replace("_", "\\_"));
+        indexProblemCache.get(c).add(message); //.replace("_", "\\_"));
     }
 
     /**
@@ -722,7 +722,7 @@ public class ContentIndexer {
         } catch (SegueSearchException e) {
             log.error("Error whilst trying to perform bulk index operation.", e);
         } catch (ActionRequestValidationException e) {
-            log.error("Error validating content during index",e);
+            log.error("Error validating content during index", e);
         }
     }
 
@@ -809,7 +809,7 @@ public class ContentIndexer {
 
         if (indexProblemCache.size() == 0) {
             // Register a no-op style error to simplify application logic by ensuring there is always a content errors index
-            Content dummyContentRecord = new Content() {{setCanonicalSourceFile("\uD83D\uDE0E");}};
+            Content dummyContentRecord = new Content() {{ setCanonicalSourceFile("\uD83D\uDE0E"); }};
             this.registerContentProblem(dummyContentRecord, "No content errors!", indexProblemCache);
         }
     }
@@ -865,7 +865,7 @@ public class ContentIndexer {
         StringBuilder ret = new StringBuilder();
         for (Content child : flattenContentObjects(content)) {
             if (child != content && null != child.getExpandable() && child.getExpandable()) {
-                ret.append((null != child.getType() ? child.getType() : "undefined")).append(",");
+                ret.append(null != child.getType() ? child.getType() : "undefined").append(",");
             }
         }
         if (ret.length() > 0) {
@@ -898,7 +898,7 @@ public class ContentIndexer {
         }
 
         // Make sure no children of potentially expandable content are expandable, if so record a content error
-        if (((null != content.getLayout() && content.getLayout().equals("tabs")) || content instanceof CodeSnippet) && null != content.getChildren()) {
+        if ((null != content.getLayout() && content.getLayout().equals("tabs") || content instanceof CodeSnippet) && null != content.getChildren()) {
             String expandableChildrenLog = collateExpandableChildren(content);
             if (!expandableChildrenLog.equals("")) {
                 this.registerContentProblem(content, "Content of type " + content.getType() + " in " + content.getCanonicalSourceFile() + " is "
@@ -1011,7 +1011,7 @@ public class ContentIndexer {
                                         + "Users will never be able to match this answer.", indexProblemCache);
                     }
 
-                    if (!q.getRequireUnits() && (null != quantity.getUnits() && !quantity.getUnits().isEmpty())) {
+                    if (!q.getRequireUnits() && null != quantity.getUnits() && !quantity.getUnits().isEmpty()) {
                         this.registerContentProblem(content, "Numeric Question: " + q.getId()
                                 + " has a Quantity with units but does not require units!", indexProblemCache);
                     }
@@ -1022,7 +1022,7 @@ public class ContentIndexer {
                             + choice.getValue() + "). It must be deleted and a new Quantity Choice created.", indexProblemCache);
                 }
             }
-            if (q.getRequireUnits() && (null != q.getDisplayUnit() && !q.getDisplayUnit().isEmpty())) {
+            if (q.getRequireUnits() && null != q.getDisplayUnit() && !q.getDisplayUnit().isEmpty()) {
                 this.registerContentProblem(content, "Numeric Question: " + q.getId() + " has a displayUnit set but also requiresUnits!"
                         + " Units will be ignored for this question!", indexProblemCache);
             }
@@ -1045,7 +1045,7 @@ public class ContentIndexer {
                             this.registerContentProblem(content, "Symbolic Question: " + q.getId() + " has Formula ("
                                     + choice.getValue() + ") with pythonExpression which contains a '\\' character.", indexProblemCache);
                         } else if (f.getPythonExpression() == null || f.getPythonExpression().isEmpty()) {
-                            this.registerContentProblem( content, "Symbolic Question: " + q.getId() + " has Formula ("
+                            this.registerContentProblem(content, "Symbolic Question: " + q.getId() + " has Formula ("
                                     + choice.getValue() + ") with empty pythonExpression!", indexProblemCache);
                         }
                     } else {

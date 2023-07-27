@@ -23,7 +23,7 @@ package uk.ac.cam.cl.dtg.segue.dao;
  */
 public class PgLogManagerEventListener extends LogManagerEventPublisher {
 
-    public PgLogManagerEventListener(PgLogManager logManager){
+    public PgLogManagerEventListener(PgLogManager logManager) {
         super(logManager);
     }
 

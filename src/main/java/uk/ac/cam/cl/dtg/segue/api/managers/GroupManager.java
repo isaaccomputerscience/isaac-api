@@ -670,7 +670,7 @@ public class GroupManager {
         List<UserSummaryWithGroupMembershipDTO> result = Lists.newArrayList();
         Map<Long, GroupMembershipDTO> userMembershipMapforMap = this.getUserMembershipMapForGroup(group.getId());
 
-        for(UserSummaryDTO dto : summarisedMemberInfo) {
+        for (UserSummaryDTO dto : summarisedMemberInfo) {
             UserSummaryWithGroupMembershipDTO newDTO = dtoMapper.map(dto, UserSummaryWithGroupMembershipDTO.class);
             GroupMembershipDTO groupMembershipDTO = userMembershipMapforMap.get(newDTO.getId());
             newDTO.setGroupMembershipInformation(dtoMapper.map(groupMembershipDTO, GroupMembershipDTO.class));

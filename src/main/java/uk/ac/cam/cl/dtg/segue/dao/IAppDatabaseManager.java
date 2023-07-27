@@ -15,10 +15,10 @@
  */
 package uk.ac.cam.cl.dtg.segue.dao;
 
+import uk.ac.cam.cl.dtg.segue.api.Constants;
+
 import java.util.List;
 import java.util.Map;
-
-import uk.ac.cam.cl.dtg.segue.api.Constants;
 
 /**
  * Interface that provides persistence functionality to external apps that sit on top of Segue.
@@ -45,8 +45,7 @@ public interface IAppDatabaseManager<T> extends IAppDataManager<T> {
      *            - a map of boolean operators mapped to lists of field names.
      * @return a list of results or an empty list.
      */
-    List<T> find(final Map<Map.Entry<Constants.BooleanOperator, String>, List<String>> fieldsToMatch)
-    ;
+    List<T> find(final Map<Map.Entry<Constants.BooleanOperator, String>, List<String>> fieldsToMatch);
 
     /**
      * findAll records.

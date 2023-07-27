@@ -15,6 +15,21 @@
  */
 package uk.ac.cam.cl.dtg.segue.dao.users;
 
+import com.google.api.client.util.Lists;
+import com.google.api.client.util.Sets;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.dos.GroupMembership;
+import uk.ac.cam.cl.dtg.isaac.dos.GroupMembershipStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.GroupStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.UserGroup;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,23 +41,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.api.client.util.Sets;
-import com.google.common.collect.Maps;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.isaac.dos.GroupMembership;
-import uk.ac.cam.cl.dtg.isaac.dos.GroupMembershipStatus;
-import uk.ac.cam.cl.dtg.isaac.dos.GroupStatus;
-import uk.ac.cam.cl.dtg.isaac.dos.UserGroup;
-import com.google.api.client.util.Lists;
-import com.google.inject.Inject;
-
-import jakarta.annotation.Nullable;
 
 /**
  * PgUserGroupPersistenceManager.
@@ -65,8 +63,8 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
 
     @Override
     public UserGroup createGroup(final UserGroup group) throws SegueDatabaseException {
-        String query = "INSERT INTO groups(group_name, owner_id, group_status, created, last_updated)" +
-                " VALUES (?, ?, ?, ?, ?);";
+        String query = "INSERT INTO groups(group_name, owner_id, group_status, created, last_updated)"
+                + " VALUES (?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {
@@ -294,21 +292,21 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
 
         // FIXME: try-with-resources!
         try (Connection conn = database.getDatabaseConnection()) {
-                PreparedStatement pst;
-                if (markAsDeleted) {
-                        pst = conn
-                                .prepareStatement("UPDATE groups SET group_status=? WHERE id = ?;");
-                        pst.setString(1, GroupStatus.DELETED.name());
-                        pst.setLong(2, groupId);
+            PreparedStatement pst;
+            if (markAsDeleted) {
+                pst = conn
+                        .prepareStatement("UPDATE groups SET group_status=? WHERE id = ?;");
+                pst.setString(1, GroupStatus.DELETED.name());
+                pst.setLong(2, groupId);
 
-                        if (pst.executeUpdate() == 0) {
-                            throw new SegueDatabaseException("Unable to mark group as deleted.");
-                        }
-                } else {
-                    pst = conn.prepareStatement("DELETE FROM groups WHERE id = ?");
-                    pst.setLong(1, groupId);
-                    pst.execute();
+                if (pst.executeUpdate() == 0) {
+                    throw new SegueDatabaseException("Unable to mark group as deleted.");
                 }
+            } else {
+                pst = conn.prepareStatement("DELETE FROM groups WHERE id = ?");
+                pst.setLong(1, groupId);
+                pst.execute();
+            }
 
         } catch (SQLException e1) {
             throw new SegueDatabaseException("Postgres exception", e1);
@@ -322,8 +320,8 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
 
     @Override
     public Map<Long, GroupMembership> getGroupMembershipMap(final Long groupId) throws SegueDatabaseException {
-        String query = "SELECT * FROM group_memberships INNER JOIN groups ON " +
-                "groups.id = group_memberships.group_id WHERE group_id = ? AND status <> ? AND group_status <> ?";
+        String query = "SELECT * FROM group_memberships INNER JOIN groups ON "
+                + "groups.id = group_memberships.group_id WHERE group_id = ? AND status <> ? AND group_status <> ?";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {
@@ -370,8 +368,8 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
 
     @Override
     public Collection<UserGroup> getGroupMembershipList(final Long userId) throws SegueDatabaseException {
-        String query = "SELECT * FROM groups INNER JOIN group_memberships ON groups.id = group_memberships.group_id" +
-                " WHERE user_id = ? AND status <> ? AND group_status <> ?";
+        String query = "SELECT * FROM groups INNER JOIN group_memberships ON groups.id = group_memberships.group_id"
+                + " WHERE user_id = ? AND status <> ? AND group_status <> ?";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {

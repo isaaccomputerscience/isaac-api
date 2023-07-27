@@ -409,7 +409,7 @@ public class GitContentManager {
             }
 
             // Only show future events
-            if (documentType.equals(EVENT_TYPE)){
+            if (documentType.equals(EVENT_TYPE)) {
                 LocalDate today = LocalDate.now();
                 long now = today.atStartOfDay(ZoneId.systemDefault()).toEpochSecond() * Constants.EVENT_DATE_EPOCH_MULTIPLIER;
                 contentQuery.must(new RangeMatchInstruction<Long>(Constants.DATE_FIELDNAME).greaterThanOrEqual(now));

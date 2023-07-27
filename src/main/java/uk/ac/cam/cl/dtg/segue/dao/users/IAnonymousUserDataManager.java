@@ -61,5 +61,5 @@ public interface IAnonymousUserDataManager {
      *
      * @return count of anonymous users
      */
-    Long getCountOfAnonymousUsers() throws SegueDatabaseException;;
+    Long getCountOfAnonymousUsers() throws SegueDatabaseException;
 }

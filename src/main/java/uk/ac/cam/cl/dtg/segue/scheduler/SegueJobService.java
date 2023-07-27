@@ -58,7 +58,7 @@ public class SegueJobService implements ServletContextListener {
     public SegueJobService(final PostgresSqlDb database, final List<SegueScheduledJob> allKnownJobs,
                            @Nullable final List<SegueScheduledJob> jobsToRemove) {
         this.allKnownJobs = allKnownJobs;
-        this.jobsToRemove =jobsToRemove;
+        this.jobsToRemove = jobsToRemove;
         this.localRegisteredJobs = new ArrayList<>();
         StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory();
 

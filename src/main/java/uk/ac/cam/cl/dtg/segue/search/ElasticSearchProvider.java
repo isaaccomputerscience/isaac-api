@@ -241,7 +241,7 @@ public class ElasticSearchProvider implements ISearchProvider {
                                              final String searchTerm, final String field, final int startIndex, final int limit,
                                              @Nullable final Map<String, AbstractFilterInstruction> filterInstructions)
             throws SegueSearchException {
-        if (null == indexBase || null == indexType || (null == searchTerm && null != field)) {
+        if (null == indexBase || null == indexType || null == searchTerm && null != field) {
             log.error("A required field or field combination is missing. Unable to execute search.");
             return null;
         }
@@ -571,10 +571,10 @@ public class ElasticSearchProvider implements ISearchProvider {
 
         // execute another query to get all results as this is an unlimited
         // query.
-        if (isUnlimitedSearch && (results.getResults().size() < results.getTotalResults())) {
+        if (isUnlimitedSearch && results.getResults().size() < results.getTotalResults()) {
             if (results.getTotalResults() > this.getMaxResultSize(indexBase, indexType)) {
-                throw new SegueSearchException(String.format("The search you have requested " +
-                        "exceeds the maximum number of results that can be returned at once (%s).",
+                throw new SegueSearchException(String.format("The search you have requested  exceeds the maximum "
+                                + "number of results that can be returned at once (%s).",
                         this.getMaxResultSize(indexBase, indexType)));
             }
 
@@ -643,7 +643,7 @@ public class ElasticSearchProvider implements ISearchProvider {
         if (matchInstruction instanceof BooleanMatchInstruction) {
             BooleanMatchInstruction booleanMatch = (BooleanMatchInstruction) matchInstruction;
             BoolQueryBuilder query = QueryBuilders.boolQuery();
-            for (AbstractMatchInstruction should : booleanMatch.getShoulds()){
+            for (AbstractMatchInstruction should : booleanMatch.getShoulds()) {
                 query.should(processMatchInstructions(should));
             }
             for (AbstractMatchInstruction must : booleanMatch.getMusts()) {
@@ -657,9 +657,7 @@ public class ElasticSearchProvider implements ISearchProvider {
                 query.boost(booleanMatch.getBoost());
             }
             return query;
-        }
-
-        else if (matchInstruction instanceof ShouldMatchInstruction) {
+        } else if (matchInstruction instanceof ShouldMatchInstruction) {
             ShouldMatchInstruction shouldMatch = (ShouldMatchInstruction) matchInstruction;
             MatchQueryBuilder matchQuery = QueryBuilders
                     .matchQuery(shouldMatch.getField(), shouldMatch.getValue()).boost(shouldMatch.getBoost());
@@ -667,14 +665,10 @@ public class ElasticSearchProvider implements ISearchProvider {
                 matchQuery.fuzziness(Fuzziness.AUTO);
             }
             return matchQuery;
-        }
-
-        else if (matchInstruction instanceof MustMatchInstruction) {
+        } else if (matchInstruction instanceof MustMatchInstruction) {
             MustMatchInstruction mustMatch = (MustMatchInstruction) matchInstruction;
             return QueryBuilders.matchQuery(mustMatch.getField(), mustMatch.getValue());
-        }
-
-        else if (matchInstruction instanceof RangeMatchInstruction) {
+        } else if (matchInstruction instanceof RangeMatchInstruction) {
             RangeMatchInstruction rangeMatch = (RangeMatchInstruction) matchInstruction;
             RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(rangeMatch.getField()).boost(rangeMatch.getBoost());
             if (rangeMatch.getGreaterThan() != null) {

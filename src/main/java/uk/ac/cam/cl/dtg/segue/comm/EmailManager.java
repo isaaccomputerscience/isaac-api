@@ -409,8 +409,8 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
      * @param keyPrefix - the key prefix - used for recursively creating the map key.
      * @return a flattened map for containing strings that can be used in email template replacement.
      */
-     public Map<String, String> flattenTokenMap(final Map<String, Object> inputMap, final Map<String, String> outputMap,
-                                                String keyPrefix) {
+    public Map<String, String> flattenTokenMap(final Map<String, Object> inputMap, final Map<String, String> outputMap,
+                                               String keyPrefix) {
         if (null == keyPrefix) {
             keyPrefix = "";
         }

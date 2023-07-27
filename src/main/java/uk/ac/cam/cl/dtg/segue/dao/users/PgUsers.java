@@ -158,10 +158,10 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     @Override
     public UserAuthenticationSettings getUserAuthenticationSettings(Long userId) throws SegueDatabaseException {
 
-        String query = "SELECT users.id, password IS NOT NULL AS has_segue_account, user_totp.shared_secret IS NOT NULL AS mfa_status, array_agg(provider) AS linked_accounts " +
-                "FROM (users LEFT OUTER JOIN user_credentials ON user_credentials.user_id=users.id) " +
-                "LEFT OUTER JOIN linked_accounts ON users.id=linked_accounts.user_id " +
-                "LEFT OUTER JOIN user_totp ON users.id=user_totp.user_id WHERE users.id=? GROUP BY users.id, user_credentials.user_id, mfa_status;";
+        String query = "SELECT users.id, password IS NOT NULL AS has_segue_account, user_totp.shared_secret IS NOT NULL AS mfa_status, array_agg(provider) AS linked_accounts "
+                + "FROM (users LEFT OUTER JOIN user_credentials ON user_credentials.user_id=users.id) "
+                + "LEFT OUTER JOIN linked_accounts ON users.id=linked_accounts.user_id "
+                + "LEFT OUTER JOIN user_totp ON users.id=user_totp.user_id WHERE users.id=? GROUP BY users.id, user_credentials.user_id, mfa_status;";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {
@@ -515,8 +515,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
 
     @Override
     public Map<SchoolInfoStatus, Long> getSchoolInfoStats() throws SegueDatabaseException {
-        String query = "SELECT school_id IS NOT NULL AS has_school_id,  school_other IS NOT NULL AS has_school_other," +
-                " count(1) FROM users WHERE NOT deleted GROUP BY has_school_id, has_school_other;";
+        String query = "SELECT school_id IS NOT NULL AS has_school_id,  school_other IS NOT NULL AS has_school_other,"
+                + " count(1) FROM users WHERE NOT deleted GROUP BY has_school_id, has_school_other;";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
              ResultSet results = pst.executeQuery();
@@ -679,8 +679,11 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         Random random = new SecureRandom();
         int newValue = random.nextInt();
         // -1 is reserved for 'no assigned token', used for when a user is logged out for example
-        if (newValue != -1) return newValue;
-        else return generateRandomTokenInteger();
+        if (newValue != -1) {
+            return newValue;
+        } else {
+            return generateRandomTokenInteger();
+        }
     }
 
     @Override
@@ -725,10 +728,10 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         Integer newSessionToken = generateRandomTokenInteger();
         userToCreate.setSessionToken(newSessionToken);
 
-        String query = "INSERT INTO users(family_name, given_name, email, role, date_of_birth, gender," +
-                " registration_date, school_id, school_other, last_updated, email_verification_status, last_seen," +
-                " email_verification_token, email_to_verify, session_token, registered_contexts, registered_contexts_last_confirmed)" +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String query = "INSERT INTO users(family_name, given_name, email, role, date_of_birth, gender,"
+                + " registration_date, school_id, school_other, last_updated, email_verification_status, last_seen,"
+                + " email_verification_token, email_to_verify, session_token, registered_contexts, registered_contexts_last_confirmed)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {
@@ -816,10 +819,10 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
             throw new SegueDatabaseException("The user you have tried to update does not exist.");
         }
 
-        String query = "UPDATE users SET family_name = ?, given_name = ?, email = ?, role = ?, date_of_birth = ?," +
-                " gender = ?, registration_date = ?, school_id = ?, school_other = ?, last_updated = ?," +
-                " email_verification_status = ?, last_seen = ?, email_verification_token = ?, email_to_verify = ?," +
-                " registered_contexts = ?, registered_contexts_last_confirmed = ? WHERE id = ?;";
+        String query = "UPDATE users SET family_name = ?, given_name = ?, email = ?, role = ?, date_of_birth = ?,"
+                + " gender = ?, registration_date = ?, school_id = ?, school_other = ?, last_updated = ?,"
+                + " email_verification_status = ?, last_seen = ?, email_verification_token = ?, email_to_verify = ?,"
+                + " registered_contexts = ?, registered_contexts_last_confirmed = ? WHERE id = ?;";
         try (PreparedStatement pst = conn.prepareStatement(query)) {
             // TODO: Change this to annotations or something to rely exclusively on the pojo.
             setValueHelper(pst, 1, userToCreate.getFamilyName());

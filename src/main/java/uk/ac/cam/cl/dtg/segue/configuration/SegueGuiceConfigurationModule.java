@@ -232,7 +232,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
             if (System.getProperty("config.location") != null) {
                 configLocation = System.getProperty("config.location");
             }
-            if (System.getenv("SEGUE_CONFIG_LOCATION") != null){
+            if (System.getenv("SEGUE_CONFIG_LOCATION") != null) {
                 configLocation = System.getenv("SEGUE_CONFIG_LOCATION");
             }
 

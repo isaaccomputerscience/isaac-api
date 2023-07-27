@@ -59,7 +59,7 @@ public class SyncMailjetUsersJob implements Job {
         } catch (ExternalAccountSynchronisationException e) {
             final String subject = "Failed to execute SyncMailjetUsersJob";
             StringWriter stringWriter = new StringWriter();
-            PrintWriter printWriter= new PrintWriter(stringWriter);
+            PrintWriter printWriter = new PrintWriter(stringWriter);
             e.printStackTrace(printWriter);
             String exception = stringWriter.toString();
             EmailCommunicationMessage email = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),

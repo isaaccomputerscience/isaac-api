@@ -104,8 +104,7 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
 
         try (InputStream inputStream = new FileInputStream(idpMetadataLocation);
              InputStreamReader reader = new InputStreamReader(inputStream)
-        )
-        {
+        ) {
             this.idpMetadata = OidcDiscoveryResponse.load(this.jsonFactory, reader);
         }
 
@@ -160,8 +159,7 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
 
         if (null == nickname || null == fullName || null == email || null == sub) {
             throw new NoUserException("Required field missing from identity provider's response.");
-        }
-        else {
+        } else {
             // Build a given name/family name based on the nickname and full name fields available. This makes
             // unreasonable assumptions about the structure of names, but it's the best we can do.
             List<String> givenNameFamilyName = getGivenNameFamilyName(nickname, fullName);
@@ -272,7 +270,7 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
         }
 
         // Finally, check that the name meets validation.
-        if (!UserAccountManager.isUserNameValid(givenName) || !UserAccountManager.isUserNameValid(familyName)){
+        if (!UserAccountManager.isUserNameValid(givenName) || !UserAccountManager.isUserNameValid(familyName)) {
             throw new NoUserException("The name provided by the identity provider does not meet validation.");
         }
         return List.of(givenName, familyName);
