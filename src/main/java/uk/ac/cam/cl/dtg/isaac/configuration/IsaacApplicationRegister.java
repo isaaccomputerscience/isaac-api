@@ -81,7 +81,7 @@ public class IsaacApplicationRegister extends Application {
     /**
      * Default constructor.
      */
-    public IsaacApplicationRegister(@Context ServletConfig servletConfig) {
+    public IsaacApplicationRegister(@Context final ServletConfig servletConfig) {
         singletons = new HashSet<>();
         injector = SegueGuiceConfigurationModule.getGuiceInjector();
         

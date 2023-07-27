@@ -745,7 +745,7 @@ public class QuizFacade extends AbstractIsaacFacade {
     @Operation(summary = "Get the QuizDTO for a test attempt.")
     public Response logQuizSectionView(@Context final HttpServletRequest httpServletRequest,
                                        @PathParam("quizAttemptId") final Long quizAttemptId,
-                                       @FormParam("sectionNumber") Integer sectionNumber) {
+                                       @FormParam("sectionNumber") final Integer sectionNumber) {
         try {
             if (sectionNumber == null) {
                 return new SegueErrorResponse(Status.BAD_REQUEST, "Missing sectionNumber.").toResponse();
@@ -1004,8 +1004,8 @@ public class QuizFacade extends AbstractIsaacFacade {
     @Produces(MediaType.APPLICATION_JSON)
     @GZIP
     @Operation(summary = "Get tests assigned by this user.")
-    public Response getQuizAssignments(@Context HttpServletRequest request,
-                                       @QueryParam("groupId") Long groupIdOfInterest) {
+    public Response getQuizAssignments(@Context final HttpServletRequest request,
+                                       @QueryParam("groupId") final Long groupIdOfInterest) {
         try {
             RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
 
@@ -1059,7 +1059,7 @@ public class QuizFacade extends AbstractIsaacFacade {
     @GZIP
     @Operation(summary = "View a test assignment.")
     public final Response getQuizAssignment(@Context final HttpServletRequest httpServletRequest,
-                                            @PathParam("quizAssignmentId") Long quizAssignmentId) {
+                                            @PathParam("quizAssignmentId") final Long quizAssignmentId) {
 
         if (null == quizAssignmentId) {
             return new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a valid test assignment id.").toResponse();
@@ -1134,7 +1134,7 @@ public class QuizFacade extends AbstractIsaacFacade {
     @GZIP
     @Operation(summary = "Download a test assignment as a CSV.")
     public final Response getQuizAssignmentCSV(@Context final HttpServletRequest httpServletRequest,
-                                               @PathParam("quizAssignmentId") Long quizAssignmentId,
+                                               @PathParam("quizAssignmentId") final Long quizAssignmentId,
                                                @QueryParam("format") final String formatMode) {
 
         if (null == quizAssignmentId) {
@@ -1251,7 +1251,7 @@ public class QuizFacade extends AbstractIsaacFacade {
     @GZIP
     @Operation(summary = "Download a CSV with all the quiz results of a given group")
     public final Response getQuizResultsForGroup(@Context final HttpServletRequest httpServletRequest,
-                                                 @PathParam("groupId") Long groupId,
+                                                 @PathParam("groupId") final Long groupId,
                                                  @QueryParam("format") final String formatMode) {
         if (null == groupId) {
             return new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a valid group id.").toResponse();
@@ -1406,7 +1406,7 @@ public class QuizFacade extends AbstractIsaacFacade {
         }
     }
 
-    private List<String> getQuizQuestionTitles(IsaacQuizDTO quiz) {
+    private List<String> getQuizQuestionTitles(final IsaacQuizDTO quiz) {
         List<String> questionTitles = new ArrayList<>();
         for (ContentBaseDTO section : quiz.getChildren().stream().filter(c -> c instanceof IsaacQuizSectionDTO).collect(Collectors.toList())) {
             if (section instanceof IsaacQuizSectionDTO) {
@@ -1420,7 +1420,7 @@ public class QuizFacade extends AbstractIsaacFacade {
         return questionTitles;
     }
 
-    private List<String> getQuizQuestionIds(IsaacQuizDTO quiz) {
+    private List<String> getQuizQuestionIds(final IsaacQuizDTO quiz) {
         List<String> questionIds = new ArrayList<>();
         for (ContentBaseDTO section : quiz.getChildren().stream().filter(c -> c instanceof IsaacQuizSectionDTO).collect(Collectors.toList())) {
             if (section instanceof IsaacQuizSectionDTO) {
@@ -1450,8 +1450,8 @@ public class QuizFacade extends AbstractIsaacFacade {
     @GZIP
     @Operation(summary = "View a test assignment attempt.")
     public final Response getQuizAssignmentAttempt(@Context final HttpServletRequest httpServletRequest,
-                                                   @PathParam("quizAssignmentId") Long quizAssignmentId,
-                                                   @PathParam("userId") Long userId) {
+                                                   @PathParam("quizAssignmentId") final Long quizAssignmentId,
+                                                   @PathParam("userId") final Long userId) {
 
         if (null == quizAssignmentId || null == userId) {
             return new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a valid test assignment and user id id.").toResponse();
@@ -1532,7 +1532,7 @@ public class QuizFacade extends AbstractIsaacFacade {
     @Path("/assignment/{quizAssignmentId}")
     @Operation(summary = "Update a test assignment (only feedbackMode and dueDate may be updated).")
     public final Response updateQuizAssignment(@Context final HttpServletRequest httpServletRequest,
-                                               @PathParam("quizAssignmentId") Long quizAssignmentId,
+                                               @PathParam("quizAssignmentId") final Long quizAssignmentId,
                                                final QuizAssignmentDTO clientQuizAssignment) {
 
         if (null == quizAssignmentId) {
@@ -1627,7 +1627,7 @@ public class QuizFacade extends AbstractIsaacFacade {
     @Path("/assignment/{quizAssignmentId}")
     @Operation(summary = "Cancel a test assignment.")
     public final Response cancelQuizAssignment(@Context final HttpServletRequest httpServletRequest,
-                                               @PathParam("quizAssignmentId") Long quizAssignmentId) {
+                                               @PathParam("quizAssignmentId") final Long quizAssignmentId) {
 
         if (null == quizAssignmentId) {
             return new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a valid test assignment id.").toResponse();
@@ -1669,7 +1669,8 @@ public class QuizFacade extends AbstractIsaacFacade {
     }
 
     @Nullable
-    private QuizAssignmentDTO checkQuizAssignmentNotCancelledOrOverdue(final QuizAttemptDTO quizAttempt) throws SegueDatabaseException, AssignmentCancelledException, ErrorResponseWrapper {
+    private QuizAssignmentDTO checkQuizAssignmentNotCancelledOrOverdue(final QuizAttemptDTO quizAttempt)
+            throws SegueDatabaseException, AssignmentCancelledException, ErrorResponseWrapper {
         // Relying on the side-effects of getting the assignment.
         QuizAssignmentDTO quizAssignment = getQuizAssignment(quizAttempt);
 
@@ -1681,7 +1682,7 @@ public class QuizFacade extends AbstractIsaacFacade {
     }
 
     @Nullable
-    private QuizAssignmentDTO getQuizAssignment(QuizAttemptDTO quizAttempt) throws SegueDatabaseException, AssignmentCancelledException {
+    private QuizAssignmentDTO getQuizAssignment(final QuizAttemptDTO quizAttempt) throws SegueDatabaseException, AssignmentCancelledException {
         if (quizAttempt.getQuizAssignmentId() != null) {
             return quizAssignmentManager.getById(quizAttempt.getQuizAssignmentId());
         }
@@ -1689,7 +1690,8 @@ public class QuizFacade extends AbstractIsaacFacade {
     }
 
     @SuppressWarnings("deprecation")
-    private QuizAttemptDTO getIncompleteQuizAttemptForUser(Long quizAttemptId, RegisteredUserDTO user) throws SegueDatabaseException, ErrorResponseWrapper {
+    private QuizAttemptDTO getIncompleteQuizAttemptForUser(final Long quizAttemptId, final RegisteredUserDTO user)
+            throws SegueDatabaseException, ErrorResponseWrapper {
         QuizAttemptDTO quizAttempt = getQuizAttemptForUser(quizAttemptId, user);
 
         if (quizAttempt.getCompletedDate() != null) {
@@ -1699,7 +1701,8 @@ public class QuizFacade extends AbstractIsaacFacade {
     }
 
     @SuppressWarnings("deprecation")
-    private QuizAttemptDTO getCompleteQuizAttemptForUser(Long quizAttemptId, RegisteredUserDTO user) throws SegueDatabaseException, ErrorResponseWrapper {
+    private QuizAttemptDTO getCompleteQuizAttemptForUser(final Long quizAttemptId, final RegisteredUserDTO user)
+            throws SegueDatabaseException, ErrorResponseWrapper {
         QuizAttemptDTO quizAttempt = getQuizAttemptForUser(quizAttemptId, user);
 
         if (quizAttempt.getCompletedDate() == null) {
@@ -1710,7 +1713,8 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     @DoNotCall
     @Deprecated
-    private QuizAttemptDTO getQuizAttemptForUser(Long quizAttemptId, RegisteredUserDTO user) throws ErrorResponseWrapper, SegueDatabaseException {
+    private QuizAttemptDTO getQuizAttemptForUser(final Long quizAttemptId, final RegisteredUserDTO user)
+            throws ErrorResponseWrapper, SegueDatabaseException {
         QuizAttemptDTO quizAttempt = this.getQuizAttempt(quizAttemptId);
 
         if (!quizAttempt.getUserId().equals(user.getId())) {
@@ -1719,7 +1723,7 @@ public class QuizFacade extends AbstractIsaacFacade {
         return quizAttempt;
     }
 
-    private QuizAttemptDTO getQuizAttempt(Long quizAttemptId) throws ErrorResponseWrapper, SegueDatabaseException {
+    private QuizAttemptDTO getQuizAttempt(final Long quizAttemptId) throws ErrorResponseWrapper, SegueDatabaseException {
         if (null == quizAttemptId) {
             throw new ErrorResponseWrapper(new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a valid test attempt id."));
         }
@@ -1727,18 +1731,21 @@ public class QuizFacade extends AbstractIsaacFacade {
         return this.quizAttemptManager.getById(quizAttemptId);
     }
 
-    private boolean canManageAssignment(QuizAssignmentDTO clientQuizAssignment, RegisteredUserDTO currentlyLoggedInUser) throws SegueDatabaseException, NoUserLoggedInException {
+    private boolean canManageAssignment(final QuizAssignmentDTO clientQuizAssignment, final RegisteredUserDTO currentlyLoggedInUser)
+            throws SegueDatabaseException, NoUserLoggedInException {
         UserGroupDTO assigneeGroup = quizAssignmentManager.getGroupForAssignment(clientQuizAssignment);
 
         return canManageGroup(currentlyLoggedInUser, assigneeGroup);
     }
 
-    private boolean canManageGroup(RegisteredUserDTO currentlyLoggedInUser, UserGroupDTO assigneeGroup) throws NoUserLoggedInException {
+    private boolean canManageGroup(final RegisteredUserDTO currentlyLoggedInUser, final UserGroupDTO assigneeGroup)
+            throws NoUserLoggedInException {
         return GroupManager.isOwnerOrAdditionalManager(assigneeGroup, currentlyLoggedInUser.getId())
             || isUserAnAdmin(userManager, currentlyLoggedInUser);
     }
 
-    private QuizAttemptDTO augmentAttempt(QuizAttemptDTO quizAttempt, @Nullable QuizAssignmentDTO quizAssignment, boolean includeCorrect) throws ContentManagerException, SegueDatabaseException {
+    private QuizAttemptDTO augmentAttempt(final QuizAttemptDTO quizAttempt, @Nullable final QuizAssignmentDTO quizAssignment,
+                                          final boolean includeCorrect) throws ContentManagerException, SegueDatabaseException {
         IsaacQuizDTO quiz = quizManager.findQuiz(quizAttempt.getQuizId());
         quiz = quizQuestionManager.augmentQuestionsForUser(quiz, quizAttempt, includeCorrect);
         quizAttempt.setQuiz(quiz);
@@ -1746,7 +1753,9 @@ public class QuizFacade extends AbstractIsaacFacade {
         return augmentAttempt(quizAttempt, quizAssignment);
     }
 
-    private List<QuizUserFeedbackDTO> getUserFeedback(RegisteredUserDTO user, QuizAssignmentDTO assignment, IsaacQuizDTO quiz, List<RegisteredUserDTO> groupMembers) throws ContentManagerException, SegueDatabaseException {
+    private List<QuizUserFeedbackDTO> getUserFeedback(
+            final RegisteredUserDTO user, final QuizAssignmentDTO assignment, final IsaacQuizDTO quiz, final List<RegisteredUserDTO> groupMembers)
+            throws ContentManagerException, SegueDatabaseException {
         Map<RegisteredUserDTO, QuizFeedbackDTO> feedbackMap = quizQuestionManager.getAssignmentTeacherFeedback(quiz, assignment, groupMembers);
         List<QuizUserFeedbackDTO> userFeedback = new ArrayList<>();
         for (RegisteredUserDTO groupMember : groupMembers) {
@@ -1761,7 +1770,8 @@ public class QuizFacade extends AbstractIsaacFacade {
     }
 
 
-    private QuizAttemptDTO augmentAttempt(QuizAttemptDTO quizAttempt, @Nullable QuizAssignmentDTO quizAssignment) throws SegueDatabaseException {
+    private QuizAttemptDTO augmentAttempt(final QuizAttemptDTO quizAttempt, @Nullable final QuizAssignmentDTO quizAssignment)
+            throws SegueDatabaseException {
         if (quizAssignment != null) {
             this.assignmentService.augmentAssignerSummaries(Collections.singletonList(quizAssignment));
             quizAttempt.setQuizAssignment(quizAssignment);

@@ -727,7 +727,7 @@ public class GameManager {
      *            - results depend on each question having an id prefixed with the question page id.
      * @return collection of markable question parts (questions).
      */
-    public static List<QuestionDTO> getAllMarkableQuestionPartsDFSOrder(ContentDTO content) {
+    public static List<QuestionDTO> getAllMarkableQuestionPartsDFSOrder(final ContentDTO content) {
         List<ContentDTO> dfs = Lists.newArrayList();
         dfs = depthFirstQuestionSearch(content, dfs);
 

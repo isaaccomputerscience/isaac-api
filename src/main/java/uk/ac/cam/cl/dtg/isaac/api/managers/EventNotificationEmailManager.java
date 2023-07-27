@@ -69,7 +69,7 @@ public class EventNotificationEmailManager {
         this.pgScheduledEmailManager = pgScheduledEmailManager;
     }
 
-    public void sendBookingStatusFilteredEmailForEvent(IsaacEventPageDTO event, String templateId, List<BookingStatus> bookingStatuses) throws SegueDatabaseException {
+    public void sendBookingStatusFilteredEmailForEvent(final IsaacEventPageDTO event, final String templateId, final List<BookingStatus> bookingStatuses) throws SegueDatabaseException {
         List<DetailedEventBookingDTO> eventBookings = bookingManager.adminGetBookingsByEventId(event.getId());
         List<Long> ids = eventBookings.stream()
                             .filter(DetailedEventBookingDTO -> bookingStatuses == null || bookingStatuses.contains(DetailedEventBookingDTO.getBookingStatus()))

@@ -1150,7 +1150,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
     }
 
     private static Map<RegisteredUserDTO, Map<String, Integer>> getUserQuestionMap(
-            Map<RegisteredUserDTO, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> questionAttemptsForAllUsersOfInterest
+            final Map<RegisteredUserDTO, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> questionAttemptsForAllUsersOfInterest
     ) {
         // Input is in format of {UserDTO: {PageId: {QuestionId: List<QuestionResponse>}}}
         // Transformed output is in format of {UserDTO: {QuestionId: Integer}}

@@ -243,7 +243,7 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
     }
 
     @Override
-    public String getAssignmentLikeName(AssignmentDTO existingAssignment) throws SegueDatabaseException {
+    public String getAssignmentLikeName(final AssignmentDTO existingAssignment) throws SegueDatabaseException {
         GameboardDTO gameboard = gameManager.getGameboard(existingAssignment.getGameboardId());
         String name = existingAssignment.getGameboardId();
         if (gameboard != null && gameboard.getTitle() != null && !gameboard.getTitle().isEmpty()) {
@@ -253,7 +253,7 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
     }
 
     @Override
-    public String getAssignmentLikeUrl(AssignmentDTO existingAssignment) {
+    public String getAssignmentLikeUrl(final AssignmentDTO existingAssignment) {
         return String.format("https://%s/assignment/%s",
                         properties.getProperty(HOST_NAME),
                         existingAssignment.getGameboardId());

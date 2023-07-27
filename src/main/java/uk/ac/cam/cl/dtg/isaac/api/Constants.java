@@ -76,7 +76,7 @@ public final class Constants {
         ft_top_ten,
         ft_upper,
         ft_lower;
-        public static FASTTRACK_LEVEL getStateFromTags(Set<String> tags) {
+        public static FASTTRACK_LEVEL getStateFromTags(final Set<String> tags) {
             FASTTRACK_LEVEL state = null;
             if (tags.contains("ft_top_ten")) {
                 state = ft_top_ten;

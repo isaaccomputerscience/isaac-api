@@ -89,7 +89,9 @@ public class QuizManager {
         this.mapper = mapper;
     }
 
-    public ResultsWrapper<ContentSummaryDTO> getAvailableQuizzes(boolean onlyVisibleToStudents, String visibleToRole, @Nullable Integer startIndex, @Nullable Integer limit) throws ContentManagerException {
+    public ResultsWrapper<ContentSummaryDTO> getAvailableQuizzes(
+            final boolean onlyVisibleToStudents, final String visibleToRole, @Nullable final Integer startIndex, @Nullable final Integer limit)
+            throws ContentManagerException {
 
         List<GitContentManager.BooleanSearchClause> fieldsToMatch = Lists.newArrayList();
         fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
@@ -142,7 +144,7 @@ public class QuizManager {
      *
      * @param items The items to augment.
      */
-    public <T extends IHasQuizSummary> void augmentWithQuizSummary(List<T> items) {
+    public <T extends IHasQuizSummary> void augmentWithQuizSummary(final List<T> items) {
         Map<String, ContentSummaryDTO> quizCache = new HashMap<>();
         for (IHasQuizSummary item: items) {
             String quizId = item.getQuizId();
@@ -174,7 +176,7 @@ public class QuizManager {
      * @return A list of sections.
      * @throws ContentManagerException when a non-section is found at the top-level, but only in DEV.
      */
-    public List<IsaacQuizSectionDTO> extractSectionObjects(IsaacQuizDTO quiz) throws ContentManagerException {
+    public List<IsaacQuizSectionDTO> extractSectionObjects(final IsaacQuizDTO quiz) throws ContentManagerException {
         if (properties.getProperty(Constants.SEGUE_APP_ENVIRONMENT).equals(Constants.EnvironmentType.DEV.name())) {
             for (ContentBaseDTO content : quiz.getChildren()) {
                 if (!(content instanceof IsaacQuizSectionDTO)) {

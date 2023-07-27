@@ -118,7 +118,7 @@ public class IsaacRegexMatchValidator implements IValidator {
         return new QuestionValidationResponse(question.getId(), userAnswer, responseCorrect, feedback, new Date());
     }
 
-    private boolean matchesPattern(String trustedRegexPattern, String userValue, final Boolean caseInsensitive,
+    private boolean matchesPattern(final String trustedRegexPattern, final String userValue, final Boolean caseInsensitive,
                                    final Boolean multiLineRegex, final Boolean matchWholeString) {
 
         if (null == trustedRegexPattern || null == userValue) {

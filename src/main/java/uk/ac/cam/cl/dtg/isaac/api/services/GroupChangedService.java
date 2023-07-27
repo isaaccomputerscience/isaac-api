@@ -73,12 +73,12 @@ public class GroupChangedService implements IGroupObserver {
     }
 
     @Override
-    public void onGroupMembershipRemoved(UserGroupDTO group, RegisteredUserDTO user) {
+    public void onGroupMembershipRemoved(final UserGroupDTO group, final RegisteredUserDTO user) {
         // Do nothing
     }
 
     @Override
-    public void onMemberAddedToGroup(UserGroupDTO group, RegisteredUserDTO user) {
+    public void onMemberAddedToGroup(final UserGroupDTO group, final RegisteredUserDTO user) {
         Validate.notNull(group);
         Validate.notNull(user);
 
@@ -134,7 +134,8 @@ public class GroupChangedService implements IGroupObserver {
             .build();
     }
 
-    private void formatGroupAssignmentsInfo(UserGroupDTO userGroup, StringBuilder htmlSB, StringBuilder plainTextSB) throws SegueDatabaseException, ContentManagerException {
+    private void formatGroupAssignmentsInfo(final UserGroupDTO userGroup, final StringBuilder htmlSB, final StringBuilder plainTextSB)
+            throws SegueDatabaseException, ContentManagerException {
         final List<AssignmentDTO> existingAssignments = this.assignmentManager.getAllAssignmentsForSpecificGroups(Collections.singletonList(userGroup), false);
 
         formatAssignmentLikeList(htmlSB, plainTextSB, existingAssignments, "assignments", assignmentManager);
@@ -148,7 +149,10 @@ public class GroupChangedService implements IGroupObserver {
         }
     }
 
-    private <A extends IAssignmentLike> void formatAssignmentLikeList(StringBuilder htmlSB, StringBuilder plainTextSB, List<A> existingAssignments, String typeOfAssignment, IAssignmentLike.Details<A> assignmentDetailsService) throws SegueDatabaseException, ContentManagerException {
+    private <A extends IAssignmentLike> void formatAssignmentLikeList(
+            final StringBuilder htmlSB, final StringBuilder plainTextSB, final List<A> existingAssignments,
+            final String typeOfAssignment, final IAssignmentLike.Details<A> assignmentDetailsService)
+            throws SegueDatabaseException, ContentManagerException {
         if (existingAssignments != null) {
             existingAssignments.sort(Comparator.comparing(IAssignmentLike::getCreationDate));
         }

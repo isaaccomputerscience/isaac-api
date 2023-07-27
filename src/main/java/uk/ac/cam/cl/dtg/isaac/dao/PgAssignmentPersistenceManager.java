@@ -235,7 +235,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
     }
 
     @Override
-    public List<AssignmentDTO> getAssignmentsByGroupList(Collection<Long> groupIds) throws SegueDatabaseException {
+    public List<AssignmentDTO> getAssignmentsByGroupList(final Collection<Long> groupIds) throws SegueDatabaseException {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT * FROM assignments WHERE group_id IN (");
 

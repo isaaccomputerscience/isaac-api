@@ -73,11 +73,11 @@ public class IsaacFreeTextValidator implements IValidator {
         return strippedAnswer;
     }
 
-    private static String extractAnswerValue(Choice answer, boolean caseInsensitive) {
+    private static String extractAnswerValue(final Choice answer, final boolean caseInsensitive) {
         return caseInsensitive ? answer.getValue().toLowerCase() : answer.getValue();
     }
 
-    private static String extractRuleValue(FreeTextRule rule) {
+    private static String extractRuleValue(final FreeTextRule rule) {
         String ruleInCorrectCase = rule.isCaseInsensitive() ? rule.getValue().toLowerCase() : rule.getValue();
         return convertToPMatchWildcardNotation(ruleInCorrectCase);
     }

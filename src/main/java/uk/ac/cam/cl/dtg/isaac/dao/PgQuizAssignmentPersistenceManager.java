@@ -133,7 +133,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
     }
 
     @Override
-    public List<QuizAssignmentDTO> getAssignmentsByGroupList(List<Long> groupIds) throws SegueDatabaseException {
+    public List<QuizAssignmentDTO> getAssignmentsByGroupList(final List<Long> groupIds) throws SegueDatabaseException {
         List<QuizAssignmentDTO> listOfResults = Lists.newArrayList();
         if (groupIds.isEmpty()) {
             return listOfResults; // IN condition below doesn't work with empty list.
@@ -168,7 +168,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
     }
 
     @Override
-    public QuizAssignmentDTO getAssignmentById(Long quizAssignmentId) throws SegueDatabaseException, AssignmentCancelledException {
+    public QuizAssignmentDTO getAssignmentById(final Long quizAssignmentId) throws SegueDatabaseException, AssignmentCancelledException {
         String query = "SELECT * FROM quiz_assignments WHERE id = ?";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
@@ -191,7 +191,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
     }
 
     @Override
-    public void cancelAssignment(Long quizAssignmentId) throws SegueDatabaseException {
+    public void cancelAssignment(final Long quizAssignmentId) throws SegueDatabaseException {
         String query = "UPDATE quiz_assignments SET deleted = true WHERE id = ?";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
@@ -205,7 +205,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
     }
 
     @Override
-    public void updateAssignment(Long quizAssignmentId, QuizAssignmentDTO updates) throws SegueDatabaseException {
+    public void updateAssignment(final Long quizAssignmentId, final QuizAssignmentDTO updates) throws SegueDatabaseException {
         String query = "UPDATE quiz_assignments SET quiz_feedback_mode = COALESCE(?, quiz_feedback_mode),"
                 + "due_date = COALESCE(?, due_date) WHERE id = ?";
         try (Connection conn = database.getDatabaseConnection();

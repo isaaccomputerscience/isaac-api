@@ -138,7 +138,7 @@ public class IsaacGraphSketcherValidator implements IValidator, ISpecifier {
     }
 
     @Override
-    public String createSpecification(Choice answer) throws ValidatorUnavailableException {
+    public String createSpecification(final Choice answer) throws ValidatorUnavailableException {
         if (!(answer instanceof GraphChoice)) {
             log.error("Isaac GraphSketcher specifier expected there to be a GraphChoice . Instead it found a Choice.");
             throw new ValidatorUnavailableException("Incorrect choice type");

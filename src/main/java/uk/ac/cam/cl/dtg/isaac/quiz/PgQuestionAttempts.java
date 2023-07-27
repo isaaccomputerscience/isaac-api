@@ -395,7 +395,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
     }
 
     @Override
-    public Map<Role, Long> getAnsweredQuestionRolesOverPrevious(TimeInterval timeInterval) throws SegueDatabaseException {
+    public Map<Role, Long> getAnsweredQuestionRolesOverPrevious(final TimeInterval timeInterval) throws SegueDatabaseException {
         String query = "SELECT role, count(DISTINCT users.id) FROM question_attempts"
                 + " JOIN users ON user_id=users.id AND NOT deleted WHERE timestamp > now() - ? GROUP BY role";
         try (Connection conn = database.getDatabaseConnection();

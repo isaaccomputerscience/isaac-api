@@ -219,7 +219,7 @@ public class EventBookingManager {
      * @return either true or false if the user is able to manage the event.
      * @throws SegueDatabaseException if there is a problem with the database while retrieving associations or groups.
      */
-    public boolean isUserAbleToManageEvent(RegisteredUserDTO user, IsaacEventPageDTO event) throws SegueDatabaseException {
+    public boolean isUserAbleToManageEvent(final RegisteredUserDTO user, final IsaacEventPageDTO event) throws SegueDatabaseException {
         if (Arrays.asList(Role.EVENT_MANAGER, Role.ADMIN).contains(user.getRole())) {
             return true;
         }
@@ -252,9 +252,9 @@ public class EventBookingManager {
      * @return either true or false whether the requesting user made the reservation
      * @throws SegueDatabaseException if there is a problem retrieving the event and booking info
      */
-    public boolean isReservationMadeByRequestingUser(RegisteredUserDTO user,
-                                                     RegisteredUserDTO userOwningReservation,
-                                                     IsaacEventPageDTO event)
+    public boolean isReservationMadeByRequestingUser(final RegisteredUserDTO user,
+                                                     final RegisteredUserDTO userOwningReservation,
+                                                     final IsaacEventPageDTO event)
             throws SegueDatabaseException {
 
         EventBookingDTO booking = this.getBookingByEventIdAndUserId(event.getId(), userOwningReservation.getId());
@@ -1305,7 +1305,7 @@ public class EventBookingManager {
      * @param bookingDetails - the booking details.
      * @return email attachment containing an ics file.
      */
-    private EmailAttachment generateEventICSFile(IsaacEventPageDTO event, EventBookingDTO bookingDetails) {
+    private EmailAttachment generateEventICSFile(final IsaacEventPageDTO event, final EventBookingDTO bookingDetails) {
 
         try {
             // note this library will go out to a third part to get a sensible timezone value.
@@ -1345,7 +1345,7 @@ public class EventBookingManager {
      * @param event - the event of interest
      * @return customised contactUs url for the event.
      */
-    private String generateEventContactUsURL(IsaacEventPageDTO event) {
+    private String generateEventContactUsURL(final IsaacEventPageDTO event) {
         String defaultURL = String.format("https://%s/contact", propertiesLoader.getProperty(HOST_NAME));
         if (event.getDate() == null) {
             return defaultURL;

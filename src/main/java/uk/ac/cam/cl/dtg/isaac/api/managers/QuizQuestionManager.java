@@ -92,11 +92,12 @@ public class QuizQuestionManager {
         this.quizAttemptManager = quizAttemptManager;
     }
 
-    public ChoiceDTO convertJsonAnswerToChoice(String jsonAnswer) throws ErrorResponseWrapper {
+    public ChoiceDTO convertJsonAnswerToChoice(final String jsonAnswer) throws ErrorResponseWrapper {
         return questionManager.convertJsonAnswerToChoice(jsonAnswer);
     }
 
-    public QuestionValidationResponseDTO validateAnswer(Question question, ChoiceDTO answerFromClientDTO) throws ErrorResponseWrapper {
+    public QuestionValidationResponseDTO validateAnswer(final Question question, final ChoiceDTO answerFromClientDTO)
+            throws ErrorResponseWrapper {
         Response response = questionManager.validateAnswer(question, answerFromClientDTO);
         if (response.getEntity() instanceof QuestionValidationResponseDTO) {
             return (QuestionValidationResponseDTO) response.getEntity();
@@ -107,7 +108,8 @@ public class QuizQuestionManager {
         }
     }
 
-    public void recordQuestionAttempt(QuizAttemptDTO quizAttempt, QuestionValidationResponseDTO questionResponse) throws SegueDatabaseException {
+    public void recordQuestionAttempt(final QuizAttemptDTO quizAttempt, final QuestionValidationResponseDTO questionResponse)
+            throws SegueDatabaseException {
         QuestionValidationResponse questionResponseDO = this.mapper.getAutoMapper().map(questionResponse, QuestionValidationResponse.class);
 
         this.quizQuestionAttemptManager.registerQuestionAttempt(quizAttempt.getId(), questionResponseDO);
@@ -129,7 +131,8 @@ public class QuizQuestionManager {
      *
      * @return The quiz object augmented (generally a modified parameter).
      */
-    public IsaacQuizDTO augmentQuestionsForUser(IsaacQuizDTO quiz, QuizAttemptDTO quizAttempt, boolean includeCorrect) throws SegueDatabaseException {
+    public IsaacQuizDTO augmentQuestionsForUser(final IsaacQuizDTO quiz, final QuizAttemptDTO quizAttempt, final boolean includeCorrect)
+            throws SegueDatabaseException {
         List<QuestionDTO> questionsToAugment = GameManager.getAllMarkableQuestionPartsDFSOrder(quiz);
 
         Map<QuestionDTO, QuestionValidationResponse> answerMap = getAnswerMap(quizAttempt, questionsToAugment);
@@ -151,7 +154,8 @@ public class QuizQuestionManager {
      * @param feedbackMode
      *            - what level of feedback to augment with.
      */
-    public QuizAttemptDTO augmentFeedbackFor(QuizAttemptDTO quizAttempt, IsaacQuizDTO quiz, QuizFeedbackMode feedbackMode) throws SegueDatabaseException, ContentManagerException {
+    public QuizAttemptDTO augmentFeedbackFor(final QuizAttemptDTO quizAttempt, final IsaacQuizDTO quiz, final QuizFeedbackMode feedbackMode)
+            throws SegueDatabaseException, ContentManagerException {
         quizAttempt.setFeedbackMode(feedbackMode);
         if (feedbackMode == QuizFeedbackMode.NONE) {
             // No feedback, no augmentation to do.
@@ -192,7 +196,9 @@ public class QuizQuestionManager {
      * @param users
      *            - the users to get feedback for.
      */
-    public Map<RegisteredUserDTO, QuizFeedbackDTO> getAssignmentTeacherFeedback(IsaacQuizDTO quiz, QuizAssignmentDTO assignment, List<RegisteredUserDTO> users) throws ContentManagerException, SegueDatabaseException {
+    public Map<RegisteredUserDTO, QuizFeedbackDTO> getAssignmentTeacherFeedback(
+            final IsaacQuizDTO quiz, final QuizAssignmentDTO assignment, final List<RegisteredUserDTO> users)
+            throws ContentManagerException, SegueDatabaseException {
         Collection<QuestionDTO> questionsToAugment = GameManager.getAllMarkableQuestionPartsDFSOrder(quiz);
         List<IsaacQuizSectionDTO> sections = quizManager.extractSectionObjects(quiz);
         augmentQuizTotals(quiz, questionsToAugment);
@@ -231,8 +237,8 @@ public class QuizQuestionManager {
      * @return a map of question DTO to latest {@link QuestionValidationResponse}
      */
     @VisibleForTesting
-    Map<QuestionDTO, QuestionValidationResponse> getAnswerMap(QuizAttemptDTO quizAttempt,
-                                                              Collection<QuestionDTO> questionsToAugment)
+    Map<QuestionDTO, QuestionValidationResponse> getAnswerMap(final QuizAttemptDTO quizAttempt,
+                                                              final Collection<QuestionDTO> questionsToAugment)
         throws SegueDatabaseException {
         Map<String, List<QuestionValidationResponse>> answers = quizQuestionAttemptManager.getAllAnswersForQuizAttempt(quizAttempt.getId());
 
@@ -248,7 +254,8 @@ public class QuizQuestionManager {
      *            - map of all question ids to a list of answers in timestamp order.
      * @return a map of question DTO to latest {@link QuestionValidationResponse}
      */
-    private Map<QuestionDTO, QuestionValidationResponse> extractAnswers(Collection<QuestionDTO> questionsToAugment, Map<String, List<QuestionValidationResponse>> answers) {
+    private Map<QuestionDTO, QuestionValidationResponse> extractAnswers(
+            final Collection<QuestionDTO> questionsToAugment, final Map<String, List<QuestionValidationResponse>> answers) {
         Map<QuestionDTO, QuestionValidationResponse> results = new HashMap<>();
 
         for (QuestionDTO question : questionsToAugment) {
@@ -276,8 +283,8 @@ public class QuizQuestionManager {
      * @param includeCorrect Include whether the answers are correct.
      */
     @VisibleForTesting
-    void augmentQuestionObjectWithAttemptInformation(Map<QuestionDTO, QuestionValidationResponse> answerMap,
-                                                     boolean includeCorrect) {
+    void augmentQuestionObjectWithAttemptInformation(
+            final Map<QuestionDTO, QuestionValidationResponse> answerMap, final boolean includeCorrect) {
         answerMap.forEach((question, lastResponse) -> {
             if (lastResponse != null) {
                 QuestionValidationResponseDTO lastAttempt;
@@ -310,7 +317,9 @@ public class QuizQuestionManager {
      * @throws ContentManagerException In DEV, if there is a malformed quiz (top-level non-Sections).
      */
     @VisibleForTesting
-    QuizFeedbackDTO getIndividualQuizFeedback(IsaacQuizDTO quiz, QuizFeedbackMode feedbackMode, Collection<QuestionDTO> questionsToAugment, Map<QuestionDTO, QuestionValidationResponse> answerMap) throws ContentManagerException {
+    QuizFeedbackDTO getIndividualQuizFeedback(
+            final IsaacQuizDTO quiz, final QuizFeedbackMode feedbackMode, final Collection<QuestionDTO> questionsToAugment,
+            final Map<QuestionDTO, QuestionValidationResponse> answerMap) throws ContentManagerException {
         List<IsaacQuizSectionDTO> sections = quizManager.extractSectionObjects(quiz);
         return getIndividualQuizFeedback(sections, feedbackMode, questionsToAugment, answerMap);
     }
@@ -325,7 +334,9 @@ public class QuizQuestionManager {
      * @return The quiz feedback.
      */
     @Nullable
-    private QuizFeedbackDTO getIndividualQuizFeedback(List<IsaacQuizSectionDTO> sections, QuizFeedbackMode feedbackMode, Collection<QuestionDTO> questionsToAugment, Map<QuestionDTO, QuestionValidationResponse> answerMap) {
+    private QuizFeedbackDTO getIndividualQuizFeedback(
+            final List<IsaacQuizSectionDTO> sections, final QuizFeedbackMode feedbackMode, final Collection<QuestionDTO> questionsToAugment,
+            final Map<QuestionDTO, QuestionValidationResponse> answerMap) {
         if (feedbackMode == QuizFeedbackMode.NONE) {
             return null;
         }
@@ -378,7 +389,7 @@ public class QuizQuestionManager {
         return feedback;
     }
 
-    private QuizFeedbackDTO.Mark consolidateMarks(Map<String, QuizFeedbackDTO.Mark> scoreTable) {
+    private QuizFeedbackDTO.Mark consolidateMarks(final Map<String, QuizFeedbackDTO.Mark> scoreTable) {
         QuizFeedbackDTO.Mark result = new QuizFeedbackDTO.Mark();
         scoreTable.values().forEach(mark -> {
             result.correct += mark.correct;
@@ -388,7 +399,7 @@ public class QuizQuestionManager {
         return result;
     }
 
-    private void augmentQuizTotals(IsaacQuizDTO quiz, Collection<QuestionDTO> questions) {
+    private void augmentQuizTotals(final IsaacQuizDTO quiz, final Collection<QuestionDTO> questions) {
         int total = 0;
         Map<String, Integer> sectionTotals = Maps.newHashMap();
         for (QuestionDTO question : questions) {
@@ -410,7 +421,7 @@ public class QuizQuestionManager {
      * @param questionId A question ID of the form "quizId|sectionId|questionId".
      * @return A section ID of the form "quizId|sectionId".
      */
-    private static String extractSectionIdFromQuizQuestionId(String questionId) {
+    private static String extractSectionIdFromQuizQuestionId(final String questionId) {
         String[] ids = questionId.split(ESCAPED_ID_SEPARATOR, 3);
         return ids[0] + ID_SEPARATOR + ids[1];
     }
