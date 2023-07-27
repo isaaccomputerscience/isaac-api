@@ -165,14 +165,14 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
 
     @Override
     public String toString() {
-        return "UserSummaryDTO [" +
-                "id=" + id +
-                ", givenName='" + givenName + '\'' +
-                ", familyName='" + familyName + '\'' +
-                ", role=" + role +
-                ", authorisedFullAccess=" + authorisedFullAccess +
-                ", emailVerificationStatus=" + emailVerificationStatus +
-                ", registeredContexts=" + registeredContexts +
-                ']';
+        return "UserSummaryDTO ["
+                + "id=" + id
+                + ", givenName='" + givenName + '\''
+                + ", familyName='" + familyName + '\''
+                + ", role=" + role
+                + ", authorisedFullAccess=" + authorisedFullAccess
+                + ", emailVerificationStatus=" + emailVerificationStatus
+                + ", registeredContexts=" + registeredContexts
+                + ']';
     }
 }

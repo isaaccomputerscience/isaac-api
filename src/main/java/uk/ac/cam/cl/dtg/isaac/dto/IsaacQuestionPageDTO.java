@@ -15,16 +15,15 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dto;
 
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.ac.cam.cl.dtg.isaac.dos.content.JsonContentType;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+import java.util.Set;
 
 /**
  * IsaacQuestion Page DTO.
@@ -72,12 +71,20 @@ public class IsaacQuestionPageDTO extends SeguePageDTO {
         this.passMark = passMark;
     }
 
-    public String getSupersededBy() { return supersededBy; }
+    public String getSupersededBy() {
+        return supersededBy;
+    }
 
-    public void setSupersededBy(String supersededBy) { this.supersededBy = supersededBy; }
+    public void setSupersededBy(String supersededBy) {
+        this.supersededBy = supersededBy;
+    }
 
-    public Integer getDifficulty() { return difficulty; }
+    public Integer getDifficulty() {
+        return difficulty;
+    }
 
-    public void setDifficulty(Integer difficulty) { this.difficulty = difficulty; }
+    public void setDifficulty(Integer difficulty) {
+        this.difficulty = difficulty;
+    }
 
 }

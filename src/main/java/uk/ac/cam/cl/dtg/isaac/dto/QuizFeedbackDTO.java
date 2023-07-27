@@ -39,12 +39,16 @@ public class QuizFeedbackDTO {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             Mark mark = (Mark) o;
-            return Objects.equals(correct, mark.correct) &&
-                Objects.equals(incorrect, mark.incorrect) &&
-                Objects.equals(notAttempted, mark.notAttempted);
+            return Objects.equals(correct, mark.correct)
+                    && Objects.equals(incorrect, mark.incorrect)
+                    && Objects.equals(notAttempted, mark.notAttempted);
         }
 
         @Override
@@ -87,7 +91,9 @@ public class QuizFeedbackDTO {
     }
 
     @Nullable
-    public Map<String, Mark> getQuestionMarks() { return questionMarks; }
+    public Map<String, Mark> getQuestionMarks() {
+        return questionMarks;
+    }
 
     @Nullable
     public Boolean isComplete() {
@@ -100,12 +106,16 @@ public class QuizFeedbackDTO {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         QuizFeedbackDTO that = (QuizFeedbackDTO) o;
-        return Objects.equals(complete, that.complete) &&
-            Objects.equals(overallMark, that.overallMark) &&
-            Objects.equals(sectionMarks, that.sectionMarks);
+        return Objects.equals(complete, that.complete)
+                && Objects.equals(overallMark, that.overallMark)
+                && Objects.equals(sectionMarks, that.sectionMarks);
     }
 
     @Override

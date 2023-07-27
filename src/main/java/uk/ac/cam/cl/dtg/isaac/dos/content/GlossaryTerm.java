@@ -65,6 +65,10 @@ public class GlossaryTerm extends Content {
     }
 
     @JsonIgnore
-    public final boolean getAutoId() { return autoId; }
-    public final void setAutoId(final boolean autoId) { this.autoId = autoId; }
+    public final boolean getAutoId() {
+        return autoId;
+    }
+    public final void setAutoId(final boolean autoId) {
+        this.autoId = autoId;
+    }
 }

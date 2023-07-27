@@ -81,11 +81,13 @@ public class Content extends ContentBase {
         this.level = level;
 
         // useful for when we want to augment this POJO
-        if (null == this.children)
+        if (null == this.children) {
             this.children = new ArrayList<ContentBase>();
+        }
 
-        if (null == this.tags)
+        if (null == this.tags) {
             this.tags = new HashSet<String>();
+        }
 
     }
 
@@ -100,11 +102,13 @@ public class Content extends ContentBase {
         this.encoding = "markdown";
 
         // useful for when we want to augment this POJO
-        if (null == this.children)
+        if (null == this.children) {
             this.children = new ArrayList<ContentBase>();
+        }
 
-        if (null == this.tags)
+        if (null == this.tags) {
             this.tags = new HashSet<String>();
+        }
     }
 
     /**
@@ -240,8 +244,9 @@ public class Content extends ContentBase {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Content))
+        if (!(o instanceof Content)) {
             return false;
+        }
 
         Content c = (Content) o;
         boolean result = true;
@@ -266,14 +271,17 @@ public class Content extends ContentBase {
     public int hashCode() {
         int hashCode = 0;
 
-        if (this.id != null)
+        if (this.id != null) {
             hashCode = hashCode + this.id.hashCode();
+        }
 
-        if (this.title != null)
+        if (this.title != null) {
             hashCode = hashCode + this.title.hashCode();
+        }
 
-        if (this.value != null)
+        if (this.value != null) {
             hashCode = hashCode + this.value.hashCode();
+        }
 
         return hashCode;
     }

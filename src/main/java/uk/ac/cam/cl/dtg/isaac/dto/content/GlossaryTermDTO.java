@@ -52,6 +52,11 @@ public class GlossaryTermDTO extends ContentDTO {
     }
 
     @JsonIgnore
-    public final boolean getAutoId() { return autoId; }
-    public final void setAutoId(final boolean autoId) { this.autoId = autoId; }
+    public final boolean getAutoId() {
+        return autoId;
+    }
+
+    public final void setAutoId(final boolean autoId) {
+        this.autoId = autoId;
+    }
 }

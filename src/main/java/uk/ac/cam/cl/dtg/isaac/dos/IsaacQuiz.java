@@ -58,7 +58,7 @@ public class IsaacQuiz extends SeguePage {
             @JsonProperty("level") Integer level,
             @JsonProperty("visibleToStudents") boolean visibleToStudents,
             @JsonProperty("hiddenFromRoles") List<String> hiddenFromRoles,
-            @JsonProperty("rubric") Content rubric){
+            @JsonProperty("rubric") Content rubric) {
         super(id, title, subtitle, type, author, encoding,
                 canonicalSourceFile, layout, children, value, attribution,
                 relatedContent, published, deprecated, tags, level);
@@ -89,7 +89,7 @@ public class IsaacQuiz extends SeguePage {
         return rubric;
     }
 
-    public void setRubric(Content rubric){
+    public void setRubric(Content rubric) {
         this.rubric = rubric;
     }
 

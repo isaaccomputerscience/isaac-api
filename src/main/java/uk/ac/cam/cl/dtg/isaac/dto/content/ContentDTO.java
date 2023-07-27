@@ -15,16 +15,16 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dto.content;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Sets;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Content Class (Data Transfer Object) This class represents a majority of content types within the Content Management
@@ -233,8 +233,9 @@ public class ContentDTO extends ContentBaseDTO {
 
     @Override
     public boolean equals(final Object o) {
-        if (!(o instanceof ContentDTO))
+        if (!(o instanceof ContentDTO)) {
             return false;
+        }
 
         ContentDTO c = (ContentDTO) o;
         boolean result = true;

@@ -60,7 +60,7 @@ public class GameboardItem {
     /**
      * Generic constructor.
      */
-    public GameboardItem() {}
+    public GameboardItem() { }
 
     /**
      * Static factory method for constructing a minimal Gameboard Item from a GameboardContentDescriptor.
@@ -70,11 +70,13 @@ public class GameboardItem {
      * @return A Minimal gameboard item containing all of the information from the content descriptor.
      */
     public static GameboardItem buildLightweightItemFromContentDescriptor(final GameboardContentDescriptor contentDescriptor) {
-        return new GameboardItem() {{
-            this.setId(contentDescriptor.getId());
-            this.setContentType(contentDescriptor.getContentType());
-            this.setCreationContext(contentDescriptor.getContext());
-        }};
+        return new GameboardItem() {
+            {
+                this.setId(contentDescriptor.getId());
+                this.setContentType(contentDescriptor.getContentType());
+                this.setCreationContext(contentDescriptor.getContext());
+            }
+        };
     }
 
     /**
@@ -231,10 +233,10 @@ public class GameboardItem {
      *            the difficulty to set
      */
     public final void setDifficulty(final Integer difficulty) {
-        this.difficulty= difficulty;
+        this.difficulty = difficulty;
     }
 
-    public final List<Constants.QuestionPartState> getQuestionPartStates(){
+    public final List<Constants.QuestionPartState> getQuestionPartStates() {
         return this.questionPartStates;
     }
 

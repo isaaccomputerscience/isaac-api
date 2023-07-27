@@ -476,22 +476,22 @@ public class RegisteredUser extends AbstractSegueUser {
 
     @Override
     public String toString() {
-        return "RegisteredUser{" +
-                "id=" + id +
-                ", givenName='" + givenName + '\'' +
-                ", familyName='" + familyName + '\'' +
-                ", email='" + email + '\'' +
-                ", role=" + role +
-                ", dateOfBirth=" + dateOfBirth +
-                ", gender=" + gender +
-                ", registrationDate=" + registrationDate +
-                ", schoolId='" + schoolId + '\'' +
-                ", schoolOther='" + schoolOther + '\'' +
-                ", emailVerificationToken='" + emailVerificationToken + '\'' +
-                ", emailToVerify='" + emailToVerify + '\'' +
-                ", emailVerificationStatus=" + emailVerificationStatus +
-                ", lastUpdated=" + lastUpdated +
-                ", lastSeen=" + lastSeen +
-                '}';
+        return "RegisteredUser{"
+                + "id=" + id
+                + ", givenName='" + givenName + '\''
+                + ", familyName='" + familyName + '\''
+                + ", email='" + email + '\''
+                + ", role=" + role
+                + ", dateOfBirth=" + dateOfBirth
+                + ", gender=" + gender
+                + ", registrationDate=" + registrationDate
+                + ", schoolId='" + schoolId + '\''
+                + ", schoolOther='" + schoolOther + '\''
+                + ", emailVerificationToken='" + emailVerificationToken + '\''
+                + ", emailToVerify='" + emailToVerify + '\''
+                + ", emailVerificationStatus=" + emailVerificationStatus
+                + ", lastUpdated=" + lastUpdated
+                + ", lastSeen=" + lastSeen
+                + '}';
     }
 }

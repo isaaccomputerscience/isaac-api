@@ -62,8 +62,12 @@ public class CodeSnippetDTO extends ContentDTO {
         this.disableHighlighting = disableHighlighting;
     }
 
-    public String getUrl() { return this.url; }
+    public String getUrl() {
+        return this.url;
+    }
 
-    public void setUrl(String url) { this.url = url; }
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }
 

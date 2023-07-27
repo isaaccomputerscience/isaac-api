@@ -91,7 +91,9 @@ public class PgEventBooking implements EventBooking {
     }
 
     @Override
-    public BookingStatus getBookingStatus() { return bookingStatus; }
+    public BookingStatus getBookingStatus() {
+        return bookingStatus;
+    }
 
     @Override
     public Date getCreationDate() {

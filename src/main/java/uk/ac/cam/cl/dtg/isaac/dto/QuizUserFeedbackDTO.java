@@ -40,11 +40,15 @@ public class QuizUserFeedbackDTO {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         QuizUserFeedbackDTO that = (QuizUserFeedbackDTO) o;
-        return Objects.equals(user, that.user) &&
-            Objects.equals(feedback, that.feedback);
+        return Objects.equals(user, that.user)
+                && Objects.equals(feedback, that.feedback);
     }
 
     @Override

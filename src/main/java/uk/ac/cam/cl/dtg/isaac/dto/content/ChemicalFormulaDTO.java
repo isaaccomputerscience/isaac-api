@@ -22,7 +22,7 @@ public class ChemicalFormulaDTO extends ChoiceDTO {
     /**
      * Default constructor required for mapping.
      */
-    public ChemicalFormulaDTO() {}
+    public ChemicalFormulaDTO() { }
 
     /**
      * Gets the mhchem expression.

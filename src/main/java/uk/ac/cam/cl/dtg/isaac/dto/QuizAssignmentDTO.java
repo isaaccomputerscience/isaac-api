@@ -257,14 +257,14 @@ public class QuizAssignmentDTO implements IAssignmentLike, IHasQuizSummary {
 
     @Override
     public String toString() {
-        return "QuizAssignmentDTO [" +
-            "id=" + id +
-            ", quizId='" + quizId + '\'' +
-            ", groupId=" + groupId +
-            ", ownerUserId=" + ownerUserId +
-            ", creationDate=" + creationDate +
-            ", dueDate=" + dueDate +
-            ", quizFeedbackMode=" + quizFeedbackMode +
-            ']';
+        return "QuizAssignmentDTO ["
+                + "id=" + id
+                + ", quizId='" + quizId + '\''
+                + ", groupId=" + groupId
+                + ", ownerUserId=" + ownerUserId
+                + ", creationDate=" + creationDate
+                + ", dueDate=" + dueDate
+                + ", quizFeedbackMode=" + quizFeedbackMode
+                + ']';
     }
 }

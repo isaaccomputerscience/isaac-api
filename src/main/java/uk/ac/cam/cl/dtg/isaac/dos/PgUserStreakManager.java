@@ -46,9 +46,9 @@ public class PgUserStreakManager implements IUserStreaksManager {
         streakRecord.put("currentActivity", 0);
         streakRecord.put("currentStreak", 0);
 
-        String query = "SELECT * FROM user_streaks_current_progress(?) LEFT JOIN user_streaks(?)" +
-                " ON user_streaks_current_progress.currentdate - user_streaks.enddate <= 1" +
-                " AND user_streaks.startdate <= user_streaks_current_progress.currentdate";
+        String query = "SELECT * FROM user_streaks_current_progress(?) LEFT JOIN user_streaks(?)"
+                + " ON user_streaks_current_progress.currentdate - user_streaks.enddate <= 1"
+                + " AND user_streaks.startdate <= user_streaks_current_progress.currentdate";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {
@@ -95,9 +95,9 @@ public class PgUserStreakManager implements IUserStreaksManager {
         streakRecord.put("currentActivity", 0);
         streakRecord.put("currentStreak", 0);
 
-        String query = "SELECT * FROM user_streaks_weekly_current_progress(?) LEFT JOIN user_streaks_weekly(?)" +
-                " ON user_streaks_weekly_current_progress.currentweek - user_streaks_weekly.enddate <= 7" +
-                " AND user_streaks_weekly.startdate <= user_streaks_weekly_current_progress.currentweek";
+        String query = "SELECT * FROM user_streaks_weekly_current_progress(?) LEFT JOIN user_streaks_weekly(?)"
+                + " ON user_streaks_weekly_current_progress.currentweek - user_streaks_weekly.enddate <= 7"
+                + " AND user_streaks_weekly.startdate <= user_streaks_weekly_current_progress.currentweek";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
         ) {

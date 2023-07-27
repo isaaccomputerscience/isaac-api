@@ -227,14 +227,18 @@ public class ContentSummaryDTO {
      *
      * @return superseding question ID, or null
      */
-    public String getSupersededBy() { return this.supersededBy; }
+    public String getSupersededBy() {
+        return this.supersededBy;
+    }
 
     /**
      * Sets the superseding question ID if this is a superseded question
      *
      * @param supersededBy superseding question ID
      */
-    public void setSupersededBy(String supersededBy) { this.supersededBy = supersededBy; }
+    public void setSupersededBy(String supersededBy) {
+        this.supersededBy = supersededBy;
+    }
 
     /**
      * Gets whether or not this question is deprecated

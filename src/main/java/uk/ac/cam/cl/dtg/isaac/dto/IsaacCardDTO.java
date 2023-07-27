@@ -31,7 +31,7 @@ public class IsaacCardDTO extends ContentDTO {
     /**
      * Default constructor required for mapping.
      */
-    public IsaacCardDTO() {}
+    public IsaacCardDTO() { }
 
     /**
      * Get the image.

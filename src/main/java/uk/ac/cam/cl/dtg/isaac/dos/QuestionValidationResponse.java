@@ -15,12 +15,12 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dos;
 
-import java.util.Date;
-
 import uk.ac.cam.cl.dtg.isaac.dos.content.Choice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.DTOMapping;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
+
+import java.util.Date;
 
 /**
  * Question Validation Response DO.
@@ -99,9 +99,12 @@ public class QuestionValidationResponse extends LightweightQuestionValidationRes
 
     @Override
     public String toString() {
-        return "QuestionValidationResponse [questionId=" + super.getQuestionId() + ", answer=" + answer +
-                ", correct=" + super.isCorrect() + ", explanation=" + explanation +
-                ", dateAttempted=" + super.getDateAttempted() + "]";
+        return "QuestionValidationResponse [questionId=" + super.getQuestionId()
+                + ", answer=" + answer
+                + ", correct=" + super.isCorrect()
+                + ", explanation=" + explanation
+                + ", dateAttempted=" + super.getDateAttempted()
+                + "]";
     }
 
 }

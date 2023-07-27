@@ -41,10 +41,10 @@ public class GameboardContentDescriptor {
 
     @Override
     public String toString() {
-        return "GameboardContentDescriptor[" +
-                "id='" + id + '\'' +
-                ", contentType='" + contentType + '\'' +
-                ", context=" + context +
-                ']';
+        return "GameboardContentDescriptor["
+                + "id='" + id + '\''
+                + ", contentType='" + contentType + '\''
+                + ", context=" + context
+                + ']';
     }
 }

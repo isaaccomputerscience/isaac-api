@@ -371,23 +371,23 @@ public class GameboardDTO implements EmailService.HasTitleOrId {
 
     @Override
     public String toString() {
-        return "GameboardDTO [" +
-                "id='" + id + '\'' +
-                ", title='" + title + '\'' +
-                ", contents=" + contents +
-                ", wildCard=" + wildCard +
-                ", wildCardPosition=" + wildCardPosition +
-                ", creationDate=" + creationDate +
-                ", gameFilter=" + gameFilter +
-                ", ownerUserId=" + ownerUserId +
-                ", ownerUserInformation=" + ownerUserInformation +
-                ", tags=" + tags +
-                ", isSavedToCurrentUser=" + isSavedToCurrentUser +
-                ", creationMethod=" + creationMethod +
-                ", percentageCompleted=" + percentageCompleted +
-                ", lastVisited=" + lastVisited +
-                ", startedQuestion=" + startedQuestion +
-                ']';
+        return "GameboardDTO ["
+                + "id='" + id + '\''
+                + ", title='" + title + '\''
+                + ", contents=" + contents
+                + ", wildCard=" + wildCard
+                + ", wildCardPosition=" + wildCardPosition
+                + ", creationDate=" + creationDate
+                + ", gameFilter=" + gameFilter
+                + ", ownerUserId=" + ownerUserId
+                + ", ownerUserInformation=" + ownerUserInformation
+                + ", tags=" + tags
+                + ", isSavedToCurrentUser=" + isSavedToCurrentUser
+                + ", creationMethod=" + creationMethod
+                + ", percentageCompleted=" + percentageCompleted
+                + ", lastVisited=" + lastVisited
+                + ", startedQuestion=" + startedQuestion
+                + ']';
     }
 
     @Override

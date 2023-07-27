@@ -29,7 +29,7 @@ public class LocalAuthDTO {
     /**
      * Default constructor.
      */
-    public LocalAuthDTO() {}
+    public LocalAuthDTO() { }
 
     public String getEmail() {
         return email;

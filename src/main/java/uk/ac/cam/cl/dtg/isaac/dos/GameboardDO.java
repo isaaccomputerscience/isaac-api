@@ -268,17 +268,17 @@ public class GameboardDO {
 
     @Override
     public String toString() {
-        return "GameboardDO [" +
-                "id='" + id + '\'' +
-                ", title='" + title + '\'' +
-                ", contents=" + contents +
-                ", wildCard=" + wildCard +
-                ", wildCardPosition=" + wildCardPosition +
-                ", creationDate=" + creationDate +
-                ", gameFilter=" + gameFilter +
-                ", ownerUserId=" + ownerUserId +
-                ", creationMethod=" + creationMethod +
-                ", tags=" + tags +
-                ']';
+        return "GameboardDO ["
+                + "id='" + id + '\''
+                + ", title='" + title + '\''
+                + ", contents=" + contents
+                + ", wildCard=" + wildCard
+                + ", wildCardPosition=" + wildCardPosition
+                + ", creationDate=" + creationDate
+                + ", gameFilter=" + gameFilter
+                + ", ownerUserId=" + ownerUserId
+                + ", creationMethod=" + creationMethod
+                + ", tags=" + tags
+                + ']';
     }
 }

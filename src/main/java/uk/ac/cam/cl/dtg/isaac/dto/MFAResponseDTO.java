@@ -25,7 +25,7 @@ public class MFAResponseDTO {
     /**
      * Default constructor.
      */
-    public MFAResponseDTO() {}
+    public MFAResponseDTO() { }
 
     public Boolean getRememberMe() {
         return rememberMe;
