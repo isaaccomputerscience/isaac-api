@@ -53,7 +53,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
 
         String query = "SELECT * FROM user_totp WHERE user_id = ?";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
 
@@ -91,7 +91,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
     private TOTPSharedSecret createCredentials(final TOTPSharedSecret credsToSave) throws SegueDatabaseException {
         String query = "INSERT INTO user_totp(user_id, shared_secret, created, last_updated) VALUES (?, ?, ?,?);";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
             setValueHelper(pst, 1, credsToSave.getUserId());
             setValueHelper(pst, 2, credsToSave.getSharedSecret());
@@ -123,7 +123,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
 
         String query = "UPDATE user_totp SET shared_secret = ?, last_updated = ? WHERE user_id = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             setValueHelper(pst, 1, credsToSave.getSharedSecret());
             setValueHelper(pst, 2, credsToSave.getLastUpdated());
@@ -150,7 +150,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
 
         String query = "DELETE FROM user_totp WHERE user_id = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             setValueHelper(pst, 1, userId);
 

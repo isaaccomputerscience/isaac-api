@@ -62,7 +62,7 @@ public class PgQuizQuestionAttemptPersistenceManager implements IQuizQuestionAtt
         String query = "INSERT INTO quiz_question_attempts(quiz_attempt_id, question_id, question_attempt, correct, \"timestamp\")"
                 + " VALUES (?, ?, ?::text::jsonb, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
-            PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
             pst.setLong(1, quizAttemptId);
             pst.setString(2, questionResponse.getQuestionId());
@@ -89,7 +89,7 @@ public class PgQuizQuestionAttemptPersistenceManager implements IQuizQuestionAtt
     public Map<String, List<QuestionValidationResponse>> getAllAnswersForQuizAttempt(final Long quizAttemptId) throws SegueDatabaseException {
         String query = "SELECT question_id, question_attempt FROM quiz_question_attempts WHERE quiz_attempt_id = ? ORDER BY timestamp";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, quizAttemptId);
 
@@ -120,7 +120,7 @@ public class PgQuizQuestionAttemptPersistenceManager implements IQuizQuestionAtt
                 + " INNER JOIN quiz_attempts ON (quiz_attempts.id = quiz_question_attempts.quiz_attempt_id)"
                 + " WHERE quiz_assignment_id = ? ORDER BY quiz_attempt_id, timestamp";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, quizAssignmentId);
 

@@ -38,7 +38,7 @@ public class PgUserAlerts implements IUserAlerts {
     public List<IUserAlert> getUserAlerts(final Long userId) throws SegueDatabaseException {
         String query = "SELECT * FROM user_alerts WHERE user_id = ? ORDER BY created ASC";
         try (Connection conn = db.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
 
@@ -58,7 +58,7 @@ public class PgUserAlerts implements IUserAlerts {
     public IUserAlert createAlert(final Long userId, final String message, final String link) throws SegueDatabaseException {
         String query = "INSERT INTO user_alerts (user_id, message, link, created) VALUES (?, ?, ?, ?) RETURNING *";
         try (Connection conn = db.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
             pst.setString(2, message);
@@ -94,7 +94,7 @@ public class PgUserAlerts implements IUserAlerts {
         }
         query += "= ?  WHERE id = ?";
         try (Connection conn = db.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
             pst.setLong(2, alertId);

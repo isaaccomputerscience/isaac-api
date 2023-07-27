@@ -107,7 +107,7 @@ public class GoogleAuthenticator implements IOAuth2Authenticator {
 
         // load up the client secrets from the file system.
         try (InputStream inputStream = new FileInputStream(clientSecretLocation);
-             InputStreamReader isr = new InputStreamReader(inputStream);
+             InputStreamReader isr = new InputStreamReader(inputStream)
         ) {
 
             clientSecrets = GoogleClientSecrets.load(new JacksonFactory(), isr);

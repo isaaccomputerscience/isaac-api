@@ -90,7 +90,7 @@ public class DeleteEventAdditionalBookingInformationJob implements Job {
                             + " AND additional_booking_information ??| array['emergencyName', 'emergencyNumber', 'accessibilityRequirements', 'medicalRequirements']"
                             + " AND pii_removed IS NULL";
                         try (Connection conn = database.getDatabaseConnection();
-                             PreparedStatement pst = conn.prepareStatement(query);
+                             PreparedStatement pst = conn.prepareStatement(query)
                         ) {
                             // Check for additional info that needs removing, check if pii has already been removed, if
                             // so, don't re-remove

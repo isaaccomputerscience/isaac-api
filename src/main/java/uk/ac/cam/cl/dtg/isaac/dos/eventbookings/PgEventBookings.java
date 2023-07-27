@@ -310,7 +310,7 @@ public class PgEventBookings implements EventBookings {
     public void deleteAdditionalInformation(final Long userId) throws SegueDatabaseException {
         String query = "UPDATE event_bookings SET additional_booking_information = null WHERE user_id = ?;";
         try (Connection conn = ds.getDatabaseConnection();
-            PreparedStatement pst = conn.prepareStatement(query);
+            PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
             pst.executeUpdate();
@@ -354,7 +354,7 @@ public class PgEventBookings implements EventBookings {
 
         String query = "SELECT * FROM event_bookings WHERE id = ?";
         try (Connection conn = ds.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, bookingId);
 
@@ -393,7 +393,7 @@ public class PgEventBookings implements EventBookings {
 
         String query = "SELECT * FROM event_bookings WHERE event_id = ? AND user_id = ?";
         try (Connection conn = ds.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, eventId);
             pst.setLong(2, userId);
@@ -438,7 +438,7 @@ public class PgEventBookings implements EventBookings {
         String query = "SELECT COUNT(1) AS TOTAL FROM event_bookings";
         try (Connection conn = ds.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
-             ResultSet results = pst.executeQuery();
+             ResultSet results = pst.executeQuery()
         ) {
             results.next();
             return results.getLong("TOTAL");
@@ -463,7 +463,7 @@ public class PgEventBookings implements EventBookings {
         sb.append(" GROUP BY event_bookings.status, users.role;");
 
         try (Connection conn = ds.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(sb.toString());
+             PreparedStatement pst = conn.prepareStatement(sb.toString())
         ) {
             pst.setString(1, eventId);
 
@@ -508,7 +508,7 @@ public class PgEventBookings implements EventBookings {
         }
 
         try (Connection conn = ds.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(sb.toString());
+             PreparedStatement pst = conn.prepareStatement(sb.toString())
         ) {
             pst.setString(1, eventId);
             if (status != null) {
@@ -533,7 +533,7 @@ public class PgEventBookings implements EventBookings {
 
         String query = "SELECT * FROM event_bookings WHERE user_id = ?";
         try (Connection conn = ds.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
 
@@ -555,7 +555,7 @@ public class PgEventBookings implements EventBookings {
 
         String query = "SELECT distinct on (event_id) * FROM event_bookings WHERE reserved_by = ? AND status != 'CANCELLED'";
         try (Connection conn = ds.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
 

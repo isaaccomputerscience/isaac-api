@@ -48,7 +48,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
                 + "           OR events_prefs.last_updated >= provider_last_updated OR provider_last_updated IS NULL)";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
-             ResultSet results = pst.executeQuery();
+             ResultSet results = pst.executeQuery()
         ) {
             List<UserExternalAccountChanges> listOfResults = Lists.newArrayList();
 
@@ -67,7 +67,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
     public void updateProviderLastUpdated(final Long userId) throws SegueDatabaseException {
         String query = "UPDATE external_accounts SET provider_last_updated=? WHERE user_id=? AND provider_name='MailJet';";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setTimestamp(1, new Timestamp(new Date().getTime()));
             pst.setLong(2, userId);
@@ -84,7 +84,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
         String query = "INSERT INTO external_accounts(user_id, provider_name, provider_user_identifier) VALUES (?, 'MailJet', ?)"
                 + " ON CONFLICT (user_id, provider_name) DO UPDATE SET provider_user_identifier=excluded.provider_user_identifier";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
             pst.setString(2, providerUserIdentifier);

@@ -118,7 +118,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
             final String anonymousId) throws SegueDatabaseException {
         String query = "SELECT temporary_app_data->'questionAttempts' AS question_attempts from temporary_user_store where id = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
             pst.setString(1, anonymousId);
 
@@ -164,7 +164,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         String query = "INSERT INTO question_attempts(user_id, question_id, question_attempt, correct, \"timestamp\")"
                 + " VALUES (?, ?, ?::text::jsonb, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
             pst.setLong(1, userId);
             pst.setString(2, fullQuestionId);
@@ -193,7 +193,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
             throws SegueDatabaseException {
         String query = "SELECT * FROM question_attempts WHERE user_id = ? ORDER BY \"timestamp\" ASC";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
 
@@ -399,7 +399,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         String query = "SELECT role, count(DISTINCT users.id) FROM question_attempts"
                 + " JOIN users ON user_id=users.id AND NOT deleted WHERE timestamp > now() - ? GROUP BY role";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setObject(1, timeInterval.getPGInterval());
 
@@ -438,7 +438,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         queryToBuild.append(" GROUP BY gen_date ORDER BY gen_date ASC;");
 
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(queryToBuild.toString());
+             PreparedStatement pst = conn.prepareStatement(queryToBuild.toString())
         ) {
             pst.setLong(1, userId);
             pst.setTimestamp(2, new java.sql.Timestamp(fromDate.getTime()));

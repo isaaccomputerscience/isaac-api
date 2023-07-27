@@ -177,7 +177,6 @@ public abstract class IsaacIntegrationTest {
                 .withEnv("xpack.security.enabled", "true")
                 .withEnv("ELASTIC_PASSWORD", "elastic")
                 .withStartupTimeout(Duration.ofSeconds(120));
-        ;
 
         postgres.start();
         elasticsearch.start();

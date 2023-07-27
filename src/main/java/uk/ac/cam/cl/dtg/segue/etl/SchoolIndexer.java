@@ -106,7 +106,7 @@ class SchoolIndexer {
 
         try (FileInputStream fs = new FileInputStream(schoolsListPath);
              InputStreamReader is = new InputStreamReader(fs, StandardCharsets.UTF_8);
-             CSVReader reader = new CSVReader(is);
+             CSVReader reader = new CSVReader(is)
         ) {
 
 

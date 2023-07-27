@@ -65,11 +65,11 @@ public final class Constants {
      * GameboardItemState Represents the potential states of a gameboard item.
      */
     public enum GameboardItemState {
-        PERFECT, PASSED, IN_PROGRESS, NOT_ATTEMPTED, FAILED;
+        PERFECT, PASSED, IN_PROGRESS, NOT_ATTEMPTED, FAILED
     }
 
     public enum QuestionPartState {
-        CORRECT, INCORRECT, NOT_ATTEMPTED;
+        CORRECT, INCORRECT, NOT_ATTEMPTED
     }
 
     public enum FASTTRACK_LEVEL {

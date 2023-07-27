@@ -59,7 +59,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
 
         String query = "INSERT INTO user_associations_tokens(token, owner_user_id, group_id) VALUES (?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, token.getToken());
             pst.setLong(2, token.getOwnerUserId());
@@ -83,7 +83,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
 
         String query = "DELETE FROM user_associations_tokens WHERE token = ?";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, token);
             pst.execute();
@@ -109,7 +109,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         String query = "INSERT INTO user_associations(user_id_granting_permission, user_id_receiving_permission,"
                 + " created) VALUES (?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userIdGrantingAccess);
             pst.setLong(2, userIdReceivingAccess);
@@ -133,7 +133,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
 
         String query = "DELETE FROM user_associations WHERE user_id_granting_permission = ? AND user_id_receiving_permission = ?";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userIdWhoGrantedAccess);
             pst.setLong(2, userIdWithAccess);
@@ -159,7 +159,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         String query = "SELECT COUNT(1) AS TOTAL FROM user_associations"
                 + " WHERE user_id_receiving_permission = ? AND user_id_granting_permission = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userIdRequestingAccess);
             pst.setLong(2, ownerUserId);
@@ -179,7 +179,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
 
         String query = "SELECT * FROM user_associations WHERE user_id_granting_permission = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
             
@@ -203,7 +203,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
     public AssociationToken lookupAssociationToken(final String tokenCode) throws SegueDatabaseException {
         String query = "SELECT * FROM user_associations_tokens WHERE token = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, tokenCode);
             
@@ -234,7 +234,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
     public AssociationToken getAssociationTokenByGroupId(final Long groupId) throws SegueDatabaseException {
         String query = "SELECT * FROM user_associations_tokens WHERE group_id = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, groupId);
             
@@ -267,7 +267,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
 
         String query = "SELECT * FROM user_associations WHERE user_id_receiving_permission = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
             
@@ -328,7 +328,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         }
 
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(sb.toString());
+             PreparedStatement pst = conn.prepareStatement(sb.toString())
         ) {
             pst.setLong(1, userIdOfInterest);
             pst.execute();

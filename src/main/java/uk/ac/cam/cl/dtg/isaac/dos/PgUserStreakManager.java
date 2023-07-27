@@ -50,7 +50,7 @@ public class PgUserStreakManager implements IUserStreaksManager {
                 + " ON user_streaks_current_progress.currentdate - user_streaks.enddate <= 1"
                 + " AND user_streaks.startdate <= user_streaks_current_progress.currentdate";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, user.getId());
             pst.setLong(2, user.getId());
@@ -72,7 +72,7 @@ public class PgUserStreakManager implements IUserStreaksManager {
 
         String query = "SELECT * FROM user_streaks(?) ORDER BY streaklength DESC LIMIT 1";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, user.getId());
 
@@ -99,7 +99,7 @@ public class PgUserStreakManager implements IUserStreaksManager {
                 + " ON user_streaks_weekly_current_progress.currentweek - user_streaks_weekly.enddate <= 7"
                 + " AND user_streaks_weekly.startdate <= user_streaks_weekly_current_progress.currentweek";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, user.getId());
             pst.setLong(2, user.getId());
@@ -121,7 +121,7 @@ public class PgUserStreakManager implements IUserStreaksManager {
 
         String query = "SELECT * FROM user_streaks_weekly(?) ORDER BY streaklength DESC LIMIT 1";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, user.getId());
 

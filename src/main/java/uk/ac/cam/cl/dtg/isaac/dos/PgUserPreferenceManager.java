@@ -64,7 +64,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
 
         String query = "SELECT * FROM user_preferences WHERE user_id=? AND preference_type=? AND preference_name=?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
             pst.setString(2, preferenceType);
@@ -106,7 +106,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
             sb.append(") AND preference_type=? AND preference_name=? ORDER BY user_id ASC;");
 
             try (Connection conn = database.getDatabaseConnection();
-                 PreparedStatement pst = conn.prepareStatement(sb.toString());
+                 PreparedStatement pst = conn.prepareStatement(sb.toString())
             ) {
                 for (int i = 1; i <= pagedUsers.size(); i++) {
                     pst.setLong(i, pagedUsers.get(i - 1).getId());
@@ -139,7 +139,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
 
         String query = "SELECT * FROM user_preferences WHERE user_id=? AND preference_type=?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
             pst.setString(2, preferenceType);
@@ -164,7 +164,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
 
         String query = "SELECT * FROM user_preferences WHERE user_id=?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
 
@@ -207,7 +207,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
             sb.append(") AND preference_type=? ORDER BY user_id ASC, preference_name ASC;");
 
             try (Connection conn = database.getDatabaseConnection();
-                 PreparedStatement pst = conn.prepareStatement(sb.toString());
+                 PreparedStatement pst = conn.prepareStatement(sb.toString())
             ) {
                 for (int i = 1; i <= pagedUsers.size(); i++) {
                     pst.setLong(i, pagedUsers.get(i - 1).getId());

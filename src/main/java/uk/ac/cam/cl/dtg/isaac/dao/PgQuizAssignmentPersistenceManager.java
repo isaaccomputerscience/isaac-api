@@ -67,7 +67,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         String query = "INSERT INTO quiz_assignments(quiz_id, group_id, owner_user_id, creation_date, due_date, quiz_feedback_mode)"
                 + " VALUES (?, ?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
             pst.setString(1, assignmentToSave.getQuizId());
             pst.setLong(2, assignmentToSave.getGroupId());
@@ -112,7 +112,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
     public List<QuizAssignmentDTO> getAssignmentsByQuizIdAndGroup(final String quizId, final Long groupId) throws SegueDatabaseException {
         String query = "SELECT * FROM quiz_assignments WHERE quiz_id = ? AND group_id = ? AND NOT deleted";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, quizId);
             pst.setLong(2, groupId);
@@ -146,7 +146,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         }
         sb.append(") AND NOT deleted ORDER BY creation_date");
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(sb.toString());
+             PreparedStatement pst = conn.prepareStatement(sb.toString())
         ) {
             int i = 1;
             for (Long id : groupIds) {
@@ -171,7 +171,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
     public QuizAssignmentDTO getAssignmentById(final Long quizAssignmentId) throws SegueDatabaseException, AssignmentCancelledException {
         String query = "SELECT * FROM quiz_assignments WHERE id = ?";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             // Deleted quiz assignments are filtered below with a specific error
             pst.setLong(1, quizAssignmentId);
@@ -194,7 +194,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
     public void cancelAssignment(final Long quizAssignmentId) throws SegueDatabaseException {
         String query = "UPDATE quiz_assignments SET deleted = true WHERE id = ?";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, quizAssignmentId);
 
@@ -209,7 +209,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         String query = "UPDATE quiz_assignments SET quiz_feedback_mode = COALESCE(?, quiz_feedback_mode),"
                 + "due_date = COALESCE(?, due_date) WHERE id = ?";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             if (updates.getQuizFeedbackMode() != null) {
                 pst.setString(1, updates.getQuizFeedbackMode().name());

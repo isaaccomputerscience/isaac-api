@@ -239,7 +239,7 @@ public class GameboardPersistenceManager {
         // create a new user to gameboard connection.
         String query = "UPDATE gameboards SET title = ? WHERE id = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, gameboard.getTitle());
             pst.setString(2, gameboard.getId());
@@ -289,7 +289,7 @@ public class GameboardPersistenceManager {
 
         String query = "SELECT COUNT(*) AS TOTAL FROM user_gameboards WHERE user_id = ? AND gameboard_id = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
             pst.setObject(2, gameboardId);
@@ -321,7 +321,7 @@ public class GameboardPersistenceManager {
                  + " ON CONFLICT ON CONSTRAINT user_gameboard_composite_key"
                  + " DO UPDATE SET last_visited=EXCLUDED.last_visited;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
             pst.setString(2, gameboardId);
@@ -354,7 +354,7 @@ public class GameboardPersistenceManager {
         String query = String.format("DELETE FROM user_gameboards WHERE user_id = ? AND gameboard_id IN (%s)", params);
 
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, userId);
 
@@ -390,7 +390,7 @@ public class GameboardPersistenceManager {
         String query = "SELECT * FROM gameboards INNER JOIN user_gameboards"
                 + " ON gameboards.id = user_gameboards.gameboard_id WHERE user_gameboards.user_id = ?";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, user.getId());
             
@@ -527,7 +527,7 @@ public class GameboardPersistenceManager {
         String query = "SELECT gameboard_id, user_id FROM user_gameboards;";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
-             ResultSet sqlResults = pst.executeQuery();
+             ResultSet sqlResults = pst.executeQuery()
         ) {
             while (sqlResults.next()) {
                 String gameboardId = sqlResults.getString("gameboard_id");
@@ -579,7 +579,7 @@ public class GameboardPersistenceManager {
                 + "game_filter, owner_user_id, creation_method, tags, creation_date)"
                 + " VALUES (?, ?, ?::text::jsonb[], ?::text::jsonb, ?, ?::text::jsonb, ?, ?, ?::text::jsonb, ?);";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             List<String> contentsJsonb = Lists.newArrayList();
             for (GameboardContentDescriptor content: gameboardToSave.getContents()) {
@@ -778,7 +778,7 @@ public class GameboardPersistenceManager {
 
         String query = "SELECT * FROM gameboards WHERE id = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, gameboardId);
             
@@ -837,7 +837,7 @@ public class GameboardPersistenceManager {
         // Then, go for the database
         String query = "SELECT * FROM gameboards WHERE id = ANY (?);";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             Array gameboardIdsPreparedArray = conn.createArrayOf("varchar", gameboardIdsForQuery.toArray());
             pst.setArray(1, gameboardIdsPreparedArray);

@@ -146,7 +146,7 @@ public class PgLogManager implements ILogManager {
     public void transferLogEventsToRegisteredUser(final String oldUserId, final String newUserId) {
         String query = "UPDATE logged_events SET user_id = ?, anonymous_user = TRUE WHERE user_id = ?;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, newUserId);
             pst.setString(2, oldUserId);
@@ -168,7 +168,7 @@ public class PgLogManager implements ILogManager {
     public Long getLogCountByType(final String type) throws SegueDatabaseException {
         String query = "SELECT COUNT(*) AS TOTAL FROM logged_events WHERE event_type = ?";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, type);
 
@@ -237,7 +237,7 @@ public class PgLogManager implements ILogManager {
         String query = "SELECT DISTINCT ip_address FROM logged_events";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
-             ResultSet results = pst.executeQuery();
+             ResultSet results = pst.executeQuery()
         ) {
             while (results.next()) {
                 ipAddresses.add(results.getString("ip_address"));
@@ -256,7 +256,7 @@ public class PgLogManager implements ILogManager {
             throws SegueDatabaseException {
         String query = "SELECT DISTINCT ON (user_id) user_id, \"timestamp\" FROM logged_events WHERE event_type = ? ORDER BY user_id, id DESC;";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, qualifyingLogEventType);
 
@@ -279,7 +279,7 @@ public class PgLogManager implements ILogManager {
         String query = "SELECT event_type FROM logged_events GROUP BY event_type";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
-             ResultSet results = pst.executeQuery();
+             ResultSet results = pst.executeQuery()
         ) {
             Set<String> eventTypesRecorded = Sets.newHashSet();
 
@@ -353,7 +353,7 @@ public class PgLogManager implements ILogManager {
         queryToBuild.append(" GROUP BY gen_month ORDER BY gen_month ASC;");
 
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(queryToBuild.toString());
+             PreparedStatement pst = conn.prepareStatement(queryToBuild.toString())
         ) {
             pst.setString(1, type);
 
@@ -426,7 +426,7 @@ public class PgLogManager implements ILogManager {
         }
 
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, type);
 
@@ -493,7 +493,7 @@ public class PgLogManager implements ILogManager {
         String query = "INSERT INTO logged_events(user_id, anonymous_user, event_type, event_details_type,"
                 + " event_details, ip_address, timestamp) VALUES (?, ?, ?, ?, ?::text::jsonb, ?::inet, ?);";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
             pst.setString(1, logEvent.getUserId());
             pst.setBoolean(2, logEvent.isAnonymousUser());

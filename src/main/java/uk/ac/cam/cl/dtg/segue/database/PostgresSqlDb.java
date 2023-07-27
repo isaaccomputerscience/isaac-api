@@ -94,7 +94,7 @@ public class PostgresSqlDb implements Closeable {
     public boolean isReadOnlyReplica() throws SQLException {
         try (Connection conn = getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement("SELECT pg_is_in_recovery()");
-             ResultSet results = pst.executeQuery();
+             ResultSet results = pst.executeQuery()
         ) {
             results.next();
             return results.getBoolean(1);

@@ -67,7 +67,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         String query = "INSERT INTO assignments(gameboard_id, group_id, owner_user_id, creation_date, due_date, notes, scheduled_start_date)"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
             pst.setString(1, assignmentToSave.getGameboardId());
             pst.setLong(2, assignmentToSave.getGroupId());
@@ -126,7 +126,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
 
         String query = "SELECT * FROM assignments WHERE id = ?";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, assignmentId);
             
@@ -165,7 +165,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
 
         String query = "SELECT * FROM assignments WHERE owner_user_id = ? AND group_id = ? ORDER BY creation_date";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, assignmentOwnerId);
             pst.setLong(2, groupId);
@@ -191,7 +191,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
             throws SegueDatabaseException {
         String query = "SELECT * FROM assignments WHERE gameboard_id = ? AND group_id = ? ORDER BY creation_date";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setString(1, gameboardId);
             pst.setLong(2, groupId);
@@ -215,7 +215,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
     public List<AssignmentDTO> getAssignmentsByOwner(final Long ownerId) throws SegueDatabaseException {
         String query = "SELECT * FROM assignments WHERE owner_user_id = ? ORDER BY creation_date";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, ownerId);
             
@@ -245,7 +245,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         sb.append(") ORDER BY creation_date");
 
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(sb.toString());
+             PreparedStatement pst = conn.prepareStatement(sb.toString())
         ) {
             int i = 1;
             for (Long id : groupIds) {
@@ -274,7 +274,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         String query = "SELECT * FROM assignments WHERE scheduled_start_date IS NOT NULL AND scheduled_start_date BETWEEN ((?)::timestamp - INTERVAL '10 minute') AND ((?)::timestamp + INTERVAL '59 minute');";
 
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setTimestamp(1, new java.sql.Timestamp(timestamp.getTime()));
             pst.setTimestamp(2, new java.sql.Timestamp(timestamp.getTime()));
@@ -297,7 +297,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
     public void deleteAssignment(final Long id) throws SegueDatabaseException {
         String query = "DELETE FROM assignments WHERE id = ?";
         try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
+             PreparedStatement pst = conn.prepareStatement(query)
         ) {
             pst.setLong(1, id);
             
