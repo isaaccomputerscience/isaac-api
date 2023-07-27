@@ -1,7 +1,7 @@
 package uk.ac.cam.cl.dtg.isaac.api.managers;
 
 /**
- * EventCancelledException
+ * EventCancelledException.
  *
  * This exception should be used if a user attempts to book themselves or another user onto
  * a cancelled event (or if any other event-specific action fails because the event is cancelled)

@@ -15,9 +15,9 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dos.users;
 
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Date;
 
 /**
  * Domain Object to represent an Anonymous user of the system.
@@ -109,7 +109,7 @@ public class AnonymousUser extends AbstractSegueUser {
     }
 
     /**
-     * set the last update date
+     * set the last update date.
      * @param lastUpdated last update date
      */
     public void setLastUpdated(final Date lastUpdated) {

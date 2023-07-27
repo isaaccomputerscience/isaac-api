@@ -43,7 +43,7 @@ public class UserBadgeManager {
     private final ITransactionManager transactionManager;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param userBadgePersistenceManager badge persistence object for liasing with database
      * @param groupManager group manager object for badge policy dependencies
@@ -70,7 +70,7 @@ public class UserBadgeManager {
     }
 
     /**
-     * Gets an up-to-date badge by either retrieving from the database or initialising first-time on the fly
+     * Gets an up-to-date badge by either retrieving from the database or initialising first-time on the fly.
      *
      * @param user owner of badge record
      * @param badgeName enum of badge to be updated
@@ -95,7 +95,7 @@ public class UserBadgeManager {
     }
 
     /**
-     * Updates the badge state and delivers to the database
+     * Updates the badge state and delivers to the database.
      *
      * @param user owner of badge record
      * @param badgeName enum of badge to be updated
@@ -139,7 +139,7 @@ public class UserBadgeManager {
     }
 
     /**
-     * Gets a map of all the users badges and their values
+     * Gets a map of all the users badges and their values.
      *
      * @param user the user of interest
      * @return a map of badge names to values

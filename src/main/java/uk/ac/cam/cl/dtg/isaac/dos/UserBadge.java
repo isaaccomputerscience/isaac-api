@@ -13,7 +13,7 @@ public class UserBadge {
     private JsonNode state;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param userId the id of the owner of the badge
      * @param badgeName the name of the badge
@@ -26,7 +26,7 @@ public class UserBadge {
     }
 
     /**
-     * Gets the user id
+     * Gets the user id.
      *
      * @return the user id
      */
@@ -35,7 +35,7 @@ public class UserBadge {
     }
 
     /**
-     * Gets the name of the badge (enum)
+     * Gets the name of the badge (enum).
      *
      * @return the badge name
      */
@@ -44,7 +44,7 @@ public class UserBadge {
     }
 
     /**
-     * Gets the current aggregate state of the badge
+     * Gets the current aggregate state of the badge.
      *
      * @return an object specifying the current badge state
      */

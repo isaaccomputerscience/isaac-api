@@ -110,7 +110,7 @@ public interface IUserGroupPersistenceManager {
     void addUserToGroup(Long userId, Long groupId) throws SegueDatabaseException;
 
     /**
-     * Update group membership status for a given user
+     * Update group membership status for a given user.
      * @param userId - the id of the user
      * @param groupId - the group they are a member of
      * @param newStatus - e.g. active, inactive or deleted.
@@ -220,7 +220,7 @@ public interface IUserGroupPersistenceManager {
     List<UserGroup> getGroupsByAdditionalManager(Long additionalManagerId) throws SegueDatabaseException;
 
     /**
-     * Get groups by additional manager id
+     * Get groups by additional manager id.
      *
      * @param additionalManagerId
      *            the owner Id to find all groups for.

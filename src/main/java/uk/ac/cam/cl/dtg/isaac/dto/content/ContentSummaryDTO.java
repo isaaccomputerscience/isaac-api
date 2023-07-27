@@ -203,7 +203,7 @@ public class ContentSummaryDTO {
     }
 
     /**
-     * Gets a list of the question part IDs
+     * Gets a list of the question part IDs.
      *
      * @return list of question part IDs for any questions in this content
      */
@@ -213,7 +213,7 @@ public class ContentSummaryDTO {
     }
 
     /**
-     * Sets a list of question part IDs
+     * Sets a list of question part IDs.
      *
      * @param questionPartIds list of question part IDs for any questions in this content
      */
@@ -223,7 +223,7 @@ public class ContentSummaryDTO {
     }
 
     /**
-     * Gets the superseding question ID if this is a superseded question
+     * Gets the superseding question ID if this is a superseded question.
      *
      * @return superseding question ID, or null
      */
@@ -232,7 +232,7 @@ public class ContentSummaryDTO {
     }
 
     /**
-     * Sets the superseding question ID if this is a superseded question
+     * Sets the superseding question ID if this is a superseded question.
      *
      * @param supersededBy superseding question ID
      */
@@ -241,7 +241,7 @@ public class ContentSummaryDTO {
     }
 
     /**
-     * Gets whether or not this question is deprecated
+     * Gets whether or not this question is deprecated.
      *
      * @return is question deprecated, if null assume not deprecated
      */
@@ -250,7 +250,7 @@ public class ContentSummaryDTO {
     }
 
     /**
-     * Sets whether or not this question should be treated as deprecated
+     * Sets whether or not this question should be treated as deprecated.
      *
      * @param deprecated is question deprecated or not
      */

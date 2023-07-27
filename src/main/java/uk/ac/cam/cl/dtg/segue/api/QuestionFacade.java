@@ -164,7 +164,7 @@ public class QuestionFacade extends AbstractSegueFacade {
     }
 
     /**
-     * Get questions answered by user per month for a given date range
+     * Get questions answered by user per month for a given date range.
      *
      * @param request - the incoming request
      * @param userIdOfInterest - The user id that the query is focused on
@@ -360,7 +360,7 @@ public class QuestionFacade extends AbstractSegueFacade {
     }
 
     /**
-     * A generic question tester where a fake question is created form received choices and evaluated against a series
+     * A generic question tester where a fake question is created form received choices and evaluated against a series.
      * of example student answers
      * @param request - the incoming request
      * @param questionType - the type of question to construct from the available choices in testJson

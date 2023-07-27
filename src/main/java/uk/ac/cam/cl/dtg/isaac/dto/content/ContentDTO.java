@@ -114,7 +114,7 @@ public class ContentDTO extends ContentBaseDTO {
     }
 
     /**
-     * Default constructor required for Jackson
+     * Default constructor required for Jackson.
      */
     public ContentDTO() {
         // useful for when we want to augment this POJO

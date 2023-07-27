@@ -15,13 +15,12 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dto.users;
 
+import com.google.api.client.util.Maps;
+import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
-
-import com.google.api.client.util.Maps;
 
 /**
  * Data Transfer Object to represent an anonymous user of the system.
@@ -115,7 +114,7 @@ public class AnonymousUserDTO extends AbstractSegueUserDTO {
     }
 
     /**
-     * set the last update date
+     * set the last update date.
      * @param lastUpdated last update date
      */
     public void setLastUpdated(final Date lastUpdated) {

@@ -342,7 +342,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
     }
 
     /**
-     * Will include shallow deleted group membership as we should reuse their group entry in the db
+     * Will include shallow deleted group membership as we should reuse their group entry in the db.
      * @param groupId group to check
      * @param userId user to check
      * @return true if they ever had a recorded membership entry in the db.

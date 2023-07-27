@@ -67,7 +67,7 @@ public class MailJetApiClientWrapper {
     }
 
     /**
-     *  Get user details for an existing MailJet account
+     *  Get user details for an existing MailJet account.
      *
      * @param mailjetIdOrEmail - email address or MailJet user ID
      * @return JSONObject of the MailJet user
@@ -133,7 +133,7 @@ public class MailJetApiClientWrapper {
     }
 
     /**
-     *  Update user details for an existing MailJet account
+     *  Update user details for an existing MailJet account.
      *
      * @param mailjetId - MailJet user ID
      * @throws MailjetException  - if underlying MailjetClient throws an exception
@@ -155,7 +155,7 @@ public class MailJetApiClientWrapper {
     }
 
     /**
-     *  Update user list subscriptions for an existing MailJet account
+     *  Update user list subscriptions for an existing MailJet account.
      *
      * @param mailjetId - MailJet user ID
      * @throws MailjetException  - if underlying MailjetClient throws an exception

@@ -373,7 +373,7 @@ public class UserAssociationManager {
     }
 
     /**
-     * Overloaded method to handle different user representation object
+     * Overloaded method to handle different user representation object.
      * @param currentUser
      *            - requesting permission
      * @param userRequested
@@ -409,18 +409,18 @@ public class UserAssociationManager {
     }
 
     /**
-     * Overloaded method to handle different user representation object
+     * Overloaded method to handle different user representation object.
      * @param currentUser
      *            - requesting permission
      * @param userRequested
      *            - the owner of the data to view.
-     * @return true if yes false if no.
+     * @return true if yes or false if no.
      */
     public boolean hasTeacherPermission(final RegisteredUserDTO currentUser, final RegisteredUserDTO userRequested) {
         return this.hasTeacherPermission(currentUser, userManager.convertToUserSummaryObject(userRequested));
     }
 
-    /**
+    /**.
      * Filter a list of records on whether a user ID has an association with the current user
      * @param currentUser the user which might have been granted access.
      * @param records a list of objects containing an ID.
@@ -447,7 +447,7 @@ public class UserAssociationManager {
     }
 
     /**
-     * A special case of the generic filterUnassociatedRecords for when the records are a list of user IDs
+     * A special case of the generic filterUnassociatedRecords for when the records are a list of user IDs.
      * @param currentUser the user which might have been granted access.
      * @param userIds a list of user IDs.
      * @return a list of user ID which has granted the current user to view their data.

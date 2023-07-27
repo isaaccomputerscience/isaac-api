@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Code snippet is a special type of content
+ * Code snippet is a special type of content.
  *
  */
 public class CodeSnippetDTO extends ContentDTO {

@@ -101,7 +101,7 @@ public interface IQuestionAttemptManager {
             throws SegueDatabaseException;
 
     /**
-     * Count the users by role which have answered questions over the previous time interval
+     * Count the users by role which have answered questions over the previous time interval.
      * @param timeInterval time interval over which to count
      * @return map of counts for each role
      * @throws SegueDatabaseException

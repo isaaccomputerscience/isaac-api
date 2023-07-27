@@ -33,7 +33,7 @@ public interface ISegueHashingAlgorithm {
     String hashPassword(String password, String salt) throws NoSuchAlgorithmException, InvalidKeySpecException;
 
     /**
-     * Generate a salt value
+     * Generate a salt value.
      * @return random salt
      * @throws NoSuchAlgorithmException
      */
@@ -46,9 +46,9 @@ public interface ISegueHashingAlgorithm {
     String hashingAlgorithmName();
 
     /**
-     * Compute a hash as a byte array
+     * Compute a hash as a byte array.
      * @param str - string value
-     * @param salt -- salt value
+     * @param salt - salt value
      * @param keyLength - key length
      * @return hash as a byte array
      * @throws NoSuchAlgorithmException

@@ -56,7 +56,7 @@ public class IsaacQuizSectionDTO extends SeguePageDTO {
     }
 
     /**
-     * Default constructor required for Jackson
+     * Default constructor required for Jackson.
      */
     public IsaacQuizSectionDTO() {
 

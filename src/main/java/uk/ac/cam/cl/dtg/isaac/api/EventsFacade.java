@@ -654,7 +654,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     }
 
     /**
-     * Allows authorised users to view a csv of event attendees
+     * Allows authorised users to view a csv of event attendees.
      *
      * @param request
      *            - so we can determine if the user is logged in
@@ -939,7 +939,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     }
 
     /**
-     * This function allows cancellation of the reservations for the given users
+     * This function allows cancellation of the reservations for the given users.
      *
      * @param request
      *            - so we can determine if the user is logged in
@@ -1669,7 +1669,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     }
 
     /**
-     * A helper method for retrieving an event object without augmented information
+     * A helper method for retrieving an event object without augmented information.
      *
      * @param eventId the id of the event of interest
      * @return the fully populated event dto with user context information.

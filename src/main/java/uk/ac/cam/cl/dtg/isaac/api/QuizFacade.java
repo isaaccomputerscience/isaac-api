@@ -102,7 +102,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager.extractPageIdFromQuestionId;
 
 /**
- * Quiz Facade
+ * Quiz Facade.
  */
 @Path("/quiz")
 @Tag(name = "/quiz")
@@ -1046,7 +1046,7 @@ public class QuizFacade extends AbstractIsaacFacade {
     }
 
     /**
-     * Allows a teacher to see results of an assignment
+     * Allows a teacher to see results of an assignment.
      *
      * @param httpServletRequest so that we can extract user information.
      * @param quizAssignmentId the id of the assignment to view.
@@ -1120,7 +1120,7 @@ public class QuizFacade extends AbstractIsaacFacade {
     }
 
     /**
-     * Allows a teacher to download the results of an assignment as a CSV
+     * Allows a teacher to download the results of an assignment as a CSV.
      *
      * @param httpServletRequest so that we can extract user information.
      * @param quizAssignmentId the id of the assignment to view.

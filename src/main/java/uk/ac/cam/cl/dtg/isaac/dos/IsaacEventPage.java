@@ -394,7 +394,7 @@ public class IsaacEventPage extends Content {
 	}
 
 	/**
-	 * Get information about the event that is common to all booking system emails
+	 * Get information about the event that is common to all booking system emails.
 	 * @return emailEventDetails
 	 */
 	public String getEmailEventDetails() {
@@ -411,7 +411,7 @@ public class IsaacEventPage extends Content {
 
 
 	/**
-	 * Get text about the event for the confirmed emails
+	 * Get text about the event for the confirmed emails.
 	 *
 	 * @return emailEventDetails
 	 */
@@ -428,7 +428,7 @@ public class IsaacEventPage extends Content {
 	}
 
 	/**
-	 * Get text about the event for the waiting list emails
+	 * Get text about the event for the waiting list emails.
 	 *
 	 * @return emailEventDetails
 	 */

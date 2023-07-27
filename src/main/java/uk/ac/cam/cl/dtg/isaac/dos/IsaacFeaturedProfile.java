@@ -70,7 +70,7 @@ public class IsaacFeaturedProfile extends Content {
 	}
 
 	/**
-	 * Default constructor required for Jackson
+	 * Default constructor required for Jackson.
 	 */
 	public IsaacFeaturedProfile() {
 

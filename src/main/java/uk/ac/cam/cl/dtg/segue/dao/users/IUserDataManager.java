@@ -86,7 +86,7 @@ public interface IUserDataManager {
             throws SegueDatabaseException;
 
     /**
-     * Get UserAuthenticationSettings Object
+     * Get UserAuthenticationSettings Object.
      * This object provides information on how a user can login based on linked accounts and if they have a Segue account
      *
      * @param userId - user of interest
@@ -298,7 +298,7 @@ public interface IUserDataManager {
     void updateSessionToken(RegisteredUser user, Integer newTokenValue) throws SegueDatabaseException;
 
     /**
-     * Count all the users by role and return a map
+     * Count all the users by role and return a map.
      * @return map of user role to integers
      * @throws SegueDatabaseException
      *             - if there is a problem with the database.
@@ -306,7 +306,7 @@ public interface IUserDataManager {
     Map<Role, Long> getRoleCount() throws SegueDatabaseException;
 
     /**
-     * Count the users by role seen over the previous time interval
+     * Count the users by role seen over the previous time interval.
      * @param timeInterval time interval over which to count
      * @return map of counts for each role
      * @throws SegueDatabaseException
@@ -315,7 +315,7 @@ public interface IUserDataManager {
     Map<Role, Long> getRolesLastSeenOver(TimeInterval timeInterval) throws SegueDatabaseException;
 
     /**
-     * Count users' reported genders
+     * Count users' reported genders.
      * @return map of counts for each gender.
      * @throws SegueDatabaseException
      *             - if there is a problem with the database.
@@ -323,7 +323,7 @@ public interface IUserDataManager {
     Map<Gender, Long> getGenderCount() throws SegueDatabaseException;
 
     /**
-     * Count users' reported school information
+     * Count users' reported school information.
      * @return map of counts for students who have provided or not provided school information
      * @throws SegueDatabaseException
      *             - if there is a problem with the database.

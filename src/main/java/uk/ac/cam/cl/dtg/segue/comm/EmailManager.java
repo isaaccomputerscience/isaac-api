@@ -458,7 +458,7 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     }
 
     /**
-     * helper function to map a value to an email friendly string
+     * helper function to map a value to an email friendly string.
      *
      * @param o - object to map
      * @return more sensible string representation or null

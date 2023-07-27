@@ -21,7 +21,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.JsonContentType;
 import uk.ac.cam.cl.dtg.segue.dto.content.InteractiveCodeSnippetDTO;
 
 /**
- * Interactive code snippet is a code snippet that can be run and edited
+ * Interactive code snippet is a code snippet that can be run and edited.
  *
  */
 @DTOMapping(InteractiveCodeSnippetDTO.class)

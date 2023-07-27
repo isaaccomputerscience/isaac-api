@@ -20,7 +20,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.JsonContentType;
 import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 
 /**
- * DTO for isaacFreeTextQuestions
+ * DTO for isaacFreeTextQuestions.
  */
 @JsonContentType("isaacFreeTextQuestion")
 @ValidatesWith(IsaacFreeTextValidator.class)

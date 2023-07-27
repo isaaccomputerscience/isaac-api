@@ -28,7 +28,7 @@ public class IsaacQuickQuestionDTO extends IsaacQuestionBaseDTO {
     private Boolean showConfidence;
 
     /**
-     * Unignores getting the answer as it is
+     * Unignores getting the answer as it is.
      * required to be shown in a quick question
      * @return the answer
      */
@@ -39,7 +39,7 @@ public class IsaacQuickQuestionDTO extends IsaacQuestionBaseDTO {
     }
 
     /**
-     * Gets the showConfidence
+     * Gets the showConfidence.
      *
      * @return the showConfidence
      */
@@ -48,7 +48,7 @@ public class IsaacQuickQuestionDTO extends IsaacQuestionBaseDTO {
     }
 
     /**
-     * Sets the showConfidence
+     * Sets the showConfidence.
      *
      * @param showConfidence
      *              the showConfidence to set

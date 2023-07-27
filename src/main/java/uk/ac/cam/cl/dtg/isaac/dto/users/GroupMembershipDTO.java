@@ -21,7 +21,7 @@ import java.util.Date;
 
 
 /**
- * GroupMembership DTO - this object represents a users membership to a group
+ * GroupMembership DTO - this object represents a users membership to a group.
  *
  */
 public class GroupMembershipDTO {
@@ -89,7 +89,7 @@ public class GroupMembershipDTO {
     }
 
     /**
-     * Get the status of the group membership
+     * Get the status of the group membership.
      * @return the group status
      */
     public GroupMembershipStatus getStatus() {
@@ -97,7 +97,7 @@ public class GroupMembershipDTO {
     }
 
     /**
-     * set the status of the group membership
+     * set the status of the group membership.
      * @param status to set
      */
     public void setStatus(final GroupMembershipStatus status) {

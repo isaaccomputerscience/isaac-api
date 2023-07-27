@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.ac.cam.cl.dtg.isaac.dto.content.CodeSnippetDTO;
 
 /**
- * Interactive code snippet is a code snippet that can be run and edited
+ * Interactive code snippet is a code snippet that can be run and edited.
  *
  */
 public class InteractiveCodeSnippetDTO extends CodeSnippetDTO {

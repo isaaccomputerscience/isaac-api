@@ -334,7 +334,9 @@ public class QuestionManager {
         }
     }
 
-    /** Test a question of a particular type against a series of test cases **/
+    /**
+     * Test a question of a particular type against a series of test cases.
+     **/
     public List<TestCase> testQuestion(final String questionType, final TestQuestion testDefinition)
             throws BadRequestException, ValidatorUnavailableException {
         try {
@@ -444,7 +446,7 @@ public class QuestionManager {
     }
 
     /**
-     * Count the users by role which have answered questions over the previous time interval
+     * Count the users by role which have answered questions over the previous time interval.
      * @param timeInterval time interval over which to count
      * @return map of counts for each role
      * @throws SegueDatabaseException
@@ -456,7 +458,7 @@ public class QuestionManager {
     }
 
     /**
-     * getQuestionAttemptCountsByDate
+     * getQuestionAttemptCountsByDate.
      *
      * Retrieves a map of days and number of question attempts
      */

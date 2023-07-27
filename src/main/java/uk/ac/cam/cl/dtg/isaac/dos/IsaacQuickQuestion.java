@@ -28,7 +28,7 @@ public class IsaacQuickQuestion extends IsaacQuestionBase {
     private Boolean showConfidence;
 
     /**
-     * Gets the showConfidence
+     * Gets the showConfidence.
      *
      * @return the showConfidence
      */
@@ -37,7 +37,7 @@ public class IsaacQuickQuestion extends IsaacQuestionBase {
     }
 
     /**
-     * Sets the showConfidence
+     * Sets the showConfidence.
      *
      * @param showConfidence
      *              the showConfidence to set

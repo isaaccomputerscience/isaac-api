@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
 
 /**
- * Manage quiz assignments
+ * Manage quiz assignments.
  */
 public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssignmentDTO> {
     private static final Logger log = LoggerFactory.getLogger(QuizAssignmentManager.class);

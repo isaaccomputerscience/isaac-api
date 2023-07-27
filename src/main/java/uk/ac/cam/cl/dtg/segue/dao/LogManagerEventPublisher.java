@@ -47,7 +47,7 @@ public abstract class LogManagerEventPublisher implements ILogManager {
 
 
     /**
-     * Add listener object to collection of listeners that wish to subscribe to events raised
+     * Add listener object to collection of listeners that wish to subscribe to events raised.
      *
      * @param listener
      *            - the listener who wants to subscribe to raised events
@@ -62,9 +62,9 @@ public abstract class LogManagerEventPublisher implements ILogManager {
     }
 
 
-
-
-    /**Method Overrides*/
+    /**
+     * Method Overrides.
+     */
 
     @Override
     public void logEvent(final AbstractSegueUserDTO user, final HttpServletRequest httpRequest, final LogType eventType, final Object eventDetails) {

@@ -17,7 +17,7 @@
 package uk.ac.cam.cl.dtg.segue.dao;
 
 /**
- *  Postgres implementation of abstract log manager/even publisher
+ *  Postgres implementation of abstract log manager/even publisher.
  *
  *  @author Dan Underwood
  */

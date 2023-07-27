@@ -198,7 +198,7 @@ public class GroupManager {
     }
 
     /**
-     * Get an individual users groupMembershipStatus
+     * Get an individual users groupMembershipStatus.
      * @param userId - userId
      * @param groupId - groupId
      * @return the membership status
@@ -337,7 +337,7 @@ public class GroupManager {
     }
 
     /**
-     * Change users group membership status
+     * Change users group membership status.
      *
      * @param group
      *            - that should be affected
@@ -661,7 +661,7 @@ public class GroupManager {
     }
 
     /**
-     * Mutates the list to include group membership information
+     * Mutates the list to include group membership information.
      *
      * @param group group to look up membership info
      * @param summarisedMemberInfo - the list containing summarised user objects - this will be replaced with summarised user objects that include membership information

@@ -100,7 +100,7 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
     }
 
     /**
-     * Get all assignments for a given group id
+     * Get all assignments for a given group id.
      * @param groupId - to which the assignments have been assigned
      * @return all assignments
      * @throws SegueDatabaseException

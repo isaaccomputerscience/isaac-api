@@ -119,7 +119,7 @@ public class Content extends ContentBase {
     }
 
     /**
-     * Default constructor required for Jackson
+     * Default constructor required for Jackson.
      */
     public Content() {
         // useful for when we want to augment this POJO

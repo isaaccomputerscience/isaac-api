@@ -37,7 +37,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * This class is responsible for managing and persisting quiz assignments
+ * This class is responsible for managing and persisting quiz assignments.
  */
 public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersistenceManager {
     private static final Logger log = LoggerFactory.getLogger(PgQuizAssignmentPersistenceManager.class);

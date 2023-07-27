@@ -35,7 +35,7 @@ public class ContentSummarizerService {
     }
 
     /**
-     * Simplify a ContentDTO object to a smaller summary class to reduce the size of the response
+     * Simplify a ContentDTO object to a smaller summary class to reduce the size of the response.
      *
      * @param content
      *            - the content object to summarise
@@ -56,7 +56,7 @@ public class ContentSummarizerService {
     }
 
     /**
-     * Helper method to simplify a ContentDTO object directly to ContentSummaryDTO
+     * Helper method to simplify a ContentDTO object directly to ContentSummaryDTO.
      *  
      * @see ContentSummarizerService#extractContentSummary(ContentDTO, Class)  
      */
@@ -89,7 +89,7 @@ public class ContentSummarizerService {
     }
 
     /**
-     * Helper method to simplify a ResultsWrapper of ContentDTO objects directly to ContentSummaryDTOs
+     * Helper method to simplify a ResultsWrapper of ContentDTO objects directly to ContentSummaryDTOs.
      *
      * @see ContentSummarizerService#extractContentSummaryFromResultsWrapper(ResultsWrapper, Class) 
      */

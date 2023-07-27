@@ -35,7 +35,7 @@ import java.util.Map;
 import static java.lang.Math.min;
 
 /**
- *  A postgres specific User Preference Manager
+ *  A postgres specific User Preference Manager.
  */
 public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
 
@@ -43,7 +43,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
     private static final Logger log = LoggerFactory.getLogger(PgUserPreferenceManager.class);
 
     /**
-     * Create a PgUserPreferenceManager
+     * Create a PgUserPreferenceManager.
      * @param database - a pre-configured postgres database object
      */
     @Inject

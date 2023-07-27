@@ -16,7 +16,7 @@
 package uk.ac.cam.cl.dtg.util.locations;
 
 /**
- * POJO representing an address
+ * POJO representing an address.
  */
 public class Address {
     private String addressLine1;

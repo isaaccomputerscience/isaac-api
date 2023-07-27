@@ -87,7 +87,7 @@ public class GroupMembership {
     }
 
     /**
-     * Get the status of the group membership
+     * Get the status of the group membership.
      * @return the group status
      */
     public GroupMembershipStatus getStatus() {
@@ -95,7 +95,7 @@ public class GroupMembership {
     }
 
     /**
-     * set the status of the group membership
+     * set the status of the group membership.
      * @param status to set
      */
     public void setStatus(final GroupMembershipStatus status) {

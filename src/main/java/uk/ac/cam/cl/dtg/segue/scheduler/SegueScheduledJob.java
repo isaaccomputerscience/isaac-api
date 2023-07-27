@@ -20,7 +20,7 @@ import org.quartz.Job;
 import java.util.Map;
 
 /**
- * Super class to support the capture of all variables needed to register a segue Scheduled Job
+ * Super class to support the capture of all variables needed to register a segue Scheduled Job.
  */
 public abstract class SegueScheduledJob {
     private String jobKey;
@@ -48,7 +48,7 @@ public abstract class SegueScheduledJob {
     }
 
     /**
-     * Group name
+     * Group name.
      *
      * Describes the group of jobs
      *
@@ -74,7 +74,7 @@ public abstract class SegueScheduledJob {
 
 
     /**
-     * Human readable description of the job
+     * Human readable description of the job.
      *
      * @return string
      */
@@ -90,7 +90,7 @@ public abstract class SegueScheduledJob {
     public abstract Map<String, Object> getExecutionContext();
 
     /**
-     * Quartz job that will be instantiated by quartz during job execution
+     * Quartz job that will be instantiated by quartz during job execution.
      *
      * The execute method is used
      *
@@ -99,8 +99,7 @@ public abstract class SegueScheduledJob {
     public abstract Job getExecutableTask();
 
     /**
-     * Create a custom segue scheduled job that overrides the
-     * execution context and executable task
+     * Create a custom segue scheduled job that overrides the execution context and executable task.
      *
      * @return SegueScheduledJob
      */

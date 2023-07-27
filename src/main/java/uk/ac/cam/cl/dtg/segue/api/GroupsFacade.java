@@ -231,7 +231,7 @@ public class GroupsFacade extends AbstractSegueFacade {
     }
 
     /**
-     * Change user's group membership status
+     * Change user's group membership status.
      *
      * @param request      - for authentication
      * @param cacheRequest - so that we can control caching of this endpoint

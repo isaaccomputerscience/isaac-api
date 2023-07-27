@@ -160,7 +160,7 @@ public interface IStatisticsManager {
             Collection<RegisteredUserDTO> users, Map<String, Date> lastSeenUserMap, int daysFromToday);
 
     /**
-     * Gets additional information for a user outlining their progress for teacher-based activity
+     * Gets additional information for a user outlining their progress for teacher-based activity.
      *
      * @param userOfInterest the user we want infor for
      * @return a map of teacher activities and the user's progress in each of them

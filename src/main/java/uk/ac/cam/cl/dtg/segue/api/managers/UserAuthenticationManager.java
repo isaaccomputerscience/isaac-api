@@ -521,7 +521,7 @@ public class UserAuthenticationManager {
     }
 
     /**
-     * Takes a request holding an authentication cookie and invalidates the associated session token stored in the database
+     * Takes a request holding an authentication cookie and invalidates the associated session token stored in the database.
      *
      * @param request - a servlet request holding an auth cookie for the user session to be invalidated
      * @throws NoUserLoggedInException - if a user cannot be retrieved from the session information

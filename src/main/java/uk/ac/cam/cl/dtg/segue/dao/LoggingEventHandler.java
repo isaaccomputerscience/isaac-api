@@ -21,7 +21,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- *  Abstract class for handling logging events raised
+ *  Abstract class for handling logging events raised.
  *  @author Dan Underwood
  */
 public abstract class LoggingEventHandler {

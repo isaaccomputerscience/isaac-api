@@ -58,7 +58,7 @@ public class FastTrackManger {
     }
 
     /**
-     * Cheacks if a gameboard ID is a valid fasttrack gameboard ID
+     * Cheacks if a gameboard ID is a valid fasttrack gameboard ID.
      * @param gameboardId to check.
      * @return whether or not it is a valid fasttrack gameboard.
      */
@@ -67,7 +67,7 @@ public class FastTrackManger {
     }
 
     /**
-     * Returns the concept name for a given question ID
+     * Returns the concept name for a given question ID.
      * @param questionId the question ID for which you want to find its fasttrack concept.
      * @return the concept string.
      * @throws ContentManagerException if content cant be found which matches the question ID.
@@ -87,7 +87,7 @@ public class FastTrackManger {
     }
 
     /**
-     * Retrieve fasttrack concept progress
+     * Retrieve fasttrack concept progress.
      *
      * @param gameboard which holds the "top ten" questions and a filter for context.
      * @param conceptTitle concept title.

@@ -18,7 +18,7 @@ package uk.ac.cam.cl.dtg.isaac.dos.content;
 import uk.ac.cam.cl.dtg.isaac.dto.content.CodeSnippetDTO;
 
 /**
- * Code snippet object
+ * Code snippet object.
  *
  */
 @DTOMapping(CodeSnippetDTO.class)
