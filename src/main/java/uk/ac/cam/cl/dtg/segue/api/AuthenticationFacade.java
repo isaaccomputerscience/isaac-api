@@ -365,8 +365,9 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             final LocalAuthDTO localAuthDTO) throws InvalidKeySpecException, NoSuchAlgorithmException {
 
         // In this case we expect a username and password in the JSON request body:
-        if (areCredentialsMissing(localAuthDTO))
+        if (areCredentialsMissing(localAuthDTO)) {
             return new SegueErrorResponse(Status.BAD_REQUEST, LOGIN_MISSING_CREDENTIALS_MESSAGE).toResponse();
+        }
         
         String email = localAuthDTO.getEmail();
         String password = localAuthDTO.getPassword();

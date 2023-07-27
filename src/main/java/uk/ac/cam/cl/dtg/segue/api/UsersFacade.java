@@ -210,8 +210,8 @@ public class UsersFacade extends AbstractSegueFacade {
 
             //TODO: We need to change the way the frontend sends passwords to reduce complexity
             Map<String, Object> mapRepresentation = tmpObjectMapper.readValue(userObjectString, HashMap.class);
-            newPassword = (String) ((Map)mapRepresentation.get("registeredUser")).get("password");
-            ((Map)mapRepresentation.get("registeredUser")).remove("password");
+            newPassword = (String) ((Map) mapRepresentation.get("registeredUser")).get("password");
+            ((Map) mapRepresentation.get("registeredUser")).remove("password");
             userSettingsObjectFromClient = tmpObjectMapper.convertValue(mapRepresentation, UserSettings.class);
             
             if (null == userSettingsObjectFromClient) {
@@ -400,10 +400,11 @@ public class UsersFacade extends AbstractSegueFacade {
                     .logEvent(userManager.getCurrentUser(request), request, SegueServerLogType.PASSWORD_RESET_REQUEST_RECEIVED,
                             ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userObject.getEmail()));
 
-            if (userExists)
+            if (userExists) {
                 log.info("Password reset requested for email: (" + sanitiseLogValue(userObject.getEmail()) + ")");
-            else
+            } else {
                 log.warn("Password reset requested for account that does not exist: (" + sanitiseLogValue(userObject.getEmail()) + ")");
+            }
             return Response.ok().build();
         } catch (SegueDatabaseException e) {
             SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,

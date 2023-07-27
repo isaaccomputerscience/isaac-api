@@ -144,12 +144,14 @@ public class UserAuthenticationManager {
         String ipAddress = RequestIPExtractor.getClientIpAddr(request);
 
         String jSessionId = null;
-        try { jSessionId = this.getJSessionIdFromRequest(request); }
-        catch (InvalidSessionException e) { /* Do nothing - leave jSessionId as null */ }
+        try {
+            jSessionId = this.getJSessionIdFromRequest(request);
+        } catch (InvalidSessionException e) { /* Do nothing - leave jSessionId as null */ }
 
         Map<String, String> sessionInformation = Maps.newHashMap();
-        try { sessionInformation = getSegueSessionFromRequest(request); }
-        catch (InvalidSessionException | IOException e) { /* Do nothing - leave session map empty */ }
+        try {
+            sessionInformation = getSegueSessionFromRequest(request);
+        } catch (InvalidSessionException | IOException e) { /* Do nothing - leave session map empty */ }
 
         String segueUserId = sessionInformation.get(SESSION_USER_ID);
         String sessionToken = sessionInformation.get(SESSION_TOKEN);
@@ -621,7 +623,7 @@ public class UserAuthenticationManager {
                     .mapToProvider(AuthenticationProvider.SEGUE.name());
 
         // make sure that the change doesn't prevent the user from logging in again.
-        if ((this.database.getAuthenticationProvidersByUser(userDO).size() > 1) || authenticator.hasPasswordRegistered(userDO)) {
+        if (this.database.getAuthenticationProvidersByUser(userDO).size() > 1 || authenticator.hasPasswordRegistered(userDO)) {
             this.database.unlinkAuthProviderFromUser(userDO, this.mapToProvider(providerString)
                     .getAuthenticationProvider());
         } else {
@@ -1180,7 +1182,7 @@ public class UserAuthenticationManager {
             log.warn("User session has failed validation. Could not parse session information.");
             return false;
         }
-        return isSessionValid((currentSessionInformation));
+        return isSessionValid(currentSessionInformation);
     }
 
     public boolean isSessionValid(Map<String, String> currentSessionInformation) {

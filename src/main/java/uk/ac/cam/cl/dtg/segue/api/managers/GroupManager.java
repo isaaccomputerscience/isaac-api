@@ -191,7 +191,7 @@ public class GroupManager {
      */
     public Map<Long, GroupMembershipDTO> getUserMembershipMapForGroup(Long groupId) throws SegueDatabaseException {
         Map<Long, GroupMembershipDTO> result = Maps.newHashMap();
-        for(Map.Entry<Long, GroupMembership> entry : this.groupDatabase.getGroupMembershipMap(groupId).entrySet()) {
+        for (Map.Entry<Long, GroupMembership> entry : this.groupDatabase.getGroupMembershipMap(groupId).entrySet()) {
             result.put(entry.getKey(), dtoMapper.map(entry.getValue(), GroupMembershipDTO.class));
         }
         return result;
@@ -564,7 +564,7 @@ public class GroupManager {
      * @return whether the user is an owner or an additional manager with privileges.
      */
     public static boolean hasAdditionalManagerPrivileges(final UserGroupDTO group, final Long userIdToCheck) {
-        return group.getOwnerId().equals(userIdToCheck) || (isInAdditionalManagerList(group, userIdToCheck) && group.isAdditionalManagerPrivileges());
+        return group.getOwnerId().equals(userIdToCheck) || isInAdditionalManagerList(group, userIdToCheck) && group.isAdditionalManagerPrivileges();
     }
 
     /**

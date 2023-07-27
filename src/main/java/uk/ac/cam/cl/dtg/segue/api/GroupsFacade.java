@@ -207,7 +207,7 @@ public class GroupsFacade extends AbstractSegueFacade {
             List<UserGroupDTO> groups = groupManager.getGroupMembershipList(user);
 
             List<Map<String, Object>> results = Lists.newArrayList();
-            for(UserGroupDTO group : groups) {
+            for (UserGroupDTO group : groups) {
                 ImmutableMap<String, Object> map = ImmutableMap.of("group", group, "membershipStatus", this.groupManager.getGroupMembershipStatus(user.getId(), group.getId()).name());
 
                 // check if the group doesn't have a last updated date if not it means that we shouldn't show students the group name as teachers may not have realised the names are public..
@@ -829,8 +829,8 @@ public class GroupsFacade extends AbstractSegueFacade {
         try {
             RegisteredUserDTO currentUser = userManager.getCurrentRegisteredUser(request);
             UserGroupDTO group = groupManager.getGroupById(groupId);
-            if (!GroupManager.isOwnerOrAdditionalManager(group, currentUser.getId()) &&
-                    !isUserAnAdmin(userManager, currentUser)) {
+            if (!GroupManager.isOwnerOrAdditionalManager(group, currentUser.getId())
+                    && !isUserAnAdmin(userManager, currentUser)) {
                 return new SegueErrorResponse(Status.FORBIDDEN,
                         "You can only view the results of assignments that you own.").toResponse();
             }

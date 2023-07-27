@@ -364,7 +364,7 @@ public class AuthorisationFacade extends AbstractSegueFacade {
     @Produces(MediaType.APPLICATION_JSON)
     @GZIP
     @Operation(summary = "List all users the specified user has been granted access by.")
-    public Response getCurrentAccessRightsForSpecificUser(@Context final HttpServletRequest request, @PathParam("userId") Long userId) throws NoUserException{
+    public Response getCurrentAccessRightsForSpecificUser(@Context final HttpServletRequest request, @PathParam("userId") Long userId) throws NoUserException {
         try {
             RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
 
@@ -421,8 +421,8 @@ public class AuthorisationFacade extends AbstractSegueFacade {
             UserGroupDTO group = this.groupManager.getGroupById(groupId);
 
             if (!GroupManager.isOwnerOrAdditionalManager(group, user.getId())) {
-                return new SegueErrorResponse(Status.FORBIDDEN, "You do not have permission to create or request a group token for this group. " +
-                        "Only owners or additional managers can.").toResponse();
+                return new SegueErrorResponse(Status.FORBIDDEN, "You do not have permission to create or request a group token for this group. "
+                        + "Only owners or additional managers can.").toResponse();
             }
 
             AssociationToken token = associationManager.generateAssociationToken(user, groupId);

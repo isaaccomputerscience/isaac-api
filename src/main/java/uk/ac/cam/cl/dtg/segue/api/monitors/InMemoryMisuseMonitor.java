@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dto.MisuseStatisticDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.SegueResourceMisuseException;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -112,15 +111,15 @@ public class InMemoryMisuseMonitor implements IMisuseMonitor {
                 
                 // deal with threshold violations
                 if (handler.getSoftThreshold() != null
-                        && (previousValue < handler.getSoftThreshold() && entry.getValue() >= handler
-                                .getSoftThreshold())) {
+                        && previousValue < handler.getSoftThreshold() && entry.getValue() >= handler
+                        .getSoftThreshold()) {
                     handler.executeSoftThresholdAction(String.format("(%s) has exceeded the soft limit!",
                             agentIdentifier));
                 }
 
                 if (handler.getHardThreshold() != null
-                        && (previousValue < handler.getHardThreshold() && entry.getValue() >= handler
-                                .getHardThreshold())) {
+                        && previousValue < handler.getHardThreshold() && entry.getValue() >= handler
+                        .getHardThreshold()) {
                     String errMessage = String.format("(%s) has exceeded the hard limit!", agentIdentifier);
 
                     handler.executeHardThresholdAction(errMessage);

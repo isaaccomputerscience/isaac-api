@@ -862,7 +862,7 @@ public class AdminFacade extends AbstractSegueFacade {
             int searchResultsLimit;
             try {
                 searchResultsLimit = Integer.parseInt(this.getProperties().getProperty(Constants.SEARCH_RESULTS_HARD_LIMIT));
-            } catch(NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 searchResultsLimit = 2000; // Hard-coded, but only as a fail-safe.
             }
 
@@ -1009,8 +1009,9 @@ public class AdminFacade extends AbstractSegueFacade {
             getLogManager().logEvent(currentlyLoggedInUser, httpServletRequest, SegueServerLogType.ADMIN_MERGE_USER,
                     ImmutableMap.of(USER_ID_FKEY_FIELDNAME, targetUser.getId(), OLD_USER_ID_FKEY_FIELDNAME, sourceUser.getId()));
 
-            log.info("Admin User: " + currentlyLoggedInUser.getEmail() + " has just merged the target user account with id: " + userIdMergeDTO.getTargetId() +
-                    " with the source user account with id: " + userIdMergeDTO.getSourceId());
+            log.info("Admin User: " + currentlyLoggedInUser.getEmail()
+                    + " has just merged the target user account with id: " + userIdMergeDTO.getTargetId()
+                    + " with the source user account with id: " + userIdMergeDTO.getSourceId());
 
             return Response.noContent().build();
         } catch (NoUserLoggedInException e) {

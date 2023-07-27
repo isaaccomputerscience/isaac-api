@@ -1848,8 +1848,8 @@ public class UserAccountManager implements IUserAccountManager {
         // since the federated providers didn't always provide email addresses - we have to check and update accordingly.
         if (!localUserInformation.getEmail().contains("@") &&
                 !EmailVerificationStatus.DELIVERY_FAILED.equals(localUserInformation.getEmailVerificationStatus())) {
-           this.updateUserEmailVerificationStatus(localUserInformation.getEmail(),
-                   EmailVerificationStatus.DELIVERY_FAILED);
+            this.updateUserEmailVerificationStatus(localUserInformation.getEmail(),
+                    EmailVerificationStatus.DELIVERY_FAILED);
         }
 
         logManager.logInternalEvent(this.convertUserDOToUserDTO(localUserInformation), SegueServerLogType.USER_REGISTRATION,
@@ -1867,7 +1867,7 @@ public class UserAccountManager implements IUserAccountManager {
      * @return true if it meets the internal storage requirements, false if not.
      */
     private boolean isUserValid(final RegisteredUser userToValidate) {
-        return (userToValidate.getEmail() != null) && isEmailValid(userToValidate.getEmail());
+        return userToValidate.getEmail() != null && isEmailValid(userToValidate.getEmail());
     }
 
     public static final boolean isEmailValid(String email) {

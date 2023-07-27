@@ -440,9 +440,9 @@ public class EmailFacade extends AbstractSegueFacade {
             if (isUserAnEventManager(userManager, sender)) {
                 if (misuseMonitor.willHaveMisused(sender.getId().toString(),
                         SendEmailMisuseHandler.class.getSimpleName(), userIds.size())) {
-                    return SegueErrorResponse
-                            .getRateThrottledResponse("You would have exceeded the number of emails you are allowed to send per day." +
-                                    " No emails have been sent.");
+                    return SegueErrorResponse.getRateThrottledResponse(
+                            "You would have exceeded the number of emails you are allowed to send per day."
+                                    + " No emails have been sent.");
                 }
                 misuseMonitor.notifyEvent(sender.getId().toString(),
                         SendEmailMisuseHandler.class.getSimpleName(), userIds.size());

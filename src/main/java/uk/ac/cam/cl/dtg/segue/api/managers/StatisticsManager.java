@@ -29,13 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.api.managers.GameManager;
 import uk.ac.cam.cl.dtg.isaac.api.services.ContentSummarizerService;
-import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
-import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
-import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
-import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
-import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
-import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.isaac.dos.AudienceContext;
 import uk.ac.cam.cl.dtg.isaac.dos.Difficulty;
 import uk.ac.cam.cl.dtg.isaac.dos.IUserStreaksManager;
@@ -48,10 +41,16 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
+import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
+import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
+import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
+import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -421,7 +420,7 @@ public class StatisticsManager implements IStatisticsManager {
 
         LocalDate now = LocalDate.now();
         LocalDate endOfAugustThisYear = LocalDate.of(now.getYear(), Month.AUGUST, 31);
-        LocalDate endOfAugustLastYear = LocalDate.of(now.getYear() -1, Month.AUGUST, 31);
+        LocalDate endOfAugustLastYear = LocalDate.of(now.getYear() - 1, Month.AUGUST, 31);
         LocalDate lastDayOfPreviousAcademicYear =
                 now.isAfter(endOfAugustThisYear) ? endOfAugustThisYear : endOfAugustLastYear;
 
@@ -535,7 +534,7 @@ public class StatisticsManager implements IStatisticsManager {
                         if (questionAttemptsByStageAndDifficultyStats.containsKey(currentStage)) {
                             if (questionAttemptsByStageAndDifficultyStats.get(currentStage).containsKey(currentDifficulty)) {
                                 questionAttemptsByStageAndDifficultyStats.get(currentStage)
-                                .put(currentDifficulty, questionAttemptsByStageAndDifficultyStats.get(currentStage).get(currentDifficulty) + 1);
+                                        .put(currentDifficulty, questionAttemptsByStageAndDifficultyStats.get(currentStage).get(currentDifficulty) + 1);
                             } else {
                                 questionAttemptsByStageAndDifficultyStats.get(currentStage).put(currentDifficulty, 1);
                             }
@@ -550,7 +549,7 @@ public class StatisticsManager implements IStatisticsManager {
                             if (questionsCorrectByStageAndDifficultyStats.containsKey(currentStage)) {
                                 if (questionsCorrectByStageAndDifficultyStats.get(currentStage).containsKey(currentDifficulty)) {
                                     questionsCorrectByStageAndDifficultyStats.get(currentStage)
-                                    .put(currentDifficulty, questionsCorrectByStageAndDifficultyStats.get(currentStage).get(currentDifficulty) + 1);
+                                            .put(currentDifficulty, questionsCorrectByStageAndDifficultyStats.get(currentStage).get(currentDifficulty) + 1);
                                 } else {
                                     questionsCorrectByStageAndDifficultyStats.get(currentStage).put(currentDifficulty, 1);
                                 }

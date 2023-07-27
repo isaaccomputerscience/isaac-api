@@ -15,28 +15,26 @@
  */
 package uk.ac.cam.cl.dtg.segue.api.managers;
 
-import java.security.SecureRandom;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
+import com.google.inject.Inject;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.segue.dao.associations.InvalidUserAssociationTokenException;
-import uk.ac.cam.cl.dtg.segue.dao.associations.UserGroupNotFoundException;
-import uk.ac.cam.cl.dtg.segue.dao.associations.IAssociationDataManager;
 import uk.ac.cam.cl.dtg.isaac.dos.AssociationToken;
 import uk.ac.cam.cl.dtg.isaac.dos.UserAssociation;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.segue.dao.associations.IAssociationDataManager;
+import uk.ac.cam.cl.dtg.segue.dao.associations.InvalidUserAssociationTokenException;
+import uk.ac.cam.cl.dtg.segue.dao.associations.UserGroupNotFoundException;
 
-import com.google.inject.Inject;
+import java.security.SecureRandom;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * UserAssociationManager Responsible for managing user associations, groups and permissions for one user to grant data
@@ -129,11 +127,11 @@ public class UserAssociationManager {
 
         // Use 5 bit ints extracted from randomBits, to generate tokenLength random characters from sample space.
         while (index < tokenLength) {
-            if (shift >= 32/5) {  // If we've expired the 32/5 values in this random int, get a new one, reset shift.
+            if (shift >= 32 / 5) {  // If we've expired the 32/5 values in this random int, get a new one, reset shift.
                 randomBits = secureRandom.nextInt();
                 shift = 0;
             }
-            int chr = (randomBits >> (5*shift)) & 0x1f;  // Extract next 5 bit int from randomBits.
+            int chr = (randomBits >> (5 * shift)) & 0x1f;  // Extract next 5 bit int from randomBits.
             shift++;  // Ensure we don't reuse any of randomBits.
             if (chr < tokenCharMap.length()) {
                 // If we're in the valid range, use that character and advance in authToken, else try again.
@@ -366,7 +364,7 @@ public class UserAssociationManager {
         try {
             return currentUser.getId().equals(userRequested.getId())
                     || Role.ADMIN.equals(currentUser.getRole())
-                    || (!Role.STUDENT.equals(currentUser.getRole()) && this.associationDatabase.hasValidAssociation(currentUser.getId(), userRequested.getId()));
+                    || !Role.STUDENT.equals(currentUser.getRole()) && this.associationDatabase.hasValidAssociation(currentUser.getId(), userRequested.getId());
         } catch (SegueDatabaseException e) {
             log.error("Database Error: Unable to determine whether a user has permission to view another users data.",
                     e);
@@ -402,7 +400,7 @@ public class UserAssociationManager {
         try {
             return currentUser.getId().equals(userRequested.getId())
                     || Role.ADMIN.equals(currentUser.getRole())
-                    || (!Role.STUDENT.equals(currentUser.getRole()) && !Role.TUTOR.equals(currentUser.getRole()) && this.associationDatabase.hasValidAssociation(currentUser.getId(), userRequested.getId()));
+                    || !Role.STUDENT.equals(currentUser.getRole()) && !Role.TUTOR.equals(currentUser.getRole()) && this.associationDatabase.hasValidAssociation(currentUser.getId(), userRequested.getId());
         } catch (SegueDatabaseException e) {
             log.error("Database Error: Unable to determine whether a user has permission to view another users data.",
                     e);
