@@ -45,7 +45,8 @@ public interface IPasswordAuthenticator extends IAuthenticator {
      * @throws SegueDatabaseException
      *             - If there is an internal database error.
      */
-    void setOrChangeUsersPassword(RegisteredUser user, final String plainTextPassword) throws InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException;
+    void setOrChangeUsersPassword(RegisteredUser user, String plainTextPassword)
+            throws InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException;
 
     /**
      * authenticate This method authenticates a given user based on the given e-mail address and password.
@@ -95,7 +96,7 @@ public interface IPasswordAuthenticator extends IAuthenticator {
      *            - Token to validate.
      * @return true if the reset token is valid
      */
-    boolean isValidResetToken(final String token) throws SegueDatabaseException;
+    boolean isValidResetToken(String token) throws SegueDatabaseException;
 
     /**
      * This method will throw an exception for invalid passwords.
@@ -104,7 +105,7 @@ public interface IPasswordAuthenticator extends IAuthenticator {
      *            - Password to validate.
      * @throws InvalidPasswordException - if the password is invalid
      */
-    void ensureValidPassword(final String password) throws InvalidPasswordException;
+    void ensureValidPassword(String password) throws InvalidPasswordException;
 
     /**
      * This method will test if the user's reset token is valid reset token for a given user.
@@ -113,7 +114,7 @@ public interface IPasswordAuthenticator extends IAuthenticator {
      *            - Token to validate.
      * @return RegisteredUser
      */
-    RegisteredUser getRegisteredUserByToken(final String token) throws SegueDatabaseException;
+    RegisteredUser getRegisteredUserByToken(String token) throws SegueDatabaseException;
 
     /**
      * Creates an email verification token and attaches it to the UserDO ready to be persisted.
@@ -126,8 +127,7 @@ public interface IPasswordAuthenticator extends IAuthenticator {
      * 
      * @return UserDO which has the associated verification token.
      */
-    RegisteredUser createEmailVerificationTokenForUser(final RegisteredUser userToAttachVerificationToken, 
-            final String email);
+    RegisteredUser createEmailVerificationTokenForUser(RegisteredUser userToAttachVerificationToken, String email);
 
     /**
      * This method tests whether the verification token is valid.
@@ -138,5 +138,5 @@ public interface IPasswordAuthenticator extends IAuthenticator {
 
      * @return - the validity of the token
      */
-    boolean isValidEmailVerificationToken(final RegisteredUser user, final String token);
+    boolean isValidEmailVerificationToken(RegisteredUser user, String token);
 }

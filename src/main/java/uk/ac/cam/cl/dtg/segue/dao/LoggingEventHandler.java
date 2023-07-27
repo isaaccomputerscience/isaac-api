@@ -26,7 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public abstract class LoggingEventHandler {
 
-    public abstract void handleEvent(AbstractSegueUserDTO user, final HttpServletRequest httpRequest, String eventType, Object eventDetails);
+    public abstract void handleEvent(AbstractSegueUserDTO user, HttpServletRequest httpRequest, String eventType, Object eventDetails);
 
-    public abstract void transferLogEventsToRegisteredUser(final String oldUserId, final String newUserId);
+    public abstract void transferLogEventsToRegisteredUser(String oldUserId, String newUserId);
 }

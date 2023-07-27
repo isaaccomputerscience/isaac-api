@@ -29,6 +29,6 @@ public interface IUserBadgePersistenceManager {
      * @param transaction object which carries database transaction across multiple functions
      * @throws SegueDatabaseException
      */
-    public void updateBadge(UserBadge badge, ITransaction transaction) throws SegueDatabaseException;
+    void updateBadge(UserBadge badge, ITransaction transaction) throws SegueDatabaseException;
 
 }

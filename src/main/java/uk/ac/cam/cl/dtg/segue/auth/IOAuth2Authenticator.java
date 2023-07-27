@@ -31,7 +31,7 @@ public interface IOAuth2Authenticator extends IOAuthAuthenticator {
 	 *         user to login with - this should result in a callback to a
 	 *         prearranged api endpoint if successful.
 	 */
-	String getAuthorizationUrl(final String antiForgeryStateToken);
+	String getAuthorizationUrl(String antiForgeryStateToken);
 
 	/**
 	 * This method generates an anti CSRF token to be included in the

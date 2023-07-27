@@ -15,11 +15,11 @@
  */
 package uk.ac.cam.cl.dtg.segue.dao.associations;
 
-import java.util.List;
-
-import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.isaac.dos.AssociationToken;
 import uk.ac.cam.cl.dtg.isaac.dos.UserAssociation;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+
+import java.util.List;
 
 /**
  * Interface for data manager classes that deal with user association data.
@@ -36,7 +36,7 @@ public interface IAssociationDataManager {
      * @throws SegueDatabaseException
      *             - if there is a database error.
      */
-    AssociationToken saveAssociationToken(final AssociationToken token) throws SegueDatabaseException;
+    AssociationToken saveAssociationToken(AssociationToken token) throws SegueDatabaseException;
 
     /**
      * Looksup an Association Token.
@@ -47,7 +47,7 @@ public interface IAssociationDataManager {
      * @throws SegueDatabaseException
      *             - if there is a database error.
      */
-    AssociationToken lookupAssociationToken(final String tokenCode) throws SegueDatabaseException;
+    AssociationToken lookupAssociationToken(String tokenCode) throws SegueDatabaseException;
 
     /**
      * getAssociationTokenByGroupId.
@@ -93,7 +93,7 @@ public interface IAssociationDataManager {
      * @throws SegueDatabaseException
      *             - if there is a database error.
      */
-    void createAssociation(final Long userIdReceivingAccess, final Long userIdGrantingAccess)
+    void createAssociation(Long userIdReceivingAccess, Long userIdGrantingAccess)
             throws SegueDatabaseException;
 
     /**
@@ -106,7 +106,7 @@ public interface IAssociationDataManager {
      * @throws SegueDatabaseException
      *             - if there is a database error.
      */
-    void deleteAssociation(final Long ownerUserId, final Long userIdWithAccess) throws SegueDatabaseException;
+    void deleteAssociation(Long ownerUserId, Long userIdWithAccess) throws SegueDatabaseException;
 
     /**
      * Revoke all permissions granted by a particular data owner.
@@ -116,7 +116,7 @@ public interface IAssociationDataManager {
      * @throws SegueDatabaseException
      *             - if there is a database error.
      */
-    void deleteAssociationsByOwner(final Long ownerUserId) throws SegueDatabaseException;
+    void deleteAssociationsByOwner(Long ownerUserId) throws SegueDatabaseException;
 
     /**
      * Revoke all permissions granted to a recipient user id.
@@ -126,7 +126,7 @@ public interface IAssociationDataManager {
      * @throws SegueDatabaseException
      *             - if there is a database error.
      */
-    void deleteAssociationsByRecipient(final Long recipientUserId) throws SegueDatabaseException;
+    void deleteAssociationsByRecipient(Long recipientUserId) throws SegueDatabaseException;
 
     /**
      * Determines whether the user has a valid association already.

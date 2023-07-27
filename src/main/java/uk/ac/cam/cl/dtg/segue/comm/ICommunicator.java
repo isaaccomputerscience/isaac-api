@@ -30,6 +30,6 @@ public interface ICommunicator<T extends ICommunicationMessage> {
      * @param message - to send
      * @throws CommunicationException - if there is a failure in sending the message
      */
-    void sendMessage(final T message) throws CommunicationException;
+    void sendMessage(T message) throws CommunicationException;
 
 }

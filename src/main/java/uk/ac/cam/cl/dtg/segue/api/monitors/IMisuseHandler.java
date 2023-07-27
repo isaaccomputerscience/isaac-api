@@ -48,7 +48,7 @@ public interface IMisuseHandler {
      * @param message
      *            - human readable input to the action - optional
      */
-    void executeSoftThresholdAction(final String message);
+    void executeSoftThresholdAction(String message);
 
     /**
      * Optional method to execute when hard threshold has been reached before exception is thrown.
@@ -56,5 +56,5 @@ public interface IMisuseHandler {
      * @param message
      *            - human readable input to the action - optional
      */
-    void executeHardThresholdAction(final String message);
+    void executeHardThresholdAction(String message);
 }

@@ -36,7 +36,7 @@ public interface IMisuseMonitor {
      * @throws SegueResourceMisuseException
      *             - this only happens when the hard threshold has been reached and indicates possible misuse.
      */
-    void notifyEvent(final String agentIdentifier, final String eventLabel) throws SegueResourceMisuseException;
+    void notifyEvent(String agentIdentifier, String eventLabel) throws SegueResourceMisuseException;
 
     /**
      * Method to notify the monitor that an event which is protected has been triggered. This method allows for the

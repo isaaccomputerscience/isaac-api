@@ -38,7 +38,7 @@ public interface IStatisticsManager {
      * @throws SegueDatabaseException
      *             if there is a problem with the database.
      */
-    Long getLogCount(final String logTypeOfInterest) throws SegueDatabaseException;
+    Long getLogCount(String logTypeOfInterest) throws SegueDatabaseException;
 
     /**
      * Get an overview of all school performance. This is for analytics / admin users.
@@ -73,7 +73,7 @@ public interface IStatisticsManager {
      * @throws UnableToIndexSchoolsException
      *             - if the school list has not been indexed.
      */
-    List<RegisteredUserDTO> getUsersBySchoolId(final String schoolId) throws ResourceNotFoundException,
+    List<RegisteredUserDTO> getUsersBySchoolId(String schoolId) throws ResourceNotFoundException,
             SegueDatabaseException, UnableToIndexSchoolsException, SegueSearchException;
 
     /**
@@ -102,7 +102,7 @@ public interface IStatisticsManager {
      * @throws ContentManagerException
      *             - if we are unable to look up the content.
      */
-    Map<String, Object> getUserQuestionInformation(final RegisteredUserDTO userOfInterest)
+    Map<String, Object> getUserQuestionInformation(RegisteredUserDTO userOfInterest)
             throws SegueDatabaseException, ContentManagerException;
 
     /**
@@ -119,8 +119,9 @@ public interface IStatisticsManager {
      * @return Map of eventType --> map of dates and frequency
      * @throws SegueDatabaseException
      */
-    Map<String, Map<LocalDate, Long>> getEventLogsByDate(final Collection<String> eventTypes,
-                                                                final Date fromDate, final Date toDate, final boolean binDataByMonth) throws SegueDatabaseException;
+    Map<String, Map<LocalDate, Long>> getEventLogsByDate(
+            Collection<String> eventTypes, Date fromDate, Date toDate, boolean binDataByMonth)
+            throws SegueDatabaseException;
 
     /**
      * getEventLogsByDate.
@@ -138,9 +139,9 @@ public interface IStatisticsManager {
      * @return Map of eventType --> map of dates and frequency
      * @throws SegueDatabaseException
      */
-    Map<String, Map<LocalDate, Long>> getEventLogsByDateAndUserList(final Collection<String> eventTypes,
-                                                                           final Date fromDate, final Date toDate, final List<RegisteredUserDTO> userList,
-                                                                           final boolean binDataByMonth) throws SegueDatabaseException;
+    Map<String, Map<LocalDate, Long>> getEventLogsByDateAndUserList(
+            Collection<String> eventTypes, Date fromDate, Date toDate, List<RegisteredUserDTO> userList, boolean binDataByMonth)
+            throws SegueDatabaseException;
 
 
     /**
@@ -155,8 +156,8 @@ public interface IStatisticsManager {
      *            week's data.
      * @return a collection containing the users who meet the criteria
      */
-    public Collection<RegisteredUserDTO> getNumberOfUsersActiveForLastNDays(final Collection<RegisteredUserDTO> users,
-                                                                            final Map<String, Date> lastSeenUserMap, final int daysFromToday);
+    Collection<RegisteredUserDTO> getNumberOfUsersActiveForLastNDays(
+            Collection<RegisteredUserDTO> users, Map<String, Date> lastSeenUserMap, int daysFromToday);
 
     /**
      * Gets additional information for a user outlining their progress for teacher-based activity
@@ -164,7 +165,7 @@ public interface IStatisticsManager {
      * @param userOfInterest the user we want infor for
      * @return a map of teacher activities and the user's progress in each of them
      */
-    Map<String, Object> getDetailedUserStatistics(final RegisteredUserDTO userOfInterest);
+    Map<String, Object> getDetailedUserStatistics(RegisteredUserDTO userOfInterest);
 
 
 

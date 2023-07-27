@@ -45,7 +45,7 @@ public interface IAppDatabaseManager<T> extends IAppDataManager<T> {
      *            - a map of boolean operators mapped to lists of field names.
      * @return a list of results or an empty list.
      */
-    List<T> find(final Map<Map.Entry<Constants.BooleanOperator, String>, List<String>> fieldsToMatch);
+    List<T> find(Map<Map.Entry<Constants.BooleanOperator, String>, List<String>> fieldsToMatch);
 
     /**
      * findAll records.

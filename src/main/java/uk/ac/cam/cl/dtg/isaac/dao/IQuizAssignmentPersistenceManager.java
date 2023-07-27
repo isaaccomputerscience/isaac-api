@@ -48,7 +48,7 @@ public interface IQuizAssignmentPersistenceManager {
      * @throws SegueDatabaseException
      *             - if there is an error when accessing the database.
      */
-    List<QuizAssignmentDTO> getAssignmentsByQuizIdAndGroup(final String quizId, final Long groupId)
+    List<QuizAssignmentDTO> getAssignmentsByQuizIdAndGroup(String quizId, Long groupId)
         throws SegueDatabaseException;
 
     /**

@@ -107,7 +107,7 @@ public interface EventBookings {
      * @throws SegueDatabaseException
      *             - if an error occurs.
      */
-    Iterable<EventBooking> findAllByEventId(final String eventId) throws SegueDatabaseException;
+    Iterable<EventBooking> findAllByEventId(String eventId) throws SegueDatabaseException;
 
     /**
      * countAllEventBookings.
@@ -153,7 +153,7 @@ public interface EventBookings {
      * @throws SegueDatabaseException
      *             - if an error occurs.
      */
-    Iterable<EventBooking> findAllByUserId(final Long userId) throws SegueDatabaseException;
+    Iterable<EventBooking> findAllByUserId(Long userId) throws SegueDatabaseException;
 
 
     /**
@@ -165,7 +165,7 @@ public interface EventBookings {
      * @throws SegueDatabaseException
      *             - if an error occurs.
      */
-    Iterable<EventBooking> findAllReservationsByUserId(final Long userId) throws SegueDatabaseException;
+    Iterable<EventBooking> findAllReservationsByUserId(Long userId) throws SegueDatabaseException;
 
     /**
      * Find an event booking by event and user id.

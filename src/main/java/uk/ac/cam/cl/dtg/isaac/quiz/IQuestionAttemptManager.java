@@ -1,14 +1,14 @@
 package uk.ac.cam.cl.dtg.isaac.quiz;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval;
-import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.isaac.dos.LightweightQuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
+import uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * IQuestionAttemptManager. Objects implementing this interface are responsible for recording question attempts
@@ -31,8 +31,8 @@ public interface IQuestionAttemptManager {
      * @throws SegueDatabaseException
      *             - if there is an error during the database operation.
      */
-    void registerQuestionAttempt(final Long userId, final String questionPageId, final String fullQuestionId,
-            final QuestionValidationResponse questionAttempt) throws SegueDatabaseException;
+    void registerQuestionAttempt(Long userId,  String questionPageId, String fullQuestionId,
+             QuestionValidationResponse questionAttempt) throws SegueDatabaseException;
 
     /**
      * Get a users question attempts.
@@ -43,7 +43,7 @@ public interface IQuestionAttemptManager {
      * @throws SegueDatabaseException
      *             - If there is a database error.
      */
-    Map<String, Map<String, List<QuestionValidationResponse>>> getQuestionAttempts(final Long userId)
+    Map<String, Map<String, List<QuestionValidationResponse>>> getQuestionAttempts(Long userId)
             throws SegueDatabaseException;
 
     /**
