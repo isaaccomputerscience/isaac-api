@@ -30,7 +30,7 @@ public class GlossaryTermDTO extends ContentDTO {
     protected String examBoard;
 
     @JsonCreator
-    public GlossaryTermDTO(@JsonProperty("explanation") ContentDTO explanation, @JsonProperty("examBoard") String examBoard) {
+    public GlossaryTermDTO(@JsonProperty("explanation") final ContentDTO explanation, @JsonProperty("examBoard") final String examBoard) {
         this.explanation = explanation;
         this.examBoard = examBoard != null ? examBoard : "";
     }
@@ -39,7 +39,7 @@ public class GlossaryTermDTO extends ContentDTO {
         return this.explanation;
     }
 
-    public void setExplanation(ContentDTO explanation) {
+    public void setExplanation(final ContentDTO explanation) {
         this.explanation = explanation;
     }
 
@@ -47,7 +47,7 @@ public class GlossaryTermDTO extends ContentDTO {
         return this.examBoard;
     }
 
-    public void setExamBoard(String examBoard) {
+    public void setExamBoard(final String examBoard) {
         this.examBoard = examBoard;
     }
 

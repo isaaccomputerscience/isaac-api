@@ -37,18 +37,27 @@ public class IsaacWildcard extends Content {
     protected String url;
 
     @JsonCreator
-    public IsaacWildcard(@JsonProperty("id") String id,
-            @JsonProperty("title") String title, @JsonProperty("subtitle") String subtitle,
-            @JsonProperty("type") String type, @JsonProperty("author") String author,
-            @JsonProperty("encoding") String encoding, @JsonProperty("canonicalSourceFile") String canonicalSourceFile,
-            @JsonProperty("layout") String layout, @JsonProperty("children") List<ContentBase> children,
-            @JsonProperty("value") String value, @JsonProperty("attribution") String attribution,
-            @JsonProperty("relatedContent") List<String> relatedContent, @JsonProperty("published") boolean published,
-            @JsonProperty("deprecated") Boolean deprecated,
-            @JsonProperty("tags") Set<String> tags, @JsonProperty("level") Integer level,
-            @JsonProperty("description") String description, @JsonProperty("url") String url) {
-        super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, value,
-                attribution, relatedContent, published, deprecated, tags, level);
+    public IsaacWildcard(
+            @JsonProperty("id") final String id,
+            @JsonProperty("title") final String title,
+            @JsonProperty("subtitle") final String subtitle,
+            @JsonProperty("type") final String type,
+            @JsonProperty("author") final String author,
+            @JsonProperty("encoding") final String encoding,
+            @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+            @JsonProperty("layout") final String layout,
+            @JsonProperty("children") final List<ContentBase> children,
+            @JsonProperty("value") final String value,
+            @JsonProperty("attribution") final String attribution,
+            @JsonProperty("relatedContent") final List<String> relatedContent,
+            @JsonProperty("published") final boolean published,
+            @JsonProperty("deprecated") final Boolean deprecated,
+            @JsonProperty("tags") final Set<String> tags,
+            @JsonProperty("level") final Integer level,
+            @JsonProperty("description") final String description,
+            @JsonProperty("url") final String url) {
+        super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, value, attribution,
+                relatedContent, published, deprecated, tags, level);
 
         this.description = description;
         this.url = url;

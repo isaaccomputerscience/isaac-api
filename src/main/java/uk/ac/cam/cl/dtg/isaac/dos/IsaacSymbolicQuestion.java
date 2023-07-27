@@ -39,7 +39,7 @@ public class IsaacSymbolicQuestion extends IsaacQuestionBase {
         return formulaSeed;
     }
 
-    public void setFormulaSeed(String formulaSeed) {
+    public void setFormulaSeed(final String formulaSeed) {
         this.formulaSeed = formulaSeed;
     }
 
@@ -51,7 +51,7 @@ public class IsaacSymbolicQuestion extends IsaacQuestionBase {
         return availableSymbols;
     }
 
-    public void setAvailableSymbols(List<String> availableSymbols) {
+    public void setAvailableSymbols(final List<String> availableSymbols) {
         this.availableSymbols = availableSymbols;
     }
 

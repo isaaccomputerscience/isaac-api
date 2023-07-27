@@ -35,7 +35,7 @@ public class PgUserAlerts implements IUserAlerts {
     }
 
     @Override
-    public List<IUserAlert> getUserAlerts(Long userId) throws SegueDatabaseException {
+    public List<IUserAlert> getUserAlerts(final Long userId) throws SegueDatabaseException {
         String query = "SELECT * FROM user_alerts WHERE user_id = ? ORDER BY created ASC";
         try (Connection conn = db.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
@@ -55,7 +55,7 @@ public class PgUserAlerts implements IUserAlerts {
     }
 
     @Override
-    public IUserAlert createAlert(Long userId, String message, String link) throws SegueDatabaseException {
+    public IUserAlert createAlert(final Long userId, final String message, final String link) throws SegueDatabaseException {
         String query = "INSERT INTO user_alerts (user_id, message, link, created) VALUES (?, ?, ?, ?) RETURNING *";
         try (Connection conn = db.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query);
@@ -79,7 +79,7 @@ public class PgUserAlerts implements IUserAlerts {
     }
 
     @Override
-    public void recordAlertEvent(Long alertId, IUserAlert.AlertEvents eventType) throws SegueDatabaseException {
+    public void recordAlertEvent(final Long alertId, final IUserAlert.AlertEvents eventType) throws SegueDatabaseException {
         String query = "UPDATE user_alerts SET ";
         switch (eventType) {
             case SEEN:

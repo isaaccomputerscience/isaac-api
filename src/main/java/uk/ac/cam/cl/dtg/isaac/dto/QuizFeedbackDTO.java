@@ -31,14 +31,14 @@ public class QuizFeedbackDTO {
             this.notAttempted = 0;
         }
 
-        public static Mark notAttempted(Integer notAttempted) {
+        public static Mark notAttempted(final Integer notAttempted) {
             Mark mark = new Mark();
             mark.notAttempted = notAttempted;
             return mark;
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) {
                 return true;
             }
@@ -69,7 +69,7 @@ public class QuizFeedbackDTO {
     @Nullable
     private Map<String, Mark> questionMarks;
 
-    public QuizFeedbackDTO(Mark overallMark, Map<String, Mark> sectionMarks, Map<String, Mark> questionMarks) {
+    public QuizFeedbackDTO(final Mark overallMark, final Map<String, Mark> sectionMarks, final Map<String, Mark> questionMarks) {
         this.overallMark = overallMark;
         this.sectionMarks = sectionMarks;
         this.questionMarks = questionMarks;
@@ -100,12 +100,12 @@ public class QuizFeedbackDTO {
         return complete;
     }
 
-    public void setComplete(boolean complete) {
+    public void setComplete(final boolean complete) {
         this.complete = complete;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }

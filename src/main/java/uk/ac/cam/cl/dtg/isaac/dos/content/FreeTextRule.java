@@ -52,7 +52,7 @@ public class FreeTextRule extends Choice {
     public boolean getAllowsMisspelling() {
         return this.allowsMisspelling;
     }
-    public void setWordProximity(Integer proximityDistance) {
+    public void setWordProximity(final Integer proximityDistance) {
         this.proximityDistance = proximityDistance;
     }
     public Integer getWordProximity() {

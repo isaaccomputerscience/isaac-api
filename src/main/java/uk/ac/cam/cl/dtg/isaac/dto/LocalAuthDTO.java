@@ -35,7 +35,7 @@ public class LocalAuthDTO {
         return email;
     }
 
-    public void setEmail(String email) {
+    public void setEmail(final String email) {
         this.email = email;
     }
 
@@ -43,7 +43,7 @@ public class LocalAuthDTO {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(final String password) {
         this.password = password;
     }
 
@@ -51,7 +51,7 @@ public class LocalAuthDTO {
         return rememberMe;
     }
 
-    public void setRememberMe(Boolean rememberMe) {
+    public void setRememberMe(final Boolean rememberMe) {
         this.rememberMe = rememberMe;
     }
 
@@ -61,7 +61,7 @@ public class LocalAuthDTO {
     }
 
     @JsonProperty("_randomPadding")
-    public void setRandomPadding(String _randomPadding) {
+    public void setRandomPadding(final String _randomPadding) {
         this.randomPadding = _randomPadding;
     }
 }

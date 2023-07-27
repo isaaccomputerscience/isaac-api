@@ -59,7 +59,7 @@ public class Formula extends Choice {
      *
      * @param requiresExactMatch Whether this formula requires an exact match. I'm not kidding.
      */
-    public void setRequiresExactMatch(boolean requiresExactMatch) {
+    public void setRequiresExactMatch(final boolean requiresExactMatch) {
         this.requiresExactMatch = requiresExactMatch;
     }
 

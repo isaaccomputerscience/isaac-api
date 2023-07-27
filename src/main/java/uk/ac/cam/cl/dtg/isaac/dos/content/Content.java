@@ -54,15 +54,22 @@ public class Content extends ContentBase {
     protected Boolean expandable;
 
     @JsonCreator
-    public Content(@JsonProperty("id") String id, @JsonProperty("title") String title,
-            @JsonProperty("subtitle") String subtitle, @JsonProperty("type") String type,
-            @JsonProperty("author") String author, @JsonProperty("encoding") String encoding,
-            @JsonProperty("canonicalSourceFile") String canonicalSourceFile, @JsonProperty("layout") String layout,
-            @JsonProperty("children") List<ContentBase> children, @JsonProperty("value") String value,
-            @JsonProperty("attribution") String attribution,
-            @JsonProperty("relatedContent") List<String> relatedContent, @JsonProperty("published") Boolean published,
-            @JsonProperty("deprecated") Boolean deprecated, @JsonProperty("tags") Set<String> tags,
-            @JsonProperty("level") Integer level) {
+    public Content(@JsonProperty("id") final String id,
+                   @JsonProperty("title") final String title,
+                   @JsonProperty("subtitle") final String subtitle,
+                   @JsonProperty("type") final String type,
+                   @JsonProperty("author") final String author,
+                   @JsonProperty("encoding") final String encoding,
+                   @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+                   @JsonProperty("layout") final String layout,
+                   @JsonProperty("children") final List<ContentBase> children,
+                   @JsonProperty("value") final String value,
+                   @JsonProperty("attribution") final String attribution,
+                   @JsonProperty("relatedContent") final List<String> relatedContent,
+                   @JsonProperty("published") final Boolean published,
+                   @JsonProperty("deprecated") final Boolean deprecated,
+                   @JsonProperty("tags") final Set<String> tags,
+                   @JsonProperty("level") final Integer level) {
         this.id = id;
         this.title = title;
         this.subtitle = subtitle;
@@ -96,7 +103,7 @@ public class Content extends ContentBase {
      * 
      * @param value
      */
-    public Content(String value) {
+    public Content(final String value) {
         this.value = value;
         this.type = "content";
         this.encoding = "markdown";
@@ -123,7 +130,7 @@ public class Content extends ContentBase {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -131,7 +138,7 @@ public class Content extends ContentBase {
         return subtitle;
     }
 
-    public void setSubtitle(String subtitle) {
+    public void setSubtitle(final String subtitle) {
         this.subtitle = subtitle;
     }
 
@@ -139,7 +146,7 @@ public class Content extends ContentBase {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(final String author) {
         this.author = author;
     }
 
@@ -147,7 +154,7 @@ public class Content extends ContentBase {
         return encoding;
     }
 
-    public void setEncoding(String encoding) {
+    public void setEncoding(final String encoding) {
         this.encoding = encoding;
     }
 
@@ -155,7 +162,7 @@ public class Content extends ContentBase {
         return layout;
     }
 
-    public void setLayout(String layout) {
+    public void setLayout(final String layout) {
         this.layout = layout;
     }
 
@@ -163,7 +170,7 @@ public class Content extends ContentBase {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(final String value) {
         this.value = value;
     }
 
@@ -171,7 +178,7 @@ public class Content extends ContentBase {
         return attribution;
     }
 
-    public void setAttribution(String attribution) {
+    public void setAttribution(final String attribution) {
         this.attribution = attribution;
     }
 
@@ -180,7 +187,7 @@ public class Content extends ContentBase {
     }
 
     @JsonDeserialize(using = TrimWhitespaceListDeserializer.class)
-    public void setRelatedContent(List<String> relatedContent) {
+    public void setRelatedContent(final List<String> relatedContent) {
         this.relatedContent = relatedContent;
     }
 
@@ -192,7 +199,7 @@ public class Content extends ContentBase {
         return published;
     }
 
-    public void setPublished(Boolean published) {
+    public void setPublished(final Boolean published) {
         this.published = published;
     }
 
@@ -206,7 +213,7 @@ public class Content extends ContentBase {
      * @param children
      *            the children to set
      */
-    public final void setChildren(List<ContentBase> children) {
+    public final void setChildren(final List<ContentBase> children) {
         this.children = children;
     }
 
@@ -214,7 +221,7 @@ public class Content extends ContentBase {
         return deprecated;
     }
 
-    public void setDeprecated(Boolean deprecated) {
+    public void setDeprecated(final Boolean deprecated) {
         this.deprecated = deprecated;
     }
 
@@ -222,7 +229,7 @@ public class Content extends ContentBase {
         return level;
     }
 
-    public void setLevel(Integer level) {
+    public void setLevel(final Integer level) {
         this.level = level;
     }
 
@@ -230,7 +237,7 @@ public class Content extends ContentBase {
         return this.searchableContent;
     }
 
-    public void setSearchableContent(String searchableContent) {
+    public void setSearchableContent(final String searchableContent) {
         this.searchableContent = searchableContent;
     }
 
@@ -238,12 +245,12 @@ public class Content extends ContentBase {
         return this.expandable;
     }
 
-    public void setExpandable(Boolean expandable) {
+    public void setExpandable(final Boolean expandable) {
         this.expandable = expandable;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (!(o instanceof Content)) {
             return false;
         }

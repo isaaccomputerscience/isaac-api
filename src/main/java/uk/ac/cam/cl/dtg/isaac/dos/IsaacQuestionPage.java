@@ -38,17 +38,26 @@ public class IsaacQuestionPage extends SeguePage {
     protected Integer difficulty;
 
     @JsonCreator
-    public IsaacQuestionPage(@JsonProperty("id") String id,
-            @JsonProperty("title") String title, @JsonProperty("subtitle") String subtitle,
-            @JsonProperty("type") String type, @JsonProperty("author") String author,
-            @JsonProperty("encoding") String encoding, @JsonProperty("canonicalSourceFile") String canonicalSourceFile,
-            @JsonProperty("layout") String layout, @JsonProperty("children") List<ContentBase> children,
-            @JsonProperty("value") String value, @JsonProperty("attribution") String attribution,
-            @JsonProperty("relatedContent") List<String> relatedContent, @JsonProperty("published") boolean published,
-            @JsonProperty("deprecated") Boolean deprecated,
-            @JsonProperty("tags") Set<String> tags, @JsonProperty("level") Integer level,
-            @JsonProperty("difficulty") Integer difficulty, @JsonProperty("passMark") Float passMark,
-            @JsonProperty("supersededBy") String supersededBy) {
+    public IsaacQuestionPage(
+            @JsonProperty("id") final String id,
+            @JsonProperty("title") final String title,
+            @JsonProperty("subtitle") final String subtitle,
+            @JsonProperty("type") final String type,
+            @JsonProperty("author") final String author,
+            @JsonProperty("encoding") final String encoding,
+            @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+            @JsonProperty("layout") final String layout,
+            @JsonProperty("children") final List<ContentBase> children,
+            @JsonProperty("value") final String value,
+            @JsonProperty("attribution") final String attribution,
+            @JsonProperty("relatedContent") final List<String> relatedContent,
+            @JsonProperty("published") final boolean published,
+            @JsonProperty("deprecated") final Boolean deprecated,
+            @JsonProperty("tags") final Set<String> tags,
+            @JsonProperty("level") final Integer level,
+            @JsonProperty("difficulty") final Integer difficulty,
+            @JsonProperty("passMark") final Float passMark,
+            @JsonProperty("supersededBy") final String supersededBy) {
         super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, value,
                 attribution, relatedContent, published, deprecated, tags, level);
 
@@ -67,7 +76,7 @@ public class IsaacQuestionPage extends SeguePage {
         return passMark;
     }
 
-    public void setPassMark(Float passMark) {
+    public void setPassMark(final Float passMark) {
         this.passMark = passMark;
     }
 
@@ -75,7 +84,7 @@ public class IsaacQuestionPage extends SeguePage {
         return supersededBy;
     }
 
-    public void setSupersededBy(String supersededBy) {
+    public void setSupersededBy(final String supersededBy) {
         this.supersededBy = supersededBy;
     }
 
@@ -83,7 +92,7 @@ public class IsaacQuestionPage extends SeguePage {
         return difficulty;
     }
 
-    public void setDifficulty(Integer difficulty) {
+    public void setDifficulty(final Integer difficulty) {
         this.difficulty = difficulty;
     }
 }

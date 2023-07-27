@@ -85,7 +85,7 @@ public class GameboardItem {
      * @param original
      *          the original gameboard item to copy
      */
-    public GameboardItem(GameboardItem original) {
+    public GameboardItem(final GameboardItem original) {
         this.setId(original.getId());
         this.setContentType(original.getContentType());
         this.setTitle(original.getTitle());
@@ -396,7 +396,7 @@ public class GameboardItem {
         return contentType;
     }
 
-    public void setContentType(String contentType) {
+    public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
 
@@ -404,7 +404,7 @@ public class GameboardItem {
         return audience;
     }
 
-    public void setAudience(List<AudienceContext> audience) {
+    public void setAudience(final List<AudienceContext> audience) {
         this.audience = audience;
     }
 
@@ -412,7 +412,7 @@ public class GameboardItem {
         return creationContext;
     }
 
-    public void setCreationContext(AudienceContext creationContext) {
+    public void setCreationContext(final AudienceContext creationContext) {
         this.creationContext = creationContext;
     }
 

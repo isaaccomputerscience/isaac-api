@@ -29,7 +29,7 @@ public class UserSummaryWithGroupMembershipDTO extends UserSummaryDTO {
         return groupMembershipInformation;
     }
 
-    public void setGroupMembershipInformation(GroupMembershipDTO groupMembershipInformation) {
+    public void setGroupMembershipInformation(final GroupMembershipDTO groupMembershipInformation) {
         this.groupMembershipInformation = groupMembershipInformation;
     }
 

@@ -42,7 +42,7 @@ public class AudienceContext {
         return stage;
     }
 
-    public void setStage(List<Stage> stage) {
+    public void setStage(final List<Stage> stage) {
         this.stage = stage;
     }
 
@@ -50,7 +50,7 @@ public class AudienceContext {
         return examBoard;
     }
 
-    public void setExamBoard(List<ExamBoard> examBoard) {
+    public void setExamBoard(final List<ExamBoard> examBoard) {
         this.examBoard = examBoard;
     }
 
@@ -58,7 +58,7 @@ public class AudienceContext {
         return difficulty;
     }
 
-    public void setDifficulty(List<Difficulty> difficulty) {
+    public void setDifficulty(final List<Difficulty> difficulty) {
         this.difficulty = difficulty;
     }
 
@@ -66,7 +66,7 @@ public class AudienceContext {
         return role;
     }
 
-    public void setRole(List<RoleRequirement> role) {
+    public void setRole(final List<RoleRequirement> role) {
         this.role = role;
     }
 }

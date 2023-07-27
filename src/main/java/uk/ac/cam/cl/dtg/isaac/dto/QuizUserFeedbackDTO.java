@@ -21,10 +21,10 @@ import jakarta.annotation.Nullable;
 import java.util.Objects;
 
 public class QuizUserFeedbackDTO {
-    private UserSummaryDTO user;
-    private QuizFeedbackDTO feedback;
+    private final UserSummaryDTO user;
+    private final QuizFeedbackDTO feedback;
 
-    public QuizUserFeedbackDTO(UserSummaryDTO user, @Nullable QuizFeedbackDTO feedback) {
+    public QuizUserFeedbackDTO(final UserSummaryDTO user, @Nullable final QuizFeedbackDTO feedback) {
         this.user = user;
         this.feedback = feedback;
     }
@@ -39,7 +39,7 @@ public class QuizUserFeedbackDTO {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }

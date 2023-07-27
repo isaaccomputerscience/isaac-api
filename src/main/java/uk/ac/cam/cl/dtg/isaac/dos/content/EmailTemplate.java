@@ -203,7 +203,7 @@ public class EmailTemplate extends Content {
      * @param replyToName
      *            the replyToName to set
      */
-    public void setReplyToName(String replyToName) {
+    public void setReplyToName(final String replyToName) {
         this.replyToName = replyToName;
     }
 }

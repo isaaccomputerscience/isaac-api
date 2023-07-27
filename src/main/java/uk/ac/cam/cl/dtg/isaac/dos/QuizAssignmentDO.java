@@ -183,7 +183,7 @@ public class QuizAssignmentDO {
      * set the due date of an assignment.
      * @param dueDate - date due
      */
-    public void setDueDate(@Nullable Date dueDate) {
+    public void setDueDate(@Nullable final Date dueDate) {
         this.dueDate = dueDate;
     }
 

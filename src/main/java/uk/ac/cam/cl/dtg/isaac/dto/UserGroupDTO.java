@@ -15,17 +15,15 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.api.client.util.Sets;
+import jakarta.annotation.Nullable;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
+
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import jakarta.annotation.Nullable;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.api.client.util.Sets;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 
 
 /**
@@ -280,7 +278,7 @@ public class UserGroupDTO {
      *
      * @param additionalManagers - those users who should have access to this group.
      */
-    public void setAdditionalManagers(Set<UserSummaryWithEmailAddressDTO> additionalManagers) {
+    public void setAdditionalManagers(final Set<UserSummaryWithEmailAddressDTO> additionalManagers) {
         this.additionalManagers = additionalManagers;
     }
 

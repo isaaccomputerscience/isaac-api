@@ -47,17 +47,17 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
      * @param database - a pre-configured postgres database object
      */
     @Inject
-    public PgUserPreferenceManager(PostgresSqlDb database) {
+    public PgUserPreferenceManager(final PostgresSqlDb database) {
         this.database = database;
     }
 
-    private UserPreference userPreferenceFromResultSet(ResultSet results) throws SQLException {
+    private UserPreference userPreferenceFromResultSet(final ResultSet results) throws SQLException {
         return new UserPreference(results.getLong("user_id"), results.getString("preference_type"),
                 results.getString("preference_name"), results.getBoolean("preference_value"));
     }
 
     @Override
-    public UserPreference getUserPreference(String preferenceType, String preferenceName, long userId)
+    public UserPreference getUserPreference(final String preferenceType, final String preferenceName, final long userId)
             throws SegueDatabaseException {
         Validate.notBlank(preferenceType);
         Validate.notBlank(preferenceName);
@@ -84,8 +84,8 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
     }
 
     @Override
-    public Map<Long, UserPreference> getUsersPreference(String preferenceType, String preferenceName, List<RegisteredUserDTO> users)
-            throws SegueDatabaseException {
+    public Map<Long, UserPreference> getUsersPreference(final String preferenceType, final String preferenceName,
+                                                        final List<RegisteredUserDTO> users) throws SegueDatabaseException {
         Validate.notBlank(preferenceType);
         Validate.notBlank(preferenceName);
 
@@ -134,7 +134,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
     }
 
     @Override
-    public List<UserPreference> getUserPreferences(String preferenceType, long userId) throws SegueDatabaseException {
+    public List<UserPreference> getUserPreferences(final String preferenceType, final long userId) throws SegueDatabaseException {
         Validate.notBlank(preferenceType);
 
         String query = "SELECT * FROM user_preferences WHERE user_id=? AND preference_type=?;";
@@ -160,7 +160,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
     }
 
     @Override
-    public List<UserPreference> getAllUserPreferences(long userId) throws SegueDatabaseException {
+    public List<UserPreference> getAllUserPreferences(final long userId) throws SegueDatabaseException {
 
         String query = "SELECT * FROM user_preferences WHERE user_id=?;";
         try (Connection conn = database.getDatabaseConnection();
@@ -185,7 +185,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
     }
 
     @Override
-    public Map<Long, List<UserPreference>> getUserPreferences(String preferenceType, List<RegisteredUserDTO> users)
+    public Map<Long, List<UserPreference>> getUserPreferences(final String preferenceType, final List<RegisteredUserDTO> users)
             throws SegueDatabaseException {
         Validate.notBlank(preferenceType);
 
@@ -241,7 +241,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
     }
 
     @Override
-    public void saveUserPreferences(List<UserPreference> userPreferences) throws SegueDatabaseException {
+    public void saveUserPreferences(final List<UserPreference> userPreferences) throws SegueDatabaseException {
         // Upsert the value in, using Postgres 9.5 syntax 'ON CONFLICT DO UPDATE ...'
         // Only update a conflicting row if value has changed, to ensure the last_updated date remains accurate:
         String query = "INSERT INTO user_preferences(user_id, preference_type, preference_name, preference_value, last_updated) "

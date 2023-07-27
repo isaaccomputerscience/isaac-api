@@ -100,7 +100,7 @@ public class GroupMembershipDTO {
      * set the status of the group membership
      * @param status to set
      */
-    public void setStatus(GroupMembershipStatus status) {
+    public void setStatus(final GroupMembershipStatus status) {
         this.status = status;
     }
 

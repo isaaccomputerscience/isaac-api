@@ -35,7 +35,7 @@ public class IsaacSymbolicQuestionDTO extends IsaacQuestionBaseDTO {
         return formulaSeed;
     }
 
-    public void setFormulaSeed(String formulaSeed) {
+    public void setFormulaSeed(final String formulaSeed) {
         this.formulaSeed = formulaSeed;
     }
 
@@ -43,7 +43,7 @@ public class IsaacSymbolicQuestionDTO extends IsaacQuestionBaseDTO {
         return availableSymbols;
     }
 
-    public void setAvailableSymbols(List<String> availableSymbols) {
+    public void setAvailableSymbols(final List<String> availableSymbols) {
         this.availableSymbols = availableSymbols;
     }
 

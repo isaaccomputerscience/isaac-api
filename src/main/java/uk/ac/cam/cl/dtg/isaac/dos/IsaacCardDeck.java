@@ -42,7 +42,7 @@ public class IsaacCardDeck extends Content {
      * Set the list of cards.
      * @param cards the list of cards to set.
      */
-    public void setCards(List<IsaacCard> cards) {
+    public void setCards(final List<IsaacCard> cards) {
         this.cards = cards;
     }
 }

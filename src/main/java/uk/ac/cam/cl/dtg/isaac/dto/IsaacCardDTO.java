@@ -45,7 +45,7 @@ public class IsaacCardDTO extends ContentDTO {
      * Set the image.
      * @param image the image to set.
      */
-    public void setImage(ImageDTO image) {
+    public void setImage(final ImageDTO image) {
         this.image = image;
     }
 
@@ -61,7 +61,7 @@ public class IsaacCardDTO extends ContentDTO {
      * Set the click url.
      * @param clickUrl the click url to set.
      */
-    public void setClickUrl(String clickUrl) {
+    public void setClickUrl(final String clickUrl) {
         this.clickUrl = clickUrl;
     }
 
@@ -93,7 +93,7 @@ public class IsaacCardDTO extends ContentDTO {
      * Set if the card is disabled.
      * @param disabled the disabled state to set to.
      */
-    public void setDisabled(boolean disabled) {
+    public void setDisabled(final boolean disabled) {
         this.disabled = disabled;
     }
 
@@ -109,7 +109,7 @@ public class IsaacCardDTO extends ContentDTO {
      * Set if the card is vertical content.
      * @param verticalContent vertical content state to set to.
      */
-    public void setVerticalContent(boolean verticalContent) {
+    public void setVerticalContent(final boolean verticalContent) {
         this.verticalContent = verticalContent;
     }
 }

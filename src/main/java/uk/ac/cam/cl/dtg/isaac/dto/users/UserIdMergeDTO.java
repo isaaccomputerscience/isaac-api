@@ -30,7 +30,7 @@ public class UserIdMergeDTO {
         return targetId;
     }
 
-    public void setTargetId(Long targetId) {
+    public void setTargetId(final Long targetId) {
         this.targetId = targetId;
     }
 
@@ -38,7 +38,7 @@ public class UserIdMergeDTO {
         return sourceId;
     }
 
-    public void setSourceId(Long sourceId) {
+    public void setSourceId(final Long sourceId) {
         this.sourceId = sourceId;
     }
 }

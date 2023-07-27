@@ -218,7 +218,7 @@ public class ContentSummaryDTO {
      * @param questionPartIds list of question part IDs for any questions in this content
      */
     @JsonIgnore
-    public void setQuestionPartIds(List<String> questionPartIds) {
+    public void setQuestionPartIds(final List<String> questionPartIds) {
         this.questionPartIds = questionPartIds;
     }
 
@@ -236,7 +236,7 @@ public class ContentSummaryDTO {
      *
      * @param supersededBy superseding question ID
      */
-    public void setSupersededBy(String supersededBy) {
+    public void setSupersededBy(final String supersededBy) {
         this.supersededBy = supersededBy;
     }
 
@@ -254,7 +254,7 @@ public class ContentSummaryDTO {
      *
      * @param deprecated is question deprecated or not
      */
-    public void setDeprecated(Boolean deprecated) {
+    public void setDeprecated(final Boolean deprecated) {
         this.deprecated = deprecated;
     }
 
@@ -280,7 +280,7 @@ public class ContentSummaryDTO {
         return audience;
     }
 
-    public void setAudience(List<AudienceContext> audience) {
+    public void setAudience(final List<AudienceContext> audience) {
         this.audience = audience;
     }
 }

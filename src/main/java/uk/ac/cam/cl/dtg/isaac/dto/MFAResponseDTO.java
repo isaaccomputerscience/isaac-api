@@ -31,7 +31,7 @@ public class MFAResponseDTO {
         return rememberMe;
     }
 
-    public void setRememberMe(Boolean rememberMe) {
+    public void setRememberMe(final Boolean rememberMe) {
         this.rememberMe = rememberMe;
     }
 
@@ -39,7 +39,7 @@ public class MFAResponseDTO {
         return mfaVerificationCode;
     }
 
-    public void setMfaVerificationCode(String mfaVerificationCode) {
+    public void setMfaVerificationCode(final String mfaVerificationCode) {
         this.mfaVerificationCode = mfaVerificationCode;
     }
 }

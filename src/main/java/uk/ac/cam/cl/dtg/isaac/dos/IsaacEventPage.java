@@ -15,22 +15,21 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dos;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
 import uk.ac.cam.cl.dtg.isaac.dos.content.DTOMapping;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ExternalReference;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Image;
 import uk.ac.cam.cl.dtg.isaac.dos.content.JsonContentType;
+import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.util.locations.Address;
 import uk.ac.cam.cl.dtg.util.locations.Location;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_GROUP_RESERVATION_DEFAULT_LIMIT;
 
@@ -71,30 +70,31 @@ public class IsaacEventPage extends Content {
 	private Boolean allowGroupReservations;
 
 	@JsonCreator
-	public IsaacEventPage(@JsonProperty("id") String id,
-						  @JsonProperty("title") String title,
-						  @JsonProperty("subtitle") String subtitle,
-						  @JsonProperty("type") String type,
-						  @JsonProperty("author") String author,
-						  @JsonProperty("encoding") String encoding,
-						  @JsonProperty("canonicalSourceFile") String canonicalSourceFile,
-						  @JsonProperty("layout") String layout,
-						  @JsonProperty("children") List<ContentBase> children,
-						  @JsonProperty("relatedContent") List<String> relatedContent,
-						  @JsonProperty("version") boolean published,
-						  @JsonProperty("deprecated") Boolean deprecated,
-						  @JsonProperty("tags") Set<String> tags,
-						  @JsonProperty("date") Date date, @JsonProperty("end_date") Date end_date,
-						  @JsonProperty("bookingDeadline") Date bookingDeadline,
-						  @JsonProperty("prepWorkDeadline") Date prepWorkDeadline,
-						  @JsonProperty("location") Location location,
-						  @JsonProperty("preResources") List<ExternalReference> preResources,
-						  @JsonProperty("postResources") List<ExternalReference> postResources,
-						  @JsonProperty("eventThumbnail") Image eventThumbnail,
-						  @JsonProperty("numberOfPlaces") Integer numberOfPlaces,
-						  @JsonProperty("EventStatus") EventStatus eventStatus,
-						  @JsonProperty("groupReservationLimit") Integer groupReservationLimit,
-						  @JsonProperty("allowGroupReservations") Boolean allowGroupReservations) {
+	public IsaacEventPage(@JsonProperty("id") final String id,
+						  @JsonProperty("title") final String title,
+						  @JsonProperty("subtitle") final String subtitle,
+						  @JsonProperty("type") final String type,
+						  @JsonProperty("author") final String author,
+						  @JsonProperty("encoding") final String encoding,
+						  @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+						  @JsonProperty("layout") final String layout,
+						  @JsonProperty("children") final List<ContentBase> children,
+						  @JsonProperty("relatedContent") final List<String> relatedContent,
+						  @JsonProperty("version") final boolean published,
+						  @JsonProperty("deprecated") final Boolean deprecated,
+						  @JsonProperty("tags") final Set<String> tags,
+						  @JsonProperty("date") final Date date,
+						  @JsonProperty("end_date") final Date end_date,
+						  @JsonProperty("bookingDeadline") final Date bookingDeadline,
+						  @JsonProperty("prepWorkDeadline") final Date prepWorkDeadline,
+						  @JsonProperty("location") final Location location,
+						  @JsonProperty("preResources") final List<ExternalReference> preResources,
+						  @JsonProperty("postResources") final List<ExternalReference> postResources,
+						  @JsonProperty("eventThumbnail") final Image eventThumbnail,
+						  @JsonProperty("numberOfPlaces") final Integer numberOfPlaces,
+						  @JsonProperty("EventStatus") final EventStatus eventStatus,
+						  @JsonProperty("groupReservationLimit") final Integer groupReservationLimit,
+						  @JsonProperty("allowGroupReservations") final Boolean allowGroupReservations) {
 		super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, null,
 			null, relatedContent, published, deprecated, tags, null);
 
@@ -423,7 +423,7 @@ public class IsaacEventPage extends Content {
 	 * Set the email confirmed booking text for emails.
 	 * @param emailConfirmedBookingText - text to show in emails
 	 */
-	public void setEmailConfirmedBookingText(String emailConfirmedBookingText) {
+	public void setEmailConfirmedBookingText(final String emailConfirmedBookingText) {
 		this.emailConfirmedBookingText = emailConfirmedBookingText;
 	}
 
@@ -440,7 +440,7 @@ public class IsaacEventPage extends Content {
 	 * Set the email waiting list text for emails.
 	 * @param emailWaitingListBookingText - text to show in email.
 	 */
-	public void setEmailWaitingListBookingText(String emailWaitingListBookingText) {
+	public void setEmailWaitingListBookingText(final String emailWaitingListBookingText) {
 		this.emailWaitingListBookingText = emailWaitingListBookingText;
 	}
 
@@ -456,7 +456,7 @@ public class IsaacEventPage extends Content {
 	 * Set the maximum number of reservations per event that a teacher can request.
 	 * @param groupReservationLimit
 	 */
-	public void setGroupReservationLimit(Integer groupReservationLimit) {
+	public void setGroupReservationLimit(final Integer groupReservationLimit) {
 		this.groupReservationLimit = groupReservationLimit;
 	}
 
@@ -464,7 +464,7 @@ public class IsaacEventPage extends Content {
 		return allowGroupReservations;
 	}
 
-	public void setAllowGroupReservations(Boolean allowGroupReservations) {
+	public void setAllowGroupReservations(final Boolean allowGroupReservations) {
 		this.allowGroupReservations = allowGroupReservations;
 	}
 

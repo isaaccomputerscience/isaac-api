@@ -262,7 +262,7 @@ public class GameboardDO {
         return contents;
     }
 
-    public void setContents(List<GameboardContentDescriptor> contents) {
+    public void setContents(final List<GameboardContentDescriptor> contents) {
         this.contents = contents;
     }
 

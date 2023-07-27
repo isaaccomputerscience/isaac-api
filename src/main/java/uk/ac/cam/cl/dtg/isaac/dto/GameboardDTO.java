@@ -138,7 +138,7 @@ public class GameboardDTO implements EmailService.HasTitleOrId {
         return contents;
     }
 
-    public void setContents(List<GameboardItem> contents) {
+    public void setContents(final List<GameboardItem> contents) {
         this.contents = contents;
     }
 

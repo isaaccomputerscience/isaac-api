@@ -52,7 +52,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
      *            - When this attempt was marked complete, or null if not yet completed.
      */
     public QuizAttemptDTO(final Long id, final Long userId, final String quizId, final Long quizAssignmentId,
-                         Date startDate, @Nullable Date completedDate) {
+                          final Date startDate, @Nullable final Date completedDate) {
         this.id = id;
         this.userId = userId;
         this.quizId = quizId;
@@ -96,7 +96,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -104,7 +104,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(final Long userId) {
         this.userId = userId;
     }
 
@@ -112,7 +112,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
         return quizId;
     }
 
-    public void setQuizId(String quizId) {
+    public void setQuizId(final String quizId) {
         this.quizId = quizId;
     }
 
@@ -121,7 +121,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
         return quizAssignmentId;
     }
 
-    public void setQuizAssignmentId(@Nullable Long quizAssignmentId) {
+    public void setQuizAssignmentId(@Nullable final Long quizAssignmentId) {
         this.quizAssignmentId = quizAssignmentId;
     }
 
@@ -129,7 +129,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(final Date startDate) {
         this.startDate = startDate;
     }
 
@@ -138,7 +138,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
         return completedDate;
     }
 
-    public void setCompletedDate(@Nullable Date completedDate) {
+    public void setCompletedDate(@Nullable final Date completedDate) {
         this.completedDate = completedDate;
     }
 
@@ -148,7 +148,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
     }
 
     @Override
-    public void setQuizSummary(ContentSummaryDTO summary) {
+    public void setQuizSummary(final ContentSummaryDTO summary) {
         this.quizSummary = summary;
     }
 
@@ -157,7 +157,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
         return quiz;
     }
 
-    public void setQuiz(IsaacQuizDTO quiz) {
+    public void setQuiz(final IsaacQuizDTO quiz) {
         this.quiz = quiz;
     }
 
@@ -166,7 +166,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
         return quizAssignment;
     }
 
-    public void setQuizAssignment(QuizAssignmentDTO quizAssignment) {
+    public void setQuizAssignment(final QuizAssignmentDTO quizAssignment) {
         this.quizAssignment = quizAssignment;
     }
 
@@ -175,7 +175,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
         return feedbackMode;
     }
 
-    public void setFeedbackMode(QuizFeedbackMode feedbackMode) {
+    public void setFeedbackMode(final QuizFeedbackMode feedbackMode) {
         this.feedbackMode = feedbackMode;
     }
 }

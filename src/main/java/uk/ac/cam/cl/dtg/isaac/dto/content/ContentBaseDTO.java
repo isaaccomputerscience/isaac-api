@@ -150,7 +150,7 @@ public abstract class ContentBaseDTO {
         return audience;
     }
 
-    public void setAudience(List<AudienceContext> audience) {
+    public void setAudience(final List<AudienceContext> audience) {
         this.audience = audience;
     }
 
@@ -158,7 +158,7 @@ public abstract class ContentBaseDTO {
         return display;
     }
 
-    public void setDisplay(Map<String, List<String>> display) {
+    public void setDisplay(final Map<String, List<String>> display) {
         this.display = display;
     }
 

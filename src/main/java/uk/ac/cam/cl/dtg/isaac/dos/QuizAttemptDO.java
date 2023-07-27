@@ -45,7 +45,7 @@ public class QuizAttemptDO {
      *            - When this attempt was marked complete, or null if not yet completed.
      */
     public QuizAttemptDO(final Long id, final Long userId, final String quizId, final Long quizAssignmentId,
-                         Date startDate, @Nullable Date completedDate) {
+                         final Date startDate, @Nullable final Date completedDate) {
         this.id = id;
         this.userId = userId;
         this.quizId = quizId;
@@ -89,7 +89,7 @@ public class QuizAttemptDO {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -97,7 +97,7 @@ public class QuizAttemptDO {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(final Long userId) {
         this.userId = userId;
     }
 
@@ -105,7 +105,7 @@ public class QuizAttemptDO {
         return quizId;
     }
 
-    public void setQuizId(String quizId) {
+    public void setQuizId(final String quizId) {
         this.quizId = quizId;
     }
 
@@ -114,7 +114,7 @@ public class QuizAttemptDO {
         return quizAssignmentId;
     }
 
-    public void setQuizAssignmentId(@Nullable Long quizAssignmentId) {
+    public void setQuizAssignmentId(@Nullable final Long quizAssignmentId) {
         this.quizAssignmentId = quizAssignmentId;
     }
 
@@ -122,7 +122,7 @@ public class QuizAttemptDO {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(final Date startDate) {
         this.startDate = startDate;
     }
 
@@ -131,7 +131,7 @@ public class QuizAttemptDO {
         return completedDate;
     }
 
-    public void setCompletedDate(@Nullable Date completedDate) {
+    public void setCompletedDate(@Nullable final Date completedDate) {
         this.completedDate = completedDate;
     }
 }

@@ -307,7 +307,7 @@ public class PgEventBookings implements EventBookings {
     }
 
     @Override
-    public void deleteAdditionalInformation(Long userId) throws SegueDatabaseException {
+    public void deleteAdditionalInformation(final Long userId) throws SegueDatabaseException {
         String query = "UPDATE event_bookings SET additional_booking_information = null WHERE user_id = ?;";
         try (Connection conn = ds.getDatabaseConnection();
             PreparedStatement pst = conn.prepareStatement(query);

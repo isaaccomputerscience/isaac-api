@@ -432,7 +432,7 @@ public class RegisteredUser extends AbstractSegueUser {
         return registeredContexts;
     }
 
-    public void setRegisteredContexts(List<UserContext> registeredContexts) {
+    public void setRegisteredContexts(final List<UserContext> registeredContexts) {
         this.registeredContexts = registeredContexts;
     }
 
@@ -440,7 +440,7 @@ public class RegisteredUser extends AbstractSegueUser {
         return registeredContextsLastConfirmed;
     }
 
-    public void setRegisteredContextsLastConfirmed(Date registeredContextsLastConfirmed) {
+    public void setRegisteredContextsLastConfirmed(final Date registeredContextsLastConfirmed) {
         this.registeredContextsLastConfirmed = registeredContextsLastConfirmed;
     }
 

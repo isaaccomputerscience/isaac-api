@@ -43,14 +43,14 @@ public class QuestionPartConceptDTO {
      * @param title
      *            of the FastTrack concept.
      */
-    public QuestionPartConceptDTO(String title) {
+    public QuestionPartConceptDTO(final String title) {
         this.title = title;
     }
 
     /**
      * Get the title of the concept.
      *
-     * @return the the title of the concept.
+     * @return the title of the concept.
      */
     public final String getTitle() {
         return this.title;
@@ -81,7 +81,7 @@ public class QuestionPartConceptDTO {
      * @param bestLevel
      *            to set for this concept.
      */
-    public final void setBestLevel(FASTTRACK_LEVEL bestLevel) {
+    public final void setBestLevel(final FASTTRACK_LEVEL bestLevel) {
         this.bestLevel = bestLevel;
     }
 

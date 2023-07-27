@@ -49,15 +49,22 @@ public class ContentDTO extends ContentBaseDTO {
     protected Boolean expandable;
 
     @JsonCreator
-    public ContentDTO(@JsonProperty("id") String id,
-            @JsonProperty("title") String title, @JsonProperty("subtitle") String subtitle,
-            @JsonProperty("type") String type, @JsonProperty("author") String author,
-            @JsonProperty("encoding") String encoding, @JsonProperty("canonicalSourceFile") String canonicalSourceFile,
-            @JsonProperty("layout") String layout, @JsonProperty("children") List<ContentBaseDTO> children,
-            @JsonProperty("value") String value, @JsonProperty("attribution") String attribution,
-            @JsonProperty("relatedContent") List<ContentSummaryDTO> relatedContent,
-            @JsonProperty("published") Boolean published, @JsonProperty("deprecated") Boolean deprecated,
-            @JsonProperty("tags") Set<String> tags, @JsonProperty("level") Integer level) {
+    public ContentDTO(@JsonProperty("id") final String id,
+                      @JsonProperty("title") final String title,
+                      @JsonProperty("subtitle") final String subtitle,
+                      @JsonProperty("type") final String type,
+                      @JsonProperty("author") final String author,
+                      @JsonProperty("encoding") final String encoding,
+                      @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+                      @JsonProperty("layout") final String layout,
+                      @JsonProperty("children") final List<ContentBaseDTO> children,
+                      @JsonProperty("value") final String value,
+                      @JsonProperty("attribution") final String attribution,
+                      @JsonProperty("relatedContent") final List<ContentSummaryDTO> relatedContent,
+                      @JsonProperty("published") final Boolean published,
+                      @JsonProperty("deprecated") final Boolean deprecated,
+                      @JsonProperty("tags") final Set<String> tags,
+                      @JsonProperty("level") final Integer level) {
         this.id = id;
         this.title = title;
         this.subtitle = subtitle;
@@ -119,7 +126,7 @@ public class ContentDTO extends ContentBaseDTO {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -127,7 +134,7 @@ public class ContentDTO extends ContentBaseDTO {
         return subtitle;
     }
 
-    public void setSubtitle(String subtitle) {
+    public void setSubtitle(final String subtitle) {
         this.subtitle = subtitle;
     }
 
@@ -136,7 +143,7 @@ public class ContentDTO extends ContentBaseDTO {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(final String author) {
         this.author = author;
     }
 
@@ -144,7 +151,7 @@ public class ContentDTO extends ContentBaseDTO {
         return encoding;
     }
 
-    public void setEncoding(String encoding) {
+    public void setEncoding(final String encoding) {
         this.encoding = encoding;
     }
 
@@ -152,7 +159,7 @@ public class ContentDTO extends ContentBaseDTO {
         return layout;
     }
 
-    public void setLayout(String layout) {
+    public void setLayout(final String layout) {
         this.layout = layout;
     }
 
@@ -160,7 +167,7 @@ public class ContentDTO extends ContentBaseDTO {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(final String value) {
         this.value = value;
     }
 
@@ -168,7 +175,7 @@ public class ContentDTO extends ContentBaseDTO {
         return attribution;
     }
 
-    public void setAttribution(String attribution) {
+    public void setAttribution(final String attribution) {
         this.attribution = attribution;
     }
 
@@ -176,7 +183,7 @@ public class ContentDTO extends ContentBaseDTO {
         return relatedContent;
     }
 
-    public void setRelatedContent(List<ContentSummaryDTO> relatedContent) {
+    public void setRelatedContent(final List<ContentSummaryDTO> relatedContent) {
         this.relatedContent = relatedContent;
     }
 
@@ -184,7 +191,7 @@ public class ContentDTO extends ContentBaseDTO {
         return this.children;
     }
 
-    public void setChildren(List<ContentBaseDTO> children) {
+    public void setChildren(final List<ContentBaseDTO> children) {
         this.children = children;
     }
 
@@ -211,7 +218,7 @@ public class ContentDTO extends ContentBaseDTO {
         return deprecated;
     }
 
-    public void setDeprecated(Boolean deprecated) {
+    public void setDeprecated(final Boolean deprecated) {
         this.deprecated = deprecated;
     }
 
@@ -227,7 +234,7 @@ public class ContentDTO extends ContentBaseDTO {
         return this.expandable;
     }
 
-    public void setExpandable(Boolean expandable) {
+    public void setExpandable(final Boolean expandable) {
         this.expandable = expandable;
     }
 

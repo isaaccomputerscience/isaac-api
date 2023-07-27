@@ -19,7 +19,7 @@ public class UserBadge {
      * @param badgeName the name of the badge
      * @param state an object specifying the current state of the badge
      */
-    public UserBadge(Long userId, UserBadgeManager.Badge badgeName, JsonNode state) {
+    public UserBadge(final Long userId, final UserBadgeManager.Badge badgeName, final JsonNode state) {
         this.userId = userId;
         this.badgeName = badgeName;
         this.state = state;
@@ -52,7 +52,7 @@ public class UserBadge {
         return this.state;
     }
 
-    public void setState(JsonNode state) {
+    public void setState(final JsonNode state) {
         this.state = state;
     }
 }

@@ -36,7 +36,7 @@ public class FreeTextRuleDTO extends ChoiceDTO {
     public void setAllowsMisspelling(final boolean allowsMisspelling) {
         this.allowsMisspelling = allowsMisspelling;
     }
-    public void setWordProximity(Integer proximityDistance) {
+    public void setWordProximity(final Integer proximityDistance) {
         this.proximityDistance = proximityDistance;
     }
     public Integer getWordProximity() {

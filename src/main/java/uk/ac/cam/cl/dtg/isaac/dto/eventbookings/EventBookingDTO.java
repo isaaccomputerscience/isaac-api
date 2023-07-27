@@ -15,10 +15,10 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dto.eventbookings;
 
-import java.util.Date;
-
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
+
+import java.util.Date;
 
 /**
  * @author sac92
@@ -130,7 +130,7 @@ public class EventBookingDTO {
      *
      * @param reservedById - the user who created the reservation.
      */
-    public void setReservedById(Long reservedById) {
+    public void setReservedById(final Long reservedById) {
         this.reservedById = reservedById;
     }
 

@@ -42,7 +42,7 @@ public class IsaacCardDeckDTO extends ContentDTO {
      * Set the cards.
      * @param cards the cards to set.
      */
-    public void setCards(List<IsaacCardDTO> cards) {
+    public void setCards(final List<IsaacCardDTO> cards) {
         this.cards = cards;
     }
 }

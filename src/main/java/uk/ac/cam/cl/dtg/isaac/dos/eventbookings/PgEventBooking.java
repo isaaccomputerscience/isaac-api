@@ -110,7 +110,7 @@ public class PgEventBooking implements EventBooking {
         return additionalInformation;
     }
 
-    private Map<String, String> convertFromJsonbToMap(Object objectToConvert) throws IOException {
+    private Map<String, String> convertFromJsonbToMap(final Object objectToConvert) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         final String stringVersion = mapper.writeValueAsString(objectToConvert);
         Map<String, String> interimResult = mapper.readValue(stringVersion, HashMap.class);

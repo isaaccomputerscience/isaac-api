@@ -15,17 +15,16 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dto;
 
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.StringWriter;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nullable;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.io.StringWriter;
 
 /**
  * A wrapper object used to indicate an error has occurred to the client using the API. 
@@ -127,7 +126,7 @@ public class SegueErrorResponse implements Serializable {
         return bypassGenericSiteErrorPage;
     }
 
-    public void setBypassGenericSiteErrorPage(boolean bypassGenericSiteErrorPage) {
+    public void setBypassGenericSiteErrorPage(final boolean bypassGenericSiteErrorPage) {
         this.bypassGenericSiteErrorPage = bypassGenericSiteErrorPage;
     }
 

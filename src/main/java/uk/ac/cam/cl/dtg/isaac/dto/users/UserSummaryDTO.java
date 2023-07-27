@@ -159,7 +159,7 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
         return registeredContexts;
     }
 
-    public void setRegisteredContexts(List<UserContext> registeredContexts) {
+    public void setRegisteredContexts(final List<UserContext> registeredContexts) {
         this.registeredContexts = registeredContexts;
     }
 
