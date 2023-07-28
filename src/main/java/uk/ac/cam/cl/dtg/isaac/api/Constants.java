@@ -117,6 +117,8 @@ public final class Constants {
     public static final Integer MAX_PODS_TO_RETURN = 10;
     public static final Integer SEARCH_MAX_WINDOW_SIZE = 10000;
     public static final Integer GAMEBOARD_MAX_TITLE_LENGTH = 255;
+    public static final Integer RANDOM_WILDCARD_SEARCH_LIMIT = 999;
+    public static final Integer QUIZ_MAX_SEARCH_RESULTS = 9000;
 
     // Log events
     public static final String QUESTION_ID_LOG_FIELDNAME = "questionId";
@@ -199,6 +201,14 @@ public final class Constants {
     public enum IsaacUserPreferences {
         SUBJECT_INTEREST, BETA_FEATURE, EXAM_BOARD, PROGRAMMING_LANGUAGE, BOOLEAN_NOTATION, DISPLAY_SETTING
     }
+
+    public static final Integer EMAIL_EVENT_REMINDER_DAYS_AHEAD = 3;
+    public static final Integer EMAIL_EVENT_FEEDBACK_DAYS_AGO = -60;
+
+    // Response messages
+    public static final String EMPTY_ASSIGNMENT_GAMEBOARD = "Assignment gameboard has no questions, or its questions no longer exist. Cannot fetch assignment progress.";
+
+    public static final Integer DO_HASHCODE_PRIME = 31;
 
     /**
      * Private constructor to prevent this class being created.

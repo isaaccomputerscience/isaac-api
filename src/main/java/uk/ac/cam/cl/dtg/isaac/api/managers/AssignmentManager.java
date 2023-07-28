@@ -186,7 +186,9 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
      * @throws SegueDatabaseException
      *             - if we cannot complete a required database operation.
      */
-    public List<AssignmentDTO> getAllAssignmentsForSpecificGroups(final Collection<UserGroupDTO> groups, final boolean includeAssignmentsScheduledInFuture) throws SegueDatabaseException {
+    public List<AssignmentDTO> getAllAssignmentsForSpecificGroups(
+            final Collection<UserGroupDTO> groups, final boolean includeAssignmentsScheduledInFuture)
+            throws SegueDatabaseException {
         Validate.notNull(groups);
         // TODO - Is there a better way of doing this empty list check? Database method explodes if given it.
         if (groups.isEmpty()) {

@@ -417,7 +417,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             final String incorrectPartString = "incorrectPartResults";
 
             if (gameboard.getContents().isEmpty()) {
-                return new SegueErrorResponse(Status.NOT_FOUND, "Assignment gameboard has no questions, or its questions no longer exist. Cannot fetch assignment progress.").toResponse();
+                return new SegueErrorResponse(Status.NOT_FOUND, EMPTY_ASSIGNMENT_GAMEBOARD).toResponse();
             }
 
             for (ImmutablePair<RegisteredUserDTO, List<GameboardItem>> userGameboardItems : this.gameManager

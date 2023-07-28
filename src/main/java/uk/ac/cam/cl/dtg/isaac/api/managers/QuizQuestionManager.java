@@ -52,8 +52,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.ESCAPED_ID_SEPARATOR;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.ID_SEPARATOR;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 
 public class QuizQuestionManager {
     private final QuestionManager questionManager;
@@ -422,7 +421,7 @@ public class QuizQuestionManager {
      * @return A section ID of the form "quizId|sectionId".
      */
     private static String extractSectionIdFromQuizQuestionId(final String questionId) {
-        String[] ids = questionId.split(ESCAPED_ID_SEPARATOR, 3);
+        String[] ids = questionId.split(ESCAPED_ID_SEPARATOR, ESCAPED_ID_SPLIT_LIMIT);
         return ids[0] + ID_SEPARATOR + ids[1];
     }
 }

@@ -746,8 +746,9 @@ public class EventsFacade extends AbstractIsaacFacade {
             }
 
             rows.add(totalsRow.toArray(new String[0]));
-            rows.add(("Family name,Given name,Role,School,Booking status,Booking date,Last updated date,Year group,Job title," +  // lgtm [java/missing-space-in-concatenation]
-                    "Stages,Exam boards,Level of teaching experience,Medical/dietary requirements,Accessibility requirements,Emergency name,Emergency number").split(","));
+            rows.add(("Family name,Given name,Role,School,Booking status,Booking date,Last updated date,Year group," // lgtm [java/missing-space-in-concatenation]
+                    + "Job title,Stages,Exam boards,Level of teaching experience,Medical/dietary requirements,"
+                    + "Accessibility requirements,Emergency name,Emergency number").split(","));
             rows.addAll(resultRows);
             csvWriter.writeAll(rows);
             csvWriter.close();
@@ -970,8 +971,10 @@ public class EventsFacade extends AbstractIsaacFacade {
             List<RegisteredUserDTO> validUsers = new ArrayList<>();
             for (Long userId : userIds) {
                 RegisteredUserDTO userOwningBooking = userManager.getUserDTOById(userId);
-                if (userIsAbleToManageEvent || bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event) && userAssociationManager.hasPermission(userLoggedIn, userOwningBooking)) {
-                    if (bookingManager.hasBookingWithAnyOfStatuses(eventId, userId, new HashSet<>(Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.WAITING_LIST, BookingStatus.RESERVED)))) {
+                if (userIsAbleToManageEvent || bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event)
+                        && userAssociationManager.hasPermission(userLoggedIn, userOwningBooking)) {
+                    if (bookingManager.hasBookingWithAnyOfStatuses(eventId, userId, new HashSet<>(Arrays.asList(
+                            BookingStatus.CONFIRMED, BookingStatus.WAITING_LIST, BookingStatus.RESERVED)))) {
                         validUsers.add(userOwningBooking);
                     } else {
                         // Maybe silently carry on instead?
@@ -1225,7 +1228,8 @@ public class EventsFacade extends AbstractIsaacFacade {
 
             if (!userOwningBooking.equals(userLoggedIn)) {
                 this.getLogManager().logEvent(userLoggedIn, request,
-                        SegueServerLogType.ADMIN_EVENT_BOOKING_CANCELLED, ImmutableMap.of(EVENT_ID_FKEY_FIELDNAME, event.getId(), USER_ID_FKEY_FIELDNAME, userOwningBooking.getId()));
+                        SegueServerLogType.ADMIN_EVENT_BOOKING_CANCELLED, ImmutableMap.of(
+                                EVENT_ID_FKEY_FIELDNAME, event.getId(), USER_ID_FKEY_FIELDNAME, userOwningBooking.getId()));
             } else {
                 this.getLogManager().logEvent(userLoggedIn, request,
                         SegueServerLogType.EVENT_BOOKING_CANCELLED, ImmutableMap.of(EVENT_ID_FKEY_FIELDNAME, event.getId()));

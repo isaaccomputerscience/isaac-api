@@ -775,8 +775,9 @@ public class GameManager {
      * @throws ContentManagerException
      *             - if there is an error retrieving the content requested.
      */
-    private GameboardDTO augmentGameboardWithQuestionAttemptInformation(final GameboardDTO gameboardDTO,
-                                                                        final Map<String, ? extends Map<String, ? extends List<? extends LightweightQuestionValidationResponse>>> questionAttemptsFromUser)
+    private GameboardDTO augmentGameboardWithQuestionAttemptInformation(
+            final GameboardDTO gameboardDTO, final Map<String, ? extends Map<String,
+            ? extends List<? extends LightweightQuestionValidationResponse>>> questionAttemptsFromUser)
             throws ContentManagerException {
         if (null == gameboardDTO) {
             return null;
@@ -1175,7 +1176,7 @@ public class GameManager {
 
         // FIXME - the 999 is a magic number because using NO_SEARCH_LIMIT doesn't work for all elasticsearch queries!
         ResultsWrapper<ContentDTO> wildcardResults = this.contentManager.findByFieldNamesRandomOrder(
-                fieldsToMap, 0, 999);
+                fieldsToMap, 0, RANDOM_WILDCARD_SEARCH_LIMIT);
 
         // try to increase randomness of wildcard results.
         Collections.shuffle(wildcardResults.getResults());

@@ -15,20 +15,19 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dos;
 
+import com.google.api.client.util.Lists;
+import com.google.inject.Inject;
+import uk.ac.cam.cl.dtg.isaac.dos.IUserNotification.NotificationStatus;
+import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-
-import com.google.api.client.util.Lists;
-import com.google.inject.Inject;
-
-import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
-import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.isaac.dos.IUserNotification.NotificationStatus;
 
 /**
  * Represents a postgres specific implementation of the UserNotifications DAO interface.

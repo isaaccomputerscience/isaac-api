@@ -103,7 +103,8 @@ public class GroupChangedService implements IGroupObserver {
      * @return a map of string to string, with some values that may want to be shown in the email.
      * @throws SegueDatabaseException if we can't get the gameboard details.
      */
-    private Map<String, Object> prepareGroupWelcomeEmailTokenMap(final RegisteredUserDTO userDTO, final UserGroupDTO userGroup) throws SegueDatabaseException, ContentManagerException {
+    private Map<String, Object> prepareGroupWelcomeEmailTokenMap(final RegisteredUserDTO userDTO, final UserGroupDTO userGroup)
+            throws SegueDatabaseException, ContentManagerException {
         Validate.notNull(userDTO);
 
         UserSummaryWithEmailAddressDTO groupOwner = userGroup.getOwnerSummary();

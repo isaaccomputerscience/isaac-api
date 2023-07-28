@@ -143,7 +143,8 @@ public class PgUserStreakManager implements IUserStreaksManager {
         long userId = user.getId();
         try {
             IUserAlert alert = new PgUserAlert(null, userId,
-                    objectMapper.writeValueAsString(ImmutableMap.of("dailyStreakRecord", this.getCurrentStreakRecord(user), "weeklyStreakRecord", this.getCurrentWeeklyStreakRecord(user))),
+                    objectMapper.writeValueAsString(ImmutableMap.of("dailyStreakRecord", this.getCurrentStreakRecord(user),
+                            "weeklyStreakRecord", this.getCurrentWeeklyStreakRecord(user))),
                     "progress", new Timestamp(System.currentTimeMillis()), null, null, null);
 
             UserAlertsWebSocket.notifyUserOfAlert(userId, alert);

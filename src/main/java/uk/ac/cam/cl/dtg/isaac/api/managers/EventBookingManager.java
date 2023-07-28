@@ -493,7 +493,10 @@ public class EventBookingManager {
 
         // Cannot reserve spots onto a cancelled event
         if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
-            throw new EventIsCancelledException(String.format("User (%s) was unable to reserve places for event (%s); the event is cancelled.", reservingUser.getId(), event.getId()));
+            throw new EventIsCancelledException(String.format(
+                    "User (%s) was unable to reserve places for event (%s); the event is cancelled.",
+                    reservingUser.getId(), event.getId()
+            ));
         }
 
         List<RegisteredUserDTO> unreservableUsers = new ArrayList<>();
@@ -623,7 +626,10 @@ public class EventBookingManager {
         // If the frontend prevents selection of unreservable users, then this email should never go out.
         if (unreservableUsers.size() > 0) {
             // Log that the reserving user tried to reserve invalid users.
-            log.error(String.format("User (%s) tried to request a reservation for invalid users on an event (%s). Users requested: %s", reservingUser.getId(), event.getId(), unreservableUsers));
+            log.error(String.format(
+                    "User (%s) tried to request a reservation for invalid users on an event (%s). Users requested: %s",
+                    reservingUser.getId(), event.getId(), unreservableUsers
+            ));
         }
 
         return reservations;

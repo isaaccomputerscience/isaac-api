@@ -21,6 +21,8 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import jakarta.annotation.Nullable;
 import java.util.Date;
 
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.DO_HASHCODE_PRIME;
+
 /**
  * This class is the Data Transfer Object used to refer to quiz attempts.
  */
@@ -70,7 +72,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
 
     @Override
     public int hashCode() {
-        return 31 + ((id == null) ? 0 : id.hashCode());
+        return DO_HASHCODE_PRIME + ((id == null) ? 0 : id.hashCode());
     }
 
     @Override

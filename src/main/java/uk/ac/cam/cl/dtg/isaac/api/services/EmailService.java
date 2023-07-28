@@ -63,7 +63,8 @@ public class EmailService {
     }
 
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yy");
-    public void sendAssignmentEmailToGroup(final IAssignmentLike assignment, final HasTitleOrId on, final Map<String, Object> tokenToValueMapping, final String templateName) throws SegueDatabaseException {
+    public void sendAssignmentEmailToGroup(final IAssignmentLike assignment, final HasTitleOrId on, final Map<String,
+            Object> tokenToValueMapping, final String templateName) throws SegueDatabaseException {
         UserGroupDTO userGroupDTO = groupManager.getGroupById(assignment.getGroupId());
 
         String dueDate = "";
@@ -97,7 +98,9 @@ public class EmailService {
         }
     }
 
-    public void sendTemplatedEmailToActiveGroupMembers(final UserGroupDTO userGroupDTO, final String templateName, final Map<String, Object> tokenToValueMapping, final EmailType emailType) throws SegueDatabaseException {
+    public void sendTemplatedEmailToActiveGroupMembers(final UserGroupDTO userGroupDTO, final String templateName,
+                                                       final Map<String, Object> tokenToValueMapping, final EmailType emailType)
+            throws SegueDatabaseException {
         List<RegisteredUserDTO> usersToEmail = Lists.newArrayList();
         Map<Long, GroupMembershipDTO> userMembershipMapforGroup = this.groupManager.getUserMembershipMapForGroup(userGroupDTO.getId());
 

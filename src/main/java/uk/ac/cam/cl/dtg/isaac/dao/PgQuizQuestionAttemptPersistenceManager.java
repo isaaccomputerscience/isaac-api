@@ -99,7 +99,7 @@ public class PgQuizQuestionAttemptPersistenceManager implements IQuizQuestionAtt
                 while (results.next()) {
                     String questionId = results.getString("question_id");
 
-                    List<QuestionValidationResponse> questionAttempts = resultsMap.computeIfAbsent(questionId, (ignore) -> Lists.newArrayList());
+                    List<QuestionValidationResponse> questionAttempts = resultsMap.computeIfAbsent(questionId, ignore -> Lists.newArrayList());
 
                     QuestionValidationResponse questionAttempt = objectMapper.readValue(
                             results.getString("question_attempt"), QuestionValidationResponse.class);
@@ -131,9 +131,9 @@ public class PgQuizQuestionAttemptPersistenceManager implements IQuizQuestionAtt
                     Long userId = results.getLong("user_id");
                     String questionId = results.getString("question_id");
 
-                    Map<String, List<QuestionValidationResponse>> userAttemptsMap = resultsMap.computeIfAbsent(userId, (ignoreKey) -> Maps.newHashMap());
+                    Map<String, List<QuestionValidationResponse>> userAttemptsMap = resultsMap.computeIfAbsent(userId, ignoreKey -> Maps.newHashMap());
 
-                    List<QuestionValidationResponse> questionAttempts = userAttemptsMap.computeIfAbsent(questionId, (ignoreKey) -> Lists.newArrayList());
+                    List<QuestionValidationResponse> questionAttempts = userAttemptsMap.computeIfAbsent(questionId, ignoreKey -> Lists.newArrayList());
 
                     QuestionValidationResponse questionAttempt = objectMapper.readValue(
                             results.getString("question_attempt"), QuestionValidationResponse.class);

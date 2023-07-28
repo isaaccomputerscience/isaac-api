@@ -313,6 +313,7 @@ public class GameboardPersistenceManager {
      * @throws SegueDatabaseException
      *             - if there is a problem persisting the link in the database.
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     public void createOrUpdateUserLinkToGameboard(final Long userId, final String gameboardId)
         throws SegueDatabaseException {
 
@@ -574,6 +575,7 @@ public class GameboardPersistenceManager {
      * @throws JsonProcessingException
      * @throws SegueDatabaseException
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private GameboardDO saveGameboard(final GameboardDO gameboardToSave) throws JsonProcessingException, SegueDatabaseException {
         String query = "INSERT INTO gameboards(id, title, contents, wildcard, wildcard_position, "
                 + "game_filter, owner_user_id, creation_method, tags, creation_date)"
