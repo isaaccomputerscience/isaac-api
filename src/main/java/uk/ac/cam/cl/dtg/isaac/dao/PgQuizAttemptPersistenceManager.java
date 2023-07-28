@@ -84,6 +84,7 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public Long saveAttempt(final QuizAttemptDTO attempt) throws SegueDatabaseException {
         QuizAttemptDO attemptToSave = mapper.map(attempt, QuizAttemptDO.class);

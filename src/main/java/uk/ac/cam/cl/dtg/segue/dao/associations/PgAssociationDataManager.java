@@ -53,6 +53,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         this.database = database;
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public AssociationToken saveAssociationToken(final AssociationToken token) throws SegueDatabaseException {
         Validate.notNull(token);
@@ -101,6 +102,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         createAssociation(userIdReceivingAccess, userIdGrantingAccess);
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void createAssociation(final Long userIdReceivingAccess, final Long userIdGrantingAccess)
             throws SegueDatabaseException {

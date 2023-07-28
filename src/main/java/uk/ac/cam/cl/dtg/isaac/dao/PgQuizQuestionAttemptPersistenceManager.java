@@ -56,6 +56,7 @@ public class PgQuizQuestionAttemptPersistenceManager implements IQuizQuestionAtt
         this.objectMapper = objectMapper.getSharedContentObjectMapper();
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void registerQuestionAttempt(final Long quizAttemptId, final QuestionValidationResponse questionResponse) throws SegueDatabaseException {
 

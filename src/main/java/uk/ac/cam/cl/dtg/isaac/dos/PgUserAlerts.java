@@ -54,6 +54,7 @@ public class PgUserAlerts implements IUserAlerts {
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public IUserAlert createAlert(final Long userId, final String message, final String link) throws SegueDatabaseException {
         String query = "INSERT INTO user_alerts (user_id, message, link, created) VALUES (?, ?, ?, ?) RETURNING *";

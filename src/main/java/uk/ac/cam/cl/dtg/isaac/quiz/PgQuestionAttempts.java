@@ -71,6 +71,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         this.objectMapper = objectMapper.getSharedContentObjectMapper();
     }
     
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void registerAnonymousQuestionAttempt(final String userId, final String questionPageId,
             final String fullQuestionId, final QuestionValidationResponse questionAttempt)
@@ -157,6 +158,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void registerQuestionAttempt(final Long userId, final String questionPageId, final String fullQuestionId,
             final QuestionValidationResponse questionAttempt) throws SegueDatabaseException {
@@ -415,6 +417,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public Map<Date, Long> getQuestionAttemptCountForUserByDateRange(final Date fromDate, final Date toDate,
                                                                      final Long userId, final Boolean perDay) throws SegueDatabaseException {

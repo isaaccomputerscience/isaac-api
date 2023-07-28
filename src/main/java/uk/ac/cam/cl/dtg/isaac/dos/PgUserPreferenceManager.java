@@ -56,6 +56,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
                 results.getString("preference_name"), results.getBoolean("preference_value"));
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public UserPreference getUserPreference(final String preferenceType, final String preferenceName, final long userId)
             throws SegueDatabaseException {
@@ -240,6 +241,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
         return usersPreferencesMap;
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void saveUserPreferences(final List<UserPreference> userPreferences) throws SegueDatabaseException {
         // Upsert the value in, using Postgres 9.5 syntax 'ON CONFLICT DO UPDATE ...'

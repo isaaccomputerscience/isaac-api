@@ -88,6 +88,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
      * @return the TOTPSharedSecret
      * @throws SegueDatabaseException - if we can't save the entry for some reason
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private TOTPSharedSecret createCredentials(final TOTPSharedSecret credsToSave) throws SegueDatabaseException {
         String query = "INSERT INTO user_totp(user_id, shared_secret, created, last_updated) VALUES (?, ?, ?,?);";
         try (Connection conn = database.getDatabaseConnection();
@@ -115,6 +116,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
      * @return the TOTPSharedSecret for chaining.
      * @throws SegueDatabaseException - if we can't save the entry for some reason
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private TOTPSharedSecret updateCredentials(final TOTPSharedSecret credsToSave) throws SegueDatabaseException {
         TOTPSharedSecret existingRecord = this.get2FASharedSecret(credsToSave.getUserId());
         if (null == existingRecord) {

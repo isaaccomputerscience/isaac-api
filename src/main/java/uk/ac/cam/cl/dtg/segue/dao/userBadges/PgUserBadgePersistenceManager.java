@@ -29,6 +29,7 @@ public class PgUserBadgePersistenceManager implements IUserBadgePersistenceManag
     public PgUserBadgePersistenceManager() {
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public UserBadge getBadge(final RegisteredUserDTO user, final UserBadgeManager.Badge badgeName,
                               final ITransaction transaction) throws SegueDatabaseException {
@@ -58,6 +59,7 @@ public class PgUserBadgePersistenceManager implements IUserBadgePersistenceManag
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void updateBadge(final UserBadge badge, final ITransaction transaction) throws SegueDatabaseException {
 

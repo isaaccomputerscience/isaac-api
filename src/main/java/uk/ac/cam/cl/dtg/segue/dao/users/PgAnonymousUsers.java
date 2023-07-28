@@ -44,6 +44,7 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
         this.database = ds;
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public AnonymousUser storeAnonymousUser(final AnonymousUser user) throws SegueDatabaseException {
         String query = "INSERT INTO temporary_user_store (id, temporary_app_data, created, last_updated)"

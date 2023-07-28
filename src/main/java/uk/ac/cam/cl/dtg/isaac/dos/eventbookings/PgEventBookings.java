@@ -66,6 +66,7 @@ public class PgEventBookings implements EventBookings {
         this.objectMapper = mapper;
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public EventBooking add(final ITransaction transaction, final String eventId, final Long userId, final Long reserveById,
                             final BookingStatus status, Map<String, String> additionalEventInformation) throws SegueDatabaseException {
@@ -145,6 +146,7 @@ public class PgEventBookings implements EventBookings {
      * @param additionalEventInformation - additional information required for the event
      * @throws SegueDatabaseException - if the database goes wrong.
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private void updateBookingStatus(final ITransaction transaction, final String eventId, final Long userId,
                                      final Long reservingUserId, final BookingStatus status,
                                      final Map<String, String> additionalEventInformation) throws SegueDatabaseException {
@@ -186,6 +188,7 @@ public class PgEventBookings implements EventBookings {
      * @param status - the new status to change the booking to
      * @throws SegueDatabaseException - if the database goes wrong.
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private void updateBookingStatus(final ITransaction transaction, final String eventId, final Long userId,
                                      final Long reservingUserId, final BookingStatus status) throws SegueDatabaseException {
         if (!(transaction instanceof PgTransaction)) {
@@ -221,6 +224,7 @@ public class PgEventBookings implements EventBookings {
      * @param additionalEventInformation - additional information required for the event
      * @throws SegueDatabaseException - if the database goes wrong.
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private void updateBookingStatus(final ITransaction transaction, final String eventId, final Long userId,
                                      final BookingStatus status,
                                      final Map<String, String> additionalEventInformation) throws SegueDatabaseException {
@@ -260,6 +264,7 @@ public class PgEventBookings implements EventBookings {
      * @param status - the new status to change the booking to
      * @throws SegueDatabaseException - if the database goes wrong.
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private void updateBookingStatus(final ITransaction transaction, final String eventId, final Long userId,
                                      final BookingStatus status) throws SegueDatabaseException {
         if (!(transaction instanceof PgTransaction)) {

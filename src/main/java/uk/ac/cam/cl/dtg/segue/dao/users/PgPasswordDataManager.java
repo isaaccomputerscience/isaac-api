@@ -96,6 +96,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
         return lc;
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     private LocalUserCredential createCredentials(final LocalUserCredential credsToSave) throws SegueDatabaseException {
         String query = "INSERT INTO user_credentials(user_id, password, security_scheme, secure_salt, reset_token, reset_expiry, last_updated)"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?);";
@@ -120,6 +121,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     private LocalUserCredential updateCredentials(final LocalUserCredential credsToSave) throws SegueDatabaseException {
         LocalUserCredential existingRecord = this.getLocalUserCredential(credsToSave.getUserId());
         if (null == existingRecord) {

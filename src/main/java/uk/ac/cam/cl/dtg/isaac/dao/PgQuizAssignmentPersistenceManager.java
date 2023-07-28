@@ -60,6 +60,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         this.mapper = mapper;
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public Long saveAssignment(final QuizAssignmentDTO assignment) throws SegueDatabaseException {
         QuizAssignmentDO assignmentToSave = mapper.map(assignment, QuizAssignmentDO.class);
@@ -204,6 +205,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void updateAssignment(final Long quizAssignmentId, final QuizAssignmentDTO updates) throws SegueDatabaseException {
         String query = "UPDATE quiz_assignments SET quiz_feedback_mode = COALESCE(?, quiz_feedback_mode),"

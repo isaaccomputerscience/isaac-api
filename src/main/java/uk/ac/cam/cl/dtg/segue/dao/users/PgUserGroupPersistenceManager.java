@@ -61,6 +61,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
         this.database = database;
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public UserGroup createGroup(final UserGroup group) throws SegueDatabaseException {
         String query = "INSERT INTO groups(group_name, owner_id, group_status, created, last_updated)"
@@ -104,6 +105,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public UserGroup editGroup(final UserGroup group) throws SegueDatabaseException {
         Validate.notNull(group.getId());
@@ -134,6 +136,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void addUserToGroup(final Long userId, final Long groupId) throws SegueDatabaseException {
         // first check if they already have a membership record
@@ -163,6 +166,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
         }        
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void setUsersGroupMembershipStatus(final Long userId, final Long groupId, final GroupMembershipStatus newStatus) throws SegueDatabaseException {
         String query = "UPDATE group_memberships SET status=? ,updated=? WHERE user_id = ? AND group_id = ?";
@@ -318,6 +322,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
         return this.getGroupMembershipMap(groupId).keySet();
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public Map<Long, GroupMembership> getGroupMembershipMap(final Long groupId) throws SegueDatabaseException {
         String query = "SELECT * FROM group_memberships INNER JOIN groups ON "
@@ -366,6 +371,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
 
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public Collection<UserGroup> getGroupMembershipList(final Long userId) throws SegueDatabaseException {
         String query = "SELECT * FROM groups INNER JOIN group_memberships ON groups.id = group_memberships.group_id"
@@ -411,6 +417,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
         }
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void addUserAdditionalManagerList(final Long userId, final Long groupId) throws SegueDatabaseException {
         String query = "INSERT INTO group_additional_managers(group_id, user_id, created) VALUES (?, ?, ?);";

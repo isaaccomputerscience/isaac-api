@@ -119,6 +119,7 @@ public class PgUserNotifications implements IUserNotifications {
      * @param notification - the notification to insert.
      * @throws SegueDatabaseException - if it fails.
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private void insertNewNotificationRecord(final IUserNotification notification) throws SegueDatabaseException {
         String query = "INSERT INTO user_notifications (user_id, notification_id, status, created) VALUES (?, ?, ?, ?)";
         try (Connection conn = database.getDatabaseConnection();
@@ -142,6 +143,7 @@ public class PgUserNotifications implements IUserNotifications {
      * @param notification - the notification to update.
      * @throws SegueDatabaseException - if it fails.
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private void updateNotificationRecord(final IUserNotification notification) throws SegueDatabaseException {
         String query = "UPDATE user_notifications SET status = ?, created=? WHERE user_id = ? AND notification_id = ?";
         try (Connection conn = database.getDatabaseConnection();

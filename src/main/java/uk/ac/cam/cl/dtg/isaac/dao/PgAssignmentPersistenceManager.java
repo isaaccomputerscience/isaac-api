@@ -60,6 +60,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         this.mapper = mapper;
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public Long saveAssignment(final AssignmentDTO assignment) throws SegueDatabaseException {
         AssignmentDO assignmentToSave = mapper.map(assignment, AssignmentDO.class);

@@ -476,6 +476,7 @@ public class PgLogManager implements ILogManager {
      *             - if we are unable to serialize the eventDetails as a string.
      * @throws SegueDatabaseException - if we cannot persist the event in the database.
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private void persistLogEvent(final String userId, final String anonymousUserId, final String eventType,
             final Object eventDetails, final String ipAddress) throws JsonProcessingException, SegueDatabaseException {
         // don't do anything if logging is not enabled.

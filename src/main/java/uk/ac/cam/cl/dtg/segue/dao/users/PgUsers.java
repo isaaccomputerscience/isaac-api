@@ -248,6 +248,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         }    
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public boolean linkAuthProviderToAccount(final RegisteredUser user, final AuthenticationProvider provider,
             final String providerUserId) throws SegueDatabaseException {
@@ -714,7 +715,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
      * @return a register user as just created.
      * @throws SegueDatabaseException - If there is a db error
      */
-    private RegisteredUser createUser(final RegisteredUser userToCreate) throws SegueDatabaseException {    
+    @SuppressWarnings("checkstyle:MagicNumber")
+    private RegisteredUser createUser(final RegisteredUser userToCreate) throws SegueDatabaseException {
         // make sure student is default role if none set
         if (null == userToCreate.getRole()) {
         	userToCreate.setRole(Role.STUDENT);
@@ -813,6 +815,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
      * @return the user as from the database
      * @throws SQLException - if there is a database problem
      */
+    @SuppressWarnings("checkstyle:MagicNumber")
     private RegisteredUser updateUser(final Connection conn, final RegisteredUser userToCreate) throws SegueDatabaseException, SQLException, JsonProcessingException {
         RegisteredUser existingUserRecord = this.getById(userToCreate.getId());
         if (null == existingUserRecord) {
