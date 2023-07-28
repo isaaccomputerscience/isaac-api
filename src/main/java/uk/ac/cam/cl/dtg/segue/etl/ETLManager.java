@@ -20,6 +20,7 @@ class ETLManager {
     private static final Logger log = LoggerFactory.getLogger(ETLFacade.class);
     private static final String LATEST_INDEX_ALIAS = "latest";
     private static final String TASK_PERIOD_SECONDS = "TASK_PERIOD_SECONDS";
+    private static final long TASK_PERIOD_SECONDS_FALLBACK = 300;
 
     private final ContentIndexer indexer;
     private final SchoolIndexer schoolIndexer;
@@ -36,7 +37,7 @@ class ETLManager {
         this.contentIndicesStore = contentIndicesStore;
         this.scheduler = Executors.newScheduledThreadPool(1);
 
-        long taskPeriodSeconds = 300;
+        long taskPeriodSeconds = TASK_PERIOD_SECONDS_FALLBACK;
         String configuredPeriod = contentIndicesStore.getProperty(TASK_PERIOD_SECONDS);
         if (configuredPeriod != null) {
             try {

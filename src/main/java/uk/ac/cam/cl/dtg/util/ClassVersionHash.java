@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ClassVersionHash {
+public final class ClassVersionHash {
+
+    private ClassVersionHash() { }
 
     public static String hashClass(final Class c) {
         try {

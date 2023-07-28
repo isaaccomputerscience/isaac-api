@@ -465,7 +465,8 @@ public class QuestionManager {
     public Map<LocalDate, Long> getUsersQuestionAttemptCountsByDate(final RegisteredUserDTO user,
                                                                     final Date fromDate, final Date toDate,
                                                                     final Boolean perDay) throws SegueDatabaseException {
-        Map<Date, Long> questionAttemptCountPerDateByUser = this.questionAttemptPersistenceManager.getQuestionAttemptCountForUserByDateRange(fromDate, toDate, user.getId(), perDay);
+        Map<Date, Long> questionAttemptCountPerDateByUser = this.questionAttemptPersistenceManager
+                .getQuestionAttemptCountForUserByDateRange(fromDate, toDate, user.getId(), perDay);
 
         // Convert the normal java dates into useful joda dates and create a new map.
         Map<LocalDate, Long> result = Maps.newHashMap();

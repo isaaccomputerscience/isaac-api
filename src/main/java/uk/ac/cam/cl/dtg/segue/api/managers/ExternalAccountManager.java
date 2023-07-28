@@ -143,8 +143,10 @@ public class ExternalAccountManager implements IExternalAccountManager {
         Long userId = userRecord.getUserId();
         mailjetApi.updateUserProperties(mailjetId, userRecord.getGivenName(), userRecord.getRole().toString(), userRecord.getEmailVerificationStatus().toString());
 
-        MailJetSubscriptionAction newsStatus = (userRecord.allowsNewsEmails() != null && userRecord.allowsNewsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE : MailJetSubscriptionAction.UNSUBSCRIBE;
-        MailJetSubscriptionAction eventsStatus = (userRecord.allowsEventsEmails() != null && userRecord.allowsEventsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE : MailJetSubscriptionAction.UNSUBSCRIBE;
+        MailJetSubscriptionAction newsStatus = (userRecord.allowsNewsEmails() != null
+                && userRecord.allowsNewsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE : MailJetSubscriptionAction.UNSUBSCRIBE;
+        MailJetSubscriptionAction eventsStatus = (userRecord.allowsEventsEmails() != null
+                && userRecord.allowsEventsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE : MailJetSubscriptionAction.UNSUBSCRIBE;
         mailjetApi.updateUserSubscriptions(mailjetId, newsStatus, eventsStatus);
 
         database.updateExternalAccount(userId, mailjetId);

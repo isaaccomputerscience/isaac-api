@@ -476,7 +476,10 @@ public class AuthorisationFacade extends AbstractSegueFacade {
 
             // add owner
             List<UserSummaryWithEmailAddressDTO> usersLinkedToToken = Lists.newArrayList();
-            usersLinkedToToken.add(userManager.convertToDetailedUserSummaryObject(userManager.getUserDTOById(associationToken.getOwnerUserId()), UserSummaryWithEmailAddressDTO.class));
+            usersLinkedToToken.add(userManager.convertToDetailedUserSummaryObject(
+                    userManager.getUserDTOById(associationToken.getOwnerUserId()),
+                    UserSummaryWithEmailAddressDTO.class
+            ));
 
             // add additional managers
             usersLinkedToToken.addAll(group.getAdditionalManagers());
@@ -497,9 +500,7 @@ public class AuthorisationFacade extends AbstractSegueFacade {
         } catch (NoUserException e) {
             return new SegueErrorResponse(Status.BAD_REQUEST, "Unable to locate user to verify identity").toResponse();
         } catch (SegueResourceMisuseException e) {
-            String message = "You have exceeded the number of requests allowed for this endpoint. "
-                    + "Please try again later.";
-            return SegueErrorResponse.getRateThrottledResponse(message);  
+            return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
         }
     }
 

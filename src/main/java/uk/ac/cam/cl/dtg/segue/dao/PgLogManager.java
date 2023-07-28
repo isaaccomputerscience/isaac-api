@@ -478,7 +478,7 @@ public class PgLogManager implements ILogManager {
      */
     @SuppressWarnings("checkstyle:MagicNumber")
     private void persistLogEvent(final String userId, final String anonymousUserId, final String eventType,
-            final Object eventDetails, final String ipAddress) throws JsonProcessingException, SegueDatabaseException {
+                                 final Object eventDetails, final String ipAddress) throws JsonProcessingException, SegueDatabaseException {
         // don't do anything if logging is not enabled.
         if (!this.loggingEnabled) {
             return;

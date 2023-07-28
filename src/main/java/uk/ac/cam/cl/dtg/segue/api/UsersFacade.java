@@ -358,9 +358,7 @@ public class UsersFacade extends AbstractSegueFacade {
             log.error(error.getErrorMessage(), e);
             return error.toResponse();
         } catch (SegueResourceMisuseException e) {
-            String message = "You have exceeded the number of requests allowed for this endpoint. "
-                    + "Please try again later.";
-            return SegueErrorResponse.getRateThrottledResponse(message);
+            return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
         }
     }
 
@@ -412,10 +410,8 @@ public class UsersFacade extends AbstractSegueFacade {
             log.error(error.getErrorMessage(), e);
             return error.toResponse();
         } catch (SegueResourceMisuseException e) {
-            String message = "You have exceeded the number of requests allowed for this endpoint. "
-                    + "Please try again later.";
             log.error("Password reset request blocked for email: (" + sanitiseLogValue(userObject.getEmail()) + ")", e.toString());
-            return SegueErrorResponse.getRateThrottledResponse(message);
+            return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
         }
     }
 

@@ -789,9 +789,9 @@ public class AdminFacade extends AbstractSegueFacade {
             }
 
             if (null != email && !email.isEmpty()) {
-                if (currentUser.getRole().equals(Role.EVENT_MANAGER) && email.replaceAll("[^A-z0-9]", "").length() < 4) {
-                    return new SegueErrorResponse(Status.FORBIDDEN,
-                            "You do not have permission to do wildcard searches with less than 4 characters.")
+                if (currentUser.getRole().equals(Role.EVENT_MANAGER)
+                        && email.replaceAll("[^A-z0-9]", "").length() < WILDCARD_SEARCH_MINIMUM_LENGTH) {
+                    return new SegueErrorResponse(Status.FORBIDDEN, WILDCARD_SEARCH_UNAUTHORISED_TOO_SHORT_MESSAGE)
                             .toResponse();
                 }
                 userPrototype.setEmail(email);
@@ -799,9 +799,10 @@ public class AdminFacade extends AbstractSegueFacade {
 
             if (null != familyName && !familyName.isEmpty()) {
                 // Event managers aren't allowed to do short wildcard searches, but need surnames less than 4 chars too.
-                if (currentUser.getRole().equals(Role.EVENT_MANAGER) && familyName.replaceAll("[^A-z]", "").length() < 4
+                if (currentUser.getRole().equals(Role.EVENT_MANAGER)
+                        && familyName.replaceAll("[^A-z]", "").length() < WILDCARD_SEARCH_MINIMUM_LENGTH
                         && familyName.length() != familyName.replaceAll("[^A-z]", "").length()) {
-                    return new SegueErrorResponse(Status.FORBIDDEN, "You do not have permission to do wildcard searches with less than 4 characters.")
+                    return new SegueErrorResponse(Status.FORBIDDEN, WILDCARD_SEARCH_UNAUTHORISED_TOO_SHORT_MESSAGE)
                             .toResponse();
                 }
                 userPrototype.setFamilyName(familyName);
@@ -859,12 +860,7 @@ public class AdminFacade extends AbstractSegueFacade {
                 return cachedResponse;
             }
 
-            int searchResultsLimit;
-            try {
-                searchResultsLimit = Integer.parseInt(this.getProperties().getProperty(Constants.SEARCH_RESULTS_HARD_LIMIT));
-            } catch (NumberFormatException e) {
-                searchResultsLimit = 2000; // Hard-coded, but only as a fail-safe.
-            }
+            int searchResultsLimit = this.getProperties().getIntegerPropertyOrFallback(SEARCH_RESULTS_HARD_LIMIT, SEARCH_RESULTS_HARD_LIMIT_FALLBACK);
 
             if (foundUsers.size() > searchResultsLimit) {
                 log.warn(String.format("%s user (%s) search returned %d results, limiting to " + searchResultsLimit + ".",
@@ -1059,7 +1055,7 @@ public class AdminFacade extends AbstractSegueFacade {
 
                 HttpEntity e = httpResponse.getEntity();
 
-                if (httpResponse.getStatusLine().getStatusCode() == 200) {
+                if (httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
                     log.info(currentUser.getEmail() + " changed live version from " + oldLiveVersion + " to " + version + ".");
                     return Response.ok().build();
                 } else {

@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_ONE_HOUR;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 
 /**
@@ -21,7 +21,7 @@ public class SegueLoginByIPMisuseHandler implements IMisuseHandler {
 
     @Inject
     public SegueLoginByIPMisuseHandler() {
-        this(50, 300, NUMBER_SECONDS_IN_ONE_HOUR);
+        this(SEGUE_LOGIN_BY_IP_DEFAULT_SOFT_THRESHOLD, SEGUE_LOGIN_BY_IP_DEFAULT_HARD_THRESHOLD, NUMBER_SECONDS_IN_ONE_HOUR);
     }
 
     @Inject

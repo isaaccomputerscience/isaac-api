@@ -435,7 +435,8 @@ public class GroupManager {
      * @throws SegueDatabaseException if there is a db error
      * @throws IllegalAccessException if oldOwner is not the current owner of the group
      */
-    public UserGroupDTO promoteUserToOwner(final UserGroupDTO group, final RegisteredUserDTO newOwner, final RegisteredUserDTO oldOwner) throws SegueDatabaseException, IllegalAccessException {
+    public UserGroupDTO promoteUserToOwner(final UserGroupDTO group, final RegisteredUserDTO newOwner, final RegisteredUserDTO oldOwner)
+            throws SegueDatabaseException, IllegalAccessException {
         Validate.notNull(group);
         Validate.notNull(newOwner);
         Validate.notNull(oldOwner);

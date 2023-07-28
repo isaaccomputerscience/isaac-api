@@ -76,6 +76,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_MAX_WINDOW_SIZE;
 
 
 /**
@@ -93,7 +94,7 @@ public class ElasticSearchProvider implements ISearchProvider {
     // to try and improve performance of searches with a -1 limit.
     private static final int LARGE_LIMIT = 100;
 
-    private static final int DEFAULT_MAX_WINDOW_SIZE = 10000;
+    private static final long CACHE_EXPIRY_MINUTES = 10;
 
     // used to optimise index setting retrieval as these probably don't change every request.
     private final Cache<String, String> settingsCache;
@@ -111,7 +112,7 @@ public class ElasticSearchProvider implements ISearchProvider {
     @Inject
     public ElasticSearchProvider(final RestHighLevelClient searchClient) {
         this.client = searchClient;
-        this.settingsCache = CacheBuilder.newBuilder().softValues().expireAfterWrite(10, TimeUnit.MINUTES).build();
+        this.settingsCache = CacheBuilder.newBuilder().softValues().expireAfterWrite(CACHE_EXPIRY_MINUTES, TimeUnit.MINUTES).build();
     }
 
     @Override
@@ -704,7 +705,7 @@ public class ElasticSearchProvider implements ISearchProvider {
 
     public SearchResponse getAllFromIndex(final String indexBase, final String indexType) throws SegueSearchException {
         String typedIndex = ElasticSearchProvider.produceTypedIndexName(indexBase, indexType);
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().size(10000).fetchSource(true);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().size(DEFAULT_MAX_WINDOW_SIZE).fetchSource(true);
         try {
             return client.search(new SearchRequest(typedIndex).source(sourceBuilder), RequestOptions.DEFAULT);
         } catch (IOException e) {

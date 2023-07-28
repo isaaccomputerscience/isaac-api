@@ -304,11 +304,9 @@ public class EmailFacade extends AbstractSegueFacade {
             log.error(String.format("Invalid parameters sent to /users/verifyemail endpoint: (%s)", e.getMessage()));
             return error.toResponse();
         } catch (SegueResourceMisuseException e) {
-            String message = "You have exceeded the number of requests allowed for this endpoint. "
-                    + "Please try again later.";
             log.error(String.format("VerifyEmail request endpoint has reached hard limit (%s)",
                     payload.get("email")));
-            return SegueErrorResponse.getRateThrottledResponse(message);
+            return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
         }
     }
 
@@ -518,7 +516,10 @@ public class EmailFacade extends AbstractSegueFacade {
                                               final ContentEmailDTO providedTemplate) {
         final EmailTemplateDTO emailTemplate = providedTemplate.getEmailTemplate();
 
-        if (Strings.isNullOrEmpty(emailTemplate.getPlainTextContent()) || Strings.isNullOrEmpty(emailTemplate.getHtmlContent()) || Strings.isNullOrEmpty(emailTemplate.getSubject())) {
+        if (Strings.isNullOrEmpty(emailTemplate.getPlainTextContent())
+                || Strings.isNullOrEmpty(emailTemplate.getHtmlContent())
+                || Strings.isNullOrEmpty(emailTemplate.getSubject())
+        ) {
             return SegueErrorResponse.getBadRequestResponse("Response must include plaintextTemplate, htmlTemplate and emailSubject");
         }
 

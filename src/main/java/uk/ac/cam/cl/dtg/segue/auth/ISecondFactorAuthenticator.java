@@ -67,7 +67,8 @@ public interface ISecondFactorAuthenticator {
      * @throws IncorrectCredentialsProvidedException - incorrect code provided
      * @throws NoCredentialsAvailableException - user has not configured 2FA
      */
-    boolean authenticate2ndFactor(RegisteredUserDTO user, Integer codeSubmitted) throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException;
+    boolean authenticate2ndFactor(RegisteredUserDTO user, Integer codeSubmitted)
+            throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException;
 
     /**
      * Remove 2FA settings for a given user's account.

@@ -42,8 +42,11 @@ import java.util.stream.Collectors;
  */
 public class UserAssociationManager {
     private static final Logger log = LoggerFactory.getLogger(UserAssociationManager.class);
-    private static final SecureRandom secureRandom = new SecureRandom();
-    private static final int tokenLength = 6;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final int TOKEN_LENGTH = 6;
+    private static final int BITS_IN_INTEGER = 32;
+    private static final int RANDOM_BITS_TO_EXTRACT = 5;
+    private static final int BIT_SHIFT_MASK = 0x1f;
     
     private final IAssociationDataManager associationDatabase;
     private final GroupManager userGroupManager;
@@ -119,19 +122,19 @@ public class UserAssociationManager {
         // Allow the following character to appear in tokens, removing ambiguous ones:
         String tokenCharMap = "ABCDEFGHJKLMNPQRTUVWXYZ2346789";
 
-        char[] authToken = new char[tokenLength];
+        char[] authToken = new char[TOKEN_LENGTH];
 
         int index = 0;  // Where we are in the token.
         int shift = 0;  // Where we are in the random 32 bit integer.
-        int randomBits = secureRandom.nextInt();
+        int randomBits = SECURE_RANDOM.nextInt();
 
         // Use 5 bit ints extracted from randomBits, to generate tokenLength random characters from sample space.
-        while (index < tokenLength) {
-            if (shift >= 32 / 5) {  // If we've expired the 32/5 values in this random int, get a new one, reset shift.
-                randomBits = secureRandom.nextInt();
+        while (index < TOKEN_LENGTH) {
+            if (shift >= BITS_IN_INTEGER / RANDOM_BITS_TO_EXTRACT) {  // If we've expired the 32/5 values in this random int, get a new one, reset shift.
+                randomBits = SECURE_RANDOM.nextInt();
                 shift = 0;
             }
-            int chr = (randomBits >> (5 * shift)) & 0x1f;  // Extract next 5 bit int from randomBits.
+            int chr = (randomBits >> (RANDOM_BITS_TO_EXTRACT * shift)) & BIT_SHIFT_MASK;  // Extract next 5 bit int from randomBits.
             shift++;  // Ensure we don't reuse any of randomBits.
             if (chr < tokenCharMap.length()) {
                 // If we're in the valid range, use that character and advance in authToken, else try again.
@@ -400,7 +403,8 @@ public class UserAssociationManager {
         try {
             return currentUser.getId().equals(userRequested.getId())
                     || Role.ADMIN.equals(currentUser.getRole())
-                    || !Role.STUDENT.equals(currentUser.getRole()) && !Role.TUTOR.equals(currentUser.getRole()) && this.associationDatabase.hasValidAssociation(currentUser.getId(), userRequested.getId());
+                    || !Role.STUDENT.equals(currentUser.getRole()) && !Role.TUTOR.equals(currentUser.getRole())
+                    && this.associationDatabase.hasValidAssociation(currentUser.getId(), userRequested.getId());
         } catch (SegueDatabaseException e) {
             log.error("Database Error: Unable to determine whether a user has permission to view another users data.",
                     e);

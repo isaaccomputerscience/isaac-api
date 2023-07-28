@@ -516,7 +516,7 @@ public class UserAuthenticationManager {
 
             response.addCookie(logoutCookie);
         } catch (IllegalStateException e) {
-            log.info(LOGOUT_SESSION_ARLEADY_INVALIDATED_MESSAGE, e);
+            log.info(LOGOUT_SESSION_ALREADY_INVALIDATED_MESSAGE, e);
         }
     }
 

@@ -211,9 +211,11 @@ public class GroupsFacade extends AbstractSegueFacade {
 
             List<Map<String, Object>> results = Lists.newArrayList();
             for (UserGroupDTO group : groups) {
-                ImmutableMap<String, Object> map = ImmutableMap.of("group", group, "membershipStatus", this.groupManager.getGroupMembershipStatus(user.getId(), group.getId()).name());
+                ImmutableMap<String, Object> map = ImmutableMap.of("group", group, "membershipStatus",
+                        this.groupManager.getGroupMembershipStatus(user.getId(), group.getId()).name());
 
-                // check if the group doesn't have a last updated date if not it means that we shouldn't show students the group name as teachers may not have realised the names are public..
+                // check if the group doesn't have a last updated date if not it means that we shouldn't show students
+                // the group name as teachers may not have realised the names are public..
                 if (group.getLastUpdated() == null) {
                     group.setGroupName(null);
                 }
@@ -660,13 +662,13 @@ public class GroupsFacade extends AbstractSegueFacade {
 
             // Tutors cannot add additional group managers
             if (!isUserTeacherOrAbove(userManager, user)) {
-                return new SegueErrorResponse(Status.FORBIDDEN, "You must have a teacher account to add additional group managers to your groups.").toResponse();
+                return new SegueErrorResponse(Status.FORBIDDEN, MUST_BE_TEACHER_TO_ADD_MANAGERS_MESSAGE).toResponse();
             }
 
             // Tutors cannot be added as additional managers of a group
             if (null == userToAdd || !isUserTeacherOrAbove(userManager, userToAdd)) {
                 // deliberately be vague about whether the account exists or they don't have a teacher account to avoid account scanning.
-                return new SegueErrorResponse(Status.BAD_REQUEST, "There was a problem adding the user specified. Please make sure their email address is correct and they have a teacher account.").toResponse();
+                return new SegueErrorResponse(Status.BAD_REQUEST, PROBLEM_ADDING_GROUP_MANAGER_MESSAGE).toResponse();
             }
 
             if (group.getOwnerId().equals(userToAdd.getId())) {
@@ -687,11 +689,9 @@ public class GroupsFacade extends AbstractSegueFacade {
         } catch (NoUserLoggedInException e) {
             return SegueErrorResponse.getNotLoggedInResponse();
         } catch (NoUserException e) {
-            return new SegueErrorResponse(Status.BAD_REQUEST, "There was a problem adding the user specified. Please make sure their email address is correct and they have a teacher account.").toResponse();
+            return new SegueErrorResponse(Status.BAD_REQUEST, PROBLEM_ADDING_GROUP_MANAGER_MESSAGE).toResponse();
         } catch (SegueResourceMisuseException e) {
-            String message = "You have exceeded the number of requests allowed for this endpoint. "
-                    + "Please try again later.";
-            return SegueErrorResponse.getRateThrottledResponse(message);
+            return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
         }
 
     }
@@ -842,8 +842,10 @@ public class GroupsFacade extends AbstractSegueFacade {
             if (assignments.size() == 0) {
                 return Response.ok(new ArrayList<>()).build();
             }
-            List<AssignmentDTO> withDueDate = assignments.stream().filter(a -> a.getDueDate() != null).sorted(Comparator.comparing(AssignmentDTO::getDueDate)).collect(Collectors.toList());
-            List<AssignmentDTO> withoutDueDate = assignments.stream().filter(a -> a.getDueDate() == null).sorted(Comparator.comparing(AssignmentDTO::getCreationDate)).collect(Collectors.toList());
+            List<AssignmentDTO> withDueDate = assignments.stream().filter(a -> a.getDueDate() != null)
+                    .sorted(Comparator.comparing(AssignmentDTO::getDueDate)).collect(Collectors.toList());
+            List<AssignmentDTO> withoutDueDate = assignments.stream().filter(a -> a.getDueDate() == null)
+                    .sorted(Comparator.comparing(AssignmentDTO::getCreationDate)).collect(Collectors.toList());
             List<AssignmentDTO> sortedAssignments = Stream.concat(withDueDate.stream(), withoutDueDate.stream()).collect(Collectors.toList());
 
             List<RegisteredUserDTO> groupMembers = groupManager.getUsersInGroup(group).stream()

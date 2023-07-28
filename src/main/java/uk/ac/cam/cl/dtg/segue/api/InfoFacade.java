@@ -176,7 +176,7 @@ public class InfoFacade extends AbstractSegueFacade {
             e.printStackTrace();
         }
 
-        if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == 200) {
+        if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
             return Response.ok(ImmutableMap.of("success", true)).build();
         } else {
             return Response.ok(ImmutableMap.of("success", false)).build();
@@ -206,7 +206,7 @@ public class InfoFacade extends AbstractSegueFacade {
             e.printStackTrace();
         }
 
-        if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == 200) {
+        if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
             return Response.ok(ImmutableMap.of("success", true)).build();
         } else {
             return Response.ok(ImmutableMap.of("success", false)).build();
@@ -235,7 +235,7 @@ public class InfoFacade extends AbstractSegueFacade {
             log.warn("Error when checking status of ETL server: " + e.toString());
         }
 
-        if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == 200) {
+        if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
             return Response.ok(ImmutableMap.of("success", true)).build();
         } else {
             return Response.ok(ImmutableMap.of("success", false)).build();
@@ -267,7 +267,7 @@ public class InfoFacade extends AbstractSegueFacade {
 
         // FIXME - this assumes a 200 means all is ok.
         // It's likely that a real problem with clustering would also lead to a 200!
-        if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == 200) {
+        if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
             return Response.ok(ImmutableMap.of("success", true)).build();
         } else {
             return Response.ok(ImmutableMap.of("success", false)).build();

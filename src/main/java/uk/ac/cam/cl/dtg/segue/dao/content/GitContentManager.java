@@ -69,6 +69,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.CACHE_METRICS_COLLECTOR;
 
 /**
@@ -390,12 +391,12 @@ public class GitContentManager {
 
             // Try to match fields
             for (String field : importantFields) {
-                contentQuery.should(new ShouldMatchInstruction(field, searchString, 10L, false));
-                contentQuery.should(new ShouldMatchInstruction(field, searchString, 3L, true));
+                contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_IMPORTANT_NON_FUZZY, false));
+                contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_IMPORTANT_FUZZY, true));
             }
             for (String field : otherFields) {
-                contentQuery.should(new ShouldMatchInstruction(field, searchString, 5L, false));
-                contentQuery.should(new ShouldMatchInstruction(field, searchString, 1L, true));
+                contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_OTHER_NON_FUZZY, false));
+                contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_OTHER_FUZZY, true));
             }
 
             // Check location.address fields on event pages
@@ -403,8 +404,8 @@ public class GitContentManager {
                 String addressPath = String.join(nestedFieldConnector, Constants.ADDRESS_PATH_FIELDNAME);
                 for (String addressField : Constants.ADDRESS_FIELDNAMES) {
                     String field = addressPath + nestedFieldConnector + addressField;
-                    contentQuery.should(new ShouldMatchInstruction(field, searchString, 3L, false));
-                    contentQuery.should(new ShouldMatchInstruction(field, searchString, 1L, true));
+                    contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_ADDRESS_NON_FUZZY, false));
+                    contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_ADDRESS_FUZZY, true));
                 }
             }
 

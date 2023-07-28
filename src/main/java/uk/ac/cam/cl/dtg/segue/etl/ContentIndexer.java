@@ -160,7 +160,7 @@ public class ContentIndexer {
 
     void setNamedVersion(final String alias, final String version) {
         List<String> allContentTypes = Arrays.stream(CONTENT_INDEX_TYPE.values())
-                .map((contentIndexType) -> contentIndexType.toString()).collect(Collectors.toList());
+                .map(CONTENT_INDEX_TYPE::toString).collect(Collectors.toList());
         es.addOrMoveIndexAlias(alias, version, allContentTypes);
     }
 
@@ -237,7 +237,7 @@ public class ContentIndexer {
 
                             // Prevents ETL indexing of quizzes that contain anything that is not an IsaacQuizSection
                             // in the top-level children array.
-                            // NOTE: I'm not sure this is the right place for this but I couldn't find a better one.
+                            // NOTE: I'm not sure if this is the right place for this but I couldn't find a better one.
                             // This also seems to be the only time we can prevent a file from being indexed entirely.
                             if (flattenedContent instanceof IsaacQuiz) {
                                 List<ContentBase> children = flattenedContent.getChildren();
@@ -251,7 +251,7 @@ public class ContentIndexer {
                                 }
                             }
 
-                            if (flattenedContent.getId().length() > 512) {
+                            if (flattenedContent.getId().length() > MAXIMUM_CONTENT_ID_LENGTH) {
                                 log.debug("Content ID too long: " + flattenedContent.getId());
                                 this.registerContentProblem(flattenedContent, "Content ID too long: " + flattenedContent.getId(), indexProblemCache);
                                 continue;
@@ -933,7 +933,7 @@ public class ContentIndexer {
                     this.registerContentProblem(content, "Unable to find Image: " + f.getSrc()
                             + " in Git. Could the reference be incorrect? SourceFile is " + content.getCanonicalSourceFile(), indexProblemCache);
                 } else if (fileData.size() > MEDIA_FILE_SIZE_LIMIT) {
-                    int sizeInKiloBytes = fileData.size() / 1024;
+                    int sizeInKiloBytes = fileData.size() / BYTES_IN_ONE_KILOBYTE;
                     this.registerContentProblem(content, String.format("Image (%s) is %s kB and exceeds file size warning limit!",
                             f.getSrc(), sizeInKiloBytes), indexProblemCache);
                 }

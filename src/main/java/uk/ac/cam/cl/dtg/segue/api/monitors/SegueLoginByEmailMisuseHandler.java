@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_TEN_MINUTES;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 
 /**
@@ -36,7 +36,7 @@ public class SegueLoginByEmailMisuseHandler implements IMisuseHandler {
 
     @Inject
     public SegueLoginByEmailMisuseHandler() {
-        this(5, 10, NUMBER_SECONDS_IN_TEN_MINUTES);
+        this(SEGUE_LOGIN_BY_EMAIL_DEFAULT_SOFT_THRESHOLD, SEGUE_LOGIN_BY_EMAIL_DEFAULT_HARD_THRESHOLD, NUMBER_SECONDS_IN_TEN_MINUTES);
     }
 
     @Inject

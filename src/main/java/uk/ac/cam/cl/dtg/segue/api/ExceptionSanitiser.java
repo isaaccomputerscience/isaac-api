@@ -17,7 +17,8 @@ public class ExceptionSanitiser implements ContainerResponseFilter {
 
     @Override
     public void filter(final ContainerRequestContext containerRequestContext, final ContainerResponseContext containerResponseContext) throws IOException {
-        if (containerResponseContext.getEntityType() == SegueErrorResponse.class && ((SegueErrorResponse) containerResponseContext.getEntity()).getAdditionalErrorInformation() != null) {
+        if (containerResponseContext.getEntityType() == SegueErrorResponse.class
+                && ((SegueErrorResponse) containerResponseContext.getEntity()).getAdditionalErrorInformation() != null) {
             SegueErrorResponse error = (SegueErrorResponse) containerResponseContext.getEntity();
             UUID generatedUUID = UUID.randomUUID();
             String logMessage = String.format(

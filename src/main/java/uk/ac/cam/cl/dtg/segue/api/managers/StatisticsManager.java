@@ -419,8 +419,8 @@ public class StatisticsManager implements IStatisticsManager {
         Queue<ContentDTO> mostRecentlyAttemptedQuestionPages = new CircularFifoQueue<>(PROGRESS_MAX_RECENT_QUESTIONS);
 
         LocalDate now = LocalDate.now();
-        LocalDate endOfAugustThisYear = LocalDate.of(now.getYear(), Month.AUGUST, 31);
-        LocalDate endOfAugustLastYear = LocalDate.of(now.getYear() - 1, Month.AUGUST, 31);
+        LocalDate endOfAugustThisYear = LocalDate.of(now.getYear(), Month.AUGUST, NUMBER_DAYS_IN_LONG_MONTH);
+        LocalDate endOfAugustLastYear = LocalDate.of(now.getYear() - 1, Month.AUGUST, NUMBER_DAYS_IN_LONG_MONTH);
         LocalDate lastDayOfPreviousAcademicYear =
                 now.isAfter(endOfAugustThisYear) ? endOfAugustThisYear : endOfAugustLastYear;
 

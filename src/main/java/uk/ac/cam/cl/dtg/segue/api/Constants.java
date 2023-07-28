@@ -139,7 +139,11 @@ public final class Constants {
      */
     public static final String SEGUE_APP_ENVIRONMENT = "SEGUE_APP_ENVIRONMENT";
     public static final String DEFAULT_LINUX_CONFIG_LOCATION = "/local/data/rutherford/conf/segue-config.properties";
+    public static final String CONFIG_LOCATION_SYSTEM_PROPERTY = "config.location";
+    public static final String SEGUE_CONFIG_LOCATION_ENVIRONMENT_PROPERTY = "SEGUE_CONFIG_LOCATION";
     public static final String MAILER_SMTP_PORT = "MAILER_SMTP_PORT";
+    public static final String SEGUE_CONFIG_LOCATION_NOT_SPECIFIED_MESSAGE = "Segue configuration location not specified, "
+            + "please provide it as either a java system property (config.location) or environment variable SEGUE_CONFIG_LOCATION";
 
     /**
      * Enum to describe types of server environment / profile.
@@ -248,7 +252,7 @@ public final class Constants {
         METADATA("metadata"),
         SCHOOL_SEARCH("school");
 
-        private String typeName;
+        private final String typeName;
 
         SCHOOLS_INDEX_TYPE(final String typeName) {
             this.typeName = typeName;
@@ -267,7 +271,7 @@ public final class Constants {
         CONTENT("content"),
         CONTENT_ERROR("contentError");
 
-        private String typeName;
+        private final String typeName;
 
         CONTENT_INDEX_TYPE(final String typeName) {
             this.typeName = typeName;
@@ -323,16 +327,26 @@ public final class Constants {
     public static final String LOCAL_AUTH_GROUP_MANAGER_EMAIL_FIELDNAME = "groupManagerEmail";
 
     // Local authentication response messages
-    public static final String PASSWORD_REQUIREMENTS_ERROR_MESSAGE = "Passwords must be at least 12 characters in length and contain at least one of each of: uppercase character, lowercase character, number and ascii punctuation character.";
+    public static final String PASSWORD_REQUIREMENTS_ERROR_MESSAGE = "Passwords must be at least 12 characters in length "
+            + "and contain at least one of each of: uppercase character, lowercase character, number and ascii punctuation character.";
     public static final String LOGIN_MISSING_CREDENTIALS_MESSAGE = "You must specify an email and password when logging in.";
     public static final String LOGIN_RATE_THROTTLE_MESSAGE = "There have been too many attempts to login to this account. Please try again later.";
     public static final String LOGIN_DATABASE_ERROR_MESSAGE = "Internal database error has occurred during authentication.";
     public static final String LOGIN_UNKNOWN_PROVIDER_MESSAGE = "Unable to locate the provider specified.";
     public static final String LOGIN_INCORRECT_CREDENTIALS_MESSAGE = "Incorrect credentials provided.";
-    public static final String LOGIN_2FA_REQUIRED_MESSAGE = "Your account type requires 2FA, but none has been configured! Please ask an admin to demote your account to regain access.";
+    public static final String LOGIN_2FA_REQUIRED_MESSAGE = "Your account type requires 2FA, but none has been configured! "
+            + "Please ask an admin to demote your account to regain access.";
     public static final String LOGOUT_DATABASE_ERROR_MESSAGE = "Internal database error has occurred during logout.";
-    public static final String LOGOUT_SESSION_ARLEADY_INVALIDATED_MESSAGE = "The session has already been invalidated. Unable to logout again...";
+    public static final String LOGOUT_SESSION_ALREADY_INVALIDATED_MESSAGE = "The session has already been invalidated. Unable to logout again...";
     public static final String LOGOUT_NO_ACTIVE_SESSION_MESSAGE = "No active user session found. You must be logged in to log out...";
+
+    // Group response messages
+    public static final String PROBLEM_ADDING_GROUP_MANAGER_MESSAGE  = "There was a problem adding the user specified. "
+            + "Please make sure their email address is correct and they have a teacher account.";
+    public static final String MUST_BE_TEACHER_TO_ADD_MANAGERS_MESSAGE = "You must have a teacher account to add additional group managers to your groups.";
+
+    // General response messages
+    public static final String TOO_MANY_REQUESTS = "You have exceeded the number of requests allowed for this endpoint. Please try again later.";
 
     // Database properties
     public static final String SEGUE_DB_NAME = "SEGUE_DB_NAME";
@@ -340,6 +354,14 @@ public final class Constants {
     public static final String POSTGRES_DB_URL = "POSTGRES_DB_URL";
     public static final String POSTGRES_DB_USER = "POSTGRES_DB_USER";
     public static final String POSTGRES_DB_PASSWORD = "POSTGRES_DB_PASSWORD";
+
+    public static final Integer CONNECTION_POOL_EVICTION_RUN_PERIOD_MILLISECONDS = 30000;
+    public static final Integer CONNECTION_POOL_MAX_TOTAL = 30;
+    public static final Integer CONNECTION_POOL_INITIAL_SIZE = 10;
+    public static final Integer CONNECTION_POOL_MAX_WAIT_MILLISECONDS = 10000;
+    public static final Integer CONNECTION_POOL_REMOVE_ABANDONED_TIMEOUT = 60;
+    public static final Integer CONNECTION_POOL_MIN_EVICTABLE_IDLE_TIMEOUT_MILLISECONDS = 30000;
+    public static final Integer CONNECTION_POOL_MIN_MIN_IDLE = 10;
 
     public enum TimeInterval {
         TWO_YEARS(2, 0, 0, 0, 0, 0),
@@ -442,6 +464,19 @@ public final class Constants {
 
     public static final Integer NO_SEARCH_LIMIT = -1;
 
+    public static final Integer WILDCARD_SEARCH_MINIMUM_LENGTH = 4;
+    public static final String WILDCARD_SEARCH_UNAUTHORISED_TOO_SHORT_MESSAGE = "You do not have permission to do wildcard searches with less than 4 characters.";
+
+    public static final Integer SEARCH_RESULTS_HARD_LIMIT_FALLBACK = 2000;
+
+    public static final Integer MAXIMUM_CONTENT_ID_LENGTH = 512;
+
+    public static final Integer BYTES_IN_ONE_KILOBYTE = 1024;
+
+    public static final Integer ELASTICSEARCH_INDEXER_REQUEST_TIMEOUT = 180000;
+
+    public static final Integer DEFAULT_MAX_WINDOW_SIZE = 10000;
+
     // Content model specific stuff
     public static final String ID_FIELDNAME = "id";
     public static final String TITLE_FIELDNAME = "title";
@@ -489,6 +524,7 @@ public final class Constants {
 
     public static final String ID_SEPARATOR = "|";
     public static final String ESCAPED_ID_SEPARATOR = "\\" + ID_SEPARATOR;
+    public static final Integer ESCAPED_ID_SPLIT_LIMIT = 3;
 
     // School List loading - raw data
     public static final String SCHOOL_URN_FIELDNAME = "URN";
@@ -539,6 +575,7 @@ public final class Constants {
     public static final int NUMBER_SECONDS_IN_ONE_DAY = NUMBER_SECONDS_IN_ONE_HOUR * 24;
     public static final int NUMBER_SECONDS_IN_ONE_WEEK = NUMBER_SECONDS_IN_ONE_DAY * 7;
     public static final int NUMBER_SECONDS_IN_THIRTY_DAYS = NUMBER_SECONDS_IN_ONE_DAY * 30;
+    public static final int NUMBER_DAYS_IN_LONG_MONTH = 31;
     public static final int ANONYMOUS_SESSION_DURATION_IN_MINUTES = 40;
     public static final int NEVER_CACHE_WITHOUT_ETAG_CHECK = 0;
 
@@ -580,6 +617,22 @@ public final class Constants {
     public enum SegueUserPreferences {
         EMAIL_PREFERENCE
     }
+
+    // Instruction Match boost
+    public static final Long MATCH_INSTRUCTION_IMPORTANT_NON_FUZZY = 10L;
+    public static final Long MATCH_INSTRUCTION_IMPORTANT_FUZZY = 3L;
+    public static final Long MATCH_INSTRUCTION_OTHER_NON_FUZZY = 5L;
+    public static final Long MATCH_INSTRUCTION_OTHER_FUZZY = 1L;
+    public static final Long MATCH_INSTRUCTION_ADDRESS_NON_FUZZY = 3L;
+    public static final Long MATCH_INSTRUCTION_ADDRESS_FUZZY = 1L;
+
+    // Misuse Handler default thresholds
+    public static final Integer PASSWORD_RESET_BY_IP_DEFAULT_SOFT_THRESHOLD = 50;
+    public static final Integer PASSWORD_RESET_BY_IP_DEFAULT_HARD_THRESHOLD = 300;
+    public static final Integer SEGUE_LOGIN_BY_EMAIL_DEFAULT_SOFT_THRESHOLD = 5;
+    public static final Integer SEGUE_LOGIN_BY_EMAIL_DEFAULT_HARD_THRESHOLD = 10;
+    public static final Integer SEGUE_LOGIN_BY_IP_DEFAULT_SOFT_THRESHOLD = 50;
+    public static final Integer SEGUE_LOGIN_BY_IP_DEFAULT_HARD_THRESHOLD = 300;
 
     /**
      * Private constructor to prevent this class being created.

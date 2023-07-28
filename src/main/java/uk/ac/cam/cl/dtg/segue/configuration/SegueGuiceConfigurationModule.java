@@ -229,16 +229,16 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
             // check the following places to determine where config file location may be.
             // 1) system env variable, 2) java param (system property), 3) use a default from the constant file.
             String configLocation = SystemUtils.IS_OS_LINUX ? DEFAULT_LINUX_CONFIG_LOCATION : null;
-            if (System.getProperty("config.location") != null) {
-                configLocation = System.getProperty("config.location");
+            if (System.getProperty(CONFIG_LOCATION_SYSTEM_PROPERTY) != null) {
+                configLocation = System.getProperty(CONFIG_LOCATION_SYSTEM_PROPERTY);
             }
-            if (System.getenv("SEGUE_CONFIG_LOCATION") != null) {
-                configLocation = System.getenv("SEGUE_CONFIG_LOCATION");
+            if (System.getenv(SEGUE_CONFIG_LOCATION_ENVIRONMENT_PROPERTY) != null) {
+                configLocation = System.getenv(SEGUE_CONFIG_LOCATION_ENVIRONMENT_PROPERTY);
             }
 
             try {
                 if (null == configLocation) {
-                    throw new FileNotFoundException("Segue configuration location not specified, please provide it as either a java system property (config.location) or environment variable SEGUE_CONFIG_LOCATION");
+                    throw new FileNotFoundException(SEGUE_CONFIG_LOCATION_NOT_SPECIFIED_MESSAGE);
                 }
 
                 globalProperties = new PropertiesLoader(configLocation);

@@ -39,6 +39,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import static uk.ac.cam.cl.dtg.segue.api.Constants.ELASTICSEARCH_INDEXER_REQUEST_TIMEOUT;
+
 /**
  * Created by Ian on 17/10/2016.
  */
@@ -53,7 +55,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
      * @param searchClient - the client that the provider should be using.
      */
     @Inject
-    public ElasticSearchIndexer(RestHighLevelClient searchClient) {
+    ElasticSearchIndexer(final RestHighLevelClient searchClient) {
         super(searchClient);
         rawFieldsListByType.put("content", Lists.newArrayList("id", "title"));
         rawFieldsListByType.put("school", Lists.newArrayList("urn"));
@@ -88,8 +90,8 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
         try {
             // increase default timeouts
             RequestConfig requestConfig = RequestConfig.custom()
-                    .setConnectTimeout(180000)
-                    .setSocketTimeout(180000)
+                    .setConnectTimeout(ELASTICSEARCH_INDEXER_REQUEST_TIMEOUT)
+                    .setSocketTimeout(ELASTICSEARCH_INDEXER_REQUEST_TIMEOUT)
                     .build();
             RequestOptions options = RequestOptions.DEFAULT.toBuilder()
                     .setRequestConfig(requestConfig)
