@@ -33,7 +33,7 @@ public @interface ValidatesWith {
     /**
      * The {@link IValidator} class that this Question relates to.
      * 
-     * @return
+     * @return the class
      */
     Class<? extends IValidator> value();
 }

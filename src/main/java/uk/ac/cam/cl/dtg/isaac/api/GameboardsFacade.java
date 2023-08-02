@@ -115,6 +115,8 @@ public class GameboardsFacade extends AbstractIsaacFacade {
      *            - to enforce privacy policies.
      * @param userBadgeManager
      *            - for updating badge information.
+     * @param fastTrackManger
+     *            - for game management of fasttrack questions and concepts
      */
     @Inject
     public GameboardsFacade(final PropertiesLoader properties, final ILogManager logManager,
@@ -144,6 +146,12 @@ public class GameboardsFacade extends AbstractIsaacFacade {
      *            - a comma separated list of fields
      * @param topics
      *            - a comma separated list of topics
+     * @param stages
+     *            - a comma separated list of stages
+     * @param difficulties
+     *            - a comma separated list of difficulties
+     * @param examBoards
+     *            - a comma separated list of examBoards
      * @param levels
      *            - a comma separated list of levels
      * @param concepts

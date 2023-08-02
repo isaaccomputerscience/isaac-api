@@ -62,6 +62,8 @@ public class GameboardDO {
      *            - User id of the owner of the gameboard.
      * @param creationMethod
      *            - Method used to construct this game board.
+     * @param tags
+     *            - Set of tags associated with the game board.
      */
     public GameboardDO(final String id, final String title, final List<GameboardContentDescriptor> contents,
                        final IsaacWildcard wildCard, final Integer wildcardPosition, final Date creationDate,

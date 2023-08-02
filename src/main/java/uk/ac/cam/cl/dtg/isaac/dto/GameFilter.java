@@ -15,9 +15,9 @@
  */
 package uk.ac.cam.cl.dtg.isaac.dto;
 
-import java.util.List;
-
 import com.google.api.client.util.Lists;
+
+import java.util.List;
 
 /**
  * Object to represent the filter used to generate a particular gameboard.
@@ -65,6 +65,12 @@ public class GameFilter {
      *            - List of concepts used to get the gameboard
      * @param questionCategories
      *            - List of questionCategories to get the gameboard ('problem_solving', 'book', etc.)
+     * @param stages
+     *            - List of stages used to get the gameboard
+     * @param difficulties
+     *            - List of difficulties used to get the gameboard
+     * @param examBoards
+     *            - List of examBoards used to get the gameboard
      */
     public GameFilter(final List<String> subjects, final List<String> fields, final List<String> topics,
             final List<Integer> levels, final List<String> concepts, final List<String> questionCategories,

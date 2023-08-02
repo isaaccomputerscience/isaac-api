@@ -166,9 +166,13 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Get quizzes visible to this user, starting from index 0.
-     *
+     * <p>
      * Anonymous users can't see quizzes.
      *
+     * @param request
+     *            - the Request needed for ETag checking
+     * @param httpServletRequest
+     *            - the Request needed for Cookies for the current user
      * @return a Response containing a list of ContentSummaryDTO for the visible quizzes.
      */
     @GET
@@ -237,9 +241,11 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Get quizzes assigned to this user.
-     *
+     * <p>
      * Shows a content summary, so we can track when a user actually attempts a quiz.
      *
+     * @param request
+     *            - the Request to get the current user
      * @return a Response containing a list of QuizAssignmentDTO for the assigned quizzes.
      */
     @GET
@@ -272,9 +278,11 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Get quizzes freely attempted by this user.
-     *
+     * <p>
      * Shows a content summary, so we can track when a user actually attempts a quiz.
      *
+     * @param request
+     *            - the Request to get the current user
      * @return a Response containing a list of QuizAttemptDTO for the freely attempted quizzes.
      */
     @GET
@@ -369,6 +377,8 @@ public class QuizFacade extends AbstractIsaacFacade {
      *
      * @see #startFreeQuizAttempt An endpoint to allow a quiz that is visibleToStudents to be taken by students.
      *
+     * @param request
+     *            - the Request object
      * @param httpServletRequest
      *            - so that we can extract user information.
      * @param quizAssignmentId
@@ -430,11 +440,13 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Start a quiz attempt for a free quiz (one that is visibleToStudents).
-     *
+     * <p>
      * This checks that quiz has not already been assigned. (When a quiz has been set to a student,
      * they are locked out of all previous feedback for that quiz and prevented from starting the
      * quiz freely in order to prevent some ways of cheating.)
      *
+     * @param request
+     *            - the Request object
      * @param httpServletRequest
      *            - so that we can extract user information.
      * @param quizId
@@ -786,8 +798,10 @@ public class QuizFacade extends AbstractIsaacFacade {
      *
      * @param request
      *            - the servlet request so we can find out if it is a known user.
+     * @param quizAttemptId
+     *            - the id to retrieve the incomplete attempt to check quiz validity and record an answer
      * @param questionId
-     *            that you are attempting to answer.
+     *            - that you are attempting to answer.
      * @param jsonAnswer
      *            - answer body which will be parsed as a Choice and then converted to a ChoiceDTO.
      * @return Response containing a QuestionValidationResponse object or containing a SegueErrorResponse .
@@ -997,6 +1011,7 @@ public class QuizFacade extends AbstractIsaacFacade {
      *
      * Optionally filtered by a particular group.
      *
+     * @param request so that we can extract user information.
      * @param groupIdOfInterest An optional ID of a group to look up.
      * @return a Response containing a list of QuizAssignmentDTO for the quizzes they have assigned.
      */

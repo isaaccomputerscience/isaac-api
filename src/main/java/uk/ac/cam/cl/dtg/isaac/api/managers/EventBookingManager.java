@@ -95,6 +95,10 @@ public class EventBookingManager {
      * @param bookingPersistenceManager - to allow bookings to be persisted in the database
      * @param emailManager              - email manager
      * @param userAssociationManager    - the userAssociationManager manager object
+     * @param propertiesLoader          - Instance of properties Loader
+     * @param groupManager              - Instance of Group Manager
+     * @param userAccountManager        - Instance of User Account Manager, for retrieving users
+     * @param transactionManager        - Instance of Transaction Manager, used for locking database while managing bookings
      */
     @Inject
     public EventBookingManager(final EventBookingPersistenceManager bookingPersistenceManager,
@@ -484,6 +488,7 @@ public class EventBookingManager {
      *
      * @param event - to reserve the user on
      * @param users - to reserve on the event
+     * @param reservingUser - the user making the reservation
      * @return confirmation of reservation
      */
     public List<EventBookingDTO> requestReservations(final IsaacEventPageDTO event, final List<RegisteredUserDTO> users,
@@ -1347,7 +1352,7 @@ public class EventBookingManager {
     }
 
     /**
-     * Helper to generate a url with a pre-generated subject field for the contact page
+     * Helper to generate a url with a pre-generated subject field for the contact page.
      * @param event - the event of interest
      * @return customised contactUs url for the event.
      */

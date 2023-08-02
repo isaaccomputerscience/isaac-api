@@ -32,8 +32,8 @@ public @interface JsonContentType {
 
     /**
      * gets the string value associated with the jsonType annotation.
-     * 
-     * default is "string"
+     *
+     * @return the string value associated with the annotation or a default of "string" if one is not found
      */
     String value() default "string";
 }

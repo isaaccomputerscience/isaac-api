@@ -142,6 +142,8 @@ public class QuizManager {
     /**
      * Fetch the quiz for each item and set the quizSummary field.
      *
+     * @param <T> an implementation of IHasQuizSummary that the list of items should conform to, this is currently
+     *           QuizAttemptDTO and QuizAssignmentDTO
      * @param items The items to augment.
      */
     public <T extends IHasQuizSummary> void augmentWithQuizSummary(final List<T> items) {

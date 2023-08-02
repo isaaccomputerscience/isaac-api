@@ -39,6 +39,8 @@ public class FastTrackManger {
     /**
      * Creates a game manager that operates using the provided api.
      *
+     * @param properties
+     *            - Instance of properties Loader
      * @param contentManager
      *            - so we can augment game objects with actual detailed content
      * @param gameboardManager
@@ -90,8 +92,9 @@ public class FastTrackManger {
      * Retrieve fasttrack concept progress.
      *
      * @param gameboard which holds the "top ten" questions and a filter for context.
+     * @param levelFilters a List of Fasttrack Levels for use in search filter.
      * @param conceptTitle concept title.
-     * @param userQuestionAttempts - the map of user's question attempts.
+     * @param userQuestionAttempts the map of user's question attempts.
      * @return list of gameboard items.
      * @throws ContentManagerException if there is a problem retrieving the content.
      */
@@ -111,6 +114,7 @@ public class FastTrackManger {
      * The result is returned sorted.
      *
      * @param boardTag the tag which marks question's association with a certain board - the board's ID.
+     * @param levelFilters a List of Fasttrack Levels for use in search filter.
      * @param conceptTitle the title of the concept which is being searched for.
      * @return ordered list of concept questions associated with the board.
      * @throws ContentManagerException if there is a problem with the content manager (i.e. Elasticsearch)

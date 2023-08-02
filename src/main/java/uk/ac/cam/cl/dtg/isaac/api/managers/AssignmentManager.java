@@ -63,6 +63,8 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
      *            - service for sending specific emails.
      * @param gameManager
      *            - the game manager object
+     * @param properties
+     *            - instance of properties loader
      */
     @Inject
     public AssignmentManager(final IAssignmentPersistenceManager assignmentPersistenceManager,

@@ -41,6 +41,9 @@ public class GroupMembershipDTO {
     /**
      * @param groupId - the group id
      * @param userId - the user id
+     * @param status - the group membership status
+     * @param created - the date the membership object was created
+     * @param updated - the date the membership object was last updated
      */
     public GroupMembershipDTO(final Long groupId, final Long userId, final GroupMembershipStatus status, final Date created, final Date updated) {
         this.groupId = groupId;

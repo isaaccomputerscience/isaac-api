@@ -46,6 +46,8 @@ public class FormulaValidationResponseDTO extends QuestionValidationResponseDTO 
      *            -
      * @param explanation
      *            -
+     * @param correctExact
+     *            -
      * @param correctSymbolic
      *            -
      * @param correctNumeric

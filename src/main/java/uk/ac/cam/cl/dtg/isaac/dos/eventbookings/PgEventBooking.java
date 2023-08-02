@@ -44,10 +44,18 @@ public class PgEventBooking implements EventBooking {
      *            - unique identifier for this booking
      * @param userId
      *            - user who is booked on to the event.
+     * @param reservedById
+     *            - the id of the user who created the reservation
      * @param eventId
      *            - event that the user is booked on to.
+     * @param bookingStatus
+     *            - the status of the booking
      * @param created
      *            - the date the booking was made.
+     * @param updated
+     *            - the date the booking was last updated
+     * @param additionalInformation
+     *            - additional information to be stored with this booking e.g. dietary requirements.
      */
     public PgEventBooking(final Long bookingId, final Long userId, final Long reservedById, final String eventId,
             final BookingStatus bookingStatus, final Date created, final Date updated, final Object additionalInformation) throws SegueDatabaseException {

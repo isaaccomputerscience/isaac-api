@@ -285,6 +285,12 @@ public class PagesFacade extends AbstractIsaacFacade {
      * @param level
      *            - a string value to be converted into an integer which represents the levels that must match the
      *            questions returned.
+     * @param stages
+     *            - a comma separated list of stages
+     * @param difficulties
+     *            - a comma separated list of difficulties
+     * @param examBoards
+     *            - a comma separated list of examBoards
      * @param fasttrack
      *            - a flag to indicate whether to search isaacFasttrackQuestions or not.
      * @param startIndex
@@ -678,10 +684,12 @@ public class PagesFacade extends AbstractIsaacFacade {
     }
 
     /**
-     * Rest end point that gets a all of the content marked as being type "pods".
+     * Rest end point that gets all of the content marked as being type "pods".
      * 
      * @param request
      *            - so that we can deal with caching.
+     * @param subject
+     *            - the subject to filter for in the search terms
      * @return A Response object containing a page fragment object or containing a SegueErrorResponse.
      */
     @GET
@@ -841,6 +849,10 @@ public class PagesFacade extends AbstractIsaacFacade {
 
     /**
      * As per the {@link #findSingleResult(Map, Map) findSingleResult} method.
+     *
+     * @param fieldsToMatch
+     *            - a Map of field names to Lists of queries to match
+     * @return A Response containing a single conceptPage or containing a SegueErrorResponse.
      */
     private Response findSingleResult(final Map<String, List<String>> fieldsToMatch) {
         return this.findSingleResult(fieldsToMatch, null);

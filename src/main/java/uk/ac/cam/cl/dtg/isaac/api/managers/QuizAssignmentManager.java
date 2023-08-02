@@ -62,6 +62,8 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
      *            - for information about quizzes.
      * @param groupManager
      *            - for group membership info.
+     * @param properties
+     *            - instance of properties loader
      */
     @Inject
     public QuizAssignmentManager(final IQuizAssignmentPersistenceManager quizAssignmentPersistenceManager,

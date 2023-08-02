@@ -31,7 +31,7 @@ public @interface SpecifiesWith {
     /**
      * The {@link ISpecifier} class that this Choice relates to.
      * 
-     * @return
+     * @return the ISpecifier
      */
     Class<? extends ISpecifier> value();
 }

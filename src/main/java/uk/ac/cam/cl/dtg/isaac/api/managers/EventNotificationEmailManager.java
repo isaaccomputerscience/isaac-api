@@ -53,6 +53,12 @@ public class EventNotificationEmailManager {
     /**
      * This class is required by quartz and must be executable by any instance of the segue api relying only on the
      * jobdata context provided.
+     * @param properties                - Instance of properties Loader
+     * @param contentManager            - for retrieving content
+     * @param bookingManager            - Instance of Booking Manager
+     * @param userAccountManager        - Instance of User Account Manager, for retrieving users
+     * @param emailManager              - for constructing and sending emails
+     * @param pgScheduledEmailManager   - for scheduling the sending of emails
      */
     @Inject
     public EventNotificationEmailManager(final PropertiesLoader properties,

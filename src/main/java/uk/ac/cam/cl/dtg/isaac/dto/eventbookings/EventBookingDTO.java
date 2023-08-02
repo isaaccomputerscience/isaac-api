@@ -55,6 +55,8 @@ public class EventBookingDTO {
      *            - id of the booking
      * @param userBooked
      *            - the user summary of the user booked on the event.
+     * @param reservedById
+     *            - the id of the user making the reservation
      * @param eventId
      *            - the event id
      * @param eventTitle
@@ -62,7 +64,11 @@ public class EventBookingDTO {
      * @param eventDate
      *            - date of the event
      * @param bookingDate
-     *            booking date.
+     *            - booking date.
+     * @param lastUpdated
+     *            - the date the booking was last updated
+     * @param status
+     *            - the booking status
      */
     public EventBookingDTO(final Long bookingId, final UserSummaryDTO userBooked, final Long reservedById,
                            final String eventId, final String eventTitle, final Date eventDate, final Date bookingDate,

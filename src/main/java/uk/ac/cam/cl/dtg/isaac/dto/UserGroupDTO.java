@@ -61,7 +61,11 @@ public class UserGroupDTO {
      * @param ownerId
      *            - owner of the group
      * @param created
-     *            - date created.
+     *            - date created
+     * @param lastUpdated
+     *            - the date the group was last updated
+     * @param archived
+     *            - if the group has been archived
      */
     public UserGroupDTO(@Nullable final Long id, final String groupName, final Long ownerId, final Date created, final Date lastUpdated,
                         final boolean archived) {

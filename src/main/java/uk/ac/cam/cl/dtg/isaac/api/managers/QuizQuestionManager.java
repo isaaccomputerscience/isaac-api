@@ -27,6 +27,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizSectionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizFeedbackDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.segue.api.ErrorResponseWrapper;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
@@ -152,6 +153,7 @@ public class QuizQuestionManager {
      *            question DTOs.
      * @param feedbackMode
      *            - what level of feedback to augment with.
+     * @return the augmented QuizAttemptDTO
      */
     public QuizAttemptDTO augmentFeedbackFor(final QuizAttemptDTO quizAttempt, final IsaacQuizDTO quiz, final QuizFeedbackMode feedbackMode)
             throws SegueDatabaseException, ContentManagerException {
@@ -185,15 +187,16 @@ public class QuizQuestionManager {
 
     /**
      * Return a map of users to their individual feedback for an assignment. Also augments the quiz with totals.
-     *
+     * <p>
      * Sets total and sectionTotals on the quiz object.
      *
      * @param quiz
-     *            - to augment - this object will be mutated as a result of this method. i.e total and sectionsTotals will be set.
+     *            - to augment - this object will be mutated as a result of this method. i.e. total and sectionsTotals will be set.
      * @param assignment
      *            - the quiz assignment to get feedback for.
      * @param users
      *            - the users to get feedback for.
+     * @return a Map of Users to their associated Quiz Feedback
      */
     public Map<RegisteredUserDTO, QuizFeedbackDTO> getAssignmentTeacherFeedback(
             final IsaacQuizDTO quiz, final QuizAssignmentDTO assignment, final List<RegisteredUserDTO> users)
@@ -215,8 +218,8 @@ public class QuizQuestionManager {
             // No questions attempted.
             if (!answers.containsKey(user.getId())) {
                 Map<String, QuizFeedbackDTO.Mark> sectionMarks = sections.stream().collect(Collectors.toMap(
-                    s -> s.getId(),
-                    s -> QuizFeedbackDTO.Mark.notAttempted(quiz.getSectionTotals().get(s.getId()))));
+                        ContentBaseDTO::getId,
+                        s -> QuizFeedbackDTO.Mark.notAttempted(quiz.getSectionTotals().get(s.getId()))));
                 return new QuizFeedbackDTO(QuizFeedbackDTO.Mark.notAttempted(quiz.getTotal()), sectionMarks, null);
             }
 

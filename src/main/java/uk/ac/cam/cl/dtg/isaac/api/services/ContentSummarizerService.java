@@ -58,7 +58,12 @@ public class ContentSummarizerService {
     /**
      * Helper method to simplify a ContentDTO object directly to ContentSummaryDTO.
      *  
-     * @see ContentSummarizerService#extractContentSummary(ContentDTO, Class)  
+     * @see ContentSummarizerService#extractContentSummary(ContentDTO, Class)
+     *
+     * @param content
+     *            - the content data transfer object
+     *
+     * @return the ContentSummaryDTO generated from the provided ContentDTO
      */
     public ContentSummaryDTO extractContentSummary(final ContentDTO content) {
         return extractContentSummary(content, ContentSummaryDTO.class);
@@ -69,6 +74,8 @@ public class ContentSummarizerService {
      *
      * @param contentList
      *            - the list of content to summarise.
+     * @param summaryClass
+     *            - the subclass of ContentSummaryDTO to convert the content into
      * @return list of shorter ContentSummaryDTO objects.
      */
     public ResultsWrapper<ContentSummaryDTO> extractContentSummaryFromResultsWrapper(
@@ -91,7 +98,11 @@ public class ContentSummarizerService {
     /**
      * Helper method to simplify a ResultsWrapper of ContentDTO objects directly to ContentSummaryDTOs.
      *
-     * @see ContentSummarizerService#extractContentSummaryFromResultsWrapper(ResultsWrapper, Class) 
+     * @see ContentSummarizerService#extractContentSummaryFromResultsWrapper(ResultsWrapper, Class)
+     *
+     * @param contentList
+     *            - the list of content to summarise.
+     * @return list of shorter ContentSummaryDTO objects.
      */
     public ResultsWrapper<ContentSummaryDTO> extractContentSummaryFromResultsWrapper(final ResultsWrapper<ContentDTO> contentList) {
         return extractContentSummaryFromResultsWrapper(contentList, ContentSummaryDTO.class);

@@ -112,9 +112,9 @@ public interface IQuestionAttemptManager {
 
     /**
      * getQuestionAttemptCountForUserByDateRange.
-     *
+     * <p>
      * An optimised method for getting question attempt counts data by month for a given date range.
-     *
+     * <p>
      * This relies on the database doing the binning for us.
      *
      * @param fromDate
@@ -123,6 +123,8 @@ public interface IQuestionAttemptManager {
      *            - the latest date the log event can have occurred
      * @param userId
      *            - the list of users ids we are interested in.
+     * @param perDay
+     *            - group attempts by day if True or by month if False or Null
      * @return a collection of log events that match the above criteria or an empty collection.
      * @throws SegueDatabaseException
      *             - if we cannot retrieve the data from the database.

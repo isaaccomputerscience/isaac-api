@@ -1064,6 +1064,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
 
     /**
      * Allows a user to assign a gameboard to group of users.
+     * @deprecated
      *
      * @param request
      *            - so that we can identify the current user.

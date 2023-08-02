@@ -137,9 +137,15 @@ public class GameManager {
      *            list of concepts (relatedContent) to include in filtered results
      * @param questionCategories
      *            list of question categories (i.e. problem_solving, book) to include in filtered results
+     * @param stages
+     *            list of stages to include in filtered results
+     * @param difficulties
+     *            list of difficulties to include in filtered results
+     * @param examBoards
+     *            list of examBoards to include in filtered results
      * @param boardOwner
      *            The user that should be marked as the creator of the gameBoard.
-     * @return a gameboard if possible that satisifies the conditions provided by the parameters. Will return null if no
+     * @return a gameboard if possible that satisfies the conditions provided by the parameters. Will return null if no
      *         questions can be provided.
      * @throws NoWildcardException
      *             - when we are unable to provide you with a wildcard object.
@@ -1161,6 +1167,8 @@ public class GameManager {
      * 
      * @param mapper
      *            - to convert between contentDTO to wildcard.
+     * @param subjectsList
+     *            - list of subjects to filter search for
      * @return wildCard object.
      * @throws NoWildcardException
      *             - when we are unable to provide you with a wildcard object.

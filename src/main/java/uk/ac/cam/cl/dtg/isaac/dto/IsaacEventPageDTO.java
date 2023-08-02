@@ -73,7 +73,6 @@ public class IsaacEventPageDTO extends ContentDTO {
     private Boolean allowGroupReservations;
 
     /**
-     *
      * @param id
      * @param title
      * @param subtitle
@@ -85,15 +84,20 @@ public class IsaacEventPageDTO extends ContentDTO {
      * @param children
      * @param relatedContent
      * @param published
+     * @param deprecated
      * @param tags
      * @param date
      * @param end_date
+     * @param bookingDeadline
+     * @param prepWorkDeadline
      * @param location
      * @param preResources
      * @param postResources
      * @param eventThumbnail
      * @param numberOfPlaces
 	 * @param eventStatus
+     * @param groupReservationLimit
+     * @param allowGroupReservations
 	 */
     @JsonCreator
     public IsaacEventPageDTO(

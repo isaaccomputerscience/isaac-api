@@ -102,13 +102,15 @@ public class GameboardPersistenceManager {
      *            - An instance of an automapper that can be used for mapping to and from GameboardDOs and DTOs.
      * @param objectMapper
      *            - An instance of an automapper that can be used for converting objects to and from json.
-     * 
      * @param uriManager
      *            - so we can generate appropriate content URIs.
+     * @param contentIndex
+     *            - index string for current content version
      */
     @Inject
     public GameboardPersistenceManager(final PostgresSqlDb database, final GitContentManager contentManager,
-                                       final MapperFacade mapper, final ObjectMapper objectMapper, final URIManager uriManager, @Named(CONTENT_INDEX) final String contentIndex) {
+                                       final MapperFacade mapper, final ObjectMapper objectMapper,
+                                       final URIManager uriManager, @Named(CONTENT_INDEX) final String contentIndex) {
         this.database = database;
         this.mapper = mapper;
         this.contentManager = contentManager;
@@ -554,7 +556,9 @@ public class GameboardPersistenceManager {
      * Utility function to create a gameboard item from a content DTO (Should be a question page).
      * 
      * @param content
-     *            to convert
+     *            - to convert
+     * @param contentDescriptor
+     *            - a GameboardContentDescriptor with additional information to add to the returned item
      * @return the gameboard item with augmented URI.
      */
     public GameboardItem convertToGameboardItem(
@@ -571,7 +575,8 @@ public class GameboardPersistenceManager {
     /**
      * saveGameboard.
      * @param gameboardToSave
-     * @return the DO persisted.
+     *            - a Gameboard DO to save to the database
+     * @return the DO being persisted.
      * @throws JsonProcessingException
      * @throws SegueDatabaseException
      */
