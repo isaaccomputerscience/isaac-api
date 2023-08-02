@@ -303,8 +303,8 @@ public class UsersFacade extends AbstractSegueFacade {
      * having to know the group members account email.
      *
      * @param request - request information used for caching
-     * @param httpServletRequest - the request, to work ou the current user
-     * @param userIdOfInterest - userId of interest - usually a the teacher's student
+     * @param httpServletRequest - the request, to work out the current user
+     * @param userIdOfInterest - userId of interest - usually the teacher's student
      * @return a successful response regardless of whether the email exists or an error code if there is a technical
      *         fault
      */

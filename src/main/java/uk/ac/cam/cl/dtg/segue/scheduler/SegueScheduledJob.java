@@ -74,7 +74,7 @@ public abstract class SegueScheduledJob {
 
 
     /**
-     * Human readable description of the job.
+     * Human-readable description of the job.
      *
      * @return string
      */
@@ -101,6 +101,12 @@ public abstract class SegueScheduledJob {
     /**
      * Create a custom segue scheduled job that overrides the execution context and executable task.
      *
+     * @param jobKey - job key string
+     * @param jobGroupName - name of the group for the job
+     * @param description - description for the job
+     * @param cronString - string describing the cron trigger for the job
+     * @param executionContext - Map of string to object describing the execution context
+     * @param executableTask - the Job to be executed
      * @return SegueScheduledJob
      */
     public static SegueScheduledJob createCustomJob(

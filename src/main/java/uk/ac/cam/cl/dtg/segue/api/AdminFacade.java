@@ -125,7 +125,7 @@ public class AdminFacade extends AbstractSegueFacade {
     private final SegueJobService segueJobService;
 
     /**
-     * Create an instance of the administrators facade.
+     * Create an instance of the administrators' facade.
      *
      * @param properties
      *            - the fully configured properties loader for the api.
@@ -133,22 +133,30 @@ public class AdminFacade extends AbstractSegueFacade {
      *            - The manager object responsible for users.
      * @param contentManager
      *            - The content manager used by the api.
+     * @param contentIndex
+     *            - The index string for the target content version
      * @param logManager
      *            - So we can log events of interest.
      * @param statsManager
      *            - So we can report high level stats.
      * @param schoolReader
      *            - for looking up school information
+     * @param userPreferenceManager
+     *            - Manager for retrieving and updating user preferences
      * @param eventBookingManager
      *            - for using the event booking system
+     * @param segueJobService
+     *            - Service for scheduling and managing segue jobs
+     * @param externalAccountManager
+     *            - Manager for synchronising account information with third-party providers
      * @param misuseMonitor
      *            - misuse monitor.
      */
     @Inject
     public AdminFacade(final PropertiesLoader properties, final UserAccountManager userManager,
-                       final GitContentManager contentManager, @Named(CONTENT_INDEX) final String contentIndex, final ILogManager logManager,
-                       final StatisticsManager statsManager, final SchoolListReader schoolReader,
-                       final AbstractUserPreferenceManager userPreferenceManager,
+                       final GitContentManager contentManager, @Named(CONTENT_INDEX) final String contentIndex,
+                       final ILogManager logManager, final StatisticsManager statsManager,
+                       final SchoolListReader schoolReader, final AbstractUserPreferenceManager userPreferenceManager,
                        final EventBookingManager eventBookingManager, final SegueJobService segueJobService,
                        final IExternalAccountManager externalAccountManager, final IMisuseMonitor misuseMonitor) {
         super(properties, logManager);
@@ -1113,7 +1121,10 @@ public class AdminFacade extends AbstractSegueFacade {
 
     /**
      * Returns some metrics relating to the running Java API process.
-     * @deprecated use Graphana to monitor these values instead of calling the endpoint.
+     * @deprecated use Grafana to monitor these values instead of calling the endpoint.
+     * @param request - the request object
+     * @param httpServletRequest - the request in servlet form via context, used to check the user's permissions
+     * @return a Response with the diagnostic report as a map or an appropriate SegueErrorResponse if unsuccessful
      */
     @Deprecated
     @GET
@@ -1168,6 +1179,8 @@ public class AdminFacade extends AbstractSegueFacade {
 
     /**
      *  Manually trigger a sync for testing or debugging purposes. Minimal success or failure reporting.
+     * @param httpServletRequest - the request, used to get the current user
+     * @return an OK Response if successful or a SegueErrorResponse if not
      */
     @POST
     @Path("/sync_external_accounts")

@@ -53,7 +53,7 @@ public class TeacherCpdBadgePolicy implements IUserBadgePolicy {
                     continue;
                 }
 
-                ContentDTO content = getcontentDetails(eventId);
+                ContentDTO content = getContentDetails(eventId);
                 if (content instanceof IsaacEventPageDTO) {
 
                     if (content.getTags().contains("teacher")) {
@@ -87,11 +87,11 @@ public class TeacherCpdBadgePolicy implements IUserBadgePolicy {
 
     /**
      *
-     * @param eventId
-     * @return
-     * @throws ContentManagerException
+     * @param eventId - the event id to search for
+     * @return the ContentDTO associated with the id
+     * @throws ContentManagerException if the subsequent method(s) provide neither a search term nor filter instructions
      */
-    private ContentDTO getcontentDetails(final String eventId) throws ContentManagerException {
+    private ContentDTO getContentDetails(final String eventId) throws ContentManagerException {
         return this.contentManager.getContentById(eventId);
     }
 }

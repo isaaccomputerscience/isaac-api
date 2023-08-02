@@ -70,8 +70,10 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
 
     /**
      *
+     * @param indexBase the index name
+     * @param indexType type of index as registered with search provider
      * @param buildBulkRequest a function that takes an elasticsearch typed index name, and produces a (populated) BulkRequestBuilder
-     * @throws SegueSearchException
+     * @throws SegueSearchException if an error occurs during the index operation
      */
     private void executeBulkIndexRequest(final String indexBase, final String indexType, final Function<String, BulkRequest> buildBulkRequest)
             throws SegueSearchException {
@@ -300,11 +302,13 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
     /**
      * This function will allow top level fields to have their contents cloned into an unanalysed field with the name
      * {FieldName}.{raw}
-     *
+     * <p>
      * This is useful if we want to query the original data without ElasticSearch having messed with it.
      *
      * @param typedIndex
      *            - type suffixed index to send the mapping corrections to.
+     * @param indexType
+     *            - type of index as registered with search provider
      */
     private void sendMappingCorrections(final String typedIndex, final String indexType) {
         try {

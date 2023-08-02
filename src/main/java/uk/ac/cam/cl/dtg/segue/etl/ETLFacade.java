@@ -30,6 +30,7 @@ public class ETLFacade extends AbstractSegueFacade {
      * Constructor that provides a properties loader.
      *
      * @param properties the propertiesLoader.
+     * @param manager the ETL Manager (for content)
      */
     @Inject
     public ETLFacade(final PropertiesLoader properties, final ETLManager manager) {

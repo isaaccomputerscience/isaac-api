@@ -54,7 +54,9 @@ public class NotificationPicker {
 
     /**
      * @param contentManager
-     *            - so we can lookup notifications created in the segue content system.
+     *            - so we can look up notifications created in the segue content system.
+     * @param contentIndex
+     *            - index string for current content version
      * @param notifications
      *            - the DAO allowing the recording of which notifications have been shown to whom.
      */

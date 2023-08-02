@@ -335,6 +335,8 @@ public class UserAuthenticationManager {
     /**
      * This method will look up a userDO based on the session information provided.
      * @param request containing session information
+     * @param allowIncompleteLoginsToReturnUser boolean if true will allow users that haven't completed MFA to be returned,
+     *                                          false will be stricter and return null if user hasn't completed MFA.
      * @return either a user or null if we couldn't find the user for whatever reason.
      */
     public RegisteredUser getUserFromSession(final HttpServletRequest request, final boolean allowIncompleteLoginsToReturnUser) {
@@ -379,6 +381,9 @@ public class UserAuthenticationManager {
     /**
      * @see #getUserFromSession(HttpServletRequest,boolean) - the two types of "request" have identical methods but are not
      *           related by interfaces or inheritance and so require duplicated methods!
+     *
+     * @param request - request to get the session and therefore user from
+     * @return the current User
      */
     public RegisteredUser getUserFromSession(final UpgradeRequest request) {
         // WARNING: There are two public getUserFromSession methods: ensure you check both!
@@ -402,7 +407,7 @@ public class UserAuthenticationManager {
 
     /**
      * Extract the session expiry time from a request.
-     *
+     * <p>
      * Does not check session validity.
      *
      * @param request The request to extract the session information from
@@ -1121,6 +1126,9 @@ public class UserAuthenticationManager {
      * @see #getSegueSessionFromRequest(HttpServletRequest) - except for some reason a WebSocket UpgradeRrequest is not
      *          an HttpServletRequest. Worse, the cookies from an HttpServletRequest are Cookie objects, but those
      *          from the WebSocket UpgradeRequest are HttpCookies!
+     *
+     * @param request - request to get the session cookie from
+     * @return a Map of session information
      */
     private Map<String, String> getSegueSessionFromRequest(final UpgradeRequest request) throws IOException,
             InvalidSessionException {

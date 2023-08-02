@@ -67,6 +67,8 @@ public class InfoFacade extends AbstractSegueFacade {
      *            - to allow access to system properties.
      * @param contentManager
      *            - So that metadata about content can be accessed.
+     * @param segueJobService
+     *            - for checking is the job scheduling service is running.
      * @param logManager
      *            - for logging events using the logging api.
      */

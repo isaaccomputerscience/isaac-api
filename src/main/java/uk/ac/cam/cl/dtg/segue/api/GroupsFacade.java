@@ -91,12 +91,15 @@ public class GroupsFacade extends AbstractSegueFacade {
 
     /**
      * Create an instance of the authentication Facade.
-     *  @param properties          - properties loader for the application
+     * @param properties          - properties loader for the application
      * @param userManager         - user manager for the application
-     * @param logManager          - so we can log interesting events.
-     * @param assignmentManager
-     * @param groupManager        - so that we can manage groups.
-     * @param associationsManager - so we can decide what information is allowed to be exposed.
+     * @param logManager          - so we can log interesting events
+     * @param assignmentManager   - for retrieving a group's assignments
+     * @param gameManager         - the game manager object
+     * @param groupManager        - so that we can manage groups
+     * @param associationsManager - so we can decide what information is allowed to be exposed
+     * @param userBadgeManager    - for updating badges
+     * @param misuseMonitor       - for rate limiting the lookup of users via manager addition requests
      */
     @Inject
     public GroupsFacade(final PropertiesLoader properties,

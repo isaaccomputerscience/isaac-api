@@ -89,6 +89,8 @@ public class AuthorisationFacade extends AbstractSegueFacade {
      *            - so we can log interesting events.
      * @param associationManager
      *            - so that we can create associations.
+     * @param groupManager
+     *            - instance of group manager
      * @param misuseMonitor
      *            - so that we can prevent overuse of protected resources.
      */

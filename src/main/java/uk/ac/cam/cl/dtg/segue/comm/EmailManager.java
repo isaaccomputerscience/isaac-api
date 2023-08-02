@@ -280,6 +280,8 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
      * 				- the user object for the user sending the email
      * @param emailTemplate
      *              - the subject of the email
+     * @param allSelectedUsers
+     *              - a list of user objects for the users to send the email to
      * @param emailType
      * 				- the type of email to send (affects who receives it)
      * @throws SegueDatabaseException
@@ -503,8 +505,12 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     /**
      * Method to parse and replace template elements with the form {{TAG}}.
      *
+     * @param content
+     *            the content template
      * @param templateProperties
      *            list of properties from which we can fill in the template
+     * @param html
+     *            boolean for if html tags are required
      * @return template with completed fields
      */
     private String completeTemplateWithProperties(final String content, final Properties templateProperties, final boolean html) {
@@ -570,6 +576,10 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
      * 		- (nullable) the id of the user the email should be sent to
      * @param userEmail
      * 		- the email of the user
+     * @param emailContent
+     *      - an EmailTemplateDTO with the content of the email
+     * @param contentProperties
+     *      - properties to apply to the template
      * @param emailType
      *      - the type of e-mail being created
      * @return
@@ -594,7 +604,11 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
      * @param userId
      * 		- (nullable) the id of the user the email should be sent to
      * @param userEmail
-     * 		- the email of the user 
+     * 		- the email of the user
+     * @param emailContent
+     *      - an EmailTemplateDTO with the content of the email
+     * @param contentProperties
+     *      - properties to apply to the template
      * @param emailType
      *      - the type of e-mail being created
      * @param attachments

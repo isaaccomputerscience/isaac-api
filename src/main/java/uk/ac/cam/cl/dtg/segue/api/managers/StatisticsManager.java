@@ -112,12 +112,16 @@ public class StatisticsManager implements IStatisticsManager {
      *            - to query School information
      * @param contentManager
      *            - to query live version information
+     * @param contentIndex
+     *            - index string for current content version
      * @param groupManager
      *            - so that we can see how many groups we have site wide.
      * @param questionManager
      *            - so that we can see how many questions were answered.
      * @param contentSummarizerService
      *            - to produce content summary objects
+     * @param userStreaksManager
+     *            - to notify users when their answer streak changes
      */
     @Inject
     public StatisticsManager(final UserAccountManager userManager, final ILogManager logManager,

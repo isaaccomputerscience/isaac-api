@@ -65,6 +65,7 @@ public class SegueDefaultFacade extends AbstractSegueFacade {
     
     /**
      * Redirect to swagger ui.
+     * @deprecated
      * @param request - context
      * @return a redirect to a page listing the available endpoints.
      * @throws URISyntaxException - should never happen as hard coded.

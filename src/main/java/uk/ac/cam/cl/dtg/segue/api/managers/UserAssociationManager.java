@@ -57,6 +57,8 @@ public class UserAssociationManager {
      * 
      * @param associationDatabase
      *            - IAssociationDataManager providing access to the database.
+     * @param userManager
+     *            - UserAccountManager for checking permissions to access other user objects
      * @param userGroupManager
      *            - IAssociationDataManager providing access to the database.
      */

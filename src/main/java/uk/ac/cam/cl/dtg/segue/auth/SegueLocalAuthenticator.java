@@ -65,10 +65,14 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
      * 
      * @param userDataManager
      *            - the user data manager which allows us to store and query user information.
+     * @param passwordDataManager
+     *            - data manager for retrieving and updating credentials information
      * @param properties
      *            - so we can look up system properties.
      * @param possibleAlgorithms
      *            - Map of possibleAlgorithms
+     * @param preferredAlgorithm
+     *            - preferred algorithm for use in hashing operations
      */
     @Inject
     public SegueLocalAuthenticator(final IUserDataManager userDataManager, final IPasswordDataManager passwordDataManager,

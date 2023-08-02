@@ -52,6 +52,7 @@ public class UserBadgeManager {
      * @param gameManager game manager object for badge policy dependencies
      * @param contentManager content manager object for badge policy dependencies
      * @param contentIndex specifies content version
+     * @param transactionManager manages transactions for atomicity of badge state updates
      */
     @Inject
     public UserBadgeManager(final IUserBadgePersistenceManager userBadgePersistenceManager, final GroupManager groupManager,

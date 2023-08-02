@@ -550,7 +550,7 @@ public final class Constants {
          *  Return the status given the state of the two school fields.
          * @param schoolIdProvided - whether a school_id is provided
          * @param schoolOtherProvided - whether a school_other is provided
-         * @return
+         * @return the provision status
          */
         public static SchoolInfoStatus get(final boolean schoolIdProvided, final boolean schoolOtherProvided) {
             if (schoolIdProvided && schoolOtherProvided) {

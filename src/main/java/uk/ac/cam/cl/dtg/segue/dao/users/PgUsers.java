@@ -977,6 +977,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
      * Helper function to remove PII and set tombstone flag for a Registered User.
      * Note: This function mutates the object that it was provided.
      *
+     * @param user
+     *            - user object to be modified
      * @return User object to be persisted that no longer has PII
      */
     private static RegisteredUser removePIIFromUserDO(final RegisteredUser user) {

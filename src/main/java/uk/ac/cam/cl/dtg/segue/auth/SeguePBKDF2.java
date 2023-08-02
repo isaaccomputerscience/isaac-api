@@ -26,9 +26,9 @@ import java.security.spec.InvalidKeySpecException;
 
 /**
  * Represents an instance of a hashing scheme used in Segue.
- *
+ * <p>
  * This is a parent class for PBKDF2 algorithms.
- *
+ * @deprecated
  */
 @Deprecated
 public class SeguePBKDF2 {

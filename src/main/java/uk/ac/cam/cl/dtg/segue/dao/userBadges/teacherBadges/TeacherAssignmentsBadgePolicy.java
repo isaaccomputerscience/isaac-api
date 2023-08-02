@@ -64,7 +64,7 @@ public class TeacherAssignmentsBadgePolicy implements IUserBadgePolicy {
     }
 
     /**
-     * Returns an updated arrayNode object containing a new assignment (if it does not already exist in the array)
+     * Returns an updated arrayNode object containing a new assignment (if it does not already exist in the array).
      *
      * @param assignments  the current array of assignment IDs
      * @param assignmentId a new assignment ID to add

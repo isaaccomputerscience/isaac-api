@@ -336,6 +336,12 @@ public class QuestionManager {
 
     /**
      * Test a question of a particular type against a series of test cases.
+     *
+     * @param questionType
+     *            - the type of question as a string
+     * @param testDefinition
+     *            - a TestQuestion data structure containing the choices and test cases to use
+     * @return a List of TestCases describing the results of the tests
      **/
     public List<TestCase> testQuestion(final String questionType, final TestQuestion testDefinition)
             throws BadRequestException, ValidatorUnavailableException {
@@ -459,8 +465,17 @@ public class QuestionManager {
 
     /**
      * getQuestionAttemptCountsByDate.
-     *
+     * <p>
      * Retrieves a map of days and number of question attempts
+     *
+     * @param user
+     *            - a User DTO for the user to get question attempt count for
+     * @param fromDate
+     *            - the start of the date range to fetch
+     * @param toDate
+     *            - the end of the date range to fetch
+     * @param perDay
+     *            - if true, group count by day, otherwise group count by month
      */
     public Map<LocalDate, Long> getUsersQuestionAttemptCountsByDate(final RegisteredUserDTO user,
                                                                     final Date fromDate, final Date toDate,

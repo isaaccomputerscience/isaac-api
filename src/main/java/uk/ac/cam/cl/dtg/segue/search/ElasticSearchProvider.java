@@ -548,6 +548,8 @@ public class ElasticSearchProvider implements ISearchProvider {
      *            - start index for results
      * @param limit
      *            - the maximum number of results to return -1 will attempt to return all results.
+     * @param sortInstructions
+     *            - a map of fields to sorting orders (ASC/DESC)
      * @return list of the search results
      */
     private ResultsWrapper<String> executeBasicQuery(final String indexBase, final String indexType,
@@ -716,14 +718,15 @@ public class ElasticSearchProvider implements ISearchProvider {
     /**
      * This method returns the maximum window size. i.e. the number of results that can be returned in a single result
      * set without having to do a special scroll query.
-     *
+     * <p>
      * This is a configurable value but the default Elastic Search value is 10,000.
-     *
+     * <p>
      * TODO: we may want to selectively upgrade queries to scroll requests if exceeding this limit.
      *
      * @param indexBase - to look up
+     * @param indexType - type of index as registered with search provider
      * @return the configured index max window size or a default,
-     * if a request exceeds this an error will be thrown. (or we should use the scroll api.
+     * if a request exceeds this an error will be thrown. (or we should use the scroll api.)
      */
     private int getMaxResultSize(final String indexBase, final String indexType) {
         final String typedIndex = ElasticSearchProvider.produceTypedIndexName(indexBase, indexType);

@@ -80,6 +80,8 @@ public class GroupManager {
      *            - the IUserGroupManager implementation
      * @param userManager
      *            - the user manager so that the group manager can get user details.
+     * @param gameManager
+     *            - the game manager object
      * @param dtoMapper
      *            - Preconfigured dto mapper
      */
@@ -211,6 +213,7 @@ public class GroupManager {
      * Helper method to consistently sort users by given name then family name in a case-insensitive order.
      * @param users
      *            - list of users.
+     * @return the List of RegisteredUserDTOs ordered by name
      */
     private List<RegisteredUserDTO> orderUsersByName(final List<RegisteredUserDTO> users) {
         // Replaces apostrophes with tildes so that string containing them are ordered in the same way as in

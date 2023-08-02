@@ -50,6 +50,8 @@ public class PerformanceMonitor implements ContainerRequestFilter, ContainerResp
 
     /**
      * PerformanceMonitor.
+     *
+     * @param monitorService - instance of the MonitorService to provide supporting functions
      */
     @Inject
     public PerformanceMonitor(final MonitorService monitorService) {

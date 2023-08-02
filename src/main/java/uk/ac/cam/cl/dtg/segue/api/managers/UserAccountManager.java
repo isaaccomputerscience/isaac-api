@@ -403,11 +403,13 @@ public class UserAccountManager implements IUserAccountManager {
      * @param response
      *            to tell the browser to store the session in our own segue cookie.
      * @param userObjectFromClient
-     *            - the new user object from the clients perspective.
+     *            - the new user object from the clients' perspective.
      * @param newPassword
      *            - the new password for the user.
      * @param userPreferenceObject
      * 			  - the new preferences for this user
+     * @param registeredUserContexts
+     * 			  - a List of User Contexts (stage, exam board)
      * @return the updated user object.
      */
     public Response createUserObjectAndLogIn(final HttpServletRequest request, final HttpServletResponse response,
@@ -525,10 +527,11 @@ public class UserAccountManager implements IUserAccountManager {
      *
      * @param request              - so that we can identify the user
      * @param response             - so we can modify the session
-     * @param userObjectFromClient - the new user object from the clients perspective.
+     * @param userObjectFromClient - the new user object from the clients' perspective.
      * @param passwordCurrent      - the current password, used if the password has changed
      * @param newPassword          - the new password, used if the password has changed
      * @param userPreferenceObject - the preferences for this user
+     * @param registeredUserContexts - a List of User Contexts (stage, exam board)
      * @return the updated user object.
      * @throws NoCredentialsAvailableException
      * @throws IncorrectCredentialsProvidedException
@@ -838,7 +841,7 @@ public class UserAccountManager implements IUserAccountManager {
     }
 
     /**
-     * Get the authentication settings of particular user
+     * Get the authentication settings of particular user.
      *
      * @param user
      *            - to retrieve settings from
@@ -994,7 +997,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     /**
      * Method to create a user object in our database and log them in.
-     *
+     * <p>
      * Note: this method is intended for creation of accounts in segue - not for linked account registration.
      * 
      * @param request
@@ -1005,6 +1008,8 @@ public class UserAccountManager implements IUserAccountManager {
      *            - the user DO to use for updates - must not contain a user id.
      * @param newPassword
      *            - new password for the account being created.
+     * @param registeredUserContexts
+     *            - a List of User Contexts (stage, exam board)
      * @throws InvalidPasswordException
      *             - the password provided does not meet our requirements.
      * @throws MissingRequiredFieldException
@@ -1344,6 +1349,7 @@ public class UserAccountManager implements IUserAccountManager {
      *
      * @param userObject
      *            - A user object containing the email address of the user to reset the password for.
+     * @return true if the request was successfully submitted or false if the user was not found
      * @throws SegueDatabaseException
      *             - If there is an internal database error.
      */
@@ -1546,6 +1552,7 @@ public class UserAccountManager implements IUserAccountManager {
     /**
      * Deactivate MFA for user's account - should only be used by admins!
      *
+     * @param user - the User to deactivate 2FA for
      * @throws SegueDatabaseException - unable to save secret to account.
      */
     public void deactivateMFAForUser(final RegisteredUserDTO user) throws SegueDatabaseException {
@@ -1720,11 +1727,12 @@ public class UserAccountManager implements IUserAccountManager {
     }
 
     /**
-     * Retrieve a partially logged in session for the user based on successful password authentication.
-     *
+     * Retrieve a partially logged-in session for the user based on successful password authentication.
+     * <p>
      * NOTE: You should not treat users has having logged in using this method as they haven't completed login.
      *
      * @param request - http request containing the cookie
+     * @return the user retrieved using the id extracted from the cookie
      */
     private RegisteredUser retrievePartialLogInForMFA(final HttpServletRequest request) {
         return this.userAuthenticationManager.getUserFromSession(request, true);

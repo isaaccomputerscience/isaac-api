@@ -136,6 +136,9 @@ public class MailJetApiClientWrapper {
      *  Update user details for an existing MailJet account.
      *
      * @param mailjetId - MailJet user ID
+     * @param firstName - first name of user for contact details
+     * @param role - role of user for contact details
+     * @param email_verification_status - verification status of user for contact details
      * @throws MailjetException  - if underlying MailjetClient throws an exception
      */
     public void updateUserProperties(final String mailjetId, final String firstName, final String role,
@@ -158,6 +161,8 @@ public class MailJetApiClientWrapper {
      *  Update user list subscriptions for an existing MailJet account.
      *
      * @param mailjetId - MailJet user ID
+     * @param newsEmails - subscription action to take for news emails
+     * @param eventsEmails - subscription action to take for events emails
      * @throws MailjetException  - if underlying MailjetClient throws an exception
      */
     public void updateUserSubscriptions(final String mailjetId, final MailJetSubscriptionAction newsEmails,

@@ -175,9 +175,9 @@ public interface IUserGroupPersistenceManager {
 
     /**
      * Create a map of user id to membership status so that group membership information can be used to change behaviour.
-     * @param groupId of interest
-     * @return
-     * @throws SegueDatabaseException
+     * @param groupId - of interest
+     * @return a Map of user ids to GroupMembership objects
+     * @throws SegueDatabaseException - if there is a database error
      */
     Map<Long, GroupMembership> getGroupMembershipMap(Long groupId) throws SegueDatabaseException;
 
@@ -213,7 +213,8 @@ public interface IUserGroupPersistenceManager {
      * Get groups by additional manager id.
      *
      * @param additionalManagerId
-     *            the additional Manager Id to find all groups for.
+     *            the additional Manager id to find all groups for.
+     * @return a list of User Groups where the provided is an additional manager
      * @throws SegueDatabaseException
      *             - if we cannot contact the database.
      */

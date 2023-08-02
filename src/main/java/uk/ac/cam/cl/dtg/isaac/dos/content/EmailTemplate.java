@@ -53,6 +53,7 @@ public class EmailTemplate extends Content {
      * @param attribution
      * @param relatedContent
      * @param published
+     * @param deprecated
      * @param tags
      * @param level
      */

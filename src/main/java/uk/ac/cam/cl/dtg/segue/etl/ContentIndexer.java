@@ -166,13 +166,26 @@ public class ContentIndexer {
 
     /**
      * This method will populate the internal gitCache based on the content object files found for a given SHA.
-     *
-     * Currently it only looks for json files in the repository.
+     * <p>
+     * Currently, it only looks for json files in the repository.
      *
      * @param sha
      *            - the version to index.
+     * @param includeUnpublished
+     *            - boolean controlling if unpublished content should be indexed
+     * @param contentCache
+     *            - a map of keys to content objects
+     * @param tagsList
+     *            - a set of seen tags
+     * @param allUnits
+     *            - a map of units used in numeric questions
+     * @param publishedUnits
+     *            - a map of units used in published numeric questions
+     * @param indexProblemCache
+     *            - a map of problems found in the indexed content
+     *
      * @return the map representing all indexed content.
-     * @throws ContentManagerException
+     * @throws ContentManagerException -  if the SHA is null or the associated resource cannot be accessed
      */
     private synchronized void buildGitContentIndex(final String sha,
                                                    final boolean includeUnpublished,
@@ -340,9 +353,9 @@ public class ContentIndexer {
 
     /**
      * Augments all child objects recursively to include additional information.
-     *
+     * <p>
      * This should be done before saving to the local gitCache in memory storage.
-     *
+     * <p>
      * This method will also attempt to reconstruct object id's of nested content such that they are unique to the page
      * by default.
      *
@@ -351,7 +364,9 @@ public class ContentIndexer {
      * @param canonicalSourceFile
      *            - source file to add to child content
      * @param parentId
-     *            - used to construct nested ids for child elements.
+     *            - used to construct nested ids for child elements
+     * @param parentPublished
+     *            - boolean to set published state based on parent state
      * @return Content object with new reference
      */
     private Content augmentChildContent(final Content content, final String canonicalSourceFile,
@@ -550,6 +565,8 @@ public class ContentIndexer {
      *            - Partial content object to represent the object that has problems.
      * @param message
      *            - Error message to associate with the problem file / content.
+     * @param indexProblemCache
+     *            - a map of problems found in the indexed content
      */
     private synchronized void registerContentProblem(final Content c, final String message, final Map<Content, List<String>> indexProblemCache) {
         Validate.notNull(c);
@@ -572,6 +589,8 @@ public class ContentIndexer {
      *
      * @param tags
      *            - set of tags to register.
+     * @param tagsList
+     *            - a set of seen tags
      */
     private synchronized void registerTags(final Set<String> tags, final Set<String> tagsList) {
 
@@ -595,6 +614,10 @@ public class ContentIndexer {
      *
      * @param q
      *            - numeric question from which to extract units.
+     * @param allUnits
+     *            - a map of units used in numeric questions
+     * @param publishedUnits
+     *            - a map of units used in published numeric questions
      */
     private synchronized void registerUnits(final IsaacNumericQuestion q, final Map<String, String> allUnits, final Map<String, String> publishedUnits) {
 
@@ -632,7 +655,15 @@ public class ContentIndexer {
      * @param sha
      *            - the version in the git cache to send to the search provider.
      * @param gitCache
-     *            a map that represents indexed content for a given sha.
+     *            - a map that represents indexed content for a given sha.
+     * @param tagsList
+     *            - a set of seen tags
+     * @param allUnits
+     *            - a map of units used in numeric questions
+     * @param publishedUnits
+     *            - a map of units used in published numeric questions
+     * @param indexProblemCache
+     *            - a map of problems found in the indexed content
      */
     private synchronized void buildElasticSearchIndex(final String sha,
                                                       final Map<String, Content> gitCache,
@@ -734,6 +765,8 @@ public class ContentIndexer {
      *            version to validate integrity of.
      * @param gitCache
      *            Data structure containing all content for a given sha.
+     * @param indexProblemCache
+     *            a map of problems found in the indexed content
      */
     private void recordContentErrors(final String sha, final Map<String, Content> gitCache,
                                      final Map<Content, List<String>> indexProblemCache) {
@@ -875,10 +908,11 @@ public class ContentIndexer {
     }
 
     /**
-     * This method will record content type specific errors for a single item of content
+     * This method will record content type specific errors for a single item of content.
      *
      * @param sha       version to validate integrity of.
      * @param content   a single item of content
+     * @param indexProblemCache a map of problems found in the indexed content
      */
     private void recordContentTypeSpecificError(final String sha, final Content content, final Map<Content, List<String>> indexProblemCache) {
         // ensure content does not have children and a value

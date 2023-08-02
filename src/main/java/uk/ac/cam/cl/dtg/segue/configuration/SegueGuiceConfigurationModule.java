@@ -509,6 +509,8 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
      *            - search provider to use
      * @param contentMapper
      *            - content mapper to use.
+     * @param globalProperties
+     *            - properties loader to use
      * @return a fully configured content Manager.
      */
     @Inject
@@ -526,7 +528,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
 
     /**
      * This provides a singleton of the LogManager for the Segue facade.
-     *
+     * <p>
      * Note: This is a singleton as logs are created very often and we wanted to minimise the overhead in class
      * creation. Although we can convert this to instances if we want to tidy this up.
      *
@@ -534,8 +536,6 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
      *            - database reference
      * @param loggingEnabled
      *            - boolean to determine if we should persist log messages.
-     * @param lhm
-     *            - location history manager
      * @return A fully configured LogManager
      */
     @Inject
@@ -760,13 +760,15 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
 
     /**
      * This provides a singleton of the GroupManager.
-     *
+     * <p>
      * Note: This needs to be a singleton as we register observers for groups.
      *
      * @param userGroupDataManager
      *            - user group data manager
      * @param userManager
      *            - user manager
+     * @param gameManager
+     *            - game manager
      * @param dtoMapper
      *            - dtoMapper
      * @return group manager
@@ -941,17 +943,23 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
      * currently only a singleton as it keeps a cache.
      *
      * @param userManager
-     *            - dependency
+     *            - to query user information
      * @param logManager
-     *            - dependency
+     *            - to query Log information
      * @param schoolManager
-     *            - dependency
+     *            - to query School information
      * @param contentManager
-     *            - dependency
+     *            - to query live version information
+     * @param contentIndex
+     *            - index string for current content version
      * @param groupManager
-     *            - dependency
+     *            - so that we can see how many groups we have site wide.
      * @param questionManager
-     *            - dependency
+     *            - so that we can see how many questions were answered.
+     * @param contentSummarizerService
+     *            - to produce content summary objects
+     * @param userStreaksManager
+     *            - to notify users when their answer streak changes
      * @return stats manager
      */
     @Provides
@@ -1085,8 +1093,6 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
         return segueJobService;
     }
 
-    /**
-     */
     @Provides
     @Singleton
     @Inject
@@ -1128,7 +1134,9 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
      * @param objectMapper
      *            - a mapper to allow content to be resolved.
      * @param uriManager
-     *            - so that the we can create content that is aware of its own location
+     *            - so that we can create content that is aware of its own location
+     * @param contentIndex
+     *            - index string for the target content version
      * @return Game persistence manager object.
      */
     @Inject
@@ -1180,6 +1188,8 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     /**
      * Gets an instance of the symbolic question validator.
      *
+     * @param properties
+     *            - properties loader to get the symbolic validator host
      * @return IsaacSymbolicValidator preconfigured to work with the specified checker.
      */
     @Provides
@@ -1194,6 +1204,8 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     /**
      * Gets an instance of the chemistry question validator.
      *
+     * @param properties
+     *            - properties loader to get the symbolic chemistry validator host
      * @return IsaacSymbolicChemistryValidator preconfigured to work with the specified checker.
      */
     @Provides
@@ -1208,6 +1220,8 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     /**
      * Gets an instance of the symbolic logic question validator.
      *
+     * @param properties
+     *            - properties loader to get the symbolic logic validator host
      * @return IsaacSymbolicLogicValidator preconfigured to work with the specified checker.
      */
     @Provides
@@ -1254,6 +1268,8 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     /**
      * Utility method to get a pre-generated reflections class for the uk.ac.cam.cl.dtg.segue package.
      *
+     * @param pkg
+     *            - class name to use as key
      * @return reflections.
      */
     public static Reflections getReflectionsClass(final String pkg) {

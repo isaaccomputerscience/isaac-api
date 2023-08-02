@@ -99,11 +99,17 @@ public class UserAlertsWebSocket implements IAlertListener {
      * Injectable constructor.
      *
      * @param userManager
-     *              - to get user information for the conencteds socket
+     *              - to get user information for the connected socket
+     * @param userAuthenticationManager
+     *              - to get the user from the session
      * @param userAlerts
      *              - to get/update persisted user alerts
      * @param logManager
-     *              - so that we can log events for users.
+     *              - so that we can log events for users
+     * @param statisticsManager
+     *              - to get user statistics
+     * @param properties
+     *              - instance of properties loader
      */
     @Inject
     public UserAlertsWebSocket(final UserAccountManager userManager,
