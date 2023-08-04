@@ -16,7 +16,7 @@
 package uk.ac.cam.cl.dtg.isaac.dto;
 
 import com.google.api.client.util.Lists;
-import uk.ac.cam.cl.dtg.isaac.api.Constants.FASTTRACK_LEVEL;
+import uk.ac.cam.cl.dtg.isaac.api.Constants.FastTrackLevel;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class QuestionPartConceptDTO {
     private String title;
-    private FASTTRACK_LEVEL bestLevel;
+    private FastTrackLevel bestLevel;
     private List<GameboardItem> upperQuestions;
     private List<GameboardItem> lowerQuestions;
 
@@ -71,7 +71,7 @@ public class QuestionPartConceptDTO {
      *
      * @return the best level.
      */
-    public final FASTTRACK_LEVEL getBestLevel() {
+    public final FastTrackLevel getBestLevel() {
         return this.bestLevel;
     }
 
@@ -81,7 +81,7 @@ public class QuestionPartConceptDTO {
      * @param bestLevel
      *            to set for this concept.
      */
-    public final void setBestLevel(final FASTTRACK_LEVEL bestLevel) {
+    public final void setBestLevel(final FastTrackLevel bestLevel) {
         this.bestLevel = bestLevel;
     }
 

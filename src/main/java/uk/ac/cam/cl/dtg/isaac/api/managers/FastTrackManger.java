@@ -99,7 +99,7 @@ public class FastTrackManger {
      * @throws ContentManagerException if there is a problem retrieving the content.
      */
     public final List<GameboardItem> getConceptProgress(
-            final GameboardDTO gameboard, final List<FASTTRACK_LEVEL> levelFilters,
+            final GameboardDTO gameboard, final List<FastTrackLevel> levelFilters,
             final String conceptTitle, final Map<String, Map<String,
             List<QuestionValidationResponse>>> userQuestionAttempts
     ) throws ContentManagerException {
@@ -120,9 +120,9 @@ public class FastTrackManger {
      * @throws ContentManagerException if there is a problem with the content manager (i.e. Elasticsearch)
      */
     private List<ContentDTO> getFastTrackConceptQuestions(
-            final String boardTag, final List<FASTTRACK_LEVEL> levelFilters, final String conceptTitle
+            final String boardTag, final List<FastTrackLevel> levelFilters, final String conceptTitle
     ) throws ContentManagerException {
-        List<String> stringLevelFilters = levelFilters.stream().map(FASTTRACK_LEVEL::name).collect(Collectors.toList());
+        List<String> stringLevelFilters = levelFilters.stream().map(FastTrackLevel::name).collect(Collectors.toList());
 
         List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
         fieldsToMap.add(new GitContentManager.BooleanSearchClause(

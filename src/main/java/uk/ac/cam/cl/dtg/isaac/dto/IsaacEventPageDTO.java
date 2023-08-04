@@ -42,7 +42,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_GROUP_RESERVATION_DEFAU
 @JsonContentType("isaacEventPage")
 public class IsaacEventPageDTO extends ContentDTO {
     private Date date;
-    private Date end_date;
+    private Date endDate;
     private Date bookingDeadline;
     private Date prepWorkDeadline;
     private Location location;
@@ -87,7 +87,7 @@ public class IsaacEventPageDTO extends ContentDTO {
      * @param deprecated
      * @param tags
      * @param date
-     * @param end_date
+     * @param endDate
      * @param bookingDeadline
      * @param prepWorkDeadline
      * @param location
@@ -115,7 +115,7 @@ public class IsaacEventPageDTO extends ContentDTO {
             @JsonProperty("deprecated") final Boolean deprecated,
             @JsonProperty("tags") final Set<String> tags,
             @JsonProperty("date") final Date date,
-            @JsonProperty("end_date") final Date end_date,
+            @JsonProperty("end_date") final Date endDate,
             @JsonProperty("bookingDeadline") final Date bookingDeadline,
             @JsonProperty("prepWorkDeadline") final Date prepWorkDeadline,
             @JsonProperty("location") final Location location,
@@ -130,7 +130,7 @@ public class IsaacEventPageDTO extends ContentDTO {
                 relatedContent, published, deprecated, tags, null);
 
         this.date = date;
-        this.end_date = end_date;
+        this.endDate = endDate;
         this.bookingDeadline = bookingDeadline;
         this.prepWorkDeadline = prepWorkDeadline;
         this.location = location;
@@ -175,19 +175,19 @@ public class IsaacEventPageDTO extends ContentDTO {
      * @return the end date
      */
     public Date getEndDate() {
-        return end_date;
+        return endDate;
     }
 
     /**
      * Sets the end date.
-     * @param end_date the end date to set
+     * @param endDate the end date to set
      */
-    public void setEndDate(final Date end_date) {
-        // Don't want 'end_date' to be null ever; force it to 'date' for consistency if necessary.
-        if (null != end_date) {
-            this.end_date = end_date;
+    public void setEndDate(final Date endDate) {
+        // Don't want 'endDate' to be null ever; force it to 'date' for consistency if necessary.
+        if (null != endDate) {
+            this.endDate = endDate;
         } else {
-            this.end_date = this.date;
+            this.endDate = this.date;
         }
     }
 
@@ -370,15 +370,6 @@ public class IsaacEventPageDTO extends ContentDTO {
      */
     public void setIsaacGroupToken(final String isaacGroupToken) {
         this.isaacGroupToken = isaacGroupToken;
-    }
-
-    /**
-     * setEnd_date.
-     *
-     * @param end_date the end date of the event.
-     */
-    public void setEnd_date(final Date end_date) {
-        this.end_date = end_date;
     }
 
     /**

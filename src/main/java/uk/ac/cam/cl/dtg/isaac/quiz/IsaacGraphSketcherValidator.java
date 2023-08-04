@@ -32,9 +32,9 @@ public class IsaacGraphSketcherValidator implements IValidator, ISpecifier {
      */
     private static final Logger log = LoggerFactory.getLogger(IsaacGraphSketcherValidator.class);
 
-    private static final AnswerToInput answerToInput = new AnswerToInput();
-    private static final Features features = new Features(new IsaacGraphSketcherSettings());
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final AnswerToInput ANSWER_TO_INPUT = new AnswerToInput();
+    private static final Features FEATURES = new Features(new IsaacGraphSketcherSettings());
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public final QuestionValidationResponse validateQuestionResponse(final Question question, final Choice answer) {
@@ -74,7 +74,7 @@ public class IsaacGraphSketcherValidator implements IValidator, ISpecifier {
             feedback = new Content("You did not provide an answer");
         } else {
             try {
-                graphAnswer = objectMapper.readValue(answer.getValue(), GraphAnswer.class);
+                graphAnswer = OBJECT_MAPPER.readValue(answer.getValue(), GraphAnswer.class);
             } catch (IOException e) {
                 log.error("Expected a GraphAnswer, but couldn't parse it for question id: "
                     + graphSketcherQuestion.getId(), e);
@@ -86,7 +86,7 @@ public class IsaacGraphSketcherValidator implements IValidator, ISpecifier {
 
         if (null == feedback) {
 
-            Input input = answerToInput.apply(graphAnswer);
+            Input input = ANSWER_TO_INPUT.apply(graphAnswer);
 
             List<Choice> orderedChoices = getOrderedChoices(graphSketcherQuestion.getChoices());
 
@@ -107,7 +107,7 @@ public class IsaacGraphSketcherValidator implements IValidator, ISpecifier {
                     continue;
                 }
 
-                Features.Matcher matcher = features.matcher(graphChoice.getGraphSpec());
+                Features.Matcher matcher = FEATURES.matcher(graphChoice.getGraphSpec());
 
                 if (matcher.test(input)) {
                     feedback = (Content) graphChoice.getExplanation();
@@ -148,14 +148,14 @@ public class IsaacGraphSketcherValidator implements IValidator, ISpecifier {
         GraphAnswer graphAnswer = null;
 
         try {
-            graphAnswer = objectMapper.readValue(answer.getValue(), GraphAnswer.class);
+            graphAnswer = OBJECT_MAPPER.readValue(answer.getValue(), GraphAnswer.class);
         } catch (IOException e) {
             log.error("Expected a GraphAnswer, but couldn't parse it for specification", e);
             throw new ValidatorUnavailableException("Couldn't parse your GraphAnswer");
         }
 
-        Input input = answerToInput.apply(graphAnswer);
+        Input input = ANSWER_TO_INPUT.apply(graphAnswer);
 
-        return features.generate(input);
+        return FEATURES.generate(input);
     }
 }

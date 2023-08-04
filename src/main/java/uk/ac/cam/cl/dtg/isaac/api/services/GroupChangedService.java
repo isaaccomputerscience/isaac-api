@@ -158,7 +158,7 @@ public class GroupChangedService implements IGroupObserver {
             existingAssignments.sort(Comparator.comparing(IAssignmentLike::getCreationDate));
         }
 
-        final DateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
+        final DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         if (existingAssignments != null && existingAssignments.size() > 0) {
             htmlSB.append("Your teacher has assigned the following " + typeOfAssignment + ":<br>");
             plainTextSB.append("Your teacher has assigned the following " + typeOfAssignment + ":\n");
@@ -177,14 +177,14 @@ public class GroupChangedService implements IGroupObserver {
 
                 String dueDate = "";
                 if (existingAssignment.getDueDate() != null) {
-                    dueDate = String.format(", due on %s", DATE_FORMAT.format(existingAssignment.getDueDate()));
+                    dueDate = String.format(", due on %s", dateFormat.format(existingAssignment.getDueDate()));
                 }
 
                 htmlSB.append(String.format("%d. <a href='%s'>%s</a> (set on %s%s)<br>", i + 1, url,
-                    name, DATE_FORMAT.format(assignmentStartDate), dueDate));
+                    name, dateFormat.format(assignmentStartDate), dueDate));
 
                 plainTextSB.append(String.format("%d. %s (set on %s%s)\n", i + 1, name,
-                    DATE_FORMAT.format(assignmentStartDate), dueDate));
+                    dateFormat.format(assignmentStartDate), dueDate));
             }
         } else if (existingAssignments != null) {
             htmlSB.append("No " + typeOfAssignment + " have been set yet.<br>");

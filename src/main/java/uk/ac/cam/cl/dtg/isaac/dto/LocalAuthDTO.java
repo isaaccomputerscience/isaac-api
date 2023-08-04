@@ -61,7 +61,7 @@ public class LocalAuthDTO {
     }
 
     @JsonProperty("_randomPadding")
-    public void setRandomPadding(final String _randomPadding) {
-        this.randomPadding = _randomPadding;
+    public void setRandomPadding(final String randomPadding) {
+        this.randomPadding = randomPadding;
     }
 }

@@ -72,18 +72,18 @@ public final class Constants {
         CORRECT, INCORRECT, NOT_ATTEMPTED
     }
 
-    public enum FASTTRACK_LEVEL {
-        ft_top_ten,
-        ft_upper,
-        ft_lower;
-        public static FASTTRACK_LEVEL getStateFromTags(final Set<String> tags) {
-            FASTTRACK_LEVEL state = null;
+    public enum FastTrackLevel {
+        FT_TOP_TEN,
+        FT_UPPER,
+        FT_LOWER;
+        public static FastTrackLevel getStateFromTags(final Set<String> tags) {
+            FastTrackLevel state = null;
             if (tags.contains("ft_top_ten")) {
-                state = ft_top_ten;
+                state = FT_TOP_TEN;
             } else if (tags.contains("ft_upper")) {
-                state = ft_upper;
+                state = FT_UPPER;
             } else if (tags.contains("ft_lower")) {
-                state = ft_lower;
+                state = FT_LOWER;
             }
             return state;
         }

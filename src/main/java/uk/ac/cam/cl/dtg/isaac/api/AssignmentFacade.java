@@ -113,7 +113,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
     private final UserBadgeManager userBadgeManager;
     private final AssignmentService assignmentService;
 
-    private final String NOT_SHARING = "NOT_SHARING";
+    private static final String NOT_SHARING = "NOT_SHARING";
     
     private final Clock clock;
     private final SimpleDateFormat dateFormat;

@@ -320,15 +320,15 @@ public class GameboardsFacade extends AbstractIsaacFacade {
 
             List<GameboardItem> conceptQuestionsProgress = Lists.newArrayList();
             if (upperQuestionId.isEmpty()) {
-                List<FASTTRACK_LEVEL> upperAndLower = Arrays.asList(FASTTRACK_LEVEL.ft_upper, FASTTRACK_LEVEL.ft_lower);
+                List<FastTrackLevel> upperAndLower = Arrays.asList(FastTrackLevel.FT_UPPER, FastTrackLevel.FT_LOWER);
                 conceptQuestionsProgress.addAll(fastTrackManger.getConceptProgress(
                         gameboard, upperAndLower, currentConceptTitle, userQuestionAttempts));
             } else {
                 String upperConceptTitle = fastTrackManger.getConceptFromQuestionId(upperQuestionId);
                 conceptQuestionsProgress.addAll(fastTrackManger.getConceptProgress(
-                        gameboard, Collections.singletonList(FASTTRACK_LEVEL.ft_upper), upperConceptTitle, userQuestionAttempts));
+                        gameboard, Collections.singletonList(FastTrackLevel.FT_UPPER), upperConceptTitle, userQuestionAttempts));
                 conceptQuestionsProgress.addAll(fastTrackManger.getConceptProgress(
-                        gameboard, Collections.singletonList(FASTTRACK_LEVEL.ft_lower), currentConceptTitle, userQuestionAttempts));
+                        gameboard, Collections.singletonList(FastTrackLevel.FT_LOWER), currentConceptTitle, userQuestionAttempts));
             }
 
             return Response.ok(conceptQuestionsProgress).build();
