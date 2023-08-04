@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Math.min;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.SEARCH_MAX_WINDOW_SIZE;
 
 /**
  *  A postgres specific User Preference Manager.
@@ -56,7 +57,6 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
                 results.getString("preference_name"), results.getBoolean("preference_value"));
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public UserPreference getUserPreference(final String preferenceType, final String preferenceName, final long userId)
             throws SegueDatabaseException {
@@ -67,9 +67,9 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
-            pst.setString(2, preferenceType);
-            pst.setString(3, preferenceName);
+            pst.setLong(FIELD_GET_PREFERENCE_USER_ID, userId);
+            pst.setString(FIELD_GET_PREFERENCE_PREFERENCE_TYPE, preferenceType);
+            pst.setString(FIELD_GET_PREFERENCE_PREFERENCE_NAME, preferenceName);
             pst.setMaxRows(1); // There is a primary key to ensure uniqueness!
 
             try (ResultSet results = pst.executeQuery()) {
@@ -92,7 +92,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
 
         Map<Long, UserPreference> usersPreferenceMap = Maps.newHashMap();
 
-        int pageSize = 10000;
+        int pageSize = SEARCH_MAX_WINDOW_SIZE;
         int fromIndex = 0;
         int toIndex = min(pageSize, users.size());
 
@@ -142,8 +142,8 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
-            pst.setString(2, preferenceType);
+            pst.setLong(FIELD_GET_PREFERENCES_USER_ID, userId);
+            pst.setString(FIELD_GET_PREFERENCES_PREFERENCE_TYPE, preferenceType);
 
             try (ResultSet results = pst.executeQuery()) {
                 List<UserPreference> userPreferences = Lists.newArrayList();
@@ -167,7 +167,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
+            pst.setLong(FIELD_GET_ALL_PREFERENCES_USER_ID, userId);
 
             try (ResultSet results = pst.executeQuery()) {
 
@@ -192,7 +192,7 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
 
         Map<Long, List<UserPreference>> usersPreferencesMap = Maps.newHashMap();
 
-        int pageSize = 10000;
+        int pageSize = SEARCH_MAX_WINDOW_SIZE;
         int fromIndex = 0;
         int toIndex = min(pageSize, users.size());
 
@@ -241,7 +241,6 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
         return usersPreferencesMap;
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void saveUserPreferences(final List<UserPreference> userPreferences) throws SegueDatabaseException {
         // Upsert the value in, using Postgres 9.5 syntax 'ON CONFLICT DO UPDATE ...'
@@ -255,10 +254,10 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
             conn.setAutoCommit(false);
             for (UserPreference preference : userPreferences) {
                 try (PreparedStatement pst = conn.prepareStatement(query)) {
-                    pst.setLong(1, preference.getUserId());
-                    pst.setString(2, preference.getPreferenceType());
-                    pst.setString(3, preference.getPreferenceName());
-                    pst.setBoolean(4, preference.getPreferenceValue());
+                    pst.setLong(FIELD_SAVE_PREFERENCES_USER_ID, preference.getUserId());
+                    pst.setString(FIELD_SAVE_PREFERENCES_PREFERENCE_TYPE, preference.getPreferenceType());
+                    pst.setString(FIELD_SAVE_PREFERENCES_PREFERENCE_NAME, preference.getPreferenceName());
+                    pst.setBoolean(FIELD_SAVE_PREFERENCES_PREFERENCE_VALUE, preference.getPreferenceValue());
 
                     pst.executeUpdate();
                 }
@@ -269,4 +268,23 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
             throw new SegueDatabaseException("Postgres exception on upsert ", e);
         }
     }
+
+    // Field Constants
+    // getUserPreference
+    private static final int FIELD_GET_PREFERENCE_USER_ID = 1;
+    private static final int FIELD_GET_PREFERENCE_PREFERENCE_TYPE = 2;
+    private static final int FIELD_GET_PREFERENCE_PREFERENCE_NAME = 3;
+
+    // getUserPreferences
+    private static final int FIELD_GET_PREFERENCES_USER_ID = 1;
+    private static final int FIELD_GET_PREFERENCES_PREFERENCE_TYPE = 2;
+
+    // getAllUserPreferences
+    private static final int FIELD_GET_ALL_PREFERENCES_USER_ID = 1;
+
+    // saveUserPreferences
+    private static final int FIELD_SAVE_PREFERENCES_USER_ID = 1;
+    private static final int FIELD_SAVE_PREFERENCES_PREFERENCE_TYPE = 2;
+    private static final int FIELD_SAVE_PREFERENCES_PREFERENCE_NAME = 3;
+    private static final int FIELD_SAVE_PREFERENCES_PREFERENCE_VALUE = 4;
 }

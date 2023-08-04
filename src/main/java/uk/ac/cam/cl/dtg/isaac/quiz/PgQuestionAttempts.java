@@ -71,7 +71,6 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         this.objectMapper = objectMapper.getSharedContentObjectMapper();
     }
     
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void registerAnonymousQuestionAttempt(final String userId, final String questionPageId,
             final String fullQuestionId, final QuestionValidationResponse questionAttempt)
@@ -92,9 +91,9 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
             String query = "UPDATE temporary_user_store SET temporary_app_data = "
                     + "jsonb_set(temporary_app_data, ?::text[], ?::text::jsonb) WHERE id = ?;";
             try (PreparedStatement pst = conn.prepareStatement(query)) {
-                pst.setString(1, "{questionAttempts}");
-                pst.setString(2, objectMapper.writeValueAsString(userAttempts));
-                pst.setString(3, userId);
+                pst.setString(FIELD_REGISTER_ANONYMOUS_ATTEMPT_TARGET_PATH, "{questionAttempts}");
+                pst.setString(FIELD_REGISTER_ANONYMOUS_ATTEMPT_ATTEMPTS_STRING, objectMapper.writeValueAsString(userAttempts));
+                pst.setString(FIELD_REGISTER_ANONYMOUS_ATTEMPT_USER_ID, userId);
 
                 if (pst.executeUpdate() == 0) {
                     throw new SegueDatabaseException("Unable to save question attempt.");
@@ -121,7 +120,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            pst.setString(1, anonymousId);
+            pst.setString(FIELD_GET_ANONYMOUS_ATTEMPTS_ANONYMOUS_ID, anonymousId);
 
             try (ResultSet resultSet = pst.executeQuery()) {
                 // are there any results
@@ -158,7 +157,6 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         }
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void registerQuestionAttempt(final Long userId, final String questionPageId, final String fullQuestionId,
             final QuestionValidationResponse questionAttempt) throws SegueDatabaseException {
@@ -168,16 +166,16 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            pst.setLong(1, userId);
-            pst.setString(2, fullQuestionId);
-            pst.setString(3, objectMapper.writeValueAsString(questionAttempt));
+            pst.setLong(FIELD_REGISTER_ATTEMPT_USER_ID, userId);
+            pst.setString(FIELD_REGISTER_ATTEMPT_QUESTION_ID, fullQuestionId);
+            pst.setString(FIELD_REGISTER_ATTEMPT_ATTEMPT_STRING, objectMapper.writeValueAsString(questionAttempt));
 
             if (questionAttempt.isCorrect() != null) {
-                pst.setBoolean(4, questionAttempt.isCorrect());
+                pst.setBoolean(FIELD_REGISTER_ATTEMPT_IS_CORRECT, questionAttempt.isCorrect());
             } else {
-                pst.setNull(4, java.sql.Types.NULL);
+                pst.setNull(FIELD_REGISTER_ATTEMPT_IS_CORRECT, java.sql.Types.NULL);
             }
-            pst.setTimestamp(5, new java.sql.Timestamp(questionAttempt.getDateAttempted().getTime()));
+            pst.setTimestamp(FIELD_REGISTER_ATTEMPT_TIMESTAMP, new java.sql.Timestamp(questionAttempt.getDateAttempted().getTime()));
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save question attempt.");
@@ -197,7 +195,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
+            pst.setLong(FIELD_GET_ATTEMPTS_USER_ID, userId);
 
             try (ResultSet results = pst.executeQuery()) {
                 // Since we go to the effort of sorting the attempts in Postgres, use LinkedHashMap which is ordered:
@@ -248,7 +246,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
 
                 Map<Long, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> mapToReturn = Maps.newHashMap();
 
-                int index = 1;
+                int index = FIELD_GET_LIGHTWEIGHT_ATTEMPTS_INITIAL_INDEX;
                 for (Long userId : userIds) {
                     pst.setLong(index++, userId);
                     mapToReturn.put(userId, new HashMap<>());
@@ -320,7 +318,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
                 Map<Long, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> mapToReturn
                         = Maps.newHashMap();
 
-                int index = 1;
+                int index = FIELD_GET_ATTEMPTS_BY_USER_AND_PREFIX_INITIAL_INDEX;
                 for (Long userId : userIds) {
                     pst.setLong(index++, userId);
                     mapToReturn.put(userId, new HashMap<>());
@@ -403,7 +401,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setObject(1, timeInterval.getPGInterval());
+            pst.setObject(FIELD_GET_ANSWERED_QUESTION_ROLES_INTERVAL_AGO, timeInterval.getPGInterval());
 
             try (ResultSet results = pst.executeQuery()) {
                 Map<Role, Long> resultsToReturn = Maps.newHashMap();
@@ -417,7 +415,6 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         }
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public Map<Date, Long> getQuestionAttemptCountForUserByDateRange(final Date fromDate, final Date toDate,
                                                                      final Long userId, final Boolean perDay) throws SegueDatabaseException {
@@ -443,9 +440,9 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(queryToBuild.toString())
         ) {
-            pst.setLong(1, userId);
-            pst.setTimestamp(2, new java.sql.Timestamp(fromDate.getTime()));
-            pst.setTimestamp(3, new java.sql.Timestamp(toDate.getTime()));
+            pst.setLong(FIELD_GET_ATTEMPTS_BY_USER_AND_DATE_USER_ID, userId);
+            pst.setTimestamp(FIELD_GET_ATTEMPTS_BY_USER_AND_DATE_START_TIMESTAMP, new java.sql.Timestamp(fromDate.getTime()));
+            pst.setTimestamp(FIELD_GET_ATTEMPTS_BY_USER_AND_DATE_END_TIMESTAMP, new java.sql.Timestamp(toDate.getTime()));
 
             try (ResultSet results = pst.executeQuery()) {
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -472,4 +469,37 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
 
         return partialQuestionAttempt;
     }
+
+    // Field Constants
+    // registerAnonymousQuestionAttempt
+    private static final int FIELD_REGISTER_ANONYMOUS_ATTEMPT_TARGET_PATH = 1;
+    private static final int FIELD_REGISTER_ANONYMOUS_ATTEMPT_ATTEMPTS_STRING = 2;
+    private static final int FIELD_REGISTER_ANONYMOUS_ATTEMPT_USER_ID = 3;
+
+    // getAnonymousQuestionAttempts
+    private static final int FIELD_GET_ANONYMOUS_ATTEMPTS_ANONYMOUS_ID = 1;
+
+    // registerQuestionAttempt
+    private static final int FIELD_REGISTER_ATTEMPT_USER_ID = 1;
+    private static final int FIELD_REGISTER_ATTEMPT_QUESTION_ID = 2;
+    private static final int FIELD_REGISTER_ATTEMPT_ATTEMPT_STRING = 3;
+    private static final int FIELD_REGISTER_ATTEMPT_IS_CORRECT = 4;
+    private static final int FIELD_REGISTER_ATTEMPT_TIMESTAMP = 5;
+
+    // getQuestionAttempts
+    private static final int FIELD_GET_ATTEMPTS_USER_ID = 1;
+
+    // getLightweightQuestionAttemptsByUsers
+    private static final int FIELD_GET_LIGHTWEIGHT_ATTEMPTS_INITIAL_INDEX = 1;
+
+    // getQuestionAttemptsByUsersAndQuestionPrefix
+    private static final int FIELD_GET_ATTEMPTS_BY_USER_AND_PREFIX_INITIAL_INDEX = 1;
+
+    // getAnsweredQuestionRolesOverPrevious
+    private static final int FIELD_GET_ANSWERED_QUESTION_ROLES_INTERVAL_AGO = 1;
+
+    // getQuestionAttemptCountForUserByDateRange
+    private static final int FIELD_GET_ATTEMPTS_BY_USER_AND_DATE_USER_ID = 1;
+    private static final int FIELD_GET_ATTEMPTS_BY_USER_AND_DATE_START_TIMESTAMP = 2;
+    private static final int FIELD_GET_ATTEMPTS_BY_USER_AND_DATE_END_TIMESTAMP = 3;
 }

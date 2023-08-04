@@ -44,7 +44,6 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
         this.database = ds;
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public AnonymousUser storeAnonymousUser(final AnonymousUser user) throws SegueDatabaseException {
         String query = "INSERT INTO temporary_user_store (id, temporary_app_data, created, last_updated)"
@@ -52,10 +51,10 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, user.getSessionId());
-            pst.setString(2, "{\"questionAttempts\":{}}");
-            pst.setTimestamp(3, new java.sql.Timestamp(user.getDateCreated().getTime()));
-            pst.setTimestamp(4, new java.sql.Timestamp(user.getDateCreated().getTime()));
+            pst.setString(FIELD_STORE_ID, user.getSessionId());
+            pst.setString(FIELD_STORE_TEMPORARY_APP_DATA, "{\"questionAttempts\":{}}");
+            pst.setTimestamp(FIELD_STORE_CREATED, new java.sql.Timestamp(user.getDateCreated().getTime()));
+            pst.setTimestamp(FIELD_STORE_LAST_UPDATED, new java.sql.Timestamp(user.getDateCreated().getTime()));
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save anonymous user.");
@@ -73,7 +72,7 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, userToDelete.getSessionId());
+            pst.setString(FIELD_DELETE_ID, userToDelete.getSessionId());
 
             int executeUpdate = pst.executeUpdate();
             if (executeUpdate == 0) {
@@ -91,7 +90,7 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, id);
+            pst.setString(FIELD_GET_ID, id);
 
             try (ResultSet result = pst.executeQuery()) {
                 // are there any results
@@ -138,8 +137,8 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
             Date newUpdatedDate = new Date();
-            pst.setTimestamp(1, new java.sql.Timestamp(newUpdatedDate.getTime()));
-            pst.setString(2, user.getSessionId());
+            pst.setTimestamp(FIELD_UPDATE_UPDATED_DATE, new java.sql.Timestamp(newUpdatedDate.getTime()));
+            pst.setString(FIELD_UPDATE_UPDATED_ID, user.getSessionId());
             pst.execute();
 
             user.setLastUpdated(newUpdatedDate);
@@ -149,4 +148,21 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
             throw new SegueDatabaseException("Postgres exception", e);
         }
     }
+
+    // Field Constants
+    // storeAnonymousUser
+    private static final int FIELD_STORE_ID = 1;
+    private static final int FIELD_STORE_TEMPORARY_APP_DATA = 2;
+    private static final int FIELD_STORE_CREATED = 3;
+    private static final int FIELD_STORE_LAST_UPDATED = 4;
+
+    // deleteAnonymousUser
+    private static final int FIELD_DELETE_ID = 1;
+
+    // getById
+    private static final int FIELD_GET_ID = 1;
+
+    // updateLastUpdatedDate
+    private static final int FIELD_UPDATE_UPDATED_DATE = 1;
+    private static final int FIELD_UPDATE_UPDATED_ID = 2;
 }

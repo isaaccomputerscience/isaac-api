@@ -69,8 +69,8 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, quizAssignmentId);
-            pst.setLong(2, userId);
+            pst.setLong(FIELD_GET_BY_ASSIGNMENT_AND_USER_ASSIGNMENT_ID, quizAssignmentId);
+            pst.setLong(FIELD_GET_BY_ASSIGNMENT_AND_USER_USER_ID, userId);
 
             try (ResultSet results = pst.executeQuery()) {
                 if (results.next()) {
@@ -84,7 +84,6 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         }
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public Long saveAttempt(final QuizAttemptDTO attempt) throws SegueDatabaseException {
         QuizAttemptDO attemptToSave = mapper.map(attempt, QuizAttemptDO.class);
@@ -93,19 +92,19 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            pst.setLong(1, attemptToSave.getUserId());
-            pst.setString(2, attemptToSave.getQuizId());
+            pst.setLong(FIELD_SAVE_ATTEMPT_USER_ID, attemptToSave.getUserId());
+            pst.setString(FIELD_SAVE_ATTEMPT_QUIZ_ID, attemptToSave.getQuizId());
 
             if (attemptToSave.getQuizAssignmentId() != null) {
-                pst.setLong(3, attemptToSave.getQuizAssignmentId());
+                pst.setLong(FIELD_SAVE_ATTEMPT_ASSIGNMENT_ID, attemptToSave.getQuizAssignmentId());
             } else {
-                pst.setNull(3, Types.BIGINT);
+                pst.setNull(FIELD_SAVE_ATTEMPT_ASSIGNMENT_ID, Types.BIGINT);
             }
 
             if (attemptToSave.getStartDate() != null) {
-                pst.setTimestamp(4, new java.sql.Timestamp(attemptToSave.getStartDate().getTime()));
+                pst.setTimestamp(FIELD_SAVE_ATTEMPT_START_DATE, new java.sql.Timestamp(attemptToSave.getStartDate().getTime()));
             } else {
-                pst.setTimestamp(4, new java.sql.Timestamp(new Date().getTime()));
+                pst.setTimestamp(FIELD_SAVE_ATTEMPT_START_DATE, new java.sql.Timestamp(new Date().getTime()));
             }
 
             if (pst.executeUpdate() == 0) {
@@ -135,8 +134,8 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, quizId);
-            pst.setLong(2, userId);
+            pst.setString(FIELD_GET_BY_QUIZ_AND_USER_QUIZ_ID, quizId);
+            pst.setLong(FIELD_GET_BY_QUIZ_AND_USER_USER_ID, userId);
 
             try (ResultSet results = pst.executeQuery()) {
 
@@ -157,7 +156,7 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, quizAttemptId);
+            pst.setLong(FIELD_GET_BY_ID_ATTEMPT_ID, quizAttemptId);
 
             try (ResultSet results = pst.executeQuery()) {
                 if (results.next()) {
@@ -180,11 +179,11 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         ) {
             Date completedDate = newCompletionStatus ? new Date() : null;
             if (completedDate != null) {
-                pst.setTimestamp(1, new java.sql.Timestamp(completedDate.getTime()));
+                pst.setTimestamp(FIELD_UPDATE_ATTEMPT_COMPLETED_DATE, new java.sql.Timestamp(completedDate.getTime()));
             } else {
-                pst.setNull(1, Types.TIMESTAMP);
+                pst.setNull(FIELD_UPDATE_ATTEMPT_COMPLETED_DATE, Types.TIMESTAMP);
             }
-            pst.setLong(2, quizAttemptId);
+            pst.setLong(FIELD_UPDATE_ATTEMPT_ATTEMPT_ID, quizAttemptId);
 
             pst.executeUpdate();
 
@@ -200,7 +199,7 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, assignmentId);
+            pst.setLong(FIELD_GET_COMPLETED_USER_IDS_ASSIGNMENT_ID, assignmentId);
 
             try (ResultSet results = pst.executeQuery()) {
                 Set<Long> setOfResults = Sets.newHashSet();
@@ -234,8 +233,8 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
-            int i = 2;
+            pst.setLong(FIELD_GET_BY_ASSIGNMENTS_AND_USER_USER_ID, userId);
+            int i = FIELD_GET_BY_ASSIGNMENTS_AND_USER_ASSIGNMENTS_INITIAL_INDEX;
             for (Long quizAssignmentId : quizAssignmentIds) {
                 pst.setLong(i++, quizAssignmentId);
             }
@@ -257,7 +256,7 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
+            pst.setLong(FIELD_GET_FREE_ATTEMPTS_BY_USER_USER_ID, userId);
 
             try (ResultSet results = pst.executeQuery()) {
                 List<QuizAttemptDTO> listOfResults = Lists.newArrayList();
@@ -277,7 +276,7 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, quizAttemptId);
+            pst.setLong(FIELD_DELETE_ATTEMPT_ATTEMPT_ID, quizAttemptId);
 
             pst.executeUpdate();
         } catch (SQLException e) {
@@ -320,4 +319,39 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
             sqlResults.getString("quiz_id"), quizAssignmentId,
             startDate, completedDate);
     }
+
+    // Field Constants
+    // getByQuizAssignmentIdAndUserId
+    private static final int FIELD_GET_BY_ASSIGNMENT_AND_USER_ASSIGNMENT_ID = 1;
+    private static final int FIELD_GET_BY_ASSIGNMENT_AND_USER_USER_ID = 2;
+
+    // saveAttempt
+    private static final int FIELD_SAVE_ATTEMPT_USER_ID = 1;
+    private static final int FIELD_SAVE_ATTEMPT_QUIZ_ID = 2;
+    private static final int FIELD_SAVE_ATTEMPT_ASSIGNMENT_ID = 3;
+    private static final int FIELD_SAVE_ATTEMPT_START_DATE = 4;
+
+    // getByQuizIdAndUserId
+    private static final int FIELD_GET_BY_QUIZ_AND_USER_QUIZ_ID = 1;
+    private static final int FIELD_GET_BY_QUIZ_AND_USER_USER_ID = 2;
+
+    // getById
+    private static final int FIELD_GET_BY_ID_ATTEMPT_ID = 1;
+
+    // updateAttemptCompletionStatus
+    private static final int FIELD_UPDATE_ATTEMPT_COMPLETED_DATE = 1;
+    private static final int FIELD_UPDATE_ATTEMPT_ATTEMPT_ID = 2;
+
+    // getCompletedUserIds
+    private static final int FIELD_GET_COMPLETED_USER_IDS_ASSIGNMENT_ID = 1;
+
+    // getByQuizAssignmentIdsAndUserId
+    private static final int FIELD_GET_BY_ASSIGNMENTS_AND_USER_USER_ID = 1;
+    private static final int FIELD_GET_BY_ASSIGNMENTS_AND_USER_ASSIGNMENTS_INITIAL_INDEX = 2;
+
+    // getFreeAttemptsByUserId
+    private static final int FIELD_GET_FREE_ATTEMPTS_BY_USER_USER_ID = 1;
+
+    // deleteAttempt
+    private static final int FIELD_DELETE_ATTEMPT_ATTEMPT_ID = 1;
 }

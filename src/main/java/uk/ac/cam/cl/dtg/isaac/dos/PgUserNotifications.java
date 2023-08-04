@@ -55,7 +55,7 @@ public class PgUserNotifications implements IUserNotifications {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
+            pst.setLong(FIELD_GET_NOTIFICATION_USER_ID, userId);
 
             try (ResultSet results = pst.executeQuery()) {
                 List<IUserNotification> returnResult = Lists.newArrayList();
@@ -118,16 +118,15 @@ public class PgUserNotifications implements IUserNotifications {
      * @param notification - the notification to insert.
      * @throws SegueDatabaseException - if it fails.
      */
-    @SuppressWarnings("checkstyle:MagicNumber")
     private void insertNewNotificationRecord(final IUserNotification notification) throws SegueDatabaseException {
         String query = "INSERT INTO user_notifications (user_id, notification_id, status, created) VALUES (?, ?, ?, ?)";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, notification.getUserId());
-            pst.setString(2, notification.getContentNotificationId());
-            pst.setString(3, notification.getStatus().name());
-            pst.setTimestamp(4, new java.sql.Timestamp(notification.getCreated().getTime()));
+            pst.setLong(FIELD_INSERT_NEW_RECORD_USER_ID, notification.getUserId());
+            pst.setString(FIELD_INSERT_NEW_RECORD_NOTIFICATION_ID, notification.getContentNotificationId());
+            pst.setString(FIELD_INSERT_NEW_RECORD_STATUS, notification.getStatus().name());
+            pst.setTimestamp(FIELD_INSERT_NEW_RECORD_CREATED, new java.sql.Timestamp(notification.getCreated().getTime()));
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save user notification.");
@@ -142,16 +141,15 @@ public class PgUserNotifications implements IUserNotifications {
      * @param notification - the notification to update.
      * @throws SegueDatabaseException - if it fails.
      */
-    @SuppressWarnings("checkstyle:MagicNumber")
     private void updateNotificationRecord(final IUserNotification notification) throws SegueDatabaseException {
         String query = "UPDATE user_notifications SET status = ?, created=? WHERE user_id = ? AND notification_id = ?";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, notification.getStatus().name());
-            pst.setTimestamp(2, new java.sql.Timestamp(notification.getCreated().getTime()));
-            pst.setLong(3, notification.getUserId());
-            pst.setString(4, notification.getContentNotificationId());
+            pst.setString(FIELD_UPDATE_RECORD_STATUS, notification.getStatus().name());
+            pst.setTimestamp(FIELD_UPDATE_RECORD_CREATED, new java.sql.Timestamp(notification.getCreated().getTime()));
+            pst.setLong(FIELD_UPDATE_RECORD_USER_ID, notification.getUserId());
+            pst.setString(FIELD_UPDATE_RECORD_NOTIFICATION_ID, notification.getContentNotificationId());
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to update user notification.");
@@ -174,8 +172,8 @@ public class PgUserNotifications implements IUserNotifications {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
-            pst.setString(2, contentId);
+            pst.setLong(FIELD_GET_RECORD_USER_ID, userId);
+            pst.setString(FIELD_GET_RECORD_NOTIFICATION_ID, contentId);
 
             try (ResultSet results = pst.executeQuery()) {
                 List<IUserNotification> listOfResults = Lists.newArrayList();
@@ -194,4 +192,24 @@ public class PgUserNotifications implements IUserNotifications {
             throw new SegueDatabaseException("Postgres exception", e);
         }
     }
+
+    // Field Constants
+    // getUserNotifications
+    private static final int FIELD_GET_NOTIFICATION_USER_ID = 1;
+
+    // insertNewNotificationRecord
+    private static final int FIELD_INSERT_NEW_RECORD_USER_ID = 1;
+    private static final int FIELD_INSERT_NEW_RECORD_NOTIFICATION_ID = 2;
+    private static final int FIELD_INSERT_NEW_RECORD_STATUS = 3;
+    private static final int FIELD_INSERT_NEW_RECORD_CREATED = 4;
+
+    // updateNotificationRecord
+    private static final int FIELD_UPDATE_RECORD_STATUS = 1;
+    private static final int FIELD_UPDATE_RECORD_CREATED = 2;
+    private static final int FIELD_UPDATE_RECORD_USER_ID = 3;
+    private static final int FIELD_UPDATE_RECORD_NOTIFICATION_ID = 4;
+
+    // getNotificationRecord
+    private static final int FIELD_GET_RECORD_USER_ID = 1;
+    private static final int FIELD_GET_RECORD_NOTIFICATION_ID = 2;
 }

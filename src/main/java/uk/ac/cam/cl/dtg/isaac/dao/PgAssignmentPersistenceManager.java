@@ -60,7 +60,6 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         this.mapper = mapper;
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public Long saveAssignment(final AssignmentDTO assignment) throws SegueDatabaseException {
         AssignmentDO assignmentToSave = mapper.map(assignment, AssignmentDO.class);
@@ -70,32 +69,32 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            pst.setString(1, assignmentToSave.getGameboardId());
-            pst.setLong(2, assignmentToSave.getGroupId());
-            pst.setLong(3, assignmentToSave.getOwnerUserId());
+            pst.setString(FIELD_SAVE_GAMEBOARD_ID, assignmentToSave.getGameboardId());
+            pst.setLong(FIELD_SAVE_GROUP_ID, assignmentToSave.getGroupId());
+            pst.setLong(FIELD_SAVE_OWNER_USER_ID, assignmentToSave.getOwnerUserId());
 
             if (assignment.getCreationDate() != null) {
-                pst.setTimestamp(4, new java.sql.Timestamp(assignmentToSave.getCreationDate().getTime()));
+                pst.setTimestamp(FIELD_SAVE_CREATION_DATE, new java.sql.Timestamp(assignmentToSave.getCreationDate().getTime()));
             } else {
-                pst.setTimestamp(4, new java.sql.Timestamp(new Date().getTime()));
+                pst.setTimestamp(FIELD_SAVE_CREATION_DATE, new java.sql.Timestamp(new Date().getTime()));
             }
 
             if (assignment.getDueDate() != null) {
-                pst.setTimestamp(5, new java.sql.Timestamp(assignmentToSave.getDueDate().getTime()));
+                pst.setTimestamp(FIELD_SAVE_DUE_DATE, new java.sql.Timestamp(assignmentToSave.getDueDate().getTime()));
             } else {
-                pst.setNull(5, Types.TIMESTAMP);
+                pst.setNull(FIELD_SAVE_DUE_DATE, Types.TIMESTAMP);
             }
 
             if (assignment.getNotes() != null) {
-                pst.setString(6, assignmentToSave.getNotes());
+                pst.setString(FIELD_SAVE_NOTES, assignmentToSave.getNotes());
             } else {
-                pst.setNull(6, Types.VARCHAR);
+                pst.setNull(FIELD_SAVE_NOTES, Types.VARCHAR);
             }
 
             if (assignment.getScheduledStartDate() != null) {
-                pst.setTimestamp(7, new java.sql.Timestamp(assignmentToSave.getScheduledStartDate().getTime()));
+                pst.setTimestamp(FIELD_SAVE_SCHEDULED_START_DATE, new java.sql.Timestamp(assignmentToSave.getScheduledStartDate().getTime()));
             } else {
-                pst.setNull(7, Types.TIMESTAMP);
+                pst.setNull(FIELD_SAVE_SCHEDULED_START_DATE, Types.TIMESTAMP);
             }
 
             if (pst.executeUpdate() == 0) {
@@ -129,7 +128,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, assignmentId);
+            pst.setLong(FIELD_GET_BY_ID_ASSIGNMENT_ID, assignmentId);
             
             try (ResultSet results = pst.executeQuery()) {
 
@@ -168,8 +167,8 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, assignmentOwnerId);
-            pst.setLong(2, groupId);
+            pst.setLong(FIELD_GET_BY_OWNER_AND_GROUP_OWNER_USER_ID, assignmentOwnerId);
+            pst.setLong(FIELD_GET_BY_OWNER_AND_GROUP_GROUP_ID, groupId);
             
             try (ResultSet results = pst.executeQuery()) {
 
@@ -194,8 +193,8 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, gameboardId);
-            pst.setLong(2, groupId);
+            pst.setString(FIELD_GET_BY_GAMEBOARD_AND_GROUP_GAMEBOARD_ID, gameboardId);
+            pst.setLong(FILED_GET_BY_GAMEBOARD_AND_GROUP_GROUP_ID, groupId);
             
             try (ResultSet results = pst.executeQuery()) {
 
@@ -218,7 +217,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, ownerId);
+            pst.setLong(FIELD_GET_BY_OWNER_OWNER_USER_ID, ownerId);
             
             try (ResultSet results = pst.executeQuery()) {
 
@@ -272,13 +271,14 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         if (null == timestamp) {
             throw new SegueDatabaseException("Parameter timestamp is null, cannot search for scheduled assignments!");
         }
-        String query = "SELECT * FROM assignments WHERE scheduled_start_date IS NOT NULL AND scheduled_start_date BETWEEN ((?)::timestamp - INTERVAL '10 minute') AND ((?)::timestamp + INTERVAL '59 minute');";
+        String query = "SELECT * FROM assignments WHERE scheduled_start_date IS NOT NULL AND scheduled_start_date "
+                + "BETWEEN ((?)::timestamp - INTERVAL '10 minute') AND ((?)::timestamp + INTERVAL '59 minute');";
 
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setTimestamp(1, new java.sql.Timestamp(timestamp.getTime()));
-            pst.setTimestamp(2, new java.sql.Timestamp(timestamp.getTime()));
+            pst.setTimestamp(FIELD_GET_SCHEDULED_FOR_HOUR_FIRST_TIMESTAMP, new java.sql.Timestamp(timestamp.getTime()));
+            pst.setTimestamp(FIELD_GET_SCHEDULED_FOR_HOUR_SECOND_TIMESTAMP, new java.sql.Timestamp(timestamp.getTime()));
 
             try (ResultSet results = pst.executeQuery()) {
                 List<AssignmentDTO> listOfResults = Lists.newArrayList();
@@ -300,7 +300,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, id);
+            pst.setLong(FIELD_DELETE_ASSIGNMENT_ID, id);
             
             pst.execute();
         } catch (SQLException e) {
@@ -344,4 +344,35 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
                 sqlResults.getLong("owner_user_id"), sqlResults.getLong("group_id"), sqlResults.getString("notes"), preciseDate,
                 preciseDueDate, preciseScheduledStartDate);
     }
+
+    // Field Constants
+    // saveAssignment
+    private static final int FIELD_SAVE_GAMEBOARD_ID = 1;
+    private static final int FIELD_SAVE_GROUP_ID = 2;
+    private static final int FIELD_SAVE_OWNER_USER_ID = 3;
+    private static final int FIELD_SAVE_CREATION_DATE = 4;
+    private static final int FIELD_SAVE_DUE_DATE = 5;
+    private static final int FIELD_SAVE_NOTES = 6;
+    private static final int FIELD_SAVE_SCHEDULED_START_DATE = 7;
+
+    // getAssignmentById
+    private static final int FIELD_GET_BY_ID_ASSIGNMENT_ID = 1;
+
+    // getAssignmentsByOwnerIdAndGroupId
+    private static final int FIELD_GET_BY_OWNER_AND_GROUP_OWNER_USER_ID = 1;
+    private static final int FIELD_GET_BY_OWNER_AND_GROUP_GROUP_ID = 2;
+
+    // getAssignmentsByGameboardAndGroup
+    private static final int FIELD_GET_BY_GAMEBOARD_AND_GROUP_GAMEBOARD_ID = 1;
+    private static final int FILED_GET_BY_GAMEBOARD_AND_GROUP_GROUP_ID = 2;
+
+    // getAssignmentsByOwner
+    private static final int FIELD_GET_BY_OWNER_OWNER_USER_ID = 1;
+
+    // getAssignmentsScheduledForHour
+    private static final int FIELD_GET_SCHEDULED_FOR_HOUR_FIRST_TIMESTAMP = 1;
+    private static final int FIELD_GET_SCHEDULED_FOR_HOUR_SECOND_TIMESTAMP = 2;
+
+    // deleteAssignment
+    private static final int FIELD_DELETE_ASSIGNMENT_ID = 1;
 }

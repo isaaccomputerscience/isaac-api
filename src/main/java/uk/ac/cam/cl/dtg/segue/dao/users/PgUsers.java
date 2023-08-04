@@ -54,8 +54,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.SchoolInfoStatus;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 
 /**
  * @author Stephen Cummins
@@ -101,7 +100,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, user.getId());
+            pst.setLong(FIELD_HAS_LINKED_ACCOUNT_USER_ID, user.getId());
 
             try (ResultSet results = pst.executeQuery()) {
                 results.next();
@@ -126,7 +125,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(sb.toString())
         ) {
-            int userParamIndex = 1;
+            int userParamIndex = FIELD_GET_PROVIDER_USER_ID_LIST_INITIAL_INDEX;
             // These will come in handy later...
             Map<Long, RegisteredUser> userMap = users.stream().collect(Collectors.toMap(RegisteredUser::getId, Function.identity()));
             Map<RegisteredUser, List<AuthenticationProvider>> authenticationProviders = new HashMap<>();
@@ -165,7 +164,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
+            pst.setLong(FIELD_GET_AUTHENTICATION_SETTINGS_USER_ID, userId);
 
             try (ResultSet results = pst.executeQuery()) {
                 if (!results.isBeforeFirst()) {
@@ -200,7 +199,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(sb.toString())
         ) {
-            int userParamIndex = 1;
+            int userParamIndex = FIELD_GET_SEGUE_ACCOUNT_EXISTENCE_USER_ID_LIST_INITIAL_INDEX;
             // These will come in handy later...
             Map<Long, RegisteredUser> userMap = users.stream().collect(Collectors.toMap(RegisteredUser::getId, Function.identity()));
             Map<RegisteredUser, Boolean> userCredentialsExistence = new HashMap<>();
@@ -232,8 +231,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, provider.name());
-            pst.setString(2, providerUserId);
+            pst.setString(FIELD_GET_BY_LINKED_ACCOUNT_PROVIDER, provider.name());
+            pst.setString(FIELD_GET_BY_LINKED_ACCOUNT_PROVIDER_USER_ID, providerUserId);
 
             try (ResultSet results = pst.executeQuery()) {
                 if (!results.isBeforeFirst()) {
@@ -248,7 +247,6 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         }    
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public boolean linkAuthProviderToAccount(final RegisteredUser user, final AuthenticationProvider provider,
             final String providerUserId) throws SegueDatabaseException {
@@ -256,9 +254,9 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            pst.setLong(1, user.getId());
-            pst.setString(2, provider.name());
-            pst.setString(3, providerUserId);
+            pst.setLong(FIELD_LINK_PROVIDER_USER_ID, user.getId());
+            pst.setString(FIELD_LINK_PROVIDER_PROVIDER, provider.name());
+            pst.setString(FIELD_LINK_PROVIDER_PROVIDER_USER_ID, providerUserId);
             
             int affectedRows = pst.executeUpdate();
 
@@ -287,8 +285,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, provider.name());
-            pst.setLong(2, user.getId());
+            pst.setString(FIELD_UNLINK_PROVIDER_PROVIDER, provider.name());
+            pst.setLong(FIELD_UNLINK_PROVIDER_USER_ID, user.getId());
             
             pst.execute();
         } catch (SQLException e) {
@@ -316,7 +314,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(sb.toString())
         ) {
-            pst.setLong(1, id);
+            pst.setLong(FIELD_GET_BY_ID_USER_ID, id);
 
             try (ResultSet results = pst.executeQuery()) {
                 return this.findOneUser(results);
@@ -335,7 +333,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, email);
+            pst.setString(FIELD_GET_BY_EMAIL_USER_EMAIL, email);
 
             try (ResultSet results = pst.executeQuery()) {
                 return this.findOneUser(results);
@@ -402,7 +400,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            index = 1;
+            index = FIELD_FIND_USERS_PARAMETERS_INITIAL_INDEX;
             for (Object value : orderToAdd) {
                 if (value instanceof String) {
                     pst.setString(index, (String) value);
@@ -438,7 +436,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            int index = 1;
+            int index = FIELD_FIND_USERS_PARAMETERS_INITIAL_INDEX;
             for (Long userId : usersToLocate) {
                 pst.setLong(index, userId);
                 index++;
@@ -500,7 +498,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setObject(1, timeInterval.getPGInterval());
+            pst.setObject(FIELD_GET_PERIOD_ROLES_INTERVAL, timeInterval.getPGInterval());
 
             try (ResultSet results = pst.executeQuery()) {
                 Map<Role, Long> resultsToReturn = Maps.newHashMap();
@@ -542,7 +540,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, token);
+            pst.setString(FIELD_GET_VERIFICATION_TOKEN_TOKEN, token);
 
             try (ResultSet results = pst.executeQuery()) {
                 return this.findOneUser(results);
@@ -592,16 +590,16 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
                 // Replace all linked providers with a uid account provider IDs to prevent clashes if the user creates a new account.
                 String deleteLinkedAccountsQuery = "UPDATE linked_accounts SET provider_user_id = ? WHERE user_id = ?";
                 try (PreparedStatement deleteLinkedAccounts = conn.prepareStatement(deleteLinkedAccountsQuery)) {
-                    deleteLinkedAccounts.setString(1, UUID.randomUUID().toString());
-                    deleteLinkedAccounts.setLong(2, userToDelete.getId());
+                    deleteLinkedAccounts.setString(FIELD_DELETE_USER_PROVIDER_USER_ID, UUID.randomUUID().toString());
+                    deleteLinkedAccounts.setLong(FIELD_DELETE_USER_USER_ID, userToDelete.getId());
                     deleteLinkedAccounts.execute();
                 }
 
                 // Hash all linked account provider IDs to prevent clashes if the user creates a new account.
                 String markUserDeletedQuery = "UPDATE users SET deleted=TRUE, last_updated=? WHERE id = ?";
                 try (PreparedStatement markUserAsDeleted = conn.prepareStatement(markUserDeletedQuery)) {
-                    markUserAsDeleted.setTimestamp(1, new Timestamp(new Date().getTime()));
-                    markUserAsDeleted.setLong(2, userToDelete.getId());
+                    markUserAsDeleted.setTimestamp(FIELD_DELETE_USER_LAST_UPDATED, new Timestamp(new Date().getTime()));
+                    markUserAsDeleted.setLong(FIELD_DELETE_USER_USER_ID, userToDelete.getId());
                     markUserAsDeleted.execute();
                 }
 
@@ -632,8 +630,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
                 conn.setAutoCommit(false);
 
                 try (PreparedStatement mergeUsers = conn.prepareStatement("SELECT mergeuser(?, ?)")) {
-                    mergeUsers.setLong(1, target.getId());
-                    mergeUsers.setLong(2, source.getId());
+                    mergeUsers.setLong(FIELD_MERGE_ACCOUNTS_TARGET_USER_ID, target.getId());
+                    mergeUsers.setLong(FIELD_MERGE_ACCOUNTS_SOURCE_USER_ID, source.getId());
                     mergeUsers.execute();
                 }
                 conn.commit();
@@ -661,8 +659,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setTimestamp(1, new java.sql.Timestamp(date.getTime()));
-            pst.setLong(2, user.getId());
+            pst.setTimestamp(FIELD_UPDATE_LAST_SEEN_LAST_SEEN, new java.sql.Timestamp(date.getTime()));
+            pst.setLong(FIELD_UPDATE_LAST_SEEN_USER_ID, user.getId());
             pst.execute();
         } catch (SQLException e) {
             throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
@@ -680,7 +678,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         Random random = new SecureRandom();
         int newValue = random.nextInt();
         // -1 is reserved for 'no assigned token', used for when a user is logged out for example
-        if (newValue != -1) {
+        if (newValue != NO_SESSION_TOKEN_RESERVED_VALUE) {
             return newValue;
         } else {
             return generateRandomTokenInteger();
@@ -690,7 +688,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     @Override
     public void invalidateSessionToken(final RegisteredUser user) throws SegueDatabaseException {
         // -1 is reserved for 'no assigned token', used for when a user is logged out for example
-        this.updateSessionToken(user, -1);
+        this.updateSessionToken(user, NO_SESSION_TOKEN_RESERVED_VALUE);
     }
 
     @Override
@@ -701,8 +699,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setInt(1, newTokenValue);
-            pst.setLong(2, user.getId());
+            pst.setInt(FIELD_UPDATE_SESSION_TOKEN_NEW_VALUE, newTokenValue);
+            pst.setLong(FIELD_UPDATE_SESSION_TOKEN_USER_ID, user.getId());
             pst.execute();
         } catch (SQLException e) {
             throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
@@ -715,7 +713,6 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
      * @return a register user as just created.
      * @throws SegueDatabaseException - If there is a db error
      */
-    @SuppressWarnings("checkstyle:MagicNumber")
     private RegisteredUser createUser(final RegisteredUser userToCreate) throws SegueDatabaseException {
         // make sure student is default role if none set
         if (null == userToCreate.getRole()) {
@@ -746,23 +743,23 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
             Array userContexts = conn.createArrayOf("jsonb", userContextsJsonb.toArray());
 
             // TODO: Change this to annotations or something to rely exclusively on the pojo.
-            setValueHelper(pst, 1, userToCreate.getFamilyName());
-            setValueHelper(pst, 2, userToCreate.getGivenName());
-            setValueHelper(pst, 3, userToCreate.getEmail());
-            setValueHelper(pst, 4, userToCreate.getRole());
-            setValueHelper(pst, 5, userToCreate.getDateOfBirth());
-            setValueHelper(pst, 6, userToCreate.getGender());
-            setValueHelper(pst, 7, userToCreate.getRegistrationDate());
-            setValueHelper(pst, 8, userToCreate.getSchoolId());
-            setValueHelper(pst, 9, userToCreate.getSchoolOther());
-            setValueHelper(pst, 10, userToCreate.getLastUpdated());
-            setValueHelper(pst, 11, userToCreate.getEmailVerificationStatus());
-            setValueHelper(pst, 12, userToCreate.getLastSeen());
-            setValueHelper(pst, 13, userToCreate.getEmailVerificationToken());
-            setValueHelper(pst, 14, userToCreate.getEmailToVerify());
-            setValueHelper(pst, 15, userToCreate.getSessionToken());
-            pst.setArray(16, userContexts);
-            setValueHelper(pst, 17, userToCreate.getRegisteredContextsLastConfirmed());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_FAMILY_NAME, userToCreate.getFamilyName());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_GIVEN_NAME, userToCreate.getGivenName());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL, userToCreate.getEmail());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_ROLE, userToCreate.getRole());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_DATE_OF_BIRTH, userToCreate.getDateOfBirth());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_GENDER, userToCreate.getGender());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_REGISTRATION_DATE, userToCreate.getRegistrationDate());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_SCHOOL_ID, userToCreate.getSchoolId());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_SCHOOL_OTHER, userToCreate.getSchoolOther());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_LAST_UPDATED, userToCreate.getLastUpdated());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL_VERIFICATION_STATUS, userToCreate.getEmailVerificationStatus());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_LAST_SEEN, userToCreate.getLastSeen());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL_VERIFICATION_TOKEN, userToCreate.getEmailVerificationToken());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL_TO_VERIFY, userToCreate.getEmailToVerify());
+            setValueHelper(pst, FIELD_CREATE_USER_SESSION_TOKEN, userToCreate.getSessionToken());
+            pst.setArray(FIELD_CREATE_USER_REGISTERED_CONTEXTS, userContexts);
+            setValueHelper(pst, FIELD_CREATE_USER_REGISTERED_CONTEXTS_LAST_CONFIRMED, userToCreate.getRegisteredContextsLastConfirmed());
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save user.");
@@ -815,7 +812,6 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
      * @return the user as from the database
      * @throws SQLException - if there is a database problem
      */
-    @SuppressWarnings("checkstyle:MagicNumber")
     private RegisteredUser updateUser(final Connection conn, final RegisteredUser userToCreate) throws SegueDatabaseException, SQLException, JsonProcessingException {
         RegisteredUser existingUserRecord = this.getById(userToCreate.getId());
         if (null == existingUserRecord) {
@@ -828,30 +824,30 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
                 + " registered_contexts = ?, registered_contexts_last_confirmed = ? WHERE id = ?;";
         try (PreparedStatement pst = conn.prepareStatement(query)) {
             // TODO: Change this to annotations or something to rely exclusively on the pojo.
-            setValueHelper(pst, 1, userToCreate.getFamilyName());
-            setValueHelper(pst, 2, userToCreate.getGivenName());
-            setValueHelper(pst, 3, userToCreate.getEmail());
-            setValueHelper(pst, 4, userToCreate.getRole());
-            setValueHelper(pst, 5, userToCreate.getDateOfBirth());
-            setValueHelper(pst, 6, userToCreate.getGender());
-            setValueHelper(pst, 7, userToCreate.getRegistrationDate());
-            setValueHelper(pst, 8, userToCreate.getSchoolId());
-            setValueHelper(pst, 9, userToCreate.getSchoolOther());
-            setValueHelper(pst, 10, userToCreate.getLastUpdated());
-            setValueHelper(pst, 11, userToCreate.getEmailVerificationStatus());
-            setValueHelper(pst, 12, userToCreate.getLastSeen());
-            setValueHelper(pst, 13, userToCreate.getEmailVerificationToken());
-            setValueHelper(pst, 14, userToCreate.getEmailToVerify());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_FAMILY_NAME, userToCreate.getFamilyName());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_GIVEN_NAME, userToCreate.getGivenName());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL, userToCreate.getEmail());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_ROLE, userToCreate.getRole());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_DATE_OF_BIRTH, userToCreate.getDateOfBirth());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_GENDER, userToCreate.getGender());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_REGISTRATION_DATE, userToCreate.getRegistrationDate());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_SCHOOL_ID, userToCreate.getSchoolId());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_SCHOOL_OTHER, userToCreate.getSchoolOther());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_LAST_UPDATED, userToCreate.getLastUpdated());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL_VERIFICATION_STATUS, userToCreate.getEmailVerificationStatus());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_LAST_SEEN, userToCreate.getLastSeen());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL_VERIFICATION_TOKEN, userToCreate.getEmailVerificationToken());
+            setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL_TO_VERIFY, userToCreate.getEmailToVerify());
             List<String> userContextsJsonb = Lists.newArrayList();
             if (userToCreate.getRegisteredContexts() != null) {
                 for (UserContext registeredContext : userToCreate.getRegisteredContexts()) {
                     userContextsJsonb.add(jsonMapper.writeValueAsString(registeredContext));
                 }
             }
-            pst.setArray(15, conn.createArrayOf("jsonb", userContextsJsonb.toArray()));
-            setValueHelper(pst, 16, userToCreate.getRegisteredContextsLastConfirmed());
+            pst.setArray(FIELD_UPDATE_USER_REGISTERED_CONTEXTS, conn.createArrayOf("jsonb", userContextsJsonb.toArray()));
+            setValueHelper(pst, FIELD_UPDATE_USER_REGISTERED_CONTEXTS_LAST_CONFIRMED, userToCreate.getRegisteredContextsLastConfirmed());
 
-            setValueHelper(pst, 17, userToCreate.getId());
+            setValueHelper(pst, FIELD_UPDATE_USER_USER_ID, userToCreate.getId());
 
 
             if (pst.executeUpdate() == 0) {
@@ -864,7 +860,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     
     /**
      * Create a pgEventBooking from a results set.
-     * 
+     * <p>
      * Assumes there is a result to read.
      * 
      * @param results
@@ -998,4 +994,84 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
 
         return user;
     }
+
+    // Field Constants
+    // hasALinkedAccount
+    private static final int FIELD_HAS_LINKED_ACCOUNT_USER_ID = 1;
+
+    // getAuthenticationProvidersByUsers
+    private static final int FIELD_GET_PROVIDER_USER_ID_LIST_INITIAL_INDEX = 1;
+
+    // getUserAuthenticationSettings
+    private static final int FIELD_GET_AUTHENTICATION_SETTINGS_USER_ID = 1;
+
+    // getSegueAccountExistenceByUsers
+    private static final int FIELD_GET_SEGUE_ACCOUNT_EXISTENCE_USER_ID_LIST_INITIAL_INDEX = 1;
+
+    // getByLinkedAccount
+    private static final int FIELD_GET_BY_LINKED_ACCOUNT_PROVIDER = 1;
+    private static final int FIELD_GET_BY_LINKED_ACCOUNT_PROVIDER_USER_ID = 2;
+
+    // linkAuthProviderToAccount
+    private static final int FIELD_LINK_PROVIDER_USER_ID = 1;
+    private static final int FIELD_LINK_PROVIDER_PROVIDER = 2;
+    private static final int FIELD_LINK_PROVIDER_PROVIDER_USER_ID = 3;
+
+    // unlinkAuthProviderFromUser
+    private static final int FIELD_UNLINK_PROVIDER_PROVIDER = 1;
+    private static final int FIELD_UNLINK_PROVIDER_USER_ID = 2;
+
+    // getById
+    private static final int FIELD_GET_BY_ID_USER_ID = 1;
+
+    // getByEmail
+    private static final int FIELD_GET_BY_EMAIL_USER_EMAIL = 1;
+
+    // findUsers
+    private static final int FIELD_FIND_USERS_PARAMETERS_INITIAL_INDEX = 1;
+
+    // getRolesLastSeenOver
+    private static final int FIELD_GET_PERIOD_ROLES_INTERVAL = 1;
+
+    // getByEmailVerificationToken
+    private static final int FIELD_GET_VERIFICATION_TOKEN_TOKEN = 1;
+
+    // deleteUserAccount - mark deleted
+    private static final int FIELD_DELETE_USER_PROVIDER_USER_ID = 1;
+    private static final int FIELD_DELETE_USER_USER_ID = 2;
+    private static final int FIELD_DELETE_USER_LAST_UPDATED = 1;
+
+    // mergeUserAccounts
+    private static final int FIELD_MERGE_ACCOUNTS_TARGET_USER_ID = 1;
+    private static final int FIELD_MERGE_ACCOUNTS_SOURCE_USER_ID = 2;
+
+    // updateUserLastSeen
+    private static final int FIELD_UPDATE_LAST_SEEN_LAST_SEEN = 1;
+    private static final int FIELD_UPDATE_LAST_SEEN_USER_ID = 2;
+
+    // updateSessionToken
+    private static final int FIELD_UPDATE_SESSION_TOKEN_NEW_VALUE = 1;
+    private static final int FIELD_UPDATE_SESSION_TOKEN_USER_ID = 2;
+
+    // createUser || updateUser
+    private static final int FIELD_CREATE_UPDATE_USER_FAMILY_NAME = 1;
+    private static final int FIELD_CREATE_UPDATE_USER_GIVEN_NAME = 2;
+    private static final int FIELD_CREATE_UPDATE_USER_EMAIL = 3;
+    private static final int FIELD_CREATE_UPDATE_USER_ROLE = 4;
+    private static final int FIELD_CREATE_UPDATE_USER_DATE_OF_BIRTH = 5;
+    private static final int FIELD_CREATE_UPDATE_USER_GENDER = 6;
+    private static final int FIELD_CREATE_UPDATE_USER_REGISTRATION_DATE = 7;
+    private static final int FIELD_CREATE_UPDATE_USER_SCHOOL_ID = 8;
+    private static final int FIELD_CREATE_UPDATE_USER_SCHOOL_OTHER = 9;
+    private static final int FIELD_CREATE_UPDATE_USER_LAST_UPDATED = 10;
+    private static final int FIELD_CREATE_UPDATE_USER_EMAIL_VERIFICATION_STATUS = 11;
+    private static final int FIELD_CREATE_UPDATE_USER_LAST_SEEN = 12;
+    private static final int FIELD_CREATE_UPDATE_USER_EMAIL_VERIFICATION_TOKEN = 13;
+    private static final int FIELD_CREATE_UPDATE_USER_EMAIL_TO_VERIFY = 14;
+    private static final int FIELD_CREATE_USER_SESSION_TOKEN = 15;
+    private static final int FIELD_CREATE_USER_REGISTERED_CONTEXTS = 16;
+    private static final int FIELD_CREATE_USER_REGISTERED_CONTEXTS_LAST_CONFIRMED = 17;
+    private static final int FIELD_UPDATE_USER_REGISTERED_CONTEXTS = 15;
+    private static final int FIELD_UPDATE_USER_REGISTERED_CONTEXTS_LAST_CONFIRMED = 16;
+    private static final int FIELD_UPDATE_USER_USER_ID = 17;
 }

@@ -55,7 +55,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
+            pst.setLong(FIELD_GET_SHARED_SECRET_USER_ID, userId);
 
             try (ResultSet results = pst.executeQuery()) {
                 return this.findOne(results);
@@ -88,16 +88,15 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
      * @return the TOTPSharedSecret
      * @throws SegueDatabaseException - if we can't save the entry for some reason
      */
-    @SuppressWarnings("checkstyle:MagicNumber")
     private TOTPSharedSecret createCredentials(final TOTPSharedSecret credsToSave) throws SegueDatabaseException {
         String query = "INSERT INTO user_totp(user_id, shared_secret, created, last_updated) VALUES (?, ?, ?,?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            setValueHelper(pst, 1, credsToSave.getUserId());
-            setValueHelper(pst, 2, credsToSave.getSharedSecret());
-            setValueHelper(pst, 3, credsToSave.getCreated());
-            setValueHelper(pst, 4, credsToSave.getLastUpdated());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_USER_ID, credsToSave.getUserId());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_SHARED_SECRET, credsToSave.getSharedSecret());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_CREATED, credsToSave.getCreated());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_LAST_UPDATED, credsToSave.getLastUpdated());
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save totp secret.");
@@ -116,7 +115,6 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
      * @return the TOTPSharedSecret for chaining.
      * @throws SegueDatabaseException - if we can't save the entry for some reason
      */
-    @SuppressWarnings("checkstyle:MagicNumber")
     private TOTPSharedSecret updateCredentials(final TOTPSharedSecret credsToSave) throws SegueDatabaseException {
         TOTPSharedSecret existingRecord = this.get2FASharedSecret(credsToSave.getUserId());
         if (null == existingRecord) {
@@ -127,9 +125,9 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            setValueHelper(pst, 1, credsToSave.getSharedSecret());
-            setValueHelper(pst, 2, credsToSave.getLastUpdated());
-            setValueHelper(pst, 3, credsToSave.getUserId());
+            setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_SHARED_SECRET, credsToSave.getSharedSecret());
+            setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_LAST_UPDATED, credsToSave.getLastUpdated());
+            setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_USER_ID, credsToSave.getUserId());
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save totp secret.");
@@ -154,7 +152,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            setValueHelper(pst, 1, userId);
+            setValueHelper(pst, FIELD_DELETE_CREDENTIALS_USER_ID, userId);
 
             pst.executeUpdate();
 
@@ -207,4 +205,22 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
                 results.getTimestamp("created"),
                 results.getTimestamp("last_updated"));
     }
+
+    // Field Constants
+    // get2FASharedSecret
+    private static final int FIELD_GET_SHARED_SECRET_USER_ID = 1;
+
+    // createCredentials
+    private static final int FIELD_CREATE_CREDENTIALS_USER_ID = 1;
+    private static final int FIELD_CREATE_CREDENTIALS_SHARED_SECRET = 2;
+    private static final int FIELD_CREATE_CREDENTIALS_CREATED = 3;
+    private static final int FIELD_CREATE_CREDENTIALS_LAST_UPDATED = 4;
+
+    // updateCredentials
+    private static final int FIELD_UPDATE_CREDENTIALS_SHARED_SECRET = 1;
+    private static final int FIELD_UPDATE_CREDENTIALS_LAST_UPDATED = 2;
+    private static final int FIELD_UPDATE_CREDENTIALS_USER_ID = 3;
+
+    // delete2FACredentials
+    private static final int FIELD_DELETE_CREDENTIALS_USER_ID = 1;
 }

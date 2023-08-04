@@ -53,7 +53,6 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         this.database = database;
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public AssociationToken saveAssociationToken(final AssociationToken token) throws SegueDatabaseException {
         Validate.notNull(token);
@@ -62,9 +61,9 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, token.getToken());
-            pst.setLong(2, token.getOwnerUserId());
-            pst.setLong(3, token.getGroupId());
+            pst.setString(FIELD_SAVE_TOKEN_TOKEN, token.getToken());
+            pst.setLong(FIELD_SAVE_TOKEN_OWNER_USER_ID, token.getOwnerUserId());
+            pst.setLong(FIELD_SAVE_TOKEN_GROUP_ID, token.getGroupId());
             
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save token.");
@@ -86,7 +85,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, token);
+            pst.setString(FIELD_DELETE_TOKEN_TOKEN, token);
             pst.execute();
         } catch (SQLException e1) {
             throw new SegueDatabaseException("Postgres exception", e1);
@@ -102,7 +101,6 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         createAssociation(userIdReceivingAccess, userIdGrantingAccess);
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void createAssociation(final Long userIdReceivingAccess, final Long userIdGrantingAccess)
             throws SegueDatabaseException {
@@ -113,9 +111,9 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userIdGrantingAccess);
-            pst.setLong(2, userIdReceivingAccess);
-            pst.setTimestamp(3, new Timestamp(new Date().getTime()));
+            pst.setLong(FIELD_CREATE_ASSOCIATION_GRANTING_USER_ID, userIdGrantingAccess);
+            pst.setLong(FIELD_CREATE_ASSOCIATION_RECEIVING_USER_ID, userIdReceivingAccess);
+            pst.setTimestamp(FIELD_CREATE_ASSOCIATION_CREATION_DATE, new Timestamp(new Date().getTime()));
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to create association.");
@@ -137,8 +135,8 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userIdWhoGrantedAccess);
-            pst.setLong(2, userIdWithAccess);
+            pst.setLong(FIELD_DELETE_ASSOCIATION_GRANTING_USER_ID, userIdWhoGrantedAccess);
+            pst.setLong(FIELD_DELETE_ASSOCIATION_RECEIVING_USER_ID, userIdWithAccess);
             pst.execute();
         } catch (SQLException e1) {
             throw new SegueDatabaseException("Postgres exception", e1);
@@ -163,8 +161,8 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userIdRequestingAccess);
-            pst.setLong(2, ownerUserId);
+            pst.setLong(FIELD_HAS_ASSOCIATION_RECEIVING_USER_ID, userIdRequestingAccess);
+            pst.setLong(FIELD_HAS_ASSOCIATION_GRANTING_USER_ID, ownerUserId);
 
             try (ResultSet results = pst.executeQuery()) {
                 results.next();
@@ -183,7 +181,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
+            pst.setLong(FIELD_GET_ASSOCIATIONS_GRANTING_USER_ID, userId);
             
             try (ResultSet results = pst.executeQuery()) {
                 List<UserAssociation> listOfResults = Lists.newArrayList();
@@ -207,7 +205,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, tokenCode);
+            pst.setString(FIELD_LOOKUP_TOKEN_TOKEN, tokenCode);
             
             try (ResultSet results = pst.executeQuery()) {
                 List<AssociationToken> listOfResults = Lists.newArrayList();
@@ -238,7 +236,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, groupId);
+            pst.setLong(FIELD_GET_TOKEN_BY_GROUP_ID_GROUP_ID, groupId);
             
             try (ResultSet results = pst.executeQuery()) {
                 List<AssociationToken> listOfResults = Lists.newArrayList();
@@ -271,7 +269,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
+            pst.setLong(FIELD_VISIBLE_USERS_RECEIVING_USER_ID, userId);
             
             try (ResultSet results = pst.executeQuery()) {
                 List<UserAssociation> listOfResults = Lists.newArrayList();
@@ -310,7 +308,7 @@ public class PgAssociationDataManager implements IAssociationDataManager {
     /**
      * Helper function to allow deletion of all associations for a given user.
      * @param userIdOfInterest - the user id of interest
-     * @param isOwner - if true the it will delete all cases where the user is the data owner and has shared,
+     * @param isOwner - if true it will delete all cases where the user is the data owner and has shared,
      *                if false it will delete all cases where the user is the recipient.
      * @throws SegueDatabaseException - if a data base error occurs.
      */
@@ -332,10 +330,48 @@ public class PgAssociationDataManager implements IAssociationDataManager {
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(sb.toString())
         ) {
-            pst.setLong(1, userIdOfInterest);
+            pst.setLong(FIELD_DELETE_ASSOCIATIONS_USER_ID, userIdOfInterest);
             pst.execute();
         } catch (SQLException e1) {
             throw new SegueDatabaseException("Postgres exception", e1);
         }
     }
+
+    // Field Constants
+    // saveAssociationToken
+    private static final int FIELD_SAVE_TOKEN_TOKEN = 1;
+    private static final int FIELD_SAVE_TOKEN_OWNER_USER_ID = 2;
+    private static final int FIELD_SAVE_TOKEN_GROUP_ID = 3;
+
+    // deleteToken
+    private static final int FIELD_DELETE_TOKEN_TOKEN = 1;
+
+    // createAssociation
+    private static final int FIELD_CREATE_ASSOCIATION_GRANTING_USER_ID = 1;
+    private static final int FIELD_CREATE_ASSOCIATION_RECEIVING_USER_ID = 2;
+    private static final int FIELD_CREATE_ASSOCIATION_CREATION_DATE = 3;
+
+    // deleteAssociation
+    private static final int FIELD_DELETE_ASSOCIATION_GRANTING_USER_ID = 1;
+    private static final int FIELD_DELETE_ASSOCIATION_RECEIVING_USER_ID = 2;
+
+    // hasValidAssociation
+    private static final int FIELD_HAS_ASSOCIATION_RECEIVING_USER_ID = 1;
+    private static final int FIELD_HAS_ASSOCIATION_GRANTING_USER_ID = 2;
+
+    // getUserAssociations
+    private static final int FIELD_GET_ASSOCIATIONS_GRANTING_USER_ID = 1;
+
+    // lookupAssociationToken
+    private static final int FIELD_LOOKUP_TOKEN_TOKEN = 1;
+
+    // getAssociationTokenByGroupId
+    private static final int FIELD_GET_TOKEN_BY_GROUP_ID_GROUP_ID = 1;
+
+    // getUsersThatICanSee
+    private static final int FIELD_VISIBLE_USERS_RECEIVING_USER_ID = 1;
+
+    // deleteAssociations
+    private static final int FIELD_DELETE_ASSOCIATIONS_USER_ID = 1;
+
 }

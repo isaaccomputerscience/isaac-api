@@ -199,6 +199,11 @@ public final class Constants {
     public static final String HMAC_SALT = "HMAC_SALT";
     public static final int TRUNCATED_TOKEN_LENGTH = 8;
 
+    /**
+     * Constant representing the reserved value to indicate that no session token is currently active.
+     */
+    public static final int NO_SESSION_TOKEN_RESERVED_VALUE = -1;
+
     // Search stuff
     public static final String SEARCH_CLUSTER_NAME = "SEARCH_CLUSTER_NAME";
     public static final String SEARCH_CLUSTER_ADDRESS = "SEARCH_CLUSTER_ADDRESS";

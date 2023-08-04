@@ -60,7 +60,6 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         this.mapper = mapper;
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public Long saveAssignment(final QuizAssignmentDTO assignment) throws SegueDatabaseException {
         QuizAssignmentDO assignmentToSave = mapper.map(assignment, QuizAssignmentDO.class);
@@ -70,23 +69,23 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            pst.setString(1, assignmentToSave.getQuizId());
-            pst.setLong(2, assignmentToSave.getGroupId());
-            pst.setLong(3, assignmentToSave.getOwnerUserId());
+            pst.setString(FIELD_SAVE_ASSIGNMENT_QUIZ_ID, assignmentToSave.getQuizId());
+            pst.setLong(FIELD_SAVE_ASSIGNMENT_GROUP_ID, assignmentToSave.getGroupId());
+            pst.setLong(FIELD_SAVE_ASSIGNMENT_OWNER_USER_ID, assignmentToSave.getOwnerUserId());
 
             if (assignmentToSave.getCreationDate() != null) {
-                pst.setTimestamp(4, new java.sql.Timestamp(assignmentToSave.getCreationDate().getTime()));
+                pst.setTimestamp(FIELD_SAVE_ASSIGNMENT_CREATION_DATE, new java.sql.Timestamp(assignmentToSave.getCreationDate().getTime()));
             } else {
-                pst.setTimestamp(4, new java.sql.Timestamp(new Date().getTime()));
+                pst.setTimestamp(FIELD_SAVE_ASSIGNMENT_CREATION_DATE, new java.sql.Timestamp(new Date().getTime()));
             }
 
             if (assignmentToSave.getDueDate() != null) {
-                pst.setTimestamp(5, new java.sql.Timestamp(assignmentToSave.getDueDate().getTime()));
+                pst.setTimestamp(FIELD_SAVE_ASSIGNMENT_DUE_DATE, new java.sql.Timestamp(assignmentToSave.getDueDate().getTime()));
             } else {
-                pst.setNull(5, Types.TIMESTAMP);
+                pst.setNull(FIELD_SAVE_ASSIGNMENT_DUE_DATE, Types.TIMESTAMP);
             }
 
-            pst.setString(6, assignmentToSave.getQuizFeedbackMode().name());
+            pst.setString(FIELD_SAVE_ASSIGNMENT_FEEDBACK_MODE, assignmentToSave.getQuizFeedbackMode().name());
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save assignment.");
@@ -115,8 +114,8 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, quizId);
-            pst.setLong(2, groupId);
+            pst.setString(FIELD_GET_ASSIGNMENTS_BY_QUIZ_AND_GROUP_QUIZ_ID, quizId);
+            pst.setLong(FIELD_GET_ASSIGNMENTS_BY_QUIZ_AND_GROUP_GROUP_ID, groupId);
 
             try (ResultSet results = pst.executeQuery()) {
 
@@ -149,7 +148,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(sb.toString())
         ) {
-            int i = 1;
+            int i = FIELD_GET_ASSIGNMENTS_BY_GROUP_LIST_INITIAL_INDEX;
             for (Long id : groupIds) {
                 pst.setLong(i, id);
                 i++;
@@ -175,7 +174,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
             // Deleted quiz assignments are filtered below with a specific error
-            pst.setLong(1, quizAssignmentId);
+            pst.setLong(FIELD_GET_ASSIGNMENT_BY_ID_ASSIGNMENT_ID, quizAssignmentId);
 
             try (ResultSet results = pst.executeQuery()) {
                 if (results.next()) {
@@ -197,7 +196,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, quizAssignmentId);
+            pst.setLong(FIELD_CANCEL_ASSIGNMENT_ASSIGNMENT_ID, quizAssignmentId);
 
             pst.execute();
         } catch (SQLException e) {
@@ -205,7 +204,6 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         }
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     @Override
     public void updateAssignment(final Long quizAssignmentId, final QuizAssignmentDTO updates) throws SegueDatabaseException {
         String query = "UPDATE quiz_assignments SET quiz_feedback_mode = COALESCE(?, quiz_feedback_mode),"
@@ -214,18 +212,18 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
             if (updates.getQuizFeedbackMode() != null) {
-                pst.setString(1, updates.getQuizFeedbackMode().name());
+                pst.setString(FIELD_UPDATE_ASSIGNMENT_FEEDBACK_MODE, updates.getQuizFeedbackMode().name());
             } else {
-                pst.setNull(1, Types.VARCHAR);
+                pst.setNull(FIELD_UPDATE_ASSIGNMENT_FEEDBACK_MODE, Types.VARCHAR);
             }
 
             if (updates.getDueDate() != null) {
-                pst.setTimestamp(2, new java.sql.Timestamp(updates.getDueDate().getTime()));
+                pst.setTimestamp(FIELD_UPDATE_ASSIGNMENT_DUE_DATE, new java.sql.Timestamp(updates.getDueDate().getTime()));
             } else {
-                pst.setNull(2, Types.TIMESTAMP);
+                pst.setNull(FIELD_UPDATE_ASSIGNMENT_DUE_DATE, Types.TIMESTAMP);
             }
 
-            pst.setLong(3, quizAssignmentId);
+            pst.setLong(FIELD_UPDATE_ASSIGNMENT_ASSIGNMENT_ID, quizAssignmentId);
 
             pst.execute();
         } catch (SQLException e) {
@@ -265,4 +263,31 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
                 sqlResults.getLong("owner_user_id"), sqlResults.getLong("group_id"), preciseDate,
                 preciseDueDate, QuizFeedbackMode.valueOf(sqlResults.getString("quiz_feedback_mode")));
     }
+
+    // Field Constants
+    // saveAssignment
+    private static final int FIELD_SAVE_ASSIGNMENT_QUIZ_ID = 1;
+    private static final int FIELD_SAVE_ASSIGNMENT_GROUP_ID = 2;
+    private static final int FIELD_SAVE_ASSIGNMENT_OWNER_USER_ID = 3;
+    private static final int FIELD_SAVE_ASSIGNMENT_CREATION_DATE = 4;
+    private static final int FIELD_SAVE_ASSIGNMENT_DUE_DATE = 5;
+    private static final int FIELD_SAVE_ASSIGNMENT_FEEDBACK_MODE = 6;
+
+    // getAssignmentsByQuizIdAndGroup
+    private static final int FIELD_GET_ASSIGNMENTS_BY_QUIZ_AND_GROUP_QUIZ_ID = 1;
+    private static final int FIELD_GET_ASSIGNMENTS_BY_QUIZ_AND_GROUP_GROUP_ID = 2;
+
+    // getAssignmentsByGroupList
+    private static final int FIELD_GET_ASSIGNMENTS_BY_GROUP_LIST_INITIAL_INDEX = 1;
+
+    // getAssignmentById
+    private static final int FIELD_GET_ASSIGNMENT_BY_ID_ASSIGNMENT_ID = 1;
+
+    // cancelAssignment
+    private static final int FIELD_CANCEL_ASSIGNMENT_ASSIGNMENT_ID = 1;
+
+    // updateAssignment
+    private static final int FIELD_UPDATE_ASSIGNMENT_FEEDBACK_MODE = 1;
+    private static final int FIELD_UPDATE_ASSIGNMENT_DUE_DATE = 2;
+    private static final int FIELD_UPDATE_ASSIGNMENT_ASSIGNMENT_ID = 3;
 }

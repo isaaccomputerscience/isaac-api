@@ -54,7 +54,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setLong(1, userId);
+            pst.setLong(FIELD_GET_CREDENTIAL_USER_ID, userId);
 
             try (ResultSet results = pst.executeQuery()) {
                 return this.findOne(results);
@@ -70,7 +70,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            pst.setString(1, token);
+            pst.setString(FIELD_GET_CREDENTIAL_BY_RESET_TOKEN_TOKEN, token);
 
             try (ResultSet results = pst.executeQuery()) {
                 return this.findOne(results);
@@ -96,20 +96,19 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
         return lc;
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     private LocalUserCredential createCredentials(final LocalUserCredential credsToSave) throws SegueDatabaseException {
         String query = "INSERT INTO user_credentials(user_id, password, security_scheme, secure_salt, reset_token, reset_expiry, last_updated)"
                 + " VALUES (?, ?, ?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
         ) {
-            setValueHelper(pst, 1, credsToSave.getUserId());
-            setValueHelper(pst, 2, credsToSave.getPassword());
-            setValueHelper(pst, 3, credsToSave.getSecurityScheme());
-            setValueHelper(pst, 4, credsToSave.getSecureSalt());
-            setValueHelper(pst, 5, credsToSave.getResetToken());
-            setValueHelper(pst, 6, credsToSave.getResetExpiry());
-            setValueHelper(pst, 7, new java.util.Date());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_USER_ID, credsToSave.getUserId());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_PASSWORD, credsToSave.getPassword());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_SECURITY_SCHEME, credsToSave.getSecurityScheme());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_SECURE_SALT, credsToSave.getSecureSalt());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_RESET_TOKEN, credsToSave.getResetToken());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_RESET_EXPIRY, credsToSave.getResetExpiry());
+            setValueHelper(pst, FIELD_CREATE_CREDENTIALS_LAST_UPDATED, new java.util.Date());
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save user.");
@@ -121,7 +120,6 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
         }
     }
 
-    @SuppressWarnings("checkstyle:MagicNumber")
     private LocalUserCredential updateCredentials(final LocalUserCredential credsToSave) throws SegueDatabaseException {
         LocalUserCredential existingRecord = this.getLocalUserCredential(credsToSave.getUserId());
         if (null == existingRecord) {
@@ -133,13 +131,13 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query)
         ) {
-            setValueHelper(pst, 1, credsToSave.getPassword());
-            setValueHelper(pst, 2, credsToSave.getSecurityScheme());
-            setValueHelper(pst, 3, credsToSave.getSecureSalt());
-            setValueHelper(pst, 4, credsToSave.getResetToken());
-            setValueHelper(pst, 5, credsToSave.getResetExpiry());
-            setValueHelper(pst, 6, new java.util.Date());
-            setValueHelper(pst, 7, credsToSave.getUserId());
+            setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_PASSWORD, credsToSave.getPassword());
+            setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_SECURITY_SCHEME, credsToSave.getSecurityScheme());
+            setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_SECURE_SALT, credsToSave.getSecureSalt());
+            setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_RESET_TOKEN, credsToSave.getResetToken());
+            setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_RESET_EXPIRY, credsToSave.getResetExpiry());
+            setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_LAST_UPDATED, new java.util.Date());
+            setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_USER_ID, credsToSave.getUserId());
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save user.");
@@ -201,4 +199,29 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
         toReturn.setLastUpdated(results.getTimestamp("last_updated"));
         return toReturn;
     }
+
+    // Field Constants
+    // getLocalUserCredential
+    private static final int FIELD_GET_CREDENTIAL_USER_ID = 1;
+
+    // getLocalUserCredentialByResetToken
+    private static final int FIELD_GET_CREDENTIAL_BY_RESET_TOKEN_TOKEN = 1;
+
+    // createCredentials
+    private static final int FIELD_CREATE_CREDENTIALS_USER_ID = 1;
+    private static final int FIELD_CREATE_CREDENTIALS_PASSWORD = 2;
+    private static final int FIELD_CREATE_CREDENTIALS_SECURITY_SCHEME = 3;
+    private static final int FIELD_CREATE_CREDENTIALS_SECURE_SALT = 4;
+    private static final int FIELD_CREATE_CREDENTIALS_RESET_TOKEN = 5;
+    private static final int FIELD_CREATE_CREDENTIALS_RESET_EXPIRY = 6;
+    private static final int FIELD_CREATE_CREDENTIALS_LAST_UPDATED = 7;
+
+    // updateCredentials
+    private static final int FIELD_UPDATE_CREDENTIALS_PASSWORD = 1;
+    private static final int FIELD_UPDATE_CREDENTIALS_SECURITY_SCHEME = 2;
+    private static final int FIELD_UPDATE_CREDENTIALS_SECURE_SALT = 3;
+    private static final int FIELD_UPDATE_CREDENTIALS_RESET_TOKEN = 4;
+    private static final int FIELD_UPDATE_CREDENTIALS_RESET_EXPIRY = 5;
+    private static final int FIELD_UPDATE_CREDENTIALS_LAST_UPDATED = 6;
+    private static final int FIELD_UPDATE_CREDENTIALS_USER_ID = 7;
 }
