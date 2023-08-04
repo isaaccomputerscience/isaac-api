@@ -53,7 +53,7 @@ public class Mailer {
 	private final String smtpPort;
 	private final String smtpUsername;
 	private final String smtpPassword;
-	private final static ConcurrentMap<Integer, Session> sessionCache = new ConcurrentHashMap<>();
+	private static final ConcurrentMap<Integer, Session> SESSION_CACHE = new ConcurrentHashMap<>();
 
 	/**
 	 * Mailer Class.
@@ -212,7 +212,7 @@ public class Mailer {
         // These are expensive to create so cache them based on the properties
         // they are configured with (using fact that hashcodes are equal only if objects equal):
         Integer propertiesHash = p.hashCode();
-        Session s = sessionCache.computeIfAbsent(propertiesHash, k -> {
+        Session s = SESSION_CACHE.computeIfAbsent(propertiesHash, k -> {
             log.info(String.format("Creating new mail Session with properties: %s", p));
             return Session.getInstance(p, new Authenticator() {
                 @Override

@@ -133,7 +133,7 @@ public class UserAccountManager implements IUserAccountManager {
     private static final Pattern EMAIL_PERMITTED_CHARS_REGEX = Pattern.compile("^[a-zA-Z0-9!#$%&'+\\-=?^_`.{|}~@]+$");
     private static final Pattern EMAIL_CONSECUTIVE_FULL_STOP_REGEX = Pattern.compile("\\.\\.");
 
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
 
     /**
      * Create an instance of the user manager class.
@@ -658,9 +658,9 @@ public class UserAccountManager implements IUserAccountManager {
      * Complete the MFA login process. If the correct TOTPCode is provided we will give the user a full session cookie
      * rather than a partial one.
      *
-     * @param request - containing the partially logged in user.
+     * @param request - containing the partially logged-in user.
      * @param response - response will be updated to include fully logged in cookie if TOTPCode is successfully verified
-     * @param TOTPCode - code to verify
+     * @param totpCode - code to verify
      * @return RegisteredUserDTO as they are now considered logged in.
      * @throws IncorrectCredentialsProvidedException
      *             - if the password is incorrect
@@ -672,7 +672,7 @@ public class UserAccountManager implements IUserAccountManager {
      *             - if there is a problem with the database.
      */
     public RegisteredUserDTO authenticateMFA(final HttpServletRequest request, final HttpServletResponse response,
-                                             final Integer TOTPCode)
+                                             final Integer totpCode)
             throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException, NoUserLoggedInException {
         RegisteredUser registeredUser = this.retrievePartialLogInForMFA(request);
 
@@ -681,7 +681,7 @@ public class UserAccountManager implements IUserAccountManager {
         }
 
         RegisteredUserDTO userToReturn = convertUserDOToUserDTO(registeredUser);
-        this.secondFactorManager.authenticate2ndFactor(userToReturn, TOTPCode);
+        this.secondFactorManager.authenticate2ndFactor(userToReturn, totpCode);
 
         // replace cookie to no longer have caveat
         return this.logUserIn(request, response, registeredUser);
@@ -1361,7 +1361,7 @@ public class UserAccountManager implements IUserAccountManager {
             return false;
         }
 
-        executor.submit(() -> {
+        EXECUTOR.submit(() -> {
             RegisteredUserDTO userDTO = this.convertUserDOToUserDTO(user);
             try {
                 this.userAuthenticationManager.resetPasswordRequest(user, userDTO);

@@ -253,13 +253,13 @@ public final class Constants {
     }
 
     public static final String SCHOOLS_INDEX_BASE = "schools";
-    public enum SCHOOLS_INDEX_TYPE {
+    public enum SchoolsIndexType {
         METADATA("metadata"),
         SCHOOL_SEARCH("school");
 
         private final String typeName;
 
-        SCHOOLS_INDEX_TYPE(final String typeName) {
+        SchoolsIndexType(final String typeName) {
             this.typeName = typeName;
         }
 
@@ -269,7 +269,7 @@ public final class Constants {
         }
     }
 
-    public enum CONTENT_INDEX_TYPE {
+    public enum ContentIndextype {
         METADATA("metadata"),
         UNIT("unit"),
         PUBLISHED_UNIT("publishedUnit"),
@@ -278,7 +278,7 @@ public final class Constants {
 
         private final String typeName;
 
-        CONTENT_INDEX_TYPE(final String typeName) {
+        ContentIndextype(final String typeName) {
             this.typeName = typeName;
         }
 

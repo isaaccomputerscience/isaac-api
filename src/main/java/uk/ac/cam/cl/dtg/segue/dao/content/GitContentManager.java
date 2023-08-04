@@ -550,7 +550,7 @@ public class GitContentManager {
         try {
             List<Object> tagObjects = (List<Object>) searchProvider.getById(
                     contentIndex,
-                    Constants.CONTENT_INDEX_TYPE.METADATA.toString(),
+                    ContentIndextype.METADATA.toString(),
                     "tags"
             ).getSource().get("tags");
             return new HashSet<>(Lists.transform(tagObjects, Functions.toStringFunction()));
@@ -561,9 +561,9 @@ public class GitContentManager {
     }
 
     public final Collection<String> getAllUnits() {
-        String unitType = Constants.CONTENT_INDEX_TYPE.UNIT.toString();
+        String unitType = ContentIndextype.UNIT.toString();
         if (globalProperties.getProperty(Constants.SEGUE_APP_ENVIRONMENT).equals(Constants.EnvironmentType.PROD.name())) {
-            unitType = Constants.CONTENT_INDEX_TYPE.PUBLISHED_UNIT.toString();
+            unitType = ContentIndextype.PUBLISHED_UNIT.toString();
         }
         try {
             SearchResponse r = searchProvider.getAllFromIndex(globalProperties.getProperty(Constants.CONTENT_INDEX), unitType);
@@ -583,7 +583,7 @@ public class GitContentManager {
     public final Map<Content, List<String>> getProblemMap() {
         try {
             SearchResponse r = searchProvider.getAllFromIndex(contentIndex,
-                    Constants.CONTENT_INDEX_TYPE.CONTENT_ERROR.toString());
+                    ContentIndextype.CONTENT_ERROR.toString());
             SearchHits hits = r.getHits();
             Map<Content, List<String>> map = new HashMap<>();
 
@@ -668,7 +668,7 @@ public class GitContentManager {
                 shaResponse =
                         searchProvider.getById(
                                 contentIndex,
-                                Constants.CONTENT_INDEX_TYPE.METADATA.toString(),
+                                ContentIndextype.METADATA.toString(),
                                 "general"
                         );
                 contentShaCache.put(contentIndex, shaResponse);

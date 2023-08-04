@@ -29,8 +29,8 @@ public class UserAlertsWebSocketServlet extends JettyWebSocketServlet {
     private static final Logger log = LoggerFactory.getLogger(UserAlertsWebSocketServlet.class);
     private static final int BAD_REQUEST = 400;
     private static final int FORBIDDEN = 403;
-    private static final Injector injector = SegueGuiceConfigurationModule.getGuiceInjector();
-    private final String hostName = injector.getInstance(PropertiesLoader.class).getProperty(HOST_NAME);
+    private static final Injector INJECTOR = SegueGuiceConfigurationModule.getGuiceInjector();
+    private final String hostName = INJECTOR.getInstance(PropertiesLoader.class).getProperty(HOST_NAME);
 
     @Override
     public void configure(final JettyWebSocketServletFactory factory) {

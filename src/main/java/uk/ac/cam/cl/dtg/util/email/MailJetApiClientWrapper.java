@@ -138,17 +138,17 @@ public class MailJetApiClientWrapper {
      * @param mailjetId - MailJet user ID
      * @param firstName - first name of user for contact details
      * @param role - role of user for contact details
-     * @param email_verification_status - verification status of user for contact details
+     * @param emailVerificationStatus - verification status of user for contact details
      * @throws MailjetException  - if underlying MailjetClient throws an exception
      */
     public void updateUserProperties(final String mailjetId, final String firstName, final String role,
-                                      final String email_verification_status) throws MailjetException {
+                                      final String emailVerificationStatus) throws MailjetException {
         Validate.notNull(mailjetId);
         MailjetRequest request = new MailjetRequest(Contactdata.resource, mailjetId)
                 .property(Contactdata.DATA, new JSONArray()
                         .put(new JSONObject().put("Name", "firstname").put("value", firstName))
                         .put(new JSONObject().put("Name", "role").put("value", role))
-                        .put(new JSONObject().put("Name", "verification_status").put("value", email_verification_status))
+                        .put(new JSONObject().put("Name", "verification_status").put("value", emailVerificationStatus))
                 );
         MailjetResponse response = mailjetClient.put(request);
         if (response.getTotal() != 1) {

@@ -208,7 +208,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     private static IGroupObserver groupObserver = null;
 
     private static Collection<Class<? extends ServletContextListener>> contextListeners;
-    private static final Map<String, Reflections> reflections = com.google.common.collect.Maps.newHashMap();
+    private static final Map<String, Reflections> REFLECTIONS = com.google.common.collect.Maps.newHashMap();
 
     /**
      * A setter method that is mostly useful for testing. It populates the global properties static value if it has not
@@ -991,7 +991,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
             String eventPrePostEmails = properties.getProperty(EVENT_PRE_POST_EMAILS);
             boolean eventPrePostEmailsEnabled = null != eventPrePostEmails && !eventPrePostEmails.isEmpty() && Boolean.parseBoolean(eventPrePostEmails);
 
-            SegueScheduledJob PIISQLJob = new SegueScheduledDatabaseScriptJob(
+            SegueScheduledJob piiSqlJob = new SegueScheduledDatabaseScriptJob(
                     "PIIDeleteScheduledJob",
                     "SQLMaintenance",
                     "SQL scheduled job that deletes PII",
@@ -1061,7 +1061,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
                     "0 0 0/4 ? * * *");
 
             List<SegueScheduledJob> configuredScheduledJobs = new ArrayList<>(Arrays.asList(
-                    PIISQLJob,
+                    piiSqlJob,
                     cleanUpOldAnonymousUsers,
                     cleanUpExpiredReservations,
                     deleteEventAdditionalBookingInformation,
@@ -1273,11 +1273,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
      * @return reflections.
      */
     public static Reflections getReflectionsClass(final String pkg) {
-        if (!reflections.containsKey(pkg)) {
+        if (!REFLECTIONS.containsKey(pkg)) {
             log.info(String.format("Caching reflections scan on '%s'", pkg));
-            reflections.put(pkg, new Reflections(pkg));
+            REFLECTIONS.put(pkg, new Reflections(pkg));
         }
-        return reflections.get(pkg);
+        return REFLECTIONS.get(pkg);
     }
 
     /**

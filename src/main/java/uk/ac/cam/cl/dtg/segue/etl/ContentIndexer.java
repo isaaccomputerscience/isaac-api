@@ -159,8 +159,8 @@ public class ContentIndexer {
     }
 
     void setNamedVersion(final String alias, final String version) {
-        List<String> allContentTypes = Arrays.stream(CONTENT_INDEX_TYPE.values())
-                .map(CONTENT_INDEX_TYPE::toString).collect(Collectors.toList());
+        List<String> allContentTypes = Arrays.stream(ContentIndextype.values())
+                .map(ContentIndextype::toString).collect(Collectors.toList());
         es.addOrMoveIndexAlias(alias, version, allContentTypes);
     }
 
@@ -695,13 +695,13 @@ public class ContentIndexer {
         long startTime, endTime;
 
         try {
-            es.indexObject(sha, CONTENT_INDEX_TYPE.METADATA.toString(),
+            es.indexObject(sha, ContentIndextype.METADATA.toString(),
                     objectMapper.writeValueAsString(ImmutableMap.of("version", sha, "created", new Date().toString())), "general");
-            es.indexObject(sha, CONTENT_INDEX_TYPE.METADATA.toString(),
+            es.indexObject(sha, ContentIndextype.METADATA.toString(),
                     objectMapper.writeValueAsString(ImmutableMap.of("tags", tagsList)), "tags");
 
             startTime = System.nanoTime();
-            es.bulkIndex(sha, CONTENT_INDEX_TYPE.UNIT.toString(), allUnits.entrySet().stream().map(entry -> {
+            es.bulkIndex(sha, ContentIndextype.UNIT.toString(), allUnits.entrySet().stream().map(entry -> {
                 try {
                     return objectMapper.writeValueAsString(ImmutableMap.of("cleanKey", entry.getKey(), "unit", entry.getValue()));
                 } catch (JsonProcessingException jsonProcessingException) {
@@ -709,7 +709,7 @@ public class ContentIndexer {
                     return null;
                 }
             }).filter(Objects::nonNull).collect(Collectors.toList()));
-            es.bulkIndex(sha, CONTENT_INDEX_TYPE.PUBLISHED_UNIT.toString(), publishedUnits.entrySet().stream().map(entry -> {
+            es.bulkIndex(sha, ContentIndextype.PUBLISHED_UNIT.toString(), publishedUnits.entrySet().stream().map(entry -> {
                 try {
                     return objectMapper.writeValueAsString(ImmutableMap.of("cleanKey", entry.getKey(), "unit", entry.getValue()));
                 } catch (JsonProcessingException jsonProcessingException) {
@@ -721,7 +721,7 @@ public class ContentIndexer {
             log.info("Bulk unit indexing took: " + ((endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND) + "ms");
 
             startTime = System.nanoTime();
-            es.bulkIndex(sha, CONTENT_INDEX_TYPE.CONTENT_ERROR.toString(), indexProblemCache.entrySet().stream().map(e -> {
+            es.bulkIndex(sha, ContentIndextype.CONTENT_ERROR.toString(), indexProblemCache.entrySet().stream().map(e -> {
                 try {
                     return objectMapper.writeValueAsString(ImmutableMap.of(
                             "canonicalSourceFile", e.getKey().getCanonicalSourceFile(),
@@ -746,7 +746,7 @@ public class ContentIndexer {
 
         try {
             startTime = System.nanoTime();
-            es.bulkIndexWithIDs(sha, CONTENT_INDEX_TYPE.CONTENT.toString(), contentToIndex);
+            es.bulkIndexWithIDs(sha, ContentIndextype.CONTENT.toString(), contentToIndex);
             endTime = System.nanoTime();
             log.info("Bulk indexing content took: " + ((endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND) + "ms");
             log.info("Search index request sent for: " + sha);
@@ -855,20 +855,20 @@ public class ContentIndexer {
      */
     private void expungeAnyContentTypeIndicesRelatedToVersion(final String version) {
         log.info("Deleting existing indexes for version " + version);
-        for (CONTENT_INDEX_TYPE contentIndexType : CONTENT_INDEX_TYPE.values()) {
+        for (ContentIndextype contentIndexType : ContentIndextype.values()) {
             es.expungeIndexFromSearchCache(version, contentIndexType.toString());
         }
     }
 
     /**
      * A successful indexing of a version means the creation of an index for each of the content types defined in
-     * CONTENT_INDEX_TYPE. This method checks that they all exist for a particular version.
+     * ContentIndextype. This method checks that they all exist for a particular version.
      *
      * @param version the content sha version to check.
      * @return True if indices exist for all expected content types at the provided version, else return false.
      */
     private boolean allContentTypesAreIndexedForVersion(final String version) {
-        return Arrays.stream(CONTENT_INDEX_TYPE.values())
+        return Arrays.stream(ContentIndextype.values())
                 .allMatch(contentIndexType -> es.hasIndex(version, contentIndexType.toString()));
     }
 
@@ -879,7 +879,7 @@ public class ContentIndexer {
      * @return True if indices exist for any of the expected content types at the provided version, else return false.
      */
     private boolean anyContentTypesAreIndexedForVersion(final String version) {
-        return Arrays.stream(CONTENT_INDEX_TYPE.values())
+        return Arrays.stream(ContentIndextype.values())
                 .anyMatch(contentIndexType -> es.hasIndex(version, contentIndexType.toString()));
     }
 

@@ -635,7 +635,7 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
         contentPropertiesToUse.putAll(contentProperties);
 
         String plainTextContent = completeTemplateWithProperties(emailContent.getPlainTextContent(), contentPropertiesToUse);
-        String HTMLContent = completeTemplateWithProperties(emailContent.getHtmlContent(), contentPropertiesToUse, true);
+        String htmlContent = completeTemplateWithProperties(emailContent.getHtmlContent(), contentPropertiesToUse, true);
 
         // Extract from address and reply to addresses:
         String overrideFromAddress = emailContent.getOverrideFromAddress();
@@ -653,7 +653,7 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
         ContentDTO plainTextTemplate = getContentDTO("email-template-ascii");
 
         Properties htmlTemplateProperties = new Properties();
-        htmlTemplateProperties.put("content", HTMLContent);
+        htmlTemplateProperties.put("content", htmlContent);
         htmlTemplateProperties.put("email", userEmail);
         htmlTemplateProperties.putAll(this.globalStringTokens);
 

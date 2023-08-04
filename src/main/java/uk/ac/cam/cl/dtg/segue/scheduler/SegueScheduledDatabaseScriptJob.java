@@ -26,23 +26,23 @@ import java.util.Map;
  * Specialised class for capturing information needed to execute an SQL file on the database where segue is running.
  */
 public class SegueScheduledDatabaseScriptJob extends SegueScheduledJob {
-    private final String SQLFile;
+    private final String sqlFile;
     Map<String, Object> executionContext;
 
     private static final Logger log = LoggerFactory.getLogger(SegueScheduledDatabaseScriptJob.class);
 
     public SegueScheduledDatabaseScriptJob(final String jobKey, final String jobGroupName, final String description,
-                                           final String cronString, final String SQLFilePath) {
+                                           final String cronString, final String sqlFilePath) {
         super(jobKey, jobGroupName, description, cronString);
 
-        this.SQLFile = SQLFilePath;
+        this.sqlFile = sqlFilePath;
 
         executionContext = Maps.newHashMap();
     }
 
     @Override
     public Map<String, Object> getExecutionContext() {
-        executionContext.put("SQLFile", SQLFile);
+        executionContext.put("SQLFile", sqlFile);
         return executionContext;
     }
 

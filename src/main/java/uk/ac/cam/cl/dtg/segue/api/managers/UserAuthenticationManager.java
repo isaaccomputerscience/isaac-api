@@ -915,7 +915,7 @@ public class UserAuthenticationManager {
         Validate.notNull(user);
         Validate.notNull(user.getId());
         SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
-        final int PARTIAL_EXPIRY_TIME_IN_SECONDS = 1200; // 20 mins
+        final int partialExpiryTimeInSeconds = 1200; // 20 mins
 
         String newUserSessionToken = this.database.regenerateSessionToken(user).toString();
         String userId = user.getId().toString();
@@ -925,7 +925,7 @@ public class UserAuthenticationManager {
         try {
             if (partialLoginFlag) {
                 // use shortened expiry time if partial login
-                sessionExpiryTimeInSeconds = PARTIAL_EXPIRY_TIME_IN_SECONDS;
+                sessionExpiryTimeInSeconds = partialExpiryTimeInSeconds;
             }
 
             Calendar calendar = Calendar.getInstance();

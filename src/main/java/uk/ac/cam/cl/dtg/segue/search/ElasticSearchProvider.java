@@ -731,19 +731,19 @@ public class ElasticSearchProvider implements ISearchProvider {
     private int getMaxResultSize(final String indexBase, final String indexType) {
         final String typedIndex = ElasticSearchProvider.produceTypedIndexName(indexBase, indexType);
         try {
-            final String MAX_WINDOW_SIZE_KEY = typedIndex + "_" + "MAX_WINDOW_SIZE";
-            String max_window_size = this.settingsCache.getIfPresent(MAX_WINDOW_SIZE_KEY);
-            if (null == max_window_size) {
+            final String maxWindowSizeKey = typedIndex + "_" + "MAX_WINDOW_SIZE";
+            String maxWindowSize = this.settingsCache.getIfPresent(maxWindowSizeKey);
+            if (null == maxWindowSize) {
                 Map<String, Settings> response = client.indices().get(new GetIndexRequest(typedIndex), RequestOptions.DEFAULT).getSettings();
                 for (Settings settings : response.values()) {
                     if (null == settings) {
                         continue;
                     }
-                    this.settingsCache.put(MAX_WINDOW_SIZE_KEY, settings.get(typedIndex + ".max_result_window",
+                    this.settingsCache.put(maxWindowSizeKey, settings.get(typedIndex + ".max_result_window",
                             Integer.toString(SEARCH_MAX_WINDOW_SIZE)));
                 }
             }
-            return Integer.parseInt(this.settingsCache.getIfPresent(MAX_WINDOW_SIZE_KEY));
+            return Integer.parseInt(this.settingsCache.getIfPresent(maxWindowSizeKey));
         } catch (IOException e) {
             log.error(String.format("Failed to retrieve max window size settings for index %s - defaulting to %d",
                     typedIndex, DEFAULT_MAX_WINDOW_SIZE), e);
