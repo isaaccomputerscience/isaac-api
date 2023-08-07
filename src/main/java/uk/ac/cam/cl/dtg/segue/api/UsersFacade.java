@@ -181,7 +181,7 @@ public class UsersFacade extends AbstractSegueFacade {
 
     /**
      * This method allows users to create a local account or update their settings.
-     *
+     * <p>
      * It will also allow administrators to change any user settings.
      *
      * @param request
@@ -365,7 +365,7 @@ public class UsersFacade extends AbstractSegueFacade {
 
     /**
      * End point that allows a local user to generate a password reset request.
-     *
+     * <p>
      * Step 1 of password reset process - send user an e-mail
      *
      * @param userObject
@@ -417,7 +417,7 @@ public class UsersFacade extends AbstractSegueFacade {
 
     /**
      * End point that verifies whether or not a password reset token is valid.
-     *
+     * <p>
      * Optional Step 2 - validate token is correct
      *
      * @param token
@@ -495,7 +495,7 @@ public class UsersFacade extends AbstractSegueFacade {
 
     /**
      * Endpoint to generate non-persistent new secret for the client.
-     *
+     * <p>
      * This can be used with an appropriate challenge to setup 2FA on the account.
      *
      * @param request - http request so we can determine the user.

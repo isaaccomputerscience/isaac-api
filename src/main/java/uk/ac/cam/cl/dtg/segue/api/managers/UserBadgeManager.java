@@ -25,7 +25,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.CONTENT_INDEX;
 
 /**
  * Management layer for updating and retrieving badge states
- *
+ * <p>
  * Created by du220 on 27/04/2018.
  */
 public class UserBadgeManager {

@@ -38,7 +38,7 @@ public abstract class SegueScheduledJob {
 
     /**
      * Key used to describe the job to the schedule cluster.
-     *
+     * <p>
      * Must be unique
      *
      * @return the id
@@ -49,7 +49,7 @@ public abstract class SegueScheduledJob {
 
     /**
      * Group name.
-     *
+     * <p>
      * Describes the group of jobs
      *
      * @return the group name
@@ -62,7 +62,7 @@ public abstract class SegueScheduledJob {
     /**
      * CronString
      * This describes the cron trigger that will be used to periodically trigger this job.
-     *
+     * <p>
      * {@see http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html}
      *
      * @return the cron pattern
@@ -91,7 +91,7 @@ public abstract class SegueScheduledJob {
 
     /**
      * Quartz job that will be instantiated by quartz during job execution.
-     *
+     * <p>
      * The execute method is used
      *
      * @return QuartzJob

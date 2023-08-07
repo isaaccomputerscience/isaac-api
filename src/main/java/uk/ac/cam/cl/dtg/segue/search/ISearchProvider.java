@@ -77,7 +77,7 @@ public interface ISearchProvider {
 
     /**
      * Executes a fuzzy search on an array of fields and will consider the fieldsThatMustMatchMap.
-     * 
+     * <p>
      * This method should prioritise exact prefix matches and then fill it with fuzzy ones.
      * 
      * @param indexBase
@@ -111,9 +111,9 @@ public interface ISearchProvider {
 
     /**
      * Executes a terms search using an array of terms on a single field.
-     *
+     * <p>
      * Useful for tag searches - Current setting is that results will only be returned if they match all search terms.
-     *
+     * <p>
      * note: null searches are allowed providing a filter is specified.
      *
      * @param indexBase
@@ -186,7 +186,7 @@ public interface ISearchProvider {
 
     /**
      * Query for a list of Results that match a given id prefix.
-     * 
+     * <p>
      * This is useful if you use un-analysed fields for ids and use the dot separator as a way of nesting fields.
      * 
      * @param indexBase

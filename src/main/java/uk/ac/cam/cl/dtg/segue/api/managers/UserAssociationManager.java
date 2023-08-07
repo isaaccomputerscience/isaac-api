@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Stephen Cummins
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- *
+ * <p>
  * You may obtain a copy of the License at
  * 		http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -112,7 +112,7 @@ public class UserAssociationManager {
 
     /**
      * Generate a new string value for a token.
-     *
+     * <p>
      * There are 30 non-ambiguous uppercase alphanumeric characters. We use a 5 bit encoding system to generate the
      * number for which character to choose, skipping in the 1/16 chance it is outside the allowed range. Loop until we
      * generate all tokenLength required characters.
@@ -193,7 +193,7 @@ public class UserAssociationManager {
 
     /**
      * get Associations.
-     *
+     * <p>
      * I.e. Who can currently view a given user's data.
      * 
      * @param user
@@ -356,7 +356,7 @@ public class UserAssociationManager {
 
     /**
      * Check if one user has permission to view another user's data.
-     * 
+     * <p>
      * Users always have permission to view their own data. Students never have permission to view another users data.
      * 
      * @param currentUser
@@ -391,7 +391,7 @@ public class UserAssociationManager {
 
     /**
      * Check if one user has teacher-level permission to view another user's data.
-     *
+     * <p>
      * Users always have permission to view their own data. Students never have permission to view another users data,
      * and tutors do not have teacher-level permissions.
      *

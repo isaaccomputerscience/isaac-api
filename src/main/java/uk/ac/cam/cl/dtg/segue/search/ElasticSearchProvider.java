@@ -510,7 +510,7 @@ public class ElasticSearchProvider implements ISearchProvider {
 
     /**
      * Provides default search execution using the fields specified.
-     *
+     * <p>
      * This method does not provide any way of controlling sort order or limiting information returned. It is most
      * useful for doing simple searches with fewer results e.g. by id.
      *
@@ -534,7 +534,7 @@ public class ElasticSearchProvider implements ISearchProvider {
 
     /**
      * Provides default search execution using the fields specified.
-     *
+     * <p>
      * This method does not provide any way of controlling sort order or limiting information returned. It is most
      * useful for doing simple searches with fewer results e.g. by id.
      *

@@ -40,7 +40,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.UNPROCESSED_SEARCH_FIELD_SUFF
 
 /**
  * Class responsible for reading the local school list csv file.
- * 
+ * <p>
  * This class is threadsafe providing that the ISearchProvider given as a dependency is not given to another instance of
  * this class. Normally this class should be treated as a singleton to ensure the ISearchProvider is not shared with
  * another instance of this class.

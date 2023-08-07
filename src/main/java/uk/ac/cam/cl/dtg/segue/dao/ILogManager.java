@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Stephen Cummins
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- *
+ * <p>
  * You may obtain a copy of the License at
  * 		http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,7 @@ import java.util.Set;
 
 /**
  * Interface for logging components.
- * 
+ * <p>
  * This is for logging user interaction events for the purpose of research and / or technology improvement not for
  * logging system errors / events.
  * 
@@ -85,7 +85,7 @@ public interface ILogManager {
     /**
      * This method will endeavour to find all log events for a given user and reassign ownership to a
      * registered user.
-     * 
+     * <p>
      * It assumes that the new userId is a registered user of the system and not anonymous.
      * 
      * @param oldUserId
@@ -139,7 +139,7 @@ public interface ILogManager {
 
     /**
      * Utility method that will generate a map of type -- > localDate -- > number of events.
-     * 
+     * <p>
      * This is done at the database level to allow efficient use of memory.
      * 
      * @param eventTypes

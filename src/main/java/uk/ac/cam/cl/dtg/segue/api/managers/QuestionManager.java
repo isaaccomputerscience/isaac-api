@@ -78,7 +78,7 @@ import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.VALIDATOR_LATENCY
 /**
  * This class is responsible for validating correct answers using the ValidatesWith annotation when it is applied on to
  * Questions.
- * 
+ * <p>
  * It is also responsible for orchestrating question attempt persistence.
  * 
  */
@@ -204,9 +204,9 @@ public class QuestionManager {
 
     /**
      * This method will ensure any user question attempt information available is used to augment this question object.
-     * 
+     * <p>
      * It will also ensure that any personalisation of questions is affected (e.g. randomised multichoice elements).
-     *
+     * <p>
      * Note: It will not do anything to related content
      * 
      * @param page

@@ -174,7 +174,7 @@ public class AuthorisationFacade extends AbstractSegueFacade {
 
     /**
      * Revoke a user association.
-     *
+     * <p>
      * This endpoint enables a users to revoke access to their data for a specific user they had previously approved.
      *
      * @param request
@@ -215,7 +215,7 @@ public class AuthorisationFacade extends AbstractSegueFacade {
 
     /**
      * Revoke all user associations
-     *
+     * <p>
      * This endpoint enables a users to revoke access to their data for all users they had previously approved.
      *
      * @param request
@@ -250,7 +250,7 @@ public class AuthorisationFacade extends AbstractSegueFacade {
 
     /**
      * Release a user association.
-     *
+     * <p>
      * This endpoint is used when a user who had previously been granted access to another's data no longer needs it
      * and wants to end the sharing relationship from their side.
      *
@@ -293,7 +293,7 @@ public class AuthorisationFacade extends AbstractSegueFacade {
 
     /**
      * Release all user associations.
-     *
+     * <p>
      * This endpoint is used when a user who had previously been granted access to other users's data no longer needs
      * the access and wants to end all the sharing relationships from their side.
      *
@@ -397,7 +397,7 @@ public class AuthorisationFacade extends AbstractSegueFacade {
 
     /**
      * Function to allow users to create or get an existing AssociationToken.
-     * 
+     * <p>
      * This token can be used by another user to grant view permissions to their user data.
      * 
      * @param request

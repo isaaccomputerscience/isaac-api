@@ -48,7 +48,7 @@ import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 
 /**
  * Glossary Facade
- * <p>
+ * <p> <p>
  * This facade is intended to provide access to glossary terms.
  *
  */

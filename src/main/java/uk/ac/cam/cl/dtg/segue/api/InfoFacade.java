@@ -50,7 +50,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_APP_ENVIRONMENT;
 
 /**
  * Info Facade
- * 
+ * <p>
  * This facade is intended to provide access to meta data about the current running system.
  * 
  */

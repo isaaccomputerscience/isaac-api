@@ -26,7 +26,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 
 /**
  * ContentBaseOrikaConverter A specialist converter class to work with the Orika automapper library.
- * 
+ * <p>
  * Responsible for converting Content objects to their correct subtype.
  * 
  */

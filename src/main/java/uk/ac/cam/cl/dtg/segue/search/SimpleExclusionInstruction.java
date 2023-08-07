@@ -17,7 +17,7 @@ package uk.ac.cam.cl.dtg.segue.search;
 
 /**
  * SimpleExclusionInstruction
- *
+ * <p>
  * SimpleExclusionInstruction expect a single value which must not appear in the results.
  */
 public class SimpleExclusionInstruction extends AbstractFilterInstruction {

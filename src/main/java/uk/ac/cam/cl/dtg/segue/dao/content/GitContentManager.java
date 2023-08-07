@@ -159,7 +159,7 @@ public class GitContentManager {
 
     /**
      *  Get a DTO object by its ID or return null.
-     *
+     * <p>
      *  This may return a cached object, and will temporarily cache the object.
      *  Do not modify the returned DTO object.
      *  The object will be retrieved in DO form, and mapped to a DTO. Both versions will be
@@ -175,7 +175,7 @@ public class GitContentManager {
 
     /**
      *  Get a DTO object by its ID or return null.
-     *
+     * <p>
      *  This may return a cached object, and will temporarily cache the object.
      *  Do not modify the returned DTO object.
      *  The object will be retrieved in DO form, and mapped to a DTO. Both versions will be
@@ -200,7 +200,7 @@ public class GitContentManager {
 
     /**
      *  Get a DO object by its ID or return null.
-     *
+     * <p>
      *  This may return a cached object, and will temporarily cache the object
      *  to avoid re-querying the data store and the deserialization costs.
      *  Do not modify the returned DO object.
@@ -215,7 +215,7 @@ public class GitContentManager {
 
     /**
      *  Get a DO object by its ID or return null.
-     *
+     * <p>
      *  This may return a cached object, and will temporarily cache the object
      *  to avoid re-querying the data store and the deserialization costs.
      *  Do not modify the returned DO object.
@@ -256,7 +256,7 @@ public class GitContentManager {
 
     /**
      *  Retrieve all DTO content matching an ID prefix.
-     *
+     * <p>
      *  This may return cached objects, and will temporarily cache the objects
      *  to avoid re-querying the data store and the deserialization costs.
      *  Do not modify the returned DTO objects.
@@ -287,7 +287,7 @@ public class GitContentManager {
 
     /**
      *  Get a list of DTO objects by their IDs.
-     *
+     * <p>
      *  This may return cached objects, and will temporarily cache the objects
      *  to avoid re-querying the data store and the deserialization costs.
      *  Do not modify the returned DTO objects.

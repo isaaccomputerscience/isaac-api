@@ -23,7 +23,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 
 /**
  * Handler to deal with sending email requests.
- *
+ * <p>
  * Preventing users from overusing this endpoint is important as only limited email sending capacity exists
  *
  * @author Connor Holloway

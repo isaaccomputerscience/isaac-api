@@ -60,7 +60,7 @@ public interface IUserGroupPersistenceManager {
 
     /**
      * Find User group by Id including deleted groups.
-     *
+     * <p>
      * Note this should only be used when trying to reconstruct assignment state, never when exposing group information directly to users.
      *
      * @param groupId
@@ -86,7 +86,7 @@ public interface IUserGroupPersistenceManager {
 
     /**
      * Create a group that users can be assigned to.
-     * 
+     * <p>
      * This is only to support organisation of accounts that can access data about other users.
      * 
      * @param group

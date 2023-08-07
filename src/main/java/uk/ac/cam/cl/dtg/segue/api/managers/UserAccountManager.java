@@ -198,7 +198,7 @@ public class UserAccountManager implements IUserAccountManager {
      * This method will start the authentication process and ultimately provide a url for the client to redirect the
      * user to. This url will be for a 3rd party authenticator who will use the callback method provided after they have
      * authenticated.
-     * 
+     * <p>
      * Users who are already logged already will be returned their UserDTO without going through the authentication
      * process.
      * 
@@ -219,7 +219,7 @@ public class UserAccountManager implements IUserAccountManager {
      * This method will start the authentication process for linking a user to a 3rd party provider. It will ultimately
      * provide a url for the client to redirect the user to. This url will be for a 3rd party authenticator who will use
      * the callback method provided after they have authenticated.
-     * 
+     * <p>
      * Users must already be logged in to use this method otherwise a 401 will be returned.
      * 
      * @param request
@@ -242,7 +242,7 @@ public class UserAccountManager implements IUserAccountManager {
     /**
      * Authenticate Callback will receive the authentication information from the different provider types. (e.g. OAuth
      * 2.0 (IOAuth2Authenticator) or bespoke)
-     * 
+     * <p>
      * This method will either register a new user and attach the linkedAccount or locate the existing account of the
      * user and create a session for that.
      * 
@@ -719,7 +719,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     /**
      * Unlink User From AuthenticationProvider
-     * 
+     * <p>
      * Removes the link between a user and a provider.
      * 
      * @param user
@@ -800,7 +800,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     /**
      * Get the details of the currently logged in registered user.
-     * 
+     * <p>
      * This method will validate the session and will throw a NoUserLoggedInException if invalid.
      * 
      * @param request
@@ -830,7 +830,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     /**
      * Extract the session expiry time from a request.
-     *
+     * <p>
      * Does not check session validity.
      *
      * @param request The request to extract the session information from
@@ -914,7 +914,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     /**
      * This function can be used to find user information about a user when given an id - EVEN if it is a deleted user.
-     *
+     * <p>
      * WARNING- Do not expect complete RegisteredUser Objects as data may be missing if you include deleted users
      * @param id
      *            - the id of the user to search for.
@@ -965,7 +965,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     /**
      * This method will return either an AnonymousUserDTO or a RegisteredUserDTO
-     * 
+     * <p>
      * If the user is currently logged in you will get a RegisteredUserDTO otherwise you will get an AnonymousUserDTO
      * containing a sessionIdentifier and any questionAttempts made by the anonymous user.
      * 
@@ -1420,7 +1420,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     /**
      * This method will test if the specified token is a valid password reset token.
-     * 
+     * <p>
      * 
      * @param token
      *            - The token to test
@@ -1621,7 +1621,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     /**
      * Get the user object from the partially completed cookie.
-     *
+     * <p>
      * WARNING: Do not use this method to determine if a user has successfully logged in or not as they could have omitted the 2FA step.
      *
      * @param request to pull back the user
@@ -1714,7 +1714,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     /**
      * Generate a partially logged in session for the user based on successful password authentication.
-     *
+     * <p>
      * To complete this the user must also complete MFA authentication.
      *
      * @param request - http request containing the cookie
@@ -1945,7 +1945,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     /**
      * Get the RegisteredUserDO of the currently logged in user. This is for internal use only.
-     * 
+     * <p>
      * This method will validate the session as well returning null if it is invalid.
      * 
      * @param request
