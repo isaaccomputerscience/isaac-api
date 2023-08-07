@@ -57,10 +57,11 @@ public class EmailTemplate extends Content {
      * @param tags
      * @param level
      */
+    @SuppressWarnings("checkstyle:ParameterName")
     public EmailTemplate(final String _id, final String id, final String title, final String subtitle,
-            final String type, final String author, final String encoding, final String canonicalSourceFile,
-            final String layout, final List<ContentBase> children, final String value, final String attribution,
-            final List<String> relatedContent, final Boolean published, final Boolean deprecated,
+                         final String type, final String author, final String encoding, final String canonicalSourceFile,
+                         final String layout, final List<ContentBase> children, final String value, final String attribution,
+                         final List<String> relatedContent, final Boolean published, final Boolean deprecated,
                          final Set<String> tags, final Integer level) {
         super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, value,
                 attribution, relatedContent, published, deprecated, tags, level);
@@ -68,7 +69,7 @@ public class EmailTemplate extends Content {
     }
 
     /**
-     * @param value
+     * @param value a string to set as the value
      */
     public EmailTemplate(final String value) {
         super(value);

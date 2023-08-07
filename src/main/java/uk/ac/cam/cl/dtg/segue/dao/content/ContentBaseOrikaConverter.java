@@ -47,7 +47,7 @@ public class ContentBaseOrikaConverter extends AbstractPolymorphicConverter<Cont
 
     @Override
     public ContentBaseDTO convert(final ContentBase source, final Type<? extends ContentBaseDTO> destinationType,
-                                  final MappingContext _context) {
+                                  final MappingContext context) {
 
         if (null == source) {
             return null;
