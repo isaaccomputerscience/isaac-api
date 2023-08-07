@@ -18,6 +18,8 @@ package uk.ac.cam.cl.dtg.isaac.dos;
 import jakarta.annotation.Nullable;
 import java.util.Date;
 
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.DO_HASHCODE_PRIME;
+
 /**
  * This class is the Domain Object used to store Quiz attempts in the isaac CMS.
  */
@@ -63,7 +65,7 @@ public class QuizAttemptDO {
 
     @Override
     public int hashCode() {
-        return 31 + ((id == null) ? 0 : id.hashCode());
+        return DO_HASHCODE_PRIME + ((id == null) ? 0 : id.hashCode());
     }
 
     @Override

@@ -126,10 +126,10 @@ public class GitContentManager {
             log.info("API Configured to hide content tagged with 'regression_test'.");
         }
 
-        this.cache = CacheBuilder.newBuilder().recordStats().softValues().expireAfterAccess(1, TimeUnit.DAYS).build();
+        this.cache = CacheBuilder.newBuilder().recordStats().softValues().expireAfterAccess(CONTENT_CACHE_EXPIRE_AFTER_ACCESS_DAYS, TimeUnit.DAYS).build();
         CACHE_METRICS_COLLECTOR.addCache("git_content_manager_cache", cache);
 
-        this.contentShaCache = CacheBuilder.newBuilder().softValues().expireAfterWrite(5, TimeUnit.SECONDS).build();
+        this.contentShaCache = CacheBuilder.newBuilder().softValues().expireAfterWrite(CONTENT_SHA_CACHE_EXPIRE_AFTER_ACCESS_SECONDS, TimeUnit.SECONDS).build();
 
         this.contentIndex = globalProperties.getProperty(Constants.CONTENT_INDEX);
     }
@@ -419,7 +419,7 @@ public class GitContentManager {
             contentQuery.setMinimumShouldMatch(numberOfExpectedShouldMatches);
 
             if (importantDocumentTypes.contains(documentType)) {
-                contentQuery.setBoost(5f);
+                contentQuery.setBoost(IMPORTANT_DOCUMENT_TYPE_BOOST);
             }
 
             matchQuery.should(contentQuery);

@@ -1343,7 +1343,10 @@ public class QuizFacade extends AbstractIsaacFacade {
                             if (overallMark != null) {
                                 // Add an apostrophe to the beginning of the score, so that the fraction isn't
                                 // interpreted as a date in excel
-                                quizTotals.add(String.format("'%d/%d", overallMark.getCorrect(), overallMark.getCorrect() + overallMark.getIncorrect() + overallMark.getNotAttempted()));
+                                quizTotals.add(String.format("'%d/%d",
+                                        overallMark.getCorrect(),
+                                        overallMark.getCorrect() + overallMark.getIncorrect() + overallMark.getNotAttempted()
+                                ));
                             } else {
                                 quizTotals.add("");
                             }

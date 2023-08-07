@@ -482,6 +482,10 @@ public final class Constants {
 
     public static final Integer DEFAULT_MAX_WINDOW_SIZE = 10000;
 
+    public static final Integer ADDITIONAL_EVENT_INFORMATION_RETENTION_DAYS_AGO = -30;
+
+    public static final int USER_ALERTS_WEBSOCKET_IDLE_TIMEOUT_SECONDS = 65000;
+
     // Content model specific stuff
     public static final String ID_FIELDNAME = "id";
     public static final String TITLE_FIELDNAME = "title";
@@ -623,6 +627,10 @@ public final class Constants {
         EMAIL_PREFERENCE
     }
 
+    // Content Manager
+    public static final Integer CONTENT_CACHE_EXPIRE_AFTER_ACCESS_DAYS = 1;
+    public static final Integer CONTENT_SHA_CACHE_EXPIRE_AFTER_ACCESS_SECONDS = 5;
+
     // Instruction Match boost
     public static final Long MATCH_INSTRUCTION_IMPORTANT_NON_FUZZY = 10L;
     public static final Long MATCH_INSTRUCTION_IMPORTANT_FUZZY = 3L;
@@ -630,6 +638,7 @@ public final class Constants {
     public static final Long MATCH_INSTRUCTION_OTHER_FUZZY = 1L;
     public static final Long MATCH_INSTRUCTION_ADDRESS_NON_FUZZY = 3L;
     public static final Long MATCH_INSTRUCTION_ADDRESS_FUZZY = 1L;
+    public static final Float IMPORTANT_DOCUMENT_TYPE_BOOST = 5f;
 
     // Misuse Handler default thresholds
     public static final Integer PASSWORD_RESET_BY_IP_DEFAULT_SOFT_THRESHOLD = 50;

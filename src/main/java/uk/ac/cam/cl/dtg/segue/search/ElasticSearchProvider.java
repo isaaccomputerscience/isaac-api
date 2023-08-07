@@ -687,9 +687,7 @@ public class ElasticSearchProvider implements ISearchProvider {
                 rangeQuery.gt(rangeMatch.getLessThan());
             }
             return rangeQuery;
-        }
-
-        else {
+        } else {
             throw new SegueSearchException(
                     "Processing match instruction which is not supported: " + matchInstruction.getClass());
         }

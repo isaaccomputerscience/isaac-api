@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
+import static uk.ac.cam.cl.dtg.segue.api.Constants.USER_ALERTS_WEBSOCKET_IDLE_TIMEOUT_SECONDS;
 import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.WEBSOCKET_LATENCY_HISTOGRAM;
 
 /**
@@ -46,7 +47,7 @@ import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.WEBSOCKET_LATENCY
  *
  * @author Dan Underwood
  */
-@WebSocket(idleTimeout = 65000)
+@WebSocket(idleTimeout = USER_ALERTS_WEBSOCKET_IDLE_TIMEOUT_SECONDS)
 public class UserAlertsWebSocket implements IAlertListener {
     private static class Protocol {
         static final String HEARTBEAT = "heartbeat";
