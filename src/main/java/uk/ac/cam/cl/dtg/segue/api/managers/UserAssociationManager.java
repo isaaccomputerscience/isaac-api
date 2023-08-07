@@ -432,7 +432,7 @@ public class UserAssociationManager {
      * @param records a list of objects containing an ID.
      * @param userIdKey a function which takes the record and returns the user ID.
      * @param <T> the type of the object containing an ID.
-     * @return a filtered list of type List<T>.
+     * @return a filtered list of type List{@literal <T>}.
      * @throws SegueDatabaseException if it was not able to get the user's associations form the database.
      */
     public <T> List<T> filterUnassociatedRecords(

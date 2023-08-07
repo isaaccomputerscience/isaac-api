@@ -85,7 +85,6 @@ public class PropertiesLoader {
     /**
      * triggerPropertiesRefresh.
      * 
-     * @return
      * @throws IOException
      *             - if we cannot load the properties file.
      */

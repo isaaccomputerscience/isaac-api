@@ -183,8 +183,6 @@ public class ContentIndexer {
      *            - a map of units used in published numeric questions
      * @param indexProblemCache
      *            - a map of problems found in the indexed content
-     *
-     * @return the map representing all indexed content.
      * @throws ContentManagerException -  if the SHA is null or the associated resource cannot be accessed
      */
     private synchronized void buildGitContentIndex(final String sha,

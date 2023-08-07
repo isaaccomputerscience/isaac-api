@@ -151,7 +151,7 @@ public class StatisticsManager implements IStatisticsManager {
      * Output general stats. This returns a Map of String to Object and is intended to be sent directly to a
      * serializable facade endpoint.
      *
-     * @return ImmutableMap<String, String> (stat name, stat value)
+     * @return an ImmutableMap{@literal <String, String>} (stat name, stat value)
      * @throws SegueDatabaseException - if there is a database error.
      */
     public synchronized Map<String, Object> getGeneralStatistics()

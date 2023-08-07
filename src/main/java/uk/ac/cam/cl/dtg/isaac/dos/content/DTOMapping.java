@@ -32,8 +32,9 @@ public @interface DTOMapping {
 
     /**
      * gets the DTO class that any Domain objects should be mapped to and from.
-     * 
+     * <p>
      * default is ContentDTO.class
+     * @return the class
      */
     Class<? extends Object> value();
 }

@@ -88,7 +88,7 @@ public class SegueContentFacade extends AbstractSegueFacade {
     }
 
     /**
-     * This method will return a ResultsWrapper<ContentDTO> based on the parameters supplied.
+     * This method will return a ResultsWrapper{@literal <ContentDTO>} based on the parameters supplied.
      * 
      * @param version
      *            - the version of the content to search. If null it will default to the current live version.
@@ -98,7 +98,7 @@ public class SegueContentFacade extends AbstractSegueFacade {
      *            - the start index for the search results.
      * @param limit
      *            - the max number of results to return.
-     * @return Response containing a ResultsWrapper<ContentDTO> or a Response containing null if none found.
+     * @return Response containing a ResultsWrapper{@literal <ContentDTO>} or a Response containing null if none found.
      */
     public final ResultsWrapper<ContentDTO> findMatchingContent(final String version,
             final List<GitContentManager.BooleanSearchClause> fieldsToMatch,
@@ -108,7 +108,7 @@ public class SegueContentFacade extends AbstractSegueFacade {
     }
 
     /**
-     * This method will return a ResultsWrapper<ContentDTO> based on the parameters supplied. Providing the results in a
+     * This method will return a ResultsWrapper{@literal <ContentDTO>} based on the parameters supplied. Providing the results in a
      * randomised order.
      * <p>
      * This method is the same as {@link #findMatchingContentRandomOrder(String, List, Integer, Integer, Long)} but uses
@@ -122,7 +122,7 @@ public class SegueContentFacade extends AbstractSegueFacade {
      *            - the start index for the search results.
      * @param limit
      *            - the max number of results to return.
-     * @return Response containing a ResultsWrapper<ContentDTO> or a Response containing null if none found.
+     * @return Response containing a ResultsWrapper{@literal <ContentDTO>} or a Response containing null if none found.
      */
     public final ResultsWrapper<ContentDTO> findMatchingContentRandomOrder(
             @Nullable final String version, final List<GitContentManager.BooleanSearchClause> fieldsToMatch,
@@ -131,8 +131,8 @@ public class SegueContentFacade extends AbstractSegueFacade {
     }
 
     /**
-     * This method will return a ResultsWrapper<ContentDTO> based on the parameters supplied. Providing the results in a
-     * randomised order.
+     * This method will return a ResultsWrapper{@literal <ContentDTO>} based on the parameters supplied. Providing the
+     * results in a randomised order.
      * 
      * @param version
      *            - the version of the content to search. If null it will default to the current live version.
@@ -144,7 +144,7 @@ public class SegueContentFacade extends AbstractSegueFacade {
      *            - the max number of results to return.
      * @param randomSeed
      *            - to allow some control over the random order of the results.
-     * @return Response containing a ResultsWrapper<ContentDTO> or a Response containing null if none found.
+     * @return Response containing a ResultsWrapper{@literal <ContentDTO>} or a Response containing null if none found.
      */
     public final ResultsWrapper<ContentDTO> findMatchingContentRandomOrder(
             @Nullable final String version, final List<GitContentManager.BooleanSearchClause> fieldsToMatch,

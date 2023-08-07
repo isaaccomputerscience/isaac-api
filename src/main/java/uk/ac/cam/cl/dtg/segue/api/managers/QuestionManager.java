@@ -476,6 +476,7 @@ public class QuestionManager {
      *            - the end of the date range to fetch
      * @param perDay
      *            - if true, group count by day, otherwise group count by month
+     * @return a Map of LocalDates to attempt counts
      */
     public Map<LocalDate, Long> getUsersQuestionAttemptCountsByDate(final RegisteredUserDTO user,
                                                                     final Date fromDate, final Date toDate,

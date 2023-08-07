@@ -218,7 +218,7 @@ public class EventBookingDTO {
 
 	/**
      * Get the lastUpdate date.
-     * @return
+     * @return the Date it was most recently updated
      */
     public Date getUpdated() {
         return lastUpdated;
