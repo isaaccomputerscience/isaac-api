@@ -195,6 +195,7 @@ public class EventsFacade extends AbstractIsaacFacade {
      *            - if present, only events with an audience matching this string will be shown
      * @return a Response containing a list of events objects or containing a SegueErrorResponse.
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)

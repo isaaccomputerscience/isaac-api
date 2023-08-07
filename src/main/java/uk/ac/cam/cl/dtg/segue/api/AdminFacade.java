@@ -753,6 +753,7 @@ public class AdminFacade extends AbstractSegueFacade {
      *            - if searching by subject interest
      * @return a userDTO or a segue error response
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     @GET
     @Path("/users")
     @Produces(MediaType.APPLICATION_JSON)

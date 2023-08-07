@@ -160,6 +160,7 @@ public class GameboardsFacade extends AbstractIsaacFacade {
      *            - a comma separated list of question categories
      * @return a Response containing a gameboard object or containing a SegueErrorResponse.
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     @GET
     @Path("gameboards")
     @Produces(MediaType.APPLICATION_JSON)

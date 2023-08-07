@@ -299,6 +299,7 @@ public class PagesFacade extends AbstractIsaacFacade {
      *            - a string value to be converted into an integer that represents the number of results to return.
      * @return A response object which contains a list of questions or an empty list.
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     @GET
     @Path("/questions")
     @Produces(MediaType.APPLICATION_JSON)
