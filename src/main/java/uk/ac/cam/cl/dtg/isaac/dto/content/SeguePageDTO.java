@@ -78,6 +78,6 @@ public class SeguePageDTO extends ContentDTO {
     @Override
     @JsonIgnore(false) // Override the parent class decorator!
     public String getCanonicalSourceFile() {
-        return this.getCanonicalSourceFile();
+        return super.getCanonicalSourceFile();
     }
 }
