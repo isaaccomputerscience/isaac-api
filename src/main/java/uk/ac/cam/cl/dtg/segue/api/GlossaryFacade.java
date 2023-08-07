@@ -44,10 +44,11 @@ import java.util.Collections;
 import java.util.List;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 
 /**
  * Glossary Facade
- *
+ * <p>
  * This facade is intended to provide access to glossary terms.
  *
  */
@@ -142,7 +143,7 @@ public class GlossaryFacade extends AbstractSegueFacade {
         try {
             c = this.contentManager.getByIdPrefix(termId, 0, DEFAULT_MAX_WINDOW_SIZE);
             if (null == c) {
-                SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "No glossary term found with id: " + termId);
+                SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "No glossary term found with id: " + sanitiseLogValue(termId));
                 log.debug(error.getErrorMessage());
                 return error.toResponse();
             }
