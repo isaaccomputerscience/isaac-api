@@ -111,7 +111,7 @@ public class Mailer {
 
     /**
      * Utility method to allow us to send multipart messages using HTML and plain text.
-     *
+     * <p>
      * 
      * @param recipient
      *            - string array of recipients that the message should be sent to
