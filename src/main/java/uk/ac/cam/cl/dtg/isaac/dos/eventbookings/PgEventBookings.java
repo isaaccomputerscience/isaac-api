@@ -43,7 +43,7 @@ import java.util.zip.CRC32;
 
 /**
  * PgEventBookings.
- * 
+ * <p>
  * Postgres aware EventBookings.
  *
  */

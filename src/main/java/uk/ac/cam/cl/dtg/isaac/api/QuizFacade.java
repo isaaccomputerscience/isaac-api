@@ -185,7 +185,7 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Get quizzes visible to this user, starting from the specified index.
-     *
+     * <p>
      * Anonymous users can't see quizzes.
      *
      * @param request the Request needed for ETag checking.
@@ -370,7 +370,7 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Start a quiz attempt for a particular quiz assignment.
-     *
+     * <p>
      * For a student, indicates the quiz is being attempted and creates a QuizAttemptDO in the DB
      * if they are a member of the group for the assignment.
      * If an attempt has already begun, return the already begun attempt.
@@ -555,7 +555,7 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Get the feedback for a quiz attempt.
-     *
+     * <p>
      * The attempt must be completed.
      *
      * @param httpServletRequest
@@ -617,7 +617,7 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Mark a QuizAttempt as complete.
-     *
+     * <p>
      * Only the user taking the quiz can mark it complete.
      *
      * @param httpServletRequest
@@ -662,7 +662,7 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Mark a QuizAttempt as incomplete.
-     *
+     * <p>
      * Only owner and group managers for the quiz assignment can mark it incomplete.
      * If it is a self-taken quiz, you cannot mark it incomplete, as that would make it easier to tweak individual
      * questions to find the right answers (also there is no assignment so you can't construct the URL anyway).
@@ -882,7 +882,7 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Abandon a started free quiz attempt.
-     *
+     * <p>
      * This can only be done on free quiz attempts, as we don't want any startDate shenanigans on assigned quizzes.
      *
      * @param httpServletRequest
@@ -931,7 +931,7 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Allows a teacher to set a quiz to a group.
-     *
+     * <p>
      * Sends emails to the members of the group informing them of the quiz.
      * Takes a quiz id, a group id, an optional end datetime for completion, and the feedbackMode.
      *
@@ -1008,7 +1008,7 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Get quizzes assigned by this user.
-     *
+     * <p>
      * Optionally filtered by a particular group.
      *
      * @param request so that we can extract user information.
@@ -1535,7 +1535,7 @@ public class QuizFacade extends AbstractIsaacFacade {
 
     /**
      * Allows a teacher to update a quiz assignment.
-     *
+     * <p>
      * Only changes to the feedbackMode and dueDate fields are accepted. A bad request error will be thrown if any other fields are set.
      *
      * @param httpServletRequest so that we can extract user information.

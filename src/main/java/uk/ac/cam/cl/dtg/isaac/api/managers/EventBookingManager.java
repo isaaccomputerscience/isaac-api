@@ -320,7 +320,7 @@ public class EventBookingManager {
      * Create booking on behalf of a user.
      * This method will allow users to be booked onto an event providing there is space. No other rules are applied.
      * This is likely to be only for admin users.
-     *
+     * <p>
      * This method will not enforce some of the restrictions such as event deadlines and email verification
      *
      * @param event - of interest
@@ -1309,7 +1309,7 @@ public class EventBookingManager {
 
     /**
      * Helper method to generate an ics file for emailing to users who have booked on to an event.
-     *
+     * <p>
      * Note: This method may return null in the event we cannot communicate with a third party service.
      *
      * @param event - the event booked on

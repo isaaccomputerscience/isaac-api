@@ -547,7 +547,7 @@ public class IsaacNumericValidator implements IValidator {
 
     /**
      * Format a number in string form such that Java BigDecimal can parse it. Trims leading and trailing spaces.
-     *
+     * <p>
      * Replace "x10^(...)" with "e(...)", allowing many common unambiguous cases, and fix uses of Unicode minus signs,
      * and allow bare powers of ten.
      *
@@ -563,7 +563,7 @@ public class IsaacNumericValidator implements IValidator {
 
     /**
      *  Replace explanation of validation response if question has default feedback and existing feedback blank or generic.
-     *
+     * <p>
      *  This method could be void, since it modifies the object passed in by reference, but it makes for shorter and
      *  simpler code when it is used if it just returns the same object it is passed.
      *

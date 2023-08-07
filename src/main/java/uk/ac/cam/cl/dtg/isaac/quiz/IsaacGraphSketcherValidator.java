@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * Validator that only provides functionality to validate graph questions.
- *
+ * <p>
  * Created by hhrl2 on 01/08/2016.
  */
 public class IsaacGraphSketcherValidator implements IValidator, ISpecifier {
@@ -127,7 +127,7 @@ public class IsaacGraphSketcherValidator implements IValidator, ISpecifier {
 
     /**
      * Create a new list of Choice objects, with no change in sort order.
-     *
+     * <p>
      * This is desirable if you ever need to use a feature in a negative way to identify an incorrect answer.
      *
      * @param choices - the Choices from a Question

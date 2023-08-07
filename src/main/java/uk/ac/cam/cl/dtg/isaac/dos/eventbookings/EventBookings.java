@@ -24,7 +24,7 @@ import java.util.Map;
 
 /**
  * Representation of a collection of event bookings.
- * 
+ * <p>
  * This should be a database aware object.
  * 
  * @author sac92
@@ -111,7 +111,7 @@ public interface EventBookings {
 
     /**
      * countAllEventBookings.
-     *
+     * <p>
      * Note: This will include any with users who have been deleted.
      *
      * @return the current count of all event bookings.
@@ -131,7 +131,7 @@ public interface EventBookings {
 
     /**
      * Find all bookings for a given event with a given status.
-     *
+     * <p>
      * Useful for finding all on a waiting list or confirmed.
      *
      * @param eventId

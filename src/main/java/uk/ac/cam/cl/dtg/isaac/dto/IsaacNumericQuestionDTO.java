@@ -61,7 +61,7 @@ public class IsaacNumericQuestionDTO extends IsaacQuestionBaseDTO {
 
     /**
      * Gets the knownUnits.
-     * 
+     * <p>
      * This is a hack so that the frontend can display all units available as a drop down list.
      * 
      * @return the knownUnits

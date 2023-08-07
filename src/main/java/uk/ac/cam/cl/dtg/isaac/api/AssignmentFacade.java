@@ -95,7 +95,7 @@ import static uk.ac.cam.cl.dtg.util.NameFormatter.getFilteredGroupNameFromGroup;
 
 /**
  * AssignmentFacade
- *
+ * <p>
  * This class provides endpoints to support assigning work to users.
  *
  */
@@ -287,7 +287,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
 
     /**
      * Allows a user to get all assignments they have set in light weight objects.
-     *
+     * <p>
      * If the user specifies a group ID to narrow the search full objects including questions in gameboards will be returned.
      *
      * @param request

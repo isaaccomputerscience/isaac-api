@@ -36,7 +36,7 @@ public interface IQuizAssignmentPersistenceManager {
 
     /**
      * Get a list of QuizAssignmentDTO objects for this quiz and group.
-     *
+     * <p>
      * It is not an error for there to be multiple of these, but the spans of their creationDate and dueDate
      * should be disjoint.
      *

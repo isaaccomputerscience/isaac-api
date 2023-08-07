@@ -1337,7 +1337,7 @@ public class EventsFacade extends AbstractIsaacFacade {
 
     /**
      * Delete a booking.
-     *
+     * <p>
      * This is an admin function to allow staff to delete a booking permanently.
      *
      * @param request
@@ -1735,7 +1735,7 @@ public class EventsFacade extends AbstractIsaacFacade {
 
     /**
      * A helper method for retrieving an event and the number of places available and if the user is booked or not.
-     *
+     * <p>
      *
      * @param request so we can determine if the user is logged in
      * @param eventId the id of the event of interest

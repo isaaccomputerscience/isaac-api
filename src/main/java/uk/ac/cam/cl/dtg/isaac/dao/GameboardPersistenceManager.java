@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Stephen Cummins
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- *
+ * <p>
  * You may obtain a copy of the License at
  * 		http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -177,7 +177,7 @@ public class GameboardPersistenceManager {
 
     /**
      * Keep generated gameboard in non-persistent storage.
-     * 
+     * <p>
      * This will be removed if the gameboard is saved to persistent storage.
      * 
      * @param gameboard
@@ -472,7 +472,7 @@ public class GameboardPersistenceManager {
 
     /**
      * Attempt to improve performance of getting gameboard items in a batch.
-     *
+     * <p>
      * This method will attempt to ensure that all gameboards provided have their associated
      * gameboard items populated with meaningful titles.
      *
@@ -644,7 +644,7 @@ public class GameboardPersistenceManager {
 
     /**
      * Convert form a gameboard DO to a Gameboard DTO.
-     *
+     * <p>
      * This method relies on the api to fully resolve questions.
      *
      * @param gameboardDO
@@ -657,7 +657,7 @@ public class GameboardPersistenceManager {
 
     /**
      * Convert form a gameboard DO to a Gameboard DTO.
-     *
+     * <p>
      * This method relies on the api to fully resolve questions.
      *
      * @param gameboardDO
