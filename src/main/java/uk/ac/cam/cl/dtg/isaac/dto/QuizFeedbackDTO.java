@@ -21,9 +21,9 @@ import java.util.Objects;
 
 public class QuizFeedbackDTO {
     public static class Mark {
-        public Integer correct;
-        public Integer incorrect;
-        public Integer notAttempted;
+        private Integer correct;
+        private Integer incorrect;
+        private Integer notAttempted;
 
         public Mark() {
             this.correct = 0;
@@ -46,7 +46,7 @@ public class QuizFeedbackDTO {
                 return false;
             }
             Mark mark = (Mark) o;
-            return Objects.equals(correct, mark.correct)
+            return Objects.equals(getCorrect(), mark.getCorrect())
                     && Objects.equals(incorrect, mark.incorrect)
                     && Objects.equals(notAttempted, mark.notAttempted);
         }
@@ -54,6 +54,30 @@ public class QuizFeedbackDTO {
         @Override
         public int hashCode() {
             return Objects.hash(correct, incorrect, notAttempted);
+        }
+
+        public Integer getCorrect() {
+            return correct;
+        }
+
+        public void setCorrect(final Integer correct) {
+            this.correct = correct;
+        }
+
+        public Integer getIncorrect() {
+            return incorrect;
+        }
+
+        public void setIncorrect(final Integer incorrect) {
+            this.incorrect = incorrect;
+        }
+
+        public Integer getNotAttempted() {
+            return notAttempted;
+        }
+
+        public void setNotAttempted(final Integer notAttempted) {
+            this.notAttempted = notAttempted;
         }
     }
 

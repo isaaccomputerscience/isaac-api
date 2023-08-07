@@ -38,7 +38,7 @@ public class Quantity extends Choice {
      * @param value - the value of the Quantity
      */
     public Quantity(final String value) {
-        this.value = value;
+        this.setValue(value);
 
     }
 
@@ -49,7 +49,7 @@ public class Quantity extends Choice {
      * @param units - the units of the Quantity
      */
     public Quantity(final String value, final String units) {
-        this.value = value;
+        this.setValue(value);
         this.units = units;
 
     }

@@ -23,10 +23,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class CodeSnippetDTO extends ContentDTO {
-    protected String language;
-    protected String code;
-    protected boolean disableHighlighting;
-    protected String url;
+    private String language;
+    private String code;
+    private boolean disableHighlighting;
+    private String url;
 
     @JsonCreator
     public CodeSnippetDTO(@JsonProperty("language") final String language, @JsonProperty("code") final String code,

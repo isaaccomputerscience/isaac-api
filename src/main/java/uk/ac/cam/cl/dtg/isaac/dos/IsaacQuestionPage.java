@@ -33,9 +33,9 @@ import java.util.Set;
 @DTOMapping(IsaacQuestionPageDTO.class)
 @JsonContentType("isaacQuestionPage")
 public class IsaacQuestionPage extends SeguePage {
-    protected Float passMark;
-    protected String supersededBy;
-    protected Integer difficulty;
+    private Float passMark;
+    private String supersededBy;
+    private Integer difficulty;
 
     @JsonCreator
     public IsaacQuestionPage(

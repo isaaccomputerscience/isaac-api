@@ -359,15 +359,15 @@ public class QuizQuestionManager {
             QuestionValidationResponse response = answerMap.get(question);
             if (response != null) {
                 if (response.isCorrect()) {
-                    sectionMark.correct++;
-                    questionMark.correct = 1;
+                    sectionMark.setCorrect(sectionMark.getCorrect() + 1);
+                    questionMark.setCorrect(1);
                 } else {
-                    sectionMark.incorrect++;
-                    questionMark.incorrect = 1;
+                    sectionMark.setIncorrect(sectionMark.getIncorrect() + 1);
+                    questionMark.setIncorrect(1);
                 }
             } else {
-                sectionMark.notAttempted++;
-                questionMark.notAttempted = 1;
+                sectionMark.setNotAttempted(sectionMark.getNotAttempted() + 1);
+                questionMark.setNotAttempted(1);
             }
         }
 
@@ -394,9 +394,9 @@ public class QuizQuestionManager {
     private QuizFeedbackDTO.Mark consolidateMarks(final Map<String, QuizFeedbackDTO.Mark> scoreTable) {
         QuizFeedbackDTO.Mark result = new QuizFeedbackDTO.Mark();
         scoreTable.values().forEach(mark -> {
-            result.correct += mark.correct;
-            result.incorrect += mark.incorrect;
-            result.notAttempted += mark.notAttempted;
+            result.setCorrect(result.getCorrect() + mark.getCorrect());
+            result.setIncorrect(result.getIncorrect() + mark.getIncorrect());
+            result.setNotAttempted(result.getNotAttempted() + mark.getNotAttempted());
         });
         return result;
     }

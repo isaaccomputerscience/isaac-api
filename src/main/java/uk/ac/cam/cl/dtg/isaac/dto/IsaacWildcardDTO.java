@@ -28,14 +28,14 @@ import java.util.Set;
 
 /**
  * ********************************************
- * 
+ * <p>
  * Note: This class is currently not used.!! TODO: make sure mapping is completed.
  * ********************************************
  */
 @JsonContentType("isaacWildcard")
 public class IsaacWildcardDTO extends ContentDTO {
-    protected String description;
-    protected String url;
+    private String description;
+    private String url;
 
     @JsonCreator
     public IsaacWildcardDTO(

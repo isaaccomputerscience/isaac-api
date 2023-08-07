@@ -172,13 +172,13 @@ public class MailJetApiClientWrapper {
                 .property(ContactManagecontactslists.CONTACTSLISTS, new JSONArray()
                         .put(new JSONObject()
                                 .put(ContactslistImportList.LISTID, legalListId)
-                                .put(ContactslistImportList.ACTION, MailJetSubscriptionAction.FORCE_SUBSCRIBE.value))
+                                .put(ContactslistImportList.ACTION, MailJetSubscriptionAction.FORCE_SUBSCRIBE.getValue()))
                         .put(new JSONObject()
                                 .put(ContactslistImportList.LISTID, newsListId)
-                                .put(ContactslistImportList.ACTION, newsEmails.value))
+                                .put(ContactslistImportList.ACTION, newsEmails.getValue()))
                         .put(new JSONObject()
                                 .put(ContactslistImportList.LISTID, eventsListId)
-                                .put(ContactslistImportList.ACTION, eventsEmails.value))
+                                .put(ContactslistImportList.ACTION, eventsEmails.getValue()))
                 );
         MailjetResponse response = mailjetClient.post(request);
         if (response.getTotal() != 1) {

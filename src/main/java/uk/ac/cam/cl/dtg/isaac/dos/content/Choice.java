@@ -25,8 +25,8 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceDTO;
 @DTOMapping(ChoiceDTO.class)
 @JsonContentType("choice")
 public class Choice extends Content {
-    protected boolean correct;
-    protected ContentBase explanation;
+    private boolean correct;
+    private ContentBase explanation;
 
     /**
      * Default Constructor required for mappers.

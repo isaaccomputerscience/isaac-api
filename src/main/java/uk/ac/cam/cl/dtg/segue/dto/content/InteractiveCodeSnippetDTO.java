@@ -25,10 +25,10 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.CodeSnippetDTO;
  */
 public class InteractiveCodeSnippetDTO extends CodeSnippetDTO {
 
-    protected String setupCode;
-    protected String testCode;
-    protected String expectedResult;
-    protected Boolean wrapCodeInMain;
+    private String setupCode;
+    private String testCode;
+    private String expectedResult;
+    private Boolean wrapCodeInMain;
 
     @JsonCreator
     public InteractiveCodeSnippetDTO(@JsonProperty("language") final String language,

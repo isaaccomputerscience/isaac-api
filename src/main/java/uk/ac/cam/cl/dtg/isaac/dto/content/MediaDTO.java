@@ -19,8 +19,8 @@ package uk.ac.cam.cl.dtg.isaac.dto.content;
  * Media (Abstract) DTO To be used anywhere that a figure should be displayed in the CMS.
  */
 public abstract class MediaDTO extends ContentDTO {
-    protected String src;
-    protected String altText;
+    private String src;
+    private String altText;
 
     /**
      * Gets the src.

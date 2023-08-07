@@ -18,8 +18,8 @@ import java.util.Iterator;
  */
 public class TeacherAssignmentsBadgePolicy implements IUserBadgePolicy {
 
-    protected final AssignmentManager assignmentManager;
-    protected final GameManager gameManager;
+    private final AssignmentManager assignmentManager;
+    private final GameManager gameManager;
 
     public TeacherAssignmentsBadgePolicy(final AssignmentManager assignmentManager,
                                          final GameManager gameManager) {

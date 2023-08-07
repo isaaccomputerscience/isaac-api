@@ -25,7 +25,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import java.util.ArrayList;
 
 public class ContentSummarizerService {
-    protected final MapperFacade mapper;
+    private final MapperFacade mapper;
     private final URIManager uriManager;
 
     @Inject

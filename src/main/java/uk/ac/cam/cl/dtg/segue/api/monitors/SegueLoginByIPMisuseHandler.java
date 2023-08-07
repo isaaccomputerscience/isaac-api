@@ -15,9 +15,9 @@ import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 public class SegueLoginByIPMisuseHandler implements IMisuseHandler {
     private static final Logger log = LoggerFactory.getLogger(SegueLoginByIPMisuseHandler.class);
 
-    public final Integer SOFT_THRESHOLD;
-    public final Integer HARD_THRESHOLD;
-    public final Integer ACCOUNTING_INTERVAL;
+    private final Integer SOFT_THRESHOLD;
+    private final Integer HARD_THRESHOLD;
+    private final Integer ACCOUNTING_INTERVAL;
 
     @Inject
     public SegueLoginByIPMisuseHandler() {

@@ -33,8 +33,8 @@ import java.util.Set;
 @JsonContentType("isaacWildcard")
 @DTOMapping(IsaacWildcardDTO.class)
 public class IsaacWildcard extends Content {
-    protected String description;
-    protected String url;
+    private String description;
+    private String url;
 
     @JsonCreator
     public IsaacWildcard(
@@ -118,37 +118,37 @@ public class IsaacWildcard extends Content {
         builder.append(", url=");
         builder.append(url);
         builder.append(", title=");
-        builder.append(title);
+        builder.append(getTitle());
         builder.append(", subtitle=");
-        builder.append(subtitle);
+        builder.append(getSubtitle());
         builder.append(", author=");
-        builder.append(author);
+        builder.append(getAuthor());
         builder.append(", encoding=");
-        builder.append(encoding);
+        builder.append(getEncoding());
         builder.append(", layout=");
-        builder.append(layout);
+        builder.append(getLayout());
         builder.append(", children=");
-        builder.append(children);
+        builder.append(getChildren());
         builder.append(", value=");
-        builder.append(value);
+        builder.append(getValue());
         builder.append(", attribution=");
-        builder.append(attribution);
+        builder.append(getAttribution());
         builder.append(", relatedContent=");
-        builder.append(relatedContent);
+        builder.append(getRelatedContent());
         builder.append(", published=");
-        builder.append(published);
+        builder.append(getPublished());
         builder.append(", level=");
-        builder.append(level);
+        builder.append(getLevel());
         builder.append(", id=");
-        builder.append(id);
+        builder.append(getId());
         builder.append(", type=");
-        builder.append(type);
+        builder.append(getType());
         builder.append(", tags=");
-        builder.append(tags);
+        builder.append(getTags());
         builder.append(", canonicalSourceFile=");
-        builder.append(canonicalSourceFile);
+        builder.append(getCanonicalSourceFile());
         builder.append(", version=");
-        builder.append(version);
+        builder.append(getVersion());
         builder.append("]");
         return builder.toString();
     }

@@ -28,8 +28,8 @@ import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
  */
 @ValidatesWith(ChoiceQuestionValidator.class)
 public class ChoiceQuestionDTO extends QuestionDTO {
-    protected List<ChoiceDTO> choices;
-    protected Boolean randomiseChoices;
+    private List<ChoiceDTO> choices;
+    private Boolean randomiseChoices;
 
     /**
      * Default Constructor for mappers.

@@ -35,7 +35,7 @@ public class UserAlertsWebSocketServlet extends JettyWebSocketServlet {
     @Override
     public void configure(final JettyWebSocketServletFactory factory) {
 
-        factory.setCreator((servletUpgradeRequest, servletUpgradeResponse) -> SegueContextNotifier.injector.getInstance(UserAlertsWebSocket.class));
+        factory.setCreator((servletUpgradeRequest, servletUpgradeResponse) -> SegueContextNotifier.getInjector().getInstance(UserAlertsWebSocket.class));
 
     }
 

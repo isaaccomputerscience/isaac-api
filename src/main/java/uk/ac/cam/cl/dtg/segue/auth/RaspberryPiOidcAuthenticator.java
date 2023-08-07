@@ -71,7 +71,7 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
     private final IdTokenVerifier idTokenVerifier;
 
     // Identity provider (AKA authorization server) metadata, including URIs of auth and token endpoints
-    public final OidcDiscoveryResponse idpMetadata;
+    private final OidcDiscoveryResponse idpMetadata;
 
     // Raspberry Pi login options
     public static final String LOGIN_OPTIONS_PARAM_NAME = "login_options";
@@ -275,5 +275,9 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
             throw new NoUserException("The name provided by the identity provider does not meet validation.");
         }
         return List.of(givenName, familyName);
+    }
+
+    public OidcDiscoveryResponse getIdpMetadata() {
+        return idpMetadata;
     }
 }

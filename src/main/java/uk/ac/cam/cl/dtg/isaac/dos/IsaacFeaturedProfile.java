@@ -35,9 +35,9 @@ import java.util.Set;
 @JsonContentType("isaacFeaturedProfile")
 public class IsaacFeaturedProfile extends Content {
 
-	protected String emailAddress;
-	protected Image image;
-	protected String homepage;
+	private String emailAddress;
+	private Image image;
+	private String homepage;
 
 	@JsonCreator
 	public IsaacFeaturedProfile(

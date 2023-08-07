@@ -1211,15 +1211,15 @@ public class QuizFacade extends AbstractIsaacFacade {
                     for (String questionId : questionIds) {
                         if (feedback.getQuestionMarks() != null) {
                             QuizFeedbackDTO.Mark questionMark = feedback.getQuestionMarks().get(questionId);
-                            if (questionMark.notAttempted == 1) {
+                            if (questionMark.getNotAttempted() == 1) {
                                 detailedMark.add("Not Attempted");
-                                summaryMark.notAttempted += 1;
-                            } else if (questionMark.incorrect == 1) {
+                                summaryMark.setNotAttempted(summaryMark.getNotAttempted() + 1);
+                            } else if (questionMark.getIncorrect() == 1) {
                                 detailedMark.add("Incorrect");
-                                summaryMark.incorrect += 1;
-                            } else if (questionMark.correct == 1) {
+                                summaryMark.setIncorrect(summaryMark.getIncorrect() + 1);
+                            } else if (questionMark.getCorrect() == 1) {
                                 detailedMark.add("Correct");
-                                summaryMark.correct += 1;
+                                summaryMark.setCorrect(summaryMark.getCorrect() + 1);
                             } else {
                                 row.add("ERROR"); // This should not happen at this level
                             }
@@ -1229,9 +1229,9 @@ public class QuizFacade extends AbstractIsaacFacade {
                             row.add("");
                         }
                     }
-                    row.add(String.format("%d", summaryMark.correct));
-                    row.add(String.format("%d", summaryMark.incorrect));
-                    row.add(String.format("%d", summaryMark.notAttempted));
+                    row.add(String.format("%d", summaryMark.getCorrect()));
+                    row.add(String.format("%d", summaryMark.getIncorrect()));
+                    row.add(String.format("%d", summaryMark.getNotAttempted()));
                     row.addAll(detailedMark);
                 }
                 rows.add(row.toArray(new String[0]));
@@ -1343,7 +1343,7 @@ public class QuizFacade extends AbstractIsaacFacade {
                             if (overallMark != null) {
                                 // Add an apostrophe to the beginning of the score, so that the fraction isn't
                                 // interpreted as a date in excel
-                                quizTotals.add(String.format("'%d/%d", overallMark.correct, overallMark.correct + overallMark.incorrect + overallMark.notAttempted));
+                                quizTotals.add(String.format("'%d/%d", overallMark.getCorrect(), overallMark.getCorrect() + overallMark.getIncorrect() + overallMark.getNotAttempted()));
                             } else {
                                 quizTotals.add("");
                             }
@@ -1368,11 +1368,11 @@ public class QuizFacade extends AbstractIsaacFacade {
                                         questionResults.add(""); // We should probably write something here to make debugging easier...
                                         continue;
                                     }
-                                    if (m.notAttempted == 1) {
+                                    if (m.getNotAttempted() == 1) {
                                         questionResults.add("Not Attempted");
-                                    } else if (m.incorrect == 1) {
+                                    } else if (m.getIncorrect() == 1) {
                                         questionResults.add("Incorrect");
-                                    } else if (m.correct == 1) {
+                                    } else if (m.getCorrect() == 1) {
                                         questionResults.add("Correct");
                                     } else {
                                         questionResults.add(""); // We should probably write something here to make debugging easier...

@@ -28,10 +28,10 @@ import uk.ac.cam.cl.dtg.segue.dto.content.InteractiveCodeSnippetDTO;
 @JsonContentType("interactiveCodeSnippet")
 public class InteractiveCodeSnippet extends CodeSnippet {
 
-    protected String setupCode;
-    protected String testCode;
-    protected String expectedResult;
-    protected Boolean wrapCodeInMain;
+    private String setupCode;
+    private String testCode;
+    private String expectedResult;
+    private Boolean wrapCodeInMain;
 
     /**
      * Default constructor, required for mappers.

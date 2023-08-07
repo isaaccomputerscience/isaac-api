@@ -24,10 +24,10 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.CodeSnippetDTO;
 @DTOMapping(CodeSnippetDTO.class)
 @JsonContentType("codeSnippet")
 public class CodeSnippet extends Content {
-    protected String language;
-    protected String code;
-    protected boolean disableHighlighting;
-    protected String url;
+    private String language;
+    private String code;
+    private boolean disableHighlighting;
+    private String url;
 
     /**
      * Default constructor, required for mappers.

@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class SegueScheduledDatabaseScriptJob extends SegueScheduledJob {
     private final String sqlFile;
-    Map<String, Object> executionContext;
+    private Map<String, Object> executionContext;
 
     private static final Logger log = LoggerFactory.getLogger(SegueScheduledDatabaseScriptJob.class);
 

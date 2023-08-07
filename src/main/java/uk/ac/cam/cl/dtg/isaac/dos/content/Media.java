@@ -24,8 +24,8 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.MediaDTO;
 @JsonContentType("media")
 @DTOMapping(MediaDTO.class)
 public abstract class Media extends Content {
-    protected String src;
-    protected String altText;
+    private String src;
+    private String altText;
 
     /**
      * Gets the src.

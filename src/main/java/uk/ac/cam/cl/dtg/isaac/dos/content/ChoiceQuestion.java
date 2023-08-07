@@ -29,8 +29,8 @@ import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 @JsonContentType("choiceQuestion")
 @ValidatesWith(ChoiceQuestionValidator.class)
 public class ChoiceQuestion extends Question {
-    protected List<Choice> choices;
-    protected Boolean randomiseChoices;
+    private List<Choice> choices;
+    private Boolean randomiseChoices;
 
     /**
      * Default constructors for auto mappers.

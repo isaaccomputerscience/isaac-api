@@ -525,7 +525,7 @@ public class IsaacEventPageDTO extends ContentDTO {
     @Override
     @JsonIgnore(false) // Override the parent class decorator!
     public String getCanonicalSourceFile() {
-        return this.canonicalSourceFile;
+        return this.getCanonicalSourceFile();
     }
 
 }

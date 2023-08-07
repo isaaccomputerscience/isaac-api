@@ -25,9 +25,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class GlossaryTermDTO extends ContentDTO {
-    protected ContentDTO explanation;
-    protected boolean autoId;
-    protected String examBoard;
+    private ContentDTO explanation;
+    private boolean autoId;
+    private String examBoard;
 
     @JsonCreator
     public GlossaryTermDTO(@JsonProperty("explanation") final ContentDTO explanation, @JsonProperty("examBoard") final String examBoard) {

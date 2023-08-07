@@ -89,7 +89,7 @@ public class ElasticSearchProvider implements ISearchProvider {
     private static final Logger log = LoggerFactory.getLogger(ElasticSearchProvider.class);
     private static final String ES_FIELD_CONNECTOR = ".";
 
-    protected final RestHighLevelClient client;
+    private final RestHighLevelClient client;
 
     // to try and improve performance of searches with a -1 limit.
     private static final int LARGE_LIMIT = 100;
@@ -749,5 +749,9 @@ public class ElasticSearchProvider implements ISearchProvider {
                     typedIndex, DEFAULT_MAX_WINDOW_SIZE), e);
             return DEFAULT_MAX_WINDOW_SIZE;
         }
+    }
+
+    public RestHighLevelClient getClient() {
+        return client;
     }
 }

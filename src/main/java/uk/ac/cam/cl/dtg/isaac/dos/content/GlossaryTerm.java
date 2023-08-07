@@ -26,9 +26,9 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.GlossaryTermDTO;
 @DTOMapping(GlossaryTermDTO.class)
 @JsonContentType("glossaryTerm")
 public class GlossaryTerm extends Content {
-    protected Content explanation;
-    protected boolean autoId;
-    protected String examBoard;
+    private Content explanation;
+    private boolean autoId;
+    private String examBoard;
 
     /**
      * Default constructor, required for mappers.

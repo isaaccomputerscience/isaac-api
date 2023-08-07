@@ -31,9 +31,9 @@ import java.util.Set;
  */
 @JsonContentType("isaacQuestionPage")
 public class IsaacQuestionPageDTO extends SeguePageDTO {
-    protected Float passMark;
-    protected String supersededBy;
-    protected Integer difficulty;
+    private Float passMark;
+    private String supersededBy;
+    private Integer difficulty;
 
     @JsonCreator
     public IsaacQuestionPageDTO(

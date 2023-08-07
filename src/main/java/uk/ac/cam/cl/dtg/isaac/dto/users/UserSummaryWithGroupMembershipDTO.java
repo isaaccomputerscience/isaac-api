@@ -19,7 +19,7 @@ package uk.ac.cam.cl.dtg.isaac.dto.users;
  * Used to augment user summary information with group membership details given a particular group context.
  */
 public class UserSummaryWithGroupMembershipDTO extends UserSummaryDTO {
-    GroupMembershipDTO groupMembershipInformation;
+    private GroupMembershipDTO groupMembershipInformation;
 
     public UserSummaryWithGroupMembershipDTO() {
 

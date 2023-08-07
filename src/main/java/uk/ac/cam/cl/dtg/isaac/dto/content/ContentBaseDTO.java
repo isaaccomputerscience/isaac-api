@@ -27,19 +27,19 @@ import java.util.Set;
 
 /**
  * Represents any content related data that can be stored by the api.
- * 
+ * <p>
  * This class is required mainly due to the relatively complex polymorphic type hierarchy that gets serialized and
  * deserialized using a custom serializer (ContentBaseDeserializer).
  */
 public abstract class ContentBaseDTO {
 
-    protected String id;
-    protected String type;
-    protected Set<String> tags;
-    protected String canonicalSourceFile;
-    protected String version;
-    protected List<AudienceContext> audience;
-    protected Map<String, List<String>> display;
+    private String id;
+    private String type;
+    private Set<String> tags;
+    private String canonicalSourceFile;
+    private String version;
+    private List<AudienceContext> audience;
+    private Map<String, List<String>> display;
 
     /**
      * Default constructor.

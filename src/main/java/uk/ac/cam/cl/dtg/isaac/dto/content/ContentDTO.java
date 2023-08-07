@@ -33,20 +33,20 @@ import java.util.Set;
  * 
  */
 public class ContentDTO extends ContentBaseDTO {
-    protected String title;
-    protected String subtitle;
-    protected String author;
-    protected String encoding;
-    protected String layout;
+    private String title;
+    private String subtitle;
+    private String author;
+    private String encoding;
+    private String layout;
     // this is the actual list of children content objects.
-    protected List<ContentBaseDTO> children;
-    protected String value;
-    protected String attribution;
-    protected List<ContentSummaryDTO> relatedContent;
-    protected Boolean published;
-    protected Boolean deprecated;
-    protected Integer level;
-    protected Boolean expandable;
+    private List<ContentBaseDTO> children;
+    private String value;
+    private String attribution;
+    private List<ContentSummaryDTO> relatedContent;
+    private Boolean published;
+    private Boolean deprecated;
+    private Integer level;
+    private Boolean expandable;
 
     @JsonCreator
     public ContentDTO(@JsonProperty("id") final String id,
@@ -65,10 +65,10 @@ public class ContentDTO extends ContentBaseDTO {
                       @JsonProperty("deprecated") final Boolean deprecated,
                       @JsonProperty("tags") final Set<String> tags,
                       @JsonProperty("level") final Integer level) {
-        this.id = id;
+        this.setId(id);
         this.title = title;
         this.subtitle = subtitle;
-        this.type = type != null ? type : "string";
+        this.setType(type != null ? type : "string");
         this.author = author;
         this.encoding = encoding;
         this.setCanonicalSourceFile(canonicalSourceFile);
@@ -79,7 +79,7 @@ public class ContentDTO extends ContentBaseDTO {
         this.published = published;
         this.deprecated = deprecated;
         this.children = children;
-        this.tags = tags;
+        this.setTags(tags);
         this.level = level;
 
         // useful for when we want to augment this POJO
@@ -87,8 +87,8 @@ public class ContentDTO extends ContentBaseDTO {
             this.children = new ArrayList<ContentBaseDTO>();
         }
 
-        if (null == this.tags) {
-            this.tags = new HashSet<String>();
+        if (null == this.getTags()) {
+            this.setTags(new HashSet<String>());
         }
     }
 
@@ -100,7 +100,7 @@ public class ContentDTO extends ContentBaseDTO {
      */
     public ContentDTO(final String value) {
         this.value = value;
-        this.type = "content";
+        this.setType("content");
         this.encoding = "markdown";
 
         // useful for when we want to augment this POJO
@@ -108,8 +108,8 @@ public class ContentDTO extends ContentBaseDTO {
             this.children = Lists.newArrayList();
         }
 
-        if (null == this.tags) {
-            this.tags = Sets.newHashSet();
+        if (null == this.getTags()) {
+            this.setTags(Sets.newHashSet());
         }
     }
 
@@ -119,7 +119,7 @@ public class ContentDTO extends ContentBaseDTO {
     public ContentDTO() {
         // useful for when we want to augment this POJO
         this.children = Lists.newArrayList();
-        this.tags = Sets.newHashSet();
+        this.setTags(Sets.newHashSet());
     }
 
     public String getTitle() {
@@ -247,8 +247,8 @@ public class ContentDTO extends ContentBaseDTO {
         ContentDTO c = (ContentDTO) o;
         boolean result = true;
 
-        if (this.id != null) {
-            result = result && this.id.equals(c.getId());
+        if (this.getId() != null) {
+            result = result && this.getId().equals(c.getId());
         }
         if (this.title != null) {
             result = result && this.title.equals(c.getTitle());
@@ -256,8 +256,8 @@ public class ContentDTO extends ContentBaseDTO {
         if (this.value != null) {
             result = result && this.value.equals(c.getValue());
         }
-        if (this.canonicalSourceFile != null) {
-            result = result && this.canonicalSourceFile.equals(c.getCanonicalSourceFile());
+        if (this.getCanonicalSourceFile() != null) {
+            result = result && this.getCanonicalSourceFile().equals(c.getCanonicalSourceFile());
         }
 
         return result;
@@ -267,8 +267,8 @@ public class ContentDTO extends ContentBaseDTO {
     public int hashCode() {
         int hashCode = 0;
 
-        if (this.id != null) {
-            hashCode = hashCode + this.id.hashCode();
+        if (this.getId() != null) {
+            hashCode = hashCode + this.getId().hashCode();
         }
         if (this.title != null) {
             hashCode = hashCode + this.title.hashCode();
