@@ -51,7 +51,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 /**
  * Segue Content Facade
  * 
- * This class specifically caters for the Rutherford physics server and is expected to provide extended functionality to
+ * This class specifically caters for the Rutherford Computer Science server and is expected to provide extended functionality to
  * the Segue api for use only on the Rutherford site.
  * 
  */

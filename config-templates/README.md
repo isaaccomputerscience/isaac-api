@@ -1,6 +1,6 @@
-#### Physics and Computer Science
+#### Computer Science
 
-If you want to get both physics and computer science content working, you'll need two copies of the `segue-config.properties` file. For consistency, use `segue-config.phy.properties` and `segue-config.cs.properties`.
+If you want to get computer science content working, you'll need two copies of the `segue-config.properties` file. For consistency, use `segue-config.cs.properties`.
 
 For the Computer Science version, you'll need to update:
 
@@ -11,6 +11,3 @@ For the Computer Science version, you'll need to update:
  - Update `GOOGLE_CALLBACK_URI` to use `localhost:8003`.
 
 In Jetty, add a new configuration like `Jetty (CS)` with the command-line `jetty:run -Dconfig.location=/path/to/segue-config.cs.properties`.
-
-Note that with this configuration it is only possible to run one of the CS or Physics APIs at a time, and they will share a database which may cause issues loading questions.
-It would be possible to override the API port and run both versions simultaneously if necessary, but the configuration in the apps would need altering too.
