@@ -744,78 +744,10 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                 }
             }
 
-            // Add a header row with due dates
-            ArrayList<String> dueDateRow = Lists.newArrayList();
-            Collections.addAll(dueDateRow, "", "Due", "");
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
-
-            ArrayList<String> headerRow = Lists.newArrayList();
-            if (includeUserIDs) {
-                Collections.addAll(headerRow, "Last Name,First Name,User ID,% Correct Overall".split(","));
-            } else {
-                Collections.addAll(headerRow, "Last Name,First Name,% Correct Overall".split(","));
-            }
-            List<String> gameboardTitles = Lists.newArrayList();
-            for (AssignmentDTO assignment : assignments) {
-                if (null != assignment.getDueDate()) {
-                    dueDateRow.add(dateFormatter.format(assignment.getDueDate()));
-                } else {
-                    dueDateRow.add(""); // No due date set
-                }
-                GameboardDTO gameboard = assignmentGameboards.get(assignment);
-                String gameboardTitle = gameboard.getTitle();
-                if (null != gameboardTitle) {
-                    gameboardTitles.add(gameboardTitle);
-                } else {
-                    gameboardTitles.add(gameboard.getId());
-                }
-            }
-            for (String gameboardTitle : gameboardTitles) {
-                headerRow.add("% Correct for '" + gameboardTitle + "'");
-            }
-            dueDateRow.add("");
-            headerRow.add("");
-
-            Map<GameboardDTO, List<String>> gameboardQuestionIds = Maps.newHashMap();
-            for (AssignmentDTO assignment : assignments) {
-                GameboardDTO gameboard = assignmentGameboards.get(assignment);
-                for (GameboardItem questionPage : gameboard.getContents()) {
-                    int b = 1;
-                    for (QuestionDTO question : gameManager.getAllMarkableQuestionPartsDFSOrder(questionPage.getId())) {
-                        List<String> questionIds = gameboardQuestionIds.get(gameboard);
-                        if (null == questionIds) {
-                            questionIds = Lists.newArrayList();
-                        }
-                        questionIds.add(question.getId());
-                        gameboardQuestionIds.put(gameboard, questionIds);
-
-                        StringBuilder s = new StringBuilder();
-                        if (question.getTitle() != null) {
-                            s.append(question.getTitle());
-                        } else {
-                            s.append("Q").append(b);
-                        }
-                        s.append(" - ").append(questionPage.getTitle()).append(" - ");
-                        if (gameboard.getTitle() != null) {
-                            s.append(gameboard.getTitle());
-                        } else {
-                            s.append(gameboard.getId());
-                        }
-                        b++;
-                        if (null != assignment.getDueDate()) {
-                            dueDateRow.add(dateFormatter.format(assignment.getDueDate()));
-                        } else {
-                            dueDateRow.add(""); // No due date set
-                        }
-                        headerRow.add(s.toString());
-                    }
-                }
-            }
-
-            // Moving on to actual rows...
             ArrayList<String[]> rows = Lists.newArrayList();
-            rows.add(dueDateRow.toArray(new String[0]));
-            rows.add(headerRow.toArray(new String[0]));
+            rows.addAll(buildHeaderAndDueDateRows(includeUserIDs, assignments, assignmentGameboards));
+
+            Map<GameboardDTO, List<String>> gameboardQuestionIds = extractGameboardQuestionIds(assignments, assignmentGameboards);
 
             for (RegisteredUserDTO groupMember : groupMembers) {
                 // FIXME Some room for improvement here, as we can retrieve all the users with a single query.
@@ -917,6 +849,96 @@ public class AssignmentFacade extends AbstractIsaacFacade {
         } catch (IOException e) {
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error while building the CSV file.").toResponse();
         }
+    }
+
+    private ArrayList<String[]> buildHeaderAndDueDateRows(
+            final boolean includeUserIDs, final List<AssignmentDTO> assignments, final Map<AssignmentDTO, GameboardDTO> assignmentGameboards
+    ) throws ContentManagerException {
+        // Add a header row with due dates
+        ArrayList<String> dueDateRow = Lists.newArrayList();
+        Collections.addAll(dueDateRow, "", "Due", "");
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
+
+        ArrayList<String> headerRow = Lists.newArrayList();
+        if (includeUserIDs) {
+            Collections.addAll(headerRow, "Last Name,First Name,User ID,% Correct Overall".split(","));
+        } else {
+            Collections.addAll(headerRow, "Last Name,First Name,% Correct Overall".split(","));
+        }
+        List<String> gameboardTitles = Lists.newArrayList();
+        for (AssignmentDTO assignment : assignments) {
+            if (null != assignment.getDueDate()) {
+                dueDateRow.add(dateFormatter.format(assignment.getDueDate()));
+            } else {
+                dueDateRow.add(""); // No due date set
+            }
+            GameboardDTO gameboard = assignmentGameboards.get(assignment);
+            String gameboardTitle = gameboard.getTitle();
+            if (null != gameboardTitle) {
+                gameboardTitles.add(gameboardTitle);
+            } else {
+                gameboardTitles.add(gameboard.getId());
+            }
+        }
+        for (String gameboardTitle : gameboardTitles) {
+            headerRow.add("% Correct for '" + gameboardTitle + "'");
+        }
+        dueDateRow.add("");
+        headerRow.add("");
+
+        for (AssignmentDTO assignment : assignments) {
+            GameboardDTO gameboard = assignmentGameboards.get(assignment);
+            for (GameboardItem questionPage : gameboard.getContents()) {
+                int b = 1;
+                for (QuestionDTO question : gameManager.getAllMarkableQuestionPartsDFSOrder(questionPage.getId())) {
+                    StringBuilder s = new StringBuilder();
+                    if (question.getTitle() != null) {
+                        s.append(question.getTitle());
+                    } else {
+                        s.append("Q").append(b);
+                    }
+                    s.append(" - ").append(questionPage.getTitle()).append(" - ");
+                    if (gameboard.getTitle() != null) {
+                        s.append(gameboard.getTitle());
+                    } else {
+                        s.append(gameboard.getId());
+                    }
+                    b++;
+                    if (null != assignment.getDueDate()) {
+                        dueDateRow.add(dateFormatter.format(assignment.getDueDate()));
+                    } else {
+                        dueDateRow.add(""); // No due date set
+                    }
+                    headerRow.add(s.toString());
+                }
+            }
+        }
+
+        // Moving on to actual rows...
+        ArrayList<String[]> rows = Lists.newArrayList();
+        rows.add(dueDateRow.toArray(new String[0]));
+        rows.add(headerRow.toArray(new String[0]));
+        return rows;
+    }
+
+    private Map<GameboardDTO, List<String>> extractGameboardQuestionIds(
+            final List<AssignmentDTO> assignments, final Map<AssignmentDTO, GameboardDTO> assignmentGameboards
+    ) throws ContentManagerException {
+        Map<GameboardDTO, List<String>> gameboardQuestionIds = Maps.newHashMap();
+        for (AssignmentDTO assignment : assignments) {
+            GameboardDTO gameboard = assignmentGameboards.get(assignment);
+            for (GameboardItem questionPage : gameboard.getContents()) {
+                for (QuestionDTO question : gameManager.getAllMarkableQuestionPartsDFSOrder(questionPage.getId())) {
+                    List<String> questionIds = gameboardQuestionIds.get(gameboard);
+                    if (null == questionIds) {
+                        questionIds = Lists.newArrayList();
+                    }
+                    questionIds.add(question.getId());
+                    gameboardQuestionIds.put(gameboard, questionIds);
+                }
+            }
+        }
+        return gameboardQuestionIds;
     }
 
     private Map<RegisteredUserDTO, Map<String, Integer>> getQuestionDataMapFromGameboards(
