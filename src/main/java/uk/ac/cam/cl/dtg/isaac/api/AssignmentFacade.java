@@ -715,115 +715,16 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             // Fetch the members of the requested group
             List<RegisteredUserDTO> groupMembers = this.groupManager.getUsersInGroup(group);
 
-            // String: question part id
-            // Integer: question part result
-            Map<RegisteredUserDTO, Map<GameboardDTO, Map<String, Integer>>> grandTable = new HashMap<>();
             // Retrieve each user's progress data and cram everything into a Grand Table for later consumption
             List<String> gameboardsIds = assignments.stream().map(AssignmentDTO::getGameboardId).collect(Collectors.toList());
             List<GameboardDTO> gameboards = gameManager.getGameboards(gameboardsIds);
 
-            Map<String, GameboardDTO> gameboardsIdMap = gameboards.stream().collect(Collectors.toMap(GameboardDTO::getId, Function.identity()));
-
-            Map<AssignmentDTO, GameboardDTO> assignmentGameboards = new HashMap<>();
-            for (AssignmentDTO assignment : assignments) {
-                GameboardDTO gameboard = gameboardsIdMap.get(assignment.getGameboardId());
-                // Create an assignment -> gameboard mapping to avoid repeatedly querying the DB later on. All the efficiency!
-                assignmentGameboards.put(assignment, gameboard);
-            }
-            Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = getQuestionDataMapFromGameboards(groupMembers, gameboards);
-
-            for (GameboardDTO gameboard : gameboards) {
-
-                for (RegisteredUserDTO student : userQuestionDataMap.keySet()) {
-                    Map<GameboardDTO, Map<String, Integer>> entry = grandTable.get(student);
-                    if (null == entry) {
-                        entry = Maps.newHashMap();
-                    }
-                    entry.put(gameboard, userQuestionDataMap.get(student));
-                    grandTable.put(student, entry);
-                }
-            }
+            Map<AssignmentDTO, GameboardDTO> assignmentGameboards = getAssignmentGameboardsMap(assignments, gameboards);
+            Map<RegisteredUserDTO, Map<GameboardDTO, Map<String, Integer>>> grandTable = buildGrandTable(groupMembers, gameboards);
 
             ArrayList<String[]> rows = Lists.newArrayList();
-            rows.addAll(buildHeaderAndDueDateRows(includeUserIDs, assignments, assignmentGameboards));
-
-            Map<GameboardDTO, List<String>> gameboardQuestionIds = extractGameboardQuestionIds(assignments, assignmentGameboards);
-
-            for (RegisteredUserDTO groupMember : groupMembers) {
-                // FIXME Some room for improvement here, as we can retrieve all the users with a single query.
-                // FIXME Not urgent, as the dominating query is the one that retrieves question attempts above.
-                UserSummaryDTO userSummary = associationManager.enforceAuthorisationPrivacy(currentlyLoggedInUser,
-                        userManager.convertToUserSummaryObject(groupMember));
-
-                ArrayList<String> row = Lists.newArrayList();
-                Map<GameboardDTO, Map<String, Integer>> userAssignments = grandTable.get(groupMember);
-                List<Float> assignmentPercentages = Lists.newArrayList();
-                List<Integer> marks = Lists.newArrayList();
-                int totalQPartsCorrect = 0;
-                int totalQPartsCount = 0;
-                for (AssignmentDTO assignment : assignments) {
-                    GameboardDTO gameboard = assignmentGameboards.get(assignment);
-                    int assignmentQPartsCorrect = 0;
-                    int assignmentQPartsCount = 0;
-                    List<String> questionIds = gameboardQuestionIds.get(gameboard);
-                    List<GameboardItem> questions = gameboard.getContents();
-                    Map<String, Integer> gameboardPartials = Maps.newHashMap();
-                    for (GameboardItem question : questions) {
-                        gameboardPartials.put(question.getId(), 0);
-                    }
-                    HashMap<String, Integer> questionParts = new HashMap<>(gameboardPartials);
-                    for (String s : questionIds) {
-                        Integer mark = userAssignments.get(gameboard).get(s);
-                        String questionPageId = extractPageIdFromQuestionId(s);
-                        questionParts.put(questionPageId, questionParts.get(questionPageId) + 1);
-                        marks.add(mark);
-                        if (null != mark) {
-                            gameboardPartials.put(questionPageId, gameboardPartials.get(questionPageId) + mark);
-                        }
-                    }
-                    for (Entry<String, Integer> entry : gameboardPartials.entrySet()) {
-                        assignmentQPartsCorrect += entry.getValue();
-                        assignmentQPartsCount += questionParts.get(entry.getKey());
-                    }
-                    totalQPartsCorrect += assignmentQPartsCorrect;
-                    totalQPartsCount += assignmentQPartsCount;
-                    assignmentPercentages.add((100f * assignmentQPartsCorrect) / assignmentQPartsCount);
-                }
-                float overallTotal = (100f * totalQPartsCorrect) / totalQPartsCount;
-
-                // The next three lines could be a little better if I were not this sleepy...
-                row.add(userSummary.getFamilyName());
-                row.add(userSummary.getGivenName());
-                if (includeUserIDs) {
-                    row.add(userSummary.getId().toString());
-                }
-
-                if (userSummary.isAuthorisedFullAccess()) {
-                    row.add(String.format("%.0f", overallTotal));
-                    for (Float assignmentPercentage : assignmentPercentages) {
-                        row.add(String.format("%.0f", assignmentPercentage));
-                    }
-                    row.add("");
-                    for (Integer mark : marks) {
-                        if (null != mark) {
-                            row.add(String.format("%d", mark));
-                        } else {
-                            row.add("");
-                        }
-                    }
-
-                } else {
-                    row.add(NOT_SHARING);
-                    for (@SuppressWarnings("unused") Float assignmentPercentage : assignmentPercentages) {
-                        row.add(NOT_SHARING);
-                    }
-                    row.add("");
-                    for (@SuppressWarnings("unused") Integer mark : marks) {
-                        row.add(NOT_SHARING);
-                    }
-                }
-                rows.add(row.toArray(new String[0]));
-            }
+            rows.addAll(buildGroupAssignmentHeaderAndDueDateRows(includeUserIDs, assignments, assignmentGameboards));
+            rows.addAll(buildGroupAssignmentsReportBody(currentlyLoggedInUser, includeUserIDs, assignments, groupMembers, assignmentGameboards, grandTable));
 
             StringWriter stringWriter = new StringWriter();
             CSVWriter csvWriter = new CSVWriter(stringWriter);
@@ -851,7 +752,127 @@ public class AssignmentFacade extends AbstractIsaacFacade {
         }
     }
 
-    private ArrayList<String[]> buildHeaderAndDueDateRows(
+    private ArrayList<String[]> buildGroupAssignmentsReportBody(
+            final RegisteredUserDTO currentlyLoggedInUser, final boolean includeUserIDs, final List<AssignmentDTO> assignments,
+            final List<RegisteredUserDTO> groupMembers, final Map<AssignmentDTO, GameboardDTO> assignmentGameboards,
+            final Map<RegisteredUserDTO, Map<GameboardDTO, Map<String, Integer>>> grandTable
+    ) throws ContentManagerException {
+        Map<GameboardDTO, List<String>> gameboardQuestionIds = extractGameboardQuestionIds(assignments, assignmentGameboards);
+
+        ArrayList<String[]> rows = Lists.newArrayList();
+        for (RegisteredUserDTO groupMember : groupMembers) {
+            // FIXME Some room for improvement here, as we can retrieve all the users with a single query.
+            // FIXME Not urgent, as the dominating query is the one that retrieves question attempts above.
+            UserSummaryDTO userSummary = associationManager.enforceAuthorisationPrivacy(currentlyLoggedInUser,
+                    userManager.convertToUserSummaryObject(groupMember));
+
+            ArrayList<String> row = Lists.newArrayList();
+            Map<GameboardDTO, Map<String, Integer>> userAssignments = grandTable.get(groupMember);
+            List<Float> assignmentPercentages = Lists.newArrayList();
+            List<Integer> marks = Lists.newArrayList();
+            int totalQPartsCorrect = 0;
+            int totalQPartsCount = 0;
+            for (AssignmentDTO assignment : assignments) {
+                GameboardDTO gameboard = assignmentGameboards.get(assignment);
+                int assignmentQPartsCorrect = 0;
+                int assignmentQPartsCount = 0;
+                List<String> questionIds = gameboardQuestionIds.get(gameboard);
+                List<GameboardItem> questions = gameboard.getContents();
+                Map<String, Integer> gameboardPartials = Maps.newHashMap();
+                for (GameboardItem question : questions) {
+                    gameboardPartials.put(question.getId(), 0);
+                }
+                HashMap<String, Integer> questionParts = new HashMap<>(gameboardPartials);
+                for (String s : questionIds) {
+                    Integer mark = userAssignments.get(gameboard).get(s);
+                    String questionPageId = extractPageIdFromQuestionId(s);
+                    questionParts.put(questionPageId, questionParts.get(questionPageId) + 1);
+                    marks.add(mark);
+                    if (null != mark) {
+                        gameboardPartials.put(questionPageId, gameboardPartials.get(questionPageId) + mark);
+                    }
+                }
+                for (Entry<String, Integer> entry : gameboardPartials.entrySet()) {
+                    assignmentQPartsCorrect += entry.getValue();
+                    assignmentQPartsCount += questionParts.get(entry.getKey());
+                }
+                totalQPartsCorrect += assignmentQPartsCorrect;
+                totalQPartsCount += assignmentQPartsCount;
+                assignmentPercentages.add((100f * assignmentQPartsCorrect) / assignmentQPartsCount);
+            }
+            float overallTotal = (100f * totalQPartsCorrect) / totalQPartsCount;
+
+            // The next three lines could be a little better if I were not this sleepy...
+            row.add(userSummary.getFamilyName());
+            row.add(userSummary.getGivenName());
+            if (includeUserIDs) {
+                row.add(userSummary.getId().toString());
+            }
+
+            if (userSummary.isAuthorisedFullAccess()) {
+                row.add(String.format("%.0f", overallTotal));
+                for (Float assignmentPercentage : assignmentPercentages) {
+                    row.add(String.format("%.0f", assignmentPercentage));
+                }
+                row.add("");
+                for (Integer mark : marks) {
+                    if (null != mark) {
+                        row.add(String.format("%d", mark));
+                    } else {
+                        row.add("");
+                    }
+                }
+
+            } else {
+                row.add(NOT_SHARING);
+                for (@SuppressWarnings("unused") Float assignmentPercentage : assignmentPercentages) {
+                    row.add(NOT_SHARING);
+                }
+                row.add("");
+                for (@SuppressWarnings("unused") Integer mark : marks) {
+                    row.add(NOT_SHARING);
+                }
+            }
+            rows.add(row.toArray(new String[0]));
+        }
+        return rows;
+    }
+
+    private static Map<AssignmentDTO, GameboardDTO> getAssignmentGameboardsMap(final List<AssignmentDTO> assignments, final List<GameboardDTO> gameboards) {
+        Map<String, GameboardDTO> gameboardsIdMap = gameboards.stream().collect(Collectors.toMap(GameboardDTO::getId, Function.identity()));
+
+        Map<AssignmentDTO, GameboardDTO> assignmentGameboards = new HashMap<>();
+        for (AssignmentDTO assignment : assignments) {
+            GameboardDTO gameboard = gameboardsIdMap.get(assignment.getGameboardId());
+            // Create an assignment -> gameboard mapping to avoid repeatedly querying the DB later on. All the efficiency!
+            assignmentGameboards.put(assignment, gameboard);
+        }
+        return assignmentGameboards;
+    }
+
+    private Map<RegisteredUserDTO, Map<GameboardDTO, Map<String, Integer>>> buildGrandTable(
+            final List<RegisteredUserDTO> groupMembers, final List<GameboardDTO> gameboards
+    ) throws SegueDatabaseException {
+        Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = getQuestionDataMapFromGameboards(groupMembers, gameboards);
+
+        // String: question part id
+        // Integer: question part result
+        Map<RegisteredUserDTO, Map<GameboardDTO, Map<String, Integer>>> grandTable = new HashMap<>();
+        for (GameboardDTO gameboard : gameboards) {
+
+            for (RegisteredUserDTO student : userQuestionDataMap.keySet()) {
+                Map<GameboardDTO, Map<String, Integer>> entry = grandTable.get(student);
+                if (null == entry) {
+                    entry = Maps.newHashMap();
+                }
+                entry.put(gameboard, userQuestionDataMap.get(student));
+                grandTable.put(student, entry);
+            }
+        }
+        return grandTable;
+    }
+
+    private ArrayList<String[]> buildGroupAssignmentHeaderAndDueDateRows(
             final boolean includeUserIDs, final List<AssignmentDTO> assignments, final Map<AssignmentDTO, GameboardDTO> assignmentGameboards
     ) throws ContentManagerException {
         // Add a header row with due dates
