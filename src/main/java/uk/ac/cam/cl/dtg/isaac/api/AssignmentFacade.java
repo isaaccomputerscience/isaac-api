@@ -516,7 +516,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             }
             Collections.addAll(totalsRow, ",Correct %".split(","));
 
-            Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = getQuestionDataMapFromMembersAndGameboard(groupMembers, gameboard);
+            Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = getQuestionDataMapFromGameboard(groupMembers, gameboard);
 
             userQuestionDataMap.forEach((user, outcome) -> questionIds.forEach(questionId -> outcome.putIfAbsent(questionId, null)));
 
@@ -575,15 +575,16 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             rows.add(userInfoHeader.split(","));
             rows.addAll(resultRows);
 
-            this.getLogManager().logEvent(currentlyLoggedInUser, request, IsaacServerLogType.DOWNLOAD_ASSIGNMENT_PROGRESS_CSV,
-                    ImmutableMap.of("assignmentId", assignmentId));
-
             StringWriter stringWriter = new StringWriter();
             CSVWriter csvWriter = new CSVWriter(stringWriter);
             csvWriter.writeAll(rows);
             csvWriter.close();
 
             StringBuilder headerBuilder = buildAssignmentProgressResponseObject(assignmentId, formatMode, currentlyLoggedInUser, stringWriter);
+
+            this.getLogManager().logEvent(currentlyLoggedInUser, request, IsaacServerLogType.DOWNLOAD_ASSIGNMENT_PROGRESS_CSV,
+                    ImmutableMap.of("assignmentId", assignmentId));
+
             // get game manager completion information for this assignment.
             return Response.ok(headerBuilder.toString())
                     .header("Content-Disposition", "attachment; filename=assignment_progress.csv")
@@ -601,22 +602,29 @@ public class AssignmentFacade extends AbstractIsaacFacade {
         }
     }
 
-    private Map<RegisteredUserDTO, Map<String, Integer>> getQuestionDataMapFromMembersAndGameboard(
+    private Map<RegisteredUserDTO, Map<String, Integer>> getQuestionDataMapFromGameboard(
             final List<RegisteredUserDTO> groupMembers, final GameboardDTO gameboard) throws SegueDatabaseException {
-        List<String> questionPageIds = Lists.newArrayList();
-        for (GameboardItem questionPage : gameboard.getContents()) {
-            questionPageIds.add(questionPage.getId());
-        }
-        Map<Long, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> questionAttempts;
-        questionAttempts = this.questionManager.getMatchingQuestionAttempts(groupMembers, questionPageIds);
+
+        List<String> questionPageIds = gameboard.getContents().stream().map(GameboardItem::getId).collect(Collectors.toList());
+
+        Map<RegisteredUserDTO, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>>
+                questionAttemptsForAllUsersOfInterest = getUserQuestionAttemptsFromPageIds(groupMembers, questionPageIds);
+
+        return getUserQuestionMap(questionAttemptsForAllUsersOfInterest);
+    }
+
+    private Map<RegisteredUserDTO, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> getUserQuestionAttemptsFromPageIds(
+            final List<RegisteredUserDTO> groupMembers, final List<String> questionPageIds) throws SegueDatabaseException {
+
+        Map<Long, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>>
+                questionAttempts = this.questionManager.getMatchingQuestionAttempts(groupMembers, questionPageIds);
 
         Map<RegisteredUserDTO, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>>
                 questionAttemptsForAllUsersOfInterest = new HashMap<>();
         for (RegisteredUserDTO user : groupMembers) {
             questionAttemptsForAllUsersOfInterest.put(user, questionAttempts.get(user.getId()));
         }
-
-        return getUserQuestionMap(questionAttemptsForAllUsersOfInterest);
+        return questionAttemptsForAllUsersOfInterest;
     }
 
     private Map<String, List<String>> extractAssignmentProgressQuestionIds(final boolean includeUserIDs, final GameboardDTO gameboard)
@@ -687,13 +695,12 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                                                            @QueryParam("format") final String formatMode) {
 
         try {
-            // Fetch the currently logged in user
+            // Fetch the currently logged-in user
             RegisteredUserDTO currentlyLoggedInUser = userManager.getCurrentRegisteredUser(request);
             boolean includeUserIDs = isUserAnAdminOrEventManager(userManager, currentlyLoggedInUser);
 
             // Fetch the requested group
-            UserGroupDTO group;
-            group = this.groupManager.getGroupById(groupId);
+            UserGroupDTO group = this.groupManager.getGroupById(groupId);
 
             // Check the user has permission to access this group:
             if (!GroupManager.isOwnerOrAdditionalManager(group, currentlyLoggedInUser.getId())
@@ -703,12 +710,10 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             }
 
             // Fetch all assignments set to the requested group:
-            List<AssignmentDTO> assignments;
-            assignments = this.assignmentManager.getAllAssignmentsForSpecificGroups(Collections.singletonList(group), false);
+            List<AssignmentDTO> assignments = this.assignmentManager.getAllAssignmentsForSpecificGroups(Collections.singletonList(group), false);
 
             // Fetch the members of the requested group
-            List<RegisteredUserDTO> groupMembers;
-            groupMembers = this.groupManager.getUsersInGroup(group);
+            List<RegisteredUserDTO> groupMembers = this.groupManager.getUsersInGroup(group);
 
             // String: question part id
             // Integer: question part result
@@ -725,21 +730,9 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                 // Create an assignment -> gameboard mapping to avoid repeatedly querying the DB later on. All the efficiency!
                 assignmentGameboards.put(assignment, gameboard);
             }
-            List<GameboardItem> gameboardItems = gameboards.stream().map(GameboardDTO::getContents).flatMap(Collection::stream).collect(Collectors.toList());
-            List<String> questionPageIds = gameboardItems.stream().map(GameboardItem::getId).collect(Collectors.toList());
-            Map<Long, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> questionAttempts;
-            try {
-                questionAttempts = this.questionManager.getMatchingQuestionAttempts(groupMembers, questionPageIds);
-            } catch (IllegalArgumentException e) {
-                questionAttempts = new HashMap<>();
-            }
-            Map<RegisteredUserDTO, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> questionAttemptsForAllUsersOfInterest = new HashMap<>();
-            for (RegisteredUserDTO user : groupMembers) {
-                questionAttemptsForAllUsersOfInterest.put(user, questionAttempts.get(user.getId()));
-            }
+            Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = getQuestionDataMapFromGameboards(groupMembers, gameboards);
 
             for (GameboardDTO gameboard : gameboards) {
-                Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = getUserQuestionMap(questionAttemptsForAllUsersOfInterest);
 
                 for (RegisteredUserDTO student : userQuestionDataMap.keySet()) {
                     Map<GameboardDTO, Map<String, Integer>> entry = grandTable.get(student);
@@ -905,15 +898,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             csvWriter.writeAll(rows);
             csvWriter.close();
 
-            StringBuilder headerBuilder = new StringBuilder();
-            if (null != formatMode && formatMode.toLowerCase().equals("excel")) {
-                headerBuilder.append("\uFEFF");  // UTF-8 Byte Order Marker
-            }
-            headerBuilder.append(String.format("Assignments for '%s' (%s)\nDownloaded on %s\nGenerated by: %s %s\n\n",
-                        group.getGroupName(), group.getId(), dateFormat.format(Date.from(Instant.now(clock))), currentlyLoggedInUser.getGivenName(),
-                        currentlyLoggedInUser.getFamilyName()))
-                    .append(stringWriter.toString())
-                    .append("\n\nN.B.\n\"The percentages are for question parts completed, not question pages.\"\n");
+            StringBuilder headerBuilder = buildGroupAssignmentProgressResponseObject(formatMode, currentlyLoggedInUser, group, stringWriter);
 
             this.getLogManager().logEvent(currentlyLoggedInUser, request, IsaacServerLogType.DOWNLOAD_GROUP_PROGRESS_CSV,
                     ImmutableMap.of("groupId", groupId));
@@ -932,6 +917,34 @@ public class AssignmentFacade extends AbstractIsaacFacade {
         } catch (IOException e) {
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error while building the CSV file.").toResponse();
         }
+    }
+
+    private Map<RegisteredUserDTO, Map<String, Integer>> getQuestionDataMapFromGameboards(
+            final List<RegisteredUserDTO> groupMembers, final List<GameboardDTO> gameboards) throws SegueDatabaseException {
+
+
+        List<GameboardItem> gameboardItems = gameboards.stream().map(GameboardDTO::getContents).flatMap(Collection::stream).collect(Collectors.toList());
+        List<String> questionPageIds = gameboardItems.stream().map(GameboardItem::getId).collect(Collectors.toList());
+
+        Map<RegisteredUserDTO, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>>
+                questionAttemptsForAllUsersOfInterest = getUserQuestionAttemptsFromPageIds(groupMembers, questionPageIds);
+
+        return getUserQuestionMap(questionAttemptsForAllUsersOfInterest);
+    }
+
+    private StringBuilder buildGroupAssignmentProgressResponseObject(
+            final String formatMode, final RegisteredUserDTO currentlyLoggedInUser, final UserGroupDTO group,
+            final StringWriter stringWriter) {
+        StringBuilder headerBuilder = new StringBuilder();
+        if (null != formatMode && formatMode.equalsIgnoreCase("excel")) {
+            headerBuilder.append("\uFEFF");  // UTF-8 Byte Order Marker
+        }
+        headerBuilder.append(String.format("Assignments for '%s' (%s)\nDownloaded on %s\nGenerated by: %s %s\n\n",
+                    group.getGroupName(), group.getId(), dateFormat.format(Date.from(Instant.now(clock))), currentlyLoggedInUser.getGivenName(),
+                    currentlyLoggedInUser.getFamilyName()))
+                .append(stringWriter.toString())
+                .append("\n\nN.B.\n\"The percentages are for question parts completed, not question pages.\"\n");
+        return headerBuilder;
     }
 
     /**
