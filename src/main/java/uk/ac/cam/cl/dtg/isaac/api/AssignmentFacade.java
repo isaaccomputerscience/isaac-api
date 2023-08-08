@@ -131,7 +131,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
      * @param associationManager - So that we can determine what information is allowed to be seen by other users.
      * @param userBadgeManager   - So that badges can be awarded to do with assignments
      * @param assignmentService  - for augmenting assignments with assigner information
-     * @param clock
+     * @param clock              - Instance of Clock for use in date calculations, can be replaced for testing purposes
      */
     @Inject
     public AssignmentFacade(final AssignmentManager assignmentManager, final QuestionManager questionManager,
@@ -286,7 +286,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
     }
 
     /**
-     * Allows a user to get all assignments they have set in light weight objects.
+     * Allows a user to get all assignments they have set in lightweight objects.
      * <p>
      * If the user specifies a group ID to narrow the search full objects including questions in gameboards will be returned.
      *
@@ -1025,13 +1025,13 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                 return new SegueErrorResponse(Status.FORBIDDEN, "You need a staff account to set assignments to more than one group at once!").toResponse();
             }
 
-            List<AssignmentStatusDTO> assigmentStatuses = new ArrayList<>();
+            List<AssignmentStatusDTO> assignmentStatuses = new ArrayList<>();
             Map<String, GameboardDTO> gameboardMap = new HashMap<>();
             Map<Long, UserGroupDTO> groupMap = new HashMap<>();
 
             for (AssignmentDTO assignmentDTO : assignmentDTOsFromClient) {
                 if (null == assignmentDTO.getGameboardId() || null == assignmentDTO.getGroupId()) {
-                    assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "A required field was missing. Must provide gameboard id and group id."));
+                    assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "A required field was missing. Must provide gameboard id and group id."));
                     continue;
                 }
 
@@ -1040,28 +1040,30 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                 if (userIsStaff) {
                     boolean notesIsTooLong = null != assignmentDTO.getNotes() && assignmentDTO.getNotes().length() > MAX_NOTE_CHAR_LENGTH;
                     if (notesIsTooLong) {
-                        assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "Your assignment notes exceed the maximum allowed length of "
+                        assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "Your assignment notes exceed the maximum allowed length of "
                                 + MAX_NOTE_CHAR_LENGTH + " characters."));
                         continue;
                     }
                 } else if (!notesIsNullOrEmpty) {
-                    assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "You are not allowed to add assignment notes."));
+                    assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "You are not allowed to add assignment notes."));
                     continue;
                 }
 
                 if (null != assignmentDTO.getDueDate() && !assignmentDTO.dueDateIsAfter(Date.from(Instant.now(clock)))) {
-                    assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "The assignment cannot be due in the past."));
+                    assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "The assignment cannot be due in the past."));
                     continue;
                 }
 
                 if (null != assignmentDTO.getScheduledStartDate()) {
                     Date oneYearInFuture = DateUtils.addYears(Date.from(Instant.now(clock)), 1);
                     if (assignmentDTO.getScheduledStartDate().after(oneYearInFuture)) {
-                        assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "The assignment cannot be scheduled to begin more than one year in the future."));
+                        assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(),
+                                "The assignment cannot be scheduled to begin more than one year in the future."));
                         continue;
                     }
                     if (null != assignmentDTO.getDueDate() && !assignmentDTO.dueDateIsAfter(assignmentDTO.getScheduledStartDate())) {
-                        assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "The assignment cannot be scheduled to begin after it is due."));
+                        assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(),
+                                "The assignment cannot be scheduled to begin after it is due."));
                         continue;
                     }
                     // If the assignment will have started in the next hour (meaning it might miss the related emails
@@ -1081,7 +1083,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                     if (null == gameboard) {
                         gameboard = this.gameManager.getGameboard(assignmentDTO.getGameboardId());
                         if (null == gameboard) {
-                            assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "The gameboard id specified does not exist."));
+                            assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "The gameboard id specified does not exist."));
                             continue;
                         }
                         gameboardMap.put(gameboard.getId(), gameboard);
@@ -1091,7 +1093,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                     if (null == assigneeGroup) {
                         assigneeGroup = groupManager.getGroupById(assignmentDTO.getGroupId());
                         if (null == assigneeGroup) {
-                            assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "The group id specified does not exist."));
+                            assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "The group id specified does not exist."));
                             continue;
                         }
                         groupMap.put(assigneeGroup.getId(), assigneeGroup);
@@ -1099,7 +1101,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
 
                     if (!GroupManager.isOwnerOrAdditionalManager(assigneeGroup, currentlyLoggedInUser.getId())
                             && !isUserAnAdmin(userManager, currentlyLoggedInUser)) {
-                        assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "You can only set assignments to groups you own or manage."));
+                        assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "You can only set assignments to groups you own or manage."));
                         continue;
                     }
 
@@ -1122,15 +1124,15 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                             UserBadgeManager.Badge.TEACHER_ASSIGNMENTS_SET, assignmentWithID.getId().toString());
 
                     // Assigning to this group was a success
-                    assigmentStatuses.add(new AssignmentStatusDTO(assignmentWithID.getGroupId(), assignmentWithID.getId()));
+                    assignmentStatuses.add(new AssignmentStatusDTO(assignmentWithID.getGroupId(), assignmentWithID.getId()));
                 } catch (DuplicateAssignmentException e) {
-                    assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), e.getMessage()));
+                    assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), e.getMessage()));
                 } catch (SegueDatabaseException e) {
                     log.error("Database error while trying to assign work", e);
-                    assigmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "Unknown database error."));
+                    assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(), "Unknown database error."));
                 }
             }
-            return Response.ok(assigmentStatuses).build();
+            return Response.ok(assignmentStatuses).build();
         } catch (NoUserLoggedInException e) {
             return SegueErrorResponse.getNotLoggedInResponse();
         }
