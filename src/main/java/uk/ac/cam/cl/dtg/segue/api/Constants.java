@@ -643,6 +643,8 @@ public final class Constants {
     // Misuse Handler default thresholds
     public static final Integer PASSWORD_RESET_BY_IP_DEFAULT_SOFT_THRESHOLD = 50;
     public static final Integer PASSWORD_RESET_BY_IP_DEFAULT_HARD_THRESHOLD = 300;
+    public static final Integer PASSWORD_RESET_BY_EMAIL_DEFAULT_SOFT_THRESHOLD = 2;
+    public static final Integer PASSWORD_RESET_BY_EMAIL_DEFAULT_HARD_THRESHOLD = 4;
     public static final Integer SEGUE_LOGIN_BY_EMAIL_DEFAULT_SOFT_THRESHOLD = 5;
     public static final Integer SEGUE_LOGIN_BY_EMAIL_DEFAULT_HARD_THRESHOLD = 10;
     public static final Integer SEGUE_LOGIN_BY_IP_DEFAULT_SOFT_THRESHOLD = 50;
