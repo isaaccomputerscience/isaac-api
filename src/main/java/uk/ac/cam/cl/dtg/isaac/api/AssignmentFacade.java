@@ -504,76 +504,12 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             GameboardDTO gameboard = this.gameManager.getGameboard(assignment.getGameboardId());
 
             List<String[]> rows = Lists.newArrayList();
-            DecimalFormat percentageFormat = new DecimalFormat("###");
 
             Map<String, List<String>> idLists = extractAssignmentProgressQuestionIds(includeUserIDs, gameboard);
             List<String> questionIds = idLists.get("questionIds");
             rows.add(idLists.get("headerRow").toArray(new String[0]));
 
-            List<String> totalsRow = Lists.newArrayList();
-            if (includeUserIDs) {
-                totalsRow.add("");
-            }
-            Collections.addAll(totalsRow, ",Correct %".split(","));
-
-            Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = getQuestionDataMapFromGameboard(groupMembers, gameboard);
-
-            userQuestionDataMap.forEach((user, outcome) -> questionIds.forEach(questionId -> outcome.putIfAbsent(questionId, null)));
-
-            List<String[]> resultRows = Lists.newArrayList();
-            int[] columnTotals = new int[questionIds.size()];
-            for (RegisteredUserDTO user : groupMembers) {
-                ArrayList<String> resultRow = Lists.newArrayList();
-                UserSummaryDTO userSummary = associationManager.enforceAuthorisationPrivacy(currentlyLoggedInUser,
-                        userManager.convertToUserSummaryObject(user));
-
-                resultRow.add(userSummary.getFamilyName());
-                resultRow.add(userSummary.getGivenName());
-                if (includeUserIDs) {
-                    resultRow.add(userSummary.getId().toString());
-                }
-                // can the user access the data?
-                if (userSummary.isAuthorisedFullAccess()) {
-                    int totalCorrect = 0;
-                    int columnNumber = 0;
-                    for (String questionId : questionIds) {
-                        Integer resultForQuestion = userQuestionDataMap.get(user).get(questionId);
-
-                        if (null == resultForQuestion) {
-                            resultRow.add("");
-                        } else {
-                            resultRow.add(String.format("%d", resultForQuestion));
-                        }
-
-                        if (resultForQuestion != null && resultForQuestion == 1) {
-                            totalCorrect++;
-                            columnTotals[columnNumber] += 1;
-                        }
-                        columnNumber++;
-                    }
-
-                    double percentageCorrect = ((double) totalCorrect / questionIds.size()) * 100F;
-                    resultRow.add(percentageFormat.format(percentageCorrect));
-
-                } else {
-                    for (@SuppressWarnings("unused") String questionId : questionIds) {
-                        resultRow.add(NOT_SHARING);
-                    }
-                }
-                Collections.addAll(resultRows, resultRow.toArray(new String[0]));
-            }
-
-            // ignore name columns
-
-            for (int i = 0; i < questionIds.size(); i++) {
-                double percentageCorrect = ((double) columnTotals[i] / groupMembers.size()) * 100F;
-                totalsRow.add(percentageFormat.format(percentageCorrect));
-            }
-
-            rows.add(totalsRow.toArray(new String[0]));
-            String userInfoHeader = includeUserIDs ? "Last Name,First Name,User ID" : "Last Name,First Name";
-            rows.add(userInfoHeader.split(","));
-            rows.addAll(resultRows);
+            rows.addAll(buildAssignmentReportBody(currentlyLoggedInUser, includeUserIDs, groupMembers, gameboard, questionIds));
 
             StringWriter stringWriter = new StringWriter();
             CSVWriter csvWriter = new CSVWriter(stringWriter);
@@ -600,6 +536,80 @@ public class AssignmentFacade extends AbstractIsaacFacade {
         } catch (IOException e) {
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error while building the CSV file.").toResponse();
         }
+    }
+
+    private List<String[]> buildAssignmentReportBody(
+            final RegisteredUserDTO currentlyLoggedInUser, final boolean includeUserIDs, final List<RegisteredUserDTO> groupMembers,
+            final GameboardDTO gameboard, final List<String> questionIds
+    ) throws SegueDatabaseException {
+        List<String[]> rows = Lists.newArrayList();
+
+        List<String> totalsRow = Lists.newArrayList();
+        if (includeUserIDs) {
+            totalsRow.add("");
+        }
+        Collections.addAll(totalsRow, ",Correct %".split(","));
+
+        Map<RegisteredUserDTO, Map<String, Integer>> userQuestionDataMap = getQuestionDataMapFromGameboard(groupMembers, gameboard);
+
+        userQuestionDataMap.forEach((user, outcome) -> questionIds.forEach(questionId -> outcome.putIfAbsent(questionId, null)));
+
+        DecimalFormat percentageFormat = new DecimalFormat("###");
+        List<String[]> resultRows = Lists.newArrayList();
+        int[] columnTotals = new int[questionIds.size()];
+        for (RegisteredUserDTO user : groupMembers) {
+            ArrayList<String> resultRow = Lists.newArrayList();
+            UserSummaryDTO userSummary = associationManager.enforceAuthorisationPrivacy(currentlyLoggedInUser,
+                    userManager.convertToUserSummaryObject(user));
+
+            resultRow.add(userSummary.getFamilyName());
+            resultRow.add(userSummary.getGivenName());
+            if (includeUserIDs) {
+                resultRow.add(userSummary.getId().toString());
+            }
+            // can the user access the data?
+            if (userSummary.isAuthorisedFullAccess()) {
+                int totalCorrect = 0;
+                int columnNumber = 0;
+                for (String questionId : questionIds) {
+                    Integer resultForQuestion = userQuestionDataMap.get(user).get(questionId);
+
+                    if (null == resultForQuestion) {
+                        resultRow.add("");
+                    } else {
+                        resultRow.add(String.format("%d", resultForQuestion));
+                    }
+
+                    if (resultForQuestion != null && resultForQuestion == 1) {
+                        totalCorrect++;
+                        columnTotals[columnNumber] += 1;
+                    }
+                    columnNumber++;
+                }
+
+                double percentageCorrect = ((double) totalCorrect / questionIds.size()) * 100F;
+                resultRow.add(percentageFormat.format(percentageCorrect));
+
+            } else {
+                for (@SuppressWarnings("unused") String questionId : questionIds) {
+                    resultRow.add(NOT_SHARING);
+                }
+            }
+            Collections.addAll(resultRows, resultRow.toArray(new String[0]));
+        }
+
+        // ignore name columns
+
+        for (int i = 0; i < questionIds.size(); i++) {
+            double percentageCorrect = ((double) columnTotals[i] / groupMembers.size()) * 100F;
+            totalsRow.add(percentageFormat.format(percentageCorrect));
+        }
+
+        rows.add(totalsRow.toArray(new String[0]));
+        String userInfoHeader = includeUserIDs ? "Last Name,First Name,User ID" : "Last Name,First Name";
+        rows.add(userInfoHeader.split(","));
+        rows.addAll(resultRows);
+        return rows;
     }
 
     private Map<RegisteredUserDTO, Map<String, Integer>> getQuestionDataMapFromGameboard(
@@ -757,9 +767,10 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             final List<RegisteredUserDTO> groupMembers, final Map<AssignmentDTO, GameboardDTO> assignmentGameboards,
             final Map<RegisteredUserDTO, Map<GameboardDTO, Map<String, Integer>>> grandTable
     ) throws ContentManagerException {
+        ArrayList<String[]> rows = Lists.newArrayList();
+
         Map<GameboardDTO, List<String>> gameboardQuestionIds = extractGameboardQuestionIds(assignments, assignmentGameboards);
 
-        ArrayList<String[]> rows = Lists.newArrayList();
         for (RegisteredUserDTO groupMember : groupMembers) {
             // FIXME Some room for improvement here, as we can retrieve all the users with a single query.
             // FIXME Not urgent, as the dominating query is the one that retrieves question attempts above.
