@@ -182,12 +182,11 @@ public class ElasticSearchProvider implements ISearchProvider {
     }
 
     @Override
-    public ResultsWrapper<String> fuzzySearch(final String indexBase, final String indexType, final String searchString,
-                                              final Integer startIndex, final Integer limit,
+    public ResultsWrapper<String> fuzzySearch(final BasicSearchParameters basicSearchParameters, final String searchString,
                                               @Nullable final Map<String, List<String>> fieldsThatMustMatch,
                                               @Nullable final Map<String, AbstractFilterInstruction> filterInstructions,
                                               final String... fields) throws SegueSearchException {
-        if (null == indexBase || null == indexType || null == searchString || null == fields) {
+        if (null == basicSearchParameters.getIndexBase() || null == basicSearchParameters.getIndexType() || null == searchString || null == fields) {
             log.warn("A required field is missing. Unable to execute search.");
             return null;
         }
@@ -234,7 +233,7 @@ public class ElasticSearchProvider implements ISearchProvider {
             masterQuery.filter(generateFilterQuery(filterInstructions));
         }
 
-        return this.executeBasicQuery(indexBase, indexType, masterQuery, startIndex, limit);
+        return this.executeBasicQuery(basicSearchParameters, masterQuery);
     }
 
     @Override
@@ -527,9 +526,15 @@ public class ElasticSearchProvider implements ISearchProvider {
      * @return list of the search results
      */
     private ResultsWrapper<String> executeBasicQuery(final String indexBase, final String indexType,
-                                                     final QueryBuilder query, final int startIndex, final int limit)
-            throws SegueSearchException {
+                                                     final QueryBuilder query, final int startIndex, final int limit
+    ) throws SegueSearchException {
         return this.executeBasicQuery(indexBase, indexType, query, startIndex, limit, null);
+    }
+
+    private ResultsWrapper<String> executeBasicQuery(final BasicSearchParameters basicSearchParameters, final QueryBuilder query)
+            throws SegueSearchException {
+        return this.executeBasicQuery(basicSearchParameters.getIndexBase(), basicSearchParameters.getIndexType(), query,
+                basicSearchParameters.getStartIndex(), basicSearchParameters.getLimit(), null);
     }
 
     /**

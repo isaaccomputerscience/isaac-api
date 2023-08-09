@@ -40,6 +40,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
+import uk.ac.cam.cl.dtg.segue.search.BasicSearchParameters;
 import uk.ac.cam.cl.dtg.segue.search.BooleanMatchInstruction;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
 import uk.ac.cam.cl.dtg.segue.search.MustMatchInstruction;
@@ -337,11 +338,8 @@ public class GitContentManager {
             final Integer startIndex, final Integer limit) throws ContentManagerException {
 
         ResultsWrapper<String> searchHits = searchProvider.fuzzySearch(
-                contentIndex,
-                CONTENT_TYPE,
+                new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit),
                 searchString,
-                startIndex,
-                limit,
                 fieldsThatMustMatch,
                 this.getBaseFilters(),
                 Constants.ID_FIELDNAME,

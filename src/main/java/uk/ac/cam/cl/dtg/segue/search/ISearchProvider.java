@@ -79,17 +79,15 @@ public interface ISearchProvider {
      * Executes a fuzzy search on an array of fields and will consider the fieldsThatMustMatchMap.
      * <p>
      * This method should prioritise exact prefix matches and then fill it with fuzzy ones.
-     * 
-     * @param indexBase
-     *            - the base string for the name of the index
-     * @param indexType
-     *            - the name of the type of document being searched for
+     *
+     * @param basicSearchParameters
+     *            - a Data Object containing the following common search parameters:
+     *            <p>indexBase - the base string for the name of the index
+     *            <p>indexType - the name of the type of document being searched for
+     *            <p>startIndex - e.g. 0 for the first set of results
+     *            <p>limit - the maximum number of results to return -1 will attempt to return all results.
      * @param searchString
      *            - the string to use for fuzzy matching
-     * @param startIndex
-     *            - e.g. 0 for the first set of results
-     * @param limit
-     *            - the maximum number of results to return -1 will attempt to return all results.
      * @param fieldsThatMustMatch
      *            - Map of Must match field -> value
      * @param filterInstructions
@@ -99,7 +97,7 @@ public interface ISearchProvider {
      * @return results
      */
     ResultsWrapper<String> fuzzySearch(
-            String indexBase, String indexType, String searchString, Integer startIndex, Integer limit, Map<String,
+            BasicSearchParameters basicSearchParameters, String searchString, Map<String,
             List<String>> fieldsThatMustMatch, @Nullable Map<String, AbstractFilterInstruction> filterInstructions,
             String... fields
     ) throws SegueSearchException;
