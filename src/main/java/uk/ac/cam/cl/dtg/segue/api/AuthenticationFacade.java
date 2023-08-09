@@ -138,27 +138,13 @@ public class AuthenticationFacade extends AbstractSegueFacade {
     @Path("/user_authentication_settings/{user_id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "The current users authentication settings, e.g. linked accounts and whether they have segue or not")
-    public final Response getCurrentUserAuthorisationSettings(@Context final HttpServletRequest request, @PathParam("user_id") Long userId) {
+    public final Response getCurrentUserAuthorisationSettings(@Context final HttpServletRequest request, @PathParam("user_id") final Long userId) {
         try {
             RegisteredUserDTO currentRegisteredUser = this.userManager.getCurrentRegisteredUser(request);
             if (null == userId) {
-                userId = currentRegisteredUser.getId();
+                return getUserAuthenticationSettings(currentRegisteredUser.getId(), currentRegisteredUser);
             }
-
-            if (!userId.equals(currentRegisteredUser.getId()) && !isUserAnAdmin(userManager, currentRegisteredUser)) {
-                return new SegueErrorResponse(Status.FORBIDDEN, "You must be an admin member to view this setting for another user.")
-                        .toResponse();
-            }
-
-            RegisteredUserDTO userToLookup;
-            if (currentRegisteredUser.getId().equals(userId)) {
-                userToLookup = currentRegisteredUser;
-            } else {
-                userToLookup = this.userManager.getUserDTOById(userId);
-            }
-
-            return Response.ok(this.userManager.getUsersAuthenticationSettings(userToLookup))
-                    .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+            return getUserAuthenticationSettings(userId, currentRegisteredUser);
         } catch (NoUserLoggedInException e) {
             return SegueErrorResponse.getNotLoggedInResponse();
         } catch (SegueDatabaseException e) {
@@ -167,6 +153,24 @@ public class AuthenticationFacade extends AbstractSegueFacade {
         } catch (NoUserException e) {
             return new SegueErrorResponse(Status.NOT_FOUND, "User ID specified could not be found").toResponse();
         }
+    }
+
+    private Response getUserAuthenticationSettings(final Long userId, final RegisteredUserDTO currentRegisteredUser)
+            throws NoUserLoggedInException, NoUserException, SegueDatabaseException {
+        if (!userId.equals(currentRegisteredUser.getId()) && !isUserAnAdmin(userManager, currentRegisteredUser)) {
+            return new SegueErrorResponse(Status.FORBIDDEN, "You must be an admin member to view this setting for another user.")
+                    .toResponse();
+        }
+
+        RegisteredUserDTO userToLookup;
+        if (currentRegisteredUser.getId().equals(userId)) {
+            userToLookup = currentRegisteredUser;
+        } else {
+            userToLookup = this.userManager.getUserDTOById(userId);
+        }
+
+        return Response.ok(this.userManager.getUsersAuthenticationSettings(userToLookup))
+                .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
     }
 
     /**
