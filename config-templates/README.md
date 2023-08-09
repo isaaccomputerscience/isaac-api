@@ -1,6 +1,6 @@
 #### Computer Science
 
-If you want to get computer science content working, you'll need two copies of the `segue-config.properties` file. For consistency, use `segue-config.cs.properties`.
+If you want to get computer science content working, you'll need a copy of the `segue-config.properties` file. For consistency, use `segue-config.cs.properties`.
 
 For the Computer Science version, you'll need to update:
 
