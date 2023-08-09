@@ -74,11 +74,11 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 public class ContentIndexer {
     private static final Logger log = LoggerFactory.getLogger(Content.class);
 
-    private static ConcurrentHashMap<String, Boolean> versionLocks = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Boolean> VERSION_LOCKS = new ConcurrentHashMap<>();
 
-    private ElasticSearchIndexer es;
-    private GitDb database;
-    private ContentMapper mapper;
+    private final ElasticSearchIndexer es;
+    private final GitDb database;
+    private final ContentMapper mapper;
 
     private static final int MEDIA_FILE_SIZE_LIMIT = 300 * 1024; // Bytes
     private static final int NANOSECONDS_IN_A_MILLISECOND = 1000000;
@@ -94,7 +94,7 @@ public class ContentIndexer {
     void loadAndIndexContent(final String version) throws Exception, VersionLockedException {
 
         // Take version lock or fail
-        Boolean alreadyLocked = versionLocks.putIfAbsent(version, true);
+        Boolean alreadyLocked = VERSION_LOCKS.putIfAbsent(version, true);
 
         if (Boolean.TRUE.equals(alreadyLocked)) {
             throw new VersionLockedException(version);
@@ -153,7 +153,7 @@ public class ContentIndexer {
             log.info("Finished indexing version " + version + ", took: " + ((endTime - totalStartTime) / NANOSECONDS_IN_A_MILLISECOND) + "ms");
 
         } finally {
-            versionLocks.remove(version);
+            VERSION_LOCKS.remove(version);
         }
 
     }
@@ -773,6 +773,7 @@ public class ContentIndexer {
      * @param indexProblemCache
      *            a map of problems found in the indexed content
      */
+    @SuppressWarnings("checkstyle:OneStatementPerLine")
     private void recordContentErrors(final String sha, final Map<String, Content> gitCache,
                                      final Map<Content, List<String>> indexProblemCache) {
 
