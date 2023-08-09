@@ -234,92 +234,7 @@ public class ContentIndexer {
                     content = this.augmentChildContent(content, treeWalk.getPathString(), null, content.getPublished());
 
                     if (null != content) {
-                        // Walk the content for site-wide searchable fields
-                        StringBuilder searchableContentBuilder = new StringBuilder();
-                        this.collateSearchableContent(content, searchableContentBuilder);
-                        content.setSearchableContent(searchableContentBuilder.toString());
-
-                        // add children (and parent) from flattened Set to
-                        // cache if they have ids
-                        for (Content flattenedContent : this.flattenContentObjects(content)) {
-                            if (flattenedContent.getId() == null) {
-                                continue;
-                            }
-
-                            // Prevents ETL indexing of quizzes that contain anything that is not an IsaacQuizSection
-                            // in the top-level children array.
-                            // NOTE: I'm not sure if this is the right place for this but I couldn't find a better one.
-                            // This also seems to be the only time we can prevent a file from being indexed entirely.
-                            if (flattenedContent instanceof IsaacQuiz) {
-                                List<ContentBase> children = flattenedContent.getChildren();
-                                if (children.stream().anyMatch(c -> !(c instanceof IsaacQuizSection))) {
-                                    log.debug("IsaacQuiz (" + flattenedContent.getId()
-                                           + ") contains top-level non-quiz sections. Skipping.");
-                                    this.registerContentProblem(flattenedContent, "Index failure - Invalid "
-                                           + "content type among quiz sections. Quizzes can only contain quiz sections "
-                                           + "in the top-level children array.", indexProblemCache);
-                                    continue;
-                                }
-                            }
-
-                            if (flattenedContent.getId().length() > MAXIMUM_CONTENT_ID_LENGTH) {
-                                log.debug("Content ID too long: " + flattenedContent.getId());
-                                this.registerContentProblem(flattenedContent, "Content ID too long: " + flattenedContent.getId(), indexProblemCache);
-                                continue;
-                            }
-
-                            if (flattenedContent.getId().contains(".")) {
-                                // Otherwise, duplicate IDs with different content,
-                                // therefore log an error
-                                log.debug("Resource with invalid ID (" + content.getId()
-                                        + ") detected in cache. Skipping " + treeWalk.getPathString());
-
-                                this.registerContentProblem(flattenedContent, "Index failure - Invalid ID "
-                                        + flattenedContent.getId() + " found in file " + treeWalk.getPathString()
-                                        + ". Must not contain restricted characters.", indexProblemCache);
-                                continue;
-                            }
-
-                            // check if we have seen this key before if
-                            // we have then we don't want to add it
-                            // again
-                            if (!contentCache.containsKey(flattenedContent.getId())) {
-                                // It must be new so we can add it
-                                log.debug("Loading into cache: " + flattenedContent.getId() + "("
-                                        + flattenedContent.getType() + ")" + " from " + treeWalk.getPathString());
-                                contentCache.put(flattenedContent.getId(), flattenedContent);
-                                registerTags(flattenedContent.getTags(), tagsList);
-
-                                // If this is a numeric question, extract any
-                                // units from its answers.
-
-                                if (flattenedContent instanceof IsaacNumericQuestion) {
-                                    registerUnits((IsaacNumericQuestion) flattenedContent, allUnits, publishedUnits);
-                                }
-
-                                continue; // our work here is done
-                            }
-
-                            // shaCache contains key already, compare the
-                            // content
-                            if (contentCache.get(flattenedContent.getId()).equals(flattenedContent)) {
-                                // content is the same therefore it is just
-                                // reuse of a content object so that is
-                                // fine.
-                                log.debug("Resource (" + content.getId() + ") already seen in cache. Skipping "
-                                        + treeWalk.getPathString());
-                                continue;
-                            }
-
-                            // Otherwise, duplicate IDs with different content,
-                            // therefore log an error
-                            log.debug("Resource with duplicate ID (" + content.getId()
-                                    + ") detected in cache. Skipping " + treeWalk.getPathString());
-                            this.registerContentProblem(flattenedContent, String.format(
-                                    "Index failure - Duplicate ID (%s) found in files (%s) and (%s): only one will be available.",
-                                    content.getId(), treeWalk.getPathString(), contentCache.get(flattenedContent.getId()).getCanonicalSourceFile()),
-                                indexProblemCache);
-                        }
+                        indexContentObject(contentCache, tagsList, allUnits, publishedUnits, indexProblemCache, treeWalk.getPathString(), content);
                     }
                 } catch (JsonMappingException e) {
                     log.debug(String.format("Unable to parse the json file found %s as a content object. "
@@ -346,6 +261,98 @@ public class ContentIndexer {
         } catch (IOException e) {
             log.error("IOException while trying to access git repository. ", e);
             throw new ContentManagerException("Unable to index content, due to an IOException.");
+        }
+    }
+
+    private void indexContentObject(
+            final Map<String, Content> contentCache, final Set<String> tagsList, final Map<String, String> allUnits,
+            final Map<String, String> publishedUnits, final Map<Content, List<String>> indexProblemCache, final String treeWalkPath,
+            final Content content) {
+        // Walk the content for site-wide searchable fields
+        StringBuilder searchableContentBuilder = new StringBuilder();
+        this.collateSearchableContent(content, searchableContentBuilder);
+        content.setSearchableContent(searchableContentBuilder.toString());
+
+        // add children (and parent) from flattened Set to
+        // cache if they have ids
+        for (Content flattenedContent : this.flattenContentObjects(content)) {
+            if (flattenedContent.getId() == null) {
+                continue;
+            }
+
+            // Prevents ETL indexing of quizzes that contain anything that is not an IsaacQuizSection
+            // in the top-level children array.
+            // NOTE: I'm not sure if this is the right place for this but I couldn't find a better one.
+            // This also seems to be the only time we can prevent a file from being indexed entirely.
+            if (flattenedContent instanceof IsaacQuiz) {
+                List<ContentBase> children = flattenedContent.getChildren();
+                if (children.stream().anyMatch(c -> !(c instanceof IsaacQuizSection))) {
+                    log.debug("IsaacQuiz (" + flattenedContent.getId()
+                           + ") contains top-level non-quiz sections. Skipping.");
+                    this.registerContentProblem(flattenedContent, "Index failure - Invalid "
+                           + "content type among quiz sections. Quizzes can only contain quiz sections "
+                           + "in the top-level children array.", indexProblemCache);
+                    continue;
+                }
+            }
+
+            if (flattenedContent.getId().length() > MAXIMUM_CONTENT_ID_LENGTH) {
+                log.debug("Content ID too long: " + flattenedContent.getId());
+                this.registerContentProblem(flattenedContent, "Content ID too long: " + flattenedContent.getId(), indexProblemCache);
+                continue;
+            }
+
+            if (flattenedContent.getId().contains(".")) {
+                // Otherwise, duplicate IDs with different content,
+                // therefore log an error
+                log.debug("Resource with invalid ID (" + content.getId()
+                        + ") detected in cache. Skipping " + treeWalkPath);
+
+                this.registerContentProblem(flattenedContent, "Index failure - Invalid ID "
+                        + flattenedContent.getId() + " found in file " + treeWalkPath
+                        + ". Must not contain restricted characters.", indexProblemCache);
+                continue;
+            }
+
+            // check if we have seen this key before if
+            // we have then we don't want to add it
+            // again
+            if (!contentCache.containsKey(flattenedContent.getId())) {
+                // It must be new so we can add it
+                log.debug("Loading into cache: " + flattenedContent.getId() + "("
+                        + flattenedContent.getType() + ")" + " from " + treeWalkPath);
+                contentCache.put(flattenedContent.getId(), flattenedContent);
+                registerTags(flattenedContent.getTags(), tagsList);
+
+                // If this is a numeric question, extract any
+                // units from its answers.
+
+                if (flattenedContent instanceof IsaacNumericQuestion) {
+                    registerUnits((IsaacNumericQuestion) flattenedContent, allUnits, publishedUnits);
+                }
+
+                continue; // our work here is done
+            }
+
+            // shaCache contains key already, compare the
+            // content
+            if (contentCache.get(flattenedContent.getId()).equals(flattenedContent)) {
+                // content is the same therefore it is just
+                // reuse of a content object so that is
+                // fine.
+                log.debug("Resource (" + content.getId() + ") already seen in cache. Skipping "
+                        + treeWalkPath);
+                continue;
+            }
+
+            // Otherwise, duplicate IDs with different content,
+            // therefore log an error
+            log.debug("Resource with duplicate ID (" + content.getId()
+                    + ") detected in cache. Skipping " + treeWalkPath);
+            this.registerContentProblem(flattenedContent, String.format(
+                    "Index failure - Duplicate ID (%s) found in files (%s) and (%s): only one will be available.",
+                    content.getId(), treeWalkPath, contentCache.get(flattenedContent.getId()).getCanonicalSourceFile()),
+                    indexProblemCache);
         }
     }
 
