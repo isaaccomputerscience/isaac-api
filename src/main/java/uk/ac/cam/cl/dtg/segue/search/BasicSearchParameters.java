@@ -1,5 +1,7 @@
 package uk.ac.cam.cl.dtg.segue.search;
 
+import java.util.Objects;
+
 /**
  * A DO to consolidate the common parameters across multiple search methods.
  */
@@ -58,5 +60,25 @@ public class BasicSearchParameters {
 
     public void setLimit(final Integer limit) {
         this.limit = limit;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        BasicSearchParameters otherBSP = (BasicSearchParameters) obj;
+        return Objects.equals(indexBase, otherBSP.indexBase)
+                && Objects.equals(indexType, otherBSP.indexType)
+                && Objects.equals(startIndex, otherBSP.startIndex)
+                && Objects.equals(limit, otherBSP.limit);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(indexBase, indexType, startIndex, limit);
     }
 }

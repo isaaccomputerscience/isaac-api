@@ -173,7 +173,8 @@ public class ElasticSearchProvider implements ISearchProvider {
             @NotNull final BooleanMatchInstruction matchInstruction,
             @Nullable final Map<String, AbstractFilterInstruction> filterInstructions
     ) throws SegueSearchException {
-        if (null == basicSearchParameters.getIndexBase() || null == basicSearchParameters.getIndexType() || null == searchString) {
+        if (null == basicSearchParameters || null == basicSearchParameters.getIndexBase() || null == basicSearchParameters.getIndexType()
+                || null == searchString) {
             log.warn("A required field is missing. Unable to execute search.");
             throw new SegueSearchException("A required field is missing. Unable to execute search.");
         }
@@ -194,7 +195,8 @@ public class ElasticSearchProvider implements ISearchProvider {
             @Nullable final Map<String, AbstractFilterInstruction> filterInstructions,
             final String... fields
     ) throws SegueSearchException {
-        if (null == basicSearchParameters.getIndexBase() || null == basicSearchParameters.getIndexType() || null == searchString || null == fields) {
+        if (null == basicSearchParameters || null == basicSearchParameters.getIndexBase() || null == basicSearchParameters.getIndexType()
+                || null == searchString || null == fields) {
             log.warn("A required field is missing. Unable to execute search.");
             return null;
         }
@@ -251,7 +253,8 @@ public class ElasticSearchProvider implements ISearchProvider {
             final String field,
             @Nullable final Map<String, AbstractFilterInstruction> filterInstructions
     ) throws SegueSearchException {
-        if (null == basicSearchParameters.getIndexBase() || null == basicSearchParameters.getIndexType() || null == searchTerms && null != field) {
+        if (null == basicSearchParameters || null == basicSearchParameters.getIndexBase() || null == basicSearchParameters.getIndexType()
+                || null == searchTerms && null != field) {
             log.error("A required field or field combination is missing. Unable to execute search.");
             return null;
         }
