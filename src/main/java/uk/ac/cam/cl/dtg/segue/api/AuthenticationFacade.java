@@ -72,6 +72,7 @@ import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
@@ -141,10 +142,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
     public final Response getCurrentUserAuthorisationSettings(@Context final HttpServletRequest request, @PathParam("user_id") final Long userId) {
         try {
             RegisteredUserDTO currentRegisteredUser = this.userManager.getCurrentRegisteredUser(request);
-            if (null == userId) {
-                return getUserAuthenticationSettings(currentRegisteredUser.getId(), currentRegisteredUser);
-            }
-            return getUserAuthenticationSettings(userId, currentRegisteredUser);
+            return getUserAuthenticationSettings(Objects.requireNonNullElse(userId, currentRegisteredUser.getId()), currentRegisteredUser);
         } catch (NoUserLoggedInException e) {
             return SegueErrorResponse.getNotLoggedInResponse();
         } catch (SegueDatabaseException e) {
