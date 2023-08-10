@@ -524,28 +524,44 @@ public class ElasticSearchProvider implements ISearchProvider {
      * This method does not provide any way of controlling sort order or limiting information returned. It is most
      * useful for doing simple searches with fewer results e.g. by id.
      *
-     * @param indexBase
-     *            - search index base string to execute the query against.
-     * @param indexType
-     *            - index type to execute the query against.
+     * @param basicSearchParameters
+     *            - a Data Object containing the following common search parameters:
+     *            <p>indexBase - search index base string to execute the query against
+     *            <p>indexType - index type to execute the query against
+     *            <p>startIndex - start index for results
+     *            <p>limit - the maximum number of results to return -1 will attempt to return all results.
      * @param query
      *            - the query to run.
-     * @param startIndex
-     *            - start index for results
-     * @param limit
-     *            - the maximum number of results to return -1 will attempt to return all results.
      * @return list of the search results
      */
-    private ResultsWrapper<String> executeBasicQuery(
-            final String indexBase, final String indexType, final QueryBuilder query, final int startIndex, final int limit
-    ) throws SegueSearchException {
-        return this.executeBasicQuery(indexBase, indexType, query, startIndex, limit, null);
-    }
-
     private ResultsWrapper<String> executeBasicQuery(final BasicSearchParameters basicSearchParameters, final QueryBuilder query
     ) throws SegueSearchException {
         return this.executeBasicQuery(basicSearchParameters.getIndexBase(), basicSearchParameters.getIndexType(), query,
                 basicSearchParameters.getStartIndex(), basicSearchParameters.getLimit(), null);
+    }
+
+    /**
+     * Provides default search execution using the fields specified.
+     * <p>
+     * This method does not provide any way of controlling sort order or limiting information returned. It is most
+     * useful for doing simple searches with fewer results e.g. by id.
+     *
+     * @param basicSearchParameters
+     *            - a Data Object containing the following common search parameters:
+     *            <p>indexBase - search index base string to execute the query against
+     *            <p>indexType - index type to execute the query against
+     *            <p>startIndex - start index for results
+     *            <p>limit - the maximum number of results to return -1 will attempt to return all results.
+     * @param query
+     *            - the query to run.
+     * @param sortInstructions
+     *            - a map of fields to sorting orders (ASC/DESC)
+     * @return list of the search results
+     */
+    private ResultsWrapper<String> executeBasicQuery(final BasicSearchParameters basicSearchParameters, final QueryBuilder query,
+                                                     @Nullable final Map<String, Constants.SortOrder> sortInstructions) throws SegueSearchException {
+        return this.executeBasicQuery(basicSearchParameters.getIndexBase(), basicSearchParameters.getIndexType(), query,
+                basicSearchParameters.getStartIndex(), basicSearchParameters.getLimit(), sortInstructions);
     }
 
     /**
@@ -604,12 +620,6 @@ public class ElasticSearchProvider implements ISearchProvider {
         }
 
         return results;
-    }
-
-    private ResultsWrapper<String> executeBasicQuery(final BasicSearchParameters basicSearchParameters, final QueryBuilder query,
-            @Nullable final Map<String, Constants.SortOrder> sortInstructions) throws SegueSearchException {
-        return this.executeBasicQuery(basicSearchParameters.getIndexBase(), basicSearchParameters.getIndexType(), query,
-                basicSearchParameters.getStartIndex(), basicSearchParameters.getLimit(), sortInstructions);
     }
 
     /**
