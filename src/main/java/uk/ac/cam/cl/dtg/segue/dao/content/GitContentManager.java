@@ -235,9 +235,8 @@ public class GitContentManager {
         if (!cache.asMap().containsKey(k)) {
 
             List<Content> searchResults = mapper.mapFromStringListToContentList(this.searchProvider.termSearch(
-                    contentIndex,
-                    CONTENT_TYPE, id,
-                    Constants.ID_FIELDNAME + "." + Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX, 0, 1,
+                    new BasicSearchParameters(contentIndex, CONTENT_TYPE, 0, 1), id,
+                    Constants.ID_FIELDNAME + "." + Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX,
                     this.getBaseFilters()).getResults()
             );
 
@@ -274,9 +273,10 @@ public class GitContentManager {
         String k = "getByIdPrefix~" + getCurrentContentSHA() + "~" + idPrefix + "~" + startIndex + "~" + limit;
         if (!cache.asMap().containsKey(k)) {
 
-            ResultsWrapper<String> searchHits = this.searchProvider.findByPrefix(contentIndex, CONTENT_TYPE,
+            ResultsWrapper<String> searchHits = this.searchProvider.findByPrefix(
+                    new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit),
                     Constants.ID_FIELDNAME + "." + Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX,
-                    idPrefix, startIndex, limit, this.getBaseFilters());
+                    idPrefix, this.getBaseFilters());
 
             List<Content> searchResults = mapper.mapFromStringListToContentList(searchHits.getResults());
 
@@ -317,12 +317,9 @@ public class GitContentManager {
             }
 
             ResultsWrapper<String> searchHits = this.searchProvider.termSearch(
-                    contentIndex,
-                    CONTENT_TYPE,
+                    new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit),
                     null,
                     null,
-                    startIndex,
-                    limit,
                     finalFilter
             );
 
@@ -429,10 +426,7 @@ public class GitContentManager {
         }
 
         ResultsWrapper<String> searchHits = searchProvider.nestedMatchSearch(
-                contentIndex,
-                CONTENT_TYPE,
-                startIndex,
-                limit,
+                new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit),
                 searchString,
                 matchQuery,
                 this.getBaseFilters()
@@ -481,8 +475,9 @@ public class GitContentManager {
             newFilterInstructions.putAll(this.getBaseFilters());
         }
 
-        ResultsWrapper<String> searchHits = searchProvider.matchSearch(contentIndex, CONTENT_TYPE, fieldsToMatch,
-                startIndex, limit, newSortInstructions, newFilterInstructions);
+        ResultsWrapper<String> searchHits = searchProvider.matchSearch(
+                new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit),
+                fieldsToMatch, newSortInstructions, newFilterInstructions);
 
         // setup object mapper to use pre-configured deserializer module.
         // Required to deal with type polymorphism
@@ -509,7 +504,8 @@ public class GitContentManager {
         ResultsWrapper<ContentDTO> finalResults;
 
         ResultsWrapper<String> searchHits;
-        searchHits = searchProvider.randomisedMatchSearch(contentIndex, CONTENT_TYPE, fieldsToMatch, startIndex, limit, randomSeed,
+        searchHits = searchProvider.randomisedMatchSearch(
+                new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit), fieldsToMatch, randomSeed,
                 this.getBaseFilters());
 
         // setup object mapper to use pre-configured deserializer module.

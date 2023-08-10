@@ -142,9 +142,9 @@ public class SchoolListReader {
 
         List<String> matchingSchoolList;
         
-        matchingSchoolList = searchProvider.findByExactMatch(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString(),
-                SCHOOL_URN_FIELDNAME.toLowerCase() + "." + UNPROCESSED_SEARCH_FIELD_SUFFIX,
-                schoolURN, 0, DEFAULT_RESULTS_LIMIT, null).getResults();
+        matchingSchoolList = searchProvider.findByExactMatch(
+                new BasicSearchParameters(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString(), 0, DEFAULT_RESULTS_LIMIT),
+                SCHOOL_URN_FIELDNAME.toLowerCase() + "." + UNPROCESSED_SEARCH_FIELD_SUFFIX, schoolURN, null).getResults();
 
         if (matchingSchoolList.isEmpty()) {
             return null;

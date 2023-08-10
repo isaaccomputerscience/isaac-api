@@ -17,9 +17,9 @@ public class BasicSearchParameters {
      * @param indexType
      *            - the name of the type of document being searched for
      * @param startIndex
-     *            - e.g. 0 for the first set of results
+     *            - start index for results, e.g. 0 for the first set of results
      * @param limit
-     *            - the maximum number of results to return -1 will attempt to return all results.
+     *            - the maximum number of results to return, -1 will attempt to return all results.
      */
     public BasicSearchParameters(final String indexBase, final String indexType, final Integer startIndex, final Integer limit) {
         this.indexBase = indexBase;

@@ -121,10 +121,12 @@ public class ElasticSearchProvider implements ISearchProvider {
     }
 
     @Override
-    public ResultsWrapper<String> matchSearch(final String indexBase, final String indexType,
-                                              final List<GitContentManager.BooleanSearchClause> fieldsToMatch, final int startIndex,
-                                              final int limit, final Map<String, Constants.SortOrder> sortInstructions,
-                                              @Nullable final Map<String, AbstractFilterInstruction> filterInstructions) throws SegueSearchException {
+    public ResultsWrapper<String> matchSearch(
+            final BasicSearchParameters basicSearchParameters,
+            final List<GitContentManager.BooleanSearchClause> fieldsToMatch,
+            final Map<String, Constants.SortOrder> sortInstructions,
+            @Nullable final Map<String, AbstractFilterInstruction> filterInstructions
+    ) throws SegueSearchException {
         // build up the query from the fieldsToMatch map
         QueryBuilder query = generateBoolMatchQuery(fieldsToMatch);
 
@@ -132,14 +134,16 @@ public class ElasticSearchProvider implements ISearchProvider {
             query = QueryBuilders.boolQuery().must(query).filter(generateFilterQuery(filterInstructions));
         }
 
-        return this.executeBasicQuery(indexBase, indexType, query, startIndex, limit, sortInstructions);
+        return this.executeBasicQuery(basicSearchParameters, query, sortInstructions);
     }
 
     @Override
-    public final ResultsWrapper<String> randomisedMatchSearch(final String indexBase, final String indexType,
-                                                              final List<GitContentManager.BooleanSearchClause> fieldsToMatch, final int startIndex, final int limit,
-                                                              final Long randomSeed, final Map<String, AbstractFilterInstruction> filterInstructions)
-            throws SegueSearchException {
+    public final ResultsWrapper<String> randomisedMatchSearch(
+            final BasicSearchParameters basicSearchParameters,
+            final List<GitContentManager.BooleanSearchClause> fieldsToMatch,
+            final Long randomSeed,
+            final Map<String, AbstractFilterInstruction> filterInstructions
+    ) throws SegueSearchException {
         // build up the query from the fieldsToMatch map
         QueryBuilder query = QueryBuilders.constantScoreQuery(generateBoolMatchQuery(fieldsToMatch));
 
@@ -159,16 +163,17 @@ public class ElasticSearchProvider implements ISearchProvider {
 
         log.debug("Randomised Query, to be sent to elasticsearch is : " + query);
 
-        return this.executeBasicQuery(indexBase, indexType, query, startIndex, limit);
+        return this.executeBasicQuery(basicSearchParameters, query);
     }
 
     @Override
     public ResultsWrapper<String> nestedMatchSearch(
-            final String indexBase, final String indexType, final Integer startIndex, final Integer limit,
-            final String searchString, @NotNull final BooleanMatchInstruction matchInstruction,
+            final BasicSearchParameters basicSearchParameters,
+            final String searchString,
+            @NotNull final BooleanMatchInstruction matchInstruction,
             @Nullable final Map<String, AbstractFilterInstruction> filterInstructions
     ) throws SegueSearchException {
-        if (null == indexBase || null == indexType || null == searchString) {
+        if (null == basicSearchParameters.getIndexBase() || null == basicSearchParameters.getIndexType() || null == searchString) {
             log.warn("A required field is missing. Unable to execute search.");
             throw new SegueSearchException("A required field is missing. Unable to execute search.");
         }
@@ -178,14 +183,17 @@ public class ElasticSearchProvider implements ISearchProvider {
             query.filter(generateFilterQuery(filterInstructions));
         }
         query.minimumShouldMatch(1);
-        return this.executeBasicQuery(indexBase, indexType, query, startIndex, limit);
+        return this.executeBasicQuery(basicSearchParameters, query);
     }
 
     @Override
-    public ResultsWrapper<String> fuzzySearch(final BasicSearchParameters basicSearchParameters, final String searchString,
-                                              @Nullable final Map<String, List<String>> fieldsThatMustMatch,
-                                              @Nullable final Map<String, AbstractFilterInstruction> filterInstructions,
-                                              final String... fields) throws SegueSearchException {
+    public ResultsWrapper<String> fuzzySearch(
+            final BasicSearchParameters basicSearchParameters,
+            final String searchString,
+            @Nullable final Map<String, List<String>> fieldsThatMustMatch,
+            @Nullable final Map<String, AbstractFilterInstruction> filterInstructions,
+            final String... fields
+    ) throws SegueSearchException {
         if (null == basicSearchParameters.getIndexBase() || null == basicSearchParameters.getIndexType() || null == searchString || null == fields) {
             log.warn("A required field is missing. Unable to execute search.");
             return null;
@@ -237,11 +245,13 @@ public class ElasticSearchProvider implements ISearchProvider {
     }
 
     @Override
-    public ResultsWrapper<String> termSearch(final String indexBase, final String indexType,
-                                             final String searchTerms, final String field, final int startIndex, final int limit,
-                                             @Nullable final Map<String, AbstractFilterInstruction> filterInstructions)
-            throws SegueSearchException {
-        if (null == indexBase || null == indexType || null == searchTerms && null != field) {
+    public ResultsWrapper<String> termSearch(
+            final BasicSearchParameters basicSearchParameters,
+            final String searchTerms,
+            final String field,
+            @Nullable final Map<String, AbstractFilterInstruction> filterInstructions
+    ) throws SegueSearchException {
+        if (null == basicSearchParameters.getIndexBase() || null == basicSearchParameters.getIndexType() || null == searchTerms && null != field) {
             log.error("A required field or field combination is missing. Unable to execute search.");
             return null;
         }
@@ -259,7 +269,7 @@ public class ElasticSearchProvider implements ISearchProvider {
             throw new SegueSearchException("This method requires either searchTerm or filter instructions.");
         }
 
-        return this.executeBasicQuery(indexBase, indexType, query, startIndex, limit);
+        return this.executeBasicQuery(basicSearchParameters, query);
     }
 
     /**
@@ -317,9 +327,8 @@ public class ElasticSearchProvider implements ISearchProvider {
     }
 
     @Override
-    public ResultsWrapper<String> findByExactMatch(final String indexBase, final String indexType,
-                                                   final String fieldName, final String needle, final int startIndex,
-                                                   final int limit,
+    public ResultsWrapper<String> findByExactMatch(final BasicSearchParameters basicSearchParameters,
+                                                   final String fieldName, final String needle,
                                                    final Map<String, AbstractFilterInstruction> filterInstructions)
             throws SegueSearchException {
         ResultsWrapper<String> resultList;
@@ -330,14 +339,14 @@ public class ElasticSearchProvider implements ISearchProvider {
             query = QueryBuilders.boolQuery().must(query).filter(generateFilterQuery(filterInstructions));
         }
 
-        resultList = this.executeBasicQuery(indexBase, indexType, query, startIndex, limit);
+        resultList = this.executeBasicQuery(basicSearchParameters, query);
 
         return resultList;
     }
 
     @Override
-    public ResultsWrapper<String> findByPrefix(final String indexBase, final String indexType, final String fieldname,
-                                               final String prefix, final int startIndex, final int limit, final Map<String, AbstractFilterInstruction> filterInstructions)
+    public ResultsWrapper<String> findByPrefix(final BasicSearchParameters basicSearchParameters, final String fieldname,
+                                               final String prefix, final Map<String, AbstractFilterInstruction> filterInstructions)
             throws SegueSearchException {
         ResultsWrapper<String> resultList;
 
@@ -347,15 +356,14 @@ public class ElasticSearchProvider implements ISearchProvider {
             query = QueryBuilders.boolQuery().must(query).filter(generateFilterQuery(filterInstructions));
         }
 
-        resultList = this.executeBasicQuery(indexBase, indexType, query, startIndex, limit);
+        resultList = this.executeBasicQuery(basicSearchParameters, query);
 
         return resultList;
     }
 
     @Override
-    public ResultsWrapper<String> findByRegEx(final String indexBase, final String indexType, final String fieldname,
-                                              final String regex, final int startIndex, final int limit,
-                                              final Map<String, AbstractFilterInstruction> filterInstructions)
+    public ResultsWrapper<String> findByRegEx(final BasicSearchParameters basicSearchParameters, final String fieldname,
+                                              final String regex, final Map<String, AbstractFilterInstruction> filterInstructions)
             throws SegueSearchException {
         ResultsWrapper<String> resultList;
 
@@ -365,7 +373,7 @@ public class ElasticSearchProvider implements ISearchProvider {
             query = QueryBuilders.boolQuery().must(query).filter(generateFilterQuery(filterInstructions));
         }
 
-        resultList = this.executeBasicQuery(indexBase, indexType, query, startIndex, limit);
+        resultList = this.executeBasicQuery(basicSearchParameters, query);
 
         return resultList;
     }
@@ -525,14 +533,14 @@ public class ElasticSearchProvider implements ISearchProvider {
      *            - the maximum number of results to return -1 will attempt to return all results.
      * @return list of the search results
      */
-    private ResultsWrapper<String> executeBasicQuery(final String indexBase, final String indexType,
-                                                     final QueryBuilder query, final int startIndex, final int limit
+    private ResultsWrapper<String> executeBasicQuery(
+            final String indexBase, final String indexType, final QueryBuilder query, final int startIndex, final int limit
     ) throws SegueSearchException {
         return this.executeBasicQuery(indexBase, indexType, query, startIndex, limit, null);
     }
 
-    private ResultsWrapper<String> executeBasicQuery(final BasicSearchParameters basicSearchParameters, final QueryBuilder query)
-            throws SegueSearchException {
+    private ResultsWrapper<String> executeBasicQuery(final BasicSearchParameters basicSearchParameters, final QueryBuilder query
+    ) throws SegueSearchException {
         return this.executeBasicQuery(basicSearchParameters.getIndexBase(), basicSearchParameters.getIndexType(), query,
                 basicSearchParameters.getStartIndex(), basicSearchParameters.getLimit(), null);
     }
@@ -557,9 +565,9 @@ public class ElasticSearchProvider implements ISearchProvider {
      *            - a map of fields to sorting orders (ASC/DESC)
      * @return list of the search results
      */
-    private ResultsWrapper<String> executeBasicQuery(final String indexBase, final String indexType,
-                                                     final QueryBuilder query, final int startIndex, final int limit,
-                                                     @Nullable final Map<String, Constants.SortOrder> sortInstructions) throws SegueSearchException {
+    private ResultsWrapper<String> executeBasicQuery(
+            final String indexBase, final String indexType, final QueryBuilder query, final int startIndex, final int limit,
+            @Nullable final Map<String, Constants.SortOrder> sortInstructions) throws SegueSearchException {
         int newLimit = limit;
         String typedIndex = ElasticSearchProvider.produceTypedIndexName(indexBase, indexType);
         boolean isUnlimitedSearch = limit == -1;
@@ -593,6 +601,12 @@ public class ElasticSearchProvider implements ISearchProvider {
         }
 
         return results;
+    }
+
+    private ResultsWrapper<String> executeBasicQuery(final BasicSearchParameters basicSearchParameters, final QueryBuilder query,
+            @Nullable final Map<String, Constants.SortOrder> sortInstructions) throws SegueSearchException {
+        return this.executeBasicQuery(basicSearchParameters.getIndexBase(), basicSearchParameters.getIndexType(), query,
+                basicSearchParameters.getStartIndex(), basicSearchParameters.getLimit(), sortInstructions);
     }
 
     /**
