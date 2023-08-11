@@ -151,8 +151,6 @@ public class IsaacSymbolicLogicValidator implements IValidator {
 
     private ValidationResult checkForSymbolicAnswerMatch(final IsaacSymbolicLogicQuestion question, final LogicFormula submittedLogicFormula)
             throws ValidatorUnavailableException {
-        ValidationResult validationResult = new ValidationResult(INITIAL_CONTENT, INITIAL_MATCH_TYPE, INITIAL_RESPONSE_CORRECT);
-
         // Go through all choices, keeping track of the best match we've seen so far. A symbolic match terminates
         // this loop immediately. A numeric match may later be replaced with a symbolic match, but otherwise will suffice.
 
@@ -202,13 +200,10 @@ public class IsaacSymbolicLogicValidator implements IValidator {
                                 + "\" against \"" + logicFormulaChoice.getPythonExpression() + "\": " + response.get("error"));
                     } else if (response.containsKey("syntax_error")) {
                         // There's a syntax error in the "test" expression, no use checking it further:
-                        closestMatch = null;
                         Content feedback =  new Content("Your answer does not seem to be valid boolean logic.<br>"
                                     + "Check for things like mismatched brackets or misplaced symbols.");
                         feedback.setTags(new HashSet<>(Collections.singletonList("syntax_error")));
-                        validationResult.setFeedback(feedback);
-                        validationResult.setResponseCorrect(false);
-                        break;
+                        return new ValidationResult(feedback, INITIAL_MATCH_TYPE, false);
                     } else {
                         log.warn("Problem checking logic formula \"" + submittedLogicFormula.getPythonExpression()
                                 + "\" for (" + question.getId() + ") with symbolic checker: " + response.get("error"));
@@ -237,8 +232,7 @@ public class IsaacSymbolicLogicValidator implements IValidator {
                     if (closestMatch == null || !closestMatch.getRequiresExactMatch()) {
                         closestMatch = logicFormulaChoice;
                         closestMatchType = matchType;
-                    }
-                    // ELSE: This is not as good a match as the one we already have.
+                    } // ELSE: This is not as good a match as the one we already have.
                 }
             }
         }
@@ -250,25 +244,23 @@ public class IsaacSymbolicLogicValidator implements IValidator {
                 if (closestMatch.isCorrect()) {
                     Content feedback = new Content("Your answer is not in the form we expected. Can you rearrange or simplify it?");
                     feedback.setTags(new HashSet<>(Collections.singletonList("required_exact")));
-                    validationResult = new ValidationResult(feedback, closestMatchType, false);
 
                     log.info("User submitted an answer that was close to an exact match, but not exact "
                             + "for question " + question.getId() + ". Choice: "
                             + closestMatch.getPythonExpression() + ", submitted: "
                             + submittedLogicFormula.getPythonExpression());
-                }
-                // ELSE: This is weak match to a wrong answer; we can't use the feedback for the choice.
+
+                    return new ValidationResult(feedback, closestMatchType, false);
+                } // ELSE: This is weak match to a wrong answer; we can't use the feedback for the choice.
             } else {
-                validationResult = new ValidationResult((Content) closestMatch.getExplanation(), closestMatchType, closestMatch.isCorrect());
+                return new ValidationResult((Content) closestMatch.getExplanation(), closestMatchType, closestMatch.isCorrect());
             }
 
         }
-        return validationResult;
+        return new ValidationResult(INITIAL_CONTENT, INITIAL_MATCH_TYPE, INITIAL_RESPONSE_CORRECT);
     }
 
     private static ValidationResult checkForExactAnswerMatch(final IsaacSymbolicLogicQuestion question, final LogicFormula submittedLogicFormula) {
-        ValidationResult validationResult = new ValidationResult(INITIAL_CONTENT, INITIAL_MATCH_TYPE, INITIAL_RESPONSE_CORRECT);
-
         // For all the choices on this question...
         for (Choice c : question.getChoices()) {
 
@@ -290,14 +282,15 @@ public class IsaacSymbolicLogicValidator implements IValidator {
 
             // ... look for an exact string match to the submitted answer.
             if (logicFormulaChoice.getPythonExpression().equals(submittedLogicFormula.getPythonExpression())) {
-                validationResult = new ValidationResult(
+                return new ValidationResult(
                         (Content) logicFormulaChoice.getExplanation(),
                         MatchType.EXACT,
                         logicFormulaChoice.isCorrect()
                 );
             }
         }
-        return validationResult;
+        // If no match is found...
+        return new ValidationResult(INITIAL_CONTENT, INITIAL_MATCH_TYPE, INITIAL_RESPONSE_CORRECT);
     }
 
     private static Content checkUserHasProvidedAnswer(final LogicFormula submittedLogicFormula) {
