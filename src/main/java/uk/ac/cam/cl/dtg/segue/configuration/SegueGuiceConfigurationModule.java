@@ -361,8 +361,6 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
         this.bindConstantToProperty(Constants.GOOGLE_CLIENT_SECRET_LOCATION, globalProperties);
         this.bindConstantToProperty(Constants.GOOGLE_CALLBACK_URI, globalProperties);
         this.bindConstantToProperty(Constants.GOOGLE_OAUTH_SCOPES, globalProperties);
-        //Google reCAPTCHA
-        this.bindConstantToProperty(Constants.GOOGLE_RECAPTCHA_SECRET, globalProperties);
         mapBinder.addBinding(AuthenticationProvider.GOOGLE).to(GoogleAuthenticator.class);
 
         // Facebook
