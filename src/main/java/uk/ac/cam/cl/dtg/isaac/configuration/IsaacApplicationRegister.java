@@ -88,6 +88,7 @@ public class IsaacApplicationRegister extends Application {
             this.singletons.add(injector.getInstance(InfoFacade.class));
             this.singletons.add(injector.getInstance(ContactFacade.class));
             this.singletons.add(injector.getInstance(QuestionFacade.class));
+            this.singletons.add(injector.getInstance(reCAPTCHAFacade.class));
             this.singletons.add(injector.getInstance(LogEventFacade.class));
             this.singletons.add(injector.getInstance(SegueDefaultFacade.class));
             this.singletons.add(injector.getInstance(UsersFacade.class));

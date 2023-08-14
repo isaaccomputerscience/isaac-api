@@ -15,42 +15,9 @@
  */
 package uk.ac.cam.cl.dtg.segue.auth;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.json.JsonObjectParser;
-import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import uk.ac.cam.cl.dtg.segue.api.Constants;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.AuthenticatorSecurityException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.CodeExchangeException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
-import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
-import uk.ac.cam.cl.dtg.isaac.dos.users.UserFromAuthProvider;
-
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -63,6 +30,26 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserFromAuthProvider;
+import uk.ac.cam.cl.dtg.segue.api.Constants;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.AuthenticatorSecurityException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.CodeExchangeException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Google authenticator adapter for Segue.
@@ -131,51 +118,6 @@ public class GoogleAuthenticator implements IOAuth2Authenticator {
                 tokenVerifier = new GoogleIdTokenVerifier(httpTransport, jsonFactory);
             }
         }
-    }
-
-    public class RecaptchaResponse {
-        private boolean success;
-
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public void setSuccess(boolean success) {
-            this.success = success;
-        }
-    }
-
-
-    public boolean verifyRecaptchaTokenIsValid(final String recaptchaToken) {
-        Validate.notNull(recaptchaToken, "Recaptcha token cannot be null");
-
-        try {
-            String secretKey = System.getenv("RECAPTCHA_SECRET_KEY");
-
-            // Build the URL using GenericUrl
-            GenericUrl urlBuilder = new GenericUrl("https://www.google.com/recaptcha/api/siteverify");
-            urlBuilder.set("secret", secretKey);
-            urlBuilder.set("response", recaptchaToken);
-
-            // Create an HTTP connection
-            HttpURLConnection connection = (HttpURLConnection) new URL(urlBuilder.toString()).openConnection();
-
-            // Get the response as an InputStream
-            InputStream inputStream = connection.getInputStream();
-
-            // Create a JsonFactory
-            JsonObjectParser parser = new JsonObjectParser(new JacksonFactory());
-
-            // Parse the JSON response using JsonLoader
-            RecaptchaResponse recaptchaResponse = parser.parseAndClose(inputStream, java.nio.charset.StandardCharsets.UTF_8, RecaptchaResponse.class);
-
-            // Get the success field
-            return recaptchaResponse.isSuccess();
-        } catch (IOException e) {
-            log.error("IO error while trying to validate reCAPTCHA token.");
-            e.printStackTrace();
-        }
-        return false;
     }
 
     /**
