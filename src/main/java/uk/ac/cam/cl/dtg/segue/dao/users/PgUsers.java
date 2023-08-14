@@ -727,8 +727,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
 
         String query = "INSERT INTO users(family_name, given_name, email, role, date_of_birth, gender," +
                 " registration_date, school_id, school_other, last_updated, email_verification_status, last_seen," +
-                " email_verification_token, email_to_verify, session_token, registered_contexts, registered_contexts_last_confirmed)" +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                " email_verification_token, email_to_verify, teacher_pending, session_token, registered_contexts, registered_contexts_last_confirmed)" +
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         try (Connection conn = database.getDatabaseConnection();
              PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {
@@ -755,9 +755,10 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
             setValueHelper(pst, 12, userToCreate.getLastSeen());
             setValueHelper(pst, 13, userToCreate.getEmailVerificationToken());
             setValueHelper(pst, 14, userToCreate.getEmailToVerify());
-            setValueHelper(pst, 15, userToCreate.getSessionToken());
-            pst.setArray(16, userContexts);
-            setValueHelper(pst, 17, userToCreate.getRegisteredContextsLastConfirmed());
+            setValueHelper(pst, 15, userToCreate.getTeacherPending());
+            setValueHelper(pst, 16, userToCreate.getSessionToken());
+            pst.setArray(17, userContexts);
+            setValueHelper(pst, 18, userToCreate.getRegisteredContextsLastConfirmed());
 
             if (pst.executeUpdate() == 0) {
                 throw new SegueDatabaseException("Unable to save user.");
@@ -819,7 +820,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         String query = "UPDATE users SET family_name = ?, given_name = ?, email = ?, role = ?, date_of_birth = ?," +
                 " gender = ?, registration_date = ?, school_id = ?, school_other = ?, last_updated = ?," +
                 " email_verification_status = ?, last_seen = ?, email_verification_token = ?, email_to_verify = ?," +
-                " registered_contexts = ?, registered_contexts_last_confirmed = ? WHERE id = ?;";
+                " teacher_pending = ?, registered_contexts = ?, registered_contexts_last_confirmed = ? WHERE id = ?;";
         try (PreparedStatement pst = conn.prepareStatement(query)) {
             // TODO: Change this to annotations or something to rely exclusively on the pojo.
             setValueHelper(pst, 1, userToCreate.getFamilyName());
@@ -836,16 +837,17 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
             setValueHelper(pst, 12, userToCreate.getLastSeen());
             setValueHelper(pst, 13, userToCreate.getEmailVerificationToken());
             setValueHelper(pst, 14, userToCreate.getEmailToVerify());
+            setValueHelper(pst, 15, userToCreate.getTeacherPending());
             List<String> userContextsJsonb = Lists.newArrayList();
             if (userToCreate.getRegisteredContexts() != null) {
                 for (UserContext registeredContext : userToCreate.getRegisteredContexts()) {
                     userContextsJsonb.add(jsonMapper.writeValueAsString(registeredContext));
                 }
             }
-            pst.setArray(15, conn.createArrayOf("jsonb", userContextsJsonb.toArray()));
-            setValueHelper(pst, 16, userToCreate.getRegisteredContextsLastConfirmed());
+            pst.setArray(16, conn.createArrayOf("jsonb", userContextsJsonb.toArray()));
+            setValueHelper(pst, 17, userToCreate.getRegisteredContextsLastConfirmed());
 
-            setValueHelper(pst, 17, userToCreate.getId());
+            setValueHelper(pst, 18, userToCreate.getId());
 
 
             if (pst.executeUpdate() == 0) {
@@ -914,6 +916,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         u.setEmailVerificationToken(results.getString("email_verification_token"));
         u.setEmailVerificationStatus(results.getString("email_verification_status") != null ? EmailVerificationStatus
                 .valueOf(results.getString("email_verification_status")) : null);
+        u.setTeacherPending(results.getBoolean("teacher_pending"));
         u.setSessionToken(results.getInt("session_token"));
 
         return u;

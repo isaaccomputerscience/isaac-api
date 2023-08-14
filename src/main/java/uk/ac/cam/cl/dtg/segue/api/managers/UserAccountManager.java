@@ -1262,6 +1262,7 @@ public class UserAccountManager implements IUserAccountManager {
         }
 
         userToSave.setRole(requestedRole);
+        userToSave.setTeacherPending(false);
         this.database.createOrUpdateUser(userToSave);
     }
 
