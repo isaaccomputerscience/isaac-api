@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 public class IsaacStringMatchValidator implements IValidator {
     private static final Logger log = LoggerFactory.getLogger(IsaacStringMatchValidator.class);
     private static final Pattern LEADING_SPACES = Pattern.compile("^\\s+", Pattern.MULTILINE);
-    private static final Pattern TRAILING_SPACES = Pattern.compile("\\s+$", Pattern.MULTILINE);
+    private static final Pattern TRAILING_SPACES = Pattern.compile("(?<!\\s)\\s+$", Pattern.MULTILINE);
     
     @Override
     public final QuestionValidationResponse validateQuestionResponse(final Question question, final Choice answer) {

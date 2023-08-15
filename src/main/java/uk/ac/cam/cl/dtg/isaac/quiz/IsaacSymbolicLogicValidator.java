@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
+
 /**
  * Validator that provides functionality to validate symbolic logic questions.
  *
@@ -196,8 +198,9 @@ public class IsaacSymbolicLogicValidator implements IValidator {
 
                 if (response.containsKey("error")) {
                     if (response.containsKey("code")) {
-                        log.error("Failed to check logic formula \"" + submittedLogicFormula.getPythonExpression()
-                                + "\" against \"" + logicFormulaChoice.getPythonExpression() + "\": " + response.get("error"));
+                        log.error("Failed to check logic formula \"" + sanitiseLogValue(submittedLogicFormula.getPythonExpression())
+                                + "\" against \"" + sanitiseLogValue(logicFormulaChoice.getPythonExpression())
+                                + "\": " + sanitiseLogValue(response.get("error").toString()));
                     } else if (response.containsKey("syntax_error")) {
                         // There's a syntax error in the "test" expression, no use checking it further:
                         Content feedback =  new Content("Your answer does not seem to be valid boolean logic.<br>"
@@ -246,9 +249,9 @@ public class IsaacSymbolicLogicValidator implements IValidator {
                     feedback.setTags(new HashSet<>(Collections.singletonList("required_exact")));
 
                     log.info("User submitted an answer that was close to an exact match, but not exact "
-                            + "for question " + question.getId() + ". Choice: "
-                            + closestMatch.getPythonExpression() + ", submitted: "
-                            + submittedLogicFormula.getPythonExpression());
+                            + "for question " + sanitiseLogValue(question.getId())
+                            + ". Choice: " + sanitiseLogValue(closestMatch.getPythonExpression())
+                            + ", submitted: " + sanitiseLogValue(submittedLogicFormula.getPythonExpression()));
 
                     return new ValidationResult(feedback, closestMatchType, false);
                 } // ELSE: This is weak match to a wrong answer; we can't use the feedback for the choice.
