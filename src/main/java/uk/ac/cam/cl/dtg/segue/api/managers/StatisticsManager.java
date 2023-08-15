@@ -187,6 +187,7 @@ public class StatisticsManager implements IStatisticsManager {
      * @throws SegueDatabaseException
      *             if there is a problem with the database.
      */
+    @Override
     public Long getLogCount(final String logTypeOfInterest) throws SegueDatabaseException {
         return this.logManager.getLogCountByType(logTypeOfInterest);
     }
@@ -317,6 +318,7 @@ public class StatisticsManager implements IStatisticsManager {
      * @throws UnableToIndexSchoolsException
      *             - if the school list has not been indexed.
      */
+    @Override
     public List<RegisteredUserDTO> getUsersBySchoolId(final String schoolId) throws ResourceNotFoundException,
             SegueDatabaseException, UnableToIndexSchoolsException, SegueSearchException {
         Validate.notNull(schoolId);
@@ -344,7 +346,7 @@ public class StatisticsManager implements IStatisticsManager {
     }
 
     /**
-     * @return a list of userId's to last event timestamp
+     * @return a Map of userId's to last event timestamp
      */
     public Map<String, Date> getLastSeenUserMap() {
         Map<String, Date> lastSeenMap = Maps.newHashMap();
@@ -371,7 +373,7 @@ public class StatisticsManager implements IStatisticsManager {
      * @param qualifyingLogEvent
      *            the string event type that will be looked for.
      * @return a map of userId's to last event timestamp
-     * @throws SegueDatabaseException
+     * @throws SegueDatabaseException - if there is a problem contacting the underlying database
      */
     public Map<String, Date> getLastSeenUserMap(final String qualifyingLogEvent) throws SegueDatabaseException {
         return this.logManager.getLastLogDateForAllUsers(qualifyingLogEvent);
@@ -390,6 +392,7 @@ public class StatisticsManager implements IStatisticsManager {
      * @throws ContentManagerException
      *             - if we are unable to look up the content.
      */
+    @Override
     public Map<String, Object> getUserQuestionInformation(final RegisteredUserDTO userOfInterest)
             throws SegueDatabaseException, ContentManagerException {
         Validate.notNull(userOfInterest);
@@ -533,8 +536,9 @@ public class StatisticsManager implements IStatisticsManager {
      * @param binDataByMonth
      *            - shall we group data by the first of every month?
      * @return Map of eventType --> map of dates and frequency
-     * @throws SegueDatabaseException
+     * @throws SegueDatabaseException - if there is a problem contacting the underlying database
      */
+    @Override
     public Map<String, Map<org.joda.time.LocalDate, Long>> getEventLogsByDate(final Collection<String> eventTypes,
             final Date fromDate, final Date toDate, final boolean binDataByMonth) throws SegueDatabaseException {
         return this.getEventLogsByDateAndUserList(eventTypes, fromDate, toDate, null, binDataByMonth);
@@ -554,8 +558,9 @@ public class StatisticsManager implements IStatisticsManager {
      * @param binDataByMonth
      *            - shall we group data by the first of every month?
      * @return Map of eventType --> map of dates and frequency
-     * @throws SegueDatabaseException
+     * @throws SegueDatabaseException - if there is a problem contacting the underlying database
      */
+    @Override
     public Map<String, Map<org.joda.time.LocalDate, Long>> getEventLogsByDateAndUserList(final Collection<String> eventTypes,
             final Date fromDate, final Date toDate, final List<RegisteredUserDTO> userList,
             final boolean binDataByMonth) throws SegueDatabaseException {
@@ -576,6 +581,7 @@ public class StatisticsManager implements IStatisticsManager {
      *            week's data.
      * @return a collection containing the users who meet the criteria
      */
+    @Override
     public Collection<RegisteredUserDTO> getNumberOfUsersActiveForLastNDays(final Collection<RegisteredUserDTO> users,
             final Map<String, Date> lastSeenUserMap, final int daysFromToday) {
 
