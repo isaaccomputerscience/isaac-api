@@ -1,12 +1,6 @@
-package uk.ac.cam.cl.dtg.segue.api;
+package uk.ac.cam.cl.dtg.segue.api.managers;
 
 import com.google.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.Validate;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -22,33 +16,29 @@ import java.net.URL;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.GOOGLE_RECAPTCHA_SECRET;
 
-@Path("/recaptcha")
-public class reCAPTCHAFacade {
+public class reCAPTCHAManager {
     private final PropertiesLoader properties;
-    private static final Logger log = LoggerFactory.getLogger(reCAPTCHAFacade.class);
+    private static final Logger log = LoggerFactory.getLogger(reCAPTCHAManager.class);
 
     @Inject
-    public reCAPTCHAFacade(PropertiesLoader properties) {
+    public reCAPTCHAManager(PropertiesLoader properties) {
         Validate.notNull(properties.getProperty(GOOGLE_RECAPTCHA_SECRET));
         this.properties = properties;
     }
 
-    @GET
-    @Path("/verify")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response isCaptchaValid(@QueryParam("response") String response) {
+    public String isCaptchaValid(String response) {
         if (response == null || response.isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Missing reCAPTCHA response token.").build();
+            return "Missing reCAPTCHA response token.";
         }
 
-        if (verifyRecaptcha(response)) {
-            return Response.ok().entity("reCAPTCHA verification successful.").build();
-        } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity("reCAPTCHA verification failed.").build();
+        if(verifyRecaptcha(response)){
+            return "reCAPTCHA verification successful.";
+        }else{
+            return "reCAPTCHA verification failed.";
         }
     }
 
-    private synchronized boolean verifyRecaptcha(String response) {
+    public synchronized boolean verifyRecaptcha(String response) {
         try {
             String secretKey = properties.getProperty(GOOGLE_RECAPTCHA_SECRET);
             String url = "https://www.google.com/recaptcha/api/siteverify",

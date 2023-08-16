@@ -49,7 +49,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
         misuseMonitor.resetMisuseCount("test-student@test.com", PasswordResetByEmailMisuseHandler.class.getSimpleName());
         misuseMonitor.resetMisuseCount("0.0.0.0", PasswordResetByIPMisuseHandler.class.getSimpleName());
         misuseMonitor.resetMisuseCount("0.0.0.0", RegistrationMisuseHandler.class.getSimpleName());
-        this.usersFacade = new UsersFacade(properties, userAccountManager, logManager, userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader);
+        this.usersFacade = new UsersFacade(properties, userAccountManager, recaptchaManager, logManager, userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader);
         mockRequest = replayMockServletRequest();
         mockResponse = niceMock(HttpServletResponse.class);
     }
