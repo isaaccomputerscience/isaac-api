@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import jakarta.annotation.Nullable;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.Validate;
@@ -25,9 +26,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.IsaacEventPage;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacNumericQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuiz;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuizSection;
-import uk.ac.cam.cl.dtg.isaac.dos.IsaacSymbolicChemistryQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacSymbolicQuestion;
-import uk.ac.cam.cl.dtg.isaac.dos.content.ChemicalFormula;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Choice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ChoiceQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.content.CodeSnippet;
@@ -46,7 +45,6 @@ import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.database.GitDb;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 
-import jakarta.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -66,7 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Maps.immutableEntry;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.CONTENT_INDEX_TYPE;
 
 /**
  * Created by Ian on 17/10/2016.
@@ -1028,7 +1026,7 @@ public class ContentIndexer {
             }
         }
 
-        // Find Symbolic Questions with broken properties. Need to exclude Chemistry questions!
+        // Find Symbolic Questions with broken properties.
         if (content instanceof IsaacSymbolicQuestion) {
             if (content.getClass().equals(IsaacSymbolicQuestion.class)) {
                 IsaacSymbolicQuestion q = (IsaacSymbolicQuestion) content;
@@ -1051,20 +1049,6 @@ public class ContentIndexer {
                     } else {
                         this.registerContentProblem(content, "Symbolic Question: " + q.getId() + " has non-Formula Choice ("
                                 + choice.getValue() + "). It must be deleted and a new Formula Choice created.", indexProblemCache);
-                    }
-                }
-            } else if (content.getClass().equals(IsaacSymbolicChemistryQuestion.class)) {
-                IsaacSymbolicChemistryQuestion q = (IsaacSymbolicChemistryQuestion) content;
-                for (Choice choice : q.getChoices()) {
-                    if (choice instanceof ChemicalFormula) {
-                        ChemicalFormula f = (ChemicalFormula) choice;
-                        if (f.getMhchemExpression() == null || f.getMhchemExpression().isEmpty()) {
-                            this.registerContentProblem(content, "Chemistry Question: " + q.getId() + " has ChemicalFormula"
-                                    + " with empty mhchemExpression!", indexProblemCache);
-                        }
-                    } else {
-                        this.registerContentProblem(content, "Chemistry Question: " + q.getId() + " has non-ChemicalFormula Choice ("
-                                + choice.getValue() + "). It must be deleted and a new ChemicalFormula Choice created.", indexProblemCache);
                     }
                 }
             }

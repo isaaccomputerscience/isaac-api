@@ -1013,7 +1013,7 @@ public class UserAccountManager implements IUserAccountManager {
      *             - If there is an internal database error.
      * @throws EmailMustBeVerifiedException
      *             - if a user attempts to sign up with an email that must be verified before it can be used
-     *             (i.e. an @isaacphysics.org or @isaacchemistry.org address).
+     *             (i.e. an @isaaccomputerscience.org address).
      */
     public RegisteredUserDTO createUserObjectAndSession(final HttpServletRequest request,
                                                         final HttpServletResponse response, final RegisteredUser user, final String newPassword, final List<UserContext> registeredUserContexts) throws InvalidPasswordException,
