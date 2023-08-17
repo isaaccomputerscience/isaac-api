@@ -26,10 +26,6 @@ public class reCAPTCHAManager {
         this.properties = properties;
     }
 
-    protected HttpURLConnection createHttpConnection(URL url) throws Exception {
-        return (HttpURLConnection) url.openConnection();
-    }
-
     public String isCaptchaValid(String response) {
         if (response == null || response.isEmpty()) {
             return "Missing reCAPTCHA response token.";
