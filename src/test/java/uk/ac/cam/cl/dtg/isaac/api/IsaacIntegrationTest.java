@@ -50,7 +50,7 @@ import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAssociationManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAuthenticationManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserBadgeManager;
-import uk.ac.cam.cl.dtg.segue.api.managers.reCAPTCHAManager;
+import uk.ac.cam.cl.dtg.segue.api.managers.RECAPTCHAManager;
 import uk.ac.cam.cl.dtg.segue.api.monitors.GroupManagerLookupMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.IMisuseMonitor;
 import uk.ac.cam.cl.dtg.segue.api.monitors.InMemoryMisuseMonitor;
@@ -124,7 +124,7 @@ public abstract class IsaacIntegrationTest {
     protected static UserAuthenticationManager userAuthenticationManager;
     protected static ISecondFactorAuthenticator secondFactorManager;
     protected static UserAccountManager userAccountManager;
-    protected static reCAPTCHAManager recaptchaManager;
+    protected static RECAPTCHAManager recaptchaManager;
     protected static GameManager gameManager;
     protected static GroupManager groupManager;
     protected static EventBookingManager eventBookingManager;

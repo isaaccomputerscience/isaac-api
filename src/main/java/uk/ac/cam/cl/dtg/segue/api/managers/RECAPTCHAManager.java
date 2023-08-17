@@ -16,29 +16,29 @@ import java.net.URL;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.GOOGLE_RECAPTCHA_SECRET;
 
-public class reCAPTCHAManager {
+public class RECAPTCHAManager {
     private final PropertiesLoader properties;
-    private static final Logger log = LoggerFactory.getLogger(reCAPTCHAManager.class);
+    private static final Logger log = LoggerFactory.getLogger(RECAPTCHAManager.class);
 
     @Inject
-    public reCAPTCHAManager(PropertiesLoader properties) {
+    public RECAPTCHAManager(final PropertiesLoader properties) {
         Validate.notNull(properties.getProperty(GOOGLE_RECAPTCHA_SECRET));
         this.properties = properties;
     }
 
-    public String isCaptchaValid(String response) {
+    public String isCaptchaValid(final String response) {
         if (response == null || response.isEmpty()) {
             return "Missing reCAPTCHA response token.";
         }
 
-        if(verifyRecaptcha(response)){
+        if (verifyRecaptcha(response)) {
             return "reCAPTCHA verification successful.";
-        }else{
+        } else {
             return "reCAPTCHA verification failed.";
         }
     }
 
-    protected JSONObject performHttpRequest(String url, String params) throws Exception {
+    protected JSONObject performHttpRequest(final String url, final String params) throws Exception {
         HttpURLConnection http = (HttpURLConnection) new URL(url).openConnection();
         http.setDoOutput(true);
         http.setRequestMethod("POST");
@@ -62,9 +62,9 @@ public class reCAPTCHAManager {
         return new JSONObject(sb.toString());
     }
 
-    public synchronized boolean verifyRecaptcha(String response) {
+    public synchronized boolean verifyRecaptcha(final String response) {
         try {
-            if(!response.isEmpty()){
+            if (!response.isEmpty()) {
                 String secretKey = properties.getProperty(GOOGLE_RECAPTCHA_SECRET);
                 String url = "https://www.google.com/recaptcha/api/siteverify";
                 String params = "secret=" + secretKey + "&response=" + response;

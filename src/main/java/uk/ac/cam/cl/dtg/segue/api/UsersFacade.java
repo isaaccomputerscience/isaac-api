@@ -54,7 +54,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.SegueResourceMisuseException;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
-import uk.ac.cam.cl.dtg.segue.api.managers.reCAPTCHAManager;
+import uk.ac.cam.cl.dtg.segue.api.managers.RECAPTCHAManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAssociationManager;
 import uk.ac.cam.cl.dtg.segue.api.monitors.IMisuseMonitor;
 import uk.ac.cam.cl.dtg.segue.api.monitors.PasswordResetByEmailMisuseHandler;
@@ -101,7 +101,7 @@ import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 public class UsersFacade extends AbstractSegueFacade {
     private static final Logger log = LoggerFactory.getLogger(UsersFacade.class);
     private final UserAccountManager userManager;
-    private final reCAPTCHAManager recaptchaManager;
+    private final RECAPTCHAManager recaptchaManager;
     private final UserAssociationManager userAssociationManager;
     private final IMisuseMonitor misuseMonitor;
     private final AbstractUserPreferenceManager userPreferenceManager;
@@ -127,7 +127,7 @@ public class UsersFacade extends AbstractSegueFacade {
      */
     @Inject
     public UsersFacade(final PropertiesLoader properties, final UserAccountManager userManager,
-                       final reCAPTCHAManager recaptchaManager, final ILogManager logManager,
+                       final RECAPTCHAManager recaptchaManager, final ILogManager logManager,
                        final UserAssociationManager userAssociationManager, final IMisuseMonitor misuseMonitor,
                        final AbstractUserPreferenceManager userPreferenceManager,
                        final SchoolListReader schoolListReader) {
