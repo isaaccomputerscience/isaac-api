@@ -44,23 +44,26 @@ public class RECAPTCHAManager {
         http.setRequestMethod("POST");
         http.setRequestProperty("Content-Type",
                 "application/x-www-form-urlencoded; charset=UTF-8");
-        OutputStream out = http.getOutputStream();
-        out.write(params.getBytes("UTF-8"));
-        out.flush();
-        out.close();
 
-        InputStream res = http.getInputStream();
-        BufferedReader rd = new BufferedReader(new InputStreamReader(res, "UTF-8"));
+        try (OutputStream out = http.getOutputStream()) {
+            out.write(params.getBytes("UTF-8"));
+            out.flush();
+        }
 
         StringBuilder sb = new StringBuilder();
-        int cp;
-        while ((cp = rd.read()) != -1) {
-            sb.append((char) cp);
-        }
-        res.close();
+        try (InputStream res = http.getInputStream();
+             BufferedReader rd = new BufferedReader(new InputStreamReader(res, "UTF-8"))) {
+
+            int cp;
+            while ((cp = rd.read()) != -1) {
+                sb.append((char) cp);
+            }
+        } // End of try-with-resources block
 
         return new JSONObject(sb.toString());
     }
+
+
 
     public synchronized boolean verifyRecaptcha(final String response) {
         try {
