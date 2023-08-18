@@ -38,6 +38,7 @@ import uk.ac.cam.cl.dtg.isaac.api.PagesFacade;
 import uk.ac.cam.cl.dtg.isaac.api.QuizFacade;
 import uk.ac.cam.cl.dtg.segue.api.*;
 import uk.ac.cam.cl.dtg.segue.api.managers.IGroupObserver;
+import uk.ac.cam.cl.dtg.segue.api.managers.RECAPTCHAManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserBadgeManager;
 import uk.ac.cam.cl.dtg.segue.api.monitors.AuditMonitor;
 import uk.ac.cam.cl.dtg.segue.api.monitors.PerformanceMonitor;
@@ -61,11 +62,13 @@ public class IsaacApplicationRegister extends Application {
     private final Set<Object> singletons;
     
     private static Injector injector;
-    
+
     /**
-     * Default constructor.
+     * Constructor for IsaacApplicationRegister.
+     *
+     * @param servletConfig The servlet configuration object that contains initialization parameters
      */
-    public IsaacApplicationRegister(@Context ServletConfig servletConfig) {
+    public IsaacApplicationRegister(@Context final ServletConfig servletConfig) {
         singletons = new HashSet<>();
         injector = SegueGuiceConfigurationModule.getGuiceInjector();
         
@@ -116,6 +119,9 @@ public class IsaacApplicationRegister extends Application {
 
             // initialise observers
             this.singletons.add(injector.getInstance(IGroupObserver.class));
+
+            //initialise manager
+            this.singletons.add(injector.getInstance(RECAPTCHAManager.class));
         }
 
         return this.singletons;
@@ -131,9 +137,11 @@ public class IsaacApplicationRegister extends Application {
 
         return result;
     }
-    
+
     /**
-     * Configure and setup Swagger (advertises api endpoints via app_root/swagger.json).
+     * Sets up the Swagger API advertiser using the provided servlet configuration.
+     *
+     * @param servletConfig The servlet configuration object that contains initialization parameters
      */
     private void setupSwaggerApiAdvertiser(final ServletConfig servletConfig) {
         PropertiesLoader propertiesLoader = injector.getInstance(PropertiesLoader.class);

@@ -114,6 +114,8 @@ public class UsersFacade extends AbstractSegueFacade {
      *            - properties loader for the application
      * @param userManager
      *            - user manager for the application
+     * @param recaptchaManager
+     *            - so we can check recaptcha token is valid
      * @param logManager
      *            - so we can log interesting events.
      * @param userAssociationManager
@@ -215,9 +217,9 @@ public class UsersFacade extends AbstractSegueFacade {
 
             //TODO: We need to change the way the frontend sends passwords to reduce complexity
             Map<String, Object> mapRepresentation = tmpObjectMapper.readValue(userObjectString, HashMap.class);
-            newPassword = (String) ((Map)mapRepresentation.get("registeredUser")).get("password");
+            newPassword = (String) ((Map) mapRepresentation.get("registeredUser")).get("password");
             reCAPTCHAToken = (String) mapRepresentation.get("recaptchaToken");
-            ((Map)mapRepresentation.get("registeredUser")).remove("password");
+            ((Map) mapRepresentation.get("registeredUser")).remove("password");
             userSettingsObjectFromClient = tmpObjectMapper.convertValue(mapRepresentation, UserSettings.class);
             
             if (null == userSettingsObjectFromClient) {
@@ -251,7 +253,7 @@ public class UsersFacade extends AbstractSegueFacade {
             try {
                 String recaptchaResponse = recaptchaManager.isCaptchaValid(reCAPTCHAToken);
 
-                if(recaptchaResponse != "reCAPTCHA verification successful."){
+                if (!recaptchaResponse.equals("reCAPTCHA verification successful.")) {
                     return new SegueErrorResponse(Status.BAD_REQUEST,  "reCAPTCHA not validated correctly.").toResponse();
                 }
                 String ipAddress = RequestIPExtractor.getClientIpAddr(request);
@@ -411,10 +413,11 @@ public class UsersFacade extends AbstractSegueFacade {
                     .logEvent(userManager.getCurrentUser(request), request, SegueServerLogType.PASSWORD_RESET_REQUEST_RECEIVED,
                             ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userObject.getEmail()));
 
-            if (userExists)
+            if (userExists) {
                 log.info("Password reset requested for email: (" + sanitiseLogValue(userObject.getEmail()) + ")");
-            else
+            } else {
                 log.warn("Password reset requested for account that does not exist: (" + sanitiseLogValue(userObject.getEmail()) + ")");
+            }
             return Response.ok().build();
         } catch (SegueDatabaseException e) {
             SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
