@@ -25,7 +25,7 @@ public class RECAPTCHAManagerTest {
     private RECAPTCHAManager createTestInstance(String responseJson) {
         return new RECAPTCHAManager(properties) {
             @Override
-            protected JSONObject performHttpRequest(String url, String params) throws Exception {
+            protected JSONObject performHttpRequest(String url, String params) {
                 return new JSONObject(responseJson);
             }
         };
