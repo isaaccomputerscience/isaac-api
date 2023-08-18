@@ -119,9 +119,6 @@ public class IsaacApplicationRegister extends Application {
 
             // initialise observers
             this.singletons.add(injector.getInstance(IGroupObserver.class));
-
-            //initialise manager
-            this.singletons.add(injector.getInstance(RECAPTCHAManager.class));
         }
 
         return this.singletons;

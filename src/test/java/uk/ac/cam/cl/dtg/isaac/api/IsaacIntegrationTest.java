@@ -228,6 +228,8 @@ public abstract class IsaacIntegrationTest {
         globalTokens.put("accountURL", String.format("https://%s/account", properties.getProperty(HOST_NAME)));
         globalTokens.put("siteBaseURL", String.format("https://%s", properties.getProperty(HOST_NAME)));
 
+        recaptchaManager = new RECAPTCHAManager(properties);
+
         JsonMapper jsonMapper = new JsonMapper();
         PgUsers pgUsers = new PgUsers(postgresSqlDb, jsonMapper);
         PgAnonymousUsers pgAnonymousUsers = new PgAnonymousUsers(postgresSqlDb);
