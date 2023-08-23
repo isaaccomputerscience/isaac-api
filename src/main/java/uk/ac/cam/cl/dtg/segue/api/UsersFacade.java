@@ -251,7 +251,7 @@ public class UsersFacade extends AbstractSegueFacade {
             }
         } else {
             try {
-                String recaptchaResponse = recaptchaManager.isCaptchaValid(reCAPTCHAToken);
+                String recaptchaResponse = recaptchaManager.recaptchaResultString(reCAPTCHAToken);
 
                 if (!recaptchaResponse.equals("reCAPTCHA verification successful.")) {
                     return new SegueErrorResponse(Status.BAD_REQUEST,  "reCAPTCHA not validated correctly.").toResponse();

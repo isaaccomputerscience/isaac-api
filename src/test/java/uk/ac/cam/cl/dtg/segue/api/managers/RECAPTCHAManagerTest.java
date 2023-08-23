@@ -40,7 +40,7 @@ public class RECAPTCHAManagerTest {
     @Test
     public final void isCaptchaValid_ValidResponse_ShouldReturnSuccessMessage() throws Exception {
         RECAPTCHAManager testInstance = createTestInstance(SUCCESS_RESPONSE_JSON);
-        assertEquals("reCAPTCHA verification successful.", testInstance.isCaptchaValid("valid-response"));
+        assertEquals("reCAPTCHA verification successful.", testInstance.recaptchaResultString("valid-response"));
     }
 
     @Test
@@ -52,7 +52,7 @@ public class RECAPTCHAManagerTest {
     @Test
     public final void isCaptchaValid_InvalidResponse_ShouldReturnFailedMessage() throws Exception {
         RECAPTCHAManager testInstance = createTestInstance(FAILURE_RESPONSE_JSON);
-        assertEquals("reCAPTCHA verification failed.", testInstance.isCaptchaValid("invalid-response"));
+        assertEquals("reCAPTCHA verification failed.", testInstance.recaptchaResultString("invalid-response"));
     }
 
     @Test
@@ -64,6 +64,6 @@ public class RECAPTCHAManagerTest {
     @Test
     public final void isCaptchaValid_EmptyResponse_ShouldReturnMissingResponseMessage() throws Exception {
         RECAPTCHAManager testInstance = createTestInstance(FAILURE_RESPONSE_JSON);
-        assertEquals("Missing reCAPTCHA response token.", testInstance.isCaptchaValid(""));
+        assertEquals("Missing reCAPTCHA response token.", testInstance.recaptchaResultString(""));
     }
 }

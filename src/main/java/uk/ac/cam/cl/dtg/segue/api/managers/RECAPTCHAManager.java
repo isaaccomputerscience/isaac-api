@@ -5,6 +5,7 @@ import org.apache.commons.lang3.Validate;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.segue.api.services.SimpleHttpClientService;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 import java.io.*;
@@ -24,7 +25,7 @@ public class RECAPTCHAManager {
         this.properties = properties;
     }
 
-    public String isCaptchaValid(final String response) {
+    public String recaptchaResultString(final String response) {
         if (response == null || response.isEmpty()) {
             return "Missing reCAPTCHA response token.";
         }
@@ -67,10 +68,10 @@ public class RECAPTCHAManager {
         try {
             if (!response.isEmpty()) {
                 String secretKey = properties.getProperty(GOOGLE_RECAPTCHA_SECRET);
+                SimpleHttpClientService client = new SimpleHttpClientService();
                 String url = "https://www.google.com/recaptcha/api/siteverify";
                 String params = "secret=" + secretKey + "&response=" + response;
-
-                JSONObject json = performHttpRequest(url, params);
+                JSONObject json = client.post(url, params);
                 return json.getBoolean("success");
             }
         } catch (Exception e) {
