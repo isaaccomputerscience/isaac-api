@@ -54,7 +54,6 @@ import uk.ac.cam.cl.dtg.segue.api.SegueDefaultFacade;
 import uk.ac.cam.cl.dtg.segue.api.SessionValidator;
 import uk.ac.cam.cl.dtg.segue.api.UsersFacade;
 import uk.ac.cam.cl.dtg.segue.api.managers.IGroupObserver;
-import uk.ac.cam.cl.dtg.segue.api.managers.RECAPTCHAManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserBadgeManager;
 import uk.ac.cam.cl.dtg.segue.api.monitors.AuditMonitor;
 import uk.ac.cam.cl.dtg.segue.api.monitors.PerformanceMonitor;

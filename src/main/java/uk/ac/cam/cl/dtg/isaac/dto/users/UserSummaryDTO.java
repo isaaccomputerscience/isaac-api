@@ -157,16 +157,18 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
     }
 
     /**
-     * Gets the teacherPending flag
+     * Gets the teacherPending flag.
      * @return the teacherPending flag
      */
-    public Boolean getTeacherPending() {return teacherPending;}
+    public Boolean getTeacherPending() {
+        return teacherPending;
+    }
 
     /**
-     * Sets the teacherPending flag
+     * Sets the teacherPending flag.
      * @param teacherPending the teacherPending flag value to set
      */
-    public void setTeacherPending(Boolean teacherPending) {
+    public void setTeacherPending(final Boolean teacherPending) {
         this.teacherPending = teacherPending;
     }
 

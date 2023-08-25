@@ -70,6 +70,8 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
      *            - date of registration
      * @param schoolId
      *            - the list of linked authentication provider accounts.
+     * @param teacherPending
+     *            - the teacherPending flag value to set
      */
     @JsonCreator
     public RegisteredUserDTO(
@@ -387,16 +389,18 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
     }
 
     /**
-     * Gets the teacherPending flag
+     * Gets the teacherPending flag.
      * @return the teacherPending flag
      */
-    public Boolean getTeacherPending() {return teacherPending;}
+    public Boolean getTeacherPending() {
+        return teacherPending;
+    }
 
     /**
-     * Sets the teacherPending flag
+     * Sets the teacherPending flag.
      * @param teacherPending the teacherPending flag value to set
      */
-    public void setTeacherPending(Boolean teacherPending) {
+    public void setTeacherPending(final Boolean teacherPending) {
         this.teacherPending = teacherPending;
     }
 
@@ -556,21 +560,21 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
 
     @Override
     public String toString() {
-        return "RegisteredUserDTO [" +
-                "id=" + id +
-                ", givenName="+ givenName +
-                ", familyName=" + familyName +
-                ", email=" + email +
-                ", role=" + role +
-                ", dateOfBirth=" + dateOfBirth +
-                ", gender=" + gender +
-                ", registrationDate=" + registrationDate +
-                ", schoolId=" + schoolId +
-                ", schoolOther=" + schoolOther +
-                ", emailVerificationStatus=" + emailVerificationStatus +
-                ", teacherPending=" + teacherPending +
-                ", firstLogin=" + firstLogin +
-                ", lastUpdated=" + lastUpdated +
-                "]";
+        return "RegisteredUserDTO ["
+                + "id=" + id
+                + ", givenName=" + givenName
+                + ", familyName=" + familyName
+                + ", email=" + email
+                + ", role=" + role
+                + ", dateOfBirth=" + dateOfBirth
+                + ", gender=" + gender
+                + ", registrationDate=" + registrationDate
+                + ", schoolId=" + schoolId
+                + ", schoolOther=" + schoolOther
+                + ", emailVerificationStatus=" + emailVerificationStatus
+                + ", teacherPending=" + teacherPending
+                + ", firstLogin=" + firstLogin
+                + ", lastUpdated=" + lastUpdated
+                + "]";
     }
 }

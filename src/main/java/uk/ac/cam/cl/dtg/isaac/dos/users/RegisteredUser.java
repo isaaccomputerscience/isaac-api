@@ -77,6 +77,8 @@ public class RegisteredUser extends AbstractSegueUser {
      *            - the most recent token generated to verify email addresses
      * @param emailVerificationStatus
      *            - whether the user has verified their email or not
+     * @param teacherPending
+     *            - the teacherPending flag value
      */
     @JsonCreator
     public RegisteredUser(
@@ -434,16 +436,18 @@ public class RegisteredUser extends AbstractSegueUser {
     }
 
     /**
-     * Gets the teacherPending flag
+     * Gets the teacherPending flag.
      * @return the teacherPending flag
      */
-    public Boolean getTeacherPending() {return teacherPending;}
+    public Boolean getTeacherPending() {
+        return teacherPending;
+    }
 
     /**
-     * Sets the teacherPending flag
+     * Sets the teacherPending flag.
      * @param teacherPending the teacherPending flag value to set
      */
-    public void setTeacherPending(Boolean teacherPending) {
+    public void setTeacherPending(final Boolean teacherPending) {
         this.teacherPending = teacherPending;
     }
 
