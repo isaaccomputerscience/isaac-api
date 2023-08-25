@@ -1,6 +1,5 @@
 package uk.ac.cam.cl.dtg.segue.api.managers;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
@@ -29,12 +28,7 @@ public class RECAPTCHAManagerTest {
     }
 
     private RECAPTCHAManager createTestInstance(String responseJson) {
-        return new RECAPTCHAManager(properties) {
-            @Override
-            protected JSONObject performHttpRequest(String url, String params) {
-                return new JSONObject(responseJson);
-            }
-        };
+        return new RECAPTCHAManager(properties);
     }
 
     @Test

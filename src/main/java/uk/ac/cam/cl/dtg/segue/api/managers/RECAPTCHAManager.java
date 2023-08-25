@@ -8,15 +8,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.api.services.SimpleHttpClientService;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.ProtocolException;
-import java.net.URL;
-
 import static uk.ac.cam.cl.dtg.segue.api.Constants.GOOGLE_RECAPTCHA_SECRET;
 
 public class RECAPTCHAManager {
@@ -39,31 +30,6 @@ public class RECAPTCHAManager {
         } else {
             return "reCAPTCHA verification failed.";
         }
-    }
-
-    protected JSONObject performHttpRequest(final String url, final String params) throws IOException, ProtocolException {
-        HttpURLConnection http = (HttpURLConnection) new URL(url).openConnection();
-        http.setDoOutput(true);
-        http.setRequestMethod("POST");
-        http.setRequestProperty("Content-Type",
-                "application/x-www-form-urlencoded; charset=UTF-8");
-
-        try (OutputStream out = http.getOutputStream()) {
-            out.write(params.getBytes("UTF-8"));
-            out.flush();
-        }
-
-        StringBuilder sb = new StringBuilder();
-        try (InputStream res = http.getInputStream();
-             BufferedReader rd = new BufferedReader(new InputStreamReader(res, "UTF-8"))) {
-
-            int cp;
-            while ((cp = rd.read()) != -1) {
-                sb.append((char) cp);
-            }
-        } // End of try-with-resources block
-
-        return new JSONObject(sb.toString());
     }
 
 
