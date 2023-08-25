@@ -18,7 +18,13 @@ public class RECAPTCHAManagerTest {
     @Before
     public final void setUp() throws Exception {
         properties = createMock(PropertiesLoader.class);
-        expect(properties.getProperty(GOOGLE_RECAPTCHA_SECRET)).andReturn("secret-key").atLeastOnce();
+        expect(properties.getProperty(GOOGLE_RECAPTCHA_SECRET)).andReturn("6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe").atLeastOnce();
+        replay(properties);
+    }
+
+    private void setSecretInvalid() throws Exception {
+        properties = createMock(PropertiesLoader.class);
+        expect(properties.getProperty(GOOGLE_RECAPTCHA_SECRET)).andReturn("invalid-secret").atLeastOnce();
         replay(properties);
     }
 
@@ -45,12 +51,14 @@ public class RECAPTCHAManagerTest {
 
     @Test
     public final void verifyRecaptcha_InvalidResponse_ShouldReturnFailure() throws Exception {
+        setSecretInvalid();
         RECAPTCHAManager testInstance = createTestInstance(FAILURE_RESPONSE_JSON);
         assertFalse(testInstance.verifyRecaptcha("invalid-response"));
     }
 
     @Test
     public final void isCaptchaValid_InvalidResponse_ShouldReturnFailedMessage() throws Exception {
+        setSecretInvalid();
         RECAPTCHAManager testInstance = createTestInstance(FAILURE_RESPONSE_JSON);
         assertEquals("reCAPTCHA verification failed.", testInstance.recaptchaResultString("invalid-response"));
     }

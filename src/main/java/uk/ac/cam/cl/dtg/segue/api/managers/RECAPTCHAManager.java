@@ -8,9 +8,13 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.api.services.SimpleHttpClientService;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.GOOGLE_RECAPTCHA_SECRET;
@@ -37,7 +41,7 @@ public class RECAPTCHAManager {
         }
     }
 
-    protected JSONObject performHttpRequest(final String url, final String params) throws IOException {
+    protected JSONObject performHttpRequest(final String url, final String params) throws IOException, ProtocolException {
         HttpURLConnection http = (HttpURLConnection) new URL(url).openConnection();
         http.setDoOutput(true);
         http.setRequestMethod("POST");
