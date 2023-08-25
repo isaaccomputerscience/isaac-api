@@ -22,7 +22,7 @@ public class RECAPTCHAManagerTest {
         replay(properties);
     }
 
-    private void setSecretInvalid() throws Exception {
+    private void setSecretInvalid() {
         properties = createMock(PropertiesLoader.class);
         expect(properties.getProperty(GOOGLE_RECAPTCHA_SECRET)).andReturn("invalid-secret").atLeastOnce();
         replay(properties);

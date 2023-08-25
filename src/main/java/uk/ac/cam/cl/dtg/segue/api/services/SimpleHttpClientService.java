@@ -2,7 +2,12 @@ package uk.ac.cam.cl.dtg.segue.api.services;
 
 import org.json.JSONObject;
 
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -24,19 +29,19 @@ public class SimpleHttpClientService {
         return http;
     }
 
-    private void setRequestProperties(HttpURLConnection http, String contentType) {
+    private void setRequestProperties(final HttpURLConnection http, final String contentType) {
         http.setDoOutput(true);
         http.setRequestProperty("Content-Type", contentType);
     }
 
-    private void sendRequestData(HttpURLConnection http, String params) throws IOException {
+    private void sendRequestData(final HttpURLConnection http, final String params) throws IOException {
         try (OutputStream out = http.getOutputStream()) {
             out.write(params.getBytes(StandardCharsets.UTF_8));
             out.flush();
         }
     }
 
-    private String getResponse(HttpURLConnection http) throws IOException {
+    private String getResponse(final HttpURLConnection http) throws IOException {
         StringBuilder sb = new StringBuilder();
         try (InputStream res = http.getInputStream();
              BufferedReader rd = new BufferedReader(new InputStreamReader(res, StandardCharsets.UTF_8))) {
