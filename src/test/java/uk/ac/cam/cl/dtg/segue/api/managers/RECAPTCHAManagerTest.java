@@ -9,9 +9,6 @@ import static org.junit.Assert.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.GOOGLE_RECAPTCHA_SECRET;
 
 public class RECAPTCHAManagerTest {
-    private static final String SUCCESS_RESPONSE_JSON = "{\"success\": true}";
-    private static final String FAILURE_RESPONSE_JSON = "{\"success\": false}";
-
     private PropertiesLoader properties;
 
     @Before
@@ -27,45 +24,45 @@ public class RECAPTCHAManagerTest {
         replay(properties);
     }
 
-    private RECAPTCHAManager createTestInstance(String responseJson) {
+    private RECAPTCHAManager createTestInstance() {
         return new RECAPTCHAManager(properties);
     }
 
     @Test
     public final void verifyRecaptcha_ValidResponse_ShouldReturnSuccess() {
-        RECAPTCHAManager testInstance = createTestInstance(SUCCESS_RESPONSE_JSON);
+        RECAPTCHAManager testInstance = createTestInstance();
         assertTrue(testInstance.verifyRecaptcha("valid-response"));
     }
 
     @Test
     public final void isCaptchaValid_ValidResponse_ShouldReturnSuccessMessage() {
-        RECAPTCHAManager testInstance = createTestInstance(SUCCESS_RESPONSE_JSON);
+        RECAPTCHAManager testInstance = createTestInstance();
         assertEquals("reCAPTCHA verification successful.", testInstance.recaptchaResultString("valid-response"));
     }
 
     @Test
     public final void verifyRecaptcha_InvalidResponse_ShouldReturnFailure() {
         setSecretInvalid();
-        RECAPTCHAManager testInstance = createTestInstance(FAILURE_RESPONSE_JSON);
+        RECAPTCHAManager testInstance = createTestInstance();
         assertFalse(testInstance.verifyRecaptcha("invalid-response"));
     }
 
     @Test
     public final void isCaptchaValid_InvalidResponse_ShouldReturnFailedMessage() {
         setSecretInvalid();
-        RECAPTCHAManager testInstance = createTestInstance(FAILURE_RESPONSE_JSON);
+        RECAPTCHAManager testInstance = createTestInstance();
         assertEquals("reCAPTCHA verification failed.", testInstance.recaptchaResultString("invalid-response"));
     }
 
     @Test
     public final void verifyRecaptcha_EmptyResponse_ShouldReturnFailure() {
-        RECAPTCHAManager testInstance = createTestInstance(FAILURE_RESPONSE_JSON);
+        RECAPTCHAManager testInstance = createTestInstance();
         assertFalse(testInstance.verifyRecaptcha(""));
     }
 
     @Test
     public final void isCaptchaValid_EmptyResponse_ShouldReturnMissingResponseMessage() {
-        RECAPTCHAManager testInstance = createTestInstance(FAILURE_RESPONSE_JSON);
+        RECAPTCHAManager testInstance = createTestInstance();
         assertEquals("Missing reCAPTCHA response token.", testInstance.recaptchaResultString(""));
     }
 }
