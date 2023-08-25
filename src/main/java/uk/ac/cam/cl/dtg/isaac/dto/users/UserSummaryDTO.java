@@ -174,21 +174,21 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
         return registeredContexts;
     }
 
-    public void setRegisteredContexts(List<UserContext> registeredContexts) {
+    public void setRegisteredContexts(final List<UserContext> registeredContexts) {
         this.registeredContexts = registeredContexts;
     }
 
     @Override
     public String toString() {
-        return "UserSummaryDTO [" +
-                "id=" + id +
-                ", givenName='" + givenName + '\'' +
-                ", familyName='" + familyName + '\'' +
-                ", role=" + role +
-                ", authorisedFullAccess=" + authorisedFullAccess +
-                ", emailVerificationStatus=" + emailVerificationStatus +
-                ", teacherPending=" + teacherPending +
-                ", registeredContexts=" + registeredContexts +
-                ']';
+        return "UserSummaryDTO ["
+                + "id=" + id
+                + ", givenName='" + givenName + '\''
+                + ", familyName='" + familyName + '\''
+                + ", role=" + role
+                + ", authorisedFullAccess=" + authorisedFullAccess
+                + ", emailVerificationStatus=" + emailVerificationStatus
+                + ", teacherPending=" + teacherPending
+                + ", registeredContexts=" + registeredContexts
+                + ']';
     }
 }
