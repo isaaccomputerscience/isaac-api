@@ -602,6 +602,10 @@ public class UserAccountManager implements IUserAccountManager {
                 userObjectFromClient.setRegisteredContextsLastConfirmed(existingUserFromDb.getRegisteredContextsLastConfirmed());
             }
 
+            if (userObjectFromClient.getTeacherPending() == null) {
+                userObjectFromClient.setTeacherPending(existingUserFromDb.getTeacherPending());
+            }
+
             RegisteredUserDTO updatedUser = updateUserObject(userObjectFromClient, newPassword);
 
             // If the user's school has changed, record it. Check this using Objects.equals() to be null safe!
