@@ -1488,8 +1488,6 @@ public class EventsFacade extends AbstractIsaacFacade {
                                             @DefaultValue(DEFAULT_RESULTS_LIMIT_AS_STRING) @QueryParam("limit") final Integer limit,
                                             @QueryParam("filter") final String filter) {
         Map<String, List<String>> fieldsToMatch = Maps.newHashMap();
-        Integer newLimit = limit;
-        Integer newStartIndex = startIndex;
 
         final Map<String, Constants.SortOrder> sortInstructions = Maps.newHashMap();
         sortInstructions.put(DATE_FIELDNAME, SortOrder.DESC);
@@ -1525,7 +1523,7 @@ public class EventsFacade extends AbstractIsaacFacade {
 
             ResultsWrapper<ContentDTO> findByFieldNames = this.contentManager.findByFieldNames(
                     ContentService.generateDefaultFieldToMatch(fieldsToMatch),
-                    newStartIndex, newLimit, sortInstructions, filterInstructions);
+                    startIndex, limit, sortInstructions, filterInstructions);
 
             // Get list of event IDs
             List<String> eventIds = findByFieldNames.getResults().stream().map(ContentDTO::getId).collect(Collectors.toList());
