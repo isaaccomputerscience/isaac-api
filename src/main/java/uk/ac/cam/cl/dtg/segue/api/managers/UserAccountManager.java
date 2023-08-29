@@ -1057,6 +1057,10 @@ public class UserAccountManager implements IUserAccountManager {
             userToSave.setRegisteredContextsLastConfirmed(new Date());
         }
 
+        if (userToSave.getTeacherPending() == null) {
+            userToSave.setTeacherPending(false);
+        }
+
         // Before save we should validate the user for mandatory fields.
         // validate names
         if (!this.isUserNameValid(user.getGivenName())) {
