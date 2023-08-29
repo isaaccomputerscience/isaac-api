@@ -205,6 +205,17 @@ public class EventBookingManager {
         return v;
     }
 
+    public Map<String, List<DetailedEventBookingDTO>> adminGetBookingsByEventIds(final List<String> eventIds) throws SegueDatabaseException {
+        Map<String, List<DetailedEventBookingDTO>> result = new HashMap<>();
+
+        for (String eventId : eventIds) {
+            result.put(eventId, adminGetBookingsByEventId(eventId));
+        }
+
+        return result;
+    }
+
+
     /**
      * Ensure an event allows group bookings.
      * @param event The ID of the event
