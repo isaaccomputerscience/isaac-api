@@ -23,7 +23,14 @@ import com.opencsv.CSVWriter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -39,11 +46,20 @@ import uk.ac.cam.cl.dtg.isaac.api.managers.GameManager;
 import uk.ac.cam.cl.dtg.isaac.api.services.AssignmentService;
 import uk.ac.cam.cl.dtg.isaac.dos.LightweightQuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
-import uk.ac.cam.cl.dtg.isaac.dto.*;
+import uk.ac.cam.cl.dtg.isaac.dto.AssignmentDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.AssignmentStatusDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardItem;
+import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
+import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
-import uk.ac.cam.cl.dtg.segue.api.managers.*;
+import uk.ac.cam.cl.dtg.segue.api.managers.GroupManager;
+import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
+import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
+import uk.ac.cam.cl.dtg.segue.api.managers.UserAssociationManager;
+import uk.ac.cam.cl.dtg.segue.api.managers.UserBadgeManager;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
@@ -56,14 +72,24 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
-import static uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager.extractPageIdFromQuestionId;
 import static uk.ac.cam.cl.dtg.util.NameFormatter.getFilteredGroupNameFromGroup;
 
 /**
@@ -739,6 +765,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             headerRow.add("");
 
             Map<GameboardDTO, List<String>> gameboardQuestionIds = Maps.newHashMap();
+            Map<String, String> questionIdToPageIdMap = Maps.newHashMap();
             for (AssignmentDTO assignment : assignments) {
                 GameboardDTO gameboard = assignmentGameboards.get(assignment);
                 for (GameboardItem questionPage : gameboard.getContents()) {
@@ -749,6 +776,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                             questionIds = Lists.newArrayList();
                         }
                         questionIds.add(question.getId());
+                        questionIdToPageIdMap.put(question.getId(), questionPage.getId());
                         gameboardQuestionIds.put(gameboard, questionIds);
 
                         StringBuilder s = new StringBuilder();
@@ -804,7 +832,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                     HashMap<String, Integer> questionParts = new HashMap<>(gameboardPartials);
                     for (String s : questionIds) {
                         Integer mark = userAssignments.get(gameboard).get(s);
-                        String questionPageId = extractPageIdFromQuestionId(s);
+                        String questionPageId = questionIdToPageIdMap.get(s);
                         questionParts.put(questionPageId, questionParts.get(questionPageId) + 1);
                         marks.add(mark);
                         if (null != mark) {
