@@ -94,7 +94,7 @@ import static uk.ac.cam.cl.dtg.util.NameFormatter.getFilteredGroupNameFromGroup;
 
 /**
  * AssignmentFacade
- *
+ * <p>
  * This class provides endpoints to support assigning work to users.
  *
  */
@@ -112,7 +112,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
     private final UserBadgeManager userBadgeManager;
     private final AssignmentService assignmentService;
 
-    private final String NOT_SHARING = "NOT_SHARING";
+    private static final String NOT_SHARING = "NOT_SHARING";
     
     private final Clock clock;
     private final SimpleDateFormat dateFormat;
@@ -286,7 +286,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
 
     /**
      * Allows a user to get all assignments they have set in light weight objects.
-     *
+     * <p>
      * If the user specifies a group ID to narrow the search full objects including questions in gameboards will be returned.
      *
      * @param request
@@ -416,7 +416,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             final String incorrectPartString = "incorrectPartResults";
 
             if (gameboard.getContents().isEmpty()) {
-                return new SegueErrorResponse(Status.NOT_FOUND, "Assignment gameboard has no questions, or its questions no longer exist. Cannot fetch assignment progress.").toResponse();
+                return new SegueErrorResponse(Status.NOT_FOUND, EMPTY_ASSIGNMENT_GAMEBOARD).toResponse();
             }
 
             for (ImmutablePair<RegisteredUserDTO, List<GameboardItem>> userGameboardItems : this.gameManager
@@ -1065,6 +1065,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
 
     /**
      * Allows a user to assign a gameboard to group of users.
+     * @deprecated
      *
      * @param request
      *            - so that we can identify the current user.
@@ -1122,8 +1123,8 @@ public class AssignmentFacade extends AbstractIsaacFacade {
             if (null == assignmentToDelete) {
                 return new SegueErrorResponse(Status.NOT_FOUND, "The assignment does not exist.").toResponse();
             }
-            if (!assigneeGroup.getOwnerId().equals(currentlyLoggedInUser.getId()) &&
-                    !GroupManager.isInAdditionalManagerList(assigneeGroup, currentlyLoggedInUser.getId())) {
+            if (!assigneeGroup.getOwnerId().equals(currentlyLoggedInUser.getId())
+                    && !GroupManager.isInAdditionalManagerList(assigneeGroup, currentlyLoggedInUser.getId())) {
                 return new SegueErrorResponse(Status.FORBIDDEN,
                         "You are not the owner of the group or a manager. Unable to delete it.").toResponse();
             }
@@ -1151,7 +1152,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
     }
 
     private static Map<RegisteredUserDTO, Map<String, Integer>> getUserQuestionMap(
-            Map<RegisteredUserDTO, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> questionAttemptsForAllUsersOfInterest
+            final Map<RegisteredUserDTO, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> questionAttemptsForAllUsersOfInterest
     ) {
         // Input is in format of {UserDTO: {PageId: {QuestionId: List<QuestionResponse>}}}
         // Transformed output is in format of {UserDTO: {QuestionId: Integer}}

@@ -32,6 +32,7 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
     private Role role;
     private boolean authorisedFullAccess;
     private EmailVerificationStatus emailVerificationStatus;
+    private Boolean teacherPending;
     private List<UserContext> registeredContexts;
 
     /**
@@ -155,24 +156,41 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
         this.emailVerificationStatus = emailVerificationStatus;
     }
 
+    /**
+     * Gets the teacherPending flag.
+     * @return the teacherPending flag
+     */
+    public Boolean getTeacherPending() {
+        return teacherPending;
+    }
+
+    /**
+     * Sets the teacherPending flag.
+     * @param teacherPending the teacherPending flag value to set
+     */
+    public void setTeacherPending(final Boolean teacherPending) {
+        this.teacherPending = teacherPending;
+    }
+
     public List<UserContext> getRegisteredContexts() {
         return registeredContexts;
     }
 
-    public void setRegisteredContexts(List<UserContext> registeredContexts) {
+    public void setRegisteredContexts(final List<UserContext> registeredContexts) {
         this.registeredContexts = registeredContexts;
     }
 
     @Override
     public String toString() {
-        return "UserSummaryDTO [" +
-                "id=" + id +
-                ", givenName='" + givenName + '\'' +
-                ", familyName='" + familyName + '\'' +
-                ", role=" + role +
-                ", authorisedFullAccess=" + authorisedFullAccess +
-                ", emailVerificationStatus=" + emailVerificationStatus +
-                ", registeredContexts=" + registeredContexts +
-                ']';
+        return "UserSummaryDTO ["
+                + "id=" + id
+                + ", givenName='" + givenName + '\''
+                + ", familyName='" + familyName + '\''
+                + ", role=" + role
+                + ", authorisedFullAccess=" + authorisedFullAccess
+                + ", emailVerificationStatus=" + emailVerificationStatus
+                + ", teacherPending=" + teacherPending
+                + ", registeredContexts=" + registeredContexts
+                + ']';
     }
 }

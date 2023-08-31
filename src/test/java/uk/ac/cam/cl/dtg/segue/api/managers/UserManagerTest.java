@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Stephen Cummins and Nick Rogers
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- *
+ * <p>
  * You may obtain a copy of the License at
  * 		http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -193,7 +193,7 @@ public class UserManagerTest {
         String validDateString = sdf.format(calendar.getTime());
 
         RegisteredUser returnUser = new RegisteredUser(validUserId, "TestFirstName", "TestLastName", "", Role.STUDENT,
-                new Date(), Gender.MALE, new Date(), null, null, null,null);
+                new Date(), Gender.MALE, new Date(), null, null, null,null, false);
         returnUser.setId(validUserId);
         returnUser.setSessionToken(0);
 
@@ -382,7 +382,7 @@ public class UserManagerTest {
                 .atLeastOnce();
 
         RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
-                new Date(), Gender.MALE, new Date(), null, null,null, null);
+                new Date(), Gender.MALE, new Date(), null, null,null, null, false);
         mappedUser.setSessionToken(0);
 
         expect(dummyDatabase.getAuthenticationProvidersByUsers(Collections.singletonList(mappedUser)))
@@ -528,7 +528,7 @@ public class UserManagerTest {
 
     /**
      * Verify that a correct HMAC response works correctly.
-     * 
+     * <p>
      * This method is dependent on the crypto algorithm used.
      * 
      * @throws Exception
@@ -542,7 +542,7 @@ public class UserManagerTest {
         HttpServletRequest request = createMock(HttpServletRequest.class);
 
         RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
-                new Date(), Gender.MALE, new Date(), null, null,null, null);
+                new Date(), Gender.MALE, new Date(), null, null,null, null, false);
         mappedUser.setSessionToken(0);
 
         String validUserId = "123";
@@ -583,7 +583,7 @@ public class UserManagerTest {
         String validDateString = sdf.format(calendar.getTime());
 
         RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
-                new Date(), Gender.MALE, new Date(), null, null,null, null);
+                new Date(), Gender.MALE, new Date(), null, null,null, null, false);
         mappedUser.setSessionToken(0);
 
         Map<String, String> validSessionInformation = getSessionInformationAsAMap(authManager, validUserId,
@@ -623,7 +623,7 @@ public class UserManagerTest {
 
         String validUserId = "123";
         RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
-                new Date(), Gender.MALE, new Date(), null, null,null, null);
+                new Date(), Gender.MALE, new Date(), null, null,null, null, false);
         mappedUser.setSessionToken(0);
 
         Calendar calendar = Calendar.getInstance();
@@ -660,7 +660,7 @@ public class UserManagerTest {
 
         String validUserId = "123";
         RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
-                new Date(), Gender.MALE, new Date(), null, null,null, null);
+                new Date(), Gender.MALE, new Date(), null, null,null, null, false);
         mappedUser.setSessionToken(1);
         Integer incorrectSessionToken = 0;
 
