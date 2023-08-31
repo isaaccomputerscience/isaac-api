@@ -64,7 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Maps.immutableEntry;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.CONTENT_INDEX_TYPE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 
 /**
  * Created by Ian on 17/10/2016.
