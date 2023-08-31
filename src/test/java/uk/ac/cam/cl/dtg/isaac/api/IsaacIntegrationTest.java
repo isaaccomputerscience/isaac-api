@@ -176,6 +176,7 @@ public abstract class IsaacIntegrationTest {
                 .withEnv("http.max_content_length", "512mb")
                 .withEnv("xpack.security.enabled", "true")
                 .withEnv("ELASTIC_PASSWORD", "elastic")
+                .withEnv("ingest.geoip.downloader.enabled", "false")
                 .withStartupTimeout(Duration.ofSeconds(120));
         ;
 
