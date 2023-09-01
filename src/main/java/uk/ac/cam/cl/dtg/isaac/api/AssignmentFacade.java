@@ -768,7 +768,9 @@ public class AssignmentFacade extends AbstractIsaacFacade {
     ) throws ContentManagerException {
         ArrayList<String[]> rows = Lists.newArrayList();
 
-        Map<GameboardDTO, List<String>> gameboardQuestionIds = extractGameboardQuestionIds(assignments, assignmentGameboards);
+        QuestionIdMaps questionIdMaps = extractGameboardQuestionIds(assignments, assignmentGameboards);
+        Map<GameboardDTO, List<String>> gameboardQuestionIds = questionIdMaps.getGameboardToQuestionMap();
+        Map<String, String> questionIdToPageIdMap = questionIdMaps.getQuestionToPageMap();
 
         for (RegisteredUserDTO groupMember : groupMembers) {
             // FIXME Some room for improvement here, as we can retrieve all the users with a single query.
@@ -795,7 +797,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                 HashMap<String, Integer> questionParts = new HashMap<>(gameboardPartials);
                 for (String s : questionIds) {
                     Integer mark = userAssignments.get(gameboard).get(s);
-                    String questionPageId = extractPageIdFromQuestionId(s);
+                    String questionPageId = questionIdToPageIdMap.get(s);
                     questionParts.put(questionPageId, questionParts.get(questionPageId) + 1);
                     marks.add(mark);
                     if (null != mark) {
@@ -952,10 +954,11 @@ public class AssignmentFacade extends AbstractIsaacFacade {
         return rows;
     }
 
-    private Map<GameboardDTO, List<String>> extractGameboardQuestionIds(
+    private QuestionIdMaps extractGameboardQuestionIds(
             final List<AssignmentDTO> assignments, final Map<AssignmentDTO, GameboardDTO> assignmentGameboards
     ) throws ContentManagerException {
         Map<GameboardDTO, List<String>> gameboardQuestionIds = Maps.newHashMap();
+        Map<String, String> questionIdToPageIdMap = Maps.newHashMap();
         for (AssignmentDTO assignment : assignments) {
             GameboardDTO gameboard = assignmentGameboards.get(assignment);
             for (GameboardItem questionPage : gameboard.getContents()) {
@@ -965,11 +968,30 @@ public class AssignmentFacade extends AbstractIsaacFacade {
                         questionIds = Lists.newArrayList();
                     }
                     questionIds.add(question.getId());
+                    questionIdToPageIdMap.put(question.getId(), questionPage.getId());
                     gameboardQuestionIds.put(gameboard, questionIds);
                 }
             }
         }
-        return gameboardQuestionIds;
+        return new QuestionIdMaps(gameboardQuestionIds, questionIdToPageIdMap);
+    }
+
+    private static class QuestionIdMaps {
+        private final Map<GameboardDTO, List<String>> gameboardToQuestionMap;
+        private final Map<String, String> questionToPageMap;
+
+        QuestionIdMaps(final Map<GameboardDTO, List<String>> gameboardToQuestionMap, final Map<String, String> questionToPageMap) {
+            this.gameboardToQuestionMap = gameboardToQuestionMap;
+            this.questionToPageMap = questionToPageMap;
+        }
+
+        public Map<GameboardDTO, List<String>> getGameboardToQuestionMap() {
+            return gameboardToQuestionMap;
+        }
+
+        public Map<String, String> getQuestionToPageMap() {
+            return questionToPageMap;
+        }
     }
 
     private Map<RegisteredUserDTO, Map<String, Integer>> getQuestionDataMapFromGameboards(
