@@ -72,6 +72,7 @@ import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
@@ -138,27 +139,10 @@ public class AuthenticationFacade extends AbstractSegueFacade {
     @Path("/user_authentication_settings/{user_id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "The current users authentication settings, e.g. linked accounts and whether they have segue or not")
-    public final Response getCurrentUserAuthorisationSettings(@Context final HttpServletRequest request, @PathParam("user_id") Long userId) {
+    public final Response getCurrentUserAuthorisationSettings(@Context final HttpServletRequest request, @PathParam("user_id") final Long userId) {
         try {
             RegisteredUserDTO currentRegisteredUser = this.userManager.getCurrentRegisteredUser(request);
-            if (null == userId) {
-                userId = currentRegisteredUser.getId();
-            }
-
-            if (!userId.equals(currentRegisteredUser.getId()) && !isUserAnAdmin(userManager, currentRegisteredUser)) {
-                return new SegueErrorResponse(Status.FORBIDDEN, "You must be an admin member to view this setting for another user.")
-                        .toResponse();
-            }
-
-            RegisteredUserDTO userToLookup;
-            if (currentRegisteredUser.getId().equals(userId)) {
-                userToLookup = currentRegisteredUser;
-            } else {
-                userToLookup = this.userManager.getUserDTOById(userId);
-            }
-
-            return Response.ok(this.userManager.getUsersAuthenticationSettings(userToLookup))
-                    .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+            return getUserAuthenticationSettings(Objects.requireNonNullElse(userId, currentRegisteredUser.getId()), currentRegisteredUser);
         } catch (NoUserLoggedInException e) {
             return SegueErrorResponse.getNotLoggedInResponse();
         } catch (SegueDatabaseException e) {
@@ -167,6 +151,24 @@ public class AuthenticationFacade extends AbstractSegueFacade {
         } catch (NoUserException e) {
             return new SegueErrorResponse(Status.NOT_FOUND, "User ID specified could not be found").toResponse();
         }
+    }
+
+    private Response getUserAuthenticationSettings(final Long userId, final RegisteredUserDTO currentRegisteredUser)
+            throws NoUserLoggedInException, NoUserException, SegueDatabaseException {
+        if (!userId.equals(currentRegisteredUser.getId()) && !isUserAnAdmin(userManager, currentRegisteredUser)) {
+            return new SegueErrorResponse(Status.FORBIDDEN, "You must be an admin member to view this setting for another user.")
+                    .toResponse();
+        }
+
+        RegisteredUserDTO userToLookup;
+        if (currentRegisteredUser.getId().equals(userId)) {
+            userToLookup = currentRegisteredUser;
+        } else {
+            userToLookup = this.userManager.getUserDTOById(userId);
+        }
+
+        return Response.ok(this.userManager.getUsersAuthenticationSettings(userToLookup))
+                .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
     }
 
     /**
@@ -365,8 +367,9 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             final LocalAuthDTO localAuthDTO) throws InvalidKeySpecException, NoSuchAlgorithmException {
 
         // In this case we expect a username and password in the JSON request body:
-        if (areCredentialsMissing(localAuthDTO))
+        if (areCredentialsMissing(localAuthDTO)) {
             return new SegueErrorResponse(Status.BAD_REQUEST, LOGIN_MISSING_CREDENTIALS_MESSAGE).toResponse();
+        }
         
         String email = localAuthDTO.getEmail();
         String password = localAuthDTO.getPassword();
@@ -406,14 +409,14 @@ public class AuthenticationFacade extends AbstractSegueFacade {
         }
     }
 
-    private void notifySegueLoginRateLimiters(HttpServletRequest request, String email) throws SegueResourceMisuseException {
+    private void notifySegueLoginRateLimiters(final HttpServletRequest request, final String email) throws SegueResourceMisuseException {
         String requestingIPAddress = RequestIPExtractor.getClientIpAddr(request);
         // Stop users logging in who have already locked their account.
         misuseMonitor.notifyEvent(email.toLowerCase(), SegueLoginByEmailMisuseHandler.class.getSimpleName());
         misuseMonitor.notifyEvent(requestingIPAddress, SegueLoginByIPMisuseHandler.class.getSimpleName());
     }
 
-    private static boolean areCredentialsMissing(LocalAuthDTO localAuthDTO) {
+    private static boolean areCredentialsMissing(final LocalAuthDTO localAuthDTO) {
         return null == localAuthDTO || null == localAuthDTO.getEmail() || localAuthDTO.getEmail().isEmpty()
                 || null == localAuthDTO.getPassword() || localAuthDTO.getPassword().isEmpty();
     }

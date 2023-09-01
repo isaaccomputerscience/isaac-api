@@ -40,6 +40,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
+import uk.ac.cam.cl.dtg.segue.search.BasicSearchParameters;
 import uk.ac.cam.cl.dtg.segue.search.BooleanMatchInstruction;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
 import uk.ac.cam.cl.dtg.segue.search.MustMatchInstruction;
@@ -69,6 +70,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.CACHE_METRICS_COLLECTOR;
 
 /**
@@ -125,10 +127,10 @@ public class GitContentManager {
             log.info("API Configured to hide content tagged with 'regression_test'.");
         }
 
-        this.cache = CacheBuilder.newBuilder().recordStats().softValues().expireAfterAccess(1, TimeUnit.DAYS).build();
+        this.cache = CacheBuilder.newBuilder().recordStats().softValues().expireAfterAccess(CONTENT_CACHE_EXPIRE_AFTER_ACCESS_DAYS, TimeUnit.DAYS).build();
         CACHE_METRICS_COLLECTOR.addCache("git_content_manager_cache", cache);
 
-        this.contentShaCache = CacheBuilder.newBuilder().softValues().expireAfterWrite(5, TimeUnit.SECONDS).build();
+        this.contentShaCache = CacheBuilder.newBuilder().softValues().expireAfterWrite(CONTENT_SHA_CACHE_EXPIRE_AFTER_ACCESS_SECONDS, TimeUnit.SECONDS).build();
 
         this.contentIndex = globalProperties.getProperty(Constants.CONTENT_INDEX);
     }
@@ -158,7 +160,7 @@ public class GitContentManager {
 
     /**
      *  Get a DTO object by its ID or return null.
-     *
+     * <p>
      *  This may return a cached object, and will temporarily cache the object.
      *  Do not modify the returned DTO object.
      *  The object will be retrieved in DO form, and mapped to a DTO. Both versions will be
@@ -174,7 +176,7 @@ public class GitContentManager {
 
     /**
      *  Get a DTO object by its ID or return null.
-     *
+     * <p>
      *  This may return a cached object, and will temporarily cache the object.
      *  Do not modify the returned DTO object.
      *  The object will be retrieved in DO form, and mapped to a DTO. Both versions will be
@@ -199,7 +201,7 @@ public class GitContentManager {
 
     /**
      *  Get a DO object by its ID or return null.
-     *
+     * <p>
      *  This may return a cached object, and will temporarily cache the object
      *  to avoid re-querying the data store and the deserialization costs.
      *  Do not modify the returned DO object.
@@ -214,7 +216,7 @@ public class GitContentManager {
 
     /**
      *  Get a DO object by its ID or return null.
-     *
+     * <p>
      *  This may return a cached object, and will temporarily cache the object
      *  to avoid re-querying the data store and the deserialization costs.
      *  Do not modify the returned DO object.
@@ -233,9 +235,8 @@ public class GitContentManager {
         if (!cache.asMap().containsKey(k)) {
 
             List<Content> searchResults = mapper.mapFromStringListToContentList(this.searchProvider.termSearch(
-                    contentIndex,
-                    CONTENT_TYPE, id,
-                    Constants.ID_FIELDNAME + "." + Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX, 0, 1,
+                    new BasicSearchParameters(contentIndex, CONTENT_TYPE, 0, 1), id,
+                    Constants.ID_FIELDNAME + "." + Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX,
                     this.getBaseFilters()).getResults()
             );
 
@@ -255,7 +256,7 @@ public class GitContentManager {
 
     /**
      *  Retrieve all DTO content matching an ID prefix.
-     *
+     * <p>
      *  This may return cached objects, and will temporarily cache the objects
      *  to avoid re-querying the data store and the deserialization costs.
      *  Do not modify the returned DTO objects.
@@ -272,9 +273,10 @@ public class GitContentManager {
         String k = "getByIdPrefix~" + getCurrentContentSHA() + "~" + idPrefix + "~" + startIndex + "~" + limit;
         if (!cache.asMap().containsKey(k)) {
 
-            ResultsWrapper<String> searchHits = this.searchProvider.findByPrefix(contentIndex, CONTENT_TYPE,
+            ResultsWrapper<String> searchHits = this.searchProvider.findByPrefix(
+                    new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit),
                     Constants.ID_FIELDNAME + "." + Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX,
-                    idPrefix, startIndex, limit, this.getBaseFilters());
+                    idPrefix, this.getBaseFilters());
 
             List<Content> searchResults = mapper.mapFromStringListToContentList(searchHits.getResults());
 
@@ -286,7 +288,7 @@ public class GitContentManager {
 
     /**
      *  Get a list of DTO objects by their IDs.
-     *
+     * <p>
      *  This may return cached objects, and will temporarily cache the objects
      *  to avoid re-querying the data store and the deserialization costs.
      *  Do not modify the returned DTO objects.
@@ -315,12 +317,9 @@ public class GitContentManager {
             }
 
             ResultsWrapper<String> searchHits = this.searchProvider.termSearch(
-                    contentIndex,
-                    CONTENT_TYPE,
+                    new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit),
                     null,
                     null,
-                    startIndex,
-                    limit,
                     finalFilter
             );
 
@@ -336,11 +335,8 @@ public class GitContentManager {
             final Integer startIndex, final Integer limit) throws ContentManagerException {
 
         ResultsWrapper<String> searchHits = searchProvider.fuzzySearch(
-                contentIndex,
-                CONTENT_TYPE,
+                new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit),
                 searchString,
-                startIndex,
-                limit,
                 fieldsThatMustMatch,
                 this.getBaseFilters(),
                 Constants.ID_FIELDNAME,
@@ -390,12 +386,12 @@ public class GitContentManager {
 
             // Try to match fields
             for (String field : importantFields) {
-                contentQuery.should(new ShouldMatchInstruction(field, searchString, 10L, false));
-                contentQuery.should(new ShouldMatchInstruction(field, searchString, 3L, true));
+                contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_IMPORTANT_NON_FUZZY, false));
+                contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_IMPORTANT_FUZZY, true));
             }
             for (String field : otherFields) {
-                contentQuery.should(new ShouldMatchInstruction(field, searchString, 5L, false));
-                contentQuery.should(new ShouldMatchInstruction(field, searchString, 1L, true));
+                contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_OTHER_NON_FUZZY, false));
+                contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_OTHER_FUZZY, true));
             }
 
             // Check location.address fields on event pages
@@ -403,13 +399,13 @@ public class GitContentManager {
                 String addressPath = String.join(nestedFieldConnector, Constants.ADDRESS_PATH_FIELDNAME);
                 for (String addressField : Constants.ADDRESS_FIELDNAMES) {
                     String field = addressPath + nestedFieldConnector + addressField;
-                    contentQuery.should(new ShouldMatchInstruction(field, searchString, 3L, false));
-                    contentQuery.should(new ShouldMatchInstruction(field, searchString, 1L, true));
+                    contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_ADDRESS_NON_FUZZY, false));
+                    contentQuery.should(new ShouldMatchInstruction(field, searchString, MATCH_INSTRUCTION_ADDRESS_FUZZY, true));
                 }
             }
 
             // Only show future events
-            if (documentType.equals(EVENT_TYPE)){
+            if (documentType.equals(EVENT_TYPE)) {
                 LocalDate today = LocalDate.now();
                 long now = today.atStartOfDay(ZoneId.systemDefault()).toEpochSecond() * Constants.EVENT_DATE_EPOCH_MULTIPLIER;
                 contentQuery.must(new RangeMatchInstruction<Long>(Constants.DATE_FIELDNAME).greaterThanOrEqual(now));
@@ -418,7 +414,7 @@ public class GitContentManager {
             contentQuery.setMinimumShouldMatch(numberOfExpectedShouldMatches);
 
             if (importantDocumentTypes.contains(documentType)) {
-                contentQuery.setBoost(5f);
+                contentQuery.setBoost(IMPORTANT_DOCUMENT_TYPE_BOOST);
             }
 
             matchQuery.should(contentQuery);
@@ -430,10 +426,7 @@ public class GitContentManager {
         }
 
         ResultsWrapper<String> searchHits = searchProvider.nestedMatchSearch(
-                contentIndex,
-                CONTENT_TYPE,
-                startIndex,
-                limit,
+                new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit),
                 searchString,
                 matchQuery,
                 this.getBaseFilters()
@@ -482,8 +475,9 @@ public class GitContentManager {
             newFilterInstructions.putAll(this.getBaseFilters());
         }
 
-        ResultsWrapper<String> searchHits = searchProvider.matchSearch(contentIndex, CONTENT_TYPE, fieldsToMatch,
-                startIndex, limit, newSortInstructions, newFilterInstructions);
+        ResultsWrapper<String> searchHits = searchProvider.matchSearch(
+                new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit),
+                fieldsToMatch, newSortInstructions, newFilterInstructions);
 
         // setup object mapper to use pre-configured deserializer module.
         // Required to deal with type polymorphism
@@ -510,7 +504,8 @@ public class GitContentManager {
         ResultsWrapper<ContentDTO> finalResults;
 
         ResultsWrapper<String> searchHits;
-        searchHits = searchProvider.randomisedMatchSearch(contentIndex, CONTENT_TYPE, fieldsToMatch, startIndex, limit, randomSeed,
+        searchHits = searchProvider.randomisedMatchSearch(
+                new BasicSearchParameters(contentIndex, CONTENT_TYPE, startIndex, limit), fieldsToMatch, randomSeed,
                 this.getBaseFilters());
 
         // setup object mapper to use pre-configured deserializer module.
@@ -549,7 +544,7 @@ public class GitContentManager {
         try {
             List<Object> tagObjects = (List<Object>) searchProvider.getById(
                     contentIndex,
-                    Constants.CONTENT_INDEX_TYPE.METADATA.toString(),
+                    ContentIndextype.METADATA.toString(),
                     "tags"
             ).getSource().get("tags");
             return new HashSet<>(Lists.transform(tagObjects, Functions.toStringFunction()));
@@ -560,9 +555,9 @@ public class GitContentManager {
     }
 
     public final Collection<String> getAllUnits() {
-        String unitType = Constants.CONTENT_INDEX_TYPE.UNIT.toString();
+        String unitType = ContentIndextype.UNIT.toString();
         if (globalProperties.getProperty(Constants.SEGUE_APP_ENVIRONMENT).equals(Constants.EnvironmentType.PROD.name())) {
-            unitType = Constants.CONTENT_INDEX_TYPE.PUBLISHED_UNIT.toString();
+            unitType = ContentIndextype.PUBLISHED_UNIT.toString();
         }
         try {
             SearchResponse r = searchProvider.getAllFromIndex(globalProperties.getProperty(Constants.CONTENT_INDEX), unitType);
@@ -582,7 +577,7 @@ public class GitContentManager {
     public final Map<Content, List<String>> getProblemMap() {
         try {
             SearchResponse r = searchProvider.getAllFromIndex(contentIndex,
-                    Constants.CONTENT_INDEX_TYPE.CONTENT_ERROR.toString());
+                    ContentIndextype.CONTENT_ERROR.toString());
             SearchHits hits = r.getHits();
             Map<Content, List<String>> map = new HashMap<>();
 
@@ -667,7 +662,7 @@ public class GitContentManager {
                 shaResponse =
                         searchProvider.getById(
                                 contentIndex,
-                                Constants.CONTENT_INDEX_TYPE.METADATA.toString(),
+                                ContentIndextype.METADATA.toString(),
                                 "general"
                         );
                 contentShaCache.put(contentIndex, shaResponse);

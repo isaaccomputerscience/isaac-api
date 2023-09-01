@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.users.School;
+import uk.ac.cam.cl.dtg.segue.search.BasicSearchParameters;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 
@@ -32,7 +33,7 @@ import java.util.List;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_RESULTS_LIMIT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOLS_INDEX_BASE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_ESTABLISHMENT_NAME_FIELDNAME_POJO;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOLS_INDEX_TYPE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.SchoolsIndexType;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_POSTCODE_FIELDNAME_POJO;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_URN_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_URN_FIELDNAME_POJO;
@@ -40,7 +41,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.UNPROCESSED_SEARCH_FIELD_SUFF
 
 /**
  * Class responsible for reading the local school list csv file.
- * 
+ * <p>
  * This class is threadsafe providing that the ISearchProvider given as a dependency is not given to another instance of
  * this class. Normally this class should be treated as a singleton to ensure the ISearchProvider is not shared with
  * another instance of this class.
@@ -67,7 +68,7 @@ public class SchoolListReader {
         String modificationDate;
         try {
             modificationDate = searchProvider.getById(
-                    SCHOOLS_INDEX_BASE, SCHOOLS_INDEX_TYPE.METADATA.toString(), "sourceFile").getSource().get("lastModified").toString();
+                    SCHOOLS_INDEX_BASE, SchoolsIndexType.METADATA.toString(), "sourceFile").getSource().get("lastModified").toString();
         } catch (SegueSearchException e) {
             log.error("Failed to retrieve school list modification date", e);
             modificationDate = "unknown";
@@ -92,10 +93,11 @@ public class SchoolListReader {
 
         // FIXME: for one release cycle, we need backwards compatibility and so cannot use the fieldsThatMustMatch property
         // It should be set to ImmutableMap.of("closed", ImmutableList.of("false"))
-        List<String> schoolSearchResults = searchProvider.fuzzySearch(SCHOOLS_INDEX_BASE, SCHOOLS_INDEX_TYPE.SCHOOL_SEARCH.toString(),
-                searchQuery, 0, DEFAULT_RESULTS_LIMIT, null, null, SCHOOL_URN_FIELDNAME_POJO,
-                SCHOOL_ESTABLISHMENT_NAME_FIELDNAME_POJO, SCHOOL_POSTCODE_FIELDNAME_POJO)
-                .getResults();
+        List<String> schoolSearchResults = searchProvider.fuzzySearch(
+                new BasicSearchParameters(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString(), 0, DEFAULT_RESULTS_LIMIT),
+                searchQuery, null, null, SCHOOL_URN_FIELDNAME_POJO, SCHOOL_ESTABLISHMENT_NAME_FIELDNAME_POJO,
+                SCHOOL_POSTCODE_FIELDNAME_POJO
+        ).getResults();
 
         List<School> resultList = Lists.newArrayList();
         for (String schoolString : schoolSearchResults) {
@@ -140,9 +142,9 @@ public class SchoolListReader {
 
         List<String> matchingSchoolList;
         
-        matchingSchoolList = searchProvider.findByExactMatch(SCHOOLS_INDEX_BASE, SCHOOLS_INDEX_TYPE.SCHOOL_SEARCH.toString(),
-                SCHOOL_URN_FIELDNAME.toLowerCase() + "." + UNPROCESSED_SEARCH_FIELD_SUFFIX,
-                schoolURN, 0, DEFAULT_RESULTS_LIMIT, null).getResults();
+        matchingSchoolList = searchProvider.findByExactMatch(
+                new BasicSearchParameters(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString(), 0, DEFAULT_RESULTS_LIMIT),
+                SCHOOL_URN_FIELDNAME.toLowerCase() + "." + UNPROCESSED_SEARCH_FIELD_SUFFIX, schoolURN, null).getResults();
 
         if (matchingSchoolList.isEmpty()) {
             return null;
@@ -163,7 +165,7 @@ public class SchoolListReader {
      * @return true if we have an index or false if not. If false we cannot guarantee a response.
      */
     private boolean ensureSchoolList() {
-        return searchProvider.hasIndex(SCHOOLS_INDEX_BASE, SCHOOLS_INDEX_TYPE.SCHOOL_SEARCH.toString());
+        return searchProvider.hasIndex(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString());
     }
 
 

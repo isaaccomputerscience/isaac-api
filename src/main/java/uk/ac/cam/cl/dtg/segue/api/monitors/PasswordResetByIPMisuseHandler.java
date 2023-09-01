@@ -24,7 +24,7 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_ONE_HOUR;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 
 /**
  * Handler to deal with email verification requests.
@@ -36,30 +36,31 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PasswordResetByIPMisuseHandler.class);
 
-    private final Integer SOFT_THRESHOLD;
-    private final Integer HARD_THRESHOLD;
-    private final Integer ACCOUNTING_INTERVAL;
+    private final Integer softThreshold;
+    private final Integer hardThreshold;
+    private final Integer accountingInterval;
 
     private final PropertiesLoader properties;
     private final EmailManager emailManager;
 
     @Inject
     public PasswordResetByIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties) {
-        this(emailManager, properties, 50, 300, NUMBER_SECONDS_IN_ONE_HOUR);
+        this(emailManager, properties, PASSWORD_RESET_BY_IP_DEFAULT_SOFT_THRESHOLD, PASSWORD_RESET_BY_IP_DEFAULT_HARD_THRESHOLD, NUMBER_SECONDS_IN_ONE_HOUR);
     }
 
     @Inject
-    public PasswordResetByIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties, Integer softThreshold, Integer hardThreshold, Integer interval) {
+    public PasswordResetByIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties,
+                                          final Integer softThreshold, final Integer hardThreshold, final Integer interval) {
         this.properties = properties;
         this.emailManager = emailManager;
-        this.SOFT_THRESHOLD = softThreshold;
-        this.HARD_THRESHOLD = hardThreshold;
-        this.ACCOUNTING_INTERVAL = interval;
+        this.softThreshold = softThreshold;
+        this.hardThreshold = hardThreshold;
+        this.accountingInterval = interval;
     }
 
     @Override
     public Integer getSoftThreshold() {
-        return SOFT_THRESHOLD;
+        return softThreshold;
     }
 
     /*
@@ -69,12 +70,12 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
      */
     @Override
     public Integer getHardThreshold() {
-        return HARD_THRESHOLD;
+        return hardThreshold;
     }
 
     @Override
     public Integer getAccountingIntervalInSeconds() {
-        return ACCOUNTING_INTERVAL;
+        return accountingInterval;
     }
 
     @Override

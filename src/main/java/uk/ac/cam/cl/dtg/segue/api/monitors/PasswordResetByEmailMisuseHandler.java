@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_MINUTE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
 
 /**
@@ -34,25 +34,25 @@ public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PasswordResetByEmailMisuseHandler.class);
 
-    private final Integer SOFT_THRESHOLD;
-    private final Integer HARD_THRESHOLD;
-    private final Integer ACCOUNTING_INTERVAL;
+    private final Integer softThreshold;
+    private final Integer hardThreshold;
+    private final Integer accountingInterval;
 
     @Inject
     public PasswordResetByEmailMisuseHandler() {
-        this(2, 4, NUMBER_SECONDS_IN_MINUTE);
+        this(PASSWORD_RESET_BY_EMAIL_DEFAULT_SOFT_THRESHOLD, PASSWORD_RESET_BY_EMAIL_DEFAULT_HARD_THRESHOLD, NUMBER_SECONDS_IN_MINUTE);
     }
 
     @Inject
-    public PasswordResetByEmailMisuseHandler(Integer softThreshold, Integer hardThreshold, Integer interval) {
-        this.SOFT_THRESHOLD = softThreshold;
-        this.HARD_THRESHOLD = hardThreshold;
-        this.ACCOUNTING_INTERVAL = interval;
+    public PasswordResetByEmailMisuseHandler(final Integer softThreshold, final Integer hardThreshold, final Integer interval) {
+        this.softThreshold = softThreshold;
+        this.hardThreshold = hardThreshold;
+        this.accountingInterval = interval;
     }
 
     @Override
     public Integer getSoftThreshold() {
-        return SOFT_THRESHOLD;
+        return softThreshold;
     }
 
     /*
@@ -62,12 +62,12 @@ public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
      */
     @Override
     public Integer getHardThreshold() {
-        return HARD_THRESHOLD;
+        return hardThreshold;
     }
 
     @Override
     public Integer getAccountingIntervalInSeconds() {
-        return ACCOUNTING_INTERVAL;
+        return accountingInterval;
     }
 
     @Override

@@ -123,37 +123,18 @@ public class GameManager {
      * This method expects only one of its 3 subject tag filter parameters to have more than one element due to
      * restrictions on the question filter interface.
      *
-     * @param title
-     *            title of the board
-     * @param subjects
-     *            list of subjects to include in filtered results
-     * @param fields
-     *            list of fields to include in filtered results
-     * @param topics
-     *            list of topics to include in filtered results
-     * @param levels
-     *            list of levels to include in filtered results
-     * @param concepts
-     *            list of concepts (relatedContent) to include in filtered results
-     * @param questionCategories
-     *            list of question categories (i.e. problem_solving, book) to include in filtered results
-     * @param boardOwner
-     *            The user that should be marked as the creator of the gameBoard.
-     * @return a gameboard if possible that satisifies the conditions provided by the parameters. Will return null if no
-     *         questions can be provided.
-     * @throws NoWildcardException
-     *             - when we are unable to provide you with a wildcard object.
-     * @throws SegueDatabaseException
-     *             - if there is an error contacting the database.
-     * @throws ContentManagerException
-     *             - if there is an error retrieving the content requested.
+     * @param title       title of the board
+     * @param gameFilter  Object representing the group of filters to use
+     * @param boardOwner  The user that should be marked as the creator of the gameBoard.
+     * @return a gameboard if possible that satisfies the conditions provided by the parameters. Will return null if no
+     * questions can be provided.
+     * @throws NoWildcardException     - when we are unable to provide you with a wildcard object.
+     * @throws SegueDatabaseException  - if there is an error contacting the database.
+     * @throws ContentManagerException - if there is an error retrieving the content requested.
      */
     public GameboardDTO generateRandomGameboard(
-            final String title, final List<String> subjects, final List<String> fields, final List<String> topics,
-            final List<Integer> levels, final List<String> concepts, final List<String> questionCategories,
-            final List<String> stages, final List<String> difficulties, final List<String> examBoards,
-            final AbstractSegueUserDTO boardOwner)
-    throws NoWildcardException, SegueDatabaseException, ContentManagerException {
+            final String title, final GameFilter gameFilter, final AbstractSegueUserDTO boardOwner)
+            throws NoWildcardException, SegueDatabaseException, ContentManagerException {
 
         Long boardOwnerId;
         if (boardOwner instanceof RegisteredUserDTO) {
@@ -166,9 +147,6 @@ public class GameManager {
         Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts = questionManager
                 .getQuestionAttemptsByUser(boardOwner);
 
-        GameFilter gameFilter = new GameFilter(
-                subjects, fields, topics, levels, concepts, questionCategories, stages, difficulties, examBoards);
-
         List<GameboardItem> selectionOfGameboardQuestions =
                 this.getSelectedGameboardQuestions(gameFilter, usersQuestionAttempts);
 
@@ -179,8 +157,8 @@ public class GameManager {
             log.debug("Created gameboard " + uuid);
 
             GameboardDTO gameboardDTO = new GameboardDTO(uuid, title, selectionOfGameboardQuestions,
-                    getRandomWildcard(mapper, subjects), generateRandomWildCardPosition(), new Date(), gameFilter,
-                    boardOwnerId, GameboardCreationMethod.FILTER, Sets.newHashSet());
+                    getRandomWildcard(mapper, gameFilter.getSubjects()), generateRandomWildCardPosition(),
+                    new Date(), gameFilter, boardOwnerId, GameboardCreationMethod.FILTER, Sets.newHashSet());
 
             this.gameboardPersistenceManager.temporarilyStoreGameboard(gameboardDTO);
 
@@ -233,7 +211,7 @@ public class GameManager {
 
     /**
      * Get a gameboard by its id.
-     * 
+     * <p>
      * Note: This gameboard will not be augmented with user information.
      * 
      * @param gameboardId
@@ -253,7 +231,7 @@ public class GameManager {
 
     /**
      * Get a list of gameboards by their ids.
-     *
+     * <p>
      * Note: These gameboards will not be augmented with any user information.
      *
      * @param gameboardIds
@@ -269,7 +247,7 @@ public class GameManager {
 
     /**
      * Get a list of gameboards by their ids.
-     *
+     * <p>
      * Note: These gameboards WILL be augmented with user attempt information, but not whether the gameboard is saved
      * to the user's boards.
      *
@@ -300,7 +278,7 @@ public class GameManager {
 
     /**
      * Get a list of gameboards by their ids, augmented with attempt information.
-     *
+     * <p>
      * Note: These gameboards WILL be augmented with user attempt information, but not whether the gameboard is saved
      * to the user's boards.
      *
@@ -727,7 +705,7 @@ public class GameManager {
      *            - results depend on each question having an id prefixed with the question page id.
      * @return collection of markable question parts (questions).
      */
-    public static List<QuestionDTO> getAllMarkableQuestionPartsDFSOrder(ContentDTO content) {
+    public static List<QuestionDTO> getAllMarkableQuestionPartsDFSOrder(final ContentDTO content) {
         List<ContentDTO> dfs = Lists.newArrayList();
         dfs = depthFirstQuestionSearch(content, dfs);
 
@@ -775,8 +753,9 @@ public class GameManager {
      * @throws ContentManagerException
      *             - if there is an error retrieving the content requested.
      */
-    private GameboardDTO augmentGameboardWithQuestionAttemptInformation(final GameboardDTO gameboardDTO,
-                                                                        final Map<String, ? extends Map<String, ? extends List<? extends LightweightQuestionValidationResponse>>> questionAttemptsFromUser)
+    private GameboardDTO augmentGameboardWithQuestionAttemptInformation(
+            final GameboardDTO gameboardDTO, final Map<String, ? extends Map<String,
+            ? extends List<? extends LightweightQuestionValidationResponse>>> questionAttemptsFromUser)
             throws ContentManagerException {
         if (null == gameboardDTO) {
             return null;
@@ -1029,7 +1008,7 @@ public class GameManager {
             // Only keep questions that have not been superseded.
             // Yes, this should probably be done in the fieldsToMap filter above, but this is simpler.
             if (c instanceof IsaacQuestionPageDTO) {
-                IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO)c;
+                IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO) c;
                 if (qp.getSupersededBy() != null && !qp.getSupersededBy().equals("")) {
                     // This question has been superseded. Don't include it.
                     continue;
@@ -1046,7 +1025,7 @@ public class GameManager {
 
     /**
      * AugmentGameItemWithAttemptInformation
-     * 
+     * <p>
      * This method will calculate the question state for use in gameboards based on the question.
      * 
      * @param gameItem
@@ -1160,6 +1139,8 @@ public class GameManager {
      * 
      * @param mapper
      *            - to convert between contentDTO to wildcard.
+     * @param subjectsList
+     *            - list of subjects to filter search for
      * @return wildCard object.
      * @throws NoWildcardException
      *             - when we are unable to provide you with a wildcard object.
@@ -1175,7 +1156,7 @@ public class GameManager {
 
         // FIXME - the 999 is a magic number because using NO_SEARCH_LIMIT doesn't work for all elasticsearch queries!
         ResultsWrapper<ContentDTO> wildcardResults = this.contentManager.findByFieldNamesRandomOrder(
-                fieldsToMap, 0, 999);
+                fieldsToMap, 0, RANDOM_WILDCARD_SEARCH_LIMIT);
 
         // try to increase randomness of wildcard results.
         Collections.shuffle(wildcardResults.getResults());
@@ -1230,7 +1211,7 @@ public class GameManager {
 
     /**
      * Helper method to generate field to match requirements for search queries (specialised for isaac-filtering rules)
-     * 
+     * <p>
      * This method will decide what should be AND and what should be OR based on the field names used.
      * 
      * @param gameFilter
@@ -1406,8 +1387,8 @@ public class GameManager {
         }
 
         if (gameboardDTO.getGameFilter() == null || !validateFilterQuery(gameboardDTO.getGameFilter())) {
-            throw new InvalidGameboardException("Your gameboard must have some valid filter information " +
-                    "e.g. subject must be set.");
+            throw new InvalidGameboardException("Your gameboard must have some valid filter information "
+                    + "e.g. subject must be set.");
         }
 
         List<String> badQuestions = this.gameboardPersistenceManager.getInvalidQuestionIdsFromGameboard(gameboardDTO);
