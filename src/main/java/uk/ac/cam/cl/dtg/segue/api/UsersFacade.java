@@ -455,7 +455,7 @@ public class UsersFacade extends AbstractSegueFacade {
         }
 
         SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Invalid password reset token.");
-        log.debug(String.format("Invalid password reset token: %s", token));
+        log.debug("Invalid password reset token.");
         return error.toResponse();
     }
 
@@ -491,7 +491,7 @@ public class UsersFacade extends AbstractSegueFacade {
 
         } catch (InvalidTokenException e) {
             SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST, "Invalid password reset token.");
-            log.error("Invalid password reset token supplied: " + token);
+            log.error("Invalid password reset token supplied.");
             return error.toResponse();
         } catch (InvalidPasswordException e) {
             SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST, e.getMessage());
