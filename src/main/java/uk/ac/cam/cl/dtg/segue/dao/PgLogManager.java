@@ -164,6 +164,7 @@ public class PgLogManager implements ILogManager {
         return this.getLogsByUserAndType(type, fromDate, toDate, null);
     }
 
+    
     @Override
     public Long getLogCountByType(final String type) throws SegueDatabaseException {
         String query = "SELECT COUNT(*) AS TOTAL FROM logged_events WHERE event_type = ?";
