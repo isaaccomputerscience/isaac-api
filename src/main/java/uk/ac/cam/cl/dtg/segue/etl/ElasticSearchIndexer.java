@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ELASTICSEARCH_INDEXER_REQUEST_TIMEOUT;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
 
 /**
  * Created by Ian on 17/10/2016.
@@ -165,7 +166,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
 
     boolean expungeTypedIndexFromSearchCache(final String typedIndex) {
         try {
-            log.info("Sending delete request to ElasticSearch for search index: " + typedIndex);
+            log.info("Sending delete request to ElasticSearch for search index: " + sanitiseInternalLogValue(typedIndex));
             getClient().indices().delete(new DeleteIndexRequest(typedIndex), RequestOptions.DEFAULT);
         } catch (ElasticsearchException | IOException e) {
             log.error("ElasticSearch exception while trying to delete index " + typedIndex + ", it might not have existed.",

@@ -98,6 +98,7 @@ import java.util.stream.Collectors;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DEFAULT_MISUSE_STATISTICS_LIMIT;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacUserPreferences;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
 
 /**
  * Admin facade for segue.
@@ -1112,8 +1113,8 @@ public class AdminFacade extends AbstractSegueFacade {
             String agentIdentifier = details.get("agentIdentifier");
             String eventLabel = details.get("eventLabel");
             misuseMonitor.resetMisuseCount(agentIdentifier, eventLabel);
-            log.info(String.format("Admin user (%s) reset misuse monitor '%s' for agent id (%s)!", user.getEmail(),
-                    eventLabel, agentIdentifier));
+            log.info(sanitiseInternalLogValue(String.format("Admin user (%s) reset misuse monitor '%s' for agent id (%s)!", user.getEmail(),
+                    eventLabel, agentIdentifier)));
             return Response.ok().build();
         } catch (NoUserLoggedInException e) {
             return SegueErrorResponse.getNotLoggedInResponse();

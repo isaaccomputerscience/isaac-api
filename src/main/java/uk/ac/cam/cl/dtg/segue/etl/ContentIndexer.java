@@ -67,6 +67,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Maps.immutableEntry;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
 
 /**
  * Created by Ian on 17/10/2016.
@@ -860,7 +861,7 @@ public class ContentIndexer {
      * @param version the commit sha of the content that we are interested in.
      */
     private void expungeAnyContentTypeIndicesRelatedToVersion(final String version) {
-        log.info("Deleting existing indexes for version " + version);
+        log.info("Deleting existing indexes for version " + sanitiseInternalLogValue(version));
         for (ContentIndextype contentIndexType : ContentIndextype.values()) {
             es.expungeIndexFromSearchCache(version, contentIndexType.toString());
         }
