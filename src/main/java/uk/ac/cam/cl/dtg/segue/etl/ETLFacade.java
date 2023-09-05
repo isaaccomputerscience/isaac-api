@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.api.AbstractSegueFacade;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
+import java.util.regex.Pattern;
+
 /**
  *
  * Created by Ian on 17/10/2016.
@@ -25,6 +27,8 @@ public class ETLFacade extends AbstractSegueFacade {
     private static final Logger log = LoggerFactory.getLogger(ETLFacade.class);
 
     private final ETLManager etlManager;
+
+    private static final Pattern SHA_PATTERN = Pattern.compile("^[0-9a-f]{40}$");
 
     /**
      * Constructor that provides a properties loader.
@@ -44,6 +48,11 @@ public class ETLFacade extends AbstractSegueFacade {
     @Operation(summary = "Update a content version alias.",
                   description = "This is primarily used to set the 'live' content version.")
     public Response setLiveVersion(@PathParam("alias") final String alias, @PathParam("version") final String version) {
+
+        if (!SHA_PATTERN.matcher(version).matches()) {
+            log.error("Version did not match expected SHA format");
+            return Response.serverError().entity("Version did not match expected SHA format").build();
+        }
 
         try {
             etlManager.setNamedVersion(alias, version);
