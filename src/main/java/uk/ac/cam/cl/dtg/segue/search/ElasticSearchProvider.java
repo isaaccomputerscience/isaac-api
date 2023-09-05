@@ -77,6 +77,7 @@ import java.util.concurrent.TimeUnit;
 
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_MAX_WINDOW_SIZE;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
 
 
 /**
@@ -314,7 +315,7 @@ public class ElasticSearchProvider implements ISearchProvider {
         try {
             return client.indices().exists(new GetIndexRequest(typedIndex), RequestOptions.DEFAULT);
         } catch (IOException e) {
-            log.error(String.format("Failed to check existence of index %s", typedIndex), e);
+            log.error(String.format("Failed to check existence of index %s", sanitiseInternalLogValue(typedIndex)), e);
             return false;
         }
     }

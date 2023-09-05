@@ -169,7 +169,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
             log.info("Sending delete request to ElasticSearch for search index: " + sanitiseInternalLogValue(typedIndex));
             getClient().indices().delete(new DeleteIndexRequest(typedIndex), RequestOptions.DEFAULT);
         } catch (ElasticsearchException | IOException e) {
-            log.error("ElasticSearch exception while trying to delete index " + typedIndex + ", it might not have existed.",
+            log.error("ElasticSearch exception while trying to delete index " + sanitiseInternalLogValue(typedIndex) + ", it might not have existed.",
                     e);
             return false;
         }
@@ -199,7 +199,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
                         getClient().indices().getAlias(new GetAliasesRequest().aliases(typedAlias + "_previous"), RequestOptions.DEFAULT)
                         .getAliases());
             } catch (IOException e) {
-                log.error(String.format("Failed to retrieve existing previous alias %s, not moving alias!", typedAlias + "_previous"));
+                log.error(String.format("Failed to retrieve existing previous alias %s, not moving alias!", sanitiseInternalLogValue(typedAlias) + "_previous"));
                 continue;
             }
 
@@ -220,7 +220,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
                         getClient().indices().getAlias(new GetAliasesRequest().aliases(typedAlias), RequestOptions.DEFAULT)
                         .getAliases());
             } catch (IOException e) {
-                log.error(String.format("Failed to retrieve existing alias %s, not moving alias!", typedAlias));
+                log.error(String.format("Failed to retrieve existing alias %s, not moving alias!", sanitiseInternalLogValue(typedAlias)));
                 continue;
             }
 
@@ -235,7 +235,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
             }
 
             if (indexWithCurrent != null && indexWithCurrent.equals(typedIndexTarget)) {
-                log.info("Not moving alias '" + typedAlias + "' - it already points to the right index.");
+                log.info("Not moving alias '" + sanitiseInternalLogValue(typedAlias) + "' - it already points to the right index.");
             } else {
                 IndicesAliasesRequest request = new IndicesAliasesRequest();
 
@@ -271,8 +271,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
                 try {
                     getClient().indices().updateAliases(request, RequestOptions.DEFAULT);
                 } catch (IOException e) {
-                    log.error(String.format("Failed to update alias %s", typedAlias), e);
-                    continue;
+                    log.error(String.format("Failed to update alias %s", sanitiseInternalLogValue(typedAlias)), e);
                 }
             }
 
