@@ -15,17 +15,8 @@
  */
 package uk.ac.cam.cl.dtg.segue.database;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
-
 import org.apache.commons.lang3.Validate;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -47,17 +38,27 @@ import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.TrackingRefUpdate;
 import org.eclipse.jgit.transport.sshd.JGitKeyCache;
 import org.eclipse.jgit.transport.sshd.SshdSessionFactory;
-import org.eclipse.jgit.transport.sshd.SshdSessionFactoryBuilder.ConfigStoreFactory;
 import org.eclipse.jgit.transport.sshd.SshdSessionFactoryBuilder;
+import org.eclipse.jgit.transport.sshd.SshdSessionFactoryBuilder.ConfigStoreFactory;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.treewalk.filter.PathSuffixFilter;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.inject.Inject;
 import uk.ac.cam.cl.dtg.segue.etl.ETLInMemorySshConfigStore;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 
 /**
@@ -182,7 +183,7 @@ public class GitDb {
         }
 
         revWalk.dispose();
-        log.debug("Retrieved Commit Id: " + commitId.getName() + " Searching for: " + fullFilePath + " found: " + path);
+        log.debug("Retrieved Commit Id: " + commitId.getName() + " Searching for: " + sanitiseUserLogValue(fullFilePath) + " found: " + path);
         ObjectLoader loader = repository.open(objectId);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -213,7 +214,7 @@ public class GitDb {
 
         ObjectId commitId = gitHandle.getRepository().resolve(sha);
         if (null == commitId) {
-            log.error("Failed to buildGitIndex - Unable to locate resource with sha: " + sha);
+            log.error("Failed to buildGitIndex - Unable to locate resource with sha: " + sanitiseInternalLogValue(sha));
         } else {
             RevWalk revWalk = new RevWalk(gitHandle.getRepository());
             RevCommit commit = revWalk.parseCommit(commitId);

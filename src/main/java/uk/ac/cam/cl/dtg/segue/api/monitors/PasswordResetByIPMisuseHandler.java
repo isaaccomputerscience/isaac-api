@@ -25,6 +25,7 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Handler to deal with email verification requests.
@@ -84,7 +85,7 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
         EmailCommunicationMessage e = new EmailCommunicationMessage(
                 properties.getProperty(Constants.SERVER_ADMIN_ADDRESS), subject, message, message, EmailType.ADMIN);
         emailManager.addSystemEmailToQueue(e);
-        log.warn("Soft threshold limit: " + message);
+        log.warn("Soft threshold limit: " + sanitiseUserLogValue(message));
     }
 
     @Override
@@ -93,7 +94,7 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
         EmailCommunicationMessage e = new EmailCommunicationMessage(
                 properties.getProperty(Constants.SERVER_ADMIN_ADDRESS), subject, message, message, EmailType.ADMIN);
         emailManager.addSystemEmailToQueue(e);
-        log.error("Hard threshold limit: " + message);
+        log.error("Hard threshold limit: " + sanitiseUserLogValue(message));
     }
 
 }

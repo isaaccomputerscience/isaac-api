@@ -24,6 +24,8 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+
 public class IPQuestionAttemptMisuseHandler implements IMisuseHandler {
 
     private static final Logger log = LoggerFactory.getLogger(IPQuestionAttemptMisuseHandler.class);
@@ -32,8 +34,8 @@ public class IPQuestionAttemptMisuseHandler implements IMisuseHandler {
     private static final Integer HARD_THRESHOLD = 240;  // One every fifteen seconds for an hour; far too high!
     private static final Integer ACCOUNTING_INTERVAL = Constants.NUMBER_SECONDS_IN_ONE_HOUR;
 
-    private PropertiesLoader properties;
-    private EmailManager emailManager;
+    private final PropertiesLoader properties;
+    private final EmailManager emailManager;
 
     /**
      * @param emailManager
@@ -64,7 +66,7 @@ public class IPQuestionAttemptMisuseHandler implements IMisuseHandler {
 
     @Override
     public void executeSoftThresholdAction(final String message) {
-        log.warn("Too many requests from an IP Address: " + message);
+        log.warn("Too many requests from an IP Address: " + sanitiseUserLogValue(message));
     }
 
     @Override
@@ -73,6 +75,6 @@ public class IPQuestionAttemptMisuseHandler implements IMisuseHandler {
         EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
                 subject, message, message, EmailType.ADMIN);
         emailManager.addSystemEmailToQueue(e);
-        log.warn("Too many requests from an IP Address: " + message + " This may be a scripted attack!");
+        log.warn("Too many requests from an IP Address: " + sanitiseUserLogValue(message) + " This may be a scripted attack!");
     }
 }

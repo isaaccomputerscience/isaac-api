@@ -27,6 +27,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 import com.google.inject.Inject;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_ONE_DAY;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Handler to deal with additional group managers requests.
@@ -41,8 +42,8 @@ public class GroupManagerLookupMisuseHandler implements IMisuseHandler {
     public static final Integer HARD_THRESHOLD = 50;
     public static final Integer ACCOUNTING_INTERVAL = NUMBER_SECONDS_IN_ONE_DAY;
 
-    private PropertiesLoader properties;
-    private EmailManager emailManager;
+    private final PropertiesLoader properties;
+    private final EmailManager emailManager;
 
     /**
      * @param emailManager
@@ -82,7 +83,7 @@ public class GroupManagerLookupMisuseHandler implements IMisuseHandler {
         EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
                                                 subject, message, message, EmailType.ADMIN);
         emailManager.addSystemEmailToQueue(e);
-        log.warn("Soft threshold limit: " + message);
+        log.warn("Soft threshold limit: " + sanitiseUserLogValue(message));
 
     }
 
@@ -93,7 +94,7 @@ public class GroupManagerLookupMisuseHandler implements IMisuseHandler {
         EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
                 subject, message, message, EmailType.ADMIN);
         emailManager.addSystemEmailToQueue(e);
-        log.warn("Hard threshold limit: " + message);
+        log.warn("Hard threshold limit: " + sanitiseUserLogValue(message));
 
     }
 }

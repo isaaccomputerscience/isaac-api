@@ -59,6 +59,7 @@ import java.util.regex.Pattern;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.QUEUED_EMAIL;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
 
 /**
  * EmailManager
@@ -367,14 +368,16 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
 
         // if this is an email type that cannot have a preference, send it and log as appropriate
         if (!email.getEmailType().isValidEmailPreference()) {
-            log.info(String.format("Added %s email to the queue with subject: %s", email.getEmailType().toString().toLowerCase(), email.getSubject()));
+            log.info(String.format("Added %s email to the queue with subject: %s", email.getEmailType().toString().toLowerCase(),
+                    sanitiseInternalLogValue(email.getSubject())));
             logManager.logInternalEvent(userDTO, SegueServerLogType.SENT_EMAIL, eventDetails);
             addToQueue(email);
             return true;
         }
 
         try {
-            UserPreference preference = userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), email.getEmailType().name(), userDTO.getId());
+            UserPreference preference = userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(),
+                    email.getEmailType().name(), userDTO.getId());
             // If no preference is present, do not send the email.
             if (preference != null && preference.getPreferenceValue()) {
                 logManager.logInternalEvent(userDTO, SegueServerLogType.SENT_EMAIL, eventDetails);
@@ -527,7 +530,7 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
                 String tag = template.substring(m.start() + offset, m.end() + offset);
 
                 if (tag.length() <= MINIMUM_TAG_LENGTH) {
-                    log.info("Skipped email template tag with no contents: " + tag);
+                    log.info("Skipped email template tag with no contents: " + sanitiseInternalLogValue(tag));
                     break;
                 }
 

@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+
 public class AnonQuestionAttemptMisuseHandler implements IMisuseHandler {
 
     private static final Logger log = LoggerFactory.getLogger(AnonQuestionAttemptMisuseHandler.class);
@@ -54,6 +56,6 @@ public class AnonQuestionAttemptMisuseHandler implements IMisuseHandler {
 
     @Override
     public void executeHardThresholdAction(final String message) {
-        log.warn("Hard threshold limit: " + message);
+        log.warn("Hard threshold limit: " + sanitiseUserLogValue(message));
     }
 }

@@ -72,6 +72,7 @@ import java.util.stream.Collectors;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.CACHE_METRICS_COLLECTOR;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Implementation that specifically works with Content objects.
@@ -242,7 +243,8 @@ public class GitContentManager {
 
             if (null == searchResults || searchResults.isEmpty()) {
                 if (!failQuietly) {
-                    log.error(String.format("Failed to locate content with ID '%s' in the cache for content SHA (%s)", id, getCurrentContentSHA()));
+                    log.error(String.format("Failed to locate content with ID '%s' in the cache for content SHA (%s)",
+                            sanitiseUserLogValue(id), getCurrentContentSHA()));
                 }
                 return null;
             }

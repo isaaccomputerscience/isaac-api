@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Handler to deal with teacher password reset requests.
@@ -69,12 +70,12 @@ public class TeacherPasswordResetMisuseHandler implements IMisuseHandler {
 
     @Override
     public void executeSoftThresholdAction(final String message) {
-        log.warn("Soft threshold limit: " + message);
+        log.warn("Soft threshold limit: " + sanitiseUserLogValue(message));
     }
 
     @Override
     public void executeHardThresholdAction(final String message) {
-        log.error("Hard threshold limit: " + message);
+        log.error("Hard threshold limit: " + sanitiseUserLogValue(message));
     }
 
 }

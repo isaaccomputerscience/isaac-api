@@ -27,4 +27,15 @@ public final class LogUtils {
     public static String sanitiseInternalLogValue(final String value) {
         return sanitiseLogValue(value);
     }
+
+    /**
+     * Sanitise a value to be logged. This value is expected to be selected or provided by general users, though the
+     * front-end may apply some validation to the input under normal use cases.
+     *
+     * @param value the String to be sanitised
+     * @return the sanitised String
+     */
+    public static String sanitiseUserLogValue(final String value) {
+        return sanitiseLogValue(value);
+    }
 }

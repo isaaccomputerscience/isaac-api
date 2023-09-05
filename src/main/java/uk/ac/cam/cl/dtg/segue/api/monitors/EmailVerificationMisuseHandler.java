@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_ONE_DAY;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Handler to deal with email verification requests.
@@ -70,11 +71,11 @@ public class EmailVerificationMisuseHandler implements IMisuseHandler {
 
     @Override
     public void executeSoftThresholdAction(final String message) {
-        log.warn("Soft threshold limit: " + message);
+        log.warn("Soft threshold limit: " + sanitiseUserLogValue(message));
     }
 
     @Override
     public void executeHardThresholdAction(final String message) {
-        log.error("Hard threshold limit: " + message);
+        log.error("Hard threshold limit: " + sanitiseUserLogValue(message));
     }
 }

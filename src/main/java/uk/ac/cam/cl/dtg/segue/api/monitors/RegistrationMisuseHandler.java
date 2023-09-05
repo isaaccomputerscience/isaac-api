@@ -25,6 +25,8 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+
 /**
  * Handler to deal with registration requests.
  * <p>
@@ -40,8 +42,8 @@ public class RegistrationMisuseHandler implements IMisuseHandler {
     private static final Integer HARD_THRESHOLD = 120;
     private static final Integer ACCOUNTING_INTERVAL = Constants.NUMBER_SECONDS_IN_ONE_HOUR;
 
-    private PropertiesLoader properties;
-    private EmailManager emailManager;
+    private final PropertiesLoader properties;
+    private final EmailManager emailManager;
 
     /**
      * @param emailManager
@@ -82,7 +84,7 @@ public class RegistrationMisuseHandler implements IMisuseHandler {
         EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
                 subject, message, message, EmailType.ADMIN);
         emailManager.addSystemEmailToQueue(e);
-        log.warn("Lots of registration requests from: " + message);
+        log.warn("Lots of registration requests from: " + sanitiseUserLogValue(message));
 
     }
 
@@ -93,7 +95,7 @@ public class RegistrationMisuseHandler implements IMisuseHandler {
         EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
                 subject, message, message, EmailType.ADMIN);
         emailManager.addSystemEmailToQueue(e);
-        log.warn("Too many registration requests from: " + message);
+        log.warn("Too many registration requests from: " + sanitiseUserLogValue(message));
 
     }
 }

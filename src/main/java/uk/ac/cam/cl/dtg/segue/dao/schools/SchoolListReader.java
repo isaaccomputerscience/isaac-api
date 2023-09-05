@@ -38,6 +38,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_POSTCODE_FIELDNAME_POJ
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_URN_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_URN_FIELDNAME_POJO;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Class responsible for reading the local school list csv file.
@@ -152,7 +153,7 @@ public class SchoolListReader {
         
         if (matchingSchoolList.size() > 1) {
             log.error("Error occurred while trying to look a school up by id... Found more than one match for "
-                    + schoolURN + " results: " + matchingSchoolList);
+                    + sanitiseUserLogValue(schoolURN) + " results: " + matchingSchoolList);
         }
 
         return mapper.readValue(matchingSchoolList.get(0), School.class);

@@ -26,6 +26,8 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 import com.google.inject.Inject;
 
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+
 /**
  * Handler to detect users storing large amounts of data in our log database.
  * <p>
@@ -71,7 +73,7 @@ public class LogEventMisuseHandler implements IMisuseHandler {
 
     @Override
     public void executeSoftThresholdAction(final String message) {
-        log.warn("Soft threshold limit: " + message);
+        log.warn("Soft threshold limit: " + sanitiseUserLogValue(message));
     }
 
     @Override
@@ -82,6 +84,6 @@ public class LogEventMisuseHandler implements IMisuseHandler {
                 subject, message, message, EmailType.ADMIN);
 
         emailManager.addSystemEmailToQueue(e);
-        log.warn("Hard threshold limit: " + message);
+        log.warn("Hard threshold limit: " + sanitiseUserLogValue(message));
     }
 }
