@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * AssignmentManager.
@@ -142,7 +143,7 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
         if (assignmentPersistenceManager.getAssignmentsByGameboardAndGroup(newAssignment.getGameboardId(),
                 newAssignment.getGroupId()).size() != 0) {
             log.error(String.format("Duplicated Assignment Exception - cannot assign the same work %s to a group %s",
-                    newAssignment.getGameboardId(), newAssignment.getGroupId()));
+                    sanitiseUserLogValue(newAssignment.getGameboardId()), newAssignment.getGroupId()));
             throw new DuplicateAssignmentException("You cannot assign the same work to a group more than once.");
         }
         

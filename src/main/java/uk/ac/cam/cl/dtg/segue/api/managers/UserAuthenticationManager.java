@@ -84,6 +84,7 @@ import java.util.Map;
 
 import static org.eclipse.jetty.http.HttpCookie.SAME_SITE_LAX_COMMENT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * This class handles all authentication details, including creation / destruction of sessions. It also handles adding
@@ -570,7 +571,7 @@ public class UserAuthenticationManager {
                     + " has not been registered / implemented yet: " + provider);
         }
 
-        log.debug("Mapping provider: " + provider + " to " + enumProvider);
+        log.debug("Mapping provider: " + sanitiseUserLogValue(provider) + " to " + enumProvider);
 
         return this.registeredAuthProviders.get(enumProvider);
     }

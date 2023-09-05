@@ -74,6 +74,7 @@ import java.util.Map;
 
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Pages Facade
@@ -470,7 +471,7 @@ public class PagesFacade extends AbstractIsaacFacade {
                         .tag(etag)
                         .build();
             } else {
-                String error = "Unable to locate a question with the id specified: " + questionId;
+                String error = "Unable to locate a question with the id specified: " + sanitiseUserLogValue(questionId);
                 log.warn(error);
                 return SegueErrorResponse.getResourceNotFoundResponse(error);
             }
@@ -542,7 +543,7 @@ public class PagesFacade extends AbstractIsaacFacade {
                             linkedGameboards.add(liteGameboard);
                         } else {
                             log.error(String.format("Unable to locate gameboard (%s) for topic summary page (%s)!",
-                                    linkedGameboardId, topicId));
+                                    linkedGameboardId, sanitiseUserLogValue(topicId)));
                         }
 
                     } catch (SegueDatabaseException e) {

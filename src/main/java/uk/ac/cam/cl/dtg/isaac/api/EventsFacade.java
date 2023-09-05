@@ -99,6 +99,7 @@ import java.util.stream.Collectors;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Events Facade.
@@ -628,7 +629,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         } catch (SegueDatabaseException e) {
             String errorMsg = String.format(
                     "Database error occurred while trying retrieve bookings for group (%s) on event (%s).",
-                    groupId, eventId);
+                    sanitiseUserLogValue(groupId), sanitiseUserLogValue(eventId));
             log.error(errorMsg, e);
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
         } catch (NoUserLoggedInException e) {
@@ -675,7 +676,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         } catch (SegueDatabaseException e) {
             String errorMsg = String.format(
                     "Database error occurred while trying retrieve bookings for event (%s).",
-                    eventId);
+                    sanitiseUserLogValue(eventId));
             log.error(errorMsg, e);
             return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
         }

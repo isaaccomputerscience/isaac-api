@@ -100,6 +100,7 @@ import static jakarta.ws.rs.core.Response.ok;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager.extractPageIdFromQuestionId;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Quiz Facade.
@@ -846,7 +847,7 @@ public class QuizFacade extends AbstractIsaacFacade {
                 question = (Question) contentBasedOnId;
             } else {
                 SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND,
-                    "No question object found for given id: " + questionId);
+                    "No question object found for given id: " + sanitiseUserLogValue(questionId));
                 log.warn(error.getErrorMessage());
                 return error.toResponse();
             }
@@ -1578,7 +1579,8 @@ public class QuizFacade extends AbstractIsaacFacade {
                 || clientQuizAssignment.getOwnerUserId() != null
                 || clientQuizAssignment.getCreationDate() != null
         ) {
-            log.warn("Attempt to change fields for test assignment id {} that aren't feedbackMode or dueDate: {}", quizAssignmentId, clientQuizAssignment);
+            log.warn("Attempt to change fields for test assignment id {} that aren't feedbackMode or dueDate: {}",
+                    quizAssignmentId, sanitiseUserLogValue(clientQuizAssignment.toString()));
             return new SegueErrorResponse(Status.BAD_REQUEST, "Those fields are not editable.").toResponse();
         }
 

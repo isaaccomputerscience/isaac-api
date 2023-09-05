@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.zip.CRC32;
 
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+
 /**
  * PgEventBookings.
  * <p>
@@ -417,8 +419,8 @@ public class PgEventBookings implements EventBookings {
                     throw new ResourceNotFoundException("Unable to locate the booking you requested.");
                 } else {
                     String msg = String.format(
-                            "Found more than one event booking that matches event id (%s) and user id (%s).", eventId,
-                            userId);
+                            "Found more than one event booking that matches event id (%s) and user id (%s).",
+                            sanitiseUserLogValue(eventId), userId);
                     log.error(msg);
                     throw new SegueDatabaseException(msg);
                 }

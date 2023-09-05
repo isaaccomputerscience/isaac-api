@@ -335,7 +335,7 @@ public class AdminFacade extends AbstractSegueFacade {
                     RegisteredUserDTO user = this.userManager.getUserDTOByEmail(email);
 
                     if (null == user) {
-                        log.error(String.format("No user could be found with email (%s)", email));
+                        log.error(String.format("No user could be found with email (%s)", sanitiseInternalLogValue(email)));
                         throw new NoUserException("No user found with this email.");
                     }
                 }
@@ -554,7 +554,7 @@ public class AdminFacade extends AbstractSegueFacade {
                 } else if (null != mailjetListId && getProperties().getProperty(MAILJET_EVENTS_LIST_ID).equals(mailjetListId.toString())) {
                     unsubscribedEmailType = EmailType.EVENTS;
                 } else {
-                    log.warn(String.format("User with email (%s) attempted to unsubscribe from unrecognised list (%s)!", recipientEmail, mailjetListId));
+                    log.warn(String.format("User with email (%s) attempted to unsubscribe from unrecognised list (%s)!", sanitiseInternalLogValue(recipientEmail), mailjetListId));
                 }
                 // Find and unsubscribe user:
                 if (recipientEmail != null && !recipientEmail.isEmpty()) {
@@ -563,7 +563,7 @@ public class AdminFacade extends AbstractSegueFacade {
                         UserPreference preferenceToSave = new UserPreference(user.getId(), SegueUserPreferences.EMAIL_PREFERENCE.name(), unsubscribedEmailType.name(), false);
                         userPreferencesToUpdate.add(preferenceToSave);
                     } catch (NoUserException e) {
-                        log.warn(String.format("User with email (%s) attempted to unsubscribe, but no Isaac account found!", recipientEmail));
+                        log.warn(String.format("User with email (%s) attempted to unsubscribe, but no Isaac account found!", sanitiseInternalLogValue(recipientEmail)));
                     }
                 }
             }
@@ -1066,7 +1066,7 @@ public class AdminFacade extends AbstractSegueFacade {
                 HttpEntity e = httpResponse.getEntity();
 
                 if (httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
-                    log.info(currentUser.getEmail() + " changed live version from " + oldLiveVersion + " to " + version + ".");
+                    log.info(currentUser.getEmail() + " changed live version from " + oldLiveVersion + " to " + sanitiseInternalLogValue(version) + ".");
                     return Response.ok().build();
                 } else {
                     SegueErrorResponse r = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, IOUtils.toString(e.getContent()));

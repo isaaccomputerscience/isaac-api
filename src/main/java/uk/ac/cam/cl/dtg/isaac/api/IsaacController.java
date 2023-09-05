@@ -69,6 +69,7 @@ import java.util.concurrent.TimeUnit;
 
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Isaac Controller
@@ -329,7 +330,7 @@ public class IsaacController extends AbstractIsaacFacade {
         if (null == fileContent) {
             String refererHeader = httpServletRequest.getHeader("Referer");
             SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the file: " + path);
-            log.warn(String.format("Unable to locate the file: (%s). Referer: (%s)", path, refererHeader));
+            log.warn(String.format("Unable to locate the file: (%s). Referer: (%s)", sanitiseUserLogValue(path), refererHeader));
             return error.toResponse();
         }
 
@@ -400,7 +401,7 @@ public class IsaacController extends AbstractIsaacFacade {
             if (null == fileContent) {
                 String refererHeader = httpServletRequest.getHeader("Referer");
                 SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the file: " + path);
-                log.warn(String.format("Unable to locate the file: (%s). Referer: (%s)", path, refererHeader));
+                log.warn(String.format("Unable to locate the file: (%s). Referer: (%s)", sanitiseUserLogValue(path), refererHeader));
                 return error.toResponse(getCacheControl(NUMBER_SECONDS_IN_TEN_MINUTES, false), etag);
             }
 

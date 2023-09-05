@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Manage quiz assignments.
@@ -104,7 +105,7 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
         if (existingQuizAssignments.size() != 0) {
             if (existingQuizAssignments.stream().anyMatch(qa -> qa.getDueDate() == null || qa.dueDateIsAfter(now))) {
                 log.error(String.format("Duplicated Test Assignment Exception - cannot assign the same work %s to a group %s when due date not passed",
-                    newAssignment.getQuizId(), newAssignment.getGroupId()));
+                        sanitiseUserLogValue(newAssignment.getQuizId()), newAssignment.getGroupId()));
                 throw new DuplicateAssignmentException("You cannot reassign a test until the due date has passed.");
             }
         }

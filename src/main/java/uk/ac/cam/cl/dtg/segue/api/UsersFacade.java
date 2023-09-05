@@ -89,6 +89,7 @@ import java.util.stream.Collectors;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * User facade.
@@ -264,7 +265,8 @@ public class UsersFacade extends AbstractSegueFacade {
                 // which has not made any other authenticated/logged request to Isaac beforehand.
                 // This _might_ be suspicious, and this logging will help establish that.
                 if (request.getSession() == null || request.getSession().getAttribute(ANONYMOUS_USER) == null) {
-                    log.error(String.format("Registration attempt from (%s) for (%s) without corresponding anonymous user!", ipAddress, registeredUser.getEmail()));
+                    log.error(String.format("Registration attempt from (%s) for (%s) without corresponding anonymous user!",
+                            ipAddress, sanitiseUserLogValue(registeredUser.getEmail())));
                 }
 
                 return userManager.createUserObjectAndLogIn(request, response, registeredUser, newPassword, userPreferences, registeredUserContexts);

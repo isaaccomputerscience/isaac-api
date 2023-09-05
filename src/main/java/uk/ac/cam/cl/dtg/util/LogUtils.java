@@ -1,5 +1,7 @@
 package uk.ac.cam.cl.dtg.util;
 
+import java.util.Map;
+
 import static org.apache.commons.text.StringEscapeUtils.escapeJava;
 
 public final class LogUtils {
@@ -37,5 +39,12 @@ public final class LogUtils {
      */
     public static String sanitiseUserLogValue(final String value) {
         return sanitiseLogValue(value);
+    }
+
+    public static String sanitiseUserLogValue(final Map<String, Object> value) {
+        if (value != null) {
+            return sanitiseUserLogValue(value.toString());
+        }
+        return null;
     }
 }

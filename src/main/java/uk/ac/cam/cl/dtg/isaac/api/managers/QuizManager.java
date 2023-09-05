@@ -49,6 +49,7 @@ import java.util.stream.Stream;
 
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * This class will be responsible for managing quizzes.
@@ -160,7 +161,7 @@ public class QuizManager {
                             + item.getQuizId() + ") that does not exist!");
                     } else if (item instanceof QuizAssignmentDTO) {
                         log.warn("Assignment (" + ((QuizAssignmentDTO) item).getId() +  ") exists with test ID ("
-                            + item.getQuizId() + ") that does not exist!");
+                            + sanitiseUserLogValue(item.getQuizId()) + ") that does not exist!");
                     }
                 }
                 quizCache.put(quizId, quiz);

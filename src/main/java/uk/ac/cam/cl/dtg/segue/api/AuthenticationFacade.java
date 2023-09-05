@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dto.LocalAuthDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.MFAResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
-import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.SegueResourceMisuseException;
@@ -76,6 +75,7 @@ import java.util.Objects;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * AuthenticationFacade.
@@ -206,7 +206,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             return error.toResponse();
         } catch (AuthenticationProviderMappingException e) {
             SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-                    "Error mapping to a known authenticator. The provider: " + signinProvider + " is unknown");
+                    "Error mapping to a known authenticator. The provider: " + sanitiseUserLogValue(signinProvider) + " is unknown");
             log.error(error.getErrorMessage(), e);
             return error.toResponse();
         }
@@ -246,7 +246,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
             return error.toResponse();
         } catch (AuthenticationProviderMappingException e) {
             SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-                    "Error mapping to a known authenticator. The provider: " + authProviderAsString + " is unknown");
+                    "Error mapping to a known authenticator. The provider: " + sanitiseUserLogValue(authProviderAsString) + " is unknown");
             log.error(error.getErrorMessage(), e);
             return error.toResponse();
         }

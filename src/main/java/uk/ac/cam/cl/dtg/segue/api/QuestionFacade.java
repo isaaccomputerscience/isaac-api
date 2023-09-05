@@ -73,6 +73,7 @@ import java.util.List;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager.extractPageIdFromQuestionId;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 /**
  * Question Facade
@@ -159,9 +160,10 @@ public class QuestionFacade extends AbstractSegueFacade {
             AbstractSegueUserDTO currentUser = this.userManager.getCurrentUser(request);
             if (currentUser instanceof RegisteredUserDTO) {
                 log.warn(String.format("MethodNotAllowed: User (%s) attempted to GET the answer to the question '%s'!",
-                        ((RegisteredUserDTO) currentUser).getId(), questionId));
+                        ((RegisteredUserDTO) currentUser).getId(), sanitiseUserLogValue(questionId)));
             } else {
-                log.warn(String.format("MethodNotAllowed: Anonymous user attempted to GET the answer to the question '%s'!", questionId));
+                log.warn(String.format("MethodNotAllowed: Anonymous user attempted to GET the answer to the question '%s'!",
+                        sanitiseUserLogValue(questionId)));
             }
             return new SegueErrorResponse(Status.METHOD_NOT_ALLOWED, errorMessage).toResponse();
         } catch (SegueDatabaseException e) {
@@ -276,7 +278,7 @@ public class QuestionFacade extends AbstractSegueFacade {
             question = (Question) contentBasedOnId;
         } else {
             SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND,
-                    "No question object found for given id: " + questionId);
+                    "No question object found for given id: " + sanitiseUserLogValue(questionId));
             log.warn(error.getErrorMessage());
             return error.toResponse();
         }
