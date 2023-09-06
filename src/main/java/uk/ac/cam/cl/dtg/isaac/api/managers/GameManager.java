@@ -430,6 +430,7 @@ public class GameManager {
 
         ComparatorChain<GameboardDTO> comparatorForSorting = new ComparatorChain<GameboardDTO>();
         Comparator<GameboardDTO> defaultComparitor = new Comparator<GameboardDTO>() {
+            @Override
             public int compare(final GameboardDTO o1, final GameboardDTO o2) {
                 return o1.getLastVisited().getTime() > o2.getLastVisited().getTime() ? -1 : 1;
             }

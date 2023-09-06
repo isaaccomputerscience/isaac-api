@@ -726,6 +726,7 @@ public class ElasticSearchProvider implements ISearchProvider {
         }
     }
 
+    @Override
     public GetResponse getById(final String indexBase, final String indexType, final String id) throws SegueSearchException {
         String typedIndex = ElasticSearchProvider.produceTypedIndexName(indexBase, indexType);
         try {
@@ -736,6 +737,7 @@ public class ElasticSearchProvider implements ISearchProvider {
         }
     }
 
+    @Override
     public SearchResponse getAllFromIndex(final String indexBase, final String indexType) throws SegueSearchException {
         String typedIndex = ElasticSearchProvider.produceTypedIndexName(indexBase, indexType);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().size(DEFAULT_MAX_WINDOW_SIZE).fetchSource(true);

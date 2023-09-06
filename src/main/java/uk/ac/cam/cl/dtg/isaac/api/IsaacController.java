@@ -100,6 +100,7 @@ public class IsaacController extends AbstractIsaacFacade {
     // Question counts are slow to calculate, so cache for up to 10 minutes. We may want to move this to a more
     // reusable place (such as statsManager.getLogCount) if we find ourselves using this pattern more).
     private final Supplier<Long> questionCountCache = Suppliers.memoizeWithExpiration(new Supplier<Long>() {
+        @Override
         public Long get() {
             Executors.newSingleThreadExecutor().submit(new Runnable() {
                 @Override
