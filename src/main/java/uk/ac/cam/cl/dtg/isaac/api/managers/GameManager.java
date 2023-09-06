@@ -906,7 +906,7 @@ public class GameManager {
             final Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts)
             throws ContentManagerException {
 
-        Long seed = new Random().nextLong();
+        Long seed = randomGenerator.nextLong();
         int searchIndex = 0;
         List<GameboardItem> selectionOfGameboardQuestions = this.getNextQuestionsForFilter(gameFilter, searchIndex,
                 seed);

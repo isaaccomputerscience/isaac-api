@@ -775,7 +775,7 @@ public class ElasticSearchProvider implements ISearchProvider {
                 }
             }
             return Integer.parseInt(this.settingsCache.getIfPresent(maxWindowSizeKey));
-        } catch (IOException e) {
+        } catch (IOException | NumberFormatException e) {
             log.error(String.format("Failed to retrieve max window size settings for index %s - defaulting to %d",
                     typedIndex, DEFAULT_MAX_WINDOW_SIZE), e);
             return DEFAULT_MAX_WINDOW_SIZE;
