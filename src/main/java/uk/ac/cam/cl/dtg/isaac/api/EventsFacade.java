@@ -162,7 +162,7 @@ public class EventsFacade extends AbstractIsaacFacade {
                       final GitContentManager contentManager, @Named(Constants.CONTENT_INDEX) final String contentIndex,
                       final UserBadgeManager userBadgeManager, final UserAssociationManager userAssociationManager,
                       final GroupManager groupManager, final UserAccountManager userAccountManager,
-                      final SchoolListReader schoolListReader, final MapperFacade mapper) {
+                      final SchoolListReader schoolListReader, MapperFacade mapper) {
     super(properties, logManager);
     this.bookingManager = bookingManager;
     this.userManager = userManager;
