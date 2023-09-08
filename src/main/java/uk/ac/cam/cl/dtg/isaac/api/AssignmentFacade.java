@@ -769,8 +769,8 @@ public class AssignmentFacade extends AbstractIsaacFacade {
         ArrayList<String[]> rows = Lists.newArrayList();
 
         QuestionIdMaps questionIdMaps = extractGameboardQuestionIds(assignments, assignmentGameboards);
-        Map<GameboardDTO, List<String>> gameboardQuestionIds = questionIdMaps.getGameboardToQuestionMap();
-        Map<String, String> questionIdToPageIdMap = questionIdMaps.getQuestionToPageMap();
+        Map<GameboardDTO, List<String>> gameboardQuestionIds = questionIdMaps.getGameboardToQuestionIdsMap();
+        Map<String, String> questionIdToPageIdMap = questionIdMaps.getQuestionIdToPageIdMap();
 
         for (RegisteredUserDTO groupMember : groupMembers) {
             // FIXME Some room for improvement here, as we can retrieve all the users with a single query.
@@ -977,20 +977,20 @@ public class AssignmentFacade extends AbstractIsaacFacade {
     }
 
     private static class QuestionIdMaps {
-        private final Map<GameboardDTO, List<String>> gameboardToQuestionMap;
-        private final Map<String, String> questionToPageMap;
+        private final Map<GameboardDTO, List<String>> gameboardToQuestionIdsMap;
+        private final Map<String, String> questionIdToPageIdMap;
 
-        QuestionIdMaps(final Map<GameboardDTO, List<String>> gameboardToQuestionMap, final Map<String, String> questionToPageMap) {
-            this.gameboardToQuestionMap = gameboardToQuestionMap;
-            this.questionToPageMap = questionToPageMap;
+        QuestionIdMaps(final Map<GameboardDTO, List<String>> gameboardToQuestionIdsMap, final Map<String, String> questionIdToPageIdMap) {
+            this.gameboardToQuestionIdsMap = gameboardToQuestionIdsMap;
+            this.questionIdToPageIdMap = questionIdToPageIdMap;
         }
 
-        public Map<GameboardDTO, List<String>> getGameboardToQuestionMap() {
-            return gameboardToQuestionMap;
+        public Map<GameboardDTO, List<String>> getGameboardToQuestionIdsMap() {
+            return gameboardToQuestionIdsMap;
         }
 
-        public Map<String, String> getQuestionToPageMap() {
-            return questionToPageMap;
+        public Map<String, String> getQuestionIdToPageIdMap() {
+            return questionIdToPageIdMap;
         }
     }
 
