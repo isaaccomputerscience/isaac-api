@@ -3,7 +3,6 @@ package uk.ac.cam.cl.dtg.isaac.quiz;
 import uk.ac.cam.cl.dtg.isaac.dos.LightweightQuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
-import uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 import java.util.Date;
@@ -102,12 +101,12 @@ public interface IQuestionAttemptManager {
 
     /**
      * Count the users by role which have answered questions over the previous time interval.
+     *
      * @param timeInterval time interval over which to count
      * @return map of counts for each role
-     * @throws SegueDatabaseException
-     *             - if there is a problem with the database.
+     * @throws SegueDatabaseException - if there is a problem with the database.
      */
-    Map<Role, Long> getAnsweredQuestionRolesOverPrevious(TimeInterval timeInterval)
+    Map<String, Map<Role, Long>> getAnsweredQuestionRolesOverPrevious(String[] timeInterval)
             throws SegueDatabaseException;
 
     /**

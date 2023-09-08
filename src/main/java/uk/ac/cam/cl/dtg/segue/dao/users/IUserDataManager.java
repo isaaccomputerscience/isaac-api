@@ -20,7 +20,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserAuthenticationSettings;
 import uk.ac.cam.cl.dtg.segue.api.Constants.SchoolInfoStatus;
-import uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
@@ -307,12 +306,12 @@ public interface IUserDataManager {
 
     /**
      * Count the users by role seen over the previous time interval.
+     *
      * @param timeInterval time interval over which to count
      * @return map of counts for each role
-     * @throws SegueDatabaseException
-     *             - if there is a problem with the database.
+     * @throws SegueDatabaseException - if there is a problem with the database.
      */
-    Map<Role, Long> getRolesLastSeenOver(TimeInterval timeInterval) throws SegueDatabaseException;
+    Map<String, Map<Role, Long>> getRolesLastSeenOver(String[] timeInterval) throws SegueDatabaseException;
 
     /**
      * Count users' reported genders.

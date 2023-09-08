@@ -2076,10 +2076,9 @@ public class UserAccountManager implements IUserAccountManager {
      *
      * @param timeInterval time interval over which to count
      * @return map of counts for each role
-     * @throws SegueDatabaseException
-     *             - if there is a problem with the database.
+     * @throws SegueDatabaseException - if there is a problem with the database.
      */
-    public Map<Role, Long> getActiveRolesOverPrevious(final TimeInterval timeInterval) throws SegueDatabaseException {
+    public Map<String, Map<Role, Long>> getActiveRolesOverPrevious(final String[] timeInterval) throws SegueDatabaseException {
         return this.database.getRolesLastSeenOver(timeInterval);
     }
 

@@ -59,7 +59,6 @@ import uk.ac.cam.cl.dtg.isaac.quiz.SpecifiesWith;
 import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 import uk.ac.cam.cl.dtg.isaac.quiz.ValidatorUnavailableException;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
-import uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval;
 import uk.ac.cam.cl.dtg.segue.api.ErrorResponseWrapper;
 import uk.ac.cam.cl.dtg.segue.configuration.SegueGuiceConfigurationModule;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
@@ -453,12 +452,12 @@ public class QuestionManager {
 
     /**
      * Count the users by role which have answered questions over the previous time interval.
+     *
      * @param timeInterval time interval over which to count
      * @return map of counts for each role
-     * @throws SegueDatabaseException
-     *             - if there is a problem with the database.
+     * @throws SegueDatabaseException - if there is a problem with the database.
      */
-    public Map<Role, Long> getAnsweredQuestionRolesOverPrevious(final TimeInterval timeInterval)
+    public Map<String, Map<Role, Long>> getAnsweredQuestionRolesOverPrevious(final String[] timeInterval)
             throws SegueDatabaseException {
         return this.questionAttemptPersistenceManager.getAnsweredQuestionRolesOverPrevious(timeInterval);
     }

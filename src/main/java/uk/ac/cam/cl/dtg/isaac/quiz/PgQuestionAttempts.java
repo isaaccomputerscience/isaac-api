@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.LightweightQuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
+import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
@@ -45,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager.extractPageIdFromQuestionId;
 
 /**
@@ -395,24 +395,27 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
     }
 
     @Override
-    public Map<Role, Long> getAnsweredQuestionRolesOverPrevious(final TimeInterval timeInterval) throws SegueDatabaseException {
-        String query = "SELECT role, count(DISTINCT users.id) FROM question_attempts"
-                + " JOIN users ON user_id=users.id AND NOT deleted WHERE timestamp > now() - ? GROUP BY role";
-        try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query)
-        ) {
-            pst.setObject(FIELD_GET_ANSWERED_QUESTION_ROLES_INTERVAL_AGO, timeInterval.getPGInterval());
-
-            try (ResultSet results = pst.executeQuery()) {
-                Map<Role, Long> resultsToReturn = Maps.newHashMap();
-                while (results.next()) {
-                    resultsToReturn.put(Role.valueOf(results.getString("role")), results.getLong("count"));
+    public Map<String, Map<Role, Long>> getAnsweredQuestionRolesOverPrevious(final String[] timeRanges) throws SegueDatabaseException {
+        Map<String, Map<Role, Long>> allResults = new HashMap<>();
+        try (Connection conn = database.getDatabaseConnection()) {
+            for (String timeRange : timeRanges) {
+                String query = "SELECT role, count(DISTINCT users.id) FROM question_attempts"
+                        + " JOIN users ON user_id=users.id AND NOT deleted WHERE timestamp > now() - ? GROUP BY role";
+                try (PreparedStatement pst = conn.prepareStatement(query)) {
+                    pst.setObject(1, Constants.TimeInterval.getPGInterval(timeRange));  // Assuming TimeInterval.getPGInterval converts timeRange to a Postgres interval
+                    try (ResultSet results = pst.executeQuery()) {
+                        Map<Role, Long> resultForTimeRange = new HashMap<>();
+                        while (results.next()) {
+                            resultForTimeRange.put(Role.valueOf(results.getString("role")), results.getLong("count"));
+                        }
+                        allResults.put(timeRange, resultForTimeRange);
+                    }
                 }
-                return resultsToReturn;
             }
         } catch (SQLException e) {
             throw new SegueDatabaseException("Postgres exception", e);
         }
+        return allResults;
     }
 
     @Override

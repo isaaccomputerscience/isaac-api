@@ -493,23 +493,26 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     }
 
     @Override
-    public Map<Role, Long> getRolesLastSeenOver(final TimeInterval timeInterval) throws SegueDatabaseException {
-        String query = "SELECT role, count(1) FROM users WHERE NOT deleted AND last_seen >= now() - ? GROUP BY role";
-        try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement(query)
-        ) {
-            pst.setObject(FIELD_GET_PERIOD_ROLES_INTERVAL, timeInterval.getPGInterval());
-
-            try (ResultSet results = pst.executeQuery()) {
-                Map<Role, Long> resultsToReturn = Maps.newHashMap();
-                while (results.next()) {
-                    resultsToReturn.put(Role.valueOf(results.getString("role")), results.getLong("count"));
+    public Map<String, Map<Role, Long>> getRolesLastSeenOver(final String[] timeRanges) throws SegueDatabaseException {
+        Map<String, Map<Role, Long>> allResults = new HashMap<>();
+        try (Connection conn = database.getDatabaseConnection()) {
+            for (String timeRange : timeRanges) {
+                String query = "SELECT role, count(1) FROM users WHERE NOT deleted AND last_seen >= now() - ? GROUP BY role";
+                try (PreparedStatement pst = conn.prepareStatement(query)) {
+                    pst.setObject(1, TimeInterval.getPGInterval(timeRange));  // Assuming TimeInterval.getPGInterval converts timeRange to a Postgres interval
+                    try (ResultSet results = pst.executeQuery()) {
+                        Map<Role, Long> resultForTimeRange = new HashMap<>();
+                        while (results.next()) {
+                            resultForTimeRange.put(Role.valueOf(results.getString("role")), results.getLong("count"));
+                        }
+                        allResults.put(timeRange, resultForTimeRange);
+                    }
                 }
-                return resultsToReturn;
             }
         } catch (SQLException e) {
-            throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
+            throw new SegueDatabaseException("Postgres exception", e);
         }
+        return allResults;
     }
 
     @Override

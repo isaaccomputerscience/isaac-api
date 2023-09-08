@@ -64,11 +64,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
 
 import static com.google.common.collect.Maps.immutableEntry;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.*;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.*;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval.*;
 
 /**
  * StatisticsManager.
@@ -148,10 +148,17 @@ public class StatisticsManager implements IStatisticsManager {
      * @return an ImmutableMap{@literal <String, String>} (stat name, stat value)
      * @throws SegueDatabaseException - if there is a database error.
      */
-    public synchronized Map<String, Object> getGeneralStatistics()
-            throws SegueDatabaseException {
-        Map<String, Object> result = Maps.newHashMap();
+    public synchronized Map<String, Object> getGeneralStatistics() throws SegueDatabaseException {
+        Map<String, Object> result = new HashMap<>();
 
+        addBasicStats(result);
+        addRangedActiveUserStats(result);
+        addRangedAnsweredQuestionStats(result);
+
+        return result;
+    }
+
+    private void addBasicStats(final Map<String, Object> result) throws SegueDatabaseException {
         result.put("userGenders", userManager.getGenderCount());
         result.put("userRoles", userManager.getRoleCount());
         result.put("userSchoolInfo", userManager.getSchoolInfoStats());
@@ -160,23 +167,18 @@ public class StatisticsManager implements IStatisticsManager {
         result.put("viewQuestionEvents", logManager.getLogCountByType(IsaacServerLogType.VIEW_QUESTION.name()));
         result.put("answeredQuestionEvents", logManager.getLogCountByType(SegueServerLogType.ANSWER_QUESTION.name()));
         result.put("viewConceptEvents", logManager.getLogCountByType(IsaacServerLogType.VIEW_CONCEPT.name()));
-
-        Map<String, Map<Role, Long>> rangedActiveUserStats = Maps.newHashMap();
-        rangedActiveUserStats.put("sevenDays", userManager.getActiveRolesOverPrevious(SEVEN_DAYS));
-        rangedActiveUserStats.put("thirtyDays", userManager.getActiveRolesOverPrevious(THIRTY_DAYS));
-        rangedActiveUserStats.put("ninetyDays", userManager.getActiveRolesOverPrevious(NINETY_DAYS));
-        rangedActiveUserStats.put("sixMonths", userManager.getActiveRolesOverPrevious(SIX_MONTHS));
-        rangedActiveUserStats.put("twoYears", userManager.getActiveRolesOverPrevious(TWO_YEARS));
-        result.put("activeUsersOverPrevious", rangedActiveUserStats);
-
-        Map<String, Map<Role, Long>> rangedAnsweredQuestionStats = Maps.newHashMap();
-        rangedAnsweredQuestionStats.put("sevenDays", questionManager.getAnsweredQuestionRolesOverPrevious(SEVEN_DAYS));
-        rangedAnsweredQuestionStats.put("thirtyDays", questionManager.getAnsweredQuestionRolesOverPrevious(THIRTY_DAYS));
-        rangedAnsweredQuestionStats.put("ninetyDays", questionManager.getAnsweredQuestionRolesOverPrevious(NINETY_DAYS));
-        result.put("answeringUsersOverPrevious", rangedAnsweredQuestionStats);
-
-        return result;
     }
+
+    private void addRangedActiveUserStats(final Map<String, Object> result) throws SegueDatabaseException {
+        String[] timeRanges = {"sevenDays", "thirtyDays", "ninetyDays", "sixMonths", "twoYears"};
+        result.put("activeUsersOverPrevious", userManager.getActiveRolesOverPrevious(timeRanges));
+    }
+
+    private void addRangedAnsweredQuestionStats(final Map<String, Object> result) throws SegueDatabaseException {
+        String[] timeRanges = {"sevenDays", "thirtyDays", "ninetyDays"};
+        result.put("answeringUsersOverPrevious", questionManager.getAnsweredQuestionRolesOverPrevious(timeRanges));
+    }
+
 
     /**
      * LogCount.

@@ -375,21 +375,31 @@ public final class Constants {
     public static final Integer CONNECTION_POOL_MIN_MIN_IDLE = 10;
 
     public enum TimeInterval {
-        TWO_YEARS(2, 0, 0, 0, 0, 0),
-        SIX_MONTHS(0, 6, 0, 0, 0, 0),
-        NINETY_DAYS(0, 0, 90, 0, 0, 0),
-        THIRTY_DAYS(0, 0, 30, 0, 0, 0),
-        SEVEN_DAYS(0, 0, 7, 0, 0, 0);
+        twoYears(2, 0, 0, 0, 0, 0),
+        sixMonths(0, 6, 0, 0, 0, 0),
+        ninetyDays(0, 0, 90, 0, 0, 0),
+        thirtyDays(0, 0, 30, 0, 0, 0),
+        sevenDays(0, 0, 7, 0, 0, 0);
 
         private final PGInterval interval;
 
         TimeInterval(final int years, final int months, final int days, final int hours, final int minutes, final double seconds) {
             this.interval = new PGInterval(years, months, days, hours, minutes, seconds);
         }
-        public PGInterval getPGInterval() {
+
+        public PGInterval getInterval() {
             return this.interval;
         }
+
+        public static PGInterval getPGInterval(final String timeRange) {
+            try {
+                return TimeInterval.valueOf(timeRange).getInterval();
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Unknown time range: " + timeRange);
+            }
+        }
     }
+
 
     // Logging component
     public static final String LOGGING_ENABLED = "LOGGING_ENABLED";
