@@ -170,13 +170,23 @@ public class StatisticsManager implements IStatisticsManager {
     }
 
     private void addRangedActiveUserStats(final Map<String, Object> result) throws SegueDatabaseException {
-        String[] timeRanges = {"sevenDays", "thirtyDays", "ninetyDays", "sixMonths", "twoYears"};
-        result.put("activeUsersOverPrevious", userManager.getActiveRolesOverPrevious(timeRanges));
+        TimeInterval[] timeIntervals = {
+            TimeInterval.SEVEN_DAYS,
+            TimeInterval.THIRTY_DAYS,
+            TimeInterval.NINETY_DAYS,
+            TimeInterval.SIX_MONTHS,
+            TimeInterval.TWO_YEARS
+        };
+        result.put("activeUsersOverPrevious", userManager.getActiveRolesOverPrevious(timeIntervals));
     }
 
     private void addRangedAnsweredQuestionStats(final Map<String, Object> result) throws SegueDatabaseException {
-        String[] timeRanges = {"sevenDays", "thirtyDays", "ninetyDays"};
-        result.put("answeringUsersOverPrevious", questionManager.getAnsweredQuestionRolesOverPrevious(timeRanges));
+        TimeInterval[] timeIntervals = {
+            TimeInterval.SEVEN_DAYS,
+            TimeInterval.THIRTY_DAYS,
+            TimeInterval.NINETY_DAYS
+        };
+        result.put("answeringUsersOverPrevious", questionManager.getAnsweredQuestionRolesOverPrevious(timeIntervals));
     }
 
 

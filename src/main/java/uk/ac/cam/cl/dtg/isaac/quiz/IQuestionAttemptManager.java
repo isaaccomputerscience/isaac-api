@@ -3,6 +3,7 @@ package uk.ac.cam.cl.dtg.isaac.quiz;
 import uk.ac.cam.cl.dtg.isaac.dos.LightweightQuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
+import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 import java.util.Date;
@@ -100,13 +101,15 @@ public interface IQuestionAttemptManager {
             throws SegueDatabaseException;
 
     /**
-     * Count the users by role which have answered questions over the previous time interval.
+     * Retrieves a count of users by their roles who have answered questions within the specified time ranges.
      *
-     * @param timeInterval time interval over which to count
-     * @return map of counts for each role
-     * @throws SegueDatabaseException - if there is a problem with the database.
+     * @param timeIntervals An array of time ranges (in string format) for which to get the user counts.
+     *                   Each time range is used in the SQL query to filter the results.
+     * @return A map where the keys are the time ranges and the values are another map containing the count of users
+     *         for each role within that time range.
+     * @throws SegueDatabaseException If there is a database-related issue, such as a SQL exception.
      */
-    Map<String, Map<Role, Long>> getAnsweredQuestionRolesOverPrevious(String[] timeInterval)
+    Map<Constants.TimeInterval, Map<Role, Long>> getAnsweredQuestionRolesOverPrevious(Constants.TimeInterval[] timeIntervals)
             throws SegueDatabaseException;
 
     /**

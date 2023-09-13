@@ -492,28 +492,37 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         }
     }
 
-    @Override
-    public Map<String, Map<Role, Long>> getRolesLastSeenOver(final String[] timeRanges) throws SegueDatabaseException {
-        Map<String, Map<Role, Long>> allResults = new HashMap<>();
+    public Map<TimeInterval, Map<Role, Long>> getRolesLastSeenOver(final TimeInterval[] timeIntervals) throws SegueDatabaseException {
+        Map<TimeInterval, Map<Role, Long>> allResults = new HashMap<>();
         try (Connection conn = database.getDatabaseConnection()) {
-            for (String timeRange : timeRanges) {
-                String query = "SELECT role, count(1) FROM users WHERE NOT deleted AND last_seen >= now() - ? GROUP BY role";
-                try (PreparedStatement pst = conn.prepareStatement(query)) {
-                    pst.setObject(1, TimeInterval.getPGInterval(timeRange));  // Assuming TimeInterval.getPGInterval converts timeRange to a Postgres interval
-                    try (ResultSet results = pst.executeQuery()) {
-                        Map<Role, Long> resultForTimeRange = new HashMap<>();
-                        while (results.next()) {
-                            resultForTimeRange.put(Role.valueOf(results.getString("role")), results.getLong("count"));
-                        }
-                        allResults.put(timeRange, resultForTimeRange);
-                    }
-                }
+            for (TimeInterval timeInterval : timeIntervals) {
+                Map<Role, Long> resultForTimeInterval = executeRoleCountQueryForTimeInterval(conn, timeInterval);
+                allResults.put(timeInterval, resultForTimeInterval);
             }
         } catch (SQLException e) {
-            throw new SegueDatabaseException("Postgres exception", e);
+            throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
         }
         return allResults;
     }
+
+    private Map<Role, Long> executeRoleCountQueryForTimeInterval(final Connection conn, final TimeInterval timeInterval) throws SQLException {
+        String query = "SELECT role, count(1) FROM users WHERE NOT deleted AND last_seen >= now() - ? GROUP BY role";
+        try (PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setObject(1, timeInterval.getPGInterval());
+            try (ResultSet results = pst.executeQuery()) {
+                return parseRoleCountsFromResults(results);
+            }
+        }
+    }
+
+    private Map<Role, Long> parseRoleCountsFromResults(final ResultSet results) throws SQLException {
+        Map<Role, Long> resultForTimeInterval = new HashMap<>();
+        while (results.next()) {
+            resultForTimeInterval.put(Role.valueOf(results.getString("role")), results.getLong("count"));
+        }
+        return resultForTimeInterval;
+    }
+
 
     @Override
     public Map<SchoolInfoStatus, Long> getSchoolInfoStats() throws SegueDatabaseException {

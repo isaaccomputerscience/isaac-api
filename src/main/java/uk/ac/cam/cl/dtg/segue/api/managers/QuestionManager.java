@@ -457,7 +457,7 @@ public class QuestionManager {
      * @return map of counts for each role
      * @throws SegueDatabaseException - if there is a problem with the database.
      */
-    public Map<String, Map<Role, Long>> getAnsweredQuestionRolesOverPrevious(final String[] timeInterval)
+    public Map<Constants.TimeInterval, Map<Role, Long>> getAnsweredQuestionRolesOverPrevious(final Constants.TimeInterval[] timeInterval)
             throws SegueDatabaseException {
         return this.questionAttemptPersistenceManager.getAnsweredQuestionRolesOverPrevious(timeInterval);
     }
