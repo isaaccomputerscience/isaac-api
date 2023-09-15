@@ -23,8 +23,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.LOCAL_AUTH_GROUP_MANAGER_INIT
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TOO_MANY_REQUESTS;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -94,6 +93,7 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 import uk.ac.cam.cl.dtg.util.RequestIpExtractor;
 
@@ -258,7 +258,7 @@ public class UsersFacade extends AbstractSegueFacade {
         // This _might_ be suspicious, and this logging will help establish that.
         if (request.getSession() == null || request.getSession().getAttribute(ANONYMOUS_USER) == null) {
           log.error(String.format("Registration attempt from (%s) for (%s) without corresponding anonymous user!",
-              ipAddress, sanitiseUserLogValue(registeredUser.getEmail())));
+              ipAddress, LogUtils.sanitiseExternalLogValue(registeredUser.getEmail())));
         }
 
         return userManager.createUserObjectAndLogIn(request, response, registeredUser, newPassword, userPreferences,
@@ -409,10 +409,10 @@ public class UsersFacade extends AbstractSegueFacade {
               ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userObject.getEmail()));
 
       if (userExists) {
-        log.info("Password reset requested for email: (" + sanitiseLogValue(userObject.getEmail()) + ")");
+        log.info("Password reset requested for email: (" + LogUtils.sanitiseExternalLogValue(userObject.getEmail()) + ")");
       } else {
-        log.warn("Password reset requested for account that does not exist: (" + sanitiseLogValue(userObject.getEmail())
-            + ")");
+        log.warn("Password reset requested for account that does not exist: ("
+            + LogUtils.sanitiseExternalLogValue(userObject.getEmail()) + ")");
       }
       return Response.ok().build();
     } catch (SegueDatabaseException e) {
@@ -421,7 +421,7 @@ public class UsersFacade extends AbstractSegueFacade {
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     } catch (SegueResourceMisuseException e) {
-      log.error("Password reset request blocked for email: (" + sanitiseLogValue(userObject.getEmail()) + ")",
+      log.error("Password reset request blocked for email: (" + LogUtils.sanitiseExternalLogValue(userObject.getEmail()) + ")",
           e.toString());
       return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
     }

@@ -33,7 +33,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.MATCH_INSTRUCTION_IMPORTANT_N
 import static uk.ac.cam.cl.dtg.segue.api.Constants.MATCH_INSTRUCTION_OTHER_FUZZY;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.MATCH_INSTRUCTION_OTHER_NON_FUZZY;
 import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.CACHE_METRICS_COLLECTOR;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.google.api.client.util.Sets;
 import com.google.common.base.Functions;
@@ -86,6 +86,7 @@ import uk.ac.cam.cl.dtg.segue.search.ShouldMatchInstruction;
 import uk.ac.cam.cl.dtg.segue.search.SimpleExclusionInstruction;
 import uk.ac.cam.cl.dtg.segue.search.SimpleFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.TermsFilterInstruction;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -252,7 +253,7 @@ public class GitContentManager {
       if (null == searchResults || searchResults.isEmpty()) {
         if (!failQuietly) {
           log.error(String.format("Failed to locate content with ID '%s' in the cache for content SHA (%s)",
-                            sanitiseUserLogValue(id),
+                            LogUtils.sanitiseExternalLogValue(id),
               getCurrentContentSHA()));
         }
         return null;

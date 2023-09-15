@@ -33,7 +33,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.QUIZ_OLD_DUEDATE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.QUIZ_OLD_FEEDBACK_MODE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
 import static uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager.extractPageIdFromQuestionId;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableMap;
@@ -112,6 +112,7 @@ import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -836,7 +837,7 @@ public class QuizFacade extends AbstractIsaacFacade {
         question = (Question) contentBasedOnId;
       } else {
         SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND,
-            "No question object found for given id: " + sanitiseUserLogValue(questionId));
+            "No question object found for given id: " + LogUtils.sanitiseExternalLogValue(questionId));
         log.warn(error.getErrorMessage());
         return error.toResponse();
       }
@@ -1594,7 +1595,7 @@ public class QuizFacade extends AbstractIsaacFacade {
         || clientQuizAssignment.getCreationDate() != null
     ) {
       log.warn("Attempt to change fields for test assignment id {} that aren't feedbackMode or dueDate: {}",
-          quizAssignmentId, sanitiseUserLogValue(clientQuizAssignment.toString()));
+          quizAssignmentId, LogUtils.sanitiseExternalLogValue(clientQuizAssignment.toString()));
       return new SegueErrorResponse(Status.BAD_REQUEST, "Those fields are not editable.").toResponse();
     }
 

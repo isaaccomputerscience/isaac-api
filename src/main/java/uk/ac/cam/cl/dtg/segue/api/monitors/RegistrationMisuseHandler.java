@@ -16,7 +16,7 @@
 
 package uk.ac.cam.cl.dtg.segue.api.monitors;
 
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.google.inject.Inject;
 import org.slf4j.Logger;
@@ -25,6 +25,7 @@ import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.comm.EmailCommunicationMessage;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -84,7 +85,7 @@ public class RegistrationMisuseHandler implements IMisuseHandler {
     EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
         subject, message, message, EmailType.ADMIN);
     emailManager.addSystemEmailToQueue(e);
-    log.warn("Lots of registration requests from: " + sanitiseUserLogValue(message));
+    log.warn("Lots of registration requests from: " + LogUtils.sanitiseExternalLogValue(message));
 
   }
 
@@ -95,7 +96,7 @@ public class RegistrationMisuseHandler implements IMisuseHandler {
     EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
         subject, message, message, EmailType.ADMIN);
     emailManager.addSystemEmailToQueue(e);
-    log.warn("Too many registration requests from: " + sanitiseUserLogValue(message));
+    log.warn("Too many registration requests from: " + LogUtils.sanitiseExternalLogValue(message));
 
   }
 }

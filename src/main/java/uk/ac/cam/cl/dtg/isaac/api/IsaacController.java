@@ -32,7 +32,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.SEARCH_TEXT_CHAR_LIMIT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.USER_ID_FKEY_FIELDNAME;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
@@ -83,6 +83,7 @@ import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -333,7 +334,7 @@ public class IsaacController extends AbstractIsaacFacade {
       String refererHeader = httpServletRequest.getHeader("Referer");
       SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the file: " + path);
       log.warn(String.format("Unable to locate the file: (%s). Referer: (%s)",
-          sanitiseUserLogValue(path), refererHeader));
+          LogUtils.sanitiseExternalLogValue(path), refererHeader));
       return error.toResponse();
     }
 
@@ -404,7 +405,7 @@ public class IsaacController extends AbstractIsaacFacade {
       if (null == fileContent) {
         String refererHeader = httpServletRequest.getHeader("Referer");
         SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the file: " + path);
-        log.warn(String.format("Unable to locate the file: (%s). Referer: (%s)", sanitiseUserLogValue(path),
+        log.warn(String.format("Unable to locate the file: (%s). Referer: (%s)", LogUtils.sanitiseExternalLogValue(path),
             refererHeader));
         return error.toResponse(getCacheControl(NUMBER_SECONDS_IN_TEN_MINUTES, false), etag);
       }

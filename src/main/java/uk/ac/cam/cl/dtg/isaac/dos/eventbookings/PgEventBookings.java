@@ -16,7 +16,7 @@
 
 package uk.ac.cam.cl.dtg.isaac.dos.eventbookings;
 
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +43,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 
 /**
  * PgEventBookings.
@@ -430,7 +431,7 @@ public class PgEventBookings implements EventBookings {
         } else {
           String msg = String.format(
               "Found more than one event booking that matches event id (%s) and user id (%s).",
-              sanitiseUserLogValue(eventId), userId);
+              LogUtils.sanitiseExternalLogValue(eventId), userId);
           log.error(msg);
           throw new SegueDatabaseException(msg);
         }

@@ -25,8 +25,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.LOGOUT_DATABASE_ERROR_MESSAGE
 import static uk.ac.cam.cl.dtg.segue.api.Constants.LOGOUT_NO_ACTIVE_SESSION_MESSAGE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.REDIRECT_URL;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseLogValue;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.google.api.client.util.Maps;
 import com.google.common.base.Strings;
@@ -82,6 +81,7 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 import uk.ac.cam.cl.dtg.util.RequestIpExtractor;
 
@@ -211,7 +211,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
       return error.toResponse();
     } catch (AuthenticationProviderMappingException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-          "Error mapping to a known authenticator. The provider: " + sanitiseUserLogValue(signinProvider)
+          "Error mapping to a known authenticator. The provider: " + LogUtils.sanitiseExternalLogValue(signinProvider)
               + " is unknown");
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
@@ -251,7 +251,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
       return error.toResponse();
     } catch (AuthenticationProviderMappingException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-          "Error mapping to a known authenticator. The provider: " + sanitiseUserLogValue(authProviderAsString)
+          "Error mapping to a known authenticator. The provider: " + LogUtils.sanitiseExternalLogValue(authProviderAsString)
               + " is unknown");
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
@@ -379,7 +379,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
       notifySegueLoginRateLimiters(request, email);
     } catch (SegueResourceMisuseException e) {
       log.error(
-          String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", sanitiseLogValue(email)));
+          String.format("Segue Login Blocked for (%s). Rate limited - too many logins.", LogUtils.sanitiseExternalLogValue(email)));
       return SegueErrorResponse.getRateThrottledResponse(LOGIN_RATE_THROTTLE_MESSAGE);
     }
 
@@ -400,12 +400,12 @@ public class AuthenticationFacade extends AbstractSegueFacade {
       log.error(LOGIN_UNKNOWN_PROVIDER_MESSAGE, e);
       return new SegueErrorResponse(Status.BAD_REQUEST, LOGIN_UNKNOWN_PROVIDER_MESSAGE).toResponse();
     } catch (IncorrectCredentialsProvidedException | NoCredentialsAvailableException e) {
-      log.info(
-          String.format("Incorrect credentials received for (%s). Error: %s", sanitiseLogValue(email), e.getMessage()));
+      log.info(String.format("Incorrect credentials received for (%s). Error: %s", LogUtils.sanitiseExternalLogValue(email),
+          e.getMessage()));
       return new SegueErrorResponse(Status.UNAUTHORIZED, LOGIN_INCORRECT_CREDENTIALS_MESSAGE).toResponse();
     } catch (MFARequiredButNotConfiguredException e) {
       log.warn(String.format("Login blocked for ADMIN account (%s) which does not have 2FA configured.",
-          sanitiseLogValue(email)));
+          LogUtils.sanitiseExternalLogValue(email)));
       return new SegueErrorResponse(Status.UNAUTHORIZED, e.getMessage()).toResponse();
     } catch (SegueDatabaseException e) {
       log.error(LOGIN_DATABASE_ERROR_MESSAGE, e);

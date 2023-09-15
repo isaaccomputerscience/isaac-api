@@ -35,7 +35,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_EXPIRY_SECONDS_FALLBA
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_TOKEN;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_USER_ID;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.STATE_PARAM_NAME;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -100,6 +100,7 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 import uk.ac.cam.cl.dtg.util.RequestIpExtractor;
 
@@ -570,7 +571,7 @@ public class UserAuthenticationManager {
           + " has not been registered / implemented yet: " + provider);
     }
 
-    log.debug("Mapping provider: " + sanitiseUserLogValue(provider) + " to " + enumProvider);
+    log.debug("Mapping provider: " + LogUtils.sanitiseExternalLogValue(provider) + " to " + enumProvider);
 
     return this.registeredAuthProviders.get(enumProvider);
   }

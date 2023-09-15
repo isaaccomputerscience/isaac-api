@@ -21,7 +21,7 @@ import static uk.ac.cam.cl.dtg.isaac.api.Constants.ISAAC_SERVER_LOG_TYPES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_SERVER_LOG_TYPES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.google.inject.Inject;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,6 +47,7 @@ import uk.ac.cam.cl.dtg.segue.api.monitors.IMisuseMonitor;
 import uk.ac.cam.cl.dtg.segue.api.monitors.LogEventMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -92,7 +93,7 @@ public class LogEventFacade extends AbstractSegueFacade {
       description = "The 'type' field must be provided and must not be a reserved value.")
   public Response postLog(@Context final HttpServletRequest httpRequest, final Map<String, Object> eventJSON) {
     if (null == eventJSON || eventJSON.get(TYPE_FIELDNAME) == null) {
-      log.error("Error during log operation, no event type specified. Event: " + sanitiseUserLogValue(eventJSON));
+      log.error("Error during log operation, no event type specified. Event: " + sanitiseExternalLogValue(eventJSON));
       return new SegueErrorResponse(Status.BAD_REQUEST, "Unable to record log message as the log has no "
           + TYPE_FIELDNAME + " property.").toResponse();
     }
@@ -109,7 +110,7 @@ public class LogEventFacade extends AbstractSegueFacade {
     // After a few weeks we should fail on the case where it is an unknown type.
     if (!ISAAC_CLIENT_LOG_TYPES.contains(eventType)) {
       log.error(String.format("Warning: Log Event '%s' is not included in ISAAC_CLIENT_LOG_TYPES",
-          sanitiseUserLogValue(eventType)));
+          LogUtils.sanitiseExternalLogValue(eventType)));
     }
 
     try {

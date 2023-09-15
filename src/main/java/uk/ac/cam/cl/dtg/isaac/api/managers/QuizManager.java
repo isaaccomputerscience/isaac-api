@@ -21,7 +21,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.BooleanOperator;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HIDDEN_FROM_ROLES_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.VISIBLE_TO_STUDENTS_FIELDNAME;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.google.api.client.util.Lists;
 import com.google.inject.Inject;
@@ -52,6 +52,7 @@ import uk.ac.cam.cl.dtg.segue.api.services.ContentService;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -160,7 +161,7 @@ public class QuizManager {
                 + item.getQuizId() + ") that does not exist!");
           } else if (item instanceof QuizAssignmentDTO) {
             log.warn("Assignment (" + ((QuizAssignmentDTO) item).getId() + ") exists with test ID ("
-                + sanitiseUserLogValue(item.getQuizId()) + ") that does not exist!");
+                + LogUtils.sanitiseExternalLogValue(item.getQuizId()) + ") that does not exist!");
           }
         }
         quizCache.put(quizId, quiz);

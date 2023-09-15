@@ -36,7 +36,6 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.TAGS_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.USER_ID_FKEY_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.USER_ID_LIST_FKEY_FIELDNAME;
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseUserLogValue;
 
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
@@ -116,6 +115,7 @@ import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.DateRangeFilterInstruction;
+import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -618,7 +618,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (SegueDatabaseException e) {
       String errorMsg = String.format(
           "Database error occurred while trying retrieve bookings for group (%s) on event (%s).",
-          sanitiseUserLogValue(groupId), sanitiseUserLogValue(eventId));
+          LogUtils.sanitiseExternalLogValue(groupId), LogUtils.sanitiseExternalLogValue(eventId));
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (NoUserLoggedInException e) {
@@ -666,7 +666,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (SegueDatabaseException e) {
       String errorMsg = String.format(
           "Database error occurred while trying retrieve bookings for event (%s).",
-          sanitiseUserLogValue(eventId));
+          LogUtils.sanitiseExternalLogValue(eventId));
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     }
