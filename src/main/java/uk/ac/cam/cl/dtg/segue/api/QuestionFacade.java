@@ -144,9 +144,9 @@ public class QuestionFacade extends AbstractSegueFacade {
   @Operation(summary = "Provide users who try to cheat with a guide to the location of our help page.")
   public Response getQuestionAnswer(@Context final HttpServletRequest request,
                                     @PathParam("question_id") final String questionId) {
-      String errorMessage =
-          String.format("We do not provide answers to questions. See https://%s/solving_problems for more help!",
-              getProperties().getProperty(HOST_NAME));
+    String errorMessage =
+        String.format("We do not provide answers to questions. See https://%s/solving_problems for more help!",
+            getProperties().getProperty(HOST_NAME));
     try {
       AbstractSegueUserDTO currentUser = this.userManager.getCurrentUser(request);
       if (currentUser instanceof RegisteredUserDTO) {
