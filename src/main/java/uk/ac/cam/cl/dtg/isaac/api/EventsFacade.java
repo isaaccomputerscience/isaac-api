@@ -181,7 +181,7 @@ public class EventsFacade extends AbstractIsaacFacade {
    *
    * @param request              - this allows us to check to see if a user is currently loggedin.
    * @param tags                 - a comma separated list of tags to include in the search.
-   * @param startIndex           - the initial index for the first result.
+   * @param startIndex
    * @param limit                - the maximums number of results to return
    * @param sortOrder            - flag to indicate preferred sort order.
    * @param showActiveOnly       - true will impose filtering on the results. False will not. Defaults to false.
