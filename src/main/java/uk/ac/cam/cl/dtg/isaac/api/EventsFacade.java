@@ -217,9 +217,9 @@ public class EventsFacade extends AbstractIsaacFacade {
       newLimit = limit;
     }
 
-    if (startIndex != null) {
-      newStartIndex = startIndex;
-    }
+      if (startIndex != null) {
+        newStartIndex = startIndex;
+      }
 
     if (tags != null) {
       fieldsToMatch.put(TAGS_FIELDNAME, Arrays.asList(tags.split(",")));
