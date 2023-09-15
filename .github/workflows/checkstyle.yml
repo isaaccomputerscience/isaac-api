@@ -17,3 +17,4 @@ jobs:
           reporter: github-pr-review
           level: error
           checkstyle_config: src/main/resources/checkstyle-config.xml
+          fail_on_error: true
