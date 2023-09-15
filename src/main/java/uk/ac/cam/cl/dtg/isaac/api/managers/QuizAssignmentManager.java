@@ -39,7 +39,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.GroupManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -102,7 +101,7 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
       if (existingQuizAssignments.stream().anyMatch(qa -> qa.getDueDate() == null || qa.dueDateIsAfter(now))) {
         log.error(String.format("Duplicated Test Assignment Exception"
                 + " - cannot assign the same work %s to a group %s when due date not passed",
-                        LogUtils.sanitiseExternalLogValue(newAssignment.getQuizId()), newAssignment.getGroupId()));
+                        sanitiseExternalLogValue(newAssignment.getQuizId()), newAssignment.getGroupId()));
         throw new DuplicateAssignmentException("You cannot reassign a test until the due date has passed.");
       }
     }

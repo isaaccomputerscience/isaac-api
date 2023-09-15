@@ -23,7 +23,7 @@ public class LogUtilsTest {
   @ParameterizedTest
   @MethodSource("stringValuesToTest")
   public void testSanitiseUserLogValue(String initialValue, String expectedSanitisedValue) {
-    assertEquals(expectedSanitisedValue, LogUtils.sanitiseExternalLogValue(initialValue));
+    assertEquals(expectedSanitisedValue, sanitiseExternalLogValue(initialValue));
   }
 
   @SuppressWarnings("checkstyle:AvoidEscapedUnicodeCharacters")

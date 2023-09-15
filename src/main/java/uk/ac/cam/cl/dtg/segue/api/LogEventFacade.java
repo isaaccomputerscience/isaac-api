@@ -47,7 +47,6 @@ import uk.ac.cam.cl.dtg.segue.api.monitors.IMisuseMonitor;
 import uk.ac.cam.cl.dtg.segue.api.monitors.LogEventMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -110,7 +109,7 @@ public class LogEventFacade extends AbstractSegueFacade {
     // After a few weeks we should fail on the case where it is an unknown type.
     if (!ISAAC_CLIENT_LOG_TYPES.contains(eventType)) {
       log.error(String.format("Warning: Log Event '%s' is not included in ISAAC_CLIENT_LOG_TYPES",
-          LogUtils.sanitiseExternalLogValue(eventType)));
+          sanitiseExternalLogValue(eventType)));
     }
 
     try {

@@ -100,7 +100,6 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 import uk.ac.cam.cl.dtg.util.RequestIpExtractor;
 
@@ -571,7 +570,7 @@ public class UserAuthenticationManager {
           + " has not been registered / implemented yet: " + provider);
     }
 
-    log.debug("Mapping provider: " + LogUtils.sanitiseExternalLogValue(provider) + " to " + enumProvider);
+    log.debug("Mapping provider: " + sanitiseExternalLogValue(provider) + " to " + enumProvider);
 
     return this.registeredAuthProviders.get(enumProvider);
   }

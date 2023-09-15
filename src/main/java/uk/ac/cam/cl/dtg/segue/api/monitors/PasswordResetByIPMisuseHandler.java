@@ -91,7 +91,7 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
     EmailCommunicationMessage e = new EmailCommunicationMessage(
         properties.getProperty(Constants.SERVER_ADMIN_ADDRESS), subject, message, message, EmailType.ADMIN);
     emailManager.addSystemEmailToQueue(e);
-    log.warn("Soft threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Soft threshold limit: " + sanitiseExternalLogValue(message));
   }
 
   @Override
@@ -100,7 +100,7 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
     EmailCommunicationMessage e = new EmailCommunicationMessage(
         properties.getProperty(Constants.SERVER_ADMIN_ADDRESS), subject, message, message, EmailType.ADMIN);
     emailManager.addSystemEmailToQueue(e);
-    log.error("Hard threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.error("Hard threshold limit: " + sanitiseExternalLogValue(message));
   }
 
 }

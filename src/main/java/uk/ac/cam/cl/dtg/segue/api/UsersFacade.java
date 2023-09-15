@@ -258,7 +258,7 @@ public class UsersFacade extends AbstractSegueFacade {
         // This _might_ be suspicious, and this logging will help establish that.
         if (request.getSession() == null || request.getSession().getAttribute(ANONYMOUS_USER) == null) {
           log.error(String.format("Registration attempt from (%s) for (%s) without corresponding anonymous user!",
-              ipAddress, LogUtils.sanitiseExternalLogValue(registeredUser.getEmail())));
+              ipAddress, sanitiseExternalLogValue(registeredUser.getEmail())));
         }
 
         return userManager.createUserObjectAndLogIn(request, response, registeredUser, newPassword, userPreferences,
@@ -409,10 +409,10 @@ public class UsersFacade extends AbstractSegueFacade {
               ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userObject.getEmail()));
 
       if (userExists) {
-        log.info("Password reset requested for email: (" + LogUtils.sanitiseExternalLogValue(userObject.getEmail()) + ")");
+        log.info("Password reset requested for email: (" + sanitiseExternalLogValue(userObject.getEmail()) + ")");
       } else {
         log.warn("Password reset requested for account that does not exist: ("
-            + LogUtils.sanitiseExternalLogValue(userObject.getEmail()) + ")");
+            + sanitiseExternalLogValue(userObject.getEmail()) + ")");
       }
       return Response.ok().build();
     } catch (SegueDatabaseException e) {
@@ -421,7 +421,7 @@ public class UsersFacade extends AbstractSegueFacade {
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     } catch (SegueResourceMisuseException e) {
-      log.error("Password reset request blocked for email: (" + LogUtils.sanitiseExternalLogValue(userObject.getEmail()) + ")",
+      log.error("Password reset request blocked for email: (" + sanitiseExternalLogValue(userObject.getEmail()) + ")",
           e.toString());
       return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
     }

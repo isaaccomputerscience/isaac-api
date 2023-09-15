@@ -26,7 +26,6 @@ import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.comm.EmailCommunicationMessage;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -83,7 +82,7 @@ public class GroupManagerLookupMisuseHandler implements IMisuseHandler {
     EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
         subject, message, message, EmailType.ADMIN);
     emailManager.addSystemEmailToQueue(e);
-    log.warn("Soft threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Soft threshold limit: " + sanitiseExternalLogValue(message));
 
   }
 
@@ -94,7 +93,7 @@ public class GroupManagerLookupMisuseHandler implements IMisuseHandler {
     EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
         subject, message, message, EmailType.ADMIN);
     emailManager.addSystemEmailToQueue(e);
-    log.warn("Hard threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Hard threshold limit: " + sanitiseExternalLogValue(message));
 
   }
 }

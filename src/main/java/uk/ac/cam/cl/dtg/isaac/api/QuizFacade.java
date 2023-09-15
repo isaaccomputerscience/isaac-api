@@ -112,7 +112,6 @@ import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -837,7 +836,7 @@ public class QuizFacade extends AbstractIsaacFacade {
         question = (Question) contentBasedOnId;
       } else {
         SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND,
-            "No question object found for given id: " + LogUtils.sanitiseExternalLogValue(questionId));
+            "No question object found for given id: " + sanitiseExternalLogValue(questionId));
         log.warn(error.getErrorMessage());
         return error.toResponse();
       }
@@ -1595,7 +1594,7 @@ public class QuizFacade extends AbstractIsaacFacade {
         || clientQuizAssignment.getCreationDate() != null
     ) {
       log.warn("Attempt to change fields for test assignment id {} that aren't feedbackMode or dueDate: {}",
-          quizAssignmentId, LogUtils.sanitiseExternalLogValue(clientQuizAssignment.toString()));
+          quizAssignmentId, sanitiseExternalLogValue(clientQuizAssignment.toString()));
       return new SegueErrorResponse(Status.BAD_REQUEST, "Those fields are not editable.").toResponse();
     }
 

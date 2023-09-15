@@ -85,7 +85,7 @@ public class RegistrationMisuseHandler implements IMisuseHandler {
     EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
         subject, message, message, EmailType.ADMIN);
     emailManager.addSystemEmailToQueue(e);
-    log.warn("Lots of registration requests from: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Lots of registration requests from: " + sanitiseExternalLogValue(message));
 
   }
 
@@ -96,7 +96,7 @@ public class RegistrationMisuseHandler implements IMisuseHandler {
     EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
         subject, message, message, EmailType.ADMIN);
     emailManager.addSystemEmailToQueue(e);
-    log.warn("Too many registration requests from: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Too many registration requests from: " + sanitiseExternalLogValue(message));
 
   }
 }

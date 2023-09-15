@@ -52,7 +52,6 @@ import uk.ac.cam.cl.dtg.segue.api.services.ContentService;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -161,7 +160,7 @@ public class QuizManager {
                 + item.getQuizId() + ") that does not exist!");
           } else if (item instanceof QuizAssignmentDTO) {
             log.warn("Assignment (" + ((QuizAssignmentDTO) item).getId() + ") exists with test ID ("
-                + LogUtils.sanitiseExternalLogValue(item.getQuizId()) + ") that does not exist!");
+                + sanitiseExternalLogValue(item.getQuizId()) + ") that does not exist!");
           }
         }
         quizCache.put(quizId, quiz);

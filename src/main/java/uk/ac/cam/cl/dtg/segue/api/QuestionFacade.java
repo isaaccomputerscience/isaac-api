@@ -153,10 +153,10 @@ public class QuestionFacade extends AbstractSegueFacade {
       AbstractSegueUserDTO currentUser = this.userManager.getCurrentUser(request);
       if (currentUser instanceof RegisteredUserDTO) {
         log.warn(String.format("MethodNotAllowed: User (%s) attempted to GET the answer to the question '%s'!",
-            ((RegisteredUserDTO) currentUser).getId(), LogUtils.sanitiseExternalLogValue(questionId)));
+            ((RegisteredUserDTO) currentUser).getId(), sanitiseExternalLogValue(questionId)));
       } else {
         log.warn(String.format("MethodNotAllowed: Anonymous user attempted to GET the answer to the question '%s'!",
-            LogUtils.sanitiseExternalLogValue(questionId)));
+            sanitiseExternalLogValue(questionId)));
       }
       return new SegueErrorResponse(Status.METHOD_NOT_ALLOWED, errorMessage).toResponse();
     } catch (SegueDatabaseException e) {
@@ -270,7 +270,7 @@ public class QuestionFacade extends AbstractSegueFacade {
       question = (Question) contentBasedOnId;
     } else {
       SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND,
-          "No question object found for given id: " + LogUtils.sanitiseExternalLogValue(questionId));
+          "No question object found for given id: " + sanitiseExternalLogValue(questionId));
       log.warn(error.getErrorMessage());
       return error.toResponse();
     }

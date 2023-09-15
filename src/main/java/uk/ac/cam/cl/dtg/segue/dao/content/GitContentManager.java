@@ -86,7 +86,6 @@ import uk.ac.cam.cl.dtg.segue.search.ShouldMatchInstruction;
 import uk.ac.cam.cl.dtg.segue.search.SimpleExclusionInstruction;
 import uk.ac.cam.cl.dtg.segue.search.SimpleFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.TermsFilterInstruction;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -253,7 +252,7 @@ public class GitContentManager {
       if (null == searchResults || searchResults.isEmpty()) {
         if (!failQuietly) {
           log.error(String.format("Failed to locate content with ID '%s' in the cache for content SHA (%s)",
-                            LogUtils.sanitiseExternalLogValue(id),
+                            sanitiseExternalLogValue(id),
               getCurrentContentSHA()));
         }
         return null;

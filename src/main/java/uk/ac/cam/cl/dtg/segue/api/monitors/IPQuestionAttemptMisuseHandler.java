@@ -25,7 +25,6 @@ import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.comm.EmailCommunicationMessage;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 public class IPQuestionAttemptMisuseHandler implements IMisuseHandler {
@@ -66,7 +65,7 @@ public class IPQuestionAttemptMisuseHandler implements IMisuseHandler {
 
   @Override
   public void executeSoftThresholdAction(final String message) {
-    log.warn("Too many requests from an IP Address: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Too many requests from an IP Address: " + sanitiseExternalLogValue(message));
   }
 
   @Override
@@ -75,7 +74,7 @@ public class IPQuestionAttemptMisuseHandler implements IMisuseHandler {
     EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
         subject, message, message, EmailType.ADMIN);
     emailManager.addSystemEmailToQueue(e);
-    log.warn("Too many requests from an IP Address: " + LogUtils.sanitiseExternalLogValue(message)
+    log.warn("Too many requests from an IP Address: " + sanitiseExternalLogValue(message)
         + " This may be a scripted attack!");
   }
 }

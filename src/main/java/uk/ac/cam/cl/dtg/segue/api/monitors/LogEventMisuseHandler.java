@@ -73,7 +73,7 @@ public class LogEventMisuseHandler implements IMisuseHandler {
 
   @Override
   public void executeSoftThresholdAction(final String message) {
-    log.warn("Soft threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Soft threshold limit: " + sanitiseExternalLogValue(message));
   }
 
   @Override
@@ -84,6 +84,6 @@ public class LogEventMisuseHandler implements IMisuseHandler {
         subject, message, message, EmailType.ADMIN);
 
     emailManager.addSystemEmailToQueue(e);
-    log.warn("Hard threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Hard threshold limit: " + sanitiseExternalLogValue(message));
   }
 }

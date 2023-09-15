@@ -71,6 +71,6 @@ public class QuestionAttemptMisuseHandler implements IMisuseHandler {
 
   @Override
   public void executeHardThresholdAction(final String message) {
-    log.warn("Hard threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Hard threshold limit: " + sanitiseExternalLogValue(message));
   }
 }

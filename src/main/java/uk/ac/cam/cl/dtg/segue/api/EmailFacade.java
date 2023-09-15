@@ -73,7 +73,6 @@ import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -148,7 +147,7 @@ public class EmailFacade extends AbstractSegueFacade {
 
       if (null == c) {
         SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "No content found with id: "
-            + LogUtils.sanitiseExternalLogValue(id));
+            + sanitiseExternalLogValue(id));
         log.info(error.getErrorMessage());
         return error.toResponse();
       }
@@ -171,7 +170,7 @@ public class EmailFacade extends AbstractSegueFacade {
       emailTemplateDTO = (EmailTemplateDTO) c;
     } else {
       SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Content is of incorrect type: "
-          + LogUtils.sanitiseExternalLogValue(id));
+          + sanitiseExternalLogValue(id));
       log.debug(error.getErrorMessage());
       return error.toResponse();
     }
@@ -202,17 +201,17 @@ public class EmailFacade extends AbstractSegueFacade {
       return Response.ok(previewMap).build();
     } catch (ResourceNotFoundException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content could not be found: " + LogUtils.sanitiseExternalLogValue(id));
+          "Content could not be found: " + sanitiseExternalLogValue(id));
       log.warn(error.getErrorMessage());
       return error.toResponse();
     } catch (ContentManagerException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content is of incorrect type: " + LogUtils.sanitiseExternalLogValue(id));
+          "Content is of incorrect type: " + sanitiseExternalLogValue(id));
       log.debug(error.getErrorMessage());
       return error.toResponse();
     } catch (IllegalArgumentException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-          "Cannot generate email with non-authorised fields: " + LogUtils.sanitiseExternalLogValue(id));
+          "Cannot generate email with non-authorised fields: " + sanitiseExternalLogValue(id));
       log.info(error.getErrorMessage());
       return error.toResponse();
     }
@@ -297,7 +296,7 @@ public class EmailFacade extends AbstractSegueFacade {
       return error.toResponse();
     } catch (SegueResourceMisuseException e) {
       log.error(String.format("VerifyEmail request endpoint has reached hard limit (%s)",
-          LogUtils.sanitiseExternalLogValue(payload.get("email"))));
+          sanitiseExternalLogValue(payload.get("email"))));
       return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
     }
   }
@@ -329,7 +328,7 @@ public class EmailFacade extends AbstractSegueFacade {
     if (EnumUtils.isValidEnum(EmailType.class, emailTypeString)) {
       emailType = EmailType.valueOf(emailTypeString);
     } else {
-      log.warn("Unknown email type '" + LogUtils.sanitiseExternalLogValue(emailTypeString) + "' provided to admin endpoint!");
+      log.warn("Unknown email type '" + sanitiseExternalLogValue(emailTypeString) + "' provided to admin endpoint!");
       return new SegueErrorResponse(Status.BAD_REQUEST, "Unknown email type!").toResponse();
     }
 
@@ -410,7 +409,7 @@ public class EmailFacade extends AbstractSegueFacade {
     if (EnumUtils.isValidEnum(EmailType.class, emailTypeString)) {
       emailType = EmailType.valueOf(emailTypeString);
     } else {
-      log.warn("Unknown email type '" + LogUtils.sanitiseExternalLogValue(emailTypeString) + "' provided to admin endpoint!");
+      log.warn("Unknown email type '" + sanitiseExternalLogValue(emailTypeString) + "' provided to admin endpoint!");
       return new SegueErrorResponse(Status.BAD_REQUEST, "Unknown email type!").toResponse();
     }
 
@@ -514,7 +513,7 @@ public class EmailFacade extends AbstractSegueFacade {
     if (EnumUtils.isValidEnum(EmailType.class, emailTypeString)) {
       emailType = EmailType.valueOf(emailTypeString);
     } else {
-      log.warn("Unknown email type '" + LogUtils.sanitiseExternalLogValue(emailTypeString) + "' provided to admin endpoint!");
+      log.warn("Unknown email type '" + sanitiseExternalLogValue(emailTypeString) + "' provided to admin endpoint!");
       return new SegueErrorResponse(Status.BAD_REQUEST, "Unknown email type!").toResponse();
     }
 

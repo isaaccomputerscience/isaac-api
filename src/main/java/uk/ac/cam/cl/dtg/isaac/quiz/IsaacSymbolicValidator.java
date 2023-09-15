@@ -35,7 +35,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Choice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Formula;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 
 /**
  * Validator that provides functionality to validate symbolic questions.
@@ -202,9 +201,9 @@ public class IsaacSymbolicValidator implements IValidator {
 
         if (response.containsKey("error")) {
           if (response.containsKey("code")) {
-            log.error("Failed to check formula \"" + LogUtils.sanitiseExternalLogValue(submittedFormula.getPythonExpression())
-                + "\" against \"" + LogUtils.sanitiseExternalLogValue(formulaChoice.getPythonExpression())
-                + "\": " + LogUtils.sanitiseExternalLogValue(response.get("error").toString()));
+            log.error("Failed to check formula \"" + sanitiseExternalLogValue(submittedFormula.getPythonExpression())
+                + "\" against \"" + sanitiseExternalLogValue(formulaChoice.getPythonExpression())
+                + "\": " + sanitiseExternalLogValue(response.get("error").toString()));
           } else if (response.containsKey("syntax_error")) {
             // There's a syntax error in the "test" expression, no use checking it further:
             Content feedback = new Content("Your answer does not seem to be valid maths.<br>"
@@ -255,9 +254,9 @@ public class IsaacSymbolicValidator implements IValidator {
           feedback.setTags(new HashSet<>(Collections.singletonList("required_exact")));
 
           log.info("User submitted an answer that was close to an exact match, but not exact "
-              + "for question " + LogUtils.sanitiseExternalLogValue(question.getId())
-              + ". Choice: " + LogUtils.sanitiseExternalLogValue(closestMatch.getPythonExpression())
-              + ", submitted: " + LogUtils.sanitiseExternalLogValue(submittedFormula.getPythonExpression()));
+              + "for question " + sanitiseExternalLogValue(question.getId())
+              + ". Choice: " + sanitiseExternalLogValue(closestMatch.getPythonExpression())
+              + ", submitted: " + sanitiseExternalLogValue(submittedFormula.getPythonExpression()));
 
           validationResult = new ValidationResult(feedback, closestMatchType, false);
         } else {
@@ -271,9 +270,9 @@ public class IsaacSymbolicValidator implements IValidator {
 
       if (closestMatchType == MatchType.NUMERIC) {
         log.info("User submitted an answer that was only numerically equivalent to one of our choices "
-            + "for question " + LogUtils.sanitiseExternalLogValue(question.getId())
-            + ". Choice: " + LogUtils.sanitiseExternalLogValue(closestMatch.getPythonExpression())
-            + ", submitted: " + LogUtils.sanitiseExternalLogValue(submittedFormula.getPythonExpression()));
+            + "for question " + sanitiseExternalLogValue(question.getId())
+            + ". Choice: " + sanitiseExternalLogValue(closestMatch.getPythonExpression())
+            + ", submitted: " + sanitiseExternalLogValue(submittedFormula.getPythonExpression()));
       }
       return validationResult;
     }

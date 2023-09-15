@@ -65,11 +65,11 @@ public class SendEmailMisuseHandler implements IMisuseHandler {
 
   @Override
   public void executeSoftThresholdAction(final String message) {
-    log.warn("Soft threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Soft threshold limit: " + sanitiseExternalLogValue(message));
   }
 
   @Override
   public void executeHardThresholdAction(final String message) {
-    log.error("Hard threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.error("Hard threshold limit: " + sanitiseExternalLogValue(message));
   }
 }

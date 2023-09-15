@@ -22,7 +22,6 @@ import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 
 /**
  * Handler to deal with email verification requests.
@@ -66,12 +65,12 @@ public class EmailVerificationRequestMisuseHandler implements IMisuseHandler {
 
   @Override
   public void executeSoftThresholdAction(final String message) {
-    log.warn("Soft threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.warn("Soft threshold limit: " + sanitiseExternalLogValue(message));
   }
 
   @Override
   public void executeHardThresholdAction(final String message) {
-    log.error("Hard threshold limit: " + LogUtils.sanitiseExternalLogValue(message));
+    log.error("Hard threshold limit: " + sanitiseExternalLogValue(message));
   }
 
 }

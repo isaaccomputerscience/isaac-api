@@ -16,8 +16,8 @@
 
 package uk.ac.cam.cl.dtg.segue.database;
 
-import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
 
 import com.google.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
@@ -59,7 +59,6 @@ import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.etl.ETLInMemorySshConfigStore;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 
 
 /**
@@ -184,7 +183,7 @@ public class GitDb {
     }
 
     revWalk.dispose();
-    log.debug("Retrieved Commit Id: " + commitId.getName() + " Searching for: " + LogUtils.sanitiseExternalLogValue(fullFilePath)
+    log.debug("Retrieved Commit Id: " + commitId.getName() + " Searching for: " + sanitiseExternalLogValue(fullFilePath)
         + " found: " + path);
     ObjectLoader loader = repository.open(objectId);
 

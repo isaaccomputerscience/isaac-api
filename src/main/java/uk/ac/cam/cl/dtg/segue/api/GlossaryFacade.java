@@ -48,7 +48,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -146,7 +145,7 @@ public class GlossaryFacade extends AbstractSegueFacade {
       c = this.contentManager.getByIdPrefix(termId, 0, DEFAULT_MAX_WINDOW_SIZE);
       if (null == c) {
         SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "No glossary term found with id: "
-            + LogUtils.sanitiseExternalLogValue(termId));
+            + sanitiseExternalLogValue(termId));
         log.debug(error.getErrorMessage());
         return error.toResponse();
       }

@@ -40,7 +40,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.GroupManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -135,7 +134,7 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
     if (assignmentPersistenceManager.getAssignmentsByGameboardAndGroup(newAssignment.getGameboardId(),
         newAssignment.getGroupId()).size() != 0) {
       log.error(String.format("Duplicated Assignment Exception - cannot assign the same work %s to a group %s",
-          LogUtils.sanitiseExternalLogValue(newAssignment.getGameboardId()), newAssignment.getGroupId()));
+          sanitiseExternalLogValue(newAssignment.getGameboardId()), newAssignment.getGroupId()));
       throw new DuplicateAssignmentException("You cannot assign the same work to a group more than once.");
     }
 

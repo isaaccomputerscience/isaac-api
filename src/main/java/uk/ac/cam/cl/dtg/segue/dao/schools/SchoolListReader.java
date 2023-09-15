@@ -150,7 +150,7 @@ public class SchoolListReader {
 
     if (matchingSchoolList.size() > 1) {
       log.error("Error occurred while trying to look a school up by id... Found more than one match for "
-          + LogUtils.sanitiseExternalLogValue(schoolURN) + " results: " + matchingSchoolList);
+          + sanitiseExternalLogValue(schoolURN) + " results: " + matchingSchoolList);
     }
 
     return mapper.readValue(matchingSchoolList.get(0), School.class);
