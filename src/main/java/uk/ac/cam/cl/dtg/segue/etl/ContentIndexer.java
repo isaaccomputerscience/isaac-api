@@ -49,9 +49,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.IsaacEventPage;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacNumericQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuiz;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuizSection;
-import uk.ac.cam.cl.dtg.isaac.dos.IsaacSymbolicChemistryQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacSymbolicQuestion;
-import uk.ac.cam.cl.dtg.isaac.dos.content.ChemicalFormula;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Choice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ChoiceQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.content.CodeSnippet;
@@ -932,12 +930,10 @@ public class ContentIndexer {
     // Find quantities with values that cannot be parsed as numbers.
     registerContentProblemsNumericQuestionInvalidChoicesOrUnits(content, indexProblemCache);
 
-    // Find Symbolic Questions with broken properties. Need to exclude Chemistry questions!
+    // Find Symbolic Questions with broken properties.
     if (content instanceof IsaacSymbolicQuestion) {
       if (content.getClass().equals(IsaacSymbolicQuestion.class)) {
         registerContentProblemsSymbolicQuestionInvalidProperties(content, indexProblemCache);
-      } else if (content.getClass().equals(IsaacSymbolicChemistryQuestion.class)) {
-        registerContentProblemsSymbolicChemistryQuestionInvalidProperties(content, indexProblemCache);
       }
     }
 
@@ -967,36 +963,6 @@ public class ContentIndexer {
           numberItems = items;
         }
       }
-    }
-  }
-
-  private void registerContentProblemsSymbolicChemistryQuestionInvalidProperties(
-      final Content content, final Map<Content, List<String>> indexProblemCache) {
-    IsaacSymbolicChemistryQuestion question = (IsaacSymbolicChemistryQuestion) content;
-    for (Choice choice : question.getChoices()) {
-      if (choice instanceof ChemicalFormula) {
-        ChemicalFormula formula = (ChemicalFormula) choice;
-        registerContentProblemQuestionChemicalFormulaIsEmpty(content, indexProblemCache, question, formula);
-      } else {
-        registerContentProblemSymbolicChemistryQuestionChoiceIsNotChemicalFormula(content, indexProblemCache, question,
-            choice);
-      }
-    }
-  }
-
-  private void registerContentProblemSymbolicChemistryQuestionChoiceIsNotChemicalFormula(
-      final Content content, final Map<Content, List<String>> indexProblemCache,
-      final IsaacSymbolicChemistryQuestion question, final Choice choice) {
-    this.registerContentProblem(content, "Chemistry Question: " + question.getId() + " has non-ChemicalFormula Choice ("
-        + choice.getValue() + "). It must be deleted and a new ChemicalFormula Choice created.", indexProblemCache);
-  }
-
-  private void registerContentProblemQuestionChemicalFormulaIsEmpty(
-      final Content content, final Map<Content, List<String>> indexProblemCache,
-      final IsaacSymbolicChemistryQuestion question, final ChemicalFormula formula) {
-    if (formula.getMhchemExpression() == null || formula.getMhchemExpression().isEmpty()) {
-      this.registerContentProblem(content, "Chemistry Question: " + question.getId() + " has ChemicalFormula"
-          + " with empty mhchemExpression!", indexProblemCache);
     }
   }
 

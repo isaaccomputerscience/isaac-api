@@ -32,8 +32,6 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.SEARCH_RESULTS_HARD_LIMIT_FAL
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueUserPreferences;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.USER_ID_FKEY_FIELDNAME;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.WILDCARD_SEARCH_MINIMUM_LENGTH;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.WILDCARD_SEARCH_UNAUTHORISED_TOO_SHORT_MESSAGE;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -758,15 +756,6 @@ public class AdminFacade extends AbstractSegueFacade {
 
       misuseMonitor.notifyEvent(currentUser.getId().toString(), UserSearchMisuseHandler.class.getSimpleName());
 
-      if (!isUserAnAdmin(userManager, currentUser)
-          && (null == familyName || familyName.isEmpty())
-          && (null == schoolOther || schoolOther.isEmpty())
-          && (null == email || email.isEmpty())
-          && (null == schoolURN || schoolURN.isEmpty())) {
-        return new SegueErrorResponse(Status.FORBIDDEN, "You do not have permission to do wildcard searches.")
-            .toResponse();
-
-      }
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueResourceMisuseException e) {
@@ -781,22 +770,10 @@ public class AdminFacade extends AbstractSegueFacade {
       }
 
       if (null != email && !email.isEmpty()) {
-        if (currentUser.getRole().equals(Role.EVENT_MANAGER)
-            && email.replaceAll("[^A-z0-9]", "").length() < WILDCARD_SEARCH_MINIMUM_LENGTH) {
-          return new SegueErrorResponse(Status.FORBIDDEN, WILDCARD_SEARCH_UNAUTHORISED_TOO_SHORT_MESSAGE)
-              .toResponse();
-        }
         userPrototype.setEmail(email);
       }
 
       if (null != familyName && !familyName.isEmpty()) {
-        // Event managers aren't allowed to do short wildcard searches, but need surnames less than 4 chars too.
-        if (currentUser.getRole().equals(Role.EVENT_MANAGER)
-            && familyName.replaceAll("[^A-z]", "").length() < WILDCARD_SEARCH_MINIMUM_LENGTH
-            && familyName.length() != familyName.replaceAll("[^A-z]", "").length()) {
-          return new SegueErrorResponse(Status.FORBIDDEN, WILDCARD_SEARCH_UNAUTHORISED_TOO_SHORT_MESSAGE)
-              .toResponse();
-        }
         userPrototype.setFamilyName(familyName);
       }
 
@@ -1073,9 +1050,8 @@ public class AdminFacade extends AbstractSegueFacade {
       String agentIdentifier = details.get("agentIdentifier");
       String eventLabel = details.get("eventLabel");
       misuseMonitor.resetMisuseCount(agentIdentifier, eventLabel);
-      log.info(sanitiseInternalLogValue(
-          String.format("Admin user (%s) reset misuse monitor '%s' for agent id (%s)!", user.getEmail(),
-              eventLabel, agentIdentifier)));
+      log.info(sanitiseInternalLogValue(String.format("Admin user (%s) reset misuse monitor '%s' for agent id (%s)!",
+          user.getEmail(), eventLabel, agentIdentifier)));
       return Response.ok().build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();

@@ -491,10 +491,6 @@ public final class Constants {
 
   public static final Integer NO_SEARCH_LIMIT = -1;
 
-  public static final Integer WILDCARD_SEARCH_MINIMUM_LENGTH = 4;
-  public static final String WILDCARD_SEARCH_UNAUTHORISED_TOO_SHORT_MESSAGE =
-      "You do not have permission to do wildcard searches with less than 4 characters.";
-
   public static final Integer SEARCH_RESULTS_HARD_LIMIT_FALLBACK = 2000;
 
   public static final Integer MAXIMUM_CONTENT_ID_LENGTH = 512;
@@ -640,9 +636,6 @@ public final class Constants {
 
   public static final String EQUALITY_CHECKER_HOST = "EQUALITY_CHECKER_HOST";
   public static final String EQUALITY_CHECKER_PORT = "EQUALITY_CHECKER_PORT";
-
-  public static final String CHEMISTRY_CHECKER_HOST = "CHEMISTRY_CHECKER_HOST";
-  public static final String CHEMISTRY_CHECKER_PORT = "CHEMISTRY_CHECKER_PORT";
 
   public static final String QUESTION_MISUSE_THRESHOLD_OVERRIDE = "QUESTION_MISUSE_THRESHOLD_OVERRIDE";
 
