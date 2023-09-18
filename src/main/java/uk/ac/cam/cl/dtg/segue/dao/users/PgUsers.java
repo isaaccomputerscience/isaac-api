@@ -504,6 +504,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     }
   }
 
+  @Override
   public Map<TimeInterval, Map<Role, Long>> getRolesLastSeenOver(final TimeInterval[] timeIntervals)
       throws SegueDatabaseException {
     Map<TimeInterval, Map<Role, Long>> allResults = new HashMap<>();

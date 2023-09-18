@@ -403,11 +403,11 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
   @Override
   public Map<TimeInterval, Map<Role, Long>> getAnsweredQuestionRolesOverPrevious(final TimeInterval[] timeRanges)
       throws SegueDatabaseException {
+    String query = "SELECT role, count(DISTINCT users.id) FROM question_attempts"
+        + " JOIN users ON user_id=users.id AND NOT deleted WHERE timestamp > now() - ? GROUP BY role";
     Map<TimeInterval, Map<Role, Long>> allResults = new HashMap<>();
     try (Connection conn = database.getDatabaseConnection()) {
       for (TimeInterval timeRange : timeRanges) {
-        String query = "SELECT role, count(DISTINCT users.id) FROM question_attempts"
-            + " JOIN users ON user_id=users.id AND NOT deleted WHERE timestamp > now() - ? GROUP BY role";
         try (PreparedStatement pst = conn.prepareStatement(query)) {
           pst.setObject(FIELD_GET_ANSWERED_QUESTION_ROLES_INTERVAL_AGO, timeRange.getPGInterval());
           try (ResultSet results = pst.executeQuery()) {

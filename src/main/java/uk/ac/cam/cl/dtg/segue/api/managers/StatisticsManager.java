@@ -148,6 +148,7 @@ public class StatisticsManager implements IStatisticsManager {
    * @return an ImmutableMap{@literal <String, String>} (stat name, stat value)
    * @throws SegueDatabaseException - if there is a database error.
    */
+  @Override
   public synchronized Map<String, Object> getGeneralStatistics() throws SegueDatabaseException {
     Map<String, Object> result = new HashMap<>();
 
