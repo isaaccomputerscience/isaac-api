@@ -190,14 +190,14 @@ public class UserManagerTest {
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, 500);
     String validDateString = sdf.format(calendar.getTime());
+    Integer sessionToken = 7;
 
     RegisteredUser returnUser = new RegisteredUser(validUserId, "TestFirstName", "TestLastName", "", Role.STUDENT,
         new Date(), Gender.MALE, new Date(), null, null, null, null, false);
     returnUser.setId(validUserId);
-    returnUser.setSessionToken(0);
 
     Map<String, String> sessionInformation =
-        getSessionInformationAsAMap(authManager, validUserId.toString(), validDateString, returnUser.getSessionToken());
+        getSessionInformationAsAMap(authManager, validUserId.toString(), validDateString, sessionToken);
     Cookie[] cookieWithSessionInfo = getCookieArray(sessionInformation);
 
     dummyDatabase.updateUserLastSeen(returnUser);
@@ -207,6 +207,7 @@ public class UserManagerTest {
     replay(request);
 
     expect(dummyDatabase.getById(validUserId)).andReturn(returnUser);
+    expect(dummyDatabase.getSessionToken(validUserId)).andReturn(sessionToken);
     expect(dummyDatabase.getAuthenticationProvidersByUsers(Collections.singletonList(returnUser)))
         .andReturn(ImmutableMap.of(returnUser, Lists.newArrayList(AuthenticationProvider.GOOGLE))).once();
     expect(dummyDatabase.getSegueAccountExistenceByUsers(Collections.singletonList(returnUser)))
@@ -327,6 +328,7 @@ public class UserManagerTest {
 
     Long someSegueUserId = 533L;
     String someSegueAnonymousUserId = "9284723987anonymous83924923";
+    Integer newSessionToken = 1234;
 
     AnonymousUser au = new AnonymousUser();
     au.setSessionId(someSegueAnonymousUserId);
@@ -382,7 +384,6 @@ public class UserManagerTest {
 
     RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
         new Date(), Gender.MALE, new Date(), null, null, null, null, false);
-    mappedUser.setSessionToken(0);
 
     expect(dummyDatabase.getAuthenticationProvidersByUsers(Collections.singletonList(mappedUser)))
         .andReturn(new HashMap<RegisteredUser, List<AuthenticationProvider>>() {
@@ -411,10 +412,10 @@ public class UserManagerTest {
 
     expect(dummyDatabase.getById(someSegueUserId)).andReturn(mappedUser);
 
-    expect(dummyDatabase.regenerateSessionToken(mappedUser)).andReturn(1234);
+    expect(dummyDatabase.regenerateSessionToken(mappedUser)).andReturn(newSessionToken);
 
     Map<String, String> sessionInformation = getSessionInformationAsAMap(authManager, someSegueUserId.toString(),
-        validDateString, mappedUser.getSessionToken());
+        validDateString, newSessionToken);
     Cookie[] cookieWithSessionInfo = getCookieArray(sessionInformation);
 
     // Expect a session to be created
@@ -542,24 +543,21 @@ public class UserManagerTest {
     HttpSession dummySession = createMock(HttpSession.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
-    RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
-        new Date(), Gender.MALE, new Date(), null, null, null, null, false);
-    mappedUser.setSessionToken(0);
-
     String validUserId = "123";
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, 500);
     String validDateString = sdf.format(calendar.getTime());
+    Integer sessionToken = 7;
 
     Map<String, String> sessionInformation =
-        getSessionInformationAsAMap(authManager, validUserId, validDateString, mappedUser.getSessionToken());
+        getSessionInformationAsAMap(authManager, validUserId, validDateString, sessionToken);
 
     replay(dummySession);
     replay(request);
     replay(dummyQuestionDatabase);
 
     // Act
-    boolean valid = Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", sessionInformation, mappedUser);
+    boolean valid = Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", sessionInformation, sessionToken);
 
     // Assert
     verify(dummyQuestionDatabase, dummySession, request);
@@ -583,17 +581,14 @@ public class UserManagerTest {
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, 500);
     String validDateString = sdf.format(calendar.getTime());
-
-    RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
-        new Date(), Gender.MALE, new Date(), null, null, null, null, false);
-    mappedUser.setSessionToken(0);
+    Integer sessionToken = 7;
 
     Map<String, String> validSessionInformation = getSessionInformationAsAMap(authManager, validUserId,
-        validDateString, mappedUser.getSessionToken());
+        validDateString, sessionToken);
 
     Map<String, String> tamperedSessionInformation = ImmutableMap.of(
         Constants.SESSION_USER_ID, validUserId,
-        Constants.SESSION_TOKEN, mappedUser.getSessionToken().toString(),
+        Constants.SESSION_TOKEN, sessionToken.toString(),
         Constants.DATE_EXPIRES, validDateString + "1",
         Constants.HMAC, validSessionInformation.get(Constants.HMAC)
     );
@@ -604,7 +599,7 @@ public class UserManagerTest {
 
     // Act
     boolean valid =
-        Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", tamperedSessionInformation, mappedUser);
+        Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", tamperedSessionInformation, sessionToken);
 
     // Assert
     verify(dummyQuestionDatabase, dummySession, request);
@@ -625,16 +620,13 @@ public class UserManagerTest {
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
     String validUserId = "123";
-    RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
-        new Date(), Gender.MALE, new Date(), null, null, null, null, false);
-    mappedUser.setSessionToken(0);
-
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, -60); // Expired 60 seconds ago
     String expiredDateString = sdf.format(calendar.getTime());
+    Integer sessionToken = 7;
 
     Map<String, String> validSessionInformation = getSessionInformationAsAMap(authManager, validUserId,
-        expiredDateString, mappedUser.getSessionToken());
+        expiredDateString, sessionToken);
 
     replay(dummySession);
     replay(request);
@@ -642,7 +634,7 @@ public class UserManagerTest {
 
     // Act
     boolean valid =
-        Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", validSessionInformation, mappedUser);
+        Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", validSessionInformation, sessionToken);
 
     // Assert
     verify(dummyQuestionDatabase, dummySession, request);
@@ -663,11 +655,8 @@ public class UserManagerTest {
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
     String validUserId = "123";
-    RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
-        new Date(), Gender.MALE, new Date(), null, null, null, null, false);
-    mappedUser.setSessionToken(1);
+    Integer correctSessionToken = 7;
     Integer incorrectSessionToken = 0;
-
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, 500);
     String validDateString = sdf.format(calendar.getTime());
@@ -682,7 +671,7 @@ public class UserManagerTest {
     // Act
     boolean valid =
         Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", sessionInformationWithTokenMismatch,
-            mappedUser);
+            correctSessionToken);
 
     // Assert
     verify(dummyQuestionDatabase, dummySession, request);
