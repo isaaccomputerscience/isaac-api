@@ -47,6 +47,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.Nullable;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Gender;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
@@ -573,6 +574,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     if (null == u) {
       // create a new one
       u = this.createUser(user);
+      this.createSessionToken(u);
     } else {
       // update
       u = this.updateUser(user);
@@ -744,6 +746,49 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     } catch (SQLException e) {
       throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
     }
+  }
+
+  @Override
+  public Integer getSessionToken(final Long userId) throws SegueDatabaseException {
+    String query = "SELECT session_token FROM user_session_token WHERE user_id = ?;";
+    try (Connection conn = database.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(query)
+    ) {
+      pst.setLong(FIELD_GET_SESSION_TOKEN_USER_ID, userId);
+      try (ResultSet results = pst.executeQuery()) {
+        return findOneToken(results);
+      }
+    } catch (SQLException e) {
+      throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
+    }
+  }
+
+  /**
+   * findOne helper method to ensure that only one result matches the search criteria.
+   *
+   * @param results ResultSet from a database search
+   * @return a single Integer session token or null of no matches found.
+   * @throws SQLException           if there is an internal database error
+   * @throws SegueDatabaseException if more than one result is returned
+   */
+  @Nullable
+  private static Integer findOneToken(ResultSet results) throws SQLException, SegueDatabaseException {
+    // are there any results
+    if (!results.isBeforeFirst()) {
+      return null;
+    }
+
+    List<Integer> listOfResults = Lists.newArrayList();
+    while (results.next()) {
+      listOfResults.add(results.getInt("session_token"));
+    }
+
+    if (listOfResults.size() > 1) {
+      throw new SegueDatabaseException("Ambiguous result, expected single result and found more than one"
+          + listOfResults);
+    }
+
+    return listOfResults.get(0);
   }
 
   /**
@@ -961,7 +1006,6 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     u.setEmailVerificationStatus(results.getString("email_verification_status") != null ? EmailVerificationStatus
         .valueOf(results.getString("email_verification_status")) : null);
     u.setTeacherPending(results.getBoolean("teacher_pending"));
-    u.setSessionToken(results.getInt("session_token"));
 
     return u;
   }
@@ -1096,6 +1140,9 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
   // updateSessionToken
   private static final int FIELD_UPDATE_SESSION_TOKEN_NEW_VALUE = 1;
   private static final int FIELD_UPDATE_SESSION_TOKEN_USER_ID = 2;
+
+  // getSessionToken
+  private static final int FIELD_GET_SESSION_TOKEN_USER_ID = 1;
 
   // createUser || updateUser
   private static final int FIELD_CREATE_UPDATE_USER_FAMILY_NAME = 1;
