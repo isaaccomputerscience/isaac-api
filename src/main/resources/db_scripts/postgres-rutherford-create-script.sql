@@ -660,6 +660,7 @@ CREATE TABLE public.user_session_token (
     session_token integer DEFAULT 0 NOT NULL
 );
 
+
 ALTER TABLE public.user_session_token OWNER TO rutherford;
 
 --
