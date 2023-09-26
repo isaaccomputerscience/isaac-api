@@ -10,4 +10,4 @@ For the Computer Science version, you'll need to update:
  - Update the ElasticSearch options to be `SEARCH_CLUSTER_NAME=cs-isaac`, `SEARCH_CLUSTER_PORT=9301`, `SEARCH_CLUSTER_INFO_PORT=9201`.
  - Update `GOOGLE_CALLBACK_URI` to use `localhost:8003`.
 
-In Jetty, add a new configuration like `Jetty (CS)` with the command-line `jetty:run -Dconfig.location=/path/to/segue-config.properties`.
+In Jetty, add a new configuration like `Jetty` with the command-line `jetty:run -Dconfig.location=/path/to/segue-config.properties`.
