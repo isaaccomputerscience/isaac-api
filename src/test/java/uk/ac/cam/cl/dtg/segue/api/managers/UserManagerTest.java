@@ -190,7 +190,7 @@ public class UserManagerTest {
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, 500);
     String validDateString = sdf.format(calendar.getTime());
-    Integer sessionToken = 7;
+    int sessionToken = 7;
 
     RegisteredUser returnUser = new RegisteredUser(validUserId, "TestFirstName", "TestLastName", "", Role.STUDENT,
         new Date(), Gender.MALE, new Date(), null, null, null, null, false);
@@ -581,14 +581,14 @@ public class UserManagerTest {
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, 500);
     String validDateString = sdf.format(calendar.getTime());
-    Integer sessionToken = 7;
+    int sessionToken = 7;
 
     Map<String, String> validSessionInformation = getSessionInformationAsAMap(authManager, validUserId,
         validDateString, sessionToken);
 
     Map<String, String> tamperedSessionInformation = ImmutableMap.of(
         Constants.SESSION_USER_ID, validUserId,
-        Constants.SESSION_TOKEN, sessionToken.toString(),
+        Constants.SESSION_TOKEN, String.valueOf(sessionToken),
         Constants.DATE_EXPIRES, validDateString + "1",
         Constants.HMAC, validSessionInformation.get(Constants.HMAC)
     );
@@ -638,7 +638,7 @@ public class UserManagerTest {
 
     // Assert
     verify(dummyQuestionDatabase, dummySession, request);
-    assertTrue(!valid);
+    assertFalse(valid);
   }
 
   /**
@@ -655,8 +655,8 @@ public class UserManagerTest {
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
     String validUserId = "123";
-    Integer correctSessionToken = 7;
-    Integer incorrectSessionToken = 0;
+    int correctSessionToken = 7;
+    int incorrectSessionToken = 0;
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, 500);
     String validDateString = sdf.format(calendar.getTime());
@@ -675,7 +675,7 @@ public class UserManagerTest {
 
     // Assert
     verify(dummyQuestionDatabase, dummySession, request);
-    assertTrue(!valid);
+    assertFalse(valid);
   }
 
   /**
@@ -684,11 +684,10 @@ public class UserManagerTest {
   @Test
   public final void isUserNameValid_longNameProvided_returnsFalse() {
     // Arrange
-    UserAccountManager userManager = buildTestUserManager();
     String name = StringUtils.repeat("a", 256);
 
     // Act
-    boolean valid = userManager.isUserNameValid(name);
+    boolean valid = UserAccountManager.isUserNameValid(name);
 
     // Assert
     assertFalse(valid);
@@ -700,11 +699,10 @@ public class UserManagerTest {
   @Test
   public final void isUserNameValid_acceptableNameProvided_returnsTrue() {
     // Arrange
-    UserAccountManager userManager = buildTestUserManager();
     String name = StringUtils.repeat("a", 255);
 
     // Act
-    boolean valid = userManager.isUserNameValid(name);
+    boolean valid = UserAccountManager.isUserNameValid(name);
 
     // Assert
     assertTrue(valid);
@@ -716,11 +714,10 @@ public class UserManagerTest {
   @Test
   public final void isUserNameValid_nameWithIllegalCharactersProvided_returnsFalse() {
     // Arrange
-    UserAccountManager userManager = buildTestUserManager();
     String name = "Matthew*";
 
     // Act
-    boolean valid = userManager.isUserNameValid(name);
+    boolean valid = UserAccountManager.isUserNameValid(name);
 
     // Assert
     assertFalse(valid);
@@ -732,11 +729,10 @@ public class UserManagerTest {
   @Test
   public final void isUserNameValid_emptyNameProvided_returnsFalse() {
     // Arrange
-    UserAccountManager userManager = buildTestUserManager();
     String name = "";
 
     // Act
-    boolean valid = userManager.isUserNameValid(name);
+    boolean valid = UserAccountManager.isUserNameValid(name);
 
     // Assert
     assertFalse(valid);
@@ -752,7 +748,7 @@ public class UserManagerTest {
     String name = null;
 
     // Act
-    boolean valid = userManager.isUserNameValid(name);
+    boolean valid = UserAccountManager.isUserNameValid(name);
 
     // Assert
     assertFalse(valid);
