@@ -69,3 +69,8 @@ jobs:
         reports: target/site/jacoco-merged-test-coverage-report/jacoco.xml
         targetdir: coveragereport
         reporttypes: Html;XML
+    - name: Upload coverage report artifact
+      uses: actions/upload-artifact@v2.2.3
+      with:
+        name: CoverageReport
+        path: coveragereport
