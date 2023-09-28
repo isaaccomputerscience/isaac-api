@@ -1741,4 +1741,8 @@ public class EventsFacade extends AbstractIsaacFacade {
       throw new ClassCastException("The object provided was not an event.");
     }
   }
+
+  private String doThing(int number) {
+    return String.valueOf(number);
+  }
 }
