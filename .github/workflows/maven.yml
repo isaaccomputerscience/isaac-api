@@ -58,3 +58,14 @@ jobs:
         publish_only_summary: true
     - name: Add Coverage Job Summary
       run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY
+    - name: Setup .NET Core # Required to execute ReportGenerator
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.x
+        dotnet-quality: 'ga'
+    - name: ReportGenerator
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.1.25
+      with:
+        reports: target/site/jacoco-merged-test-coverage-report/jacoco.xml
+        targetdir: coveragereport
+        reporttypes: Html;XML
