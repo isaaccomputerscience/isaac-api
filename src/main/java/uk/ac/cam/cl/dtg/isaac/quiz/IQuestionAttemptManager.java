@@ -54,6 +54,8 @@ public interface IQuestionAttemptManager {
       throws SegueDatabaseException;
 
   /**
+   * Registers an anonymous user's attempt to answer a question and stores it in the database.
+   *
    * @param userId          - some anonymous identifier
    * @param questionPageId  - question page id
    * @param fullQuestionId  - full question id
@@ -64,6 +66,8 @@ public interface IQuestionAttemptManager {
                                         QuestionValidationResponse questionAttempt) throws SegueDatabaseException;
 
   /**
+   * Retrieves the question attempts of an anonymous user from the database.
+   *
    * @param anonymousId - some anonymous identifier
    * @return List of questionpage --> question id --> list of QuestionResponses.
    */
@@ -83,7 +87,8 @@ public interface IQuestionAttemptManager {
   /**
    * Retrieves a count of users by their roles who have answered questions within the specified time ranges.
    *
-   * @param timeIntervals An array of TimeInterval enums, each specifying a time range.
+   * @param timeIntervals An array of time ranges (in string format) for which to get the user counts.
+   *                      Each time range is used in the SQL query to filter the results.
    * @return A map where the keys are the time ranges and the values are another map containing the count of users
    *     for each role within that time range.
    * @throws SegueDatabaseException If there is a database-related issue, such as a SQL exception.
