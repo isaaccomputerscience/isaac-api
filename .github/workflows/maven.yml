@@ -37,40 +37,14 @@ jobs:
       id: jacoco
       uses: madrapps/jacoco-report@v1.6.1
       with:
-        paths: |
-          ${{ github.workspace }}/**/target/site/jacoco-merged-test-coverage-report/jacoco.xml
+        paths: ${{ github.workspace }}/**/target/site/jacoco-merged-test-coverage-report/jacoco.xml
         token: ${{ secrets.GITHUB_TOKEN }}
-        min-coverage-overall: 40
-        min-coverage-changed-files: 60
-        title: Coverage Report
+        min-coverage-overall: 80
+        min-coverage-changed-files: 80
+        title: Coverage Report # A title is required for update-comment to work correctly
         update-comment: true
-    - name: JaCoCo Code Coverage Report
-      id: jacoco_reporter
-      uses: PavanMudigonda/jacoco-reporter@v4.8
-      with:
-        coverage_results_path: target/site/jacoco-merged-test-coverage-report/jacoco.xml
-        coverage_report_name: Coverage
-        coverage_report_title: JaCoCo
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        skip_check_run: true
-        minimum_coverage: 80
-        fail_below_threshold: false
-        publish_only_summary: true
-    - name: Add Coverage Job Summary
-      run: echo "${{ steps.jacoco_reporter.outputs.coverageSummary }}" >> $GITHUB_STEP_SUMMARY
-    - name: Setup .NET Core # Required to execute ReportGenerator
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 6.x
-        dotnet-quality: 'ga'
-    - name: ReportGenerator
-      uses: danielpalme/ReportGenerator-GitHub-Action@5.1.25
-      with:
-        reports: target/site/jacoco-merged-test-coverage-report/jacoco.xml
-        targetdir: coveragereport
-        reporttypes: Html;XML
-    - name: Upload coverage report artifact
-      uses: actions/upload-artifact@v2.2.3
-      with:
-        name: CoverageReport
-        path: coveragereport
+        pass-emoji: ':white_check_mark:'
+        fail-emoji: ':x:'
+        continue-on-error: true # Defaults to true. If false, fails check if coverage below minimum threshold
+        # The repository is currently far below the threshold so we can't enforce it for now without blocking everything
+        # else. We may want to consider it once the level is raised to something more suitable?
