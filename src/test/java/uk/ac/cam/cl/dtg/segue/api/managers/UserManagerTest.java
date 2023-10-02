@@ -547,7 +547,7 @@ public class UserManagerTest {
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, 500);
     String validDateString = sdf.format(calendar.getTime());
-    Integer sessionToken = 7;
+    int sessionToken = 7;
 
     Map<String, String> sessionInformation =
         getSessionInformationAsAMap(authManager, validUserId, validDateString, sessionToken);
@@ -623,7 +623,7 @@ public class UserManagerTest {
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, -60); // Expired 60 seconds ago
     String expiredDateString = sdf.format(calendar.getTime());
-    Integer sessionToken = 7;
+    int sessionToken = 7;
 
     Map<String, String> validSessionInformation = getSessionInformationAsAMap(authManager, validUserId,
         expiredDateString, sessionToken);
