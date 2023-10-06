@@ -10,6 +10,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 import com.google.api.client.util.Maps;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -119,6 +120,7 @@ public class EventNotificationEmailManager {
     sortInstructions.put(DATE_FIELDNAME, Constants.SortOrder.DESC);
     ZonedDateTime now = ZonedDateTime.now();
     ZonedDateTime threeDaysAhead = now.plusDays(EMAIL_EVENT_REMINDER_DAYS_AHEAD);
+    Date endOfToday = Date.from(now.with(LocalTime.MAX).toInstant());
     DateRangeFilterInstruction
         eventsWithinThreeDays = new DateRangeFilterInstruction(new Date(), Date.from(threeDaysAhead.toInstant()));
     filterInstructions.put(DATE_FIELDNAME, eventsWithinThreeDays);
@@ -135,11 +137,20 @@ public class EventNotificationEmailManager {
           if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
             continue;
           }
-          String emailKey = String.format("%s@pre", event.getId());
-          // Includes the attended status in case the events team have pre-emptively marked someone as attended.
-          List<BookingStatus> bookingStatuses = Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.ATTENDED);
-          if (pgScheduledEmailManager.commitToSchedulingEmail(emailKey)) {
-            this.sendBookingStatusFilteredEmailForEvent(event, "event_reminder", bookingStatuses);
+          if (event.getDate().after(endOfToday)) {
+            String emailKey = String.format("%s@pre", event.getId());
+            // Includes the attended status in case the events team have pre-emptively marked someone as attended.
+            List<BookingStatus> bookingStatuses = Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.ATTENDED);
+            if (pgScheduledEmailManager.commitToSchedulingEmail(emailKey)) {
+              this.sendBookingStatusFilteredEmailForEvent(event, "event_reminder", bookingStatuses);
+            }
+          } else {
+            String emailKey = String.format("%s@presameday", event.getId());
+            // Includes the attended status in case the events team have pre-emptively marked someone as attended.
+            List<BookingStatus> bookingStatuses = Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.ATTENDED);
+            if (pgScheduledEmailManager.commitToSchedulingEmail(emailKey)) {
+              this.sendBookingStatusFilteredEmailForEvent(event, "event_reminder_same_day", bookingStatuses);
+            }
           }
         }
       }
