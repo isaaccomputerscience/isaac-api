@@ -1532,9 +1532,12 @@ public class EventsFacade extends AbstractIsaacFacade {
             bookingsForThisEvent.stream().filter(b -> BookingStatus.CONFIRMED.equals(b.getBookingStatus())).count();
         long numberOfWaitingListBookings =
             bookingsForThisEvent.stream().filter(b -> BookingStatus.WAITING_LIST.equals(b.getBookingStatus())).count();
+        long numberAttended =
+            bookingsForThisEvent.stream().filter(b -> BookingStatus.ATTENDED.equals(b.getBookingStatus())).count();
 
         eventOverviewBuilder.put("numberOfConfirmedBookings", numberOfConfirmedBookings);
         eventOverviewBuilder.put("numberOfWaitingListBookings", numberOfWaitingListBookings);
+        eventOverviewBuilder.put("numberAttended", numberAttended);
 
         if (null != event.getNumberOfPlaces()) {
           eventOverviewBuilder.put("numberOfPlaces", event.getNumberOfPlaces());
