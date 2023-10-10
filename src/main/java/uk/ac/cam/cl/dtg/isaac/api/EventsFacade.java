@@ -19,6 +19,7 @@ package uk.ac.cam.cl.dtg.isaac.api;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.ENDDATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EVENT_TYPE;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.PRIVATE_EVENT_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ADMIN_BOOKING_REASON_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ATTENDED_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.BOOKING_STATUS_FIELDNAME;
@@ -116,6 +117,7 @@ import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.DateRangeFilterInstruction;
+import uk.ac.cam.cl.dtg.segue.search.SimpleExclusionInstruction;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -288,6 +290,11 @@ public class EventsFacade extends AbstractIsaacFacade {
           SegueErrorResponse.getNotLoggedInResponse();
         }
       } else {
+        if (filterInstructions == null) {
+          filterInstructions = Maps.newHashMap();
+        }
+        // If neither bookings only nor reservations only, hide private events
+        filterInstructions.put(PRIVATE_EVENT_FIELDNAME, new SimpleExclusionInstruction("true"));
         findByFieldNames = this.contentManager.findByFieldNames(
             ContentService.generateDefaultFieldToMatch(fieldsToMatch), newStartIndex, newLimit,
             sortInstructions, filterInstructions);
@@ -1521,6 +1528,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         eventOverviewBuilder.put("bookingDeadline",
             event.getBookingDeadline() == null ? event.getDate() : event.getBookingDeadline());
         eventOverviewBuilder.put("eventStatus", event.getEventStatus());
+        eventOverviewBuilder.put("privateEvent", event.getPrivateEvent());
 
         if (null != event.getLocation()) {
           eventOverviewBuilder.put("location", event.getLocation());
