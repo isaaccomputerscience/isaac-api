@@ -72,6 +72,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import ma.glasnost.orika.MapperFacade;
@@ -1528,7 +1529,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         eventOverviewBuilder.put("bookingDeadline",
             event.getBookingDeadline() == null ? event.getDate() : event.getBookingDeadline());
         eventOverviewBuilder.put("eventStatus", event.getEventStatus());
-        eventOverviewBuilder.put("privateEvent", event.getPrivateEvent());
+        eventOverviewBuilder.put("privateEvent", Objects.requireNonNullElse(event.getPrivateEvent(), false));
 
         if (null != event.getLocation()) {
           eventOverviewBuilder.put("location", event.getLocation());
