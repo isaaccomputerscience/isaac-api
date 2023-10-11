@@ -5,7 +5,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, 'robert/104-coverage-spike-testing' ]
   pull_request:
     branches: [ master, main ]
 
