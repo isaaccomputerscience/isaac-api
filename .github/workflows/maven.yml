@@ -34,7 +34,7 @@ jobs:
     - name: Test with Maven
       run: mvn -B verify --file pom.xml
     - name: Add coverage to PR
-      id: jacoco
+      id: jacocof
       uses: madrapps/jacoco-report@v1.6.1
       with:
         paths: ${{ github.workspace }}/**/target/site/jacoco-merged-test-coverage-report/jacoco.xml
@@ -45,6 +45,4 @@ jobs:
         update-comment: true
         pass-emoji: ':white_check_mark:'
         fail-emoji: ':x:'
-        continue-on-error: true # Defaults to true. If false, fails check if coverage below minimum threshold
-        # The repository is currently far below the threshold so we can't enforce it for now without blocking everything
-        # else. We may want to consider it once the level is raised to something more suitable?
+        continue-on-error: true # The repository is currently far below the threshold, so we can't enforce this for now
