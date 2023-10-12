@@ -602,7 +602,6 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
       throw new SegueDatabaseException("Unable to locate the user requested to delete.");
     }
 
-    // FIXME: try-with-resources!
     try (Connection conn = database.getDatabaseConnection()) {
       try {
         conn.setAutoCommit(false);
