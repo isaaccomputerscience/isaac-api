@@ -756,7 +756,6 @@ public class EventBookingManagerTest {
     testEvent.setAllowGroupReservations(true);
 
     // Mocks the counts for the places available calculation from the database
-    // TODO we should make this a helper method in the test really
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
