@@ -18,7 +18,6 @@ import com.google.api.client.util.Maps;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -110,12 +109,7 @@ public class EventBookingManagerTest {
     someStudentUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someStudentUser.setRole(Role.STUDENT);
 
-    EventBookingDTO firstBooking = new EventBookingDTO();
-    UserSummaryDTO firstUser = new UserSummaryDTO();
-    firstUser.setRole(Role.STUDENT);
-    firstUser.setId(someStudentUser.getId());
-    firstBooking.setUserBooked(firstUser);
-    firstBooking.setBookingStatus(BookingStatus.CONFIRMED);
+    EventBookingDTO firstBooking = prepareEventBookingDTO(BookingStatus.CONFIRMED, Role.STUDENT, someStudentUser.getId());
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
@@ -163,12 +157,6 @@ public class EventBookingManagerTest {
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.STUDENT);
 
-    EventBookingDTO firstBooking = new EventBookingDTO();
-    UserSummaryDTO firstUser = new UserSummaryDTO();
-    firstUser.setRole(Role.STUDENT);
-    firstBooking.setUserBooked(firstUser);
-    firstBooking.setBookingStatus(BookingStatus.CONFIRMED);
-
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
     expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
@@ -210,12 +198,6 @@ public class EventBookingManagerTest {
     someUser.setId(6L);
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.TEACHER);
-
-    EventBookingDTO firstBooking = new EventBookingDTO();
-    UserSummaryDTO firstUser = new UserSummaryDTO();
-    firstUser.setRole(Role.TEACHER);
-    firstBooking.setUserBooked(firstUser);
-    firstBooking.setBookingStatus(BookingStatus.CONFIRMED);
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 1L);
@@ -308,25 +290,11 @@ public class EventBookingManagerTest {
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.TEACHER);
 
-    EventBookingDTO firstBooking = new EventBookingDTO();
-    UserSummaryDTO firstUser = new UserSummaryDTO();
-    firstUser.setRole(Role.TEACHER);
-    firstBooking.setUserBooked(firstUser);
-    firstBooking.setBookingStatus(BookingStatus.CANCELLED);
-
-    EventBookingDTO secondBooking = new EventBookingDTO();
-    UserSummaryDTO secondUser = new UserSummaryDTO();
-    secondUser.setRole(Role.TEACHER);
-    secondBooking.setUserBooked(firstUser);
-    secondBooking.setBookingStatus(BookingStatus.WAITING_LIST);
-
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1L);
     placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
     expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
         placesAvailableMap).atLeastOnce();
-
-    List<EventBookingDTO> currentBookings = Arrays.asList(firstBooking, secondBooking);
 
     expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(),
         someUser.getId())).andReturn(null)
@@ -365,19 +333,12 @@ public class EventBookingManagerTest {
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.TEACHER);
 
-    EventBookingDTO secondBooking = new EventBookingDTO();
-    UserSummaryDTO secondUser = new UserSummaryDTO();
-    secondUser.setRole(Role.TEACHER);
-    secondUser.setId(7L);
-    secondBooking.setUserBooked(secondUser);
-    secondBooking.setBookingStatus(BookingStatus.CANCELLED);
+    EventBookingDTO secondBooking = prepareEventBookingDTO(BookingStatus.CANCELLED, Role.TEACHER, 7L);
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
     expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
         placesAvailableMap).atLeastOnce();
-
-    List<EventBookingDTO> currentBookings = Arrays.asList(secondBooking);
 
     expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), someUser.getId()))
         .andReturn(null).once();
@@ -424,22 +385,9 @@ public class EventBookingManagerTest {
     firstUserFull.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     firstUserFull.setRole(Role.TEACHER);
 
-    DetailedEventBookingDTO firstBooking = new DetailedEventBookingDTO();
-    UserSummaryDTO firstUser = new UserSummaryDTO();
-    firstUser.setId(firstUserFull.getId());
-    firstUser.setRole(Role.TEACHER);
-
-    firstBooking.setUserBooked(firstUser);
-    firstBooking.setBookingStatus(BookingStatus.WAITING_LIST);
-
-    EventBookingDTO secondBooking = new EventBookingDTO();
-    UserSummaryDTO secondUser = new UserSummaryDTO();
-    secondUser.setRole(Role.TEACHER);
-    secondUser.setId(7L);
-    secondBooking.setUserBooked(firstUser);
-    secondBooking.setBookingStatus(BookingStatus.CANCELLED);
-
-    List<EventBookingDTO> currentBookings = Arrays.asList(firstBooking, secondBooking);
+    UserSummaryDTO firstUser = prepareUserSummaryDTO(Role.TEACHER, firstUserFull.getId());
+    DetailedEventBookingDTO firstBooking = prepareDetailedEventBookingDTO(BookingStatus.WAITING_LIST, firstUser);
+    EventBookingDTO secondBooking = prepareEventBookingDTO(BookingStatus.CANCELLED, firstUser);
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
@@ -547,22 +495,13 @@ public class EventBookingManagerTest {
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.TEACHER);
 
-    DetailedEventBookingDTO firstBooking = new DetailedEventBookingDTO();
-    UserSummaryDTO firstUser = new UserSummaryDTO();
-    firstBooking.setEventId(testEvent.getId());
-    firstUser.setId(6L);
-    firstUser.setRole(Role.TEACHER);
-    firstBooking.setUserBooked(firstUser);
-    firstBooking.setBookingStatus(BookingStatus.WAITING_LIST);
+    UserSummaryDTO firstUser = prepareUserSummaryDTO(Role.TEACHER, 6L);
+    DetailedEventBookingDTO firstBooking =
+        prepareDetailedEventBookingDTO(BookingStatus.WAITING_LIST, firstUser, testEvent.getId());
     firstBooking.setAdditionalInformation(someAdditionalInformation);
 
-    DetailedEventBookingDTO secondBooking = new DetailedEventBookingDTO();
-    UserSummaryDTO secondUser = new UserSummaryDTO();
-    secondUser.setId(2L);
-    secondUser.setRole(Role.TEACHER);
-    secondBooking.setEventId(testEvent.getId());
-    secondBooking.setUserBooked(firstUser);
-    secondBooking.setBookingStatus(BookingStatus.CANCELLED);
+    DetailedEventBookingDTO secondBooking =
+        prepareDetailedEventBookingDTO(BookingStatus.CANCELLED, firstUser, testEvent.getId());
     secondBooking.setAdditionalInformation(someAdditionalInformation);
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
@@ -570,8 +509,6 @@ public class EventBookingManagerTest {
     placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1L);
     expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
         placesAvailableMap).atLeastOnce();
-
-    List<EventBookingDTO> currentBookings = Arrays.asList(firstBooking, secondBooking);
 
     expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), 6L))
         .andReturn(firstBooking).once();
@@ -618,23 +555,8 @@ public class EventBookingManagerTest {
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.TEACHER);
 
-    DetailedEventBookingDTO firstBooking = new DetailedEventBookingDTO();
-    UserSummaryDTO firstUser = new UserSummaryDTO();
-    firstBooking.setEventId(testEvent.getId());
-    firstUser.setId(6L);
-    firstUser.setRole(Role.TEACHER);
-    firstBooking.setUserBooked(firstUser);
-    firstBooking.setBookingStatus(BookingStatus.WAITING_LIST);
-
-    DetailedEventBookingDTO secondBooking = new DetailedEventBookingDTO();
-    UserSummaryDTO secondUser = new UserSummaryDTO();
-    secondUser.setId(2L);
-    secondUser.setRole(Role.TEACHER);
-    secondBooking.setEventId(testEvent.getId());
-    secondBooking.setUserBooked(firstUser);
-    secondBooking.setBookingStatus(BookingStatus.CONFIRMED);
-
-    List<EventBookingDTO> currentBookings = Arrays.asList(firstBooking, secondBooking);
+    DetailedEventBookingDTO firstBooking =
+        prepareDetailedEventBookingDTO(BookingStatus.WAITING_LIST, testEvent.getId(), Role.TEACHER, 6L);
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 1L);
@@ -715,20 +637,6 @@ public class EventBookingManagerTest {
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.STUDENT);
 
-    EventBookingDTO firstBooking = new EventBookingDTO();
-    UserSummaryDTO firstUser = new UserSummaryDTO();
-    firstUser.setRole(Role.STUDENT);
-    firstBooking.setUserBooked(firstUser);
-    firstBooking.setBookingStatus(BookingStatus.CONFIRMED);
-
-    EventBookingDTO secondBooking = new EventBookingDTO();
-    UserSummaryDTO secondUser = new UserSummaryDTO();
-    secondUser.setRole(Role.STUDENT);
-    secondBooking.setUserBooked(secondUser);
-    secondBooking.setBookingStatus(BookingStatus.WAITING_LIST);
-
-    List<EventBookingDTO> currentBookings = Arrays.asList(firstBooking, secondBooking);
-
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
     placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 1L);
@@ -763,18 +671,7 @@ public class EventBookingManagerTest {
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.STUDENT);
 
-    EventBookingDTO firstBooking = new EventBookingDTO();
-    UserSummaryDTO firstUser = new UserSummaryDTO();
-    firstUser.setRole(Role.STUDENT);
-    firstBooking.setUserBooked(firstUser);
-    firstBooking.setBookingStatus(BookingStatus.RESERVED);
     placesAvailableMap.get(BookingStatus.RESERVED).put(Role.STUDENT, 1L);
-
-    EventBookingDTO secondBooking = new EventBookingDTO();
-    UserSummaryDTO secondUser = new UserSummaryDTO();
-    secondUser.setRole(Role.STUDENT);
-    secondBooking.setUserBooked(secondUser);
-    secondBooking.setBookingStatus(BookingStatus.CONFIRMED);
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
 
     expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
@@ -1185,5 +1082,45 @@ public class EventBookingManagerTest {
     placesAvailableMap.put(BookingStatus.CONFIRMED, Maps.newHashMap());
     placesAvailableMap.put(BookingStatus.RESERVED, Maps.newHashMap());
     return placesAvailableMap;
+  }
+
+  private static DetailedEventBookingDTO prepareDetailedEventBookingDTO(
+      BookingStatus bookingStatus, String eventId, Role userRole, Long userId) {
+    UserSummaryDTO user = prepareUserSummaryDTO(userRole, userId);
+    return prepareDetailedEventBookingDTO(bookingStatus, user, eventId);
+  }
+
+  private static DetailedEventBookingDTO prepareDetailedEventBookingDTO(
+      BookingStatus bookingStatus, UserSummaryDTO user, String eventId) {
+    DetailedEventBookingDTO booking = prepareDetailedEventBookingDTO(bookingStatus, user);
+    booking.setEventId(eventId);
+    return booking;
+  }
+
+  private static DetailedEventBookingDTO prepareDetailedEventBookingDTO(
+      BookingStatus bookingStatus, UserSummaryDTO user) {
+    DetailedEventBookingDTO booking = new DetailedEventBookingDTO();
+    booking.setUserBooked(user);
+    booking.setBookingStatus(bookingStatus);
+    return booking;
+  }
+
+  private static EventBookingDTO prepareEventBookingDTO(BookingStatus bookingStatus, Role userRole, Long userId) {
+    UserSummaryDTO user = prepareUserSummaryDTO(userRole, userId);
+    return prepareEventBookingDTO(bookingStatus, user);
+  }
+
+  private static EventBookingDTO prepareEventBookingDTO(BookingStatus bookingStatus, UserSummaryDTO user) {
+    EventBookingDTO booking = new EventBookingDTO();
+    booking.setUserBooked(user);
+    booking.setBookingStatus(bookingStatus);
+    return booking;
+  }
+
+  private static UserSummaryDTO prepareUserSummaryDTO(Role userRole, Long userId) {
+    UserSummaryDTO user = new UserSummaryDTO();
+    user.setId(userId);
+    user.setRole(userRole);
+    return user;
   }
 }
