@@ -75,8 +75,8 @@ public class EventsFacadeIT extends IsaacIntegrationTest {
     // NOTE: We may end up having more events in the dataset than the limit specified in the call.
     //       In this case, we need to check for the limit up here and then check if the response object tells us
     //       that there are more, and how many there are.
-    assertEquals(8, results.stream().filter(event -> event.getPrivateEvent() == null || !event.getPrivateEvent()).count());
-    assertEquals(0, results.stream().filter(event -> event.getPrivateEvent() != null && event.getPrivateEvent()).count());
+    assertEquals(8, results.stream().filter(event -> event.getIsPrivateEvent() == null || !event.getIsPrivateEvent()).count());
+    assertEquals(0, results.stream().filter(event -> event.getIsPrivateEvent() != null && event.getIsPrivateEvent()).count());
   }
 
   @Test
@@ -347,7 +347,7 @@ public class EventsFacadeIT extends IsaacIntegrationTest {
     assertNotNull(entity);
     List<ImmutableMap<String, Object>> results = entity.getResults();
     assertEquals(9, results.size());
-    assertEquals(8, results.stream().filter(overview -> !(Boolean) overview.get("privateEvent")).count());
-    assertEquals(1, results.stream().filter(overview -> (Boolean) overview.get("privateEvent")).count());
+    assertEquals(8, results.stream().filter(overview -> !(Boolean) overview.get("isPrivateEvent")).count());
+    assertEquals(1, results.stream().filter(overview -> (Boolean) overview.get("isPrivateEvent")).count());
   }
 }
