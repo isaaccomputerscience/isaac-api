@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import uk.ac.cam.cl.dtg.isaac.dao.EventBookingPersistenceManager;
@@ -92,12 +93,7 @@ public class EventBookingManagerTest {
   public void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_noExceptionThrown() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
-    testEvent.setNumberOfPlaces(1);
-    testEvent.setTags(ImmutableSet.of("student", "computerscience"));
-    testEvent.setEmailEventDetails("Some Details");
-    testEvent.setDate(someFutureDate);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTOWithDetails(studentCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -147,11 +143,7 @@ public class EventBookingManagerTest {
   public void requestBooking_checkStudentNotAllowedOnStudentEventAsCapacityFull_eventFullExceptionThrown() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
-    testEvent.setNumberOfPlaces(1);
-    testEvent.setTags(ImmutableSet.of("student", "computerscience"));
-    testEvent.setDate(someFutureDate);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(studentCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -189,11 +181,7 @@ public class EventBookingManagerTest {
   public void requestBooking_checkTeacherNotAllowedOnTeacherEventAsCapacityFull_eventFullExceptionThrown() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
-    testEvent.setNumberOfPlaces(1);
-    testEvent.setTags(ImmutableSet.of("teacher", "computerscience"));
-    testEvent.setDate(someFutureDate);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(teacherCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -230,10 +218,7 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_addressNotVerified_addressNotVerifiedExceptionThrown() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
-    testEvent.setNumberOfPlaces(1);
-    testEvent.setTags(ImmutableSet.of("student", "computerscience"));
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(studentCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -251,16 +236,12 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_expiredBooking_EventExpiredExceptionThrown() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
-    testEvent.setNumberOfPlaces(1);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(studentCSTags);
 
     // old deadline
     Date old = new Date();
     old.setTime(958074310000L);
-
     testEvent.setBookingDeadline(old);
-    testEvent.setTags(ImmutableSet.of("student", "computerscience"));
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -280,11 +261,7 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_cancelledSpaceAndWaitingList_SpaceRemainsFull() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
-    testEvent.setNumberOfPlaces(1);
-    testEvent.setTags(ImmutableSet.of("teacher", "computerscience"));
-    testEvent.setDate(someFutureDate);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(teacherCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -322,12 +299,7 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_cancelledSpaceAndNoWaitingList_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
-    testEvent.setNumberOfPlaces(1);
-    testEvent.setTags(ImmutableSet.of("teacher", "computerscience"));
-    testEvent.setEmailEventDetails("Some Details");
-    testEvent.setDate(someFutureDate);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTOWithDetails(studentCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -374,12 +346,8 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_cancelledSpaceAndSomeWaitingList_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTOWithDetails(teacherCSTags);
     testEvent.setNumberOfPlaces(2);
-    testEvent.setTags(ImmutableSet.of("teacher", "computerscience"));
-    testEvent.setEmailEventDetails("Some Details");
-    testEvent.setDate(someFutureDate);
 
     RegisteredUserDTO firstUserFull = new RegisteredUserDTO();
     firstUserFull.setId(6L);
@@ -470,12 +438,7 @@ public class EventBookingManagerTest {
   @Test
   public void promoteBooking_spaceDueToCancellation_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
-    testEvent.setNumberOfPlaces(1);
-    testEvent.setTags(ImmutableSet.of("teacher", "computerscience"));
-    testEvent.setEmailEventDetails("some details");
-    testEvent.setDate(someFutureDate);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTOWithDetails(teacherCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -530,11 +493,7 @@ public class EventBookingManagerTest {
   @Test
   public void promoteBooking_NoSpace_Failure() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
-    testEvent.setNumberOfPlaces(1);
-    testEvent.setTags(ImmutableSet.of("teacher", "computerscience"));
-    testEvent.setDate(someFutureDate);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(teacherCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -612,12 +571,9 @@ public class EventBookingManagerTest {
   public void getEventPage_checkWaitingListOnlyEventCapacity_capacityCalculatedCorrectly() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(studentCSTags);
     testEvent.setNumberOfPlaces(2);
-    testEvent.setTags(ImmutableSet.of("student", "computerscience"));
     testEvent.setEventStatus(EventStatus.WAITING_LIST_ONLY);
-    testEvent.setDate(someFutureDate);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -645,7 +601,7 @@ public class EventBookingManagerTest {
     IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
     testEvent.setId("someEventId");
     testEvent.setNumberOfPlaces(2);
-    testEvent.setTags(ImmutableSet.of("student", "computerscience"));
+    testEvent.setTags(studentCSTags);
     testEvent.setEventStatus(EventStatus.OPEN);
     testEvent.setDate(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)); // future dated
     testEvent.setAllowGroupReservations(true);
@@ -1087,5 +1043,27 @@ public class EventBookingManagerTest {
     UserSummaryDTO user = prepareUserSummaryDTO(userId);
     user.setEmailVerificationStatus(emailVerificationStatus);
     return user;
+  }
+
+  private static final Set<String> studentCSTags = ImmutableSet.of("student", "computerscience");
+  private static final Set<String> teacherCSTags = ImmutableSet.of("teacher", "computerscience");
+
+  private static IsaacEventPageDTO prepareIsaacEventPageDTO(Set<String> tags) {
+    return prepareIsaacEventPageDTO("someEventId", 1, tags, someFutureDate);
+  }
+
+  private static IsaacEventPageDTO prepareIsaacEventPageDTO(String eventId, Integer numberOfPlaces, Set<String> tags, Date date) {
+    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
+    testEvent.setId(eventId);
+    testEvent.setNumberOfPlaces(numberOfPlaces);
+    testEvent.setTags(tags);
+    testEvent.setDate(date);
+    return testEvent;
+  }
+
+  private static IsaacEventPageDTO prepareIsaacEventPageDTOWithDetails(Set<String> tags) {
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(tags);
+    testEvent.setEmailEventDetails("Some Details");
+    return testEvent;
   }
 }
