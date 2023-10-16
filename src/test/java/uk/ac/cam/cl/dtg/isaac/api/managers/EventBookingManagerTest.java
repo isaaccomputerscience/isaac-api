@@ -93,7 +93,7 @@ public class EventBookingManagerTest {
   public void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_noExceptionThrown() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithDetails(studentCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -299,7 +299,7 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_cancelledSpaceAndNoWaitingList_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithDetails(studentCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -346,8 +346,7 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_cancelledSpaceAndSomeWaitingList_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithDetails(teacherCSTags);
-    testEvent.setNumberOfPlaces(2);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(teacherCSTags, 2);
 
     RegisteredUserDTO firstUserFull = new RegisteredUserDTO();
     firstUserFull.setId(6L);
@@ -438,7 +437,7 @@ public class EventBookingManagerTest {
   @Test
   public void promoteBooking_spaceDueToCancellation_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithDetails(teacherCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(teacherCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -535,13 +534,8 @@ public class EventBookingManagerTest {
     // Create a future event and event booking manager
     EventBookingManager ebm = this.buildEventBookingManager();
     int initialNumberOfPlaces = 1000;
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO() {{
-        setId("someEventId");
-        setNumberOfPlaces(initialNumberOfPlaces);
-        setTags(ImmutableSet.of("student"));
-        setEventStatus(EventStatus.OPEN);
-        setDate(someFutureDate);
-      }};
+    IsaacEventPageDTO testEvent =
+        prepareIsaacEventPageDto(ImmutableSet.of("student"), initialNumberOfPlaces, EventStatus.OPEN);
 
     // Mock the event booking status count result from the event booking persistence manager
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
@@ -571,9 +565,7 @@ public class EventBookingManagerTest {
   public void getEventPage_checkWaitingListOnlyEventCapacity_capacityCalculatedCorrectly() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
-    testEvent.setNumberOfPlaces(2);
-    testEvent.setEventStatus(EventStatus.WAITING_LIST_ONLY);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 2, EventStatus.WAITING_LIST_ONLY);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -598,12 +590,7 @@ public class EventBookingManagerTest {
   public void getEventPage_checkStudentEventReservedBookings_capacityCalculatedCorrectly() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
-    testEvent.setId("someEventId");
-    testEvent.setNumberOfPlaces(2);
-    testEvent.setTags(studentCSTags);
-    testEvent.setEventStatus(EventStatus.OPEN);
-    testEvent.setDate(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)); // future dated
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 2, EventStatus.OPEN);
     testEvent.setAllowGroupReservations(true);
 
     // Mocks the counts for the places available calculation from the database
@@ -1052,7 +1039,15 @@ public class EventBookingManagerTest {
     return prepareIsaacEventPageDto("someEventId", 1, tags, someFutureDate);
   }
 
-  private static IsaacEventPageDTO prepareIsaacEventPageDto(String eventId, Integer numberOfPlaces, Set<String> tags, Date date) {
+  private static IsaacEventPageDTO prepareIsaacEventPageDto(
+      Set<String> tags, Integer numberOfPlaces, EventStatus eventStatus) {
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto("someEventId", numberOfPlaces, tags, someFutureDate);
+    testEvent.setEventStatus(eventStatus);
+    return testEvent;
+  }
+
+  private static IsaacEventPageDTO prepareIsaacEventPageDto(
+      String eventId, Integer numberOfPlaces, Set<String> tags, Date date) {
     IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
     testEvent.setId(eventId);
     testEvent.setNumberOfPlaces(numberOfPlaces);
@@ -1061,8 +1056,14 @@ public class EventBookingManagerTest {
     return testEvent;
   }
 
-  private static IsaacEventPageDTO prepareIsaacEventPageDtoWithDetails(Set<String> tags) {
+  private static IsaacEventPageDTO prepareIsaacEventPageDtoWithEventDetails(Set<String> tags) {
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(tags);
+    testEvent.setEmailEventDetails("Some Details");
+    return testEvent;
+  }
+
+  private static IsaacEventPageDTO prepareIsaacEventPageDtoWithEventDetails(Set<String> tags, Integer numberOfPlaces) {
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto("someEventId", numberOfPlaces, tags, someFutureDate);
     testEvent.setEmailEventDetails("Some Details");
     return testEvent;
   }
