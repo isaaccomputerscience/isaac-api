@@ -69,7 +69,7 @@ public class IsaacEventPage extends Content {
 
   private Boolean allowGroupReservations;
 
-  private Boolean isPrivateEvent;
+  private Boolean privateEvent;
 
   @JsonCreator
   public IsaacEventPage(@JsonProperty("id") final String id,
@@ -97,7 +97,7 @@ public class IsaacEventPage extends Content {
                         @JsonProperty("EventStatus") final EventStatus eventStatus,
                         @JsonProperty("groupReservationLimit") final Integer groupReservationLimit,
                         @JsonProperty("allowGroupReservations") final Boolean allowGroupReservations,
-                        @JsonProperty("isPrivateEvent") final Boolean isPrivateEvent) {
+                        @JsonProperty("privateEvent") final Boolean privateEvent) {
     super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, null,
         null, relatedContent, published, deprecated, tags, null);
 
@@ -114,7 +114,7 @@ public class IsaacEventPage extends Content {
     this.groupReservationLimit =
         groupReservationLimit != null ? groupReservationLimit : EVENT_GROUP_RESERVATION_DEFAULT_LIMIT;
     this.allowGroupReservations = allowGroupReservations != null ? allowGroupReservations : false;
-    this.isPrivateEvent = isPrivateEvent;
+    this.privateEvent = privateEvent;
   }
 
   /**
@@ -470,11 +470,11 @@ public class IsaacEventPage extends Content {
     this.allowGroupReservations = allowGroupReservations;
   }
 
-  public Boolean getIsPrivateEvent() {
-    return isPrivateEvent;
+  public Boolean isPrivateEvent() {
+    return privateEvent;
   }
 
-  public void setIsPrivateEvent(Boolean isPrivateEvent) {
-    this.isPrivateEvent = isPrivateEvent;
+  public void setPrivateEvent(Boolean privateEvent) {
+    this.privateEvent = privateEvent;
   }
 }

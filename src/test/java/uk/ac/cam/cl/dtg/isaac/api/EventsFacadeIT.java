@@ -75,8 +75,8 @@ public class EventsFacadeIT extends IsaacIntegrationTest {
     // NOTE: We may end up having more events in the dataset than the limit specified in the call.
     //       In this case, we need to check for the limit up here and then check if the response object tells us
     //       that there are more, and how many there are.
-    Long numberOfPublicEventsInResults = results.stream().filter(event -> event.getIsPrivateEvent() == null || !event.getIsPrivateEvent()).count();
-    Long numberOfPrivateEventsInResults = results.stream().filter(event -> event.getIsPrivateEvent() != null && event.getIsPrivateEvent()).count();
+    Long numberOfPublicEventsInResults = results.stream().filter(event -> event.isPrivateEvent() == null || !event.isPrivateEvent()).count();
+    Long numberOfPrivateEventsInResults = results.stream().filter(event -> event.isPrivateEvent() != null && event.isPrivateEvent()).count();
     assertEquals(8, numberOfPublicEventsInResults);
     assertEquals(0, numberOfPrivateEventsInResults);
   }
