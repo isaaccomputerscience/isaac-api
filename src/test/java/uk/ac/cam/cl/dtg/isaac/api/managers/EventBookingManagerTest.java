@@ -93,7 +93,7 @@ public class EventBookingManagerTest {
   public void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_noExceptionThrown() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTOWithDetails(studentCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithDetails(studentCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -105,7 +105,7 @@ public class EventBookingManagerTest {
     someStudentUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someStudentUser.setRole(Role.STUDENT);
 
-    EventBookingDTO firstBooking = prepareEventBookingDTO(BookingStatus.CONFIRMED, someStudentUser.getId(),
+    EventBookingDTO firstBooking = prepareEventBookingDto(BookingStatus.CONFIRMED, someStudentUser.getId(),
         Role.STUDENT);
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
@@ -143,7 +143,7 @@ public class EventBookingManagerTest {
   public void requestBooking_checkStudentNotAllowedOnStudentEventAsCapacityFull_eventFullExceptionThrown() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(studentCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -181,7 +181,7 @@ public class EventBookingManagerTest {
   public void requestBooking_checkTeacherNotAllowedOnTeacherEventAsCapacityFull_eventFullExceptionThrown() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(teacherCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -218,7 +218,7 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_addressNotVerified_addressNotVerifiedExceptionThrown() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(studentCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -236,7 +236,7 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_expiredBooking_EventExpiredExceptionThrown() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(studentCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
 
     // old deadline
     Date old = new Date();
@@ -261,7 +261,7 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_cancelledSpaceAndWaitingList_SpaceRemainsFull() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(teacherCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
@@ -299,14 +299,14 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_cancelledSpaceAndNoWaitingList_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTOWithDetails(studentCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithDetails(studentCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.TEACHER);
 
-    EventBookingDTO secondBooking = prepareEventBookingDTO(BookingStatus.CANCELLED, 7L, Role.TEACHER);
+    EventBookingDTO secondBooking = prepareEventBookingDto(BookingStatus.CANCELLED, 7L, Role.TEACHER);
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
@@ -346,7 +346,7 @@ public class EventBookingManagerTest {
   @Test
   public void requestBooking_cancelledSpaceAndSomeWaitingList_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTOWithDetails(teacherCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithDetails(teacherCSTags);
     testEvent.setNumberOfPlaces(2);
 
     RegisteredUserDTO firstUserFull = new RegisteredUserDTO();
@@ -354,9 +354,9 @@ public class EventBookingManagerTest {
     firstUserFull.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     firstUserFull.setRole(Role.TEACHER);
 
-    UserSummaryDTO firstUser = prepareUserSummaryDTO(firstUserFull.getId(), Role.TEACHER);
-    DetailedEventBookingDTO firstBooking = prepareDetailedEventBookingDTO(firstUser, BookingStatus.WAITING_LIST);
-    EventBookingDTO secondBooking = prepareEventBookingDTO(BookingStatus.CANCELLED, firstUser);
+    UserSummaryDTO firstUser = prepareUserSummaryDto(firstUserFull.getId(), Role.TEACHER);
+    DetailedEventBookingDTO firstBooking = prepareDetailedEventBookingDto(firstUser, BookingStatus.WAITING_LIST);
+    EventBookingDTO secondBooking = prepareEventBookingDto(BookingStatus.CANCELLED, firstUser);
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
@@ -402,9 +402,9 @@ public class EventBookingManagerTest {
 
     RegisteredUserDTO reservedStudent = testCase.student1;
     DetailedEventBookingDTO reservedStudentBooking =
-        prepareDetailedEventBookingDTO(reservedStudent.getId(), BookingStatus.RESERVED, testCase.event.getId());
+        prepareDetailedEventBookingDto(reservedStudent.getId(), BookingStatus.RESERVED, testCase.event.getId());
     DetailedEventBookingDTO reservedStudentBookingAfterConfirmation =
-        prepareDetailedEventBookingDTO(reservedStudent.getId(), BookingStatus.CONFIRMED, testCase.event.getId());
+        prepareDetailedEventBookingDto(reservedStudent.getId(), BookingStatus.CONFIRMED, testCase.event.getId());
 
     // Expected external calls
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testCase.event.getId());
@@ -438,19 +438,19 @@ public class EventBookingManagerTest {
   @Test
   public void promoteBooking_spaceDueToCancellation_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTOWithDetails(teacherCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithDetails(teacherCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.TEACHER);
 
-    UserSummaryDTO firstUser = prepareUserSummaryDTO(6L, Role.TEACHER);
+    UserSummaryDTO firstUser = prepareUserSummaryDto(6L, Role.TEACHER);
     DetailedEventBookingDTO firstBooking =
-        prepareDetailedEventBookingDTO(firstUser, BookingStatus.WAITING_LIST, testEvent.getId());
+        prepareDetailedEventBookingDto(firstUser, BookingStatus.WAITING_LIST, testEvent.getId());
     firstBooking.setAdditionalInformation(someAdditionalInformation);
     DetailedEventBookingDTO secondBooking =
-        prepareDetailedEventBookingDTO(firstUser, BookingStatus.CANCELLED, testEvent.getId());
+        prepareDetailedEventBookingDto(firstUser, BookingStatus.CANCELLED, testEvent.getId());
     secondBooking.setAdditionalInformation(someAdditionalInformation);
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
@@ -493,16 +493,16 @@ public class EventBookingManagerTest {
   @Test
   public void promoteBooking_NoSpace_Failure() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(teacherCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
     someUser.setId(6L);
     someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someUser.setRole(Role.TEACHER);
 
-    UserSummaryDTO firstUser = prepareUserSummaryDTO(6L, Role.TEACHER);
+    UserSummaryDTO firstUser = prepareUserSummaryDto(6L, Role.TEACHER);
     DetailedEventBookingDTO firstBooking =
-        prepareDetailedEventBookingDTO(firstUser, BookingStatus.WAITING_LIST, testEvent.getId());
+        prepareDetailedEventBookingDto(firstUser, BookingStatus.WAITING_LIST, testEvent.getId());
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 1L);
@@ -571,7 +571,7 @@ public class EventBookingManagerTest {
   public void getEventPage_checkWaitingListOnlyEventCapacity_capacityCalculatedCorrectly() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(studentCSTags);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
     testEvent.setNumberOfPlaces(2);
     testEvent.setEventStatus(EventStatus.WAITING_LIST_ONLY);
 
@@ -741,7 +741,7 @@ public class EventBookingManagerTest {
 
     // Make student two have a cancelled booking
     DetailedEventBookingDTO student2sCancelledBooking =
-        prepareDetailedEventBookingDTO(testCase.student2.getId(), BookingStatus.CANCELLED, testCase.event.getId());
+        prepareDetailedEventBookingDto(testCase.student2.getId(), BookingStatus.CANCELLED, testCase.event.getId());
 
     // Define expected external calls
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testCase.event.getId());
@@ -848,7 +848,7 @@ public class EventBookingManagerTest {
     RegisteredUserDTO previouslyReservedStudent = testCase.student3;
     Map<BookingStatus, Map<Role, Long>> previousBookingCounts = generatePlacesAvailableMap();
     previousBookingCounts.put(BookingStatus.CONFIRMED, ImmutableMap.of(Role.STUDENT, 1L));
-    DetailedEventBookingDTO existingEventBooking = prepareDetailedEventBookingDTO(
+    DetailedEventBookingDTO existingEventBooking = prepareDetailedEventBookingDto(
         previouslyReservedStudent.getId(), BookingStatus.CONFIRMED, testCase.event.getId());
     existingEventBooking.setReservedById(testCase.teacher.getId());
 
@@ -890,7 +890,7 @@ public class EventBookingManagerTest {
 
     // Make student two have a cancelled booking
     DetailedEventBookingDTO student2sCancelledReservation =
-        prepareDetailedEventBookingDTO(testCase.student2.getId(), BookingStatus.CANCELLED, testCase.event.getId());
+        prepareDetailedEventBookingDto(testCase.student2.getId(), BookingStatus.CANCELLED, testCase.event.getId());
     student2sCancelledReservation.setReservedById(testCase.teacher.getId());
     Map<BookingStatus, Map<Role, Long>> previousBookingCounts = generatePlacesAvailableMap();
     previousBookingCounts.put(BookingStatus.CANCELLED, ImmutableMap.of(Role.STUDENT, 1L));
@@ -960,17 +960,17 @@ public class EventBookingManagerTest {
         setEmail("student1");
         setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       }};
-    UserSummaryDTO student1Summary = prepareUserSummaryDTO(1L, EmailVerificationStatus.VERIFIED);
+    UserSummaryDTO student1Summary = prepareUserSummaryDto(1L, EmailVerificationStatus.VERIFIED);
     DetailedEventBookingDTO student1Booking =
-        prepareDetailedEventBookingDTO(student1Summary, BookingStatus.RESERVED, "SomeEventId");
+        prepareDetailedEventBookingDto(student1Summary, BookingStatus.RESERVED, "SomeEventId");
     RegisteredUserDTO student2 = new RegisteredUserDTO() {{
         setId(2L);
         setEmail("student2");
         setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       }};
-    UserSummaryDTO student2Summary = prepareUserSummaryDTO(2L, EmailVerificationStatus.VERIFIED);
+    UserSummaryDTO student2Summary = prepareUserSummaryDto(2L, EmailVerificationStatus.VERIFIED);
     DetailedEventBookingDTO student2Booking =
-        prepareDetailedEventBookingDTO(student2Summary, BookingStatus.RESERVED, "SomeEventId");
+        prepareDetailedEventBookingDto(student2Summary, BookingStatus.RESERVED, "SomeEventId");
     RegisteredUserDTO student3 = new RegisteredUserDTO() {{
         setId(2L);
         setEmail("student2");
@@ -994,20 +994,20 @@ public class EventBookingManagerTest {
     return placesAvailableMap;
   }
 
-  private static DetailedEventBookingDTO prepareDetailedEventBookingDTO(
+  private static DetailedEventBookingDTO prepareDetailedEventBookingDto(
       Long userId, BookingStatus bookingStatus, String eventId) {
-    UserSummaryDTO user = prepareUserSummaryDTO(userId);
-    return prepareDetailedEventBookingDTO(user, bookingStatus, eventId);
+    UserSummaryDTO user = prepareUserSummaryDto(userId);
+    return prepareDetailedEventBookingDto(user, bookingStatus, eventId);
   }
 
-  private static DetailedEventBookingDTO prepareDetailedEventBookingDTO(
+  private static DetailedEventBookingDTO prepareDetailedEventBookingDto(
       UserSummaryDTO user, BookingStatus bookingStatus, String eventId) {
-    DetailedEventBookingDTO booking = prepareDetailedEventBookingDTO(user, bookingStatus);
+    DetailedEventBookingDTO booking = prepareDetailedEventBookingDto(user, bookingStatus);
     booking.setEventId(eventId);
     return booking;
   }
 
-  private static DetailedEventBookingDTO prepareDetailedEventBookingDTO(
+  private static DetailedEventBookingDTO prepareDetailedEventBookingDto(
       UserSummaryDTO user, BookingStatus bookingStatus) {
     DetailedEventBookingDTO booking = new DetailedEventBookingDTO();
     booking.setUserBooked(user);
@@ -1015,32 +1015,32 @@ public class EventBookingManagerTest {
     return booking;
   }
 
-  private static EventBookingDTO prepareEventBookingDTO(BookingStatus bookingStatus, Long userId, Role userRole) {
-    UserSummaryDTO user = prepareUserSummaryDTO(userId, userRole);
-    return prepareEventBookingDTO(bookingStatus, user);
+  private static EventBookingDTO prepareEventBookingDto(BookingStatus bookingStatus, Long userId, Role userRole) {
+    UserSummaryDTO user = prepareUserSummaryDto(userId, userRole);
+    return prepareEventBookingDto(bookingStatus, user);
   }
 
-  private static EventBookingDTO prepareEventBookingDTO(BookingStatus bookingStatus, UserSummaryDTO user) {
+  private static EventBookingDTO prepareEventBookingDto(BookingStatus bookingStatus, UserSummaryDTO user) {
     EventBookingDTO booking = new EventBookingDTO();
     booking.setUserBooked(user);
     booking.setBookingStatus(bookingStatus);
     return booking;
   }
 
-  private static UserSummaryDTO prepareUserSummaryDTO(Long userId) {
+  private static UserSummaryDTO prepareUserSummaryDto(Long userId) {
     UserSummaryDTO user = new UserSummaryDTO();
     user.setId(userId);
     return user;
   }
 
-  private static UserSummaryDTO prepareUserSummaryDTO(Long userId, Role userRole) {
-    UserSummaryDTO user = prepareUserSummaryDTO(userId);
+  private static UserSummaryDTO prepareUserSummaryDto(Long userId, Role userRole) {
+    UserSummaryDTO user = prepareUserSummaryDto(userId);
     user.setRole(userRole);
     return user;
   }
 
-  private static UserSummaryDTO prepareUserSummaryDTO(Long userId, EmailVerificationStatus emailVerificationStatus) {
-    UserSummaryDTO user = prepareUserSummaryDTO(userId);
+  private static UserSummaryDTO prepareUserSummaryDto(Long userId, EmailVerificationStatus emailVerificationStatus) {
+    UserSummaryDTO user = prepareUserSummaryDto(userId);
     user.setEmailVerificationStatus(emailVerificationStatus);
     return user;
   }
@@ -1048,11 +1048,11 @@ public class EventBookingManagerTest {
   private static final Set<String> studentCSTags = ImmutableSet.of("student", "computerscience");
   private static final Set<String> teacherCSTags = ImmutableSet.of("teacher", "computerscience");
 
-  private static IsaacEventPageDTO prepareIsaacEventPageDTO(Set<String> tags) {
-    return prepareIsaacEventPageDTO("someEventId", 1, tags, someFutureDate);
+  private static IsaacEventPageDTO prepareIsaacEventPageDto(Set<String> tags) {
+    return prepareIsaacEventPageDto("someEventId", 1, tags, someFutureDate);
   }
 
-  private static IsaacEventPageDTO prepareIsaacEventPageDTO(String eventId, Integer numberOfPlaces, Set<String> tags, Date date) {
+  private static IsaacEventPageDTO prepareIsaacEventPageDto(String eventId, Integer numberOfPlaces, Set<String> tags, Date date) {
     IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
     testEvent.setId(eventId);
     testEvent.setNumberOfPlaces(numberOfPlaces);
@@ -1061,8 +1061,8 @@ public class EventBookingManagerTest {
     return testEvent;
   }
 
-  private static IsaacEventPageDTO prepareIsaacEventPageDTOWithDetails(Set<String> tags) {
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDTO(tags);
+  private static IsaacEventPageDTO prepareIsaacEventPageDtoWithDetails(Set<String> tags) {
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(tags);
     testEvent.setEmailEventDetails("Some Details");
     return testEvent;
   }
