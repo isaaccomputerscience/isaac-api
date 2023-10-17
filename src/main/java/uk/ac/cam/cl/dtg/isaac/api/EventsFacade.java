@@ -1529,7 +1529,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         eventOverviewBuilder.put("bookingDeadline",
             event.getBookingDeadline() == null ? event.getDate() : event.getBookingDeadline());
         eventOverviewBuilder.put("eventStatus", event.getEventStatus());
-        eventOverviewBuilder.put("isPrivateEvent", Objects.requireNonNullElse(event.isPrivateEvent(), false));
+        eventOverviewBuilder.put("privateEvent", Objects.requireNonNullElse(event.isPrivateEvent(), false));
 
         if (null != event.getLocation()) {
           eventOverviewBuilder.put("location", event.getLocation());
