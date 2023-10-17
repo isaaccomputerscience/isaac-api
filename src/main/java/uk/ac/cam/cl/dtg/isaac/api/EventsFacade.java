@@ -19,7 +19,7 @@ package uk.ac.cam.cl.dtg.isaac.api;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.ENDDATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EVENT_TYPE;
-import static uk.ac.cam.cl.dtg.isaac.api.Constants.IS_PRIVATE_EVENT_FIELDNAME;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.PRIVATE_EVENT_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ADMIN_BOOKING_REASON_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ATTENDED_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.BOOKING_STATUS_FIELDNAME;
@@ -295,7 +295,7 @@ public class EventsFacade extends AbstractIsaacFacade {
           filterInstructions = Maps.newHashMap();
         }
         // If neither bookings only nor reservations only, hide private events
-        filterInstructions.put(IS_PRIVATE_EVENT_FIELDNAME, new SimpleExclusionInstruction("true"));
+        filterInstructions.put(PRIVATE_EVENT_FIELDNAME, new SimpleExclusionInstruction("true"));
         findByFieldNames = this.contentManager.findByFieldNames(
             ContentService.generateDefaultFieldToMatch(fieldsToMatch), newStartIndex, newLimit,
             sortInstructions, filterInstructions);

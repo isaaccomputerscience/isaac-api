@@ -349,8 +349,8 @@ public class EventsFacadeIT extends IsaacIntegrationTest {
     assertNotNull(entity);
     List<ImmutableMap<String, Object>> results = entity.getResults();
     assertEquals(9, results.size());
-    Long numberOfPublicEventsInResults = results.stream().filter(overview -> !(Boolean) overview.get("isPrivateEvent")).count();
-    Long numberOfPrivateEventsInResults = results.stream().filter(overview -> (Boolean) overview.get("isPrivateEvent")).count();
+    Long numberOfPublicEventsInResults = results.stream().filter(overview -> !(Boolean) overview.get("privateEvent")).count();
+    Long numberOfPrivateEventsInResults = results.stream().filter(overview -> (Boolean) overview.get("privateEvent")).count();
     assertEquals(8, numberOfPublicEventsInResults);
     assertEquals(1, numberOfPrivateEventsInResults);
   }
