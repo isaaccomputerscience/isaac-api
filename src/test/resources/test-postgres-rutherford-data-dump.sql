@@ -521,7 +521,7 @@ SELECT pg_catalog.setval('public.user_alerts_id_seq', 1, false);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 12, true);
+SELECT pg_catalog.setval('public.users_id_seq', 13, true);
 
 
 --
