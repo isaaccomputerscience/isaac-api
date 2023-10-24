@@ -11,6 +11,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_MINUTE;
 import static uk.ac.cam.cl.dtg.util.ServletTestUtils.createMockServletRequest;
 import static uk.ac.cam.cl.dtg.util.ServletTestUtils.replayMockServletRequest;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -18,6 +19,7 @@ import jakarta.ws.rs.core.Response;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,11 +27,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.api.UsersFacade;
 import uk.ac.cam.cl.dtg.segue.api.monitors.PasswordResetByEmailMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.PasswordResetByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.api.monitors.RegistrationMisuseHandler;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.AdditionalAuthenticationRequiredException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.AuthenticationProviderMappingException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.IncorrectCredentialsProvidedException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.MFARequiredButNotConfiguredException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 public class UsersFacadeIT extends IsaacIntegrationTest {
   private UsersFacade usersFacade;
@@ -254,5 +264,100 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
         // Names cannot contain forbidden characters
         Arguments.of("Te*st")
     );
+  }
+
+  @Test
+  public void requestRoleChange_valid() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+      MFARequiredButNotConfiguredException {
+    LoginResult currentlyStudentLogin = loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
+    HttpServletRequest upgradeRequest = createRequestWithCookies(new Cookie[] {currentlyStudentLogin.cookie});
+    replay(upgradeRequest);
+    Map<String, String> requestDetails = Map.of(
+        "verificationDetails", "school staff url",
+        "otherDetails", "more information"
+    );
+
+    Response upgradeResponse = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
+
+    assertEquals(Response.Status.OK.getStatusCode(), upgradeResponse.getStatus());
+  }
+
+  @Test
+  public void requestRoleChange_missingDetails() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+      MFARequiredButNotConfiguredException {
+    LoginResult currentlyStudentLogin = loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
+    HttpServletRequest upgradeRequest = createRequestWithCookies(new Cookie[]{currentlyStudentLogin.cookie});
+    replay(upgradeRequest);
+    Map<String, String> requestDetails = Map.of(
+        "otherDetails", "more information"
+    );
+
+    Response upgradeResponse = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
+
+    assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), upgradeResponse.getStatus());
+    assertEquals("Missing form details.", upgradeResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+  }
+
+  @Test
+  public void requestRoleChange_notLoggedIn() {
+    HttpServletRequest upgradeRequest = createRequestWithCookies(new Cookie[]{});
+    replay(upgradeRequest);
+    Map<String, String> requestDetails = Map.of(
+        "verificationDetails", "school staff url",
+        "otherDetails", "more information"
+    );
+
+    Response upgradeResponse = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
+
+    assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), upgradeResponse.getStatus());
+    assertEquals("You must be logged in to request a role change.", upgradeResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+  }
+
+  @Test
+  public void requestRoleChange_duplicateRequest()
+      throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+      MFARequiredButNotConfiguredException {
+    LoginResult currentlyStudentLogin = loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
+    HttpServletRequest upgradeRequest = createRequestWithCookies(new Cookie[]{currentlyStudentLogin.cookie});
+    replay(upgradeRequest);
+    Map<String, String> requestDetails = Map.of(
+        "verificationDetails", "school staff url",
+        "otherDetails", "more information"
+    );
+
+    Response upgradeResponse1 = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
+
+    assertEquals(Response.Status.OK.getStatusCode(), upgradeResponse1.getStatus());
+
+    Response upgradeResponse2 = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
+
+    assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), upgradeResponse2.getStatus());
+    assertEquals("You have already submitted a teacher upgrade request.", upgradeResponse2.readEntity(SegueErrorResponse.class).getErrorMessage());
+  }
+
+  @Test
+  public void requestRoleChange_alreadyTeacher()
+      throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+      MFARequiredButNotConfiguredException {
+    LoginResult currentlyStudentLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest upgradeRequest = createRequestWithCookies(new Cookie[]{currentlyStudentLogin.cookie});
+    replay(upgradeRequest);
+    Map<String, String> requestDetails = Map.of(
+        "verificationDetails", "school staff url",
+        "otherDetails", "more information"
+    );
+
+    Response upgradeResponse = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
+
+    assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), upgradeResponse.getStatus());
+    assertEquals("You already have a teacher role.", upgradeResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
   }
 }

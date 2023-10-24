@@ -2017,7 +2017,7 @@ public class UserAccountManager implements IUserAccountManager {
     String roleName = requestedRole.toString();
     String userSchool = Objects.requireNonNullElse(currentUser.getSchoolId(), currentUser.getSchoolOther());
     String verificationDetails = requestDetails.get("verificationDetails");
-    String otherInformation = requestDetails.get("otherInformation");
+    String otherInformation = Objects.requireNonNullElse(requestDetails.get("otherInformation"), "");
     String emailSubject = String.format("%s Account Request", roleName);
     String emailMessage = String.format(
         "Hello,\n<br>\n<br>"

@@ -714,9 +714,7 @@ public class UsersFacade extends AbstractSegueFacade {
   @Operation(summary = "Submit a contact form request.")
   public Response requestRoleChange(
       @Context final HttpServletRequest request, final Map<String, String> requestDetails) {
-    if (requestDetails == null
-        || StringUtils.isEmpty(requestDetails.get("verificationDetails"))
-        || StringUtils.isEmpty(requestDetails.get("otherDetails"))) {
+    if (requestDetails == null || StringUtils.isEmpty(requestDetails.get("verificationDetails"))) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "Missing form details.").toResponse();
     }
 
