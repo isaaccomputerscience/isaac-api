@@ -323,22 +323,18 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
       AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
       AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
       MFARequiredButNotConfiguredException {
-    LoginResult currentlyStudentLogin = loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
-    HttpServletRequest upgradeRequest = createRequestWithCookies(new Cookie[]{currentlyStudentLogin.cookie});
+    LoginResult pendingTeacherLogin = loginAs(httpSession, ITConstants.TEST_PENDING_TEACHER_EMAIL, ITConstants.TEST_PENDING_TEACHER_PASSWORD);
+    HttpServletRequest upgradeRequest = createRequestWithCookies(new Cookie[]{pendingTeacherLogin.cookie});
     replay(upgradeRequest);
     Map<String, String> requestDetails = Map.of(
         "verificationDetails", "school staff url",
         "otherDetails", "more information"
     );
 
-    Response upgradeResponse1 = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
+    Response upgradeResponse = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
 
-    assertEquals(Response.Status.OK.getStatusCode(), upgradeResponse1.getStatus());
-
-    Response upgradeResponse2 = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
-
-    assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), upgradeResponse2.getStatus());
-    assertEquals("You have already submitted a teacher upgrade request.", upgradeResponse2.readEntity(SegueErrorResponse.class).getErrorMessage());
+    assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), upgradeResponse.getStatus());
+    assertEquals("You have already submitted a teacher upgrade request.", upgradeResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
   }
 
   @Test
