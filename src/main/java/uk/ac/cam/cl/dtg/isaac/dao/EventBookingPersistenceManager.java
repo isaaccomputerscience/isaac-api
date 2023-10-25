@@ -18,6 +18,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.DetailedEventBookingDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
@@ -297,8 +298,8 @@ public class EventBookingPersistenceManager {
       // Note: This will pull back deleted users for the purpose of the events system
       // Note: This will also pull in PII that should be of no interest to anyone
       // DANGER: The User DTO gets silently upgraded to one containing the email address here
-      UserSummaryWithEmailAddressDTO user = userManager.convertToDetailedUserSummaryObject(userManager.getUserDTOById(eb
-          .getUserId(), true), UserSummaryWithEmailAddressDTO.class);
+      UserSummaryWithEmailAddressAndGenderDTO user = userManager.convertToUserSummaryWithEmailAddressAndGenderObject(userManager.getUserDTOById(eb
+          .getUserId(), true), UserSummaryWithEmailAddressAndGenderDTO.class);
       result.setReservedById(eb.getReservedById());
       result.setUserBooked(user);
       result.setBookingId(eb.getId());
