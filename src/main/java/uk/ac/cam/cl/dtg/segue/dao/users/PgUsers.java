@@ -47,7 +47,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.Validate;
-import org.jetbrains.annotations.Nullable;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Gender;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
@@ -771,7 +770,6 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
    * @throws SQLException           if there is an internal database error
    * @throws SegueDatabaseException if more than one result is returned
    */
-  @Nullable
   private static Integer findOneToken(ResultSet results) throws SQLException, SegueDatabaseException {
     // are there any results
     if (!results.isBeforeFirst()) {
