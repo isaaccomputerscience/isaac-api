@@ -24,23 +24,18 @@ public final class ITConstants {
   // Users
   public static final String TEST_ADMIN_EMAIL = "test-admin@test.com";
   public static final String TEST_ADMIN_PASSWORD = "test1234";
-  public static final long TEST_ADMIN_ID = 2L;
 
   public static final String TEST_EDITOR_EMAIL = "test-editor@test.com";
   public static final String TEST_EDITOR_PASSWORD = "test1234";
-  public static final long TEST_EDITOR_ID = 4L;
 
   public static final String TEST_EVENTMANAGER_EMAIL = "test-event@test.com";
   public static final String TEST_EVENTMANAGER_PASSWORD = "test1234";
-  public static final long TEST_EVENTMANAGER_ID = 3L;
 
   public static final String TEST_TEACHER_EMAIL = "test-teacher@test.com";
   public static final String TEST_TEACHER_PASSWORD = "test1234";
   public static final long TEST_TEACHER_ID = 5L;
 
   public static final String DAVE_TEACHER_EMAIL = "dave-teacher@test.com";
-  public static final String DAVE_TEACHER_PASSWORD = "test1234";
-  public static final long DAVE_TEACHER_ID = 10L;
 
   public static final String TEST_STUDENT_EMAIL = "test-student@test.com";
   public static final String TEST_STUDENT_PASSWORD = "test1234";
@@ -52,7 +47,6 @@ public final class ITConstants {
 
   public static final String TEST_PENDING_TEACHER_EMAIL = "pending-teacher@test.com";
   public static final String TEST_PENDING_TEACHER_PASSWORD = "test1234";
-  public static final long TEST_PENDING_TEACHER_ID = 13L;
 
   public static final String TEST_UNKNOWN_USER_ONE_EMAIL = "test-student1@test.com";
   public static final String TEST_UNKNOWN_USER_TWO_EMAIL = "test-student2@test.com";
