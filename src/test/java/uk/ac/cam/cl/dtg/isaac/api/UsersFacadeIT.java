@@ -5,6 +5,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.niceMock;
 import static org.easymock.EasyMock.replay;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_MINUTE;
@@ -278,10 +279,14 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
         "verificationDetails", "school staff url",
         "otherDetails", "more information"
     );
+    RegisteredUserDTO initialUserState = currentlyStudentLogin.user;
+    assertFalse(initialUserState.getTeacherPending());
+    initialUserState.setTeacherPending(true);
 
     Response upgradeResponse = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
 
     assertEquals(Response.Status.OK.getStatusCode(), upgradeResponse.getStatus());
+    assertEquals(initialUserState, upgradeResponse.readEntity(RegisteredUserDTO.class));
   }
 
   @Test
