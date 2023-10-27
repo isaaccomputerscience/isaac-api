@@ -16,6 +16,9 @@
 
 package uk.ac.cam.cl.dtg.segue.database;
 
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
+
 import com.google.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 import java.io.ByteArrayOutputStream;
@@ -180,14 +183,13 @@ public class GitDb {
     }
 
     revWalk.dispose();
-    log.debug("Retrieved Commit Id: " + commitId.getName() + " Searching for: " + fullFilePath + " found: " + path);
+    log.debug("Retrieved Commit Id: " + commitId.getName() + " Searching for: " + sanitiseExternalLogValue(fullFilePath)
+        + " found: " + path);
     ObjectLoader loader = repository.open(objectId);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     loader.copyTo(out);
 
-    // TODO: Calling close seems to be unnecessary when not writing to the repo, and prints an error frequently.
-    //repository.close();
     return out;
   }
 
@@ -211,7 +213,7 @@ public class GitDb {
 
     ObjectId commitId = gitHandle.getRepository().resolve(sha);
     if (null == commitId) {
-      log.error("Failed to buildGitIndex - Unable to locate resource with sha: " + sha);
+      log.error("Failed to buildGitIndex - Unable to locate resource with sha: " + sanitiseInternalLogValue(sha));
     } else {
       RevWalk revWalk = new RevWalk(gitHandle.getRepository());
       RevCommit commit = revWalk.parseCommit(commitId);

@@ -17,6 +17,7 @@
 package uk.ac.cam.cl.dtg.isaac.api.managers;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableMap;
@@ -133,7 +134,7 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
     if (assignmentPersistenceManager.getAssignmentsByGameboardAndGroup(newAssignment.getGameboardId(),
         newAssignment.getGroupId()).size() != 0) {
       log.error(String.format("Duplicated Assignment Exception - cannot assign the same work %s to a group %s",
-          newAssignment.getGameboardId(), newAssignment.getGroupId()));
+          sanitiseExternalLogValue(newAssignment.getGameboardId()), newAssignment.getGroupId()));
       throw new DuplicateAssignmentException("You cannot assign the same work to a group more than once.");
     }
 
@@ -180,7 +181,6 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
       final Collection<UserGroupDTO> groups, final boolean includeAssignmentsScheduledInFuture)
       throws SegueDatabaseException {
     Validate.notNull(groups);
-    // TODO - Is there a better way of doing this empty list check? Database method explodes if given it.
     if (groups.isEmpty()) {
       return new ArrayList<>();
     }

@@ -33,6 +33,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.MATCH_INSTRUCTION_IMPORTANT_N
 import static uk.ac.cam.cl.dtg.segue.api.Constants.MATCH_INSTRUCTION_OTHER_FUZZY;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.MATCH_INSTRUCTION_OTHER_NON_FUZZY;
 import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.CACHE_METRICS_COLLECTOR;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.google.api.client.util.Sets;
 import com.google.common.base.Functions;
@@ -195,7 +196,7 @@ public class GitContentManager {
    * @return the content DTO object.
    * @throws ContentManagerException on failure to return the object or null.
    */
-  public final ContentDTO getContentById(final String id, final boolean failQuietly) throws ContentManagerException {
+  public ContentDTO getContentById(final String id, final boolean failQuietly) throws ContentManagerException {
     String k = "getContentById~" + getCurrentContentSHA() + "~" + id;
     if (!cache.asMap().containsKey(k)) {
       ContentDTO c = this.mapper.getDTOByDO(this.getContentDOById(id, failQuietly));
@@ -250,7 +251,8 @@ public class GitContentManager {
 
       if (null == searchResults || searchResults.isEmpty()) {
         if (!failQuietly) {
-          log.error(String.format("Failed to locate content with ID '%s' in the cache for content SHA (%s)", id,
+          log.error(String.format("Failed to locate content with ID '%s' in the cache for content SHA (%s)",
+                            sanitiseExternalLogValue(id),
               getCurrentContentSHA()));
         }
         return null;
@@ -509,7 +511,7 @@ public class GitContentManager {
     return this.findByFieldNamesRandomOrder(fieldsToMatch, startIndex, limit, null);
   }
 
-  public final ResultsWrapper<ContentDTO> findByFieldNamesRandomOrder(
+  public ResultsWrapper<ContentDTO> findByFieldNamesRandomOrder(
       final List<BooleanSearchClause> fieldsToMatch, final Integer startIndex,
       final Integer limit, @Nullable final Long randomSeed
   ) throws ContentManagerException {

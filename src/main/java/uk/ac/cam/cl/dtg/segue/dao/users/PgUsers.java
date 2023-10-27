@@ -436,27 +436,25 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
 
   @Override
   public List<RegisteredUser> findUsers(final List<Long> usersToLocate) throws SegueDatabaseException {
-    StringBuilder inParams = new StringBuilder();
-    inParams.append("?");
-    for (int i = 1; i < usersToLocate.size(); i++) {
-      inParams.append(",?");
+    if (usersToLocate.isEmpty()) {
+      return new ArrayList<>();
     }
-    String query =
-        String.format("SELECT * FROM users WHERE id IN (%s) AND NOT deleted ORDER BY family_name, given_name",
-            inParams.toString());
+
+    String inParams = String.join(",", Collections.nCopies(usersToLocate.size(), "?"));
+    String query = String.format(
+            "SELECT * FROM users WHERE id IN (%s) AND NOT deleted ORDER BY family_name, given_name", inParams);
 
     try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
-      int index = FIELD_FIND_USERS_PARAMETERS_INITIAL_INDEX;
-      for (Long userId : usersToLocate) {
-        pst.setLong(index, userId);
-        index++;
+         PreparedStatement pst = conn.prepareStatement(query)) {
+
+      for (int i = 0; i < usersToLocate.size(); i++) {
+        pst.setLong(i + 1, usersToLocate.get(i));
       }
 
       try (ResultSet results = pst.executeQuery()) {
         return this.findAllUsers(results);
       }
+
     } catch (SQLException e) {
       throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
     } catch (JsonProcessingException e) {
@@ -505,24 +503,39 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
   }
 
   @Override
-  public Map<Role, Long> getRolesLastSeenOver(final TimeInterval timeInterval) throws SegueDatabaseException {
-    String query = "SELECT role, count(1) FROM users WHERE NOT deleted AND last_seen >= now() - ? GROUP BY role";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
-      pst.setObject(FIELD_GET_PERIOD_ROLES_INTERVAL, timeInterval.getPGInterval());
-
-      try (ResultSet results = pst.executeQuery()) {
-        Map<Role, Long> resultsToReturn = Maps.newHashMap();
-        while (results.next()) {
-          resultsToReturn.put(Role.valueOf(results.getString("role")), results.getLong("count"));
-        }
-        return resultsToReturn;
+  public Map<TimeInterval, Map<Role, Long>> getRolesLastSeenOver(final TimeInterval[] timeIntervals)
+      throws SegueDatabaseException {
+    Map<TimeInterval, Map<Role, Long>> allResults = new HashMap<>();
+    try (Connection conn = database.getDatabaseConnection()) {
+      for (TimeInterval timeInterval : timeIntervals) {
+        Map<Role, Long> resultForTimeInterval = executeRoleCountQueryForTimeInterval(conn, timeInterval);
+        allResults.put(timeInterval, resultForTimeInterval);
       }
     } catch (SQLException e) {
       throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
     }
+    return allResults;
   }
+
+  private Map<Role, Long> executeRoleCountQueryForTimeInterval(final Connection conn, final TimeInterval timeInterval)
+      throws SQLException {
+    String query = "SELECT role, count(1) FROM users WHERE NOT deleted AND last_seen >= now() - ? GROUP BY role";
+    try (PreparedStatement pst = conn.prepareStatement(query)) {
+      pst.setObject(1, timeInterval.getPGInterval());
+      try (ResultSet results = pst.executeQuery()) {
+        return parseRoleCountsFromResults(results);
+      }
+    }
+  }
+
+  private Map<Role, Long> parseRoleCountsFromResults(final ResultSet results) throws SQLException {
+    Map<Role, Long> resultForTimeInterval = new HashMap<>();
+    while (results.next()) {
+      resultForTimeInterval.put(Role.valueOf(results.getString("role")), results.getLong("count"));
+    }
+    return resultForTimeInterval;
+  }
+
 
   @Override
   public Map<SchoolInfoStatus, Long> getSchoolInfoStats() throws SegueDatabaseException {
@@ -587,7 +600,6 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
       throw new SegueDatabaseException("Unable to locate the user requested to delete.");
     }
 
-    // FIXME: try-with-resources!
     try (Connection conn = database.getDatabaseConnection()) {
       try {
         conn.setAutoCommit(false);
@@ -758,7 +770,6 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
       }
       Array userContexts = conn.createArrayOf("jsonb", userContextsJsonb.toArray());
 
-      // TODO: Change this to annotations or something to rely exclusively on the pojo.
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_FAMILY_NAME, userToCreate.getFamilyName());
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_GIVEN_NAME, userToCreate.getGivenName());
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL, userToCreate.getEmail());
@@ -844,7 +855,6 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         + " email_verification_status = ?, last_seen = ?, email_verification_token = ?, email_to_verify = ?,"
         + " teacher_pending = ?, registered_contexts = ?, registered_contexts_last_confirmed = ? WHERE id = ?;";
     try (PreparedStatement pst = conn.prepareStatement(query)) {
-      // TODO: Change this to annotations or something to rely exclusively on the pojo.
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_FAMILY_NAME, userToCreate.getFamilyName());
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_GIVEN_NAME, userToCreate.getGivenName());
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL, userToCreate.getEmail());

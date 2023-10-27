@@ -517,7 +517,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * This provides a singleton of the git content manager for the segue facade.
    * <br>
    * TODO: This is a singleton as the units and tags are stored in memory. If we move these out it can be an instance.
-   * This would be better as then we can give it a new search provider if the client has closed.
+   *  This would be better as then we can give it a new search provider if the client has closed.
    *
    * @param database         - database reference
    * @param searchProvider   - search provider to use
@@ -886,12 +886,12 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     String version = "unknown";
     try {
       Properties p = new Properties();
-      InputStream is = SegueGuiceConfigurationModule.class.getResourceAsStream("/version.properties");
-      if (is != null) {
-        p.load(is);
-        version = p.getProperty("version", "");
+      try (InputStream is = SegueGuiceConfigurationModule.class.getResourceAsStream("/version.properties")) {
+        if (is != null) {
+          p.load(is);
+          version = p.getProperty("version", "");
+        }
       }
-      is.close();
     } catch (Exception e) {
       log.error(e.getMessage());
     }

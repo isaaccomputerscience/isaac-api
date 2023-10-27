@@ -17,7 +17,6 @@
 package uk.ac.cam.cl.dtg.segue.api;
 
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DEFAULT_MISUSE_STATISTICS_LIMIT;
-import static uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacUserPreferences;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.CONTENT_INDEX;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EnvironmentType;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.MAILGUN_SECRET_KEY;
@@ -33,8 +32,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.SEARCH_RESULTS_HARD_LIMIT_FAL
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueUserPreferences;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.USER_ID_FKEY_FIELDNAME;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.WILDCARD_SEARCH_MINIMUM_LENGTH;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.WILDCARD_SEARCH_UNAUTHORISED_TOO_SHORT_MESSAGE;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Maps;
@@ -65,7 +63,6 @@ import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -329,7 +326,7 @@ public class AdminFacade extends AbstractSegueFacade {
           RegisteredUserDTO user = this.userManager.getUserDTOByEmail(email);
 
           if (null == user) {
-            log.error(String.format("No user could be found with email (%s)", email));
+            log.error(String.format("No user could be found with email (%s)", sanitiseInternalLogValue(email)));
             throw new NoUserException("No user found with this email.");
           }
         }
@@ -537,7 +534,6 @@ public class AdminFacade extends AbstractSegueFacade {
 
       for (Map<String, Object> eventDetails : eventDetailsList) {
         String recipientEmail = (String) eventDetails.get("email");
-        // TODO: this is very MailJet specific:
         Integer mailjetListId = (Integer) eventDetails.get("mj_list_id");
         EmailType unsubscribedEmailType = EmailType.NEWS_AND_UPDATES;
         if (null != mailjetListId && getProperties().getProperty(MAILJET_NEWS_LIST_ID)
@@ -548,7 +544,7 @@ public class AdminFacade extends AbstractSegueFacade {
           unsubscribedEmailType = EmailType.EVENTS;
         } else {
           log.warn(String.format("User with email (%s) attempted to unsubscribe from unrecognised list (%s)!",
-              recipientEmail, mailjetListId));
+              sanitiseInternalLogValue(recipientEmail), mailjetListId));
         }
         // Find and unsubscribe user:
         if (recipientEmail != null && !recipientEmail.isEmpty()) {
@@ -560,7 +556,7 @@ public class AdminFacade extends AbstractSegueFacade {
             userPreferencesToUpdate.add(preferenceToSave);
           } catch (NoUserException e) {
             log.warn(String.format("User with email (%s) attempted to unsubscribe, but no Isaac account found!",
-                recipientEmail));
+                sanitiseInternalLogValue(recipientEmail)));
           }
         }
       }
@@ -759,15 +755,6 @@ public class AdminFacade extends AbstractSegueFacade {
 
       misuseMonitor.notifyEvent(currentUser.getId().toString(), UserSearchMisuseHandler.class.getSimpleName());
 
-      if (!isUserAnAdmin(userManager, currentUser)
-          && (null == familyName || familyName.isEmpty())
-          && (null == schoolOther || schoolOther.isEmpty())
-          && (null == email || email.isEmpty())
-          && (null == schoolURN || schoolURN.isEmpty())) {
-        return new SegueErrorResponse(Status.FORBIDDEN, "You do not have permission to do wildcard searches.")
-            .toResponse();
-
-      }
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueResourceMisuseException e) {
@@ -782,22 +769,10 @@ public class AdminFacade extends AbstractSegueFacade {
       }
 
       if (null != email && !email.isEmpty()) {
-        if (currentUser.getRole().equals(Role.EVENT_MANAGER)
-            && email.replaceAll("[^A-z0-9]", "").length() < WILDCARD_SEARCH_MINIMUM_LENGTH) {
-          return new SegueErrorResponse(Status.FORBIDDEN, WILDCARD_SEARCH_UNAUTHORISED_TOO_SHORT_MESSAGE)
-              .toResponse();
-        }
         userPrototype.setEmail(email);
       }
 
       if (null != familyName && !familyName.isEmpty()) {
-        // Event managers aren't allowed to do short wildcard searches, but need surnames less than 4 chars too.
-        if (currentUser.getRole().equals(Role.EVENT_MANAGER)
-            && familyName.replaceAll("[^A-z]", "").length() < WILDCARD_SEARCH_MINIMUM_LENGTH
-            && familyName.length() != familyName.replaceAll("[^A-z]", "").length()) {
-          return new SegueErrorResponse(Status.FORBIDDEN, WILDCARD_SEARCH_UNAUTHORISED_TOO_SHORT_MESSAGE)
-              .toResponse();
-        }
         userPrototype.setFamilyName(familyName);
       }
 
@@ -1027,7 +1002,8 @@ public class AdminFacade extends AbstractSegueFacade {
         HttpEntity e = httpResponse.getEntity();
 
         if (httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
-          log.info(currentUser.getEmail() + " changed live version from " + oldLiveVersion + " to " + version + ".");
+          log.info(currentUser.getEmail() + " changed live version from " + oldLiveVersion + " to "
+              + sanitiseInternalLogValue(version) + ".");
           return Response.ok().build();
         } else {
           SegueErrorResponse r = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, IOUtils.toString(e.getContent()));
@@ -1073,8 +1049,8 @@ public class AdminFacade extends AbstractSegueFacade {
       String agentIdentifier = details.get("agentIdentifier");
       String eventLabel = details.get("eventLabel");
       misuseMonitor.resetMisuseCount(agentIdentifier, eventLabel);
-      log.info(String.format("Admin user (%s) reset misuse monitor '%s' for agent id (%s)!", user.getEmail(),
-          eventLabel, agentIdentifier));
+      log.info(sanitiseInternalLogValue(String.format("Admin user (%s) reset misuse monitor '%s' for agent id (%s)!",
+          user.getEmail(), eventLabel, agentIdentifier)));
       return Response.ok().build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
@@ -1150,7 +1126,6 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/sync_external_accounts")
   @Operation(summary = "Trigger an update for external providers where account details have changed.")
   public Response syncExternalAccounts(@Context final HttpServletRequest httpServletRequest) {
-    //TODO - automate this with Quartz, then review if this is still necessary?
     try {
       RegisteredUserDTO user = userManager.getCurrentRegisteredUser(httpServletRequest);
       if (!isUserAnAdmin(userManager, user)) {

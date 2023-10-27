@@ -26,11 +26,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.ID_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_DAYS_IN_LONG_MONTH;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval.NINETY_DAYS;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval.SEVEN_DAYS;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval.SIX_MONTHS;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval.THIRTY_DAYS;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval.TWO_YEARS;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX;
 
 import com.google.api.client.util.Lists;
@@ -53,6 +49,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -84,7 +81,6 @@ import uk.ac.cam.cl.dtg.util.UserQuestionInformation;
 
 /**
  * StatisticsManager.
- * TODO this file is a mess... it needs refactoring.
  */
 public class StatisticsManager implements IStatisticsManager {
   private UserAccountManager userManager;
@@ -151,10 +147,18 @@ public class StatisticsManager implements IStatisticsManager {
    * @return an ImmutableMap{@literal <String, String>} (stat name, stat value)
    * @throws SegueDatabaseException - if there is a database error.
    */
-  public synchronized Map<String, Object> getGeneralStatistics()
-      throws SegueDatabaseException {
-    Map<String, Object> result = Maps.newHashMap();
+  @Override
+  public synchronized Map<String, Object> getGeneralStatistics() throws SegueDatabaseException {
+    Map<String, Object> result = new HashMap<>();
 
+    addBasicStats(result);
+    addRangedActiveUserStats(result);
+    addRangedAnsweredQuestionStats(result);
+
+    return result;
+  }
+
+  private void addBasicStats(final Map<String, Object> result) throws SegueDatabaseException {
     result.put("userGenders", userManager.getGenderCount());
     result.put("userRoles", userManager.getRoleCount());
     result.put("userSchoolInfo", userManager.getSchoolInfoStats());
@@ -163,23 +167,28 @@ public class StatisticsManager implements IStatisticsManager {
     result.put("viewQuestionEvents", logManager.getLogCountByType(IsaacServerLogType.VIEW_QUESTION.name()));
     result.put("answeredQuestionEvents", logManager.getLogCountByType(SegueServerLogType.ANSWER_QUESTION.name()));
     result.put("viewConceptEvents", logManager.getLogCountByType(IsaacServerLogType.VIEW_CONCEPT.name()));
-
-    Map<String, Map<Role, Long>> rangedActiveUserStats = Maps.newHashMap();
-    rangedActiveUserStats.put("sevenDays", userManager.getActiveRolesOverPrevious(SEVEN_DAYS));
-    rangedActiveUserStats.put("thirtyDays", userManager.getActiveRolesOverPrevious(THIRTY_DAYS));
-    rangedActiveUserStats.put("ninetyDays", userManager.getActiveRolesOverPrevious(NINETY_DAYS));
-    rangedActiveUserStats.put("sixMonths", userManager.getActiveRolesOverPrevious(SIX_MONTHS));
-    rangedActiveUserStats.put("twoYears", userManager.getActiveRolesOverPrevious(TWO_YEARS));
-    result.put("activeUsersOverPrevious", rangedActiveUserStats);
-
-    Map<String, Map<Role, Long>> rangedAnsweredQuestionStats = Maps.newHashMap();
-    rangedAnsweredQuestionStats.put("sevenDays", questionManager.getAnsweredQuestionRolesOverPrevious(SEVEN_DAYS));
-    rangedAnsweredQuestionStats.put("thirtyDays", questionManager.getAnsweredQuestionRolesOverPrevious(THIRTY_DAYS));
-    rangedAnsweredQuestionStats.put("ninetyDays", questionManager.getAnsweredQuestionRolesOverPrevious(NINETY_DAYS));
-    result.put("answeringUsersOverPrevious", rangedAnsweredQuestionStats);
-
-    return result;
   }
+
+  private void addRangedActiveUserStats(final Map<String, Object> result) throws SegueDatabaseException {
+    TimeInterval[] timeIntervals = {
+        TimeInterval.SEVEN_DAYS,
+        TimeInterval.THIRTY_DAYS,
+        TimeInterval.NINETY_DAYS,
+        TimeInterval.SIX_MONTHS,
+        TimeInterval.TWO_YEARS
+    };
+    result.put("activeUsersOverPrevious", userManager.getActiveRolesOverPrevious(timeIntervals));
+  }
+
+  private void addRangedAnsweredQuestionStats(final Map<String, Object> result) throws SegueDatabaseException {
+    TimeInterval[] timeIntervals = {
+        TimeInterval.SEVEN_DAYS,
+        TimeInterval.THIRTY_DAYS,
+        TimeInterval.NINETY_DAYS
+    };
+    result.put("answeringUsersOverPrevious", questionManager.getAnsweredQuestionRolesOverPrevious(timeIntervals));
+  }
+
 
   /**
    * LogCount.
@@ -200,6 +209,7 @@ public class StatisticsManager implements IStatisticsManager {
    *     numberActiveLastThirtyDays.
    * @throws UnableToIndexSchoolsException - if there is a problem getting school details.
    */
+  @Override
   public List<Map<String, Object>> getSchoolStatistics()
       throws UnableToIndexSchoolsException, SegueSearchException {
     @SuppressWarnings("unchecked")
@@ -271,6 +281,7 @@ public class StatisticsManager implements IStatisticsManager {
    * @return A map of schools to integers (representing the number of registered users)
    * @throws UnableToIndexSchoolsException as per the description
    */
+  @Override
   public Map<School, List<RegisteredUserDTO>> getUsersBySchool()
       throws UnableToIndexSchoolsException, SegueSearchException {
     List<RegisteredUserDTO> users;
@@ -344,6 +355,7 @@ public class StatisticsManager implements IStatisticsManager {
   /**
    * @return a Map of userId's to last event timestamp
    */
+  @Override
   public Map<String, Date> getLastSeenUserMap() {
     Map<String, Date> lastSeenMap = Maps.newHashMap();
 
@@ -370,6 +382,7 @@ public class StatisticsManager implements IStatisticsManager {
    * @return a map of userId's to last event timestamp
    * @throws SegueDatabaseException - if there is a problem contacting the underlying database
    */
+  @Override
   public Map<String, Date> getLastSeenUserMap(final String qualifyingLogEvent) throws SegueDatabaseException {
     return this.logManager.getLastLogDateForAllUsers(qualifyingLogEvent);
   }
@@ -388,9 +401,6 @@ public class StatisticsManager implements IStatisticsManager {
   public Map<String, Object> getUserQuestionInformation(final RegisteredUserDTO userOfInterest)
       throws SegueDatabaseException, ContentManagerException {
     Validate.notNull(userOfInterest);
-
-    // FIXME: there was a TODO here about tidying this up and moving it elsewhere.
-    // It has been improved and tidied, but may still better belong elsewhere . . .
 
     UserQuestionInformation userQuestionInformation = new UserQuestionInformation();
 

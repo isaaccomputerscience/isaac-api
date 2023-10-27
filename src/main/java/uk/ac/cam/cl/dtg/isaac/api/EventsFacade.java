@@ -36,6 +36,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.TAGS_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.USER_ID_FKEY_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.USER_ID_LIST_FKEY_FIELDNAME;
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
@@ -617,7 +618,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (SegueDatabaseException e) {
       String errorMsg = String.format(
           "Database error occurred while trying retrieve bookings for group (%s) on event (%s).",
-          groupId, eventId);
+          sanitiseExternalLogValue(groupId), sanitiseExternalLogValue(eventId));
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (NoUserLoggedInException e) {
@@ -665,7 +666,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (SegueDatabaseException e) {
       String errorMsg = String.format(
           "Database error occurred while trying retrieve bookings for event (%s).",
-          eventId);
+          sanitiseExternalLogValue(eventId));
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     }
@@ -1531,9 +1532,15 @@ public class EventsFacade extends AbstractIsaacFacade {
             bookingsForThisEvent.stream().filter(b -> BookingStatus.CONFIRMED.equals(b.getBookingStatus())).count();
         long numberOfWaitingListBookings =
             bookingsForThisEvent.stream().filter(b -> BookingStatus.WAITING_LIST.equals(b.getBookingStatus())).count();
+        long numberAttended =
+            bookingsForThisEvent.stream().filter(b -> BookingStatus.ATTENDED.equals(b.getBookingStatus())).count();
+        long numberAbsent =
+            bookingsForThisEvent.stream().filter(b -> BookingStatus.ABSENT.equals(b.getBookingStatus())).count();
 
         eventOverviewBuilder.put("numberOfConfirmedBookings", numberOfConfirmedBookings);
         eventOverviewBuilder.put("numberOfWaitingListBookings", numberOfWaitingListBookings);
+        eventOverviewBuilder.put("numberAttended", numberAttended);
+        eventOverviewBuilder.put("numberAbsent", numberAbsent);
 
         if (null != event.getNumberOfPlaces()) {
           eventOverviewBuilder.put("numberOfPlaces", event.getNumberOfPlaces());
@@ -1690,7 +1697,6 @@ public class EventsFacade extends AbstractIsaacFacade {
     if (possibleEvent instanceof IsaacEventPageDTO) {
       // The Events Facade *mutates* the EventDTO returned by this method; we must return a copy of
       // the original object else we will poison the contentManager's cache!
-      // TODO: might it be better to get the DO from the cache and map it to DTO here to reduce overhead?
       return mapper.map(possibleEvent, IsaacEventPageDTO.class);
     }
     return null;
