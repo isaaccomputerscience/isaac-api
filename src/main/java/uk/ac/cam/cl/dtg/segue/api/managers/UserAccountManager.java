@@ -2004,18 +2004,18 @@ public class UserAccountManager implements IUserAccountManager {
       throws SegueDatabaseException, NoUserException {
     RegisteredUser user = findUserById(userId);
     if (user == null) {
-      throw new NoUserException("No user found with this ID.");
+      throw new NoUserException(String.format("No user found with ID: %s", userId));
     }
     user.setTeacherPending(newFlagValue);
     RegisteredUser updatedUser = database.createOrUpdateUser(user);
     return dtoMapper.map(updatedUser, RegisteredUserDTO.class);
   }
 
-  public void sendRoleChangeRequestEmail(final HttpServletRequest request, final RegisteredUserDTO currentUser,
+  public void sendRoleChangeRequestEmail(final HttpServletRequest request, final RegisteredUserDTO user,
                                          final Role requestedRole, final Map<String, String> requestDetails)
       throws SegueDatabaseException, ContentManagerException {
     String roleName = requestedRole.toString();
-    String userSchool = Objects.requireNonNullElse(currentUser.getSchoolId(), currentUser.getSchoolOther());
+    String userSchool = Objects.requireNonNullElse(user.getSchoolId(), user.getSchoolOther());
     String verificationDetails = requestDetails.get("verificationDetails");
     String otherInformation = Objects.requireNonNullElse(requestDetails.get("otherInformation"), "");
     String emailSubject = String.format("%s Account Request", roleName);
@@ -2027,21 +2027,21 @@ public class UserAccountManager implements IUserAccountManager {
             + " (or a phone number to contact the school) is: %s\n<br>\n<br>\n<br>"
             + "Any other information: %s\n<br>\n<br>"
             + "Thanks, \n<br>\n<br>%s %s",
-        userSchool, verificationDetails, otherInformation, currentUser.getGivenName(), currentUser.getFamilyName());
-    emailManager.sendContactUsFormEmail(properties.getProperty(Constants.MAIL_RECEIVERS),
-        new ImmutableMap.Builder<String, Object>()
-            .put("contactGivenName", currentUser.getGivenName())
-            .put("contactFamilyName", currentUser.getFamilyName())
-            .put("contactUserId", currentUser.getId())
-            .put("contactUserRole", currentUser.getRole())
-            .put("contactEmail", currentUser.getEmail())
-            .put("contactSubject", emailSubject)
-            .put("contactMessage", emailMessage)
-            .put("replyToName", String.format("%s %s", currentUser.getGivenName(), currentUser.getFamilyName()))
-            .build());
+        userSchool, verificationDetails, otherInformation, user.getGivenName(), user.getFamilyName());
+    Map<String, Object> emailValues = new ImmutableMap.Builder<String, Object>()
+        .put("contactGivenName", user.getGivenName())
+        .put("contactFamilyName", user.getFamilyName())
+        .put("contactUserId", user.getId())
+        .put("contactUserRole", user.getRole())
+        .put("contactEmail", user.getEmail())
+        .put("contactSubject", emailSubject)
+        .put("contactMessage", emailMessage)
+        .put("replyToName", String.format("%s %s", user.getGivenName(), user.getFamilyName()))
+        .build();
+    emailManager.sendContactUsFormEmail(properties.getProperty(Constants.MAIL_RECEIVERS), emailValues);
 
-    logManager.logEvent(currentUser, request, SegueServerLogType.CONTACT_US_FORM_USED,
-        ImmutableMap.of("message", String.format("%s %s (%s) - %s", currentUser.getGivenName(),
-            currentUser.getFamilyName(), currentUser.getEmail(), emailMessage)));
+    logManager.logEvent(user, request, SegueServerLogType.CONTACT_US_FORM_USED,
+        ImmutableMap.of("message", String.format("%s %s (%s) - %s", user.getGivenName(),
+            user.getFamilyName(), user.getEmail(), emailMessage)));
   }
 }
