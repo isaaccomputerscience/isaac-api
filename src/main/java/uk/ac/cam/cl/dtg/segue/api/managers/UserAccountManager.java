@@ -2017,7 +2017,13 @@ public class UserAccountManager implements IUserAccountManager {
     String roleName = requestedRole.toString();
     String userSchool = Objects.requireNonNullElse(user.getSchoolId(), user.getSchoolOther());
     String verificationDetails = requestDetails.get("verificationDetails");
-    String otherInformation = Objects.requireNonNullElse(requestDetails.get("otherInformation"), "");
+    String otherInformation = requestDetails.get("otherInformation");
+    String otherInformationLine;
+    if (otherInformation == null || otherInformation.isEmpty()) {
+      otherInformationLine = "";
+    } else {
+      otherInformationLine = String.format("Any other information: %s\n<br>\n<br>", otherInformation);
+    }
     String emailSubject = String.format("%s Account Request", roleName);
     String emailMessage = String.format(
         "Hello,\n<br>\n<br>"
@@ -2025,9 +2031,9 @@ public class UserAccountManager implements IUserAccountManager {
             + "My school is: %s\n<br>"
             + "A link to my school website with a staff list showing my name and email"
             + " (or a phone number to contact the school) is: %s\n<br>\n<br>\n<br>"
-            + "Any other information: %s\n<br>\n<br>"
+            + "%s"
             + "Thanks, \n<br>\n<br>%s %s",
-        userSchool, verificationDetails, otherInformation, user.getGivenName(), user.getFamilyName());
+        userSchool, verificationDetails, otherInformationLine, user.getGivenName(), user.getFamilyName());
     Map<String, Object> emailValues = new ImmutableMap.Builder<String, Object>()
         .put("contactGivenName", user.getGivenName())
         .put("contactFamilyName", user.getFamilyName())
