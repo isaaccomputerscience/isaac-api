@@ -293,9 +293,12 @@ public abstract class IsaacIntegrationTest {
     }
     replay(secondFactorManager);
 
+    schoolListReader = new SchoolListReader(elasticSearchProvider);
+
     userAccountManager =
         new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, mapperFacade, emailManager,
-            pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager, userPreferenceManager);
+            pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager, userPreferenceManager,
+            schoolListReader);
 
     ObjectMapper objectMapper = new ObjectMapper();
     EventBookingPersistenceManager bookingPersistanceManager =
@@ -319,7 +322,6 @@ public abstract class IsaacIntegrationTest {
     replay(userBadgeManager);
     assignmentManager = new AssignmentManager(assignmentPersistenceManager, groupManager,
         new EmailService(emailManager, groupManager, userAccountManager), gameManager, properties);
-    schoolListReader = createNiceMock(SchoolListReader.class);
 
     quizManager = new QuizManager(properties, new ContentService(contentManager, "latest"), contentManager,
         new ContentSummarizerService(mapperFacade, new URIManager(properties)), contentMapper);

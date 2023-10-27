@@ -72,6 +72,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Gender;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
+import uk.ac.cam.cl.dtg.isaac.dos.users.School;
 import uk.ac.cam.cl.dtg.isaac.dos.users.TOTPSharedSecret;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserAuthenticationSettings;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
@@ -113,8 +114,11 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
+import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
+import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IAnonymousUserDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
+import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -139,6 +143,7 @@ public class UserAccountManager implements IUserAccountManager {
   private final ISecondFactorAuthenticator secondFactorManager;
 
   private final AbstractUserPreferenceManager userPreferenceManager;
+  private final SchoolListReader schoolListReader;
 
   private final Pattern restrictedSignupEmailRegex;
   private static final int USER_NAME_MAX_LENGTH = 255;
@@ -164,6 +169,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @param userAuthenticationManager - for managing sessions, passwords and third-party provider links
    * @param secondFactorManager       - for configuring 2FA
    * @param userPreferenceManager     - Allows user preferences to be managed.
+   * @param schoolListReader          - to look up a users school.
    */
   @Inject
   public UserAccountManager(final IUserDataManager database, final QuestionManager questionDb,
@@ -173,7 +179,8 @@ public class UserAccountManager implements IUserAccountManager {
                             final EmailManager emailQueue, final IAnonymousUserDataManager temporaryUserCache,
                             final ILogManager logManager, final UserAuthenticationManager userAuthenticationManager,
                             final ISecondFactorAuthenticator secondFactorManager,
-                            final AbstractUserPreferenceManager userPreferenceManager) {
+                            final AbstractUserPreferenceManager userPreferenceManager,
+                            final SchoolListReader schoolListReader) {
 
     Validate.notNull(properties.getProperty(HMAC_SALT));
     Validate.notNull(properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
@@ -194,6 +201,7 @@ public class UserAccountManager implements IUserAccountManager {
     this.userAuthenticationManager = userAuthenticationManager;
     this.secondFactorManager = secondFactorManager;
     this.userPreferenceManager = userPreferenceManager;
+    this.schoolListReader = schoolListReader;
 
     String forbiddenEmailRegex = properties.getProperty(RESTRICTED_SIGNUP_EMAIL_REGEX);
     if (null == forbiddenEmailRegex || forbiddenEmailRegex.isEmpty()) {
@@ -2013,10 +2021,18 @@ public class UserAccountManager implements IUserAccountManager {
 
   public void sendRoleChangeRequestEmail(final HttpServletRequest request, final RegisteredUserDTO user,
                                          final Role requestedRole, final Map<String, String> requestDetails)
-      throws SegueDatabaseException, ContentManagerException {
-    String roleName = requestedRole.toString();
-    String userSchool = Objects.requireNonNullElse(user.getSchoolId(), user.getSchoolOther());
+      throws SegueDatabaseException, ContentManagerException, MissingRequiredFieldException {
+    String userSchool = getSchoolNameWithPostcode(user);
+    if (userSchool == null) {
+      throw new MissingRequiredFieldException(
+          String.format("School information could not be found for user with ID: %s", user.getId()));
+    }
+
     String verificationDetails = requestDetails.get("verificationDetails");
+    if (verificationDetails == null || verificationDetails.isEmpty()) {
+      throw new MissingRequiredFieldException("No verification details provided");
+    }
+
     String otherInformation = requestDetails.get("otherInformation");
     String otherInformationLine;
     if (otherInformation == null || otherInformation.isEmpty()) {
@@ -2024,6 +2040,8 @@ public class UserAccountManager implements IUserAccountManager {
     } else {
       otherInformationLine = String.format("Any other information: %s\n<br>\n<br>", otherInformation);
     }
+
+    String roleName = requestedRole.toString();
     String emailSubject = String.format("%s Account Request", roleName);
     String emailMessage = String.format(
         "Hello,\n<br>\n<br>"
@@ -2049,5 +2067,20 @@ public class UserAccountManager implements IUserAccountManager {
     logManager.logEvent(user, request, SegueServerLogType.CONTACT_US_FORM_USED,
         ImmutableMap.of("message", String.format("%s %s (%s) - %s", user.getGivenName(),
             user.getFamilyName(), user.getEmail(), emailMessage)));
+  }
+
+  private String getSchoolNameWithPostcode(final RegisteredUserDTO user) {
+    if (user.getSchoolId() != null && !user.getSchoolId().isEmpty()) {
+      try {
+        School school = schoolListReader.findSchoolById(user.getSchoolId());
+        return String.format("%s, %s", school.getName(), school.getPostcode());
+      } catch (UnableToIndexSchoolsException | IOException | SegueSearchException e) {
+        log.error(String.format("Could not find school matching URN: %s", user.getSchoolId()));
+      }
+    }
+    if (user.getSchoolOther() != null && !user.getSchoolOther().isEmpty()) {
+      return user.getSchoolOther();
+    }
+    return null;
   }
 }

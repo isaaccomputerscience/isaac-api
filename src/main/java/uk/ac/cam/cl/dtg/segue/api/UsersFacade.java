@@ -86,6 +86,7 @@ import uk.ac.cam.cl.dtg.segue.api.monitors.TeacherPasswordResetMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.IncorrectCredentialsProvidedException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidPasswordException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidTokenException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.MissingRequiredFieldException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
@@ -744,6 +745,10 @@ public class UsersFacade extends AbstractSegueFacade {
       String errorMsg = "An error occurred while retrieving the email template";
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
+    } catch (MissingRequiredFieldException e) {
+      String errorMsg = "Required user information or verification details could not be found";
+      log.error(errorMsg, e);
+      return new SegueErrorResponse(Status.BAD_REQUEST, errorMsg).toResponse();
     }
   }
 }
