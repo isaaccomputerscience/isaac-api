@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.dtg.segue.api.managers;
 
+import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
@@ -16,6 +17,7 @@ import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isUserNameV
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 import ma.glasnost.orika.MapperFacade;
@@ -43,6 +45,7 @@ import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.segue.dao.users.PgAnonymousUsers;
 import uk.ac.cam.cl.dtg.segue.dao.users.PgUsers;
+import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 public class UserAccountManagerTest {
@@ -63,18 +66,18 @@ public class UserAccountManagerTest {
 
   @BeforeEach
   public void beforeEach() {
-    database = createNiceMock(PgUsers.class);
+    database = createMock(PgUsers.class);
     questionmanager = createNiceMock(QuestionManager.class);
     propertiesLoader = createNiceMock(PropertiesLoader.class);
     providersToRegister = Map.of();
     dtoMapper = createNiceMock(MapperFacade.class);
-    emailManager = createNiceMock(EmailManager.class);
+    emailManager = createMock(EmailManager.class);
     pgAnonymousUsers = createNiceMock(PgAnonymousUsers.class);
     logManager = createNiceMock(ILogManager.class);
     userAuthenticationManager = createNiceMock(UserAuthenticationManager.class);
     secondFactorAuthenticator = createNiceMock(ISecondFactorAuthenticator.class);
     userPreferenceManager = createNiceMock(PgUserPreferenceManager.class);
-    schoolListReader = createNiceMock(SchoolListReader.class);
+    schoolListReader = createMock(SchoolListReader.class);
 
     expect(propertiesLoader.getProperty(HMAC_SALT)).andStubReturn("SALTY");
     expect(propertiesLoader.getProperty(Constants.SESSION_EXPIRY_SECONDS_DEFAULT)).andStubReturn("60");
@@ -211,7 +214,6 @@ public class UserAccountManagerTest {
   public void sendRoleChangeRequestEmail_success()
       throws UnableToIndexSchoolsException, ContentManagerException, IOException, SegueDatabaseException,
       MissingRequiredFieldException {
-
     School school = new School() {
       {
         setUrn("1");
@@ -228,18 +230,14 @@ public class UserAccountManagerTest {
         "contactUserId", 1L,
         "contactUserRole", STUDENT,
         "contactEmail", "test@test.com",
-        "contactSubject", "TEACHER Account Request",
-        "contactMessage", "Hello,\n"
-            + "<br>\n"
-            + "<br>Please could you convert my Isaac account into a teacher account.\n"
-            + "<br>\n"
-            + "<br>My school is: SchoolName, Postcode\n"
-            + "<br>A link to my school website with a staff list showing my name and email (or a phone number to contact the school) is: school staff url\n"
-            + "<br>\n"
-            + "<br>\n"
-            + "<br>Thanks, \n"
-            + "<br>\n"
-            + "<br>GivenName FamilyName",
+        "contactSubject", "Teacher Account Request",
+        "contactMessage", "Hello,\n<br>\n<br>"
+            + "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>"
+            + "My school is: SchoolName, Postcode\n<br>"
+            + "A link to my school website with a staff list showing my name and email"
+            + " (or a phone number to contact the school) is: school staff url\n<br>\n<br>\n<br>"
+            + "Any other information: more information\n<br>\n<br>"
+            + "Thanks, \n<br>\n<br>GivenName FamilyName",
         "replyToName", "GivenName FamilyName"
     );
     emailManager.sendContactUsFormEmail("admin@localhost", expectedEmailDetails);
@@ -264,5 +262,201 @@ public class UserAccountManagerTest {
     );
 
     userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails);
+
+    verify(schoolListReader);
+    verify(emailManager);
+  }
+
+  @Test
+  public void sendRoleChangeRequestEmail_successNoOtherInformation()
+      throws UnableToIndexSchoolsException, ContentManagerException, IOException, SegueDatabaseException,
+      MissingRequiredFieldException {
+    School school = new School() {
+      {
+        setUrn("1");
+        setName("SchoolName");
+        setPostcode("Postcode");
+      }
+    };
+    expect(schoolListReader.findSchoolById("1")).andReturn(school);
+    replay(schoolListReader);
+
+    Map<String, Object> expectedEmailDetails = Map.of(
+        "contactGivenName", "GivenName",
+        "contactFamilyName", "FamilyName",
+        "contactUserId", 1L,
+        "contactUserRole", STUDENT,
+        "contactEmail", "test@test.com",
+        "contactSubject", "Teacher Account Request",
+        "contactMessage", "Hello,\n<br>\n<br>"
+            + "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>"
+            + "My school is: SchoolName, Postcode\n<br>"
+            + "A link to my school website with a staff list showing my name and email"
+            + " (or a phone number to contact the school) is: school staff url\n<br>\n<br>\n<br>"
+            + "Thanks, \n<br>\n<br>GivenName FamilyName",
+        "replyToName", "GivenName FamilyName"
+    );
+    emailManager.sendContactUsFormEmail("admin@localhost", expectedEmailDetails);
+    expectLastCall();
+    replay(emailManager);
+
+    HttpServletRequest request = createNiceMock(HttpServletRequest.class);
+    replay(request);
+    RegisteredUserDTO user = new RegisteredUserDTO() {
+      {
+        setId(1L);
+        setSchoolId("1");
+        setGivenName("GivenName");
+        setFamilyName("FamilyName");
+        setEmail("test@test.com");
+        setRole(STUDENT);
+      }
+    };
+    Map<String, String> requestDetails = Map.of(
+        "verificationDetails", "school staff url"
+    );
+
+    userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails);
+
+    verify(schoolListReader);
+    verify(emailManager);
+  }
+
+  @Test
+  public void sendRoleChangeRequestEmail_missingSchool()
+      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    expect(schoolListReader.findSchoolById("1")).andReturn(null);
+    replay(schoolListReader);
+
+    HttpServletRequest request = createNiceMock(HttpServletRequest.class);
+    replay(request);
+    RegisteredUserDTO user = new RegisteredUserDTO() {
+      {
+        setId(1L);
+        setSchoolId("1");
+        setGivenName("GivenName");
+        setFamilyName("FamilyName");
+        setEmail("test@test.com");
+        setRole(STUDENT);
+      }
+    };
+    Map<String, String> requestDetails = Map.of(
+        "verificationDetails", "school staff url",
+        "otherDetails", "more information"
+    );
+
+    assertThrows(MissingRequiredFieldException.class,
+        () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails));
+
+    verify(schoolListReader);
+  }
+
+  @Test
+  public void sendRoleChangeRequestEmail_missingVerificationDetails()
+      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    School school = new School() {
+      {
+        setUrn("1");
+        setName("SchoolName");
+        setPostcode("Postcode");
+      }
+    };
+    expect(schoolListReader.findSchoolById("1")).andReturn(school);
+    replay(schoolListReader);
+
+    HttpServletRequest request = createNiceMock(HttpServletRequest.class);
+    replay(request);
+    RegisteredUserDTO user = new RegisteredUserDTO() {
+      {
+        setId(1L);
+        setSchoolId("1");
+        setGivenName("GivenName");
+        setFamilyName("FamilyName");
+        setEmail("test@test.com");
+        setRole(STUDENT);
+      }
+    };
+    Map<String, String> requestDetails = Map.of(
+        "otherDetails", "more information"
+    );
+
+    assertThrows(MissingRequiredFieldException.class,
+        () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails));
+
+    verify(schoolListReader);
+  }
+
+  @Test
+  public void sendRoleChangeRequestEmail_nullVerificationDetails()
+      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    School school = new School() {
+      {
+        setUrn("1");
+        setName("SchoolName");
+        setPostcode("Postcode");
+      }
+    };
+    expect(schoolListReader.findSchoolById("1")).andReturn(school);
+    replay(schoolListReader);
+
+    HttpServletRequest request = createNiceMock(HttpServletRequest.class);
+    replay(request);
+    RegisteredUserDTO user = new RegisteredUserDTO() {
+      {
+        setId(1L);
+        setSchoolId("1");
+        setGivenName("GivenName");
+        setFamilyName("FamilyName");
+        setEmail("test@test.com");
+        setRole(STUDENT);
+      }
+    };
+    Map<String, String> requestDetails = new HashMap<>() {
+      {
+        put("verificationDetails", null);
+        put("otherDetails", "more information");
+      }
+    };
+
+    assertThrows(MissingRequiredFieldException.class,
+        () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails));
+
+    verify(schoolListReader);
+  }
+
+  @Test
+  public void sendRoleChangeRequestEmail_emptyVerificationDetails()
+      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    School school = new School() {
+      {
+        setUrn("1");
+        setName("SchoolName");
+        setPostcode("Postcode");
+      }
+    };
+    expect(schoolListReader.findSchoolById("1")).andReturn(school);
+    replay(schoolListReader);
+
+    HttpServletRequest request = createNiceMock(HttpServletRequest.class);
+    replay(request);
+    RegisteredUserDTO user = new RegisteredUserDTO() {
+      {
+        setId(1L);
+        setSchoolId("1");
+        setGivenName("GivenName");
+        setFamilyName("FamilyName");
+        setEmail("test@test.com");
+        setRole(STUDENT);
+      }
+    };
+    Map<String, String> requestDetails = Map.of(
+        "verificationDetails", "",
+        "otherDetails", "more information"
+    );
+
+    assertThrows(MissingRequiredFieldException.class,
+        () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails));
+
+    verify(schoolListReader);
   }
 }
