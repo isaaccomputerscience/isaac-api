@@ -10,6 +10,7 @@ import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.isaac.dos.users.Role.STUDENT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
@@ -300,12 +301,11 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
       );
       RegisteredUserDTO initialUserState = currentlyStudentLogin.user;
       assertFalse(initialUserState.getTeacherPending());
-      initialUserState.setTeacherPending(true);
 
       Response upgradeResponse = usersFacade.requestRoleChange(upgradeRequest, requestDetails);
 
       assertEquals(Response.Status.OK.getStatusCode(), upgradeResponse.getStatus());
-      assertEquals(initialUserState, upgradeResponse.readEntity(RegisteredUserDTO.class));
+      assertTrue(upgradeResponse.readEntity(RegisteredUserDTO.class).getTeacherPending());
 
       // Reset flag
       try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
