@@ -134,6 +134,8 @@ public abstract class IsaacIntegrationTest {
   protected static ISecondFactorAuthenticator secondFactorManager;
   protected static UserAccountManager userAccountManager;
   protected static RecaptchaManager recaptchaManager;
+  protected static PgUsers pgUsers;
+  protected static PgAnonymousUsers pgAnonymousUsers;
   protected static GameManager gameManager;
   protected static GroupManager groupManager;
   protected static EventBookingManager eventBookingManager;
@@ -253,8 +255,8 @@ public abstract class IsaacIntegrationTest {
     recaptchaManager = new RecaptchaManager(properties);
 
     JsonMapper jsonMapper = new JsonMapper();
-    PgUsers pgUsers = new PgUsers(postgresSqlDb, jsonMapper);
-    PgAnonymousUsers pgAnonymousUsers = new PgAnonymousUsers(postgresSqlDb);
+    pgUsers = new PgUsers(postgresSqlDb, jsonMapper);
+    pgAnonymousUsers = new PgAnonymousUsers(postgresSqlDb);
     PgPasswordDataManager passwordDataManager = new PgPasswordDataManager(postgresSqlDb);
 
     ContentMapper contentMapper = new ContentMapper(new Reflections("uk.ac.cam.cl.dtg"));
