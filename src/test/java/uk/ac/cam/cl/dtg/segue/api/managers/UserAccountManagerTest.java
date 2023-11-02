@@ -1,13 +1,35 @@
 package uk.ac.cam.cl.dtg.segue.api.managers;
 
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isEmailValid;
 import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isUserNameValid;
 
+import java.util.Map;
 import java.util.stream.Stream;
+import ma.glasnost.orika.MapperFacade;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import uk.ac.cam.cl.dtg.isaac.dos.PgUserPreferenceManager;
+import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
+import uk.ac.cam.cl.dtg.segue.api.Constants;
+import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
+import uk.ac.cam.cl.dtg.segue.auth.IAuthenticator;
+import uk.ac.cam.cl.dtg.segue.auth.ISecondFactorAuthenticator;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
+import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
+import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
+import uk.ac.cam.cl.dtg.segue.dao.users.PgAnonymousUsers;
+import uk.ac.cam.cl.dtg.segue.dao.users.PgUsers;
+import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 public class UserAccountManagerTest {
 
@@ -88,5 +110,51 @@ public class UserAccountManagerTest {
         Arguments.of(false, "testemail-example"),
         Arguments.of(false, "testemail-twittter")
     );
+  }
+
+  @Test
+  public void updateTeacherPendingFlag() throws SegueDatabaseException, NoUserException {
+    PgUsers database = createNiceMock(PgUsers.class);
+    QuestionManager questionmanager = createNiceMock(QuestionManager.class);
+    PropertiesLoader propertiesLoader = createNiceMock(PropertiesLoader.class);
+    Map<AuthenticationProvider, IAuthenticator> providersToRegister = Map.of();
+    MapperFacade dtoMapper = createNiceMock(MapperFacade.class);
+    EmailManager emailManager = createNiceMock(EmailManager.class);
+    PgAnonymousUsers pgAnonymousUsers = createNiceMock(PgAnonymousUsers.class);
+    ILogManager logManager = createNiceMock(ILogManager.class);
+    UserAuthenticationManager userAuthenticationManager = createNiceMock(UserAuthenticationManager.class);
+    ISecondFactorAuthenticator secondFactorAuthenticator = createNiceMock(ISecondFactorAuthenticator.class);
+    PgUserPreferenceManager userPreferenceManager = createNiceMock(PgUserPreferenceManager.class);
+    SchoolListReader schoolListReader = createNiceMock(SchoolListReader.class);
+
+    RegisteredUser initialUserState = new RegisteredUser() {
+      {
+        setId(1L);
+        setTeacherPending(false);
+      }
+    };
+    RegisteredUser expectedUserState = new RegisteredUser() {
+      {
+        setId(1L);
+        setTeacherPending(true);
+      }
+    };
+    expect(database.getById(1L)).andReturn(initialUserState);
+    expect(database.createOrUpdateUser(expectedUserState)).andReturn(expectedUserState);
+    replay(database);
+
+    expect(propertiesLoader.getProperty(HMAC_SALT)).andStubReturn("SALTY");
+    expect(propertiesLoader.getProperty(Constants.SESSION_EXPIRY_SECONDS_DEFAULT)).andStubReturn("60");
+    expect(propertiesLoader.getProperty(Constants.HOST_NAME)).andStubReturn("HOST");
+    replay(propertiesLoader);
+
+    UserAccountManager userAccountManager =
+        new UserAccountManager(database, questionmanager, propertiesLoader, providersToRegister, dtoMapper,
+            emailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorAuthenticator,
+            userPreferenceManager, schoolListReader);
+
+    userAccountManager.updateTeacherPendingFlag(1L, true);
+
+    verify(database);
   }
 }
