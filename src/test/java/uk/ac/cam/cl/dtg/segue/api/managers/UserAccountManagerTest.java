@@ -268,7 +268,7 @@ public class UserAccountManagerTest {
   }
 
   @Test
-  public void sendRoleChangeRequestEmail_successNoOtherInformation()
+  public void sendRoleChangeRequestEmail_successNoOtherDetails()
       throws UnableToIndexSchoolsException, ContentManagerException, IOException, SegueDatabaseException,
       MissingRequiredFieldException {
     School school = new School() {
@@ -351,8 +351,9 @@ public class UserAccountManagerTest {
     verify(schoolListReader);
   }
 
-  @Test
-  public void sendRoleChangeRequestEmail_missingVerificationDetails()
+  @ParameterizedTest(name = "{index} {0}")
+  @MethodSource("sendRoleChangeRequestEmail_invalidVerificationDetails")
+  public void sendRoleChangeRequestEmail_invalidVerificationDetails(String ignoredTestLabel, Map<String, String> requestDetails)
       throws UnableToIndexSchoolsException, SegueSearchException, IOException {
     School school = new School() {
       {
@@ -374,47 +375,6 @@ public class UserAccountManagerTest {
         setFamilyName("FamilyName");
         setEmail("test@test.com");
         setRole(STUDENT);
-      }
-    };
-    Map<String, String> requestDetails = Map.of(
-        "otherDetails", "more information"
-    );
-
-    assertThrows(MissingRequiredFieldException.class,
-        () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails));
-
-    verify(schoolListReader);
-  }
-
-  @Test
-  public void sendRoleChangeRequestEmail_nullVerificationDetails()
-      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
-    School school = new School() {
-      {
-        setUrn("1");
-        setName("SchoolName");
-        setPostcode("Postcode");
-      }
-    };
-    expect(schoolListReader.findSchoolById("1")).andReturn(school);
-    replay(schoolListReader);
-
-    HttpServletRequest request = createNiceMock(HttpServletRequest.class);
-    replay(request);
-    RegisteredUserDTO user = new RegisteredUserDTO() {
-      {
-        setId(1L);
-        setSchoolId("1");
-        setGivenName("GivenName");
-        setFamilyName("FamilyName");
-        setEmail("test@test.com");
-        setRole(STUDENT);
-      }
-    };
-    Map<String, String> requestDetails = new HashMap<>() {
-      {
-        put("verificationDetails", null);
-        put("otherDetails", "more information");
       }
     };
 
@@ -424,39 +384,21 @@ public class UserAccountManagerTest {
     verify(schoolListReader);
   }
 
-  @Test
-  public void sendRoleChangeRequestEmail_emptyVerificationDetails()
-      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
-    School school = new School() {
-      {
-        setUrn("1");
-        setName("SchoolName");
-        setPostcode("Postcode");
-      }
-    };
-    expect(schoolListReader.findSchoolById("1")).andReturn(school);
-    replay(schoolListReader);
-
-    HttpServletRequest request = createNiceMock(HttpServletRequest.class);
-    replay(request);
-    RegisteredUserDTO user = new RegisteredUserDTO() {
-      {
-        setId(1L);
-        setSchoolId("1");
-        setGivenName("GivenName");
-        setFamilyName("FamilyName");
-        setEmail("test@test.com");
-        setRole(STUDENT);
-      }
-    };
-    Map<String, String> requestDetails = Map.of(
-        "verificationDetails", "",
-        "otherDetails", "more information"
+  private static Stream<Arguments> sendRoleChangeRequestEmail_invalidVerificationDetails() {
+    return Stream.of(
+        Arguments.of("missingVerificationDetails", Map.of(
+            "otherDetails", "more information"
+        )),
+        Arguments.of("nullVerificationDetails", new HashMap<>() {
+              {
+                put("verificationDetails", null);
+                put("otherDetails", "more information");
+              }
+            }),
+        Arguments.of("emptyVerificationDetails", Map.of(
+                "verificationDetails", "",
+            "otherDetails", "more information"
+        ))
     );
-
-    assertThrows(MissingRequiredFieldException.class,
-        () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails));
-
-    verify(schoolListReader);
   }
 }
