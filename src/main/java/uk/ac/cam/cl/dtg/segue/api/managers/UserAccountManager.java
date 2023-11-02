@@ -78,7 +78,13 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserFromAuthProvider;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.*;
+import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserAuthenticationSettingsDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 import uk.ac.cam.cl.dtg.segue.auth.IAuthenticator;
@@ -1493,10 +1499,12 @@ public class UserAccountManager implements IUserAccountManager {
    * @param detailedDTOClass - The level of detail required for the conversion
    * @return a summarised object with reduced personal information
    */
-  public UserSummaryWithEmailAddressDTO convertToDetailedUserSummaryObject(
-      final RegisteredUserDTO userToConvert, final Class<? extends UserSummaryWithEmailAddressDTO> detailedDTOClass) {
+  public UserSummaryWithEmailAddressAndGenderDTO convertToUserSummaryWithEmailAddressAndGenderObject(
+          final RegisteredUserDTO userToConvert,
+          final Class<? extends UserSummaryWithEmailAddressAndGenderDTO> detailedDTOClass) {
     return this.dtoMapper.map(userToConvert, detailedDTOClass);
   }
+
 
   /**
    * Helper method to convert a user object into a more detailed summary object depending on the dto provided.
@@ -1505,8 +1513,8 @@ public class UserAccountManager implements IUserAccountManager {
    * @param detailedDTOClass - The level of detail required for the conversion
    * @return a summarised object with reduced personal information
    */
-  public UserSummaryWithEmailAddressAndGenderDTO convertToUserSummaryWithEmailAddressAndGenderObject(
-          final RegisteredUserDTO userToConvert, final Class<? extends UserSummaryWithEmailAddressAndGenderDTO> detailedDTOClass) {
+  public UserSummaryWithEmailAddressDTO convertToDetailedUserSummaryObject(
+      final RegisteredUserDTO userToConvert, final Class<? extends UserSummaryWithEmailAddressDTO> detailedDTOClass) {
     return this.dtoMapper.map(userToConvert, detailedDTOClass);
   }
 

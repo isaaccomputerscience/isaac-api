@@ -298,7 +298,8 @@ public class EventBookingPersistenceManager {
       // Note: This will pull back deleted users for the purpose of the events system
       // Note: This will also pull in PII that should be of no interest to anyone
       // DANGER: The User DTO gets silently upgraded to one containing the email address here
-      UserSummaryWithEmailAddressAndGenderDTO user = userManager.convertToUserSummaryWithEmailAddressAndGenderObject(userManager.getUserDTOById(eb
+      UserSummaryWithEmailAddressAndGenderDTO user = userManager
+              .convertToUserSummaryWithEmailAddressAndGenderObject(userManager.getUserDTOById(eb
           .getUserId(), true), UserSummaryWithEmailAddressAndGenderDTO.class);
       result.setReservedById(eb.getReservedById());
       result.setUserBooked(user);
