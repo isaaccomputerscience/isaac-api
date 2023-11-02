@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -2042,7 +2043,7 @@ public class UserAccountManager implements IUserAccountManager {
     }
 
     String roleName = requestedRole.toString();
-    String emailSubject = String.format("%s Account Request", roleName);
+    String emailSubject = String.format("%s Account Request", StringUtils.capitalize(roleName.toLowerCase()));
     String emailMessage = String.format(
         "Hello,\n<br>\n<br>"
             + "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>"

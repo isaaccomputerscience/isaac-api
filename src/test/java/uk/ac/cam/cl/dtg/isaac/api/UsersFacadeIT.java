@@ -328,7 +328,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
           "contactUserId", 6L,
           "contactUserRole", STUDENT,
           "contactEmail", "test-student@test.com",
-          "contactSubject", "TEACHER Account Request",
+          "contactSubject", "Teacher Account Request",
           "contactMessage", "Hello,\n<br>\n<br>"
               + "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>"
               + "My school is: Eton College, SL4 6DW\n<br>"
