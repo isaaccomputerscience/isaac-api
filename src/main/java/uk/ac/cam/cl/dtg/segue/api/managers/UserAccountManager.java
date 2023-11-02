@@ -2033,12 +2033,12 @@ public class UserAccountManager implements IUserAccountManager {
       throw new MissingRequiredFieldException("No verification details provided");
     }
 
-    String otherInformation = requestDetails.get("otherInformation");
-    String otherInformationLine;
-    if (otherInformation == null || otherInformation.isEmpty()) {
-      otherInformationLine = "";
+    String otherDetails = requestDetails.get("otherDetails");
+    String otherDetailsLine;
+    if (otherDetails == null || otherDetails.isEmpty()) {
+      otherDetailsLine = "";
     } else {
-      otherInformationLine = String.format("Any other information: %s\n<br>\n<br>", otherInformation);
+      otherDetailsLine = String.format("Any other information: %s\n<br>\n<br>", otherDetails);
     }
 
     String roleName = requestedRole.toString();
@@ -2051,7 +2051,7 @@ public class UserAccountManager implements IUserAccountManager {
             + " (or a phone number to contact the school) is: %s\n<br>\n<br>\n<br>"
             + "%s"
             + "Thanks, \n<br>\n<br>%s %s",
-        userSchool, verificationDetails, otherInformationLine, user.getGivenName(), user.getFamilyName());
+        userSchool, verificationDetails, otherDetailsLine, user.getGivenName(), user.getFamilyName());
     Map<String, Object> emailValues = new ImmutableMap.Builder<String, Object>()
         .put("contactGivenName", user.getGivenName())
         .put("contactFamilyName", user.getFamilyName())
@@ -2073,7 +2073,10 @@ public class UserAccountManager implements IUserAccountManager {
     if (user.getSchoolId() != null && !user.getSchoolId().isEmpty()) {
       try {
         School school = schoolListReader.findSchoolById(user.getSchoolId());
-        return String.format("%s, %s", school.getName(), school.getPostcode());
+        if (school != null) {
+          return String.format("%s, %s", school.getName(), school.getPostcode());
+        }
+        log.error(String.format("Could not find school matching URN: %s", user.getSchoolId()));
       } catch (UnableToIndexSchoolsException | IOException | SegueSearchException e) {
         log.error(String.format("Could not find school matching URN: %s", user.getSchoolId()));
       }

@@ -317,7 +317,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void verifyEmail()
+    public void verifyEmailValues()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -329,17 +329,13 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
           "contactUserRole", STUDENT,
           "contactEmail", "test-student@test.com",
           "contactSubject", "TEACHER Account Request",
-          "contactMessage", "Hello,\n"
-              + "<br>\n"
-              + "<br>Please could you convert my Isaac account into a teacher account.\n"
-              + "<br>\n"
-              + "<br>My school is: Eton College, SL4 6DW\n"
-              + "<br>A link to my school website with a staff list showing my name and email (or a phone number to contact the school) is: school staff url\n"
-              + "<br>\n"
-              + "<br>\n"
-              + "<br>Thanks, \n"
-              + "<br>\n"
-              + "<br>Test Student Student",
+          "contactMessage", "Hello,\n<br>\n<br>"
+              + "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>"
+              + "My school is: Eton College, SL4 6DW\n<br>"
+              + "A link to my school website with a staff list showing my name and email"
+              + " (or a phone number to contact the school) is: school staff url\n<br>\n<br>\n<br>"
+              + "Any other information: more information\n<br>\n<br>"
+              + "Thanks, \n<br>\n<br>Test Student Student",
           "replyToName", "Test Student Student"
       );
 
