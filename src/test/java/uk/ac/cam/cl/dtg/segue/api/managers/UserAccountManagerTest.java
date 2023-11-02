@@ -5,9 +5,9 @@ import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.ac.cam.cl.dtg.isaac.dos.users.Role.STUDENT;
 import static uk.ac.cam.cl.dtg.isaac.dos.users.Role.TEACHER;
@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 import ma.glasnost.orika.MapperFacade;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -89,13 +88,6 @@ public class UserAccountManagerTest {
         new UserAccountManager(database, questionmanager, propertiesLoader, providersToRegister, dtoMapper,
             emailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorAuthenticator,
             userPreferenceManager, schoolListReader);
-  }
-
-  @AfterEach
-  public void afterEach() {
-    reset(database);
-    reset(schoolListReader);
-    reset(emailManager);
   }
 
   @ParameterizedTest
@@ -214,13 +206,7 @@ public class UserAccountManagerTest {
   public void sendRoleChangeRequestEmail_success()
       throws UnableToIndexSchoolsException, ContentManagerException, IOException, SegueDatabaseException,
       MissingRequiredFieldException {
-    School school = new School() {
-      {
-        setUrn("1");
-        setName("SchoolName");
-        setPostcode("Postcode");
-      }
-    };
+    School school = prepareSchoolWithUrn();
     expect(schoolListReader.findSchoolById("1")).andReturn(school);
     replay(schoolListReader);
 
@@ -246,16 +232,7 @@ public class UserAccountManagerTest {
 
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     replay(request);
-    RegisteredUserDTO user = new RegisteredUserDTO() {
-      {
-        setId(1L);
-        setSchoolId("1");
-        setGivenName("GivenName");
-        setFamilyName("FamilyName");
-        setEmail("test@test.com");
-        setRole(STUDENT);
-      }
-    };
+    RegisteredUserDTO user = prepareRegisteredUserDto();
     Map<String, String> requestDetails = Map.of(
         "verificationDetails", "school staff url",
         "otherDetails", "more information"
@@ -271,13 +248,7 @@ public class UserAccountManagerTest {
   public void sendRoleChangeRequestEmail_successNoOtherDetails()
       throws UnableToIndexSchoolsException, ContentManagerException, IOException, SegueDatabaseException,
       MissingRequiredFieldException {
-    School school = new School() {
-      {
-        setUrn("1");
-        setName("SchoolName");
-        setPostcode("Postcode");
-      }
-    };
+    School school = prepareSchoolWithUrn();
     expect(schoolListReader.findSchoolById("1")).andReturn(school);
     replay(schoolListReader);
 
@@ -302,16 +273,7 @@ public class UserAccountManagerTest {
 
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     replay(request);
-    RegisteredUserDTO user = new RegisteredUserDTO() {
-      {
-        setId(1L);
-        setSchoolId("1");
-        setGivenName("GivenName");
-        setFamilyName("FamilyName");
-        setEmail("test@test.com");
-        setRole(STUDENT);
-      }
-    };
+    RegisteredUserDTO user = prepareRegisteredUserDto();
     Map<String, String> requestDetails = Map.of(
         "verificationDetails", "school staff url"
     );
@@ -330,16 +292,7 @@ public class UserAccountManagerTest {
 
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     replay(request);
-    RegisteredUserDTO user = new RegisteredUserDTO() {
-      {
-        setId(1L);
-        setSchoolId("1");
-        setGivenName("GivenName");
-        setFamilyName("FamilyName");
-        setEmail("test@test.com");
-        setRole(STUDENT);
-      }
-    };
+    RegisteredUserDTO user = prepareRegisteredUserDto();
     Map<String, String> requestDetails = Map.of(
         "verificationDetails", "school staff url",
         "otherDetails", "more information"
@@ -355,28 +308,13 @@ public class UserAccountManagerTest {
   @MethodSource("sendRoleChangeRequestEmail_invalidVerificationDetails")
   public void sendRoleChangeRequestEmail_invalidVerificationDetails(String ignoredTestLabel, Map<String, String> requestDetails)
       throws UnableToIndexSchoolsException, SegueSearchException, IOException {
-    School school = new School() {
-      {
-        setUrn("1");
-        setName("SchoolName");
-        setPostcode("Postcode");
-      }
-    };
+    School school = prepareSchoolWithUrn();
     expect(schoolListReader.findSchoolById("1")).andReturn(school);
     replay(schoolListReader);
 
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     replay(request);
-    RegisteredUserDTO user = new RegisteredUserDTO() {
-      {
-        setId(1L);
-        setSchoolId("1");
-        setGivenName("GivenName");
-        setFamilyName("FamilyName");
-        setEmail("test@test.com");
-        setRole(STUDENT);
-      }
-    };
+    RegisteredUserDTO user = prepareRegisteredUserDto();
 
     assertThrows(MissingRequiredFieldException.class,
         () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails));
@@ -399,6 +337,150 @@ public class UserAccountManagerTest {
                 "verificationDetails", "",
             "otherDetails", "more information"
         ))
+    );
+  }
+
+  private static RegisteredUserDTO prepareRegisteredUserDto() {
+    return new RegisteredUserDTO() {
+      {
+        setId(1L);
+        setSchoolId("1");
+        setGivenName("GivenName");
+        setFamilyName("FamilyName");
+        setEmail("test@test.com");
+        setRole(STUDENT);
+      }
+    };
+  }
+
+  private static School prepareSchoolWithUrn() {
+    return new School() {
+      {
+        setUrn("1");
+        setName("SchoolName");
+        setPostcode("Postcode");
+      }
+    };
+  }
+
+  @Test
+  public void getSchoolNameWithPostcode_validUrn()
+      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    School school = prepareSchoolWithUrn();
+    expect(schoolListReader.findSchoolById("1")).andReturn(school);
+    replay(schoolListReader);
+
+    RegisteredUserDTO user = new RegisteredUserDTO() {
+      {
+        setId(1L);
+        setSchoolId("1");
+      }
+    };
+
+    String result = userAccountManager.getSchoolNameWithPostcode(user);
+
+    assertEquals("SchoolName, Postcode", result);
+
+    verify(schoolListReader);
+  }
+
+  @Test
+  public void getSchoolNameWithPostcode_unknownUrn()
+      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    expect(schoolListReader.findSchoolById("1")).andReturn(null);
+    replay(schoolListReader);
+
+    RegisteredUserDTO user = new RegisteredUserDTO() {
+      {
+        setId(1L);
+        setSchoolId("1");
+      }
+    };
+
+    String result = userAccountManager.getSchoolNameWithPostcode(user);
+
+    assertNull(result);
+
+    verify(schoolListReader);
+  }
+
+  @Test
+  public void getSchoolNameWithPostcode_errorOnUrn()
+      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    expect(schoolListReader.findSchoolById("1")).andThrow(new SegueSearchException("Error"));
+    replay(schoolListReader);
+
+    RegisteredUserDTO user = new RegisteredUserDTO() {
+      {
+        setId(1L);
+        setSchoolId("1");
+      }
+    };
+
+    String result = userAccountManager.getSchoolNameWithPostcode(user);
+
+    assertNull(result);
+
+    verify(schoolListReader);
+  }
+
+  @ParameterizedTest
+  @MethodSource("getSchoolNameWithPostcode_urnlessUsers")
+  public void getSchoolNameWithPostcode_urnlessUsers(String expectedResult, RegisteredUserDTO user) {
+    replay(schoolListReader);
+
+    String result = userAccountManager.getSchoolNameWithPostcode(user);
+
+    assertEquals(expectedResult, result);
+
+    // Confirm no unexpected methods have been called on the SchoolListReader
+    verify(schoolListReader);
+  }
+
+  private static Stream<Arguments> getSchoolNameWithPostcode_urnlessUsers() {
+    return Stream.of(
+        Arguments.of("Also a school", new RegisteredUserDTO() {
+          {
+            setId(1L);
+            setSchoolId(null);
+            setSchoolOther("Also a school");
+          }
+        }),
+        Arguments.of("Also a school", new RegisteredUserDTO() {
+          {
+            setId(1L);
+            setSchoolId("");
+            setSchoolOther("Also a school");
+          }
+        }),
+        Arguments.of(null, new RegisteredUserDTO() {
+          {
+            setId(1L);
+            setSchoolId(null);
+            setSchoolOther(null);
+          }
+        }),
+        Arguments.of(null, new RegisteredUserDTO() {
+          {
+            setId(1L);
+            setSchoolId("");
+            setSchoolOther(null);
+          }
+        }),
+        Arguments.of(null, new RegisteredUserDTO() {
+          {
+            setId(1L);
+            setSchoolId(null);
+            setSchoolOther("");
+          }
+        }),
+        Arguments.of(null, new RegisteredUserDTO() {
+          {
+            setId(1L);
+            setSchoolId("");
+            setSchoolOther("");
+          }
+        })
     );
   }
 }

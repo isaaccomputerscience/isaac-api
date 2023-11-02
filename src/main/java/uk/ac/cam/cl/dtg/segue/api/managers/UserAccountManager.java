@@ -2070,7 +2070,7 @@ public class UserAccountManager implements IUserAccountManager {
             user.getFamilyName(), user.getEmail(), emailMessage)));
   }
 
-  private String getSchoolNameWithPostcode(final RegisteredUserDTO user) {
+  public String getSchoolNameWithPostcode(final RegisteredUserDTO user) {
     if (user.getSchoolId() != null && !user.getSchoolId().isEmpty()) {
       try {
         School school = schoolListReader.findSchoolById(user.getSchoolId());
@@ -2085,6 +2085,7 @@ public class UserAccountManager implements IUserAccountManager {
     if (user.getSchoolOther() != null && !user.getSchoolOther().isEmpty()) {
       return user.getSchoolOther();
     }
+    log.warn(String.format("User with ID: %s has no defined school information", user.getId()));
     return null;
   }
 }
