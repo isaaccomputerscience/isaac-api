@@ -16,7 +16,7 @@
 
 package uk.ac.cam.cl.dtg.segue.api.monitors;
 
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_TEN_MINUTES;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_THIRTY_MINUTES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_LOGIN_BY_EMAIL_DEFAULT_HARD_THRESHOLD;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_LOGIN_BY_EMAIL_DEFAULT_SOFT_THRESHOLD;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
@@ -24,7 +24,6 @@ import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 
 /**
  * Handler to detect bruteforce login attempts.
@@ -41,7 +40,7 @@ public class SegueLoginByEmailMisuseHandler implements IMisuseHandler {
   @Inject
   public SegueLoginByEmailMisuseHandler() {
     this(SEGUE_LOGIN_BY_EMAIL_DEFAULT_SOFT_THRESHOLD, SEGUE_LOGIN_BY_EMAIL_DEFAULT_HARD_THRESHOLD,
-        NUMBER_SECONDS_IN_TEN_MINUTES);
+        NUMBER_SECONDS_IN_THIRTY_MINUTES);
   }
 
   @Inject
