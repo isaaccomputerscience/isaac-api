@@ -83,7 +83,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserAuthenticationSettingsDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDto;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
@@ -1495,26 +1495,14 @@ public class UserAccountManager implements IUserAccountManager {
   /**
    * Helper method to convert a user object into a more detailed summary object depending on the dto provided.
    *
-   * @param userToConvert    - full user object.
-   * @param detailedDTOClass - The level of detail required for the conversion
-   * @return a summarised object with reduced personal information
+   * @param <T>             - The type parameter representing the detailed DTO class
+   * @param userToConvert   - Full user object.
+   * @param detailedDTOClass - The DTO class type into which the user object is to be converted
+   * @return a summarised DTO object with details as per the specified detailedDTOClass
    */
-  public UserSummaryWithEmailAddressAndGenderDTO convertToUserSummaryWithEmailAddressAndGenderObject(
+  public <T extends UserSummaryDTO> T convertToUserSummary(
           final RegisteredUserDTO userToConvert,
-          final Class<? extends UserSummaryWithEmailAddressAndGenderDTO> detailedDTOClass) {
-    return this.dtoMapper.map(userToConvert, detailedDTOClass);
-  }
-
-
-  /**
-   * Helper method to convert a user object into a more detailed summary object depending on the dto provided.
-   *
-   * @param userToConvert    - full user object.
-   * @param detailedDTOClass - The level of detail required for the conversion
-   * @return a summarised object with reduced personal information
-   */
-  public UserSummaryWithEmailAddressDTO convertToDetailedUserSummaryObject(
-      final RegisteredUserDTO userToConvert, final Class<? extends UserSummaryWithEmailAddressDTO> detailedDTOClass) {
+          final Class<T> detailedDTOClass) {
     return this.dtoMapper.map(userToConvert, detailedDTOClass);
   }
 
@@ -1546,7 +1534,7 @@ public class UserAccountManager implements IUserAccountManager {
     Validate.notNull(userListToConvert);
     List<UserSummaryWithEmailAddressDTO> resultList = Lists.newArrayList();
     for (RegisteredUserDTO user : userListToConvert) {
-      resultList.add(this.convertToDetailedUserSummaryObject(user, detailedDTO));
+      resultList.add(this.convertToUserSummary(user, detailedDTO));
     }
     return resultList;
   }
@@ -1567,7 +1555,7 @@ public class UserAccountManager implements IUserAccountManager {
     if (null == registeredUser) {
       throw new NoUserLoggedInException();
     }
-    return this.convertToDetailedUserSummaryObject(this.convertUserDOToUserDTO(registeredUser),
+    return this.convertToUserSummary(this.convertUserDOToUserDTO(registeredUser),
         UserSummaryWithEmailAddressDTO.class);
   }
 
