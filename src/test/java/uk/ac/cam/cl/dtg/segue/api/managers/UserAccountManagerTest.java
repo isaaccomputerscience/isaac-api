@@ -49,33 +49,24 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 public class UserAccountManagerTest {
 
-  PgUsers database;
-  QuestionManager questionmanager;
-  PropertiesLoader propertiesLoader;
-  Map<AuthenticationProvider, IAuthenticator> providersToRegister;
-  MapperFacade dtoMapper;
-  EmailManager emailManager;
-  PgAnonymousUsers pgAnonymousUsers;
-  ILogManager logManager;
-  UserAuthenticationManager userAuthenticationManager;
-  ISecondFactorAuthenticator secondFactorAuthenticator;
-  PgUserPreferenceManager userPreferenceManager;
-  SchoolListReader schoolListReader;
-  UserAccountManager userAccountManager;
+  private PgUsers database;
+  private EmailManager emailManager;
+  private SchoolListReader schoolListReader;
+  private UserAccountManager userAccountManager;
 
   @BeforeEach
   public void beforeEach() {
     database = createMock(PgUsers.class);
-    questionmanager = createNiceMock(QuestionManager.class);
-    propertiesLoader = createNiceMock(PropertiesLoader.class);
-    providersToRegister = Map.of();
-    dtoMapper = createNiceMock(MapperFacade.class);
+    QuestionManager questionmanager = createNiceMock(QuestionManager.class);
+    PropertiesLoader propertiesLoader = createNiceMock(PropertiesLoader.class);
+    Map<AuthenticationProvider, IAuthenticator> providersToRegister = Map.of();
+    MapperFacade dtoMapper = createNiceMock(MapperFacade.class);
     emailManager = createMock(EmailManager.class);
-    pgAnonymousUsers = createNiceMock(PgAnonymousUsers.class);
-    logManager = createNiceMock(ILogManager.class);
-    userAuthenticationManager = createNiceMock(UserAuthenticationManager.class);
-    secondFactorAuthenticator = createNiceMock(ISecondFactorAuthenticator.class);
-    userPreferenceManager = createNiceMock(PgUserPreferenceManager.class);
+    PgAnonymousUsers pgAnonymousUsers = createNiceMock(PgAnonymousUsers.class);
+    ILogManager logManager = createNiceMock(ILogManager.class);
+    UserAuthenticationManager userAuthenticationManager = createNiceMock(UserAuthenticationManager.class);
+    ISecondFactorAuthenticator secondFactorAuthenticator = createNiceMock(ISecondFactorAuthenticator.class);
+    PgUserPreferenceManager userPreferenceManager = createNiceMock(PgUserPreferenceManager.class);
     schoolListReader = createMock(SchoolListReader.class);
 
     expect(propertiesLoader.getProperty(HMAC_SALT)).andStubReturn("SALTY");
