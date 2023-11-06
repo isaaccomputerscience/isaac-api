@@ -162,18 +162,14 @@ public class UserAccountManagerTest {
 
   @Test
   public void updateTeacherPendingFlag_success() throws SegueDatabaseException, NoUserException {
-    RegisteredUser initialUserState = new RegisteredUser() {
-      {
-        setId(1L);
-        setTeacherPending(false);
-      }
-    };
-    RegisteredUser expectedUserState = new RegisteredUser() {
-      {
-        setId(1L);
-        setTeacherPending(true);
-      }
-    };
+    RegisteredUser initialUserState = new RegisteredUser();
+    initialUserState.setId(1L);
+    initialUserState.setTeacherPending(false);
+
+    RegisteredUser expectedUserState = new RegisteredUser();
+    expectedUserState.setId(1L);
+    expectedUserState.setTeacherPending(true);
+
     expect(database.getById(1L)).andReturn(initialUserState);
     expect(database.createOrUpdateUser(expectedUserState)).andStubReturn(expectedUserState);
     replay(database);
@@ -223,7 +219,7 @@ public class UserAccountManagerTest {
 
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     replay(request);
-    RegisteredUserDTO user = prepareRegisteredUserDto();
+    RegisteredUserDTO user = prepareRegisteredUserDtoWithDetails();
     Map<String, String> requestDetails = Map.of(
         "verificationDetails", "school staff url",
         "otherDetails", "more information"
@@ -264,7 +260,7 @@ public class UserAccountManagerTest {
 
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     replay(request);
-    RegisteredUserDTO user = prepareRegisteredUserDto();
+    RegisteredUserDTO user = prepareRegisteredUserDtoWithDetails();
     Map<String, String> requestDetails = Map.of(
         "verificationDetails", "school staff url"
     );
@@ -283,7 +279,7 @@ public class UserAccountManagerTest {
 
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     replay(request);
-    RegisteredUserDTO user = prepareRegisteredUserDto();
+    RegisteredUserDTO user = prepareRegisteredUserDtoWithDetails();
     Map<String, String> requestDetails = Map.of(
         "verificationDetails", "school staff url",
         "otherDetails", "more information"
@@ -305,7 +301,7 @@ public class UserAccountManagerTest {
 
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     replay(request);
-    RegisteredUserDTO user = prepareRegisteredUserDto();
+    RegisteredUserDTO user = prepareRegisteredUserDtoWithDetails();
 
     assertThrows(MissingRequiredFieldException.class,
         () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails));
@@ -331,27 +327,23 @@ public class UserAccountManagerTest {
     );
   }
 
-  private static RegisteredUserDTO prepareRegisteredUserDto() {
-    return new RegisteredUserDTO() {
-      {
-        setId(1L);
-        setSchoolId("1");
-        setGivenName("GivenName");
-        setFamilyName("FamilyName");
-        setEmail("test@test.com");
-        setRole(STUDENT);
-      }
-    };
+  private static RegisteredUserDTO prepareRegisteredUserDtoWithDetails() {
+    RegisteredUserDTO user = new RegisteredUserDTO();
+    user.setId(1L);
+    user.setSchoolId("1");
+    user.setGivenName("GivenName");
+    user.setFamilyName("FamilyName");
+    user.setEmail("test@test.com");
+    user.setRole(STUDENT);
+    return user;
   }
 
   private static School prepareSchoolWithUrn() {
-    return new School() {
-      {
-        setUrn("1");
-        setName("SchoolName");
-        setPostcode("Postcode");
-      }
-    };
+    School school = new School();
+    school.setUrn("1");
+    school.setName("SchoolName");
+    school.setPostcode("Postcode");
+    return school;
   }
 
   @Test
@@ -361,12 +353,7 @@ public class UserAccountManagerTest {
     expect(schoolListReader.findSchoolById("1")).andReturn(school);
     replay(schoolListReader);
 
-    RegisteredUserDTO user = new RegisteredUserDTO() {
-      {
-        setId(1L);
-        setSchoolId("1");
-      }
-    };
+    RegisteredUserDTO user = prepareRegisteredUserDtoWithUrn();
 
     String result = userAccountManager.getSchoolNameWithPostcode(user);
 
@@ -381,12 +368,7 @@ public class UserAccountManagerTest {
     expect(schoolListReader.findSchoolById("1")).andReturn(null);
     replay(schoolListReader);
 
-    RegisteredUserDTO user = new RegisteredUserDTO() {
-      {
-        setId(1L);
-        setSchoolId("1");
-      }
-    };
+    RegisteredUserDTO user = prepareRegisteredUserDtoWithUrn();
 
     String result = userAccountManager.getSchoolNameWithPostcode(user);
 
@@ -401,18 +383,20 @@ public class UserAccountManagerTest {
     expect(schoolListReader.findSchoolById("1")).andThrow(new SegueSearchException("Error"));
     replay(schoolListReader);
 
-    RegisteredUserDTO user = new RegisteredUserDTO() {
-      {
-        setId(1L);
-        setSchoolId("1");
-      }
-    };
+    RegisteredUserDTO user = prepareRegisteredUserDtoWithUrn();
 
     String result = userAccountManager.getSchoolNameWithPostcode(user);
 
     assertNull(result);
 
     verify(schoolListReader);
+  }
+
+  private static RegisteredUserDTO prepareRegisteredUserDtoWithUrn() {
+    RegisteredUserDTO user = new RegisteredUserDTO();
+    user.setId(1L);
+    user.setSchoolId("1");
+    return user;
   }
 
   @ParameterizedTest
@@ -430,48 +414,20 @@ public class UserAccountManagerTest {
 
   private static Stream<Arguments> getSchoolNameWithPostcode_urnlessUsers() {
     return Stream.of(
-        Arguments.of("Also a school", new RegisteredUserDTO() {
-          {
-            setId(1L);
-            setSchoolId(null);
-            setSchoolOther("Also a school");
-          }
-        }),
-        Arguments.of("Also a school", new RegisteredUserDTO() {
-          {
-            setId(1L);
-            setSchoolId("");
-            setSchoolOther("Also a school");
-          }
-        }),
-        Arguments.of(null, new RegisteredUserDTO() {
-          {
-            setId(1L);
-            setSchoolId(null);
-            setSchoolOther(null);
-          }
-        }),
-        Arguments.of(null, new RegisteredUserDTO() {
-          {
-            setId(1L);
-            setSchoolId("");
-            setSchoolOther(null);
-          }
-        }),
-        Arguments.of(null, new RegisteredUserDTO() {
-          {
-            setId(1L);
-            setSchoolId(null);
-            setSchoolOther("");
-          }
-        }),
-        Arguments.of(null, new RegisteredUserDTO() {
-          {
-            setId(1L);
-            setSchoolId("");
-            setSchoolOther("");
-          }
-        })
+        Arguments.of("Also a school", prepareRegisteredUserDtoWithSchoolOther(null, "Also a school")),
+        Arguments.of("Also a school", prepareRegisteredUserDtoWithSchoolOther("", "Also a school")),
+        Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther(null, null)),
+        Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther("", null)),
+        Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther(null, "")),
+        Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther("", ""))
     );
+  }
+
+  private static RegisteredUserDTO prepareRegisteredUserDtoWithSchoolOther(String schoolUrn, String schoolOther) {
+    RegisteredUserDTO user = new RegisteredUserDTO();
+    user.setId(1L);
+    user.setSchoolId(schoolUrn);
+    user.setSchoolOther(schoolOther);
+    return user;
   }
 }
