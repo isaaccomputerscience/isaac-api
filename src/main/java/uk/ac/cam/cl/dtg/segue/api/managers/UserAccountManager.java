@@ -1502,8 +1502,8 @@ public class UserAccountManager implements IUserAccountManager {
    */
   public <T extends UserSummaryDTO> T convertToUserSummary(
           final RegisteredUserDTO userToConvert,
-          final Class<T> detailedDTOClass) {
-    return this.dtoMapper.map(userToConvert, detailedDTOClass);
+          final Class<T> detailedDtoClass) {
+    return this.dtoMapper.map(userToConvert, detailedDtoClass);
   }
 
   /**
