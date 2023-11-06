@@ -16,6 +16,13 @@
 
 package uk.ac.cam.cl.dtg.segue.comm;
 
+import static org.easymock.EasyMock.and;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -27,16 +34,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.easymock.Capture;
-import org.easymock.EasyMock;
-import org.easymock.IAnswer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.easymock.PowerMock;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.AbstractUserPreferenceManager;
@@ -58,9 +58,6 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 /**
  * Test class for the EmailManager class.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(GitContentManager.class)
-@PowerMockIgnore("javax.management.*")
 public class EmailManagerTest {
   private static final String CONTENT_VERSION = "liveVersion";
 
@@ -118,61 +115,55 @@ public class EmailManagerTest {
     userDTOWithNulls.setFamilyName(null);
 
     // Create dummy email communicator
-    emailCommunicator = EasyMock.createMock(EmailCommunicator.class);
+    emailCommunicator = createMock(EmailCommunicator.class);
 
     // Create dummy email preferences
-    userPreferenceManager = EasyMock.createMock(PgUserPreferenceManager.class);
+    userPreferenceManager = createMock(PgUserPreferenceManager.class);
 
-    mockPropertiesLoader = EasyMock.createMock(PropertiesLoader.class);
-    EasyMock.expect(mockPropertiesLoader.getProperty("HOST_NAME")).andReturn("dev.isaaccomputerscience.org")
-        .anyTimes();
-    EasyMock.expect(mockPropertiesLoader.getProperty("REPLY_TO_ADDRESS")).andReturn("test-reply@test.com").anyTimes();
-    EasyMock.expect(mockPropertiesLoader.getProperty("MAIL_FROM_ADDRESS"))
+    mockPropertiesLoader = createMock(PropertiesLoader.class);
+    expect(mockPropertiesLoader.getProperty("HOST_NAME")).andReturn("dev.isaaccomputerscience.org").anyTimes();
+    expect(mockPropertiesLoader.getProperty("REPLY_TO_ADDRESS")).andReturn("test-reply@test.com").anyTimes();
+    expect(mockPropertiesLoader.getProperty("MAIL_FROM_ADDRESS"))
         .andReturn("no-reply@isaaccomputerscience.org").anyTimes();
-    EasyMock.expect(mockPropertiesLoader.getProperty("MAIL_NAME")).andReturn("Isaac Computer Science").anyTimes();
+    expect(mockPropertiesLoader.getProperty("MAIL_NAME")).andReturn("Isaac Computer Science").anyTimes();
 
-    EasyMock.replay(mockPropertiesLoader);
+    replay(mockPropertiesLoader);
 
 
     // Create content manager
-    mockContentManager = PowerMock.createMock(GitContentManager.class);
+    mockContentManager = createMock(GitContentManager.class);
 
     // Create log manager
-    logManager = EasyMock.createMock(ILogManager.class);
+    logManager = createMock(ILogManager.class);
     logManager.logInternalEvent(null, null, null);
-    EasyMock.expectLastCall().anyTimes();
+    expectLastCall().anyTimes();
 
     // Create user manager
-    userManager = EasyMock.createMock(UserAccountManager.class);
+    userManager = createMock(UserAccountManager.class);
 
     capturedArgument = Capture.newInstance();
 
     // Mock the emailCommunicator methods so we can see what is sent
     try {
-      emailCommunicator.sendMessage(EasyMock.and(EasyMock.capture(capturedArgument),
-          EasyMock.isA(EmailCommunicationMessage.class)));
+      emailCommunicator.sendMessage(and(capture(capturedArgument), isA(EmailCommunicationMessage.class)));
     } catch (CommunicationException e1) {
       e1.printStackTrace();
       Assert.fail();
     }
 
-    EasyMock.replay(emailCommunicator);
+    replay(emailCommunicator);
     System.out.println("setup");
 
-    mockAuthenticator = EasyMock.createMock(SegueLocalAuthenticator.class);
+    mockAuthenticator = createMock(SegueLocalAuthenticator.class);
 
-    EasyMock.expect(mockAuthenticator.createEmailVerificationTokenForUser(user, user.getEmail())).andAnswer(
-        new IAnswer<RegisteredUser>() {
+    expect(mockAuthenticator.createEmailVerificationTokenForUser(user, user.getEmail())).andAnswer(
+        () -> {
+          user.setEmailVerificationToken("emailVerificationToken");
+          return user;
+        }
+    );
 
-          @Override
-          public RegisteredUser answer() throws Throwable {
-            user.setEmailVerificationToken("emailVerificationToken");
-            return user;
-          }
-
-        });
-
-    EasyMock.replay(mockAuthenticator);
+    replay(mockAuthenticator);
   }
 
   /**
@@ -214,7 +205,7 @@ public class EmailManagerTest {
    */
   @Test
   public final void sendTemplatedEmailToUser_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
-    EasyMock.replay(userManager);
+    replay(userManager);
 
     EmailTemplateDTO template = createDummyEmailTemplate("Hi, {{givenName}}."
         + "\nThanks for registering!\nYour Isaac email address is: "
@@ -225,18 +216,14 @@ public class EmailManagerTest {
 
     ContentDTO asciiTemplate = createDummyContentTemplate("{{content}}");
     try {
-      EasyMock.expect(
-              mockContentManager.getContentById("email-template-registration-confirmation"))
-          .andReturn(template);
+      expect(mockContentManager.getContentById("email-template-registration-confirmation")).andReturn(template);
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-html")).andReturn(
-          htmlTemplate);
-      EasyMock.expect(mockContentManager.getContentById("email-template-ascii")).andReturn(
-          asciiTemplate);
+      expect(mockContentManager.getContentById("email-template-html")).andReturn(htmlTemplate);
+      expect(mockContentManager.getContentById("email-template-ascii")).andReturn(asciiTemplate);
 
-      EasyMock.expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
+      expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
-      EasyMock.replay(mockContentManager);
+      replay(mockContentManager);
 
     } catch (ContentManagerException e) {
       e.printStackTrace();
@@ -300,19 +287,15 @@ public class EmailManagerTest {
 
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
     try {
-      EasyMock.expect(
-              mockContentManager.getContentById("email-template-federated-password-reset"))
-          .andReturn(template);
+      expect(mockContentManager.getContentById("email-template-federated-password-reset")).andReturn(template);
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-html")).andReturn(
-          htmlTemplate);
+      expect(mockContentManager.getContentById("email-template-html")).andReturn(htmlTemplate);
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-ascii")).andReturn(
-          htmlTemplate);
+      expect(mockContentManager.getContentById("email-template-ascii")).andReturn(htmlTemplate);
 
-      EasyMock.expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
+      expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
-      EasyMock.replay(mockContentManager);
+      replay(mockContentManager);
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
@@ -373,18 +356,15 @@ public class EmailManagerTest {
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
 
     try {
-      EasyMock.expect(mockContentManager.getContentById("email-template-password-reset"))
-          .andReturn(template).once();
+      expect(mockContentManager.getContentById("email-template-password-reset")).andReturn(template).once();
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-html"))
-          .andReturn(htmlTemplate).once();
+      expect(mockContentManager.getContentById("email-template-html")).andReturn(htmlTemplate).once();
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-ascii")).andReturn(
-          htmlTemplate);
+      expect(mockContentManager.getContentById("email-template-ascii")).andReturn(htmlTemplate);
 
-      EasyMock.expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
+      expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
-      EasyMock.replay(mockContentManager);
+      replay(mockContentManager);
 
     } catch (ContentManagerException e) {
       e.printStackTrace();
@@ -446,16 +426,13 @@ public class EmailManagerTest {
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
     // Create content manager
     try {
-      EasyMock.expect(
-              mockContentManager.getContentById("email-template-registration-confirmation"))
-          .andReturn(template).once();
+      expect(mockContentManager.getContentById("email-template-registration-confirmation")).andReturn(template).once();
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-html"))
-          .andReturn(htmlTemplate).once();
+      expect(mockContentManager.getContentById("email-template-html")).andReturn(htmlTemplate).once();
 
-      EasyMock.expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
+      expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
-      EasyMock.replay(mockContentManager);
+      replay(mockContentManager);
 
     } catch (ContentManagerException e) {
       e.printStackTrace();
@@ -488,23 +465,19 @@ public class EmailManagerTest {
     EmailTemplateDTO template = createDummyEmailTemplate("this is a template with no tags");
 
     // Create content manager
-    GitContentManager mockContentManager = PowerMock.createMock(GitContentManager.class);
+    GitContentManager mockContentManager = createMock(GitContentManager.class);
 
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
     try {
-      EasyMock.expect(
-              mockContentManager.getContentById("email-template-registration-confirmation"))
-          .andReturn(template);
+      expect(mockContentManager.getContentById("email-template-registration-confirmation")).andReturn(template);
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-ascii")).andReturn(
-          htmlTemplate);
+      expect(mockContentManager.getContentById("email-template-ascii")).andReturn(htmlTemplate);
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-html")).andReturn(
-          htmlTemplate);
+      expect(mockContentManager.getContentById("email-template-html")).andReturn(htmlTemplate);
 
-      EasyMock.expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
+      expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
-      PowerMock.replay(mockContentManager);
+      replay(mockContentManager);
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
@@ -550,16 +523,13 @@ public class EmailManagerTest {
   public void sendRegistrationConfirmation_checkNullContentDTO_exceptionThrownAndDealtWith() {
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
     try {
-      EasyMock.expect(
-              mockContentManager.getContentById("email-template-registration-confirmation"))
-          .andReturn(null);
+      expect(mockContentManager.getContentById("email-template-registration-confirmation")).andReturn(null);
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-html")).andReturn(
-          htmlTemplate);
+      expect(mockContentManager.getContentById("email-template-html")).andReturn(htmlTemplate);
 
-      EasyMock.expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
+      expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
-      EasyMock.replay(mockContentManager);
+      replay(mockContentManager);
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
@@ -614,17 +584,17 @@ public class EmailManagerTest {
         new UserPreference(userDTOWithNulls.getId(), SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
             false);
     try {
-      EasyMock.expect(
+      expect(
           userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
               userDTOWithNulls.getId())).andReturn(userPreference);
-      EasyMock.expect(
+      expect(
           userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
               userDTOWithNulls.getId())).andReturn(userPreference);
     } catch (SegueDatabaseException e1) {
       e1.printStackTrace();
       Assert.fail();
     }
-    EasyMock.replay(userPreferenceManager);
+    replay(userPreferenceManager);
 
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
     EmailTemplateDTO emailTemplate = createDummyEmailTemplate("Hello {{givenName}}, "
@@ -632,18 +602,17 @@ public class EmailManagerTest {
     String contentObjectId = "test-email-template";
 
     try {
-      EasyMock.expect(mockContentManager.getContentById(contentObjectId)).andReturn(
-          emailTemplate);
+      expect(mockContentManager.getContentById(contentObjectId)).andReturn(emailTemplate);
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-html"))
+      expect(mockContentManager.getContentById("email-template-html"))
           .andReturn(htmlTemplate).times(allSelectedUsers.size());
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-ascii"))
+      expect(mockContentManager.getContentById("email-template-ascii"))
           .andReturn(htmlTemplate).times(allSelectedUsers.size());
 
-      EasyMock.expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
+      expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
-      EasyMock.replay(mockContentManager);
+      replay(mockContentManager);
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
@@ -676,17 +645,17 @@ public class EmailManagerTest {
         new UserPreference(userDTOWithNulls.getId(), SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
             false);
     try {
-      EasyMock.expect(
+      expect(
           userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
               userDTOWithNulls.getId())).andReturn(userPreference);
-      EasyMock.expect(
+      expect(
           userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
               userDTOWithNulls.getId())).andReturn(userPreference);
     } catch (SegueDatabaseException e1) {
       e1.printStackTrace();
       Assert.fail();
     }
-    EasyMock.replay(userPreferenceManager);
+    replay(userPreferenceManager);
 
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
     String htmlContent = "hi {{givenName}}<br><br>This is a test";
@@ -700,15 +669,15 @@ public class EmailManagerTest {
 
     try {
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-html"))
+      expect(mockContentManager.getContentById("email-template-html"))
           .andReturn(htmlTemplate).times(allSelectedUsers.size());
 
-      EasyMock.expect(mockContentManager.getContentById("email-template-ascii"))
+      expect(mockContentManager.getContentById("email-template-ascii"))
           .andReturn(htmlTemplate).times(allSelectedUsers.size());
 
-      EasyMock.expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
+      expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
-      EasyMock.replay(mockContentManager);
+      replay(mockContentManager);
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();

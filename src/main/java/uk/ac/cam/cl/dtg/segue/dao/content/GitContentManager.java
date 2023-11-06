@@ -196,7 +196,7 @@ public class GitContentManager {
    * @return the content DTO object.
    * @throws ContentManagerException on failure to return the object or null.
    */
-  public final ContentDTO getContentById(final String id, final boolean failQuietly) throws ContentManagerException {
+  public ContentDTO getContentById(final String id, final boolean failQuietly) throws ContentManagerException {
     String k = "getContentById~" + getCurrentContentSHA() + "~" + id;
     if (!cache.asMap().containsKey(k)) {
       ContentDTO c = this.mapper.getDTOByDO(this.getContentDOById(id, failQuietly));
@@ -511,7 +511,7 @@ public class GitContentManager {
     return this.findByFieldNamesRandomOrder(fieldsToMatch, startIndex, limit, null);
   }
 
-  public final ResultsWrapper<ContentDTO> findByFieldNamesRandomOrder(
+  public ResultsWrapper<ContentDTO> findByFieldNamesRandomOrder(
       final List<BooleanSearchClause> fieldsToMatch, final Integer startIndex,
       final Integer limit, @Nullable final Long randomSeed
   ) throws ContentManagerException {
