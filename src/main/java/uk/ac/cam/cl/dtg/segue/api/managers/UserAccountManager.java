@@ -1497,7 +1497,7 @@ public class UserAccountManager implements IUserAccountManager {
    *
    * @param <T>             - The type parameter representing the detailed DTO class
    * @param userToConvert   - Full user object.
-   * @param detailedDTOClass - The DTO class type into which the user object is to be converted
+   * @param detailedDtoClass - The DTO class type into which the user object is to be converted
    * @return a summarised DTO object with details as per the specified detailedDTOClass
    */
   public <T extends UserSummaryDTO> T convertToUserSummary(
