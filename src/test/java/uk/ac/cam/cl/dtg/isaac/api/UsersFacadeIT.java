@@ -308,12 +308,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
       assertTrue(upgradeResponse.readEntity(RegisteredUserDTO.class).getTeacherPending());
 
       // Reset flag
-      try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
-          "UPDATE users SET teacher_pending = ? WHERE id = ?;")) {
-        pst.setBoolean(1, false);
-        pst.setLong(2, ITConstants.TEST_STUDENT_ID);
-        pst.executeUpdate();
-      }
+      resetTestDatabaseTeacherPendingFlag(ITConstants.TEST_STUDENT_ID);
     }
 
     @Test
@@ -367,12 +362,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
       reset(mockEmailManager);
 
       // Reset flag
-      try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
-          "UPDATE users SET teacher_pending = ? WHERE id = ?;")) {
-        pst.setBoolean(1, false);
-        pst.setLong(2, ITConstants.TEST_STUDENT_ID);
-        pst.executeUpdate();
-      }
+      resetTestDatabaseTeacherPendingFlag(ITConstants.TEST_STUDENT_ID);
     }
 
     @Test
@@ -471,6 +461,15 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
       assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), upgradeResponse.getStatus());
       assertEquals("You already have a teacher role.",
           upgradeResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+  }
+
+  private static void resetTestDatabaseTeacherPendingFlag(Long userId) throws SQLException {
+    try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
+        "UPDATE users SET teacher_pending = ? WHERE id = ?;")) {
+      pst.setBoolean(1, false);
+      pst.setLong(2, userId);
+      pst.executeUpdate();
     }
   }
 }
