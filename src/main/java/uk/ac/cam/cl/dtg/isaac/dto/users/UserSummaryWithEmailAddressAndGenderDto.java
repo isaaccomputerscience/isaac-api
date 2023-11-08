@@ -36,7 +36,7 @@ public class UserSummaryWithEmailAddressAndGenderDto extends UserSummaryWithEmai
   /**
    * Sets the gender.
    *
-   * @param gender the id to set
+   * @param gender - The gender of the user
    */
   public void setGender(final String gender) {
     this.gender = gender;
