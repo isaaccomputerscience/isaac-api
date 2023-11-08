@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 James Sharkey
+ * Copyright 2023 Kasim Ali
  * <br>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package uk.ac.cam.cl.dtg.isaac.dto.users;
 
 /**
- * View of a User Summary object, which contains additional information (email).
+ * View of a User Summary object, which contains additional information (email and gender).
  * Usually used where a sharing relationship has or will be created.
  */
 public class UserSummaryWithEmailAddressAndGenderDto extends UserSummaryWithEmailAddressDTO {
