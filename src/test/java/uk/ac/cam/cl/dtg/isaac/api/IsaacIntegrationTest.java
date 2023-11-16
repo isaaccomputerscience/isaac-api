@@ -136,6 +136,7 @@ public abstract class IsaacIntegrationTest {
   protected static RecaptchaManager recaptchaManager;
   protected static PgUsers pgUsers;
   protected static PgAnonymousUsers pgAnonymousUsers;
+  protected static ContentMapper contentMapper;
   protected static GameManager gameManager;
   protected static GroupManager groupManager;
   protected static EventBookingManager eventBookingManager;
@@ -259,7 +260,7 @@ public abstract class IsaacIntegrationTest {
     pgAnonymousUsers = new PgAnonymousUsers(postgresSqlDb);
     PgPasswordDataManager passwordDataManager = new PgPasswordDataManager(postgresSqlDb);
 
-    ContentMapper contentMapper = new ContentMapper(new Reflections("uk.ac.cam.cl.dtg"));
+    contentMapper = new ContentMapper(new Reflections("uk.ac.cam.cl.dtg"));
     PgQuestionAttempts pgQuestionAttempts = new PgQuestionAttempts(postgresSqlDb, contentMapper);
     questionManager = new QuestionManager(contentMapper, pgQuestionAttempts);
 
