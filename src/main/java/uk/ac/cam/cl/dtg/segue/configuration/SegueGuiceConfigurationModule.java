@@ -837,7 +837,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
           new RegistrationMisuseHandler(emailManager, properties));
 
       misuseMonitor.registerHandler(SegueLoginByEmailMisuseHandler.class.getSimpleName(),
-          new SegueLoginByEmailMisuseHandler());
+          new SegueLoginByEmailMisuseHandler(properties));
 
       misuseMonitor.registerHandler(SegueLoginByIPMisuseHandler.class.getSimpleName(),
           new SegueLoginByIPMisuseHandler());

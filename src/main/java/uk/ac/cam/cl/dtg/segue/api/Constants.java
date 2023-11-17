@@ -640,6 +640,8 @@ public final class Constants {
 
   public static final String QUESTION_MISUSE_THRESHOLD_OVERRIDE = "QUESTION_MISUSE_THRESHOLD_OVERRIDE";
 
+  public static final String SEGUE_LOGIN_EMAIL_MISUSE_INTERVAL = "SEGUE_LOGIN_EMAIL_MISUSE_INTERVAL";
+
   // User Preferences:
   public enum SegueUserPreferences {
     EMAIL_PREFERENCE
