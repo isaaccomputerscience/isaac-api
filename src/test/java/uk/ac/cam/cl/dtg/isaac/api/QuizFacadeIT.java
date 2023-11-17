@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_QUIZ_ID;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ALICE_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ALICE_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHERS_AB_GROUP_ID;
@@ -42,6 +44,7 @@ import jakarta.ws.rs.core.Response;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
+import java.util.List;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -305,6 +308,66 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       // check an error message was returned
       SegueErrorResponse responseBody = (SegueErrorResponse) previewQuizResponse.getEntity();
       assertEquals("You do not have the permissions to complete this action", responseBody.getErrorMessage());
+    }
+  }
+
+  @Nested
+  class GetAssignedQuizzes {
+    @Test
+    public void studentAssignedQuizzes_noAssignments()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+      HttpServletRequest assignedQuizRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(assignedQuizRequest);
+
+      Response getAssignedQuizzesResponse = quizFacade.getAssignedQuizzes(assignedQuizRequest);
+
+      assertEquals(Response.Status.OK.getStatusCode(), getAssignedQuizzesResponse.getStatus());
+
+      @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
+          (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
+      assertTrue(responseBody.isEmpty());
+    }
+
+    @Test
+    public void studentAssignedQuizzes_oneAssignment()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_ALICE_EMAIL, TEST_STUDENT_ALICE_PASSWORD);
+      HttpServletRequest assignedQuizRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(assignedQuizRequest);
+
+      Response getAssignedQuizzesResponse = quizFacade.getAssignedQuizzes(assignedQuizRequest);
+
+      assertEquals(Response.Status.OK.getStatusCode(), getAssignedQuizzesResponse.getStatus());
+
+      @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
+          (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
+      assertTrue(responseBody.stream().anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID)));
+    }
+
+    @Test
+    public void teacherAssignedQuizzes_noAssignments()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult studentLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+      HttpServletRequest assignedQuizRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(assignedQuizRequest);
+
+      Response getAssignedQuizzesResponse = quizFacade.getAssignedQuizzes(assignedQuizRequest);
+
+      assertEquals(Response.Status.OK.getStatusCode(), getAssignedQuizzesResponse.getStatus());
+
+      @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
+          (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
+      assertTrue(responseBody.isEmpty());
     }
   }
 }

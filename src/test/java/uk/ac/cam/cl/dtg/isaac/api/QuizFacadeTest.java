@@ -195,23 +195,23 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void getAssignedQuizzes() {
-    List<QuizAssignmentDTO> noAssignments = Collections.emptyList();
-    forEndpoint(() -> quizFacade.getAssignedQuizzes(httpServletRequest),
-        requiresLogin(),
-        as(student,
-            prepare(assignmentService, m -> m.augmentAssignerSummaries(studentAssignments)),
-            prepare(quizManager, m -> m.augmentWithQuizSummary(studentAssignments)),
-            prepare(quizAttemptManager, m -> m.augmentAssignmentsFor(student, studentAssignments)),
-            respondsWith(studentAssignments)),
-        as(anyOf(teacher, secondStudent),
-            prepare(assignmentService, m -> m.augmentAssignerSummaries(noAssignments)),
-            prepare(quizManager, m -> m.augmentWithQuizSummary(noAssignments)),
-            prepare(quizAttemptManager, m -> m.augmentAssignmentsFor(currentUser(), noAssignments)),
-            respondsWith(noAssignments)
-        ));
-  }
+//  @Test
+//  public void getAssignedQuizzes() {
+//    List<QuizAssignmentDTO> noAssignments = Collections.emptyList();
+//    forEndpoint(() -> quizFacade.getAssignedQuizzes(httpServletRequest),
+//        requiresLogin(),
+//        as(student,
+//            prepare(assignmentService, m -> m.augmentAssignerSummaries(studentAssignments)),
+//            prepare(quizManager, m -> m.augmentWithQuizSummary(studentAssignments)),
+//            prepare(quizAttemptManager, m -> m.augmentAssignmentsFor(student, studentAssignments)),
+//            respondsWith(studentAssignments)),
+//        as(anyOf(teacher, secondStudent),
+//            prepare(assignmentService, m -> m.augmentAssignerSummaries(noAssignments)),
+//            prepare(quizManager, m -> m.augmentWithQuizSummary(noAssignments)),
+//            prepare(quizAttemptManager, m -> m.augmentAssignmentsFor(currentUser(), noAssignments)),
+//            respondsWith(noAssignments)
+//        ));
+//  }
 
   @Test
   public void getFreeAttempts() {
