@@ -180,20 +180,20 @@ public class QuizFacadeTest extends AbstractFacadeTest {
         assignmentService, quizAttemptManager, quizQuestionManager, associationManager);
   }
 
-  @Test
-  public void availableQuizzes() {
-    forEndpoint(() -> quizFacade.getAvailableQuizzes(request, httpServletRequest),
-        requiresLogin(),
-        as(anyOf(student, secondStudent),
-            check((response) ->
-                assertEquals(Collections.singletonList(studentQuizSummary), extractResults(response)))
-        ),
-        as(teacher,
-            check((response) ->
-                assertEquals(ImmutableList.of(studentQuizSummary, teacherQuizSummary), extractResults(response)))
-        )
-    );
-  }
+//  @Test
+//  public void availableQuizzes() {
+//    forEndpoint(() -> quizFacade.getAvailableQuizzes(request, httpServletRequest),
+//        requiresLogin(),
+//        as(anyOf(student, secondStudent),
+//            check((response) ->
+//                assertEquals(Collections.singletonList(studentQuizSummary), extractResults(response)))
+//        ),
+//        as(teacher,
+//            check((response) ->
+//                assertEquals(ImmutableList.of(studentQuizSummary, teacherQuizSummary), extractResults(response)))
+//        )
+//    );
+//  }
 
   @Test
   public void getAssignedQuizzes() {

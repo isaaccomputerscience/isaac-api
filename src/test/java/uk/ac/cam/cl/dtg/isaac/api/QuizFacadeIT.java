@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_QUIZ_ID;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHERS_AB_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHER_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHER_ID;
@@ -42,6 +44,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.QuizFeedbackMode;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizDTO;
@@ -69,197 +72,239 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         quizQuestionManager);
   }
 
-  @Test
-  public void createQuizAssignmentEndpoint_assignQuizAsTeacher_succeeds() throws NoCredentialsAvailableException,
-      NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-      IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-    // Arrange
-    // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-    HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-    replay(assignQuizRequest);
+  @Nested
+  class CreateQuizAssignmentEndpoint {
+    @Test
+    public void assignQuizAsTeacher_succeeds() throws NoCredentialsAvailableException,
+        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
+        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
+        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+      // Arrange
+      // log in as Teacher, create request
+      LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(assignQuizRequest);
 
-    QuizAssignmentDTO quizAssignmentDTO = new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID,
-        TEST_TEACHER_ID, TEST_TEACHERS_AB_GROUP_ID, new Date(), DateUtils.addDays(new Date(), 5),
-        QuizFeedbackMode.DETAILED_FEEDBACK);
+      QuizAssignmentDTO quizAssignmentDTO = new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID,
+          TEST_TEACHER_ID, TEST_TEACHERS_AB_GROUP_ID, new Date(), DateUtils.addDays(new Date(), 5),
+          QuizFeedbackMode.DETAILED_FEEDBACK);
 
-    // Act
-    // make request
-    Response createQuizResponse = quizFacade.createQuizAssignment(assignQuizRequest, quizAssignmentDTO);
+      // Act
+      // make request
+      Response createQuizResponse = quizFacade.createQuizAssignment(assignQuizRequest, quizAssignmentDTO);
 
-    // Assert
-    // check status code is OK
-    assertEquals(Response.Status.OK.getStatusCode(), createQuizResponse.getStatus());
+      // Assert
+      // check status code is OK
+      assertEquals(Response.Status.OK.getStatusCode(), createQuizResponse.getStatus());
 
-    // check the quiz was assigned successfully
-    QuizAssignmentDTO responseBody = (QuizAssignmentDTO) createQuizResponse.getEntity();
-    assertEquals(TEST_TEACHERS_AB_GROUP_ID, (long) responseBody.getGroupId());
+      // check the quiz was assigned successfully
+      QuizAssignmentDTO responseBody = (QuizAssignmentDTO) createQuizResponse.getEntity();
+      assertEquals(TEST_TEACHERS_AB_GROUP_ID, (long) responseBody.getGroupId());
+    }
+
+    @Test
+    public void assignQuizAsTutor_fails() throws NoCredentialsAvailableException,
+        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
+        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
+        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+      // Arrange
+      // log in as Tutor, create request
+      LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
+      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+      replay(assignQuizRequest);
+
+      QuizAssignmentDTO quizAssignmentDTO = new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID,
+          TEST_TUTOR_ID, TEST_TUTORS_AB_GROUP_ID, new Date(), DateUtils.addDays(new Date(), 5),
+          QuizFeedbackMode.DETAILED_FEEDBACK);
+
+      // Act
+      // make request
+      Response createQuizResponse = quizFacade.createQuizAssignment(assignQuizRequest, quizAssignmentDTO);
+
+      // Assert
+      // check status code is FORBIDDEN
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizResponse.getStatus());
+
+      // check an error message was returned
+      SegueErrorResponse responseBody = (SegueErrorResponse) createQuizResponse.getEntity();
+      assertEquals("You do not have the permissions to complete this action", responseBody.getErrorMessage());
+    }
   }
 
-  @Test
-  public void createQuizAssignmentEndpoint_assignQuizAsTutor_fails() throws NoCredentialsAvailableException,
-      NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-      IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-    // Arrange
-    // log in as Tutor, create request
-    LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-    HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
-    replay(assignQuizRequest);
+  @Nested
+  class GetAvailableQuizzesEndpoint {
+    @Test
+    public void getQuizzesAsTeacher_returnsAll() throws NoCredentialsAvailableException,
+        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
+        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
+        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+      // Arrange
+      // log in as Teacher, create request
+      LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(assignQuizRequest);
 
-    QuizAssignmentDTO quizAssignmentDTO = new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID,
-        TEST_TUTOR_ID, TEST_TUTORS_AB_GROUP_ID, new Date(), DateUtils.addDays(new Date(), 5),
-        QuizFeedbackMode.DETAILED_FEEDBACK);
+      // Act
+      // make request
+      Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), assignQuizRequest);
 
-    // Act
-    // make request
-    Response createQuizResponse = quizFacade.createQuizAssignment(assignQuizRequest, quizAssignmentDTO);
+      // Assert
+      // check status code is OK
+      assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
 
-    // Assert
-    // check status code is FORBIDDEN
-    assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizResponse.getStatus());
+      // check all quizzes are returned as available
+      @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
+          (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
+      assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
+      assertTrue(
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)));
+      assertTrue(
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID)));
+    }
 
-    // check an error message was returned
-    SegueErrorResponse responseBody = (SegueErrorResponse) createQuizResponse.getEntity();
-    assertEquals("You do not have the permissions to complete this action", responseBody.getErrorMessage());
+    /**
+     * Tests that quizzes with visibleToStudents=false and hiddenFromRoles=[TUTOR] are not considered available to a tutor.
+     */
+    @Test
+    public void getQuizzesAsTutor_returnsNonInvisibleToStudentOrHiddenFromRoleQuizzes()
+        throws
+        NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException,
+        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
+        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+      // Arrange
+      // log in as Tutor, create request
+      LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
+      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+      replay(assignQuizRequest);
+
+      // Act
+      // make request
+      Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), assignQuizRequest);
+
+      // Assert
+      // check status code is OK
+      assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
+
+      // check invisible-to-student and hidden-from-tutor-role quizzes are not returned as available
+      @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
+          (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
+      assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
+      assertFalse(
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)));
+      assertFalse(
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID)));
+    }
+
+    @Test
+    public void getQuizzesAsStudent_returnsNonInvisibleToStudentQuizzes() throws
+        NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException,
+        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
+        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+      // Arrange
+      // log in as Tutor, create request
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(assignQuizRequest);
+
+      // Act
+      // make request
+      Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), assignQuizRequest);
+
+      // Assert
+      // check status code is OK
+      assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
+
+      // check invisible-to-student and hidden-from-tutor-role quizzes are not returned as available
+      @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
+          (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
+      assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
+      assertFalse(
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)));
+      assertFalse(
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID)));
+    }
   }
 
-  @Test
-  public void getAvailableQuizzesEndpoint_getQuizzesAsTeacher_returnsAll() throws NoCredentialsAvailableException,
-      NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-      IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-    // Arrange
-    // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-    HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-    replay(assignQuizRequest);
+  @Nested
+  class PreviewQuizEndpoint {
+    @Test
+    public void previewInvisibleToStudentQuizAsTeacher_succeeds()
+        throws NoCredentialsAvailableException,
+        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
+        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
+        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+      // Arrange
+      // log in as Teacher, create request
+      LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(assignQuizRequest);
 
-    // Act
-    // make request
-    Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), assignQuizRequest);
+      // Act
+      // make request
+      Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), assignQuizRequest,
+          QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID);
 
-    // Assert
-    // check status code is OK
-    assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
+      // Assert
+      // check status code is OK
+      assertEquals(Response.Status.OK.getStatusCode(), previewQuizResponse.getStatus());
 
-    // check all quizzes are returned as available
-    @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
-        (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
-    assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
-    assertTrue(
-        responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)));
-    assertTrue(
-        responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID)));
-  }
+      // check the quiz is returned for preview
+      IsaacQuizDTO responseBody = (IsaacQuizDTO) previewQuizResponse.getEntity();
+      assertEquals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID, responseBody.getId());
+    }
 
-  /**
-   * Tests that quizzes with visibleToStudents=false and hiddenFromRoles=[TUTOR] are not considered available to a tutor.
-   */
-  @Test
-  public void getAvailableQuizzesEndpoint_getQuizzesAsTutor_returnsNonInvisibleToStudentOrHiddenFromRoleQuizzes() throws
-      NoCredentialsAvailableException, NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-      IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-    // Arrange
-    // log in as Tutor, create request
-    LoginResult teacherLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-    HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-    replay(assignQuizRequest);
+    @Test
+    public void previewHiddenFromRoleStudentQuizAsTutor_fails()
+        throws NoCredentialsAvailableException,
+        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
+        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
+        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+      // Arrange
+      // log in as Tutor, create request
+      LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
+      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+      replay(assignQuizRequest);
 
-    // Act
-    // make request
-    Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), assignQuizRequest);
+      // Act
+      // make request
+      Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), assignQuizRequest,
+          QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID);
 
-    // Assert
-    // check status code is OK
-    assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
+      // Assert
+      // check status code is FORBIDDEN
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
 
-    // check invisible-to-student and hidden-from-tutor-role quizzes are not returned as available
-    @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
-        (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
-    assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
-    assertFalse(
-        responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)));
-    assertFalse(
-        responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID)));
-  }
+      // check an error message was returned
+      SegueErrorResponse responseBody = (SegueErrorResponse) previewQuizResponse.getEntity();
+      assertEquals("You do not have the permissions to complete this action", responseBody.getErrorMessage());
+    }
 
-  @Test
-  public void previewQuizEndpoint_previewInvisibleToStudentQuizAsTeacher_succeeds()
-      throws NoCredentialsAvailableException,
-      NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-      IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-    // Arrange
-    // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-    HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-    replay(assignQuizRequest);
+    @Test
+    public void previewHiddenFromRoleTutorQuizAsTutor_fails()
+        throws NoCredentialsAvailableException,
+        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
+        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
+        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+      // Arrange
+      // log in as Tutor, create request
+      LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
+      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+      replay(assignQuizRequest);
 
-    // Act
-    // make request
-    Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), assignQuizRequest,
-        QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID);
+      // Act
+      // make request
+      Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), assignQuizRequest,
+          QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID);
 
-    // Assert
-    // check status code is OK
-    assertEquals(Response.Status.OK.getStatusCode(), previewQuizResponse.getStatus());
+      // Assert
+      // check status code is FORBIDDEN
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
 
-    // check the quiz is returned for preview
-    IsaacQuizDTO responseBody = (IsaacQuizDTO) previewQuizResponse.getEntity();
-    assertEquals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID, responseBody.getId());
-  }
-
-  @Test
-  public void previewQuizEndpoint_previewHiddenFromRoleStudentQuizAsTutor_fails()
-      throws NoCredentialsAvailableException,
-      NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-      IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-    // Arrange
-    // log in as Tutor, create request
-    LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-    HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
-    replay(assignQuizRequest);
-
-    // Act
-    // make request
-    Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), assignQuizRequest,
-        QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID);
-
-    // Assert
-    // check status code is FORBIDDEN
-    assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
-
-    // check an error message was returned
-    SegueErrorResponse responseBody = (SegueErrorResponse) previewQuizResponse.getEntity();
-    assertEquals("You do not have the permissions to complete this action", responseBody.getErrorMessage());
-  }
-
-  @Test
-  public void previewQuizEndpoint_previewHiddenFromRoleTutorQuizAsTutor_fails() throws NoCredentialsAvailableException,
-      NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-      IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-    // Arrange
-    // log in as Tutor, create request
-    LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-    HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
-    replay(assignQuizRequest);
-
-    // Act
-    // make request
-    Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), assignQuizRequest,
-        QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID);
-
-    // Assert
-    // check status code is FORBIDDEN
-    assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
-
-    // check an error message was returned
-    SegueErrorResponse responseBody = (SegueErrorResponse) previewQuizResponse.getEntity();
-    assertEquals("You do not have the permissions to complete this action", responseBody.getErrorMessage());
+      // check an error message was returned
+      SegueErrorResponse responseBody = (SegueErrorResponse) previewQuizResponse.getEntity();
+      assertEquals("You do not have the permissions to complete this action", responseBody.getErrorMessage());
+    }
   }
 }
