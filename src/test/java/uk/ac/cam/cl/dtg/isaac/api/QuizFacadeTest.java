@@ -213,19 +213,19 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //        ));
 //  }
 
-  @Test
-  public void getFreeAttempts() {
-    List<QuizAttemptDTO> noAttempts = Collections.emptyList();
-    forEndpoint(() -> quizFacade.getFreeAttempts(httpServletRequest),
-        requiresLogin(),
-        as(student,
-            prepare(quizManager, m -> m.augmentWithQuizSummary(studentOwnAttempts)),
-            respondsWith(studentOwnAttempts)),
-        as(anyOf(teacher, secondStudent),
-            prepare(quizManager, m -> m.augmentWithQuizSummary(noAttempts)),
-            respondsWith(noAttempts)
-        ));
-  }
+//  @Test
+//  public void getFreeAttempts() {
+//    List<QuizAttemptDTO> noAttempts = Collections.emptyList();
+//    forEndpoint(() -> quizFacade.getFreeAttempts(httpServletRequest),
+//        requiresLogin(),
+//        as(student,
+//            prepare(quizManager, m -> m.augmentWithQuizSummary(studentOwnAttempts)),
+//            respondsWith(studentOwnAttempts)),
+//        as(anyOf(teacher, secondStudent),
+//            prepare(quizManager, m -> m.augmentWithQuizSummary(noAttempts)),
+//            respondsWith(noAttempts)
+//        ));
+//  }
 
   @Test
   public void getQuizAssignment() {

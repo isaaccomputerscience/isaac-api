@@ -188,6 +188,8 @@ COPY public.quiz_assignments (id, quiz_id, group_id, owner_user_id, creation_dat
 --
 
 COPY public.quiz_attempts (id, user_id, quiz_id, quiz_assignment_id, start_date, completed_date) FROM stdin;
+1	7	_quiz_test	1	2023-01-01 13:00:00.000	2023-01-01 14:00:00.000
+2	8	_quiz_test	\N	2023-01-01 13:00:00.000	2023-01-01 14:00:00.000
 \.
 
 

@@ -26,6 +26,8 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_TUTOR
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ALICE_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ALICE_PASSWORD;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_BOB_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_BOB_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHERS_AB_GROUP_ID;
@@ -52,6 +54,7 @@ import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.QuizFeedbackMode;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuizSummaryDTO;
@@ -137,6 +140,19 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class GetAvailableQuizzesEndpoint {
     @Test
+    public void getQuizzesWithoutLogin_fails() {
+      HttpServletRequest getQuizzesRequest = createNiceMock(HttpServletRequest.class);
+      replay(getQuizzesRequest);
+
+      Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), getQuizzesRequest);
+
+      assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizzesResponse.getStatus());
+
+      assertEquals("You must be logged in to access this resource.",
+          getQuizzesResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
     public void getQuizzesAsTeacher_returnsAll() throws NoCredentialsAvailableException,
         NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
         IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
@@ -144,12 +160,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       // Arrange
       // log in as Teacher, create request
       LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-      replay(assignQuizRequest);
+      HttpServletRequest getQuizzesRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(getQuizzesRequest);
 
       // Act
       // make request
-      Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), assignQuizRequest);
+      Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), getQuizzesRequest);
 
       // Assert
       // check status code is OK
@@ -178,12 +194,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       // Arrange
       // log in as Tutor, create request
       LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
-      replay(assignQuizRequest);
+      HttpServletRequest getQuizzesRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+      replay(getQuizzesRequest);
 
       // Act
       // make request
-      Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), assignQuizRequest);
+      Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), getQuizzesRequest);
 
       // Assert
       // check status code is OK
@@ -208,12 +224,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       // Arrange
       // log in as Tutor, create request
       LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
-      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
-      replay(assignQuizRequest);
+      HttpServletRequest getQuizzesRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(getQuizzesRequest);
 
       // Act
       // make request
-      Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), assignQuizRequest);
+      Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), getQuizzesRequest);
 
       // Assert
       // check status code is OK
@@ -241,12 +257,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       // Arrange
       // log in as Teacher, create request
       LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-      replay(assignQuizRequest);
+      HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(previewQuizRequest);
 
       // Act
       // make request
-      Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), assignQuizRequest,
+      Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
           QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID);
 
       // Assert
@@ -267,12 +283,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       // Arrange
       // log in as Tutor, create request
       LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
-      replay(assignQuizRequest);
+      HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+      replay(previewQuizRequest);
 
       // Act
       // make request
-      Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), assignQuizRequest,
+      Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
           QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID);
 
       // Assert
@@ -293,12 +309,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       // Arrange
       // log in as Tutor, create request
       LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
-      replay(assignQuizRequest);
+      HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+      replay(previewQuizRequest);
 
       // Act
       // make request
-      Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), assignQuizRequest,
+      Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
           QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID);
 
       // Assert
@@ -313,6 +329,19 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class GetAssignedQuizzes {
+    @Test
+    public void getAssignedQuizzesWithoutLogin_fails() {
+      HttpServletRequest assignedQuizRequest = createNiceMock(HttpServletRequest.class);
+      replay(assignedQuizRequest);
+
+      Response getAssignedQuizzesResponse = quizFacade.getAssignedQuizzes(assignedQuizRequest);
+
+      assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getAssignedQuizzesResponse.getStatus());
+
+      assertEquals("You must be logged in to access this resource.",
+          getAssignedQuizzesResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
     @Test
     public void studentAssignedQuizzes_noAssignments()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
@@ -368,6 +397,80 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
           (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
       assertTrue(responseBody.isEmpty());
+    }
+  }
+
+  @Nested
+  class GetFreeAttempts {
+    @Test
+    public void getFreeAttemptsWithoutLogin_fails() {
+      HttpServletRequest getFreeAttemptsRequest = createNiceMock(HttpServletRequest.class);
+      replay(getFreeAttemptsRequest);
+
+      Response getFreeAttemptsResponse = quizFacade.getFreeAttempts(getFreeAttemptsRequest);
+
+      assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getFreeAttemptsResponse.getStatus());
+
+      assertEquals("You must be logged in to access this resource.",
+          getFreeAttemptsResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
+    public void studentFreeAttempts_noAttempts()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+      HttpServletRequest getFreeAttemptsRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(getFreeAttemptsRequest);
+
+      Response getFreeAttemptsResponse = quizFacade.getFreeAttempts(getFreeAttemptsRequest);
+
+      assertEquals(Response.Status.OK.getStatusCode(), getFreeAttemptsResponse.getStatus());
+
+      @SuppressWarnings("unchecked") List<QuizAttemptDTO> responseBody =
+          (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
+      assertTrue(responseBody.isEmpty());
+    }
+
+    @Test
+    public void studentFreeAttempts_oneAssignedAttempt()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_ALICE_EMAIL, TEST_STUDENT_ALICE_PASSWORD);
+      HttpServletRequest getFreeAttemptsRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(getFreeAttemptsRequest);
+
+      Response getFreeAttemptsResponse = quizFacade.getFreeAttempts(getFreeAttemptsRequest);
+
+      assertEquals(Response.Status.OK.getStatusCode(), getFreeAttemptsResponse.getStatus());
+
+      @SuppressWarnings("unchecked") List<QuizAttemptDTO> responseBody =
+          (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
+      assertTrue(responseBody.isEmpty());
+    }
+
+    @Test
+    public void studentFreeAttempts_oneFreeAttempt()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_BOB_EMAIL, TEST_STUDENT_BOB_PASSWORD);
+      HttpServletRequest getFreeAttemptsRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(getFreeAttemptsRequest);
+
+      Response getFreeAttemptsResponse = quizFacade.getFreeAttempts(getFreeAttemptsRequest);
+
+      assertEquals(Response.Status.OK.getStatusCode(), getFreeAttemptsResponse.getStatus());
+
+      @SuppressWarnings("unchecked") List<QuizAttemptDTO> responseBody =
+          (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
+      assertTrue(responseBody.stream()
+          .anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID)));
     }
   }
 }
