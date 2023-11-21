@@ -59,7 +59,8 @@ COPY public.groups (id, group_name, owner_id, created, archived, group_status, l
 1	AB Group (Test)	5	2022-07-06 15:36:58	f	ACTIVE	\N	f
 2	BC Group (Dave)	10	2022-07-06 15:37:32	f	ACTIVE	\N	f
 4	AB Group 2 (Test Tutor)	12	2022-12-12 14:48:40.245	f	ACTIVE	2022-12-12 14:48:40.245	f
-7	AssignmentFacade IT Group	5	2023-01-01 12:00:00	f	ACTIVE	\N	f
+5	AssignmentFacade IT Group	5	2023-01-01 12:00:00	f	ACTIVE	\N	f
+6	QuizFacade IT Group	5	2023-01-01 12:00:00	f	ACTIVE	\N	f
 \.
 
 
@@ -70,7 +71,7 @@ COPY public.groups (id, group_name, owner_id, created, archived, group_status, l
 COPY public.assignments (id, gameboard_id, group_id, owner_user_id, notes, creation_date, due_date, scheduled_start_date) FROM stdin;
 2	9313cadd-d4ce-420f-9331-300e3067b45f	1	5	\N	2022-08-03 12:14:50.134	\N	\N
 3	43c3ca6d-4d1b-49df-3ec4-4ce2b306eb45	2	10	\N	2023-01-27 12:14:50.134	\N	\N
-4	assignmentfacade-it-gameboard-id	7	5	\N	2023-01-01 12:00:00.000	\N	\N
+4	assignmentfacade-it-gameboard-id	5	5	\N	2023-01-01 12:00:00.000	\N	\N
 \.
 
 
@@ -113,10 +114,13 @@ COPY public.group_memberships (group_id, user_id, created, updated, status) FROM
 2	9	\N	2022-07-06 14:38:36.064903+00	ACTIVE
 4	7	2022-12-12 14:48:52.043	2022-12-12 14:48:52.043+00	ACTIVE
 4	8	2022-12-12 14:49:25.081	2022-12-12 14:49:25.082+00	ACTIVE
-7	6	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
-7	7	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
-7	8	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
-7	9	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
+5	6	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
+5	7	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
+5	8	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
+5	9	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
+6	7	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
+6	8	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
+6	9	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
 \.
 
 
@@ -489,7 +493,7 @@ SELECT pg_catalog.setval('public.event_bookings_id_seq', 4, true);
 -- Name: groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.groups_id_seq', 4, true);
+SELECT pg_catalog.setval('public.groups_id_seq', 6, true);
 
 
 --
@@ -510,28 +514,28 @@ SELECT pg_catalog.setval('public.logged_events_id_seq', 1, true);
 -- Name: question_attempts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.question_attempts_id_seq', 1, true);
+SELECT pg_catalog.setval('public.question_attempts_id_seq', 22, true);
 
 
 --
 -- Name: quiz_assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.quiz_assignments_id_seq', 2, true);
+SELECT pg_catalog.setval('public.quiz_assignments_id_seq', 1, true);
 
 
 --
 -- Name: quiz_attempts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.quiz_attempts_id_seq', 1, true);
+SELECT pg_catalog.setval('public.quiz_attempts_id_seq', 2, true);
 
 
 --
 -- Name: quiz_question_attempts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.quiz_question_attempts_id_seq', 3, true);
+SELECT pg_catalog.setval('public.quiz_question_attempts_id_seq', 1, true);
 
 
 --
