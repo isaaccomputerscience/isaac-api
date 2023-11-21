@@ -22,7 +22,6 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.getCurrentArguments;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.powermock.api.easymock.PowerMock.createMock;
 import static org.powermock.api.easymock.PowerMock.createNiceMock;
 import static org.powermock.api.easymock.PowerMock.expectLastCall;
@@ -30,7 +29,6 @@ import static org.powermock.api.easymock.PowerMock.replay;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.QUIZ_SECTION;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
@@ -227,51 +225,51 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //        ));
 //  }
 
-  @Test
-  public void getQuizAssignment() {
-    QuizFeedbackDTO studentFeedback = new QuizFeedbackDTO();
-    QuizFeedbackDTO otherStudentFeedback = new QuizFeedbackDTO();
-    forEndpoint(() -> quizFacade.getQuizAssignment(httpServletRequest, studentAssignment.getId()),
-        requiresLogin(),
-        as(studentsTeachersOrAdmin(),
-            prepare(quizAssignmentManager,
-                m -> expect(m.getGroupForAssignment(studentAssignment)).andReturn(studentGroup)),
-            prepare(quizQuestionManager, m -> expect(m.getAssignmentTeacherFeedback(studentQuiz, studentAssignment,
-                ImmutableList.of(student, secondStudent)))
-                .andReturn(ImmutableMap.of(student, studentFeedback, secondStudent, otherStudentFeedback))),
-            prepare(associationManager, m -> {
-              expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(secondStudent))).andAnswer(
-                  grantAccess(true));
-              expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(student))).andAnswer(
-                  grantAccess(true));
-            }),
-            prepare(assignmentService, m -> m.augmentAssignerSummaries(Collections.singletonList(studentAssignment))),
-            check(response -> {
-              assertEquals(otherStudentFeedback, getFeedbackFor(secondStudent));
-              assertEquals(studentFeedback, getFeedbackFor(student));
-            })
-        ),
-        forbiddenForEveryoneElse(),
-        as(studentsTeachersOrAdmin(),
-            prepare(quizAssignmentManager,
-                m -> expect(m.getGroupForAssignment(studentAssignment)).andReturn(studentGroup)),
-            prepare(quizQuestionManager, m -> expect(m.getAssignmentTeacherFeedback(studentQuiz, studentAssignment,
-                ImmutableList.of(student, secondStudent)))
-                .andReturn(ImmutableMap.of(student, studentFeedback, secondStudent, otherStudentFeedback))),
-            prepare(associationManager, m -> {
-              expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(secondStudent))).andAnswer(
-                  grantAccess(false));
-              expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(student))).andAnswer(
-                  grantAccess(true));
-            }),
-            prepare(assignmentService, m -> m.augmentAssignerSummaries(Collections.singletonList(studentAssignment))),
-            check(response -> {
-              assertNull(getFeedbackFor(secondStudent));
-              assertEquals(studentFeedback, getFeedbackFor(student));
-            })
-        )
-    );
-  }
+//  @Test
+//  public void getQuizAssignment() {
+//    QuizFeedbackDTO studentFeedback = new QuizFeedbackDTO();
+//    QuizFeedbackDTO otherStudentFeedback = new QuizFeedbackDTO();
+//    forEndpoint(() -> quizFacade.getQuizAssignment(httpServletRequest, studentAssignment.getId()),
+//        requiresLogin(),
+//        as(studentsTeachersOrAdmin(),
+//            prepare(quizAssignmentManager,
+//                m -> expect(m.getGroupForAssignment(studentAssignment)).andReturn(studentGroup)),
+//            prepare(quizQuestionManager, m -> expect(m.getAssignmentTeacherFeedback(studentQuiz, studentAssignment,
+//                ImmutableList.of(student, secondStudent)))
+//                .andReturn(ImmutableMap.of(student, studentFeedback, secondStudent, otherStudentFeedback))),
+//            prepare(associationManager, m -> {
+//              expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(secondStudent))).andAnswer(
+//                  grantAccess(true));
+//              expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(student))).andAnswer(
+//                  grantAccess(true));
+//            }),
+//            prepare(assignmentService, m -> m.augmentAssignerSummaries(Collections.singletonList(studentAssignment))),
+//            check(response -> {
+//              assertEquals(otherStudentFeedback, getFeedbackFor(secondStudent));
+//              assertEquals(studentFeedback, getFeedbackFor(student));
+//            })
+//        ),
+//        forbiddenForEveryoneElse(),
+//        as(studentsTeachersOrAdmin(),
+//            prepare(quizAssignmentManager,
+//                m -> expect(m.getGroupForAssignment(studentAssignment)).andReturn(studentGroup)),
+//            prepare(quizQuestionManager, m -> expect(m.getAssignmentTeacherFeedback(studentQuiz, studentAssignment,
+//                ImmutableList.of(student, secondStudent)))
+//                .andReturn(ImmutableMap.of(student, studentFeedback, secondStudent, otherStudentFeedback))),
+//            prepare(associationManager, m -> {
+//              expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(secondStudent))).andAnswer(
+//                  grantAccess(false));
+//              expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(student))).andAnswer(
+//                  grantAccess(true));
+//            }),
+//            prepare(assignmentService, m -> m.augmentAssignerSummaries(Collections.singletonList(studentAssignment))),
+//            check(response -> {
+//              assertNull(getFeedbackFor(secondStudent));
+//              assertEquals(studentFeedback, getFeedbackFor(student));
+//            })
+//        )
+//    );
+//  }
 
   private IAnswer<UserSummaryDTO> grantAccess(boolean access) {
     return () -> {
