@@ -44,9 +44,13 @@ public final class ITConstants {
 
   public static final String TEST_STUDENT_ALICE_EMAIL = "alice-student@test.com";
   public static final String TEST_STUDENT_ALICE_PASSWORD = "test1234";
+  public static final long TEST_STUDENT_ALICE_ID = 7L;
 
   public static final String TEST_STUDENT_BOB_EMAIL = "bob-student@test.com";
   public static final String TEST_STUDENT_BOB_PASSWORD = "test1234";
+  public static final long TEST_STUDENT_BOB_ID = 8L;
+
+  public static final long TEST_STUDENT_CHARLIE_ID = 9L;
 
   public static final String TEST_TUTOR_EMAIL = "test-tutor@test.com";
   public static final String TEST_TUTOR_PASSWORD = "test1234";

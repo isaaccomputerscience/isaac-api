@@ -29,10 +29,14 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_ADMIN_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_ADMIN_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ALICE_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ALICE_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ALICE_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_BOB_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_BOB_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_BOB_PASSWORD;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_CHARLIE_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHERS_AB_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHER_EMAIL;
@@ -60,6 +64,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.QuizFeedbackMode;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptFeedbackDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuizSummaryDTO;
@@ -608,6 +613,209 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
       assertFalse(responseBody.getUserFeedback().stream()
           .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
+    }
+  }
+
+  @Nested
+  class GetQuizAssignmentAttempt {
+    @Test
+    public void noQuizId_badRequest() {
+      HttpServletRequest getQuizAssignmentAttemptRequest = createNiceMock(HttpServletRequest.class);
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, null, TEST_STUDENT_ALICE_ID);
+
+      assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      assertEquals("You must provide a valid test assignment and user id id.",
+          getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
+    public void noUserId_badRequest() {
+      HttpServletRequest getQuizAssignmentAttemptRequest = createNiceMock(HttpServletRequest.class);
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, null);
+
+      assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      assertEquals("You must provide a valid test assignment and user id id.",
+          getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
+    public void anonymousUser_unauthorized() {
+      HttpServletRequest getQuizAssignmentAttemptRequest = createNiceMock(HttpServletRequest.class);
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+
+      assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      assertEquals("You must be logged in to access this resource.",
+          getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
+    public void student_forbidden() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+      HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      assertEquals("You do not have the permissions to complete this action",
+          getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
+    public void tutor_forbidden() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
+      HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      assertEquals("You do not have the permissions to complete this action",
+          getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
+    public void teacherNotGroupManager_forbidden()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult teacherLogin = loginAs(httpSession, DAVE_TEACHER_EMAIL, DAVE_TEACHER_PASSWORD);
+      HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      assertEquals("You can only view assignments to groups you own or manage.",
+          getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
+    public void teacherIsGroupManager_targetStudentNotInGroup()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+      HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ID);
+
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      assertEquals("That student is not in the group that was assigned this test.",
+          getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
+    public void teacherIsGroupManager_targetStudentHasPrivacyRestrictions()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+      HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_CHARLIE_ID);
+
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      assertEquals("You do not have access to that student's data.",
+          getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
+    public void teacherIsGroupManager_targetStudentIncompleteAssignment()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+      HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_BOB_ID);
+
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      assertEquals("That student has not completed this test assignment.",
+          getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+
+    @Test
+    public void teacherIsGroupManager_targetStudentCompleteAssignment()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+      HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+
+      assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      QuizAttemptFeedbackDTO responseBody =
+          (QuizAttemptFeedbackDTO) getQuizAssignmentAttemptResponse.getEntity();
+      assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getUser().getId());
+      assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getAttempt().getUserId());
+      assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getAttempt().getQuizId());
+    }
+
+
+    @Disabled("Admin login requires MFA")
+    @Test
+    public void admin_targetStudentCompleteAssignment()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult teacherLogin = loginAs(httpSession, TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD);
+      HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+      replay(getQuizAssignmentAttemptRequest);
+
+      Response getQuizAssignmentAttemptResponse =
+          quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+
+      assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
+
+      QuizAttemptFeedbackDTO responseBody =
+          (QuizAttemptFeedbackDTO) getQuizAssignmentAttemptResponse.getEntity();
+      assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getUser().getId());
+      assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getAttempt().getUserId());
+      assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getAttempt().getQuizId());
     }
   }
 }
