@@ -44,8 +44,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import uk.ac.cam.cl.dtg.isaac.api.managers.DueBeforeNowException;
-import uk.ac.cam.cl.dtg.isaac.api.managers.DuplicateAssignmentException;
 import uk.ac.cam.cl.dtg.isaac.api.managers.QuizAssignmentManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.QuizAttemptManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.QuizQuestionManager;
@@ -328,42 +326,42 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void createQuizAssignment() {
-    QuizAssignmentDTO newAssignment =
-        new QuizAssignmentDTO(0xB8003111799L, otherQuiz.getId(), null, studentGroup.getId(), null, someFutureDate,
-            QuizFeedbackMode.OVERALL_MARK);
-    QuizAssignmentDTO assignmentRequest =
-        new QuizAssignmentDTO(null, otherQuiz.getId(), null, studentGroup.getId(), null, someFutureDate,
-            QuizFeedbackMode.OVERALL_MARK);
-    forEndpoint((QuizAssignmentDTO assignment) -> () -> quizFacade.createQuizAssignment(httpServletRequest, assignment),
-        with(assignmentRequest,
-            requiresLogin(),
-            as(studentsTeachersOrAdmin(),
-                prepare(quizAssignmentManager,
-                    m -> expect(m.createAssignment(assignmentRequest)).andReturn(newAssignment)),
-                prepare(quizManager, m -> m.augmentWithQuizSummary(Collections.singletonList(newAssignment))),
-                respondsWith(newAssignment),
-                check(ignoreResponse -> assertEquals(currentUser().getId(), assignmentRequest.getOwnerUserId()))
-            ),
-            forbiddenForEveryoneElse()
-        ),
-        with(assignmentRequest,
-            as(studentsTeachersOrAdmin(),
-                prepare(quizAssignmentManager,
-                    m -> expect(m.createAssignment(assignmentRequest)).andThrow(new DueBeforeNowException())),
-                failsWith(Status.BAD_REQUEST)
-            )
-        ),
-        with(assignmentRequest,
-            as(studentsTeachersOrAdmin(),
-                prepare(quizAssignmentManager, m -> expect(m.createAssignment(assignmentRequest)).andThrow(
-                    new DuplicateAssignmentException("Test"))),
-                failsWith(Status.BAD_REQUEST)
-            )
-        )
-    );
-  }
+//  @Test
+//  public void createQuizAssignment() {
+//    QuizAssignmentDTO newAssignment =
+//        new QuizAssignmentDTO(0xB8003111799L, otherQuiz.getId(), null, studentGroup.getId(), null, someFutureDate,
+//            QuizFeedbackMode.OVERALL_MARK);
+//    QuizAssignmentDTO assignmentRequest =
+//        new QuizAssignmentDTO(null, otherQuiz.getId(), null, studentGroup.getId(), null, someFutureDate,
+//            QuizFeedbackMode.OVERALL_MARK);
+//    forEndpoint((QuizAssignmentDTO assignment) -> () -> quizFacade.createQuizAssignment(httpServletRequest, assignment),
+//        with(assignmentRequest,
+//            requiresLogin(),
+//            as(studentsTeachersOrAdmin(),
+//                prepare(quizAssignmentManager,
+//                    m -> expect(m.createAssignment(assignmentRequest)).andReturn(newAssignment)),
+//                prepare(quizManager, m -> m.augmentWithQuizSummary(Collections.singletonList(newAssignment))),
+//                respondsWith(newAssignment),
+//                check(ignoreResponse -> assertEquals(currentUser().getId(), assignmentRequest.getOwnerUserId()))
+//            ),
+//            forbiddenForEveryoneElse()
+//        ),
+//        with(assignmentRequest,
+//            as(studentsTeachersOrAdmin(),
+//                prepare(quizAssignmentManager,
+//                    m -> expect(m.createAssignment(assignmentRequest)).andThrow(new DueBeforeNowException())),
+//                failsWith(Status.BAD_REQUEST)
+//            )
+//        ),
+//        with(assignmentRequest,
+//            as(studentsTeachersOrAdmin(),
+//                prepare(quizAssignmentManager, m -> expect(m.createAssignment(assignmentRequest)).andThrow(
+//                    new DuplicateAssignmentException("Test"))),
+//                failsWith(Status.BAD_REQUEST)
+//            )
+//        )
+//    );
+//  }
 
   @Test
   public void cancelQuizAssignment() {
