@@ -24,6 +24,8 @@ public final class ITConstants {
   // Users
   public static final String TEST_ADMIN_EMAIL = "test-admin@test.com";
   public static final String TEST_ADMIN_PASSWORD = "test1234";
+  public static final long TEST_ADMIN_ID = 2L;
+
 
   public static final String TEST_EDITOR_EMAIL = "test-editor@test.com";
   public static final String TEST_EDITOR_PASSWORD = "test1234";

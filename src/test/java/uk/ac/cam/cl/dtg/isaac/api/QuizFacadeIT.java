@@ -26,8 +26,7 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.DAVE_TEACHER_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_QUIZ_ID;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_ADMIN_EMAIL;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_ADMIN_PASSWORD;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_ADMIN_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ALICE_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ALICE_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ALICE_PASSWORD;
@@ -46,18 +45,23 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTORS_AB_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_PASSWORD;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_DATE_FORMAT;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.QuizFeedbackMode;
@@ -586,18 +590,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       assertTrue(responseBody.getUserFeedback().stream()
           .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
       assertFalse(responseBody.getUserFeedback().stream()
+          .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
+      assertFalse(responseBody.getUserFeedback().stream()
           .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
     }
 
-    @Disabled("Admin login requires MFA")
     @Test
-    public void admin_feedbackOnlyForStudentsAllowingAccess()
-        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
-        MFARequiredButNotConfiguredException {
-      LoginResult adminLogin = loginAs(httpSession, TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD);
-      HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminLogin.cookie});
+    public void admin_feedbackAccessAllForStudents() throws JsonProcessingException {
+      Cookie adminSessionCookie = createManualCookieForAdmin();
+      HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
       replay(getQuizAssignmentRequest);
 
       Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, 1L);
@@ -609,7 +610,9 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       assertEquals(1L, responseBody.getId());
       assertTrue(responseBody.getUserFeedback().stream()
           .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
-      assertTrue(responseBody.getUserFeedback().stream()
+      assertFalse(responseBody.getUserFeedback().stream()
+          .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
+      assertFalse(responseBody.getUserFeedback().stream()
           .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
       assertFalse(responseBody.getUserFeedback().stream()
           .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
@@ -795,15 +798,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
 
-    @Disabled("Admin login requires MFA")
     @Test
-    public void admin_targetStudentCompleteAssignment()
-        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
-        MFARequiredButNotConfiguredException {
-      LoginResult teacherLogin = loginAs(httpSession, TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD);
-      HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    public void admin_targetStudentCompleteAssignment() throws JsonProcessingException {
+      Cookie adminSessionCookie = createManualCookieForAdmin();
+      HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
       replay(getQuizAssignmentAttemptRequest);
 
       Response getQuizAssignmentAttemptResponse =
@@ -817,5 +815,27 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getAttempt().getUserId());
       assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getAttempt().getQuizId());
     }
+  }
+
+  /**
+   * As the integration tests do not currently support MFA login, we cannot use the normal login process and have to
+   * create cookies manually when testing admin accounts.
+   *
+   * @return a Cookie loaded with session information for the test admin user.
+   * @throws JsonProcessingException if the cookie serialisation fails
+   */
+  public Cookie createManualCookieForAdmin() throws JsonProcessingException {
+    SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
+    String userId = String.valueOf(TEST_ADMIN_ID);
+    String hmacKey = properties.getProperty(HMAC_SALT);
+    int sessionExpiryTimeInSeconds = 300;
+
+    Calendar calendar = Calendar.getInstance();
+    calendar.add(Calendar.SECOND, sessionExpiryTimeInSeconds);
+    String sessionExpiryDate = sessionDateFormat.format(calendar.getTime());
+
+    Map<String, String> sessionInformation =
+        userAuthenticationManager.prepareSessionInformation(userId, "0", sessionExpiryDate, hmacKey, null);
+    return userAuthenticationManager.createAuthCookie(sessionInformation, sessionExpiryTimeInSeconds);
   }
 }
