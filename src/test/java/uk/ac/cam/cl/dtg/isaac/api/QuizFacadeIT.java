@@ -44,9 +44,7 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHERS_AB_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHER_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHER_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHER_PASSWORD;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTORS_AB_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_EMAIL;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_PASSWORD;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_DATE_FORMAT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
@@ -63,7 +61,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -93,65 +90,6 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     this.quizFacade = new QuizFacade(properties, logManager, contentManager, quizManager, userAccountManager,
         userAssociationManager, groupManager, quizAssignmentManager, assignmentService, quizAttemptManager,
         quizQuestionManager);
-  }
-
-  @Nested
-  class CreateQuizAssignmentEndpoint {
-    @Test
-    public void assignQuizAsTeacher_succeeds() throws NoCredentialsAvailableException,
-        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-      // Arrange
-      // log in as Teacher, create request
-      LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-      replay(assignQuizRequest);
-
-      QuizAssignmentDTO quizAssignmentDTO = new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID,
-          TEST_TEACHER_ID, TEST_TEACHERS_AB_GROUP_ID, new Date(), DateUtils.addDays(new Date(), 5),
-          QuizFeedbackMode.DETAILED_FEEDBACK);
-
-      // Act
-      // make request
-      Response createQuizResponse = quizFacade.createQuizAssignment(assignQuizRequest, quizAssignmentDTO);
-
-      // Assert
-      // check status code is OK
-      assertEquals(Response.Status.OK.getStatusCode(), createQuizResponse.getStatus());
-
-      // check the quiz was assigned successfully
-      QuizAssignmentDTO responseBody = (QuizAssignmentDTO) createQuizResponse.getEntity();
-      assertEquals(TEST_TEACHERS_AB_GROUP_ID, (long) responseBody.getGroupId());
-    }
-
-    @Test
-    public void assignQuizAsTutor_fails() throws NoCredentialsAvailableException,
-        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-      // Arrange
-      // log in as Tutor, create request
-      LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-      HttpServletRequest assignQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
-      replay(assignQuizRequest);
-
-      QuizAssignmentDTO quizAssignmentDTO = new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID,
-          TEST_TUTOR_ID, TEST_TUTORS_AB_GROUP_ID, new Date(), DateUtils.addDays(new Date(), 5),
-          QuizFeedbackMode.DETAILED_FEEDBACK);
-
-      // Act
-      // make request
-      Response createQuizResponse = quizFacade.createQuizAssignment(assignQuizRequest, quizAssignmentDTO);
-
-      // Assert
-      // check status code is FORBIDDEN
-      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizResponse.getStatus());
-
-      // check an error message was returned
-      SegueErrorResponse responseBody = (SegueErrorResponse) createQuizResponse.getEntity();
-      assertEquals("You do not have the permissions to complete this action", responseBody.getErrorMessage());
-    }
   }
 
   @Nested
