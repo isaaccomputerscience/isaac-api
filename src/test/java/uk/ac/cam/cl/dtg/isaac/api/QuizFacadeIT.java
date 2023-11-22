@@ -772,13 +772,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, null, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
-            createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
 
       @Test
@@ -789,13 +790,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, null, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
-            createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
 
       @Test
@@ -806,13 +808,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
                 null);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
-            createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
 
       @Test
@@ -827,13 +830,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, "not_a_quiz", null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.NOT_FOUND.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        assertEquals("This test has become unavailable.",
-            createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("This test has become unavailable.",
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
 
       @Test
@@ -850,13 +854,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, somePastDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        assertEquals("You cannot set a quiz with a due date in the past.",
-            createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("You cannot set a quiz with a due date in the past.",
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
 
       @Test
@@ -871,13 +876,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, QUIZ_FACADE_IT_TEST_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        assertEquals("You cannot reassign a test until the due date has passed.",
-            createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("You cannot reassign a test until the due date has passed.",
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
     }
 
@@ -891,13 +897,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        assertEquals("You must be logged in to access this resource.",
-            createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("You must be logged in to access this resource.",
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
 
       @Test
@@ -912,13 +919,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        assertEquals("You do not have the permissions to complete this action",
-            createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("You do not have the permissions to complete this action",
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
 
       @Test
@@ -933,13 +941,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        assertEquals("You do not have the permissions to complete this action",
-            createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("You do not have the permissions to complete this action",
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
 
       @Test
@@ -955,13 +964,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        assertEquals("You can only set assignments to groups you own or manage.",
-            createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("You can only set assignments to groups you own or manage.",
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
     }
 
@@ -979,19 +989,20 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
-        assertEquals(Response.Status.OK.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.OK.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        QuizAssignmentDTO responseBody =
-            (QuizAssignmentDTO) createQuizAssignmentResponse.getEntity();
-        assertNotNull(responseBody.getId());
-        assertEquals(TEST_TEACHER_ID, responseBody.getOwnerUserId());
-        assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
-        assertEquals(TEST_TEACHERS_AB_GROUP_ID, responseBody.getGroupId());
-        assertNotNull(responseBody.getCreationDate());
-        assertEquals(someFutureDate, responseBody.getDueDate());
+          QuizAssignmentDTO responseBody =
+              (QuizAssignmentDTO) createQuizAssignmentResponse.getEntity();
+          assertNotNull(responseBody.getId());
+          assertEquals(TEST_TEACHER_ID, responseBody.getOwnerUserId());
+          assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
+          assertEquals(TEST_TEACHERS_AB_GROUP_ID, responseBody.getGroupId());
+          assertNotNull(responseBody.getCreationDate());
+          assertEquals(someFutureDate, responseBody.getDueDate());
+        }
       }
 
       @Test
@@ -1003,19 +1014,20 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, DAVE_TEACHERS_BC_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest);
+        try (Response createQuizAssignmentResponse =
+            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest)) {
 
-        assertEquals(Response.Status.OK.getStatusCode(), createQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.OK.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-        QuizAssignmentDTO responseBody =
-            (QuizAssignmentDTO) createQuizAssignmentResponse.getEntity();
-        assertNotNull(responseBody.getId());
-        assertEquals(TEST_ADMIN_ID, responseBody.getOwnerUserId());
-        assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
-        assertEquals(DAVE_TEACHERS_BC_GROUP_ID, responseBody.getGroupId());
-        assertNotNull(responseBody.getCreationDate());
-        assertEquals(someFutureDate, responseBody.getDueDate());
+          QuizAssignmentDTO responseBody =
+              (QuizAssignmentDTO) createQuizAssignmentResponse.getEntity();
+          assertNotNull(responseBody.getId());
+          assertEquals(TEST_ADMIN_ID, responseBody.getOwnerUserId());
+          assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
+          assertEquals(DAVE_TEACHERS_BC_GROUP_ID, responseBody.getGroupId());
+          assertNotNull(responseBody.getCreationDate());
+          assertEquals(someFutureDate, responseBody.getDueDate());
+        }
       }
     }
   }
