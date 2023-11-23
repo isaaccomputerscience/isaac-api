@@ -1156,7 +1156,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest cancelQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(cancelQuizAssignmentRequest);
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 1L)) {
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 2L)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
@@ -1173,7 +1173,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest cancelQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(cancelQuizAssignmentRequest);
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 1L)) {
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 3L)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 

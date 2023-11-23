@@ -363,17 +363,17 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void cancelQuizAssignment() {
-    forEndpoint(() -> quizFacade.cancelQuizAssignment(httpServletRequest, studentAssignment.getId()),
-        requiresLogin(),
-        as(studentsTeachersOrAdmin(),
-            prepare(quizAssignmentManager, m -> m.cancelAssignment(studentAssignment)),
-            succeeds()
-        ),
-        forbiddenForEveryoneElse()
-    );
-  }
+//  @Test
+//  public void cancelQuizAssignment() {
+//    forEndpoint(() -> quizFacade.cancelQuizAssignment(httpServletRequest, studentAssignment.getId()),
+//        requiresLogin(),
+//        as(studentsTeachersOrAdmin(),
+//            prepare(quizAssignmentManager, m -> m.cancelAssignment(studentAssignment)),
+//            succeeds()
+//        ),
+//        forbiddenForEveryoneElse()
+//    );
+//  }
 
   @Test
   public void updateQuizAssignment() {

@@ -184,6 +184,8 @@ COPY public.question_attempts (id, user_id, question_id, question_attempt, corre
 
 COPY public.quiz_assignments (id, quiz_id, group_id, owner_user_id, creation_date, due_date, quiz_feedback_mode, deleted) FROM stdin;
 1	_quiz_test	6	5	2023-01-01 12:00:00.000	\N	NONE	f
+2	_hidden_from_roles_student_quiz_test	6	5	2023-01-01 12:00:00.000	\N	NONE	f
+3	_hidden_from_roles_tutor_quiz_test	6	5	2023-01-01 12:00:00.000	\N	NONE	f
 \.
 
 
@@ -521,7 +523,7 @@ SELECT pg_catalog.setval('public.question_attempts_id_seq', 22, true);
 -- Name: quiz_assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.quiz_assignments_id_seq', 1, true);
+SELECT pg_catalog.setval('public.quiz_assignments_id_seq', 3, true);
 
 
 --
