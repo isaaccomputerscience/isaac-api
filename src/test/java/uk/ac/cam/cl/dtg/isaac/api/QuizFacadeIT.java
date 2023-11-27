@@ -90,15 +90,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @BeforeEach
   public void setUp() throws Exception {
     // get an instance of the facade to test
-    this.quizFacade = new QuizFacade(properties, logManager, contentManager, quizManager, userAccountManager,
-        userAssociationManager, groupManager, quizAssignmentManager, assignmentService, quizAttemptManager,
-        quizQuestionManager);
+    this.quizFacade =
+        new QuizFacade(properties, logManager, contentManager, quizManager, userAccountManager, userAssociationManager,
+            groupManager, quizAssignmentManager, assignmentService, quizAttemptManager, quizQuestionManager);
   }
 
   Date someFutureDate =
       new Date(System.currentTimeMillis() + NUMBER_SECONDS_IN_ONE_DAY * NUMBER_MILLISECONDS_IN_SECOND);
-  Date somePastDate =
-      new Date(System.currentTimeMillis() - NUMBER_SECONDS_IN_ONE_DAY * NUMBER_MILLISECONDS_IN_SECOND);
+  Date somePastDate = new Date(System.currentTimeMillis() - NUMBER_SECONDS_IN_ONE_DAY * NUMBER_MILLISECONDS_IN_SECOND);
 
 
   @Nested
@@ -117,10 +116,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void getQuizzesAsTeacher_returnsAll() throws NoCredentialsAvailableException,
-        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+    public void getQuizzesAsTeacher_returnsAll()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
       // Arrange
       // log in as Teacher, create request
       LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
@@ -150,11 +150,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
      */
     @Test
     public void getQuizzesAsTutor_returnsNonInvisibleToStudentOrHiddenFromRoleQuizzes()
-        throws
-        NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-        AuthenticationProviderMappingException,
-        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
       // Arrange
       // log in as Tutor, create request
       LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
@@ -180,11 +179,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void getQuizzesAsStudent_returnsNonInvisibleToStudentQuizzes() throws
-        NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-        AuthenticationProviderMappingException,
-        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+    public void getQuizzesAsStudent_returnsNonInvisibleToStudentQuizzes()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
       // Arrange
       // log in as Tutor, create request
       LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
@@ -214,10 +213,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   class PreviewQuizEndpoint {
     @Test
     public void previewInvisibleToStudentQuizAsTeacher_succeeds()
-        throws NoCredentialsAvailableException,
-        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
       // Arrange
       // log in as Teacher, create request
       LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
@@ -240,10 +239,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Test
     public void previewHiddenFromRoleStudentQuizAsTutor_fails()
-        throws NoCredentialsAvailableException,
-        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
       // Arrange
       // log in as Tutor, create request
       LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
@@ -266,10 +265,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Test
     public void previewHiddenFromRoleTutorQuizAsTutor_fails()
-        throws NoCredentialsAvailableException,
-        NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-        IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-        NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
       // Arrange
       // log in as Tutor, create request
       LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
@@ -433,24 +432,43 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       @SuppressWarnings("unchecked") List<QuizAttemptDTO> responseBody =
           (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
-      assertTrue(responseBody.stream()
-          .anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID)));
+      assertTrue(responseBody.stream().anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID)));
     }
   }
 
   @Nested
   class GetQuizAssignment {
-    @Test
-    public void noQuizId_badRequest() {
-      HttpServletRequest getQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
-      replay(getQuizAssignmentRequest);
+    @Nested
+    class BadRequestMissingOrInvalidData {
+      @Test
+      public void noQuizId() {
+        HttpServletRequest getQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
+        replay(getQuizAssignmentRequest);
 
-      Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, null);
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, null);
 
-      assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-      assertEquals("You must provide a valid test assignment id.",
-          getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        assertEquals("You must provide a valid test assignment id.",
+            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+      }
+
+      @Test
+      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(getQuizAssignmentRequest);
+
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, 5L);
+
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentResponse.getStatus());
+
+        assertEquals("This assignment has been cancelled.",
+            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+      }
     }
 
     @Nested
@@ -537,8 +555,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-        QuizAssignmentDTO responseBody =
-            (QuizAssignmentDTO) getQuizAssignmentResponse.getEntity();
+        QuizAssignmentDTO responseBody = (QuizAssignmentDTO) getQuizAssignmentResponse.getEntity();
         assertEquals(1L, responseBody.getId());
         assertTrue(responseBody.getUserFeedback().stream()
             .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
@@ -560,8 +577,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-        QuizAssignmentDTO responseBody =
-            (QuizAssignmentDTO) getQuizAssignmentResponse.getEntity();
+        QuizAssignmentDTO responseBody = (QuizAssignmentDTO) getQuizAssignmentResponse.getEntity();
         assertEquals(1L, responseBody.getId());
         assertTrue(responseBody.getUserFeedback().stream()
             .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
@@ -605,6 +621,24 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals("You must provide a valid test assignment and user id id.",
             getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+      }
+
+      @Test
+      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(getQuizAssignmentRequest);
+
+        Response getQuizAssignmentResponse =
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentRequest, 5L, TEST_STUDENT_ALICE_ID);
+
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentResponse.getStatus());
+
+        assertEquals("This assignment has been cancelled.",
+            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
       }
     }
 
@@ -763,8 +797,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        QuizAttemptFeedbackDTO responseBody =
-            (QuizAttemptFeedbackDTO) getQuizAssignmentAttemptResponse.getEntity();
+        QuizAttemptFeedbackDTO responseBody = (QuizAttemptFeedbackDTO) getQuizAssignmentAttemptResponse.getEntity();
         assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getUser().getId());
         assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getAttempt().getUserId());
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getAttempt().getQuizId());
@@ -783,8 +816,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        QuizAttemptFeedbackDTO responseBody =
-            (QuizAttemptFeedbackDTO) getQuizAssignmentAttemptResponse.getEntity();
+        QuizAttemptFeedbackDTO responseBody = (QuizAttemptFeedbackDTO) getQuizAssignmentAttemptResponse.getEntity();
         assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getUser().getId());
         assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getAttempt().getUserId());
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getAttempt().getQuizId());
@@ -837,8 +869,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest createQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(createQuizAssignmentRequest);
         QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
-                null);
+            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate, null);
 
         try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
             assignmentRequest)) {
@@ -1026,8 +1057,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.OK.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-          QuizAssignmentDTO responseBody =
-              (QuizAssignmentDTO) createQuizAssignmentResponse.getEntity();
+          QuizAssignmentDTO responseBody = (QuizAssignmentDTO) createQuizAssignmentResponse.getEntity();
           assertNotNull(responseBody.getId());
           assertEquals(TEST_TEACHER_ID, responseBody.getOwnerUserId());
           assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
@@ -1046,13 +1076,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, DAVE_TEACHERS_BC_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
-        try (Response createQuizAssignmentResponse =
-            quizFacade.createQuizAssignment(createQuizAssignmentRequest, assignmentRequest)) {
+        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
+            assignmentRequest)) {
 
           assertEquals(Response.Status.OK.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-          QuizAssignmentDTO responseBody =
-              (QuizAssignmentDTO) createQuizAssignmentResponse.getEntity();
+          QuizAssignmentDTO responseBody = (QuizAssignmentDTO) createQuizAssignmentResponse.getEntity();
           assertNotNull(responseBody.getId());
           assertEquals(TEST_ADMIN_ID, responseBody.getOwnerUserId());
           assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
@@ -1066,17 +1095,40 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class CancelQuizAssignment {
-    @Test
-    public void missingQuizAssignmentId() {
-      HttpServletRequest cancelQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
-      replay(cancelQuizAssignmentRequest);
+    @Nested
+    class BadRequestMissingOrInvalidData {
+      @Test
+      public void missingQuizAssignmentId() {
+        HttpServletRequest cancelQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
+        replay(cancelQuizAssignmentRequest);
 
-      try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, null)) {
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
+            null)) {
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
-        assertEquals("You must provide a valid test assignment id.",
-            cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          assertEquals("You must provide a valid test assignment id.",
+              cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+        HttpServletRequest cancelQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(cancelQuizAssignmentRequest);
+
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 5L)) {
+
+
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
+
+          assertEquals("This assignment is already cancelled.",
+              cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
       }
     }
 
@@ -1133,7 +1185,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherNotGroupManager() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void teacherNotGroupManager()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1197,11 +1250,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void missingQuizAssignmentId() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, null,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, null, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, null,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1214,11 +1266,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void changingAssignmentId() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(1L, null, null, null, null, null,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(1L, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1231,11 +1282,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void changingQuizId() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, "_quiz_test", null, null, null, null,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, "_quiz_test", null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1248,11 +1298,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void changingGroupId() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, 1L, null, null,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, 1L, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1265,11 +1314,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void changingOwnerId() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, 1L, null, null, null,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, 1L, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1282,11 +1330,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void changingCreationDateId() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, new Date(), null,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, new Date(), null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1303,15 +1350,34 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
         HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, somePastDate,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, somePastDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           assertEquals("You can only extend due dates into the future.",
+              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+        HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(updateQuizAssignmentRequest);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, someFutureDate, null);
+
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 5L,
+            quizAssignmentDto)) {
+
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
+
+          assertEquals("This assignment is already cancelled.",
               updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
         }
       }
@@ -1323,11 +1389,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void anonymousUser() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, null,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1344,11 +1409,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
         HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, null,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1365,11 +1429,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
         HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, null,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1379,18 +1442,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherNotGroupManager() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void teacherNotGroupManager()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult teacherLogin = loginAs(httpSession, DAVE_TEACHER_EMAIL, DAVE_TEACHER_PASSWORD);
         HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, null,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1410,11 +1473,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
         HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, someFutureDate,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, someFutureDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1423,7 +1485,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void validFeedbackModeUpdate() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void validFeedbackModeUpdate()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1431,10 +1494,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, null,
-                QuizFeedbackMode.OVERALL_MARK);
+            new QuizAssignmentDTO(null, null, null, null, null, null, QuizFeedbackMode.OVERALL_MARK);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1447,11 +1510,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         Cookie adminSessionCookie = createManualCookieForAdmin();
         HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, someFutureDate,
-                null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, someFutureDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1465,10 +1527,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, null,
-                QuizFeedbackMode.OVERALL_MARK);
+            new QuizAssignmentDTO(null, null, null, null, null, null, QuizFeedbackMode.OVERALL_MARK);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L, quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
+            quizAssignmentDto)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
