@@ -61,6 +61,7 @@ COPY public.groups (id, group_name, owner_id, created, archived, group_status, l
 4	AB Group 2 (Test Tutor)	12	2022-12-12 14:48:40.245	f	ACTIVE	2022-12-12 14:48:40.245	f
 5	AssignmentFacade IT Group	5	2023-01-01 12:00:00	f	ACTIVE	\N	f
 6	QuizFacade IT Group	5	2023-01-01 12:00:00	f	ACTIVE	\N	f
+7	QuizFacade IT Group 2	5	2023-01-01 12:00:00	f	ACTIVE	\N	f
 \.
 
 
@@ -121,6 +122,9 @@ COPY public.group_memberships (group_id, user_id, created, updated, status) FROM
 6	7	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
 6	8	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
 6	9	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
+7	7	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
+7	8	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
+7	9	2023-01-01 12:00:00.000	2023-01-01 12:00:00.000+00	ACTIVE
 \.
 
 
@@ -186,6 +190,7 @@ COPY public.quiz_assignments (id, quiz_id, group_id, owner_user_id, creation_dat
 1	_quiz_test	6	5	2023-01-01 12:00:00.000	\N	NONE	f
 2	_hidden_from_roles_student_quiz_test	6	5	2023-01-01 12:00:00.000	\N	NONE	f
 3	_hidden_from_roles_tutor_quiz_test	6	5	2023-01-01 12:00:00.000	\N	NONE	f
+4	_quiz_test	7	5	2023-01-01 12:00:00.000	\N	NONE	f
 \.
 
 
@@ -481,7 +486,7 @@ COPY quartz_cluster.qrtz_simprop_triggers (sched_name, trigger_name, trigger_gro
 -- Name: assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.assignments_id_seq', 2, true);
+SELECT pg_catalog.setval('public.assignments_id_seq', 4, true);
 
 
 --
@@ -495,7 +500,7 @@ SELECT pg_catalog.setval('public.event_bookings_id_seq', 4, true);
 -- Name: groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.groups_id_seq', 6, true);
+SELECT pg_catalog.setval('public.groups_id_seq', 7, true);
 
 
 --
