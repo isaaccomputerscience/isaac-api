@@ -88,6 +88,8 @@ public final class ITConstants {
   // Assignments
   public static final Long ASSIGNMENT_FACADE_TEST_GROUP_ID = 5L;
   public static final Long QUIZ_ASSIGNMENT_ID = 1L;
+  public static final Long QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_FIRST_ID = 2L;
+  public static final Long QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_SECOND_ID = 3L;
   public static final Long QUIZ_ASSIGNMENT_CANCELLED_ID = 5L;
   public static final Long QUIZ_ASSIGNMENT_OVERDUE_ID = 6L;
 

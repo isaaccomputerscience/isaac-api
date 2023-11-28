@@ -27,6 +27,8 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.DAVE_TEACHERS_BC_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.DAVE_TEACHER_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.DAVE_TEACHER_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_CANCELLED_ID;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_FIRST_ID;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_SECOND_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_OVERDUE_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_IT_TEST_GROUP_ID;
@@ -53,6 +55,7 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_PASSWORD;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_DATE_FORMAT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_MILLISECONDS_IN_SECOND;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_FIVE_MINUTES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_ONE_DAY;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -465,7 +468,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, 5L);
+        Response getQuizAssignmentResponse =
+            quizFacade.getQuizAssignment(getQuizAssignmentRequest, QUIZ_ASSIGNMENT_CANCELLED_ID);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -481,7 +485,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, 1L);
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, QUIZ_ASSIGNMENT_ID);
 
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -498,7 +502,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, 1L);
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, QUIZ_ASSIGNMENT_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -515,7 +519,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, 1L);
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, QUIZ_ASSIGNMENT_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -533,7 +537,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, 1L);
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, QUIZ_ASSIGNMENT_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -554,12 +558,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, 1L);
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, QUIZ_ASSIGNMENT_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
         QuizAssignmentDTO responseBody = (QuizAssignmentDTO) getQuizAssignmentResponse.getEntity();
-        assertEquals(1L, responseBody.getId());
+        assertEquals(QUIZ_ASSIGNMENT_ID, responseBody.getId());
         assertTrue(responseBody.getUserFeedback().stream()
             .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
         assertTrue(responseBody.getUserFeedback().stream()
@@ -576,12 +580,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, 1L);
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(getQuizAssignmentRequest, QUIZ_ASSIGNMENT_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
         QuizAssignmentDTO responseBody = (QuizAssignmentDTO) getQuizAssignmentResponse.getEntity();
-        assertEquals(1L, responseBody.getId());
+        assertEquals(QUIZ_ASSIGNMENT_ID, responseBody.getId());
         assertTrue(responseBody.getUserFeedback().stream()
             .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
         assertFalse(responseBody.getUserFeedback().stream()
@@ -618,7 +622,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, null);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID, null);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -636,7 +640,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentRequest);
 
         Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentRequest, 5L, TEST_STUDENT_ALICE_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentRequest, QUIZ_ASSIGNMENT_CANCELLED_ID,
+                TEST_STUDENT_ALICE_ID);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -653,7 +658,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
+                TEST_STUDENT_ALICE_ID);
 
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -672,7 +678,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
+                TEST_STUDENT_ALICE_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -690,7 +697,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
+                TEST_STUDENT_ALICE_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -710,7 +718,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
+                TEST_STUDENT_ALICE_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -733,7 +742,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -753,7 +762,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_CHARLIE_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
+                TEST_STUDENT_CHARLIE_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -773,7 +783,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_BOB_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
+                TEST_STUDENT_BOB_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -796,7 +807,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
+                TEST_STUDENT_ALICE_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -815,7 +827,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, 1L, TEST_STUDENT_ALICE_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
+                TEST_STUDENT_ALICE_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -911,8 +924,6 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        Date somePastDate = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
-
         LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
         HttpServletRequest createQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(createQuizAssignmentRequest);
@@ -1124,7 +1135,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest cancelQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(cancelQuizAssignmentRequest);
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 5L)) {
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_CANCELLED_ID)) {
 
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
@@ -1142,7 +1154,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest cancelQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(cancelQuizAssignmentRequest);
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 1L)) {
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID)) {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
@@ -1160,7 +1173,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest cancelQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(cancelQuizAssignmentRequest);
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 1L)) {
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
@@ -1178,7 +1192,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest cancelQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
         replay(cancelQuizAssignmentRequest);
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 1L)) {
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
@@ -1197,7 +1212,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest cancelQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(cancelQuizAssignmentRequest);
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 1L)) {
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
@@ -1218,7 +1234,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest cancelQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(cancelQuizAssignmentRequest);
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 2L)) {
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_FIRST_ID)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
@@ -1235,7 +1252,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest cancelQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(cancelQuizAssignmentRequest);
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, 3L)) {
+        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_SECOND_ID)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
@@ -1269,10 +1287,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void changingAssignmentId() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(1L, null, null, null, null, null, null);
+        QuizAssignmentDTO quizAssignmentDto =
+            new QuizAssignmentDTO(QUIZ_ASSIGNMENT_ID, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1285,10 +1304,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void changingQuizId() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, null, null, null, null);
+        QuizAssignmentDTO quizAssignmentDto =
+            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1303,8 +1323,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, 1L, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1319,8 +1339,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, 1L, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1335,8 +1355,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, new Date(), null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1355,8 +1375,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, somePastDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1375,8 +1395,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, someFutureDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 5L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_CANCELLED_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1394,8 +1414,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1414,8 +1434,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1434,8 +1454,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1455,8 +1475,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1478,8 +1498,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, someFutureDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1499,8 +1519,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         QuizAssignmentDTO quizAssignmentDto =
             new QuizAssignmentDTO(null, null, null, null, null, null, QuizFeedbackMode.OVERALL_MARK);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1515,8 +1535,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, someFutureDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1532,8 +1552,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         QuizAssignmentDTO quizAssignmentDto =
             new QuizAssignmentDTO(null, null, null, null, null, null, QuizFeedbackMode.OVERALL_MARK);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
-            quizAssignmentDto)) {
+        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
 
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
@@ -1875,7 +1895,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
     String userId = String.valueOf(TEST_ADMIN_ID);
     String hmacKey = properties.getProperty(HMAC_SALT);
-    int sessionExpiryTimeInSeconds = 300;
+    int sessionExpiryTimeInSeconds = NUMBER_SECONDS_IN_FIVE_MINUTES;
 
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, sessionExpiryTimeInSeconds);
