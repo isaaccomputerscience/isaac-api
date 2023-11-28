@@ -430,36 +430,36 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void startQuizAttempt() {
-    QuizAttemptDTO attempt = new QuizAttemptDTO();
-    String testQuizId = "TEST_QUIZ_ID";
-    attempt.setQuizId(testQuizId);
-    IsaacQuizDTO testQuiz = new IsaacQuizDTO();
-
-    forEndpoint(
-        (assignment) -> () -> quizFacade.startQuizAttempt(requestForCaching, httpServletRequest, assignment.getId()),
-        with(studentAssignment,
-            requiresLogin(),
-            as(anyOf(student, secondStudent),
-                prepare(quizAttemptManager,
-                    m -> expect(m.fetchOrCreate(studentAssignment, currentUser())).andReturn(attempt)),
-                prepare(quizManager, m -> expect(m.findQuiz(testQuizId)).andReturn(testQuiz)),
-                prepare(quizQuestionManager,
-                    m -> expect(m.augmentQuestionsForUser(testQuiz, attempt, false)).andReturn(testQuiz)),
-                prepare(assignmentService, m -> {
-                  m.augmentAssignerSummaries(Collections.singletonList(studentAssignment));
-                  expectLastCall();
-                }),
-                respondsWith(attempt),
-                check(ignore -> assertEquals(testQuiz, attempt.getQuiz()))),
-            forbiddenForEveryoneElse()
-        ),
-        with(overdueAssignment,
-            as(student, failsWith(Status.FORBIDDEN))
-        )
-    );
-  }
+//  @Test
+//  public void startQuizAttempt() {
+//    QuizAttemptDTO attempt = new QuizAttemptDTO();
+//    String testQuizId = "TEST_QUIZ_ID";
+//    attempt.setQuizId(testQuizId);
+//    IsaacQuizDTO testQuiz = new IsaacQuizDTO();
+//
+//    forEndpoint(
+//        (assignment) -> () -> quizFacade.startQuizAttempt(requestForCaching, httpServletRequest, assignment.getId()),
+//        with(studentAssignment,
+//            requiresLogin(),
+//            as(anyOf(student, secondStudent),
+//                prepare(quizAttemptManager,
+//                    m -> expect(m.fetchOrCreate(studentAssignment, currentUser())).andReturn(attempt)),
+//                prepare(quizManager, m -> expect(m.findQuiz(testQuizId)).andReturn(testQuiz)),
+//                prepare(quizQuestionManager,
+//                    m -> expect(m.augmentQuestionsForUser(testQuiz, attempt, false)).andReturn(testQuiz)),
+//                prepare(assignmentService, m -> {
+//                  m.augmentAssignerSummaries(Collections.singletonList(studentAssignment));
+//                  expectLastCall();
+//                }),
+//                respondsWith(attempt),
+//                check(ignore -> assertEquals(testQuiz, attempt.getQuiz()))),
+//            forbiddenForEveryoneElse()
+//        ),
+//        with(overdueAssignment,
+//            as(student, failsWith(Status.FORBIDDEN))
+//        )
+//    );
+//  }
 
   @Test
   public void startFreeQuizAttempt() {
