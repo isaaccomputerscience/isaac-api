@@ -52,6 +52,7 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHER_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHER_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_PASSWORD;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.UNKNOWN_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_DATE_FORMAT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_MILLISECONDS_IN_SECOND;
@@ -825,7 +826,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest createQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(createQuizAssignmentRequest);
         QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, "not_a_quiz", null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
+            new QuizAssignmentDTO(null, UNKNOWN_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
                 QuizFeedbackMode.OVERALL_MARK);
 
         try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
@@ -1534,7 +1535,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(previewQuizRequest);
 
         try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            "not_a_quiz")) {
+            UNKNOWN_QUIZ_ID)) {
 
           assertEquals(Response.Status.NOT_FOUND.getStatusCode(), previewQuizResponse.getStatus());
 
@@ -1837,6 +1838,150 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         assertEquals(QUIZ_ASSIGNMENT_ID, responseBody.getQuizAssignmentId());
         assertNotNull(responseBody.getQuiz());
         assertNotNull(responseBody.getQuizAssignment());
+      }
+    }
+  }
+
+  @Nested
+  class StartFreeQuizAttempt {
+    @Nested
+    class InvalidUser {
+      @Test
+      public void anonymousUser() {
+        HttpServletRequest startFreeQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
+        replay(startFreeQuizAttemptRequest);
+
+        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
+            startFreeQuizAttemptRequest, QUIZ_TEST_QUIZ_ID)) {
+
+          assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
+
+          assertEquals("You must be logged in to access this resource.",
+              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void hiddenFromStudents() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+        HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+        replay(startFreeQuizAttemptRequest);
+
+        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
+            startFreeQuizAttemptRequest, QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)) {
+
+          assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
+
+          assertEquals("Free attempts are not available for test quiz.",
+              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void assignedQuiz() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_ALICE_EMAIL, TEST_STUDENT_ALICE_PASSWORD);
+        HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+        replay(startFreeQuizAttemptRequest);
+
+        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
+            startFreeQuizAttemptRequest, QUIZ_TEST_QUIZ_ID)) {
+
+          assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
+
+          assertEquals("This test has been assigned to you by a teacher. "
+                  + "You can not attempt this test freely. If you have already done the test for your teacher, "
+                  + "and want to do it again, ask your teacher to allow you another attempt.",
+              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+    }
+
+    @Nested
+    class BadRequestMissingOrInvalidData {
+      @Test
+      public void missingId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+        HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+        replay(startFreeQuizAttemptRequest);
+
+        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
+            startFreeQuizAttemptRequest, null)) {
+
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
+
+          assertEquals("You must provide a valid test id.",
+              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void emptyId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+        HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+        replay(startFreeQuizAttemptRequest);
+
+        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
+            startFreeQuizAttemptRequest, "")) {
+
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
+
+          assertEquals("You must provide a valid test id.",
+              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void unknownId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+        HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+        replay(startFreeQuizAttemptRequest);
+
+        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
+            startFreeQuizAttemptRequest, UNKNOWN_QUIZ_ID)) {
+
+          assertEquals(Response.Status.NOT_FOUND.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
+
+          assertEquals("This test has become unavailable.",
+              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+    }
+
+    @Test
+    public void validRequest() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+      HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(startFreeQuizAttemptRequest);
+
+      try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
+          startFreeQuizAttemptRequest, QUIZ_TEST_QUIZ_ID)) {
+
+        assertEquals(Response.Status.OK.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
+
+        QuizAttemptDTO responseBody = (QuizAttemptDTO) startFreeQuizAttemptResponse.getEntity();
+        assertEquals(TEST_STUDENT_ID, responseBody.getUserId());
+        assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
+        assertNull(responseBody.getQuizAssignmentId());
+        assertNotNull(responseBody.getQuiz());
+        assertNull(responseBody.getQuizAssignment());
       }
     }
   }

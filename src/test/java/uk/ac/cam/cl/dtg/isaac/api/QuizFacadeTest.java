@@ -461,39 +461,39 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void startFreeQuizAttempt() {
-    QuizAttemptDTO attempt = new QuizAttemptDTO();
-    String testQuizId = "TEST_QUIZ_ID";
-    attempt.setQuizId(testQuizId);
-    IsaacQuizDTO testQuiz = new IsaacQuizDTO();
-
-    forEndpoint((quiz) -> () -> quizFacade.startFreeQuizAttempt(requestForCaching, httpServletRequest, quiz.getId()),
-        with(studentQuiz,
-            requiresLogin(),
-            as(secondStudent,
-                prepare(quizAttemptManager,
-                    m -> expect(m.fetchOrCreateFreeQuiz(studentQuiz, secondStudent)).andReturn(attempt)),
-                prepare(quizManager, m -> {
-                  expect(m.findQuiz(studentQuiz.getId())).andReturn(studentQuiz);
-                  // This is a bit of a swizz; the attempt we return above refers to a different, fresh quiz, which we wire up here.
-                  expect(m.findQuiz(testQuizId)).andReturn(testQuiz);
-                }),
-                prepare(quizQuestionManager,
-                    m -> expect(m.augmentQuestionsForUser(testQuiz, attempt, false)).andReturn(testQuiz)),
-                respondsWith(attempt)
-            ),
-            as(student,
-                failsWith(Status.FORBIDDEN)
-            )
-        ),
-        with(teacherQuiz,
-            as(anyOf(student, secondStudent),
-                failsWith(Status.FORBIDDEN)
-            )
-        )
-    );
-  }
+//  @Test
+//  public void startFreeQuizAttempt() {
+//    QuizAttemptDTO attempt = new QuizAttemptDTO();
+//    String testQuizId = "TEST_QUIZ_ID";
+//    attempt.setQuizId(testQuizId);
+//    IsaacQuizDTO testQuiz = new IsaacQuizDTO();
+//
+//    forEndpoint((quiz) -> () -> quizFacade.startFreeQuizAttempt(requestForCaching, httpServletRequest, quiz.getId()),
+//        with(studentQuiz,
+//            requiresLogin(),
+//            as(secondStudent,
+//                prepare(quizAttemptManager,
+//                    m -> expect(m.fetchOrCreateFreeQuiz(studentQuiz, secondStudent)).andReturn(attempt)),
+//                prepare(quizManager, m -> {
+//                  expect(m.findQuiz(studentQuiz.getId())).andReturn(studentQuiz);
+//                  // This is a bit of a swizz; the attempt we return above refers to a different, fresh quiz, which we wire up here.
+//                  expect(m.findQuiz(testQuizId)).andReturn(testQuiz);
+//                }),
+//                prepare(quizQuestionManager,
+//                    m -> expect(m.augmentQuestionsForUser(testQuiz, attempt, false)).andReturn(testQuiz)),
+//                respondsWith(attempt)
+//            ),
+//            as(student,
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        ),
+//        with(teacherQuiz,
+//            as(anyOf(student, secondStudent),
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        )
+//    );
+//  }
 
   @Test
   public void getQuizAttempt() {

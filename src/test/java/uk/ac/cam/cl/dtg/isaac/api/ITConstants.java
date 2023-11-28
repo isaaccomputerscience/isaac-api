@@ -84,6 +84,7 @@ public final class ITConstants {
   public static final String QUIZ_TEST_QUIZ_ID = "_quiz_test";
   public static final String QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID = "_hidden_from_roles_student_quiz_test";
   public static final String QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID = "_hidden_from_roles_tutor_quiz_test";
+  public static final String UNKNOWN_QUIZ_ID = "_not_a_quiz";
 
   // Assignments
   public static final Long ASSIGNMENT_FACADE_TEST_GROUP_ID = 5L;
