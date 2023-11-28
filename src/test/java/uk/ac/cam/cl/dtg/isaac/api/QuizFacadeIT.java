@@ -44,6 +44,9 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_BOB_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_BOB_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_CHARLIE_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ERIKA_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ERIKA_ID;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ERIKA_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TEACHERS_AB_GROUP_ID;
@@ -1866,7 +1869,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_ERIKA_EMAIL, TEST_STUDENT_ERIKA_PASSWORD);
         HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startFreeQuizAttemptRequest);
 
@@ -1909,7 +1912,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_ERIKA_EMAIL, TEST_STUDENT_ERIKA_PASSWORD);
         HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startFreeQuizAttemptRequest);
 
@@ -1928,7 +1931,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_ERIKA_EMAIL, TEST_STUDENT_ERIKA_PASSWORD);
         HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startFreeQuizAttemptRequest);
 
@@ -1947,7 +1950,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_ERIKA_EMAIL, TEST_STUDENT_ERIKA_PASSWORD);
         HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startFreeQuizAttemptRequest);
 
@@ -1967,7 +1970,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_ERIKA_EMAIL, TEST_STUDENT_ERIKA_PASSWORD);
       HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(startFreeQuizAttemptRequest);
 
@@ -1977,7 +1980,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         assertEquals(Response.Status.OK.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
         QuizAttemptDTO responseBody = (QuizAttemptDTO) startFreeQuizAttemptResponse.getEntity();
-        assertEquals(TEST_STUDENT_ID, responseBody.getUserId());
+        assertEquals(TEST_STUDENT_ERIKA_ID, responseBody.getUserId());
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
         assertNull(responseBody.getQuizAssignmentId());
         assertNotNull(responseBody.getQuiz());
