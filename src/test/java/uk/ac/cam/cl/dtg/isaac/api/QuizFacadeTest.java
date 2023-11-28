@@ -421,14 +421,14 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void previewQuiz() {
-    forEndpoint(() -> quizFacade.previewQuiz(requestForCaching, httpServletRequest, studentQuiz.getId()),
-        requiresLogin(),
-        as(student, failsWith(SegueErrorResponse.getIncorrectRoleResponse())),
-        as(teacher, respondsWith(studentQuiz))
-    );
-  }
+//  @Test
+//  public void previewQuiz() {
+//    forEndpoint(() -> quizFacade.previewQuiz(requestForCaching, httpServletRequest, studentQuiz.getId()),
+//        requiresLogin(),
+//        as(student, failsWith(SegueErrorResponse.getIncorrectRoleResponse())),
+//        as(teacher, respondsWith(studentQuiz))
+//    );
+//  }
 
   @Test
   public void startQuizAttempt() {

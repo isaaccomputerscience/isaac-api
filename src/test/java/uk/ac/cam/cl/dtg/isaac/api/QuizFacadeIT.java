@@ -1282,7 +1282,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void changingQuizId() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
-        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, "_quiz_test", null, null, null, null, null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, null, null, null, null);
 
         try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, 1L,
             quizAssignmentDto)) {
@@ -1535,6 +1535,185 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           assertNull(updateQuizAssignmentResponse.getEntity());
+        }
+      }
+    }
+  }
+
+  @Nested
+  class PreviewQuiz {
+    @Nested
+    class BadRequestMissingOrInvalidData {
+      @Test
+      public void nullId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult tutorLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+        HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+        replay(previewQuizRequest);
+
+        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
+            null)) {
+
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), previewQuizResponse.getStatus());
+
+          assertEquals("You must provide a valid test id.",
+              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void emptyId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult tutorLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+        HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+        replay(previewQuizRequest);
+
+        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
+            "")) {
+
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), previewQuizResponse.getStatus());
+
+          assertEquals("You must provide a valid test id.",
+              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void unknownId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult tutorLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+        HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+        replay(previewQuizRequest);
+
+        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
+            "not_a_quiz")) {
+
+          assertEquals(Response.Status.NOT_FOUND.getStatusCode(), previewQuizResponse.getStatus());
+
+          assertEquals("This test has become unavailable.",
+              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+    }
+
+    @Nested
+    class StandardQuizPermissions {
+      @Test
+      public void anonymousUser() {
+        HttpServletRequest previewQuizRequest = createNiceMock(HttpServletRequest.class);
+        replay(previewQuizRequest);
+
+        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
+            QUIZ_TEST_QUIZ_ID)) {
+
+          assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), previewQuizResponse.getStatus());
+
+          assertEquals("You must be logged in to access this resource.",
+              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void student() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
+        HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+        replay(previewQuizRequest);
+
+        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
+            QUIZ_TEST_QUIZ_ID)) {
+
+          assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
+
+          assertEquals("You do not have the permissions to complete this action",
+              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
+        HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+        replay(previewQuizRequest);
+
+        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
+            QUIZ_TEST_QUIZ_ID)) {
+
+          assertEquals(Response.Status.OK.getStatusCode(), previewQuizResponse.getStatus());
+
+          IsaacQuizDTO responseBody = (IsaacQuizDTO) previewQuizResponse.getEntity();
+          assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getId());
+        }
+      }
+
+      @Test
+      public void teacher() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult tutorLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+        HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+        replay(previewQuizRequest);
+
+        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
+            QUIZ_TEST_QUIZ_ID)) {
+
+          assertEquals(Response.Status.OK.getStatusCode(), previewQuizResponse.getStatus());
+
+          IsaacQuizDTO responseBody = (IsaacQuizDTO) previewQuizResponse.getEntity();
+          assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getId());
+        }
+      }
+    }
+
+    @Nested
+    class RestrictedQuizPermissions {
+      @Test
+      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
+        HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+        replay(previewQuizRequest);
+
+        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
+            QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)) {
+
+          assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
+
+          assertEquals("You do not have the permissions to complete this action",
+              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void teacher() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult tutorLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+        HttpServletRequest previewQuizRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+        replay(previewQuizRequest);
+
+        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
+            QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)) {
+
+          assertEquals(Response.Status.OK.getStatusCode(), previewQuizResponse.getStatus());
+
+          IsaacQuizDTO responseBody = (IsaacQuizDTO) previewQuizResponse.getEntity();
+          assertEquals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID, responseBody.getId());
         }
       }
     }
