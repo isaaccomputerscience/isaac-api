@@ -49,7 +49,6 @@ import uk.ac.cam.cl.dtg.isaac.api.managers.QuizQuestionManager;
 import uk.ac.cam.cl.dtg.isaac.api.services.AssignmentService;
 import uk.ac.cam.cl.dtg.isaac.api.services.ContentSummarizerService;
 import uk.ac.cam.cl.dtg.isaac.dos.QuizFeedbackMode;
-import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
@@ -495,38 +494,38 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void getQuizAttempt() {
-    IsaacQuizDTO augmentedQuiz = new IsaacQuizDTO();
-    forEndpoint((attempt) -> () -> quizFacade.getQuizAttempt(httpServletRequest, attempt.getId()),
-        with(studentAttempt,
-            requiresLogin(),
-            as(secondStudent,
-                failsWith(Status.FORBIDDEN)
-            ),
-            as(student,
-                prepare(quizQuestionManager, m ->
-                    expect(m.augmentQuestionsForUser(studentQuiz, studentAttempt, false)).andReturn(augmentedQuiz)),
-                prepare(assignmentService, m -> {
-                  m.augmentAssignerSummaries(Collections.singletonList(studentAssignment));
-                  expectLastCall();
-                }),
-                respondsWith(studentAttempt),
-                check(ignore -> assertEquals(augmentedQuiz, studentAttempt.getQuiz()))
-            )
-        ),
-        with(overdueAttempt,
-            as(student,
-                failsWith(Status.FORBIDDEN)
-            )
-        ),
-        with(completedAttempt,
-            as(student,
-                failsWith(Status.FORBIDDEN)
-            )
-        )
-    );
-  }
+//  @Test
+//  public void getQuizAttempt() {
+//    IsaacQuizDTO augmentedQuiz = new IsaacQuizDTO();
+//    forEndpoint((attempt) -> () -> quizFacade.getQuizAttempt(httpServletRequest, attempt.getId()),
+//        with(studentAttempt,
+//            requiresLogin(),
+//            as(secondStudent,
+//                failsWith(Status.FORBIDDEN)
+//            ),
+//            as(student,
+//                prepare(quizQuestionManager, m ->
+//                    expect(m.augmentQuestionsForUser(studentQuiz, studentAttempt, false)).andReturn(augmentedQuiz)),
+//                prepare(assignmentService, m -> {
+//                  m.augmentAssignerSummaries(Collections.singletonList(studentAssignment));
+//                  expectLastCall();
+//                }),
+//                respondsWith(studentAttempt),
+//                check(ignore -> assertEquals(augmentedQuiz, studentAttempt.getQuiz()))
+//            )
+//        ),
+//        with(overdueAttempt,
+//            as(student,
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        ),
+//        with(completedAttempt,
+//            as(student,
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        )
+//    );
+//  }
 
   @Test
   public void getQuizAttemptFeedback() {
