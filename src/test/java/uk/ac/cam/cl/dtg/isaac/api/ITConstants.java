@@ -98,12 +98,17 @@ public final class ITConstants {
   public static final Long QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_SECOND_ID = 3L;
   public static final Long QUIZ_ASSIGNMENT_SECOND_ID = 4L;
   public static final Long QUIZ_ASSIGNMENT_CANCELLED_ID = 5L;
-  public static final Long QUIZ_ASSIGNMENT_OVERDUE_ID = 6L;
+  public static final Long QUIZ_ASSIGNMENT_EXPIRED_ID = 6L;
+  public static final Long QUIZ_ASSIGNMENT_FEEDBACK_MODE_ID = 7L;
+
 
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID = 1L;
+  public static final Long QUIZ_ASSIGNMENT_ATTEMPT_BOB_FREE_ID = 2L;
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID = 3L;
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_ALICE_CANCELLED_ID = 4L;
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID = 5L;
+  public static final Long QUIZ_ASSIGNMENT_ATTEMPT_BOB_COMPLETE_ID = 6L;
+  public static final Long QUIZ_ASSIGNMENT_ATTEMPT_ALICE_FEEDBACK_MODE_ID = 7L;
 
   private ITConstants() {
   }

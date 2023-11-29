@@ -193,6 +193,7 @@ COPY public.quiz_assignments (id, quiz_id, group_id, owner_user_id, creation_dat
 4	_quiz_test	7	5	2023-01-01 12:00:00.000	\N	NONE	f
 5	_quiz_test	6	5	2023-01-01 12:00:00.000	\N	NONE	t
 6	_quiz_test	6	5	2023-01-01 12:00:00.000	2023-01-08 12:00:00.000	NONE	f
+7	_quiz_test	6	5	2023-01-01 12:00:00.000	\N	DETAILED_FEEDBACK	f
 \.
 
 
@@ -206,6 +207,8 @@ COPY public.quiz_attempts (id, user_id, quiz_id, quiz_assignment_id, start_date,
 3	7	_quiz_test	4	2023-01-01 13:00:00.000	\N
 4	7	_quiz_test	5	2023-01-01 13:00:00.000	\N
 5	7	_quiz_test	6	2023-01-01 13:00:00.000	\N
+6	8	_quiz_test	6	2023-01-01 13:00:00.000	2023-01-01 14:00:00.000
+7	7	_quiz_test	7	2023-01-01 13:00:00.000	2023-01-01 14:00:00.000
 \.
 
 
@@ -533,14 +536,14 @@ SELECT pg_catalog.setval('public.question_attempts_id_seq', 22, true);
 -- Name: quiz_assignments_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.quiz_assignments_id_seq', 6, true);
+SELECT pg_catalog.setval('public.quiz_assignments_id_seq', 7, true);
 
 
 --
 -- Name: quiz_attempts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.quiz_attempts_id_seq', 5, true);
+SELECT pg_catalog.setval('public.quiz_attempts_id_seq', 7, true);
 
 
 --
