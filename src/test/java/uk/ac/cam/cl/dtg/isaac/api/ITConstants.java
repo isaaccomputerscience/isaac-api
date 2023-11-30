@@ -109,6 +109,7 @@ public final class ITConstants {
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID = 5L;
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_BOB_COMPLETE_ID = 6L;
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_ALICE_FEEDBACK_MODE_ID = 7L;
+  public static final Long QUIZ_ASSIGNMENT_ATTEMPT_BOB_FOR_COMPLETION_TEST_ID = 8L;
 
   private ITConstants() {
   }

@@ -32,6 +32,7 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_ATTEMPT_ALI
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_ATTEMPT_ALICE_FEEDBACK_MODE_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_ATTEMPT_BOB_COMPLETE_ID;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_ATTEMPT_BOB_FOR_COMPLETION_TEST_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_ATTEMPT_BOB_FREE_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_CANCELLED_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_EXPIRED_ID;
@@ -2136,7 +2137,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAttemptFeedbackRequest);
 
         try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
@@ -2156,7 +2157,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAttemptFeedbackRequest);
 
         try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
@@ -2175,7 +2176,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAttemptFeedbackRequest);
 
         try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
@@ -2191,7 +2192,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(getQuizAttemptFeedbackRequest);
 
         try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
@@ -2341,6 +2342,126 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           assertNull(responseBody.getQuizAssignment());
           assertEquals(QuizFeedbackMode.DETAILED_FEEDBACK, responseBody.getFeedbackMode());
         }
+      }
+    }
+  }
+
+  @Nested
+  class CompleteQuizAttempt {
+    @Nested
+    class InvalidUser {
+      @Test
+      public void anonymousUser() {
+        HttpServletRequest completeQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
+        replay(completeQuizAttemptRequest);
+
+        try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
+
+          assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), completeQuizAttemptResponse.getStatus());
+
+          assertEquals("You must be logged in to access this resource.",
+              completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void studentNotAttemptCreator()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_BOB_EMAIL, TEST_STUDENT_BOB_PASSWORD);
+        HttpServletRequest completeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+        replay(completeQuizAttemptRequest);
+
+        try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
+
+          assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
+
+          assertEquals("You cannot complete someone else's test.",
+              completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void teacher() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+          AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+          AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+          MFARequiredButNotConfiguredException {
+        LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
+        HttpServletRequest completeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(completeQuizAttemptRequest);
+
+        try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
+
+          assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
+
+          assertEquals("You cannot complete someone else's test.",
+              completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      public void admin() throws JsonProcessingException {
+        Cookie adminSessionCookie = createManualCookieForAdmin();
+        HttpServletRequest completeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
+        replay(completeQuizAttemptRequest);
+
+        try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
+
+          assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
+
+          assertEquals("You cannot complete someone else's test.",
+              completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+    }
+
+    @Test
+    public void alreadyCompleted()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_ALICE_EMAIL, TEST_STUDENT_ALICE_PASSWORD);
+      HttpServletRequest completeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(completeQuizAttemptRequest);
+
+      try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
+          QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
+
+        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
+
+        assertEquals("That test is already complete.",
+            completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+      }
+    }
+
+    @Test
+    public void validRequest()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+        MFARequiredButNotConfiguredException {
+      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_BOB_EMAIL, TEST_STUDENT_BOB_PASSWORD);
+      HttpServletRequest completeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+      replay(completeQuizAttemptRequest);
+
+      try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
+          QUIZ_ASSIGNMENT_ATTEMPT_BOB_FOR_COMPLETION_TEST_ID)) {
+
+        assertEquals(Response.Status.OK.getStatusCode(), completeQuizAttemptResponse.getStatus());
+
+        QuizAttemptDTO responseBody = (QuizAttemptDTO) completeQuizAttemptResponse.getEntity();
+        assertEquals(TEST_STUDENT_BOB_ID, responseBody.getUserId());
+        assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
+        assertEquals(QUIZ_ASSIGNMENT_FEEDBACK_MODE_ID, responseBody.getQuizAssignmentId());
+        assertNull(responseBody.getQuiz());
+        assertNull(responseBody.getQuizAssignment());
       }
     }
   }

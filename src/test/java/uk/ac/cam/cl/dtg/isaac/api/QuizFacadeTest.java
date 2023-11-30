@@ -582,28 +582,28 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void completeQuizAttempt() {
-    QuizAttemptDTO updatedAttempt = new QuizAttemptDTO();
-    forEndpoint((attempt) -> () -> quizFacade.completeQuizAttempt(httpServletRequest, attempt.getId()),
-        with(studentAttempt,
-            requiresLogin(),
-            as(student,
-                prepare(quizAttemptManager,
-                    m -> expect(m.updateAttemptCompletionStatus(studentAttempt, true)).andReturn(updatedAttempt)),
-                respondsWith(updatedAttempt)
-            ),
-            everyoneElse(
-                failsWith(Status.FORBIDDEN)
-            )
-        ),
-        with(completedAttempt,
-            as(everyone,
-                failsWith(Status.FORBIDDEN)
-            )
-        )
-    );
-  }
+//  @Test
+//  public void completeQuizAttempt() {
+//    QuizAttemptDTO updatedAttempt = new QuizAttemptDTO();
+//    forEndpoint((attempt) -> () -> quizFacade.completeQuizAttempt(httpServletRequest, attempt.getId()),
+//        with(studentAttempt,
+//            requiresLogin(),
+//            as(student,
+//                prepare(quizAttemptManager,
+//                    m -> expect(m.updateAttemptCompletionStatus(studentAttempt, true)).andReturn(updatedAttempt)),
+//                respondsWith(updatedAttempt)
+//            ),
+//            everyoneElse(
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        ),
+//        with(completedAttempt,
+//            as(everyone,
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        )
+//    );
+//  }
 
   @Test
   public void completeQuizAttemptMarkIncompleteByTeacher() {
