@@ -52,7 +52,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizFeedbackDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.QuizUserFeedbackDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
@@ -605,70 +604,70 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void completeQuizAttemptMarkIncompleteByTeacher() {
-    QuizAttemptDTO updatedAttempt = new QuizAttemptDTO();
-    forEndpoint((user) -> () -> quizFacade.markIncompleteQuizAttempt(httpServletRequest, studentAssignment.getId(),
-            user.getId()),
-        with(student,
-            requiresLogin(),
-            as(studentsTeachersOrAdmin(),
-                prepare(quizAttemptManager, m -> {
-                  expect(m.getByQuizAssignmentAndUser(studentAssignment, student)).andReturn(completedAttempt);
-                  expect(m.updateAttemptCompletionStatus(completedAttempt, false)).andReturn(updatedAttempt);
-                }),
-                prepare(associationManager, m -> {
-                  expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(student))).andAnswer(
-                      grantAccess(true));
-                }),
-                respondsWith(new QuizUserFeedbackDTO(getUserSummaryFor(student), new QuizFeedbackDTO()))
-            ),
-            as(studentsTeachersOrAdmin(),
-                prepare(quizAttemptManager, m -> {
-                  expect(m.getByQuizAssignmentAndUser(studentAssignment, student)).andReturn(completedAttempt);
-                  expect(m.updateAttemptCompletionStatus(completedAttempt, false)).andReturn(updatedAttempt);
-                }),
-                prepare(associationManager, m -> {
-                  expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(student))).andAnswer(
-                      grantAccess(false));
-                }),
-                respondsWith(new QuizUserFeedbackDTO(getUserSummaryFor(student), null))
-            ),
-            everyoneElse(
-                failsWith(Status.FORBIDDEN)
-            )
-        ),
-        with(student,
-            requiresLogin(),
-            as(studentsTeachersOrAdmin(),
-                prepare(quizAttemptManager, m -> {
-                  expect(m.getByQuizAssignmentAndUser(studentAssignment, student)).andReturn(studentAttempt);
-                }),
-                failsWith(Status.BAD_REQUEST)
-            ),
-            everyoneElse(
-                failsWith(Status.FORBIDDEN)
-            )
-        ),
-        with(otherStudent,
-            as(studentsTeachersOrAdmin(),
-                failsWith(Status.BAD_REQUEST)
-            ),
-            everyoneElse(
-                failsWith(Status.FORBIDDEN)
-            )
-        )
-    );
-    forEndpoint(
-        () -> quizFacade.markIncompleteQuizAttempt(httpServletRequest, overdueAssignment.getId(), student.getId()),
-        as(studentsTeachersOrAdmin(),
-            failsWith(Status.BAD_REQUEST)
-        ),
-        everyoneElse(
-            failsWith(Status.FORBIDDEN)
-        )
-    );
-  }
+//  @Test
+//  public void completeQuizAttemptMarkIncompleteByTeacher() {
+//    QuizAttemptDTO updatedAttempt = new QuizAttemptDTO();
+//    forEndpoint((user) -> () -> quizFacade.markIncompleteQuizAttempt(httpServletRequest, studentAssignment.getId(),
+//            user.getId()),
+//        with(student,
+//            requiresLogin(),
+//            as(studentsTeachersOrAdmin(),
+//                prepare(quizAttemptManager, m -> {
+//                  expect(m.getByQuizAssignmentAndUser(studentAssignment, student)).andReturn(completedAttempt);
+//                  expect(m.updateAttemptCompletionStatus(completedAttempt, false)).andReturn(updatedAttempt);
+//                }),
+//                prepare(associationManager, m -> {
+//                  expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(student))).andAnswer(
+//                      grantAccess(true));
+//                }),
+//                respondsWith(new QuizUserFeedbackDTO(getUserSummaryFor(student), new QuizFeedbackDTO()))
+//            ),
+//            as(studentsTeachersOrAdmin(),
+//                prepare(quizAttemptManager, m -> {
+//                  expect(m.getByQuizAssignmentAndUser(studentAssignment, student)).andReturn(completedAttempt);
+//                  expect(m.updateAttemptCompletionStatus(completedAttempt, false)).andReturn(updatedAttempt);
+//                }),
+//                prepare(associationManager, m -> {
+//                  expect(m.enforceAuthorisationPrivacy(currentUser(), getUserSummaryFor(student))).andAnswer(
+//                      grantAccess(false));
+//                }),
+//                respondsWith(new QuizUserFeedbackDTO(getUserSummaryFor(student), null))
+//            ),
+//            everyoneElse(
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        ),
+//        with(student,
+//            requiresLogin(),
+//            as(studentsTeachersOrAdmin(),
+//                prepare(quizAttemptManager, m -> {
+//                  expect(m.getByQuizAssignmentAndUser(studentAssignment, student)).andReturn(studentAttempt);
+//                }),
+//                failsWith(Status.BAD_REQUEST)
+//            ),
+//            everyoneElse(
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        ),
+//        with(otherStudent,
+//            as(studentsTeachersOrAdmin(),
+//                failsWith(Status.BAD_REQUEST)
+//            ),
+//            everyoneElse(
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        )
+//    );
+//    forEndpoint(
+//        () -> quizFacade.markIncompleteQuizAttempt(httpServletRequest, overdueAssignment.getId(), student.getId()),
+//        as(studentsTeachersOrAdmin(),
+//            failsWith(Status.BAD_REQUEST)
+//        ),
+//        everyoneElse(
+//            failsWith(Status.FORBIDDEN)
+//        )
+//    );
+//  }
 
   @Test
   public void answerQuestion() {
