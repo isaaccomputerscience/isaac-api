@@ -50,11 +50,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import org.jboss.resteasy.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +136,63 @@ public class GameboardsFacade extends AbstractIsaacFacade {
     this.userManager = userManager;
     this.associationManager = associationManager;
     this.fastTrackManger = fastTrackManger;
+  }
+
+  /**
+   * REST end point to provide a generated Gameboard in the question tile of the student dashboard where five questions will be selected in random.
+   * TBC
+   */
+
+  @Path("/questionTileGameboard")
+  public class QuestionTileGameboard {
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRandomQuestions(@Context final HttpServletRequest request,
+                                       @QueryParam("subjects") final String subjects,
+                                       @QueryParam("topics") final String topics,
+                                       @QueryParam("stages") final String stages,
+                                       @QueryParam("difficulties") final String difficulties,
+                                       @QueryParam("examBoards") final String examBoards) {
+
+      // Create a list to hold the questions?
+
+      // Data for possible subjects, fields, topics, etc.
+      List<String> subjectsList = splitCsvStringQueryParam(subjects);
+      List<String> topicsList = splitCsvStringQueryParam(topics);
+      List<String> stagesList = splitCsvStringQueryParam(stages);
+      List<String> difficultiesList = splitCsvStringQueryParam(difficulties);
+      List<String> examBoardsList = splitCsvStringQueryParam(examBoards);
+
+      // Create a list to hold the questions?
+      List<String> questions = new ArrayList<>();
+
+      // Simulate generating random questions
+      for (int i = 0; i < 5; i++) {
+        // Generate a random index for each list
+        int randomSubjectIndex = new Random().nextInt(subjectsList.size());
+        int randomTopicIndex = new Random().nextInt(topicsList.size());
+        int randomStagesIndex = new Random().nextInt(stagesList.size());
+        int randomDifficultiesIndex = new Random().nextInt(difficultiesList.size());
+        int randomExamBoardsIndex = new Random().nextInt(examBoardsList.size());
+
+
+        // Construct a question using the randomly selected values
+        String question = String.format("Question %d: Subject=%s, Topic=%s, Stages=%s, Difficulty=%s, ExamBoards%s",
+            i + 1,
+            subjectsList.get(randomSubjectIndex),
+            topicsList.get(randomTopicIndex),
+            stagesList.get(randomStagesIndex),
+            difficultiesList.get(randomDifficultiesIndex),
+            examBoardsList.get(randomExamBoardsIndex));
+
+        // Add the question to the list
+        questions.add(question);
+      }
+
+      // Return the list of random questions as JSON
+      return Response.ok(questions).build();
+    }
   }
 
   /**
