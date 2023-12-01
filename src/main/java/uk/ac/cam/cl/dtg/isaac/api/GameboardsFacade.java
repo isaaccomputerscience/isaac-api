@@ -140,15 +140,19 @@ public class GameboardsFacade extends AbstractIsaacFacade {
 
   /**
    * REST end point to provide a generated Gameboard in the question tile of the student dashboard where five questions will be selected in random.
-   * TBC
+   *
+   * @param request            - this allows us to check to see if a user is currently loggedin.
+   * @param subjects           - a comma separated list of subjects
+   * @param topics             - a comma separated list of topics
+   * @param stages             - a comma separated list of stages
+   * @param difficulties       - a comma separated list of difficulties
+   * @param examBoards         - a comma separated list of examBoards
+   * @return a Response containing a gameboard object or containing a SegueErrorResponse.
    */
-
-  @Path("/questionTileGameboard")
-  public class QuestionTileGameboard {
-
     @GET
+    @Path("/randomQuestions")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRandomQuestions(@Context final HttpServletRequest request,
+    public final Response getRandomQuestions(@Context final HttpServletRequest request,
                                        @QueryParam("subjects") final String subjects,
                                        @QueryParam("topics") final String topics,
                                        @QueryParam("stages") final String stages,
@@ -193,7 +197,6 @@ public class GameboardsFacade extends AbstractIsaacFacade {
       // Return the list of random questions as JSON
       return Response.ok(questions).build();
     }
-  }
 
   /**
    * REST end point to provide a Temporary Gameboard stored in volatile storage.
