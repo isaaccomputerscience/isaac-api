@@ -116,6 +116,12 @@ public final class ITConstants {
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_ALICE_FEEDBACK_MODE_ID = 7L;
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_BOB_FOR_SET_COMPLETE_TEST_ID = 8L;
 
+  public static final String QUIZ_TEST_QUESTION_FIRST_ID = "_quiz_test|0ec982f6-e2bf-4974-b777-c50b9471beb1|84c48a78-2a27-4843-866a-c8895aa60e70";
+  public static final String QUIZ_TEST_HIDDEN_FROM_TUTORS_QUESTION_FIRST_ID = "_hidden_from_roles_tutor_quiz_test|0ec982f6-e2bf-4974-b777-c50b9471beb1|84c48a78-2a27-4843-866a-c8895aa60e70";
+  public static final String QUIZ_TEST_UNKNOWN_QUESTION_ID = "not_a_question";
+
+  public static final String QUIZ_TEST_FIRST_QUESTION_ANSWER = "{\"type\":\"quantity\",\"value\":\"3.0\",\"units\":\"V\"}";
+
   private ITConstants() {
   }
 }

@@ -48,14 +48,12 @@ import uk.ac.cam.cl.dtg.isaac.api.managers.QuizAttemptManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.QuizQuestionManager;
 import uk.ac.cam.cl.dtg.isaac.api.services.AssignmentService;
 import uk.ac.cam.cl.dtg.isaac.api.services.ContentSummarizerService;
-import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizFeedbackDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuizSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
@@ -669,63 +667,63 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void answerQuestion() {
-    String jsonAnswer = "jsonAnswer";
-    ChoiceDTO choice = new ChoiceDTO();
-    QuestionValidationResponseDTO validationResponse = new QuestionValidationResponseDTO();
+//  @Test
+//  public void answerQuestion() {
+//    String jsonAnswer = "jsonAnswer";
+//    ChoiceDTO choice = new ChoiceDTO();
+//    QuestionValidationResponseDTO validationResponse = new QuestionValidationResponseDTO();
+//
+//    forEndpoint(
+//        (attempt) -> () -> quizFacade.answerQuestion(httpServletRequest, attempt.getId(), question.getId(), jsonAnswer),
+//        with(studentAttempt,
+//            requiresLogin(),
+//            as(student,
+//                prepare(quizQuestionManager, m -> {
+//                  expect(m.convertJsonAnswerToChoice(jsonAnswer)).andReturn(choice);
+//                  expect(m.validateAnswer(questionDO, choice)).andReturn(validationResponse);
+//                  //expect(m.augmentQuestionsForUser(studentQuiz, studentAttempt, student, false)).andReturn(quiz);
+//                  m.recordQuestionAttempt(studentAttempt, validationResponse);
+//                }),
+//                succeeds()
+//            ),
+//            forbiddenForEveryoneElse()
+//        ),
+//        with(completedAttempt,
+//            as(everyone,
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        ),
+//        with(overdueAttempt,
+//            as(everyone,
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        )
+//    );
+//  }
 
-    forEndpoint(
-        (attempt) -> () -> quizFacade.answerQuestion(httpServletRequest, attempt.getId(), question.getId(), jsonAnswer),
-        with(studentAttempt,
-            requiresLogin(),
-            as(student,
-                prepare(quizQuestionManager, m -> {
-                  expect(m.convertJsonAnswerToChoice(jsonAnswer)).andReturn(choice);
-                  expect(m.validateAnswer(questionDO, choice)).andReturn(validationResponse);
-                  //expect(m.augmentQuestionsForUser(studentQuiz, studentAttempt, student, false)).andReturn(quiz);
-                  m.recordQuestionAttempt(studentAttempt, validationResponse);
-                }),
-                succeeds()
-            ),
-            forbiddenForEveryoneElse()
-        ),
-        with(completedAttempt,
-            as(everyone,
-                failsWith(Status.FORBIDDEN)
-            )
-        ),
-        with(overdueAttempt,
-            as(everyone,
-                failsWith(Status.FORBIDDEN)
-            )
-        )
-    );
-  }
-
-  @Test
-  public void answerQuestionOnWrongQuiz() {
-    String jsonAnswer = "jsonAnswer";
-
-    forEndpoint(() -> quizFacade.answerQuestion(httpServletRequest, otherAttempt.getId(), question.getId(), jsonAnswer),
-        as(student,
-            failsWith(Status.BAD_REQUEST)
-        )
-    );
-  }
-
-  @Test
-  public void answerQuestionOnNonQuiz() {
-    String jsonAnswer = "jsonAnswer";
-
-    forEndpoint(
-        () -> quizFacade.answerQuestion(httpServletRequest, studentAttempt.getId(), questionPageQuestion.getId(),
-            jsonAnswer),
-        as(student,
-            failsWith(Status.BAD_REQUEST)
-        )
-    );
-  }
+//  @Test
+//  public void answerQuestionOnWrongQuiz() {
+//    String jsonAnswer = "jsonAnswer";
+//
+//    forEndpoint(() -> quizFacade.answerQuestion(httpServletRequest, otherAttempt.getId(), question.getId(), jsonAnswer),
+//        as(student,
+//            failsWith(Status.BAD_REQUEST)
+//        )
+//    );
+//  }
+//
+//  @Test
+//  public void answerQuestionOnNonQuiz() {
+//    String jsonAnswer = "jsonAnswer";
+//
+//    forEndpoint(
+//        () -> quizFacade.answerQuestion(httpServletRequest, studentAttempt.getId(), questionPageQuestion.getId(),
+//            jsonAnswer),
+//        as(student,
+//            failsWith(Status.BAD_REQUEST)
+//        )
+//    );
+//  }
 
   @Test
   public void abandonQuizAttempt() {
