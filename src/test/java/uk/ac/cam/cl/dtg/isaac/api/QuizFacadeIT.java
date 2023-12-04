@@ -388,7 +388,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class GetQuizAssignment {
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void noQuizId() {
         HttpServletRequest getQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
@@ -544,7 +544,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class GetQuizAssignmentAttempt {
     @Nested
-    class BadRequestMissingData {
+    class MissingOrInvalidData {
       @Test
       public void noQuizId_badRequest() {
         HttpServletRequest getQuizAssignmentAttemptRequest = createNiceMock(HttpServletRequest.class);
@@ -786,7 +786,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class CreateQuizAssignment {
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void assignmentMissingQuizId() {
         HttpServletRequest createQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
@@ -1053,7 +1053,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class CancelQuizAssignment {
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void missingQuizAssignmentId() {
         HttpServletRequest cancelQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
@@ -1209,7 +1209,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class UpdateQuizAssignment {
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void missingQuizAssignmentId() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
@@ -1509,7 +1509,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class PreviewQuiz {
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void nullId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
@@ -1730,7 +1730,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class StartQuizAttempt {
     @Nested
-    class InvalidUser {
+    class UnauthorisedOrForbiddenUser {
       @Test
       public void anonymousUser() {
         HttpServletRequest startQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
@@ -1767,7 +1767,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void missingId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
@@ -1872,7 +1872,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class StartFreeQuizAttempt {
     @Nested
-    class InvalidUser {
+    class UnauthorisedOrForbiddenUser {
       @Test
       public void anonymousUser() {
         HttpServletRequest startFreeQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
@@ -1930,7 +1930,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void missingId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
@@ -2016,7 +2016,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class GetQuizAttempt {
     @Nested
-    class InvalidUser {
+    class UnauthorisedOrForbiddenUser {
       @Test
       public void anonymousUser() {
         HttpServletRequest getQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
@@ -2054,7 +2054,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Nested
-    class InvalidRequest {
+    class MissingOrInvalidData {
       @Test
       public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
@@ -2140,7 +2140,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class GetQuizAttemptFeedback {
     @Nested
-    class InvalidUser {
+    class UnauthorisedOrForbiddenUser {
       @Test
       public void anonymousUser() {
         HttpServletRequest getQuizAttemptFeedbackRequest = createNiceMock(HttpServletRequest.class);
@@ -2359,7 +2359,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class CompleteQuizAttempt {
     @Nested
-    class InvalidUser {
+    class UnauthorisedOrForbiddenUser {
       @Test
       public void anonymousUser() {
         HttpServletRequest completeQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
@@ -2479,7 +2479,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class MarkIncompleteQuizAttempt {
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void missingAssignmentId() {
         HttpServletRequest markIncompleteQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
@@ -2801,7 +2801,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class AnswerQuestion {
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void nullAnswer() {
         HttpServletRequest answerQuestionRequest = createNiceMock(HttpServletRequest.class);
@@ -3019,7 +3019,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class AbandonQuizAttempt {
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void missingAttemptId()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
@@ -3141,7 +3141,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class LogQuizSectionView {
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void missingSectionNumber() {
         HttpServletRequest logQuizSectionViewRequest = createNiceMock(HttpServletRequest.class);
@@ -3279,7 +3279,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class GetQuizAssignments {
     @Nested
-    class BadRequestMissingOrInvalidData {
+    class MissingOrInvalidData {
       @Test
       public void unknownGroupId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,

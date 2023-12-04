@@ -2,6 +2,8 @@ package uk.ac.cam.cl.dtg.isaac.api;
 
 import static org.easymock.EasyMock.createMock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_FIRST_QUESTION_ANSWER;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_HIDDEN_FROM_TUTORS_QUESTION_FIRST_ID;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
@@ -27,12 +29,11 @@ public class QuestionFacadeIT extends IsaacIntegrationTest {
   @Test
   public void answerQuestionNotAvailableForQuizQuestions() {
     HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
-    String questionId =
-        "_hidden_from_roles_tutor_quiz_test|0ec982f6-e2bf-4974-b777-c50b9471beb1|84c48a78-2a27-4843-866a-c8895aa60e70";
-    String jsonAnswer = "42";
 
-    Response response = questionFacade.answerQuestion(mockRequest, questionId, jsonAnswer);
+    try (Response response = questionFacade.answerQuestion(mockRequest, QUIZ_TEST_HIDDEN_FROM_TUTORS_QUESTION_FIRST_ID,
+        QUIZ_TEST_FIRST_QUESTION_ANSWER)) {
 
-    assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
+    }
   }
 }
