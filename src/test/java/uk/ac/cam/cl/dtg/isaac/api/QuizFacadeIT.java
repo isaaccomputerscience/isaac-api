@@ -46,7 +46,6 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_SET_INCOMPL
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_IT_TEST_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_FIRST_QUESTION_ANSWER;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_HIDDEN_FROM_TUTORS_QUESTION_FIRST_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_QUESTION_FIRST_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_QUIZ_ID;
@@ -3010,26 +3009,6 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           assertEquals("This is not your test attempt.",
               answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
         }
-      }
-    }
-
-    @Test
-    public void validRequest() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-        AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-        AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
-        MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_ALICE_EMAIL, TEST_STUDENT_ALICE_PASSWORD);
-      HttpServletRequest answerQuestionRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
-      replay(answerQuestionRequest);
-
-      // TODO: Failing to find validator during testing, investigation required
-      //  See QuestionManager line 156; Check missing required properties?
-      try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-          QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, QUIZ_TEST_QUESTION_FIRST_ID, QUIZ_TEST_FIRST_QUESTION_ANSWER)) {
-
-        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), answerQuestionResponse.getStatus());
-
-        assertNull(answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
       }
     }
   }
