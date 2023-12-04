@@ -40,8 +40,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import org.jboss.resteasy.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -230,6 +232,45 @@ public class QuestionFacade extends AbstractSegueFacade {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error while looking up event information")
           .toResponse();
     }
+  }
+
+  /**
+   * REST end point to provide five questions in random located in the question tile of the student dashboard.
+   *
+   * @param request            - this allows us to check to see if a user is currently loggedin.
+   * @param subjects           - a comma separated list of subjects
+   * @param topics             - a comma separated list of topics
+   * @param stages             - a comma separated list of stages
+   * @param difficulties       - a comma separated list of difficulties
+   * @param examBoards         - a comma separated list of examBoards
+   * @return a Response containing a gameboard object or containing a SegueErrorResponse.
+   */
+  @GET
+  @Path("/randomQuestions")
+  @Produces(MediaType.APPLICATION_JSON)
+  public final Response getRandomQuestions(@Context final HttpServletRequest request,
+                                           @QueryParam("subjects") final String subjects,
+                                           @QueryParam("topics") final String topics,
+                                           @QueryParam("stages") final String stages,
+                                           @QueryParam("difficulties") final String difficulties,
+                                           @QueryParam("examBoards") final String examBoards) {
+
+    // Create a list to hold the questions?
+
+    // Data for possible subjects, fields, topics, etc.
+
+
+    // Create a list to hold the questions?
+    List<String> questions = new ArrayList<>();
+
+    // Simulate generating random questions
+    for (int i = 0; i < 5; i++) {
+      // Generate a random index for each list?
+
+      // Return the list of random questions as JSON
+      return Response.ok(questions).build();
+    }
+    return null;
   }
 
 
