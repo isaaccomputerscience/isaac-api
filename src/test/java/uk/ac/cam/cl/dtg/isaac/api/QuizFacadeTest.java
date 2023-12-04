@@ -725,29 +725,29 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void abandonQuizAttempt() {
-    forEndpoint((attempt) -> () -> quizFacade.abandonQuizAttempt(httpServletRequest, attempt.getId()),
-        with(studentAttempt,
-            requiresLogin(),
-            as(everyone,
-                failsWith(Status.FORBIDDEN)
-            )
-        ),
-        with(ownAttempt,
-            as(student,
-                prepare(quizAttemptManager, m -> m.deleteAttempt(ownAttempt)),
-                succeeds()
-            ),
-            forbiddenForEveryoneElse()
-        ),
-        with(ownCompletedAttempt,
-            as(everyone,
-                failsWith(Status.FORBIDDEN)
-            )
-        )
-    );
-  }
+//  @Test
+//  public void abandonQuizAttempt() {
+//    forEndpoint((attempt) -> () -> quizFacade.abandonQuizAttempt(httpServletRequest, attempt.getId()),
+//        with(studentAttempt,
+//            requiresLogin(),
+//            as(everyone,
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        ),
+//        with(ownAttempt,
+//            as(student,
+//                prepare(quizAttemptManager, m -> m.deleteAttempt(ownAttempt)),
+//                succeeds()
+//            ),
+//            forbiddenForEveryoneElse()
+//        ),
+//        with(ownCompletedAttempt,
+//            as(everyone,
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        )
+//    );
+//  }
 
   @Test
   public void logQuizSectionView() {

@@ -214,6 +214,7 @@ COPY public.quiz_attempts (id, user_id, quiz_id, quiz_assignment_id, start_date,
 9	7	_hidden_from_roles_tutor_quiz_test	8	2023-01-01 13:00:00.000	2023-01-01 14:00:00.000
 10	9	_hidden_from_roles_tutor_quiz_test	8	2023-01-01 13:00:00.000	2023-01-01 14:00:00.000
 11	9	_quiz_test	1	2023-01-01 13:00:00.000	2023-01-01 14:00:00.000
+12	7	_quiz_test	\N	2023-01-01 13:00:00.000	\N
 \.
 
 
@@ -548,7 +549,7 @@ SELECT pg_catalog.setval('public.quiz_assignments_id_seq', 8, true);
 -- Name: quiz_attempts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: rutherford
 --
 
-SELECT pg_catalog.setval('public.quiz_attempts_id_seq', 11, true);
+SELECT pg_catalog.setval('public.quiz_attempts_id_seq', 12, true);
 
 
 --
