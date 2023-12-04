@@ -80,6 +80,8 @@ public final class ITConstants {
   public static final long DAVE_TEACHERS_BC_GROUP_ID = 2L;
   public static final long TEST_TUTORS_AB_GROUP_ID = 4L;
   public static final long QUIZ_FACADE_IT_TEST_GROUP_ID = 6L;
+  public static final long QUIZ_FACADE_IT_SECONDARY_TEST_GROUP_ID = 7L;
+  public static final long UNKNOWN_GROUP_ID = 1000L;
 
   // Gameboards
   public static final String ASSIGNMENTS_TEST_GAMEBOARD_ID = "865072ab-9223-495f-a809-5ee2b98252e4";

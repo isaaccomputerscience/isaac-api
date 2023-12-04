@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Objects;
 import org.easymock.IAnswer;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -47,8 +46,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizFeedbackDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
-import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
-import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuizSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
@@ -766,59 +763,59 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void getAllQuizAssignments() {
-    List<UserGroupDTO> studentGroups = ImmutableList.of(studentGroup, studentInactiveGroup);
-    ImmutableList<QuizAssignmentDTO> inactiveGroupAssignments =
-        ImmutableList.of(studentInactiveAssignment, studentInactiveIgnoredAssignment);
-    forEndpoint((Long groupIdOfInterest) -> () -> quizFacade.getQuizAssignments(httpServletRequest, groupIdOfInterest),
-        with(null,
-            requiresLogin(),
-            as(anyOf(teacher, secondTeacher),
-                prepare(groupManager, m -> expect(m.getAllGroupsOwnedAndManagedByUser(currentUser(), false))
-                    .andReturn(studentGroups)),
-                prepare(quizAssignmentManager, m -> expect(m.getAssignmentsForGroups(studentGroups))
-                    .andReturn(teacherAssignmentsToTheirGroups)),
-                prepare(quizManager, m -> {
-                  m.augmentWithQuizSummary(teacherAssignmentsToTheirGroups);
-                }),
-                respondsWith(teacherAssignmentsToTheirGroups)
-            ),
-            as(otherTeacher,
-                prepare(groupManager, m -> expect(m.getAllGroupsOwnedAndManagedByUser(currentUser(), false))
-                    .andReturn(Collections.emptyList())),
-                prepare(quizAssignmentManager, m -> expect(m.getAssignmentsForGroups(Collections.emptyList()))
-                    .andReturn(Collections.emptyList())),
-                prepare(quizManager, m -> {
-                  m.augmentWithQuizSummary(Collections.emptyList());
-                }),
-                respondsWith(Collections.emptyList())),
-            as(anyOf(student, secondStudent, otherStudent),
-                failsWith(SegueErrorResponse.getIncorrectRoleResponse())
-            )
-        ),
-        with(studentInactiveGroup.getId(),
-            requiresLogin(),
-            as(anyOf(teacher, adminUser),
-                prepare(groupManager, m -> expect(m.getGroupById(studentInactiveGroup.getId()))
-                    .andReturn(studentInactiveGroup)),
-                prepare(quizAssignmentManager,
-                    m -> expect(m.getAssignmentsForGroups(Collections.singletonList(studentInactiveGroup)))
-                        .andReturn(inactiveGroupAssignments)),
-                prepare(quizManager, m -> m.augmentWithQuizSummary(inactiveGroupAssignments)),
-                respondsWith(inactiveGroupAssignments)
-            ),
-            as(anyOf(student, secondStudent, otherStudent),
-                failsWith(SegueErrorResponse.getIncorrectRoleResponse())
-            ),
-            everyoneElse(
-                prepare(groupManager, m -> expect(m.getGroupById(studentInactiveGroup.getId()))
-                    .andReturn(studentInactiveGroup)),
-                failsWith(Status.FORBIDDEN)
-            )
-        )
-    );
-  }
+//  @Test
+//  public void getAllQuizAssignments() {
+//    List<UserGroupDTO> studentGroups = ImmutableList.of(studentGroup, studentInactiveGroup);
+//    ImmutableList<QuizAssignmentDTO> inactiveGroupAssignments =
+//        ImmutableList.of(studentInactiveAssignment, studentInactiveIgnoredAssignment);
+//    forEndpoint((Long groupIdOfInterest) -> () -> quizFacade.getQuizAssignments(httpServletRequest, groupIdOfInterest),
+//        with(null,
+//            requiresLogin(),
+//            as(anyOf(teacher, secondTeacher),
+//                prepare(groupManager, m -> expect(m.getAllGroupsOwnedAndManagedByUser(currentUser(), false))
+//                    .andReturn(studentGroups)),
+//                prepare(quizAssignmentManager, m -> expect(m.getAssignmentsForGroups(studentGroups))
+//                    .andReturn(teacherAssignmentsToTheirGroups)),
+//                prepare(quizManager, m -> {
+//                  m.augmentWithQuizSummary(teacherAssignmentsToTheirGroups);
+//                }),
+//                respondsWith(teacherAssignmentsToTheirGroups)
+//            ),
+//            as(otherTeacher,
+//                prepare(groupManager, m -> expect(m.getAllGroupsOwnedAndManagedByUser(currentUser(), false))
+//                    .andReturn(Collections.emptyList())),
+//                prepare(quizAssignmentManager, m -> expect(m.getAssignmentsForGroups(Collections.emptyList()))
+//                    .andReturn(Collections.emptyList())),
+//                prepare(quizManager, m -> {
+//                  m.augmentWithQuizSummary(Collections.emptyList());
+//                }),
+//                respondsWith(Collections.emptyList())),
+//            as(anyOf(student, secondStudent, otherStudent),
+//                failsWith(SegueErrorResponse.getIncorrectRoleResponse())
+//            )
+//        ),
+//        with(studentInactiveGroup.getId(),
+//            requiresLogin(),
+//            as(anyOf(teacher, adminUser),
+//                prepare(groupManager, m -> expect(m.getGroupById(studentInactiveGroup.getId()))
+//                    .andReturn(studentInactiveGroup)),
+//                prepare(quizAssignmentManager,
+//                    m -> expect(m.getAssignmentsForGroups(Collections.singletonList(studentInactiveGroup)))
+//                        .andReturn(inactiveGroupAssignments)),
+//                prepare(quizManager, m -> m.augmentWithQuizSummary(inactiveGroupAssignments)),
+//                respondsWith(inactiveGroupAssignments)
+//            ),
+//            as(anyOf(student, secondStudent, otherStudent),
+//                failsWith(SegueErrorResponse.getIncorrectRoleResponse())
+//            ),
+//            everyoneElse(
+//                prepare(groupManager, m -> expect(m.getGroupById(studentInactiveGroup.getId()))
+//                    .andReturn(studentInactiveGroup)),
+//                failsWith(Status.FORBIDDEN)
+//            )
+//        )
+//    );
+//  }
 
   private Testcase forbiddenForEveryoneElse() {
     return everyoneElse(
