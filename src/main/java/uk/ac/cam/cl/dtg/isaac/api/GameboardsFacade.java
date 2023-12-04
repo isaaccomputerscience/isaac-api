@@ -139,66 +139,6 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   }
 
   /**
-   * REST end point to provide a generated Gameboard in the question tile of the student dashboard where five questions will be selected in random.
-   *
-   * @param request            - this allows us to check to see if a user is currently loggedin.
-   * @param subjects           - a comma separated list of subjects
-   * @param topics             - a comma separated list of topics
-   * @param stages             - a comma separated list of stages
-   * @param difficulties       - a comma separated list of difficulties
-   * @param examBoards         - a comma separated list of examBoards
-   * @return a Response containing a gameboard object or containing a SegueErrorResponse.
-   */
-    @GET
-    @Path("/randomQuestions")
-    @Produces(MediaType.APPLICATION_JSON)
-    public final Response getRandomQuestions(@Context final HttpServletRequest request,
-                                       @QueryParam("subjects") final String subjects,
-                                       @QueryParam("topics") final String topics,
-                                       @QueryParam("stages") final String stages,
-                                       @QueryParam("difficulties") final String difficulties,
-                                       @QueryParam("examBoards") final String examBoards) {
-
-      // Create a list to hold the questions?
-
-      // Data for possible subjects, fields, topics, etc.
-      List<String> subjectsList = splitCsvStringQueryParam(subjects);
-      List<String> topicsList = splitCsvStringQueryParam(topics);
-      List<String> stagesList = splitCsvStringQueryParam(stages);
-      List<String> difficultiesList = splitCsvStringQueryParam(difficulties);
-      List<String> examBoardsList = splitCsvStringQueryParam(examBoards);
-
-      // Create a list to hold the questions?
-      List<String> questions = new ArrayList<>();
-
-      // Simulate generating random questions
-      for (int i = 0; i < 5; i++) {
-        // Generate a random index for each list
-        int randomSubjectIndex = new Random().nextInt(subjectsList.size());
-        int randomTopicIndex = new Random().nextInt(topicsList.size());
-        int randomStagesIndex = new Random().nextInt(stagesList.size());
-        int randomDifficultiesIndex = new Random().nextInt(difficultiesList.size());
-        int randomExamBoardsIndex = new Random().nextInt(examBoardsList.size());
-
-
-        // Construct a question using the randomly selected values
-        String question = String.format("Question %d: Subject=%s, Topic=%s, Stages=%s, Difficulty=%s, ExamBoards%s",
-            i + 1,
-            subjectsList.get(randomSubjectIndex),
-            topicsList.get(randomTopicIndex),
-            stagesList.get(randomStagesIndex),
-            difficultiesList.get(randomDifficultiesIndex),
-            examBoardsList.get(randomExamBoardsIndex));
-
-        // Add the question to the list
-        questions.add(question);
-      }
-
-      // Return the list of random questions as JSON
-      return Response.ok(questions).build();
-    }
-
-  /**
    * REST end point to provide a Temporary Gameboard stored in volatile storage.
    *
    * @param request            - this allows us to check to see if a user is currently loggedin.
