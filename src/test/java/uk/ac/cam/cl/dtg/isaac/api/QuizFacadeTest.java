@@ -18,15 +18,11 @@ package uk.ac.cam.cl.dtg.isaac.api;
 
 import static org.easymock.EasyMock.anyLong;
 import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.getCurrentArguments;
-import static org.junit.Assert.assertEquals;
 import static org.powermock.api.easymock.PowerMock.createMock;
 import static org.powermock.api.easymock.PowerMock.createNiceMock;
-import static org.powermock.api.easymock.PowerMock.expectLastCall;
 import static org.powermock.api.easymock.PowerMock.replay;
-import static uk.ac.cam.cl.dtg.isaac.api.Constants.QUIZ_SECTION;
 
 import com.google.common.collect.ImmutableList;
 import jakarta.ws.rs.core.EntityTag;
@@ -35,7 +31,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import org.easymock.IAnswer;
 import org.junit.Before;
@@ -749,27 +744,27 @@ public class QuizFacadeTest extends AbstractFacadeTest {
 //    );
 //  }
 
-  @Test
-  public void logQuizSectionView() {
-    int sectionNumber = 3;
-    forEndpoint(() -> quizFacade.logQuizSectionView(httpServletRequest, studentAttempt.getId(), sectionNumber),
-        requiresLogin(),
-        as(student,
-            prepare(logManager, m -> {
-              m.logEvent(eq(student), eq(httpServletRequest), eq(Constants.IsaacServerLogType.VIEW_QUIZ_SECTION),
-                  anyObject());
-              expectLastCall().andAnswer(() -> {
-                Object[] arguments = getCurrentArguments();
-                Map<String, Object> event = (Map<String, Object>) arguments[3];
-                assertEquals(sectionNumber, event.get(QUIZ_SECTION));
-                return null;
-              });
-            }),
-            succeeds()
-        ),
-        forbiddenForEveryoneElse()
-    );
-  }
+//  @Test
+//  public void logQuizSectionView() {
+//    int sectionNumber = 3;
+//    forEndpoint(() -> quizFacade.logQuizSectionView(httpServletRequest, studentAttempt.getId(), sectionNumber),
+//        requiresLogin(),
+//        as(student,
+//            prepare(logManager, m -> {
+//              m.logEvent(eq(student), eq(httpServletRequest), eq(Constants.IsaacServerLogType.VIEW_QUIZ_SECTION),
+//                  anyObject());
+//              expectLastCall().andAnswer(() -> {
+//                Object[] arguments = getCurrentArguments();
+//                Map<String, Object> event = (Map<String, Object>) arguments[3];
+//                assertEquals(sectionNumber, event.get(QUIZ_SECTION));
+//                return null;
+//              });
+//            }),
+//            succeeds()
+//        ),
+//        forbiddenForEveryoneElse()
+//    );
+//  }
 
   @Test
   public void getAllQuizAssignments() {
