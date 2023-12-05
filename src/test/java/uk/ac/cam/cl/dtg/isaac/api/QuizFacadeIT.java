@@ -75,10 +75,7 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.UNKNOWN_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.UNKNOWN_QUIZ_ID;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_DATE_FORMAT;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_MILLISECONDS_IN_SECOND;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_FIVE_MINUTES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_ONE_DAY;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -88,11 +85,8 @@ import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -133,7 +127,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class GetAvailableQuizzesEndpoint {
     @Test
-    public void getQuizzesWithoutLogin_fails() {
+    public void asAnonymousUser_isUnauthorised() {
       HttpServletRequest getQuizzesRequest = createNiceMock(HttpServletRequest.class);
       replay(getQuizzesRequest);
 
@@ -146,26 +140,19 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void getQuizzesAsTeacher_returnsAll()
+    public void asTeacher_returnsAllQuizzes()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      // Arrange
-      // log in as Teacher, create request
       LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
       HttpServletRequest getQuizzesRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
       replay(getQuizzesRequest);
 
-      // Act
-      // make request
       Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), getQuizzesRequest);
 
-      // Assert
-      // check status code is OK
       assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
 
-      // check all quizzes are returned as available
       @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
           (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
       assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
@@ -179,26 +166,19 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
      * Tests that quizzes with visibleToStudents=false and hiddenFromRoles=[TUTOR] are not considered available to a tutor.
      */
     @Test
-    public void getQuizzesAsTutor_returnsNonInvisibleToStudentOrHiddenFromRoleQuizzes()
+    public void asTutor_returnsQuizzesNotHiddenFromStudentOrTutorRole()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      // Arrange
-      // log in as Tutor, create request
       LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
       HttpServletRequest getQuizzesRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
       replay(getQuizzesRequest);
 
-      // Act
-      // make request
       Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), getQuizzesRequest);
 
-      // Assert
-      // check status code is OK
       assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
 
-      // check invisible-to-student and hidden-from-tutor-role quizzes are not returned as available
       @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
           (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
       assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
@@ -209,26 +189,19 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void getQuizzesAsStudent_returnsNonInvisibleToStudentQuizzes()
+    public void asStudent_returnsQuizzesNotHiddenFromStudentRole()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      // Arrange
-      // log in as Tutor, create request
       LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
       HttpServletRequest getQuizzesRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(getQuizzesRequest);
 
-      // Act
-      // make request
       Response getQuizzesResponse = quizFacade.getAvailableQuizzes(createNiceMock(Request.class), getQuizzesRequest);
 
-      // Assert
-      // check status code is OK
       assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
 
-      // check invisible-to-student and hidden-from-tutor-role quizzes are not returned as available
       @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
           (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
       assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
@@ -242,7 +215,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class GetAssignedQuizzes {
     @Test
-    public void anonymousUser_unauthorised() {
+    public void asAnonymousUser_isUnauthorised() {
       HttpServletRequest assignedQuizRequest = createNiceMock(HttpServletRequest.class);
       replay(assignedQuizRequest);
 
@@ -255,7 +228,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void studentAssignedQuizzes_noAssignments()
+    public void asStudent_withNoAssignments_returnsEmptyList()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -274,7 +247,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void studentAssignedQuizzes_oneAssignment()
+    public void asStudent_withAssignments_returnsListOfAssignments()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -289,11 +262,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
           (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
+      assertEquals(6, responseBody.size());
       assertTrue(responseBody.stream().anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID)));
     }
 
     @Test
-    public void teacherAssignedQuizzes_noAssignments()
+    public void asTeacher_withNoAssignments_returnsEmptyList()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -315,7 +289,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   @Nested
   class GetFreeAttempts {
     @Test
-    public void anonymousUser_unauthorised() {
+    public void asAnonymousUser_isUnauthorised() {
       HttpServletRequest getFreeAttemptsRequest = createNiceMock(HttpServletRequest.class);
       replay(getFreeAttemptsRequest);
 
@@ -328,7 +302,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void studentFreeAttempts_noAttempts()
+    public void asStudent_withNoAttempts_returnsEmptyList()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -347,7 +321,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void studentFreeAttempts_oneAssignedAttempt()
+    public void asStudent_withOnlyAssignedAttempts_returnsEmptyList()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -366,7 +340,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void studentFreeAttempts_oneFreeAttempt()
+    public void asStudent_withFreeAttempts_returnsListOnlyOfFreeAttempts()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -382,6 +356,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @SuppressWarnings("unchecked") List<QuizAttemptDTO> responseBody =
           (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
       assertTrue(responseBody.stream().anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID)));
+      assertFalse(responseBody.stream().anyMatch(q -> q.getQuizAssignmentId() != null));
     }
   }
 
@@ -390,7 +365,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void noQuizId() {
+      public void missingQuizId_isBadRequest() {
         HttpServletRequest getQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(getQuizAssignmentRequest);
 
@@ -403,7 +378,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void cancelledAssignment_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -424,7 +400,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest getQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(getQuizAssignmentRequest);
 
@@ -437,7 +413,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void student() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -454,7 +431,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTutor_isForbidden() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -471,7 +448,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherNotGroupManager()
+      public void asTeacher_whoIsNotGroupManager_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -492,7 +469,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class ValidUser {
       @Test
-      public void teacherIsGroupManager_feedbackOnlyForStudentsAllowingAccess()
+      public void asTeacher_whoIsGroupManager_returnsListOfAssignments_withFeedbackOnlyForStudentsAllowingAccess()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -518,7 +495,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void admin_feedbackAccessAllForStudents() throws JsonProcessingException {
+      public void asAdmin_returnsListOfAssignments_withFeedbackForAllStudents() throws JsonProcessingException {
         Cookie adminSessionCookie = createManualCookieForAdmin();
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(getQuizAssignmentRequest);
@@ -532,9 +509,9 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         assertTrue(responseBody.getUserFeedback().stream()
             .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
         assertFalse(responseBody.getUserFeedback().stream()
-            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
-        assertFalse(responseBody.getUserFeedback().stream()
             .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
+        assertFalse(responseBody.getUserFeedback().stream()
+            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
         assertFalse(responseBody.getUserFeedback().stream()
             .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
       }
@@ -546,7 +523,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void noQuizId_badRequest() {
+      public void missingQuizAssignmentId_isBadRequest() {
         HttpServletRequest getQuizAssignmentAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(getQuizAssignmentAttemptRequest);
 
@@ -560,7 +537,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void noUserId_badRequest() {
+      public void missingUserId_isBadRequest() {
         HttpServletRequest getQuizAssignmentAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(getQuizAssignmentAttemptRequest);
 
@@ -574,7 +551,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void cancelledAssignment_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -596,7 +574,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest getQuizAssignmentAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(getQuizAssignmentAttemptRequest);
 
@@ -611,7 +589,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void student() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -631,7 +610,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTutor_isForbidden() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -650,7 +629,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherNotGroupManager()
+      public void asTeacher_whoIsNotGroupManager_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -674,7 +653,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class CorrectGroupOwnerButInvalidTarget {
       @Test
-      public void targetStudentNotInGroup()
+      public void asTeacher_withTargetStudent_whoIsNotInGroup_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -694,7 +673,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void targetStudentHasPrivacyRestrictions()
+      public void asTeacher_withTargetStudentWhoDoesNotGrantViewingPermissions_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -715,7 +694,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void targetStudentHasNotCompletedAssignment()
+      public void asTeacher_withTargetStudent_whoHasNotCompletedAssignment_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -739,7 +718,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class ValidRequest {
       @Test
-      public void targetStudentHasCompletedAssignment()
+      public void asTeacher_withTargetStudent_whoHasCompletedAssignment_returnsQuizAttemptFeedback()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -763,21 +742,21 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
 
       @Test
-      public void targetStudentHasNotCompletedAssignmentAsAdmin() throws JsonProcessingException {
+      public void asAdmin_overridesNoViewingPermissions_returnsQuizAttemptFeedback() throws JsonProcessingException {
         Cookie adminSessionCookie = createManualCookieForAdmin();
         HttpServletRequest getQuizAssignmentAttemptRequest =
             createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(getQuizAssignmentAttemptRequest);
 
         Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                TEST_STUDENT_ALICE_ID);
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_FEEDBACK_MODE_ID,
+                TEST_STUDENT_CHARLIE_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
         QuizAttemptFeedbackDTO responseBody = (QuizAttemptFeedbackDTO) getQuizAssignmentAttemptResponse.getEntity();
-        assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getUser().getId());
-        assertEquals(TEST_STUDENT_ALICE_ID, responseBody.getAttempt().getUserId());
+        assertEquals(TEST_STUDENT_CHARLIE_ID, responseBody.getUser().getId());
+        assertEquals(TEST_STUDENT_CHARLIE_ID, responseBody.getAttempt().getUserId());
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getAttempt().getQuizId());
       }
     }
@@ -788,7 +767,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void assignmentMissingQuizId() {
+      public void missingQuizId_isBadRequest() {
         HttpServletRequest createQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(createQuizAssignmentRequest);
         QuizAssignmentDTO assignmentRequest =
@@ -806,7 +785,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void assignmentMissingGroupId() {
+      public void missingGroupId_isBadRequest() {
         HttpServletRequest createQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(createQuizAssignmentRequest);
         QuizAssignmentDTO assignmentRequest =
@@ -824,7 +803,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void assignmentMissingFeedbackMode() {
+      public void missingFeedbackMode_isBadRequest() {
         HttpServletRequest createQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(createQuizAssignmentRequest);
         QuizAssignmentDTO assignmentRequest =
@@ -841,7 +820,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void unknownQuizId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void unknownQuizId_isNotFound()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -863,7 +843,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void dueDateInPast() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void dueDateInPast_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -885,7 +866,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void duplicateAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void duplicateActiveAssignment_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -910,7 +892,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest createQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(createQuizAssignmentRequest);
         QuizAssignmentDTO assignmentRequest =
@@ -928,7 +910,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void student() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -950,7 +933,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTutor_isForbidden() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -972,7 +955,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherNotGroupManager()
+      public void asTeacher_whoIsNotGroupManager_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -998,7 +981,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class ValidUser {
       @Test
-      public void validAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTeacher_whoIsGroupManager_returnsQuizAssignment()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1025,7 +1009,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void validAssignmentAsAdmin() throws JsonProcessingException {
+      public void asAdmin_returnsQuizAssignment() throws JsonProcessingException {
         Cookie adminSessionCookie = createManualCookieForAdmin();
         HttpServletRequest createQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(createQuizAssignmentRequest);
@@ -1055,7 +1039,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void missingQuizAssignmentId() {
+      public void missingQuizAssignmentId_isBadRequest() {
         HttpServletRequest cancelQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(cancelQuizAssignmentRequest);
 
@@ -1070,7 +1054,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void cancelledAssignment_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1093,7 +1078,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest cancelQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(cancelQuizAssignmentRequest);
 
@@ -1108,7 +1093,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void student() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1127,7 +1113,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTutor_isForbidden() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1146,7 +1132,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherNotGroupManager()
+      public void asTeacher_whoIsNotGroupManager_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -1169,7 +1155,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class ValidUser {
       @Test
-      public void validRequest() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTeacher_whoIsGroupManager_returnsNoContent()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1187,7 +1174,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void validRequestAsAdmin() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asAdmin_returnsNoContent()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1211,7 +1199,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void missingQuizAssignmentId() {
+      public void missingQuizAssignmentId_isBadRequest() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
@@ -1227,7 +1215,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void changingAssignmentId() {
+      public void changingQuizAssignmentId_isBadRequest() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto =
@@ -1244,7 +1232,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void changingQuizId() {
+      public void changingQuizId_isBadRequest() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto =
@@ -1261,7 +1249,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void changingGroupId() {
+      public void changingGroupId_isBadRequest() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, 1L, null, null, null);
@@ -1277,7 +1265,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void changingOwnerId() {
+      public void changingOwnerId_isBadRequest() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, 1L, null, null, null, null);
@@ -1293,7 +1281,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void changingCreationDateId() {
+      public void changingCreationDateId_isBadRequest() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, new Date(), null, null);
@@ -1309,7 +1297,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void pastDueDate() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void settingDueDate_withDateInThePast_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1329,7 +1318,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void cancelledAssignment_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1352,7 +1342,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest updateQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(updateQuizAssignmentRequest);
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
@@ -1368,7 +1358,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void student() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1388,7 +1379,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTutor_isForbidden() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1408,7 +1399,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherNotGroupManager()
+      public void asTeacher_whoisNotGroupManager_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -1432,7 +1423,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class ValidUser {
       @Test
-      public void validDueDateUpdate() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTeacher_whoIs_groupManager_settingDueDate_withValidDate_returnsNoContent()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1451,7 +1443,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void validFeedbackModeUpdate()
+      public void asTeacher_whoIs_groupManager_settingFeedbackMode_returnsNoContent()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -1472,7 +1464,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void validDueDateUpdateAsAdmin() throws JsonProcessingException {
+      public void asAdmin_settingDueDate_withValidDate_returnsNoContent() throws JsonProcessingException {
         Cookie adminSessionCookie = createManualCookieForAdmin();
         HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(updateQuizAssignmentRequest);
@@ -1488,7 +1480,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void validFeedbackModeUpdateAsAdmin() throws JsonProcessingException {
+      public void asAdmin_settingFeedbackMode_returnsNoContent() throws JsonProcessingException {
         Cookie adminSessionCookie = createManualCookieForAdmin();
         HttpServletRequest updateQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(updateQuizAssignmentRequest);
@@ -1511,7 +1503,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void nullId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void nullQuizId_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1530,7 +1523,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void emptyId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void emptyQuizId_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1549,7 +1543,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void unknownId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void unknownQuizId_isNotFound()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1571,7 +1566,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class StandardQuizPermissions {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest previewQuizRequest = createNiceMock(HttpServletRequest.class);
         replay(previewQuizRequest);
 
@@ -1586,7 +1581,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void student() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1605,7 +1601,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTutor_isForbidden() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1624,7 +1620,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacher() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTeacher_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1646,7 +1643,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class RestrictedQuizPermissions {
       @Test
-      public void hiddenFromStudentsAsTutor()
+      public void asTutor_withQuizThatIsHiddenFromStudentRole_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -1666,7 +1663,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void hiddenFromTutorsAsTutor()
+      public void asTutor_withQuizThatIsHiddenFromTutorRole_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -1686,7 +1683,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void hiddenFromStudentsAsTeacher()
+      public void asTeacher_withQuizThatIsHiddenFromStudentRole_returnsQuiz()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -1706,7 +1703,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void hiddenFromTutorsAsTeacher()
+      public void asTeacher_withQuizThatIsHiddenFromTutorRole_returnsQuiz()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -1732,7 +1729,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest startQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(startQuizAttemptRequest);
 
@@ -1747,7 +1744,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void studentNotInGroup() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_whoIsNotInGroup_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1769,7 +1767,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void missingId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void missingQuizAssignmentId_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1788,7 +1787,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void cancelledAssignment_isGone()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1807,7 +1807,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void expiredAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void expiredAssignment_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1826,7 +1827,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void alreadyAttempted() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void alreadyAttemptedAssignment_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1846,7 +1848,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void validRequest() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+    public void asStudent_withValidRequest_returnsQuizAttempt()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
@@ -1874,7 +1877,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest startFreeQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(startFreeQuizAttemptRequest);
 
@@ -1889,7 +1892,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void hiddenFromStudents() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_withQuizThatIsHiddenFromStudentRole()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1908,7 +1912,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void assignedQuiz() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_withQuizThatHasBeenAssigned_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1932,7 +1937,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void missingId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void missingQuizId_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1951,7 +1957,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void emptyId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void emptyQuizId_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1970,7 +1977,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void unknownId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void unknownQuizId_isNotFound()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1990,7 +1998,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void validRequest() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+    public void asStudent_withValidRequest_returnsQuizAttempt()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
@@ -2018,7 +2027,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest getQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(getQuizAttemptRequest);
 
@@ -2033,7 +2042,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void studentNotAttemptCreator()
+      public void asStudent_whoIsNotAttemptCreator_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2056,7 +2065,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void cancelledAssignment_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2075,7 +2085,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void expiredAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void expiredAssignment_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2094,7 +2105,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void alreadyCompleted() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void alreadyCompletedAttempt_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2114,7 +2126,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void validRequest() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+    public void validRequest_returnsQuizAttempt()
+        throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
@@ -2142,7 +2155,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest getQuizAttemptFeedbackRequest = createNiceMock(HttpServletRequest.class);
         replay(getQuizAttemptFeedbackRequest);
 
@@ -2157,7 +2170,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void studentNotAttemptCreator()
+      public void asStudent_whoIsNotAttemptCreator_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2177,7 +2190,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacher() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTeacher_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2196,7 +2210,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void admin() throws JsonProcessingException {
+      public void asAdmin_isForbidden() throws JsonProcessingException {
         Cookie adminSessionCookie = createManualCookieForAdmin();
         HttpServletRequest getQuizAttemptFeedbackRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(getQuizAttemptFeedbackRequest);
@@ -2215,7 +2229,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class IncompleteAttempt {
       @Test
-      public void expiredAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void expiredAssignment_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2234,7 +2249,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void incompleteAttempt() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void incompleteAttempt_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2256,7 +2272,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class CompletedAttempt {
       @Test
-      public void completedAttemptNoDueDate()
+      public void completedAttempt_withAssignmentWithNoDueDate_returnsQuizAttempt()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2281,7 +2297,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void completedAttemptWithDueDate()
+      public void completedAttempt_withAssignmentWithDueDate_returnsQuizAttempt()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2306,7 +2322,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void completedAttemptFeedbackMode()
+      public void completedAttempt_returnsQuizAttempt_withAppropriateFeedbackMode()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2331,7 +2347,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void freeAttempt() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void completedAttempt_withNoAssignment_returnsQuizAttempt()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2361,7 +2378,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest completeQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(completeQuizAttemptRequest);
 
@@ -2376,7 +2393,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void studentNotAttemptCreator()
+      public void asStudent_whoIsNotAttemptCreator_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2396,7 +2413,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacher() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTeacher_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2415,7 +2433,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void admin() throws JsonProcessingException {
+      public void asAdmin_isForbidden() throws JsonProcessingException {
         Cookie adminSessionCookie = createManualCookieForAdmin();
         HttpServletRequest completeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(completeQuizAttemptRequest);
@@ -2432,7 +2450,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void alreadyCompleted()
+    public void alreadyCompletedAttempt_isForbidden()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2452,7 +2470,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void validRequest()
+    public void validRequest_returnsQuizAttempt()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2481,13 +2499,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void missingAssignmentId() {
+      public void missingQuizAssignmentId_isBadRequest() {
         HttpServletRequest markIncompleteQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            null, TEST_STUDENT_ALICE_ID)) {
+            markIncompleteQuizAttemptRequest, null, TEST_STUDENT_ALICE_ID)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2497,13 +2514,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void missingUserId() {
+      public void missingUserId_isBadRequest() {
         HttpServletRequest markIncompleteQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ID, null)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, null)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2513,7 +2529,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void unknownUserId()
+      public void unknownUserId_isBadRequest()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2524,8 +2540,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ID, TEST_NON_EXISTENT_USER_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_NON_EXISTENT_USER_ID)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2535,7 +2550,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void cancelledAssignment()
+      public void cancelledAssignment_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2546,8 +2561,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_CANCELLED_ID, TEST_STUDENT_ALICE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_CANCELLED_ID, TEST_STUDENT_ALICE_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2557,7 +2571,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void expiredAssignment()
+      public void expiredAssignment_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2568,8 +2582,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_EXPIRED_ID, TEST_STUDENT_ALICE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_EXPIRED_ID, TEST_STUDENT_ALICE_ID)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2579,7 +2592,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void userNotInGroup()
+      public void targetUserIsNotInAssignmentGroup_isBadRequest()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2590,8 +2603,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ID)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2601,7 +2613,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void assignmentAlreadyIncomplete()
+      public void attemptIsAlreadyIncomplete_isBadRequest()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2612,8 +2624,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_SECOND_ID, TEST_STUDENT_ALICE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_SECOND_ID, TEST_STUDENT_ALICE_ID)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2623,7 +2634,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void unknownAssignmentId()
+      public void unknownQuizAssignmentId_isInternalServerError()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2634,8 +2645,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_NON_EXISTENT_ID, TEST_STUDENT_ALICE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_NON_EXISTENT_ID, TEST_STUDENT_ALICE_ID)) {
 
           assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
               markIncompleteQuizAttemptResponse.getStatus());
@@ -2649,13 +2659,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest markIncompleteQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ALICE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ALICE_ID)) {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2665,7 +2674,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void student() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2675,8 +2685,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ALICE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ALICE_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2686,7 +2695,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTutorIsForbidden() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2696,8 +2705,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ALICE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ALICE_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2707,7 +2715,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherNotGroupManager()
+      public void asTeacher_whoIsNotGroupManager_IsForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2718,8 +2726,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ALICE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ALICE_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2732,7 +2739,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class ValidRequest {
       @Test
-      public void validRequest()
+      public void asTeacher_whoIsGroupManager_returnsQuizUserFeedback()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2743,8 +2750,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID, TEST_STUDENT_ALICE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID, TEST_STUDENT_ALICE_ID)) {
 
           assertEquals(Response.Status.OK.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2755,7 +2761,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void validRequestPrivacyRestrictions()
+      public void asTeacher_withTargetStudentWhoDoesNotGrantViewingPermissions_returnsQuizUserFeedback_withNullFeedback()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -2766,8 +2772,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID, TEST_STUDENT_CHARLIE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID, TEST_STUDENT_CHARLIE_ID)) {
 
           assertEquals(Response.Status.OK.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2778,15 +2783,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void validRequestAsAdmin() throws JsonProcessingException {
+      public void asAdmin_overridesNoViewingPermissions_returnsQuizUserFeedback() throws JsonProcessingException {
         Cookie adminSessionCookie = createManualCookieForAdmin();
         HttpServletRequest markIncompleteQuizAttemptRequest =
             createRequestWithCookies(new Cookie[] {adminSessionCookie});
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ID, TEST_STUDENT_CHARLIE_ID)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_STUDENT_CHARLIE_ID)) {
 
           assertEquals(Response.Status.OK.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2803,7 +2807,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void nullAnswer() {
+      public void nullAnswer_isBadRequest() {
         HttpServletRequest answerQuestionRequest = createNiceMock(HttpServletRequest.class);
         replay(answerQuestionRequest);
 
@@ -2818,7 +2822,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void emptyAnswer() {
+      public void emptyAnswer_isBadRequest() {
         HttpServletRequest answerQuestionRequest = createNiceMock(HttpServletRequest.class);
         replay(answerQuestionRequest);
 
@@ -2833,7 +2837,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void nullQuestionId() {
+      public void nullQuestionId_isBadRequest() {
         HttpServletRequest answerQuestionRequest = createNiceMock(HttpServletRequest.class);
         replay(answerQuestionRequest);
 
@@ -2848,7 +2852,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void emptyQuestionId() {
+      public void emptyQuestionId_isBadRequest() {
         HttpServletRequest answerQuestionRequest = createNiceMock(HttpServletRequest.class);
         replay(answerQuestionRequest);
 
@@ -2863,7 +2867,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void unknownQuestionId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void unknownQuestionId_isNotFound()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2882,7 +2887,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void questionNotInQuiz() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void questionIdIsNotInQuiz_isBadRequest()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2901,7 +2907,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void completedAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void completedAttempt_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2920,7 +2927,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void cancelledAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void cancelledAssignment_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2939,7 +2947,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void expiredAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void expiredAssignment_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2958,7 +2967,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void unknownAssignment() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void unknownAssignmentId_isInternalServerError()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -2980,7 +2990,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest answerQuestionRequest = createNiceMock(HttpServletRequest.class);
         replay(answerQuestionRequest);
 
@@ -2995,7 +3005,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void studentNotAttemptCreator()
+      public void asStudent_whoIsNotAttemptCreator_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3021,7 +3031,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void missingAttemptId()
+      public void missingQuizAttemptId_isBadRequest()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3040,7 +3050,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void canOnlyCancelFreeAttempts()
+      public void freeAttempt_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3060,7 +3070,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void completedAttempt()
+      public void completedAttempt_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3083,7 +3093,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest cancelQuizAttemptRequest = createNiceMock(HttpServletRequest.class);
         replay(cancelQuizAttemptRequest);
 
@@ -3098,7 +3108,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void studentNotAttemptCreator()
+      public void asStudent_whoIsNotAttemptCreator_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3119,7 +3129,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void validRequest()
+    public void validRequest_returnsNoContent()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3143,7 +3153,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void missingSectionNumber() {
+      public void missingSectionNumber_isBadRequest() {
         HttpServletRequest logQuizSectionViewRequest = createNiceMock(HttpServletRequest.class);
         replay(logQuizSectionViewRequest);
 
@@ -3158,7 +3168,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void cancelledAssignment()
+      public void cancelledAssignment_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3178,7 +3188,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void expiredAssignment()
+      public void expiredAssignment_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3198,7 +3208,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void alreadyCompletedAssignment()
+      public void alreadyCompletedAttempt_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3221,7 +3231,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest logQuizSectionViewRequest = createNiceMock(HttpServletRequest.class);
         replay(logQuizSectionViewRequest);
 
@@ -3236,7 +3246,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void studentNotAttemptCreator()
+      public void asStudent_whoIsNotAttemptCreator_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3257,7 +3267,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
 
     @Test
-    public void validRequest()
+    public void validRequest_returnsNoContent()
         throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3281,7 +3291,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class MissingOrInvalidData {
       @Test
-      public void unknownGroupId() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void unknownGroupId_isInternalServerError()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -3301,7 +3312,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnspecifiedGroupUnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_withNullGroupId_isUnauthorised() {
         HttpServletRequest getQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(getQuizAssignmentRequest);
 
@@ -3314,7 +3325,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void student() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_withNullGroupId_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -3331,7 +3343,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTutor_withNullGroupId_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -3351,11 +3364,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class SpecifiedGroupUnauthorisedOrForbiddenUser {
       @Test
-      public void anonymousUser() {
+      public void asAnonymousUser_withNonNullGroupId_isUnauthorised() {
         HttpServletRequest getQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -3364,7 +3378,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void student() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asStudent_withNonNullGroupId_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -3372,7 +3387,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -3381,7 +3397,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void tutor() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTutor_withNonNullGroupId_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -3389,7 +3406,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -3398,7 +3416,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherNotGroupManager() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTeacher_whoIsNotGroupManager_withNonNullGroupId_isForbidden()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -3406,7 +3425,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -3418,7 +3438,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class UnspecifiedGroupValidRequest {
       @Test
-      public void teacher() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTeacher_withNullGroupId_withAssignments_returnsListOfQuizAssignmentsForAllManagedGroups()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -3436,7 +3457,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherWithoutAssignments()
+      public void asTeacher_withNullGroupId_withoutAssignments_returnsEmptyList()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3458,7 +3479,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     @Nested
     class SpecifiedGroupValidRequest {
       @Test
-      public void teacher() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTeacher_whoIsGroupManager_withNonNullGroupId_returnsListOfQuizAssignmentsForGroup()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -3466,7 +3488,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -3476,7 +3499,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void teacherAlternateGroup() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTeacher_whoIsGroupManager_withOtherNonNullGroupId_returnsListOfQuizAssignmentsForOtherGroup()
+          throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -3484,7 +3508,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
         replay(getQuizAssignmentRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_SECONDARY_TEST_GROUP_ID);
+        Response getQuizAssignmentResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_SECONDARY_TEST_GROUP_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -3492,43 +3517,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
             (List<QuizAssignmentDTO>) getQuizAssignmentResponse.getEntity();
         assertEquals(1, responseBody.size());
       }
+
+      @Test
+      public void asAdmin_withNonNullGroupId_returnsListOfQuizAssignmentsForGroup() throws JsonProcessingException {
+        Cookie adminSessionCookie = createManualCookieForAdmin();
+        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
+        replay(getQuizAssignmentRequest);
+
+        Response getQuizAssignmentResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+
+        assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
+
+        @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
+            (List<QuizAssignmentDTO>) getQuizAssignmentResponse.getEntity();
+        assertEquals(6, responseBody.size());
+      }
     }
-
-    @Test
-    public void admin() throws JsonProcessingException {
-      Cookie adminSessionCookie = createManualCookieForAdmin();
-      HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
-      replay(getQuizAssignmentRequest);
-
-      Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
-
-      assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
-
-      @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-          (List<QuizAssignmentDTO>) getQuizAssignmentResponse.getEntity();
-      assertEquals(6, responseBody.size());
-    }
-  }
-
-  /**
-   * As the integration tests do not currently support MFA login, we cannot use the normal login process and have to
-   * create cookies manually when testing admin accounts.
-   *
-   * @return a Cookie loaded with session information for the test admin user.
-   * @throws JsonProcessingException if the cookie serialisation fails
-   */
-  public Cookie createManualCookieForAdmin() throws JsonProcessingException {
-    SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
-    String userId = String.valueOf(TEST_ADMIN_ID);
-    String hmacKey = properties.getProperty(HMAC_SALT);
-    int sessionExpiryTimeInSeconds = NUMBER_SECONDS_IN_FIVE_MINUTES;
-
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.SECOND, sessionExpiryTimeInSeconds);
-    String sessionExpiryDate = sessionDateFormat.format(calendar.getTime());
-
-    Map<String, String> sessionInformation =
-        userAuthenticationManager.prepareSessionInformation(userId, "0", sessionExpiryDate, hmacKey, null);
-    return userAuthenticationManager.createAuthCookie(sessionInformation, sessionExpiryTimeInSeconds);
   }
 }
