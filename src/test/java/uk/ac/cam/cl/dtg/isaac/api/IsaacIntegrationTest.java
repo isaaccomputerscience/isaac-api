@@ -134,9 +134,6 @@ public abstract class IsaacIntegrationTest {
   protected static ISecondFactorAuthenticator secondFactorManager;
   protected static UserAccountManager userAccountManager;
   protected static RecaptchaManager recaptchaManager;
-  protected static PgUsers pgUsers;
-  protected static PgAnonymousUsers pgAnonymousUsers;
-  protected static ContentMapper contentMapper;
   protected static GameManager gameManager;
   protected static GroupManager groupManager;
   protected static EventBookingManager eventBookingManager;
@@ -155,6 +152,9 @@ public abstract class IsaacIntegrationTest {
   protected static IQuizAttemptPersistenceManager quizAttemptPersistenceManager;
   protected static IQuizQuestionAttemptPersistenceManager quizQuestionAttemptPersistenceManager;
   protected static QuizQuestionManager quizQuestionManager;
+  protected static PgUsers pgUsers;
+  protected static PgAnonymousUsers pgAnonymousUsers;
+  protected static ContentMapper contentMapper;
 
   // Services
   protected static AssignmentService assignmentService;
