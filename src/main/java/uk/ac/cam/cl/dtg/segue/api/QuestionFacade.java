@@ -16,13 +16,24 @@
 
 package uk.ac.cam.cl.dtg.segue.api;
 
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.HIDE_FROM_FILTER_TAG;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.QUESTION_TYPE;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.RELATED_CONTENT_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.CONTENT_INDEX;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.DEPRECATED_FIELDNAME;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.DIFFICULTY_FIELDNAME;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.EXAM_BOARD_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.LEVEL_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.STAGE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.TAGS_FIELDNAME;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager.extractPageIdFromQuestionId;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
+import com.google.api.client.util.Lists;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +52,8 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -53,6 +66,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.TestCase;
 import uk.ac.cam.cl.dtg.isaac.dos.TestQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
+import uk.ac.cam.cl.dtg.isaac.dto.GameFilter;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceDTO;
@@ -253,24 +267,34 @@ public class QuestionFacade extends AbstractSegueFacade {
                                            @QueryParam("topics") final String topics,
                                            @QueryParam("stages") final String stages,
                                            @QueryParam("difficulties") final String difficulties,
-                                           @QueryParam("examBoards") final String examBoards) {
+                                           @QueryParam("examBoards") final String examBoards)
+      throws ContentManagerException {
 
-    // Create a list to hold the questions?
+    List<String> subjectsList = splitCsvStringQueryParam(subjects);
+    List<String> topicsList = splitCsvStringQueryParam(topics);
+    List<String> stagesList = splitCsvStringQueryParam(stages);
+    List<String> difficultiesList = splitCsvStringQueryParam(difficulties);
+    List<String> examBoardsList = splitCsvStringQueryParam(examBoards);
 
-    // Data for possible subjects, fields, topics, etc.
+    GameFilter gameFilter = new GameFilter(subjectsList,
+        null,
+        topicsList,
+        null,
+        null,
+        null,
+        stagesList,
+        difficultiesList,
+        examBoardsList);
 
+    List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
+    fieldsToMap.add(new GitContentManager.BooleanSearchClause(
+        TYPE_FIELDNAME, Constants.BooleanOperator.AND, Collections.singletonList(QUESTION_TYPE)));
+    fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
-    // Create a list to hold the questions?
-    List<String> questions = new ArrayList<>();
+    var questions = this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, 5);
 
-    // Simulate generating random questions
-    for (int i = 0; i < 5; i++) {
-      // Generate a random index for each list?
-
-      // Return the list of random questions as JSON
-      return Response.ok(questions).build();
-    }
-    return null;
+    // Return the list of random questions as JSON
+    return Response.ok(questions).build();
   }
 
 
@@ -477,5 +501,150 @@ public class QuestionFacade extends AbstractSegueFacade {
     } catch (ErrorResponseWrapper responseWrapper) {
       return responseWrapper.toResponse();
     }
+  }
+
+  // Move these out of the facade
+  private static List<String> splitCsvStringQueryParam(final String queryParamCsv) {
+    if (null != queryParamCsv && !queryParamCsv.isEmpty()) {
+      return Arrays.asList(queryParamCsv.split(","));
+    } else {
+      return null;
+    }
+  }
+  private static List<GitContentManager.BooleanSearchClause> generateFieldToMatchForQuestionFilter(
+      final GameFilter gameFilter) {
+
+    // Validate that the field sizes are as we expect for tags
+    // Check that the query provided adheres to the rules we expect
+    if (!validateFilterQuery(gameFilter)) {
+      throw new IllegalArgumentException("Error validating filter query.");
+    }
+
+    List<GitContentManager.BooleanSearchClause> fieldsToMatch = Lists.newArrayList();
+
+    // handle question categories
+    if (null != gameFilter.getQuestionCategories()) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
+          TAGS_FIELDNAME, Constants.BooleanOperator.OR, gameFilter.getQuestionCategories()));
+    }
+
+    // Filter on content tags
+    List<String> tagAnds = Lists.newArrayList();
+    List<String> tagOrs = Lists.newArrayList();
+
+    // deal with tags which represent subjects, fields and topics
+    if (null != gameFilter.getSubjects()) {
+      if (gameFilter.getSubjects().size() > 1) {
+        tagOrs.addAll(gameFilter.getSubjects());
+      } else { // should be exactly 1
+        tagAnds.addAll(gameFilter.getSubjects());
+
+        // ok now we are allowed to look at the fields
+        if (null != gameFilter.getFields()) {
+          // If multiple fields are chosen, don't filter by field at all, unless there are no topics
+          // /!\ This was changed for the CS question finder, and doesn't break the PHY question finder
+          if (gameFilter.getFields().size() == 1) {
+            tagAnds.addAll(gameFilter.getFields());
+          } else if (null == gameFilter.getTopics()) {
+            tagOrs.addAll(gameFilter.getFields());
+          }
+          // Now we look at topics
+          if (null != gameFilter.getTopics()) {
+            if (gameFilter.getTopics().size() > 1) {
+              tagOrs.addAll(gameFilter.getTopics());
+            } else {
+              tagAnds.addAll(gameFilter.getTopics());
+            }
+          }
+        }
+      }
+    }
+
+    // deal with adding overloaded tags field for subjects, fields and topics
+    if (tagAnds.size() > 0) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, Constants.BooleanOperator.AND, tagAnds));
+    }
+    if (tagOrs.size() > 0) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, Constants.BooleanOperator.OR, tagOrs));
+    }
+
+    // now deal with levels
+    if (null != gameFilter.getLevels()) {
+      List<String> levelsAsStrings = Lists.newArrayList();
+      for (Integer levelInt : gameFilter.getLevels()) {
+        levelsAsStrings.add(levelInt.toString());
+      }
+      fieldsToMatch.add(
+          new GitContentManager.BooleanSearchClause(LEVEL_FIELDNAME, Constants.BooleanOperator.OR, levelsAsStrings));
+    }
+
+    // Handle the nested audience fields: stage, difficulty and examBoard
+    if (null != gameFilter.getStages()) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
+          STAGE_FIELDNAME, Constants.BooleanOperator.OR, gameFilter.getStages()));
+    }
+    if (null != gameFilter.getDifficulties()) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
+          DIFFICULTY_FIELDNAME, Constants.BooleanOperator.OR, gameFilter.getDifficulties()));
+    }
+    if (null != gameFilter.getExamBoards()) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
+          EXAM_BOARD_FIELDNAME, Constants.BooleanOperator.OR, gameFilter.getExamBoards()));
+    }
+
+    // handle concepts
+    if (null != gameFilter.getConcepts()) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
+          RELATED_CONTENT_FIELDNAME, Constants.BooleanOperator.OR, gameFilter.getConcepts()));
+    }
+
+    // handle exclusions
+    // exclude questions with no-filter tag
+    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, Constants.BooleanOperator.NOT,
+        Collections.singletonList(HIDE_FROM_FILTER_TAG)));
+
+    // exclude questions marked deprecated
+    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(DEPRECATED_FIELDNAME, Constants.BooleanOperator.NOT,
+        Collections.singletonList("true")));
+
+    return fieldsToMatch;
+  }
+  private static boolean validateFilterQuery(final GameFilter gameFilter) {
+    if (null == gameFilter.getSubjects() && null == gameFilter.getFields() && null == gameFilter.getTopics()) {
+      return true;
+    } else if (null == gameFilter.getSubjects()
+        && (null != gameFilter.getFields() || null != gameFilter.getTopics())) {
+      log.warn("Error validating query: You cannot have a " + "null subject and still specify fields or topics.");
+      return false;
+    } else if (null != gameFilter.getSubjects()
+        && null == gameFilter.getFields() && null != gameFilter.getTopics()) {
+      log.warn("Error validating query: You cannot have a null field" + " and still specify subject and topics.");
+      return false;
+    }
+
+    // this variable indicates whether we have found a multiple term query
+    // already.
+    boolean foundMultipleTerms = false;
+
+    // Now check that the subjects are of the correct size
+    if (null != gameFilter.getSubjects() && !gameFilter.getSubjects().isEmpty()) {
+      if (gameFilter.getSubjects().size() > 1) {
+        foundMultipleTerms = true;
+      }
+    }
+
+    if (null != gameFilter.getFields() && !gameFilter.getFields().isEmpty()) {
+      if (foundMultipleTerms) {
+        log.warn("Error validating query: multiple subjects and fields specified.");
+        return false;
+      }
+    }
+
+    /* We don't check topics since it no longer matters if multiple fields are specified
+       (after CS question finder addition).
+       This doesn't change how the PHY question finder works, unless the user uses the URL to specify multiple fields
+     */
+
+    return true;
   }
 }
