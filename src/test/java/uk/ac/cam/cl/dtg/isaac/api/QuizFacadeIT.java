@@ -26,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.DAVE_TEACHERS_BC_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.DAVE_TEACHER_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.DAVE_TEACHER_PASSWORD;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.INCORRECT_ROLE_ERROR_MESSAGE;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.NOT_LOGGED_IN_ERROR_MESSAGE;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_ATTEMPT_ALICE_CANCELLED_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID;
@@ -135,8 +137,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizzesResponse.getStatus());
 
-      assertEquals("You must be logged in to access this resource.",
-          getQuizzesResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+      String actualErrorMessage = getQuizzesResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+      assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
     }
 
     @Test
@@ -155,11 +157,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
           (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
-      assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
-      assertTrue(
-          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)));
-      assertTrue(
-          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID)));
+      boolean isTestQuizPresent = responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID));
+      boolean isHiddenFromStudentsQuizPresent =
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID));
+      boolean isHiddenFromTutorsQuizPresent =
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID));
+      assertTrue(isTestQuizPresent);
+      assertTrue(isHiddenFromStudentsQuizPresent);
+      assertTrue(isHiddenFromTutorsQuizPresent);
     }
 
     /**
@@ -181,11 +186,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
           (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
-      assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
-      assertFalse(
-          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)));
-      assertFalse(
-          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID)));
+      boolean isTestQuizPresent = responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID));
+      boolean isHiddenFromStudentsQuizPresent =
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID));
+      boolean isHiddenFromTutorsQuizPresent =
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID));
+      assertTrue(isTestQuizPresent);
+      assertFalse(isHiddenFromStudentsQuizPresent);
+      assertFalse(isHiddenFromTutorsQuizPresent);
     }
 
     @Test
@@ -204,11 +212,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
           (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
-      assertTrue(responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID)));
-      assertFalse(
-          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)));
-      assertFalse(
-          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID)));
+      boolean isTestQuizPresent = responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_TEST_QUIZ_ID));
+      boolean isHiddenFromStudentsQuizPresent =
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID));
+      boolean isHiddenFromTutorsQuizPresent =
+          responseBody.getResults().stream().anyMatch(q -> q.getId().equals(QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID));
+      assertTrue(isTestQuizPresent);
+      assertFalse(isHiddenFromStudentsQuizPresent);
+      assertFalse(isHiddenFromTutorsQuizPresent);
     }
   }
 
@@ -223,8 +234,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getAssignedQuizzesResponse.getStatus());
 
-      assertEquals("You must be logged in to access this resource.",
-          getAssignedQuizzesResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+      String actualErrorMessage = getAssignedQuizzesResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+      assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
     }
 
     @Test
@@ -263,7 +274,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
           (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
       assertEquals(6, responseBody.size());
-      assertTrue(responseBody.stream().anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID)));
+      boolean isTestQuizPresent = responseBody.stream().anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID));
+      assertTrue(isTestQuizPresent);
     }
 
     @Test
@@ -297,8 +309,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getFreeAttemptsResponse.getStatus());
 
-      assertEquals("You must be logged in to access this resource.",
-          getFreeAttemptsResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+      String actualErrorMessage = getFreeAttemptsResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+      assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
     }
 
     @Test
@@ -355,8 +367,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       @SuppressWarnings("unchecked") List<QuizAttemptDTO> responseBody =
           (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
-      assertTrue(responseBody.stream().anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID)));
-      assertFalse(responseBody.stream().anyMatch(q -> q.getQuizAssignmentId() != null));
+      boolean isTestQuizPresent = responseBody.stream().anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID));
+      boolean anyReturnedQuizHasAssignment = responseBody.stream().anyMatch(q -> q.getQuizAssignmentId() != null);
+      assertTrue(isTestQuizPresent);
+      assertFalse(anyReturnedQuizHasAssignment);
     }
   }
 
@@ -373,8 +387,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-        assertEquals("You must provide a valid test assignment id.",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("You must provide a valid test assignment id.", actualErrorMessage);
       }
 
       @Test
@@ -392,8 +406,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-        assertEquals("This assignment has been cancelled.",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("This assignment has been cancelled.", actualErrorMessage);
       }
     }
 
@@ -408,8 +422,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-        assertEquals("You must be logged in to access this resource.",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -426,8 +440,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-        assertEquals("You do not have the permissions to complete this action",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -443,8 +457,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-        assertEquals("You do not have the permissions to complete this action",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -461,8 +475,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-        assertEquals("You can only view assignments to groups you own or manage.",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("You can only view assignments to groups you own or manage.", actualErrorMessage);
       }
     }
 
@@ -484,14 +498,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         QuizAssignmentDTO responseBody = (QuizAssignmentDTO) getQuizAssignmentResponse.getEntity();
         assertEquals(QUIZ_ASSIGNMENT_ID, responseBody.getId());
-        assertTrue(responseBody.getUserFeedback().stream()
-            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
-        assertTrue(responseBody.getUserFeedback().stream()
-            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
-        assertFalse(responseBody.getUserFeedback().stream()
-            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
-        assertFalse(responseBody.getUserFeedback().stream()
-            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
+        boolean isUserFeedbackWithAccessAndFeedbackPresent = responseBody.getUserFeedback().stream()
+            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
+        boolean isUserFeedbackWithNoAccessAndNoFeedbackPresent = responseBody.getUserFeedback().stream()
+            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
+        boolean isUserFeedbackWithAccessButNoFeedbackPresent = responseBody.getUserFeedback().stream()
+            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
+        boolean isUserFeedbackWithNoAccessButFeedbackPresent = responseBody.getUserFeedback().stream()
+            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
+        assertTrue(isUserFeedbackWithAccessAndFeedbackPresent);
+        assertTrue(isUserFeedbackWithNoAccessAndNoFeedbackPresent);
+        assertFalse(isUserFeedbackWithAccessButNoFeedbackPresent);
+        assertFalse(isUserFeedbackWithNoAccessButFeedbackPresent);
       }
 
       @Test
@@ -506,14 +524,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         QuizAssignmentDTO responseBody = (QuizAssignmentDTO) getQuizAssignmentResponse.getEntity();
         assertEquals(QUIZ_ASSIGNMENT_ID, responseBody.getId());
-        assertTrue(responseBody.getUserFeedback().stream()
-            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
-        assertFalse(responseBody.getUserFeedback().stream()
-            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
-        assertFalse(responseBody.getUserFeedback().stream()
-            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null));
-        assertFalse(responseBody.getUserFeedback().stream()
-            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null));
+        boolean isUserFeedbackWithAccessAndFeedbackPresent = responseBody.getUserFeedback().stream()
+            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
+        boolean isUserFeedbackWithNoAccessAndNoFeedbackPresent = responseBody.getUserFeedback().stream()
+            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
+        boolean isUserFeedbackWithAccessButNoFeedbackPresent = responseBody.getUserFeedback().stream()
+            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
+        boolean isUserFeedbackWithNoAccessButFeedbackPresent = responseBody.getUserFeedback().stream()
+            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
+        assertTrue(isUserFeedbackWithAccessAndFeedbackPresent);
+        assertFalse(isUserFeedbackWithNoAccessAndNoFeedbackPresent);
+        assertFalse(isUserFeedbackWithAccessButNoFeedbackPresent);
+        assertFalse(isUserFeedbackWithNoAccessButFeedbackPresent);
       }
     }
   }
@@ -532,8 +554,9 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        assertEquals("You must provide a valid test assignment and user id id.",
-            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage =
+            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("You must provide a valid test assignment and user id id.", actualErrorMessage);
       }
 
       @Test
@@ -546,8 +569,9 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        assertEquals("You must provide a valid test assignment and user id id.",
-            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage =
+            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("You must provide a valid test assignment and user id id.", actualErrorMessage);
       }
 
       @Test
@@ -557,17 +581,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentAttemptRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(getQuizAssignmentAttemptRequest);
 
-        Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentRequest, QUIZ_ASSIGNMENT_CANCELLED_ID,
+        Response getQuizAssignmentAttemptResponse =
+            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_CANCELLED_ID,
                 TEST_STUDENT_ALICE_ID);
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        assertEquals("This assignment has been cancelled.",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("This assignment has been cancelled.", actualErrorMessage);
       }
     }
 
@@ -584,8 +608,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        assertEquals("You must be logged in to access this resource.",
-            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -605,8 +629,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        assertEquals("You do not have the permissions to complete this action",
-            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -624,8 +648,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        assertEquals("You do not have the permissions to complete this action",
-            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -645,8 +669,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        assertEquals("You can only view assignments to groups you own or manage.",
-            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("You can only view assignments to groups you own or manage.", actualErrorMessage);
       }
     }
 
@@ -668,8 +692,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        assertEquals("That student is not in the group that was assigned this test.",
-            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("That student is not in the group that was assigned this test.", actualErrorMessage);
       }
 
       @Test
@@ -689,8 +713,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        assertEquals("You do not have access to that student's data.",
-            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("You do not have access to that student's data.", actualErrorMessage);
       }
 
       @Test
@@ -710,8 +734,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
-        assertEquals("That student has not completed this test assignment.",
-            getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("That student has not completed this test assignment.", actualErrorMessage);
       }
     }
 
@@ -779,8 +803,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
+          String actualErrorMessage =
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
           assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
-              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+              actualErrorMessage);
         }
       }
 
@@ -797,8 +823,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
+          String actualErrorMessage =
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
           assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
-              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+              actualErrorMessage);
         }
       }
 
@@ -814,8 +842,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
+          String actualErrorMessage =
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
           assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
-              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+              actualErrorMessage);
         }
       }
 
@@ -837,8 +867,9 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.NOT_FOUND.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-          assertEquals("This test has become unavailable.",
-              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage =
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This test has become unavailable.", actualErrorMessage);
         }
       }
 
@@ -860,8 +891,9 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-          assertEquals("You cannot set a quiz with a due date in the past.",
-              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage =
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You cannot set a quiz with a due date in the past.", actualErrorMessage);
         }
       }
 
@@ -883,8 +915,9 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-          assertEquals("You cannot reassign a test until the due date has passed.",
-              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage =
+              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You cannot reassign a test until the due date has passed.", actualErrorMessage);
         }
       }
     }
@@ -904,8 +937,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -927,8 +960,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-          assertEquals("You do not have the permissions to complete this action",
-              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -949,8 +982,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-          assertEquals("You do not have the permissions to complete this action",
-              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -972,8 +1005,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
-          assertEquals("You can only set assignments to groups you own or manage.",
-              createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = createQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You can only set assignments to groups you own or manage.", actualErrorMessage);
         }
       }
     }
@@ -1048,8 +1081,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
-          assertEquals("You must provide a valid test assignment id.",
-              cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You must provide a valid test assignment id.", actualErrorMessage);
         }
       }
 
@@ -1069,8 +1102,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
-          assertEquals("This assignment is already cancelled.",
-              cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This assignment is already cancelled.", actualErrorMessage);
         }
       }
     }
@@ -1087,8 +1120,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1107,8 +1140,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
-          assertEquals("You do not have the permissions to complete this action",
-              cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1126,8 +1159,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
-          assertEquals("You do not have the permissions to complete this action",
-              cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1146,8 +1179,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
-          assertEquals("You can only cancel assignments to groups you own or manage.",
-              cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You can only cancel assignments to groups you own or manage.", actualErrorMessage);
         }
       }
     }
@@ -1209,8 +1242,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("You must provide a valid test assignment id.",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You must provide a valid test assignment id.", actualErrorMessage);
         }
       }
 
@@ -1243,8 +1276,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("Those fields are not editable.",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("Those fields are not editable.", actualErrorMessage);
         }
       }
 
@@ -1259,8 +1292,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("Those fields are not editable.",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("Those fields are not editable.", actualErrorMessage);
         }
       }
 
@@ -1275,8 +1308,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("Those fields are not editable.",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("Those fields are not editable.", actualErrorMessage);
         }
       }
 
@@ -1291,8 +1324,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("Those fields are not editable.",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("Those fields are not editable.", actualErrorMessage);
         }
       }
 
@@ -1312,8 +1345,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("You can only extend due dates into the future.",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You can only extend due dates into the future.", actualErrorMessage);
         }
       }
 
@@ -1333,8 +1366,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("This assignment is already cancelled.",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This assignment is already cancelled.", actualErrorMessage);
         }
       }
     }
@@ -1352,8 +1385,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1373,8 +1406,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("You do not have the permissions to complete this action",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1393,8 +1426,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("You do not have the permissions to complete this action",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1414,8 +1447,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
-          assertEquals("You can only updates assignments to groups you own or manage.",
-              updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = updateQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You can only updates assignments to groups you own or manage.", actualErrorMessage);
         }
       }
     }
@@ -1517,8 +1550,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), previewQuizResponse.getStatus());
 
-          assertEquals("You must provide a valid test id.",
-              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You must provide a valid test id.", actualErrorMessage);
         }
       }
 
@@ -1537,8 +1570,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), previewQuizResponse.getStatus());
 
-          assertEquals("You must provide a valid test id.",
-              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You must provide a valid test id.", actualErrorMessage);
         }
       }
 
@@ -1557,8 +1590,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.NOT_FOUND.getStatusCode(), previewQuizResponse.getStatus());
 
-          assertEquals("This test has become unavailable.",
-              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This test has become unavailable.", actualErrorMessage);
         }
       }
     }
@@ -1575,8 +1608,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), previewQuizResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1595,13 +1628,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
 
-          assertEquals("You do not have the permissions to complete this action",
-              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
       @Test
-      public void asTutor_isForbidden() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      public void asTutor_returnsQuiz() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
@@ -1620,7 +1653,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       }
 
       @Test
-      public void asTeacher_isForbidden()
+      public void asTeacher_returnsQuiz()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -1657,8 +1690,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
 
-          assertEquals("You do not have the permissions to complete this action",
-              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1677,8 +1710,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
 
-          assertEquals("You do not have the permissions to complete this action",
-              previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = previewQuizResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1738,8 +1771,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), startQuizAttemptResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1758,8 +1791,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startQuizAttemptResponse.getStatus());
 
-          assertEquals("You are not a member of a group to which this test is assigned.",
-              startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You are not a member of a group to which this test is assigned.", actualErrorMessage);
         }
       }
     }
@@ -1781,8 +1814,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), startQuizAttemptResponse.getStatus());
 
-          assertEquals("You must provide a valid test assignment id.",
-              startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You must provide a valid test assignment id.", actualErrorMessage);
         }
       }
 
@@ -1801,8 +1834,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.GONE.getStatusCode(), startQuizAttemptResponse.getStatus());
 
-          assertEquals("This test assignment has been cancelled.",
-              startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This test assignment has been cancelled.", actualErrorMessage);
         }
       }
 
@@ -1821,8 +1854,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startQuizAttemptResponse.getStatus());
 
-          assertEquals("The due date for this test has passed.",
-              startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("The due date for this test has passed.", actualErrorMessage);
         }
       }
 
@@ -1841,8 +1874,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startQuizAttemptResponse.getStatus());
 
-          assertEquals("You have already completed your attempt for this test.",
-              startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You have already completed your attempt for this test.", actualErrorMessage);
         }
       }
     }
@@ -1886,8 +1919,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -1906,8 +1939,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
-          assertEquals("Free attempts are not available for test quiz.",
-              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("Free attempts are not available for test quiz.", actualErrorMessage);
         }
       }
 
@@ -1926,10 +1959,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
-          assertEquals("This test has been assigned to you by a teacher. "
-                  + "You can not attempt this test freely. If you have already done the test for your teacher, "
-                  + "and want to do it again, ask your teacher to allow you another attempt.",
-              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          String expectedErrorMessage = "This test has been assigned to you by a teacher. "
+              + "You can not attempt this test freely. If you have already done the test for your teacher, "
+              + "and want to do it again, ask your teacher to allow you another attempt.";
+          assertEquals(expectedErrorMessage, actualErrorMessage);
         }
       }
     }
@@ -1951,8 +1985,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
-          assertEquals("You must provide a valid test id.",
-              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You must provide a valid test id.", actualErrorMessage);
         }
       }
 
@@ -1971,8 +2005,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
-          assertEquals("You must provide a valid test id.",
-              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You must provide a valid test id.", actualErrorMessage);
         }
       }
 
@@ -1991,8 +2025,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.NOT_FOUND.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
-          assertEquals("This test has become unavailable.",
-              startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = startFreeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This test has become unavailable.", actualErrorMessage);
         }
       }
     }
@@ -2036,8 +2070,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAttemptResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              getQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -2056,8 +2090,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptResponse.getStatus());
 
-          assertEquals("This is not your test attempt.",
-              getQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This is not your test attempt.", actualErrorMessage);
         }
       }
     }
@@ -2079,8 +2113,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptResponse.getStatus());
 
-          assertEquals("This test assignment has been cancelled.",
-              getQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This test assignment has been cancelled.", actualErrorMessage);
         }
       }
 
@@ -2099,8 +2133,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptResponse.getStatus());
 
-          assertEquals("The due date for this test has passed.",
-              getQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("The due date for this test has passed.", actualErrorMessage);
         }
       }
 
@@ -2119,8 +2153,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptResponse.getStatus());
 
-          assertEquals("You have completed this test.",
-              getQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You have completed this test.", actualErrorMessage);
         }
       }
     }
@@ -2164,8 +2198,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -2184,8 +2218,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
-          assertEquals("This is not your test attempt.",
-              getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This is not your test attempt.", actualErrorMessage);
         }
       }
 
@@ -2204,8 +2238,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
-          assertEquals("This is not your test attempt.",
-              getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This is not your test attempt.", actualErrorMessage);
         }
       }
 
@@ -2220,8 +2254,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
-          assertEquals("This is not your test attempt.",
-              getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This is not your test attempt.", actualErrorMessage);
         }
       }
     }
@@ -2243,8 +2277,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
-          assertEquals("You have not completed this test.",
-              getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You have not completed this test.", actualErrorMessage);
         }
       }
 
@@ -2263,8 +2297,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
-          assertEquals("You have not completed this test.",
-              getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = getQuizAttemptFeedbackResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You have not completed this test.", actualErrorMessage);
         }
       }
     }
@@ -2387,8 +2421,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -2407,8 +2441,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
-          assertEquals("You cannot complete someone else's test.",
-              completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You cannot complete someone else's test.", actualErrorMessage);
         }
       }
 
@@ -2427,8 +2461,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
-          assertEquals("You cannot complete someone else's test.",
-              completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You cannot complete someone else's test.", actualErrorMessage);
         }
       }
 
@@ -2443,8 +2477,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
-          assertEquals("You cannot complete someone else's test.",
-              completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You cannot complete someone else's test.", actualErrorMessage);
         }
       }
     }
@@ -2464,8 +2498,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
-        assertEquals("That test is already complete.",
-            completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = completeQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("That test is already complete.", actualErrorMessage);
       }
     }
 
@@ -2508,8 +2542,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("Missing quizAssignmentId.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("Missing quizAssignmentId.", actualErrorMessage);
         }
       }
 
@@ -2523,8 +2557,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("Missing userId.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("Missing userId.", actualErrorMessage);
         }
       }
 
@@ -2544,8 +2578,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("No such user.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("No such user.", actualErrorMessage);
         }
       }
 
@@ -2565,8 +2599,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("This test assignment has been cancelled.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This test assignment has been cancelled.", actualErrorMessage);
         }
       }
 
@@ -2586,8 +2620,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("You cannot mark a test attempt as incomplete after the due date.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You cannot mark a test attempt as incomplete after the due date.", actualErrorMessage);
         }
       }
 
@@ -2607,8 +2641,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("That user is not in this group.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("That user is not in this group.", actualErrorMessage);
         }
       }
 
@@ -2628,8 +2662,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("That test is already incomplete.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("That test is already incomplete.", actualErrorMessage);
         }
       }
 
@@ -2650,8 +2684,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
               markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("SegueDatabaseException whilst marking test attempt incomplete",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("SegueDatabaseException whilst marking test attempt incomplete", actualErrorMessage);
         }
       }
     }
@@ -2668,8 +2702,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -2689,8 +2723,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("You can only mark assignments incomplete for groups you own or manage.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You can only mark assignments incomplete for groups you own or manage.", actualErrorMessage);
         }
       }
 
@@ -2709,8 +2743,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("You can only mark assignments incomplete for groups you own or manage.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You can only mark assignments incomplete for groups you own or manage.", actualErrorMessage);
         }
       }
 
@@ -2730,8 +2764,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
-          assertEquals("You can only mark assignments incomplete for groups you own or manage.",
-              markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = markIncompleteQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You can only mark assignments incomplete for groups you own or manage.", actualErrorMessage);
         }
       }
     }
@@ -2816,8 +2850,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("No answer received.",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("No answer received.", actualErrorMessage);
         }
       }
 
@@ -2831,8 +2865,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("No answer received.",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("No answer received.", actualErrorMessage);
         }
       }
 
@@ -2846,8 +2880,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("Missing questionId.",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("Missing questionId.", actualErrorMessage);
         }
       }
 
@@ -2861,8 +2895,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("Missing questionId.",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("Missing questionId.", actualErrorMessage);
         }
       }
 
@@ -2881,8 +2915,9 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.NOT_FOUND.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("No question object found for given id: " + QUIZ_TEST_UNKNOWN_QUESTION_ID,
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          String expectedErrorMessage = "No question object found for given id: " + QUIZ_TEST_UNKNOWN_QUESTION_ID;
+          assertEquals(expectedErrorMessage, actualErrorMessage);
         }
       }
 
@@ -2901,8 +2936,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("This question is part of another test.",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This question is part of another test.", actualErrorMessage);
         }
       }
 
@@ -2921,8 +2956,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("You have completed this test.",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You have completed this test.", actualErrorMessage);
         }
       }
 
@@ -2941,8 +2976,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("This test assignment has been cancelled.",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This test assignment has been cancelled.", actualErrorMessage);
         }
       }
 
@@ -2961,8 +2996,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("The due date for this test has passed.",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("The due date for this test has passed.", actualErrorMessage);
         }
       }
 
@@ -2981,8 +3016,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("SegueDatabaseException whilst submitting test answer",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("SegueDatabaseException whilst submitting test answer", actualErrorMessage);
         }
       }
     }
@@ -2999,8 +3034,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -3019,8 +3054,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), answerQuestionResponse.getStatus());
 
-          assertEquals("This is not your test attempt.",
-              answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = answerQuestionResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This is not your test attempt.", actualErrorMessage);
         }
       }
     }
@@ -3044,13 +3079,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
-          assertEquals("You must provide a valid test attempt id.",
-              cancelQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You must provide a valid test attempt id.", actualErrorMessage);
         }
       }
 
       @Test
-      public void freeAttempt_isForbidden()
+      public void assignedAttempt_isForbidden()
           throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -3064,8 +3099,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
-          assertEquals("You can only cancel attempts on tests you chose to take.",
-              cancelQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You can only cancel attempts on tests you chose to take.", actualErrorMessage);
         }
       }
 
@@ -3084,8 +3119,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
-          assertEquals("You cannot cancel completed test attempts.",
-              cancelQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You cannot cancel completed test attempts.", actualErrorMessage);
         }
       }
     }
@@ -3102,8 +3137,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              cancelQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -3122,8 +3157,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
-          assertEquals("You cannot cancel a test attempt for someone else.",
-              cancelQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = cancelQuizAttemptResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You cannot cancel a test attempt for someone else.", actualErrorMessage);
         }
       }
     }
@@ -3162,8 +3197,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
-          assertEquals("Missing sectionNumber.",
-              logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("Missing sectionNumber.", actualErrorMessage);
         }
       }
 
@@ -3182,8 +3217,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
-          assertEquals("This test assignment has been cancelled.",
-              logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This test assignment has been cancelled.", actualErrorMessage);
         }
       }
 
@@ -3202,8 +3237,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
-          assertEquals("The due date for this test has passed.",
-              logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("The due date for this test has passed.", actualErrorMessage);
         }
       }
 
@@ -3222,8 +3257,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
-          assertEquals("You have completed this test.",
-              logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("You have completed this test.", actualErrorMessage);
         }
       }
     }
@@ -3240,8 +3275,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
-          assertEquals("You must be logged in to access this resource.",
-              logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
         }
       }
 
@@ -3260,8 +3295,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
-          assertEquals("This is not your test attempt.",
-              logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+          String actualErrorMessage = logQuizSectionViewResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+          assertEquals("This is not your test attempt.", actualErrorMessage);
         }
       }
     }
@@ -3297,15 +3332,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, UNKNOWN_GROUP_ID);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(getQuizAssignmentsRequest, UNKNOWN_GROUP_ID);
 
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        assertEquals("Database error whilst getting assigned tests",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentsResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("Database error whilst getting assigned tests", actualErrorMessage);
       }
     }
 
@@ -3313,15 +3348,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     class UnspecifiedGroupUnauthorisedOrForbiddenUser {
       @Test
       public void asAnonymousUser_withNullGroupId_isUnauthorised() {
-        HttpServletRequest getQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createNiceMock(HttpServletRequest.class);
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, null);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(getQuizAssignmentsRequest, null);
 
-        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        assertEquals("You must be logged in to access this resource.",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentsResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -3331,15 +3366,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, null);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(getQuizAssignmentsRequest, null);
 
-        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        assertEquals("You do not have the permissions to complete this action",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentsResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -3349,15 +3384,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, null);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(getQuizAssignmentsRequest, null);
 
-        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        assertEquals("You do not have the permissions to complete this action",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentsResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
       }
     }
 
@@ -3365,16 +3400,16 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     class SpecifiedGroupUnauthorisedOrForbiddenUser {
       @Test
       public void asAnonymousUser_withNonNullGroupId_isUnauthorised() {
-        HttpServletRequest getQuizAssignmentRequest = createNiceMock(HttpServletRequest.class);
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createNiceMock(HttpServletRequest.class);
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentsResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
-        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        assertEquals("You must be logged in to access this resource.",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentsResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(NOT_LOGGED_IN_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -3384,16 +3419,16 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult studentLogin = loginAs(httpSession, TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentsResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
-        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        assertEquals("You do not have the permissions to complete this action",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentsResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -3403,16 +3438,16 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentsResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
-        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        assertEquals("You do not have the permissions to complete this action",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentsResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals(INCORRECT_ROLE_ERROR_MESSAGE, actualErrorMessage);
       }
 
       @Test
@@ -3422,16 +3457,16 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult teacherLogin = loginAs(httpSession, DAVE_TEACHER_EMAIL, DAVE_TEACHER_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentsResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
-        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        assertEquals("You are not the owner or manager of that group",
-            getQuizAssignmentResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+        String actualErrorMessage = getQuizAssignmentsResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
+        assertEquals("You are not the owner or manager of that group", actualErrorMessage);
       }
     }
 
@@ -3444,15 +3479,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, null);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(getQuizAssignmentsRequest, null);
 
-        assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
         @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-            (List<QuizAssignmentDTO>) getQuizAssignmentResponse.getEntity();
+            (List<QuizAssignmentDTO>) getQuizAssignmentsResponse.getEntity();
         assertEquals(7, responseBody.size());
       }
 
@@ -3463,15 +3498,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult teacherLogin = loginAs(httpSession, DAVE_TEACHER_EMAIL, DAVE_TEACHER_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(getQuizAssignmentRequest, null);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(getQuizAssignmentsRequest, null);
 
-        assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
         @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-            (List<QuizAssignmentDTO>) getQuizAssignmentResponse.getEntity();
+            (List<QuizAssignmentDTO>) getQuizAssignmentsResponse.getEntity();
         assertTrue(responseBody.isEmpty());
       }
     }
@@ -3485,16 +3520,16 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(getQuizAssignmentsRequest);
 
-        Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentsResponse =
+            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
-        assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
+        assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
         @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-            (List<QuizAssignmentDTO>) getQuizAssignmentResponse.getEntity();
+            (List<QuizAssignmentDTO>) getQuizAssignmentsResponse.getEntity();
         assertEquals(6, responseBody.size());
       }
 
@@ -3505,11 +3540,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
         LoginResult teacherLogin = loginAs(httpSession, TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+        replay(getQuizAssignmentsRequest);
 
         Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_SECONDARY_TEST_GROUP_ID);
+            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_SECONDARY_TEST_GROUP_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -3521,11 +3556,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void asAdmin_withNonNullGroupId_returnsListOfQuizAssignmentsForGroup() throws JsonProcessingException {
         Cookie adminSessionCookie = createManualCookieForAdmin();
-        HttpServletRequest getQuizAssignmentRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
-        replay(getQuizAssignmentRequest);
+        HttpServletRequest getQuizAssignmentsRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
+        replay(getQuizAssignmentsRequest);
 
         Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
 

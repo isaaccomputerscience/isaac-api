@@ -123,6 +123,9 @@ public final class ITConstants {
 
   public static final String QUIZ_TEST_FIRST_QUESTION_ANSWER = "{\"type\":\"quantity\",\"value\":\"3.0\",\"units\":\"V\"}";
 
+  public static final String NOT_LOGGED_IN_ERROR_MESSAGE = "You must be logged in to access this resource.";
+  public static final String INCORRECT_ROLE_ERROR_MESSAGE = "You do not have the permissions to complete this action";
+
   private ITConstants() {
   }
 }
