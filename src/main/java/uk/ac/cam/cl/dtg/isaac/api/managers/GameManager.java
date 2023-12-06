@@ -980,6 +980,14 @@ public class GameManager {
     return selectionOfGameboardQuestions;
   }
 
+  /**
+   * This generates a set of five question in random.
+   *
+   * @param gameFilter - to enable search
+   * @param limit      - to provide a limit of questions
+   * @return a list of questions
+   * @throws ContentManagerException - if there is a problem accessing the content repository.
+   */
   public ResultsWrapper<ContentDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
       throws ContentManagerException {
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
