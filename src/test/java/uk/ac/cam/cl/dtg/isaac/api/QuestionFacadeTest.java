@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import uk.ac.cam.cl.dtg.isaac.api.managers.GameManager;
 import uk.ac.cam.cl.dtg.isaac.dos.IUserStreaksManager;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.QuestionFacade;
@@ -63,6 +64,7 @@ public class QuestionFacadeTest extends AbstractFacadeTest {
 
     ILogManager logManager = createNiceMock(ILogManager.class); // We don't care about logging.
     GitContentManager contentManager = createMock(GitContentManager.class);
+    GameManager gameManager = createMock(GameManager.class);
     ContentMapper contentMapper = createMock(ContentMapper.class);
 
     String contentIndex = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
@@ -73,7 +75,7 @@ public class QuestionFacadeTest extends AbstractFacadeTest {
 
     questionManager = createMock(QuestionManager.class);
 
-    questionFacade = new QuestionFacade(properties, contentMapper, contentManager, contentIndex,
+    questionFacade = new QuestionFacade(properties, contentMapper, contentManager, gameManager, contentIndex,
         userManager, questionManager, logManager, misuseMonitor, userBadgeManager, userStreaksManager,
         userAssociationManager);
 

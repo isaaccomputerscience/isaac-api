@@ -980,6 +980,16 @@ public class GameManager {
     return selectionOfGameboardQuestions;
   }
 
+  public ResultsWrapper<ContentDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
+      throws ContentManagerException {
+    List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
+    fieldsToMap.add(new GitContentManager.BooleanSearchClause(
+        TYPE_FIELDNAME, uk.ac.cam.cl.dtg.segue.api.Constants.BooleanOperator.AND, Collections.singletonList(QUESTION_TYPE)));
+    fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
+
+    return this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, limit, null);
+  }
+
   /**
    * AugmentGameItemWithAttemptInformation
    * <br>
@@ -1365,4 +1375,7 @@ public class GameManager {
 
     return gameboardDTO;
   }
+
+
+
 }

@@ -60,6 +60,7 @@ import java.util.Random;
 import org.jboss.resteasy.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.api.managers.GameManager;
 import uk.ac.cam.cl.dtg.isaac.dos.IUserStreaksManager;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuiz;
 import uk.ac.cam.cl.dtg.isaac.dos.TestCase;
@@ -104,8 +105,8 @@ import uk.ac.cam.cl.dtg.util.RequestIpExtractor;
 @Tag(name = "/questions")
 public class QuestionFacade extends AbstractSegueFacade {
   private static final Logger log = LoggerFactory.getLogger(QuestionFacade.class);
-
   private final ContentMapper mapper;
+  private final GameManager gameManager;
   private final GitContentManager contentManager;
   private final String contentIndex;
   private final UserAccountManager userManager;
@@ -119,20 +120,22 @@ public class QuestionFacade extends AbstractSegueFacade {
    * @param properties             - the fully configured properties loader for the api.
    * @param mapper                 - The Content mapper object used for polymorphic mapping of content objects.
    * @param contentManager         - The content version controller used by the api.
+   * @param gameManager            - The manager object responsible for games.
    * @param contentIndex           - The index string for current content version
    * @param userManager            - The manager object responsible for users.
    * @param questionManager        - A question manager object responsible for managing questions and augmenting
-   *                                     questions with user information.
+   *                               questions with user information.
    * @param logManager             - An instance of the log manager used for recording usage of the CMS.
    * @param misuseMonitor          - An instance of the misuse monitor for rate limiting answer attempts
    * @param userBadgeManager       - An instance of the badge manager
    * @param userStreaksManager     - An instance of the streaks manager to notify users when their answer streak changes
    * @param userAssociationManager - An instance of the association manager to check for teacher permissions over other
-   *                                     users
+   *                               users
    */
   @Inject
   public QuestionFacade(final PropertiesLoader properties, final ContentMapper mapper,
-                        final GitContentManager contentManager, @Named(CONTENT_INDEX) final String contentIndex,
+                        final GitContentManager contentManager, final GameManager gameManager,
+                        @Named(CONTENT_INDEX) final String contentIndex,
                         final UserAccountManager userManager, final QuestionManager questionManager,
                         final ILogManager logManager, final IMisuseMonitor misuseMonitor,
                         final UserBadgeManager userBadgeManager, final IUserStreaksManager userStreaksManager,
@@ -142,6 +145,7 @@ public class QuestionFacade extends AbstractSegueFacade {
     this.questionManager = questionManager;
     this.mapper = mapper;
     this.contentManager = contentManager;
+    this.gameManager = gameManager;
     this.contentIndex = contentIndex;
     this.userManager = userManager;
     this.misuseMonitor = misuseMonitor;
@@ -251,47 +255,38 @@ public class QuestionFacade extends AbstractSegueFacade {
   /**
    * REST end point to provide five questions in random located in the question tile of the student dashboard.
    *
-   * @param request            - this allows us to check to see if a user is currently loggedin.
-   * @param subjects           - a comma separated list of subjects
-   * @param topics             - a comma separated list of topics
-   * @param stages             - a comma separated list of stages
-   * @param difficulties       - a comma separated list of difficulties
-   * @param examBoards         - a comma separated list of examBoards
+   * @param request    - this allows us to check to see if a user is currently loggedin.
+   * @param subjects   - a comma separated list of subjects
+   * @param stages     - a comma separated list of stages
+   * @param examBoards - a comma separated list of examBoards
    * @return a Response containing a gameboard object or containing a SegueErrorResponse.
    */
   @GET
   @Path("/randomQuestions")
   @Produces(MediaType.APPLICATION_JSON)
+  @GZIP
   public final Response getRandomQuestions(@Context final HttpServletRequest request,
                                            @QueryParam("subjects") final String subjects,
-                                           @QueryParam("topics") final String topics,
                                            @QueryParam("stages") final String stages,
-                                           @QueryParam("difficulties") final String difficulties,
                                            @QueryParam("examBoards") final String examBoards)
       throws ContentManagerException {
 
     List<String> subjectsList = splitCsvStringQueryParam(subjects);
-    List<String> topicsList = splitCsvStringQueryParam(topics);
     List<String> stagesList = splitCsvStringQueryParam(stages);
-    List<String> difficultiesList = splitCsvStringQueryParam(difficulties);
     List<String> examBoardsList = splitCsvStringQueryParam(examBoards);
 
-    GameFilter gameFilter = new GameFilter(subjectsList,
+    GameFilter gameFilter = new GameFilter(
+        subjectsList,
         null,
-        topicsList,
+        null,
         null,
         null,
         null,
         stagesList,
-        difficultiesList,
+        null,
         examBoardsList);
 
-    List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
-    fieldsToMap.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, Constants.BooleanOperator.AND, Collections.singletonList(QUESTION_TYPE)));
-    fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
-
-    var questions = this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, 5);
+    var questions = this.gameManager.generateRandomQuestions(gameFilter, 5);
 
     // Return the list of random questions as JSON
     return Response.ok(questions).build();
@@ -510,141 +505,5 @@ public class QuestionFacade extends AbstractSegueFacade {
     } else {
       return null;
     }
-  }
-  private static List<GitContentManager.BooleanSearchClause> generateFieldToMatchForQuestionFilter(
-      final GameFilter gameFilter) {
-
-    // Validate that the field sizes are as we expect for tags
-    // Check that the query provided adheres to the rules we expect
-    if (!validateFilterQuery(gameFilter)) {
-      throw new IllegalArgumentException("Error validating filter query.");
-    }
-
-    List<GitContentManager.BooleanSearchClause> fieldsToMatch = Lists.newArrayList();
-
-    // handle question categories
-    if (null != gameFilter.getQuestionCategories()) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          TAGS_FIELDNAME, Constants.BooleanOperator.OR, gameFilter.getQuestionCategories()));
-    }
-
-    // Filter on content tags
-    List<String> tagAnds = Lists.newArrayList();
-    List<String> tagOrs = Lists.newArrayList();
-
-    // deal with tags which represent subjects, fields and topics
-    if (null != gameFilter.getSubjects()) {
-      if (gameFilter.getSubjects().size() > 1) {
-        tagOrs.addAll(gameFilter.getSubjects());
-      } else { // should be exactly 1
-        tagAnds.addAll(gameFilter.getSubjects());
-
-        // ok now we are allowed to look at the fields
-        if (null != gameFilter.getFields()) {
-          // If multiple fields are chosen, don't filter by field at all, unless there are no topics
-          // /!\ This was changed for the CS question finder, and doesn't break the PHY question finder
-          if (gameFilter.getFields().size() == 1) {
-            tagAnds.addAll(gameFilter.getFields());
-          } else if (null == gameFilter.getTopics()) {
-            tagOrs.addAll(gameFilter.getFields());
-          }
-          // Now we look at topics
-          if (null != gameFilter.getTopics()) {
-            if (gameFilter.getTopics().size() > 1) {
-              tagOrs.addAll(gameFilter.getTopics());
-            } else {
-              tagAnds.addAll(gameFilter.getTopics());
-            }
-          }
-        }
-      }
-    }
-
-    // deal with adding overloaded tags field for subjects, fields and topics
-    if (tagAnds.size() > 0) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, Constants.BooleanOperator.AND, tagAnds));
-    }
-    if (tagOrs.size() > 0) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, Constants.BooleanOperator.OR, tagOrs));
-    }
-
-    // now deal with levels
-    if (null != gameFilter.getLevels()) {
-      List<String> levelsAsStrings = Lists.newArrayList();
-      for (Integer levelInt : gameFilter.getLevels()) {
-        levelsAsStrings.add(levelInt.toString());
-      }
-      fieldsToMatch.add(
-          new GitContentManager.BooleanSearchClause(LEVEL_FIELDNAME, Constants.BooleanOperator.OR, levelsAsStrings));
-    }
-
-    // Handle the nested audience fields: stage, difficulty and examBoard
-    if (null != gameFilter.getStages()) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          STAGE_FIELDNAME, Constants.BooleanOperator.OR, gameFilter.getStages()));
-    }
-    if (null != gameFilter.getDifficulties()) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          DIFFICULTY_FIELDNAME, Constants.BooleanOperator.OR, gameFilter.getDifficulties()));
-    }
-    if (null != gameFilter.getExamBoards()) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          EXAM_BOARD_FIELDNAME, Constants.BooleanOperator.OR, gameFilter.getExamBoards()));
-    }
-
-    // handle concepts
-    if (null != gameFilter.getConcepts()) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          RELATED_CONTENT_FIELDNAME, Constants.BooleanOperator.OR, gameFilter.getConcepts()));
-    }
-
-    // handle exclusions
-    // exclude questions with no-filter tag
-    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, Constants.BooleanOperator.NOT,
-        Collections.singletonList(HIDE_FROM_FILTER_TAG)));
-
-    // exclude questions marked deprecated
-    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(DEPRECATED_FIELDNAME, Constants.BooleanOperator.NOT,
-        Collections.singletonList("true")));
-
-    return fieldsToMatch;
-  }
-  private static boolean validateFilterQuery(final GameFilter gameFilter) {
-    if (null == gameFilter.getSubjects() && null == gameFilter.getFields() && null == gameFilter.getTopics()) {
-      return true;
-    } else if (null == gameFilter.getSubjects()
-        && (null != gameFilter.getFields() || null != gameFilter.getTopics())) {
-      log.warn("Error validating query: You cannot have a " + "null subject and still specify fields or topics.");
-      return false;
-    } else if (null != gameFilter.getSubjects()
-        && null == gameFilter.getFields() && null != gameFilter.getTopics()) {
-      log.warn("Error validating query: You cannot have a null field" + " and still specify subject and topics.");
-      return false;
-    }
-
-    // this variable indicates whether we have found a multiple term query
-    // already.
-    boolean foundMultipleTerms = false;
-
-    // Now check that the subjects are of the correct size
-    if (null != gameFilter.getSubjects() && !gameFilter.getSubjects().isEmpty()) {
-      if (gameFilter.getSubjects().size() > 1) {
-        foundMultipleTerms = true;
-      }
-    }
-
-    if (null != gameFilter.getFields() && !gameFilter.getFields().isEmpty()) {
-      if (foundMultipleTerms) {
-        log.warn("Error validating query: multiple subjects and fields specified.");
-        return false;
-      }
-    }
-
-    /* We don't check topics since it no longer matters if multiple fields are specified
-       (after CS question finder addition).
-       This doesn't change how the PHY question finder works, unless the user uses the URL to specify multiple fields
-     */
-
-    return true;
   }
 }
