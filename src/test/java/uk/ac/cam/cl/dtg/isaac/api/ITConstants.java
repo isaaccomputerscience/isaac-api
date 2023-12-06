@@ -44,19 +44,25 @@ public final class ITConstants {
   public static final String TEST_STUDENT_PASSWORD = "test1234";
   public static final long TEST_STUDENT_ID = 6L;
 
-  public static final String TEST_STUDENT_ALICE_EMAIL = "alice-student@test.com";
-  public static final String TEST_STUDENT_ALICE_PASSWORD = "test1234";
-  public static final long TEST_STUDENT_ALICE_ID = 7L;
+  // QuizFacade Additional Test Students
+  // (1) Test Student is not in the QuizFacade assignment group and will make no free attempts
+  // (2) Alice is the first member of QuizFacade assignment group, has no unassigned quiz attempts
+  // (3) Bob is the second member of QuizFacade assignment group, has an unassigned quiz attempt
+  // (4) Charlie is the third member of QuizFacade assignment group, does not provide viewing permissions to group owner
+  // (5) Erika is also not in the QuizFacade assignment group but will make free attempts
+  public static final String QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS = "alice-student@test.com";
+  public static final String QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS = "test1234";
+  public static final long QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS = 7L;
 
-  public static final String TEST_STUDENT_BOB_EMAIL = "bob-student@test.com";
-  public static final String TEST_STUDENT_BOB_PASSWORD = "test1234";
-  public static final long TEST_STUDENT_BOB_ID = 8L;
+  public static final String QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT = "bob-student@test.com";
+  public static final String QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT = "test1234";
+  public static final long QUIZ_FACADE_TEST_STUDENT_3_ID_WITH_FREE_ATTEMPT = 8L;
 
-  public static final String TEST_STUDENT_ERIKA_EMAIL = "erika-student@test.com";
-  public static final String TEST_STUDENT_ERIKA_PASSWORD = "test1234";
-  public static final long TEST_STUDENT_ERIKA_ID = 11L;
+  public static final long QUIZ_FACADE_TEST_STUDENT_4_ID_RESTRICTED_VIEWING_FOR_TEST_TEACHER = 9L;
 
-  public static final long TEST_STUDENT_CHARLIE_ID = 9L;
+  public static final String QUIZ_FACADE_TEST_STUDENT_5_EMAIL_NO_EXISTING_ATTEMPTS = "erika-student@test.com";
+  public static final String QUIZ_FACADE_TEST_STUDENT_5_PASSWORD_NO_EXISTING_ATTEMPTS = "test1234";
+  public static final long QUIZ_FACADE_TEST_STUDENT_5_ID_NO_EXISTING_ATTEMPTS = 11L;
 
   public static final String TEST_TUTOR_EMAIL = "test-tutor@test.com";
   public static final String TEST_TUTOR_PASSWORD = "test1234";

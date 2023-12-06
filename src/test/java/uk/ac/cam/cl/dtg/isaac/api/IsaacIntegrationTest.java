@@ -9,15 +9,10 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_ADMIN_ID;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_DATE_FORMAT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_LINUX_CONFIG_LOCATION;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EMAIL_SIGNATURE;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_FIVE_MINUTES;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.api.client.util.Maps;
@@ -29,9 +24,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import ma.glasnost.orika.MapperFacade;
@@ -400,27 +393,5 @@ public abstract class IsaacIntegrationTest {
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     expect(request.getCookies()).andReturn(cookies).anyTimes();
     return request;
-  }
-
-  /**
-   * As the integration tests do not currently support MFA login, we cannot use the normal login process and have to
-   * create cookies manually when testing admin accounts.
-   *
-   * @return a Cookie loaded with session information for the test admin user.
-   * @throws JsonProcessingException if the cookie serialisation fails
-   */
-  protected static Cookie createManualCookieForAdmin() throws JsonProcessingException {
-    SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
-    String userId = String.valueOf(TEST_ADMIN_ID);
-    String hmacKey = properties.getProperty(HMAC_SALT);
-    int sessionExpiryTimeInSeconds = NUMBER_SECONDS_IN_FIVE_MINUTES;
-
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.SECOND, sessionExpiryTimeInSeconds);
-    String sessionExpiryDate = sessionDateFormat.format(calendar.getTime());
-
-    Map<String, String> sessionInformation =
-        userAuthenticationManager.prepareSessionInformation(userId, "0", sessionExpiryDate, hmacKey, null);
-    return userAuthenticationManager.createAuthCookie(sessionInformation, sessionExpiryTimeInSeconds);
   }
 }
