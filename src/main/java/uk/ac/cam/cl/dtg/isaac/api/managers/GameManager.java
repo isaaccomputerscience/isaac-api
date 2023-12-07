@@ -988,14 +988,33 @@ public class GameManager {
    * @return a list of questions
    * @throws ContentManagerException - if there is a problem accessing the content repository.
    */
-  public ResultsWrapper<ContentDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
+  public List<ContentDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
       throws ContentManagerException {
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
     fieldsToMap.add(new GitContentManager.BooleanSearchClause(
         TYPE_FIELDNAME, uk.ac.cam.cl.dtg.segue.api.Constants.BooleanOperator.AND, Collections.singletonList(QUESTION_TYPE)));
     fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
-    return this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, limit, null);
+    List<ContentDTO> questionsToReturn = Lists.newArrayList();
+
+    while(questionsToReturn.size() < limit){
+    var results =  this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, limit, null);
+
+    List<ContentDTO> generatedQuestions = results.getResults();
+
+    for (ContentDTO question : generatedQuestions) {
+      // Only keep questions that have not been superseded.
+      if (question instanceof IsaacQuestionPageDTO) {
+        IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO) question;
+        if (qp.getSupersededBy() != null && !qp.getSupersededBy().equals("")) {
+          // This question has been superseded. Don't include it.
+          continue;
+        }
+      }
+      questionsToReturn.add(question);
+    }
+    }
+    return questionsToReturn.subList(0, limit);
   }
 
   /**
