@@ -60,9 +60,9 @@ public final class ITConstants {
 
   public static final long QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID = 9L;
 
-  public static final String QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_EMAIL = "erika-student@test.com";
-  public static final String QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_PASSWORD = "test1234";
-  public static final long QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_ID = 11L;
+  public static final String QUIZ_FACADE_TEST_STUDENT_5_WITH_NO_EXISTING_ATTEMPTS_EMAIL = "erika-student@test.com";
+  public static final String QUIZ_FACADE_TEST_STUDENT_5_WITH_NO_EXISTING_ATTEMPTS_PASSWORD = "test1234";
+  public static final long QUIZ_FACADE_TEST_STUDENT_5_WITH_NO_EXISTING_ATTEMPTS_ID = 11L;
 
   public static final String TEST_TUTOR_EMAIL = "test-tutor@test.com";
   public static final String TEST_TUTOR_PASSWORD = "test1234";
