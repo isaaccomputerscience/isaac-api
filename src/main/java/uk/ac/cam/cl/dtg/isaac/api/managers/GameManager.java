@@ -1003,11 +1003,13 @@ public class GameManager {
     List<ContentDTO> generatedQuestions = results.getResults();
 
     for (ContentDTO question : generatedQuestions) {
-      // Only keep questions that have not been superseded.
+      // Only keep questions that have not been superseded or deprecated.
       if (question instanceof IsaacQuestionPageDTO) {
         IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO) question;
-        if (qp.getSupersededBy() != null && !qp.getSupersededBy().equals("")) {
-          // This question has been superseded. Don't include it.
+        if ((qp.getSupersededBy() != null
+            && !qp.getSupersededBy().equals(""))
+        || (qp.getDeprecated() != null && !qp.getDeprecated().equals(""))) {
+          // This question has been superseded/deprecated. Don't include it.
           continue;
         }
       }
