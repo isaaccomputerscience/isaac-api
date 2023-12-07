@@ -48,16 +48,16 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_SECOND_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_IT_SECONDARY_TEST_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_IT_TEST_GROUP_ID;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_3_ID_WITH_FREE_ATTEMPT;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_4_ID_RESTRICTED_VIEWING_FOR_TEST_TEACHER;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_5_EMAIL_NO_EXISTING_ATTEMPTS;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_5_ID_NO_EXISTING_ATTEMPTS;
-import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_5_PASSWORD_NO_EXISTING_ATTEMPTS;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_ID;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_ID;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_HIDDEN_FROM_TUTORS_QUESTION_FIRST_ID;
@@ -269,8 +269,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-          QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
       HttpServletRequest assignedQuizRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(assignedQuizRequest);
 
@@ -345,8 +345,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-          QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
       HttpServletRequest getFreeAttemptsRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(getFreeAttemptsRequest);
 
@@ -365,8 +365,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-          QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+          QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
       HttpServletRequest getFreeAttemptsRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(getFreeAttemptsRequest);
 
@@ -560,7 +560,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         Response getQuizAssignmentAttemptResponse =
             quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, null,
-                QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS);
+                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -596,7 +596,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         Response getQuizAssignmentAttemptResponse =
             quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_CANCELLED_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS);
+                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -614,7 +614,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         Response getQuizAssignmentAttemptResponse =
             quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS);
+                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
 
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -635,7 +635,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         Response getQuizAssignmentAttemptResponse =
             quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS);
+                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -654,7 +654,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         Response getQuizAssignmentAttemptResponse =
             quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS);
+                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -675,7 +675,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         Response getQuizAssignmentAttemptResponse =
             quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS);
+                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -719,7 +719,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         Response getQuizAssignmentAttemptResponse =
             quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_4_ID_RESTRICTED_VIEWING_FOR_TEST_TEACHER);
+                QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -740,7 +740,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         Response getQuizAssignmentAttemptResponse =
             quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_3_ID_WITH_FREE_ATTEMPT);
+                QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_ID);
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -764,13 +764,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         Response getQuizAssignmentAttemptResponse =
             quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS);
+                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
         QuizAttemptFeedbackDTO responseBody = (QuizAttemptFeedbackDTO) getQuizAssignmentAttemptResponse.getEntity();
-        assertEquals(QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS, responseBody.getUser().getId());
-        assertEquals(QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS, responseBody.getAttempt().getUserId());
+        assertEquals(QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID, responseBody.getUser().getId());
+        assertEquals(QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID, responseBody.getAttempt().getUserId());
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getAttempt().getQuizId());
       }
 
@@ -784,13 +784,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         Response getQuizAssignmentAttemptResponse =
             quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_FEEDBACK_MODE_ID,
-                QUIZ_FACADE_TEST_STUDENT_4_ID_RESTRICTED_VIEWING_FOR_TEST_TEACHER);
+                QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID);
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
         QuizAttemptFeedbackDTO responseBody = (QuizAttemptFeedbackDTO) getQuizAssignmentAttemptResponse.getEntity();
-        assertEquals(QUIZ_FACADE_TEST_STUDENT_4_ID_RESTRICTED_VIEWING_FOR_TEST_TEACHER, responseBody.getUser().getId());
-        assertEquals(QUIZ_FACADE_TEST_STUDENT_4_ID_RESTRICTED_VIEWING_FOR_TEST_TEACHER, responseBody.getAttempt().getUserId());
+        assertEquals(QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID, responseBody.getUser().getId());
+        assertEquals(QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID, responseBody.getAttempt().getUserId());
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getAttempt().getQuizId());
       }
     }
@@ -1815,8 +1815,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest startQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startQuizAttemptRequest);
 
@@ -1836,8 +1836,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest startQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startQuizAttemptRequest);
 
@@ -1857,8 +1857,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest startQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startQuizAttemptRequest);
 
@@ -1878,8 +1878,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest startQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startQuizAttemptRequest);
 
@@ -1900,8 +1900,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-          QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+          QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
       HttpServletRequest startQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(startQuizAttemptRequest);
 
@@ -1911,7 +1911,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         assertEquals(Response.Status.OK.getStatusCode(), startQuizAttemptResponse.getStatus());
 
         QuizAttemptDTO responseBody = (QuizAttemptDTO) startQuizAttemptResponse.getEntity();
-        assertEquals(QUIZ_FACADE_TEST_STUDENT_3_ID_WITH_FREE_ATTEMPT, responseBody.getUserId());
+        assertEquals(QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_ID, responseBody.getUserId());
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
         assertEquals(QUIZ_ASSIGNMENT_ID, responseBody.getQuizAssignmentId());
         assertNotNull(responseBody.getQuiz());
@@ -1945,8 +1945,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_5_EMAIL_NO_EXISTING_ATTEMPTS,
-            QUIZ_FACADE_TEST_STUDENT_5_PASSWORD_NO_EXISTING_ATTEMPTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_PASSWORD);
         HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startFreeQuizAttemptRequest);
 
@@ -1966,8 +1966,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startFreeQuizAttemptRequest);
 
@@ -1993,8 +1993,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_5_EMAIL_NO_EXISTING_ATTEMPTS,
-            QUIZ_FACADE_TEST_STUDENT_5_PASSWORD_NO_EXISTING_ATTEMPTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_PASSWORD);
         HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startFreeQuizAttemptRequest);
 
@@ -2014,8 +2014,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_5_EMAIL_NO_EXISTING_ATTEMPTS,
-            QUIZ_FACADE_TEST_STUDENT_5_PASSWORD_NO_EXISTING_ATTEMPTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_PASSWORD);
         HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startFreeQuizAttemptRequest);
 
@@ -2035,8 +2035,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_5_EMAIL_NO_EXISTING_ATTEMPTS,
-            QUIZ_FACADE_TEST_STUDENT_5_PASSWORD_NO_EXISTING_ATTEMPTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_PASSWORD);
         HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(startFreeQuizAttemptRequest);
 
@@ -2057,8 +2057,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_5_EMAIL_NO_EXISTING_ATTEMPTS,
-          QUIZ_FACADE_TEST_STUDENT_5_PASSWORD_NO_EXISTING_ATTEMPTS);
+      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_EMAIL,
+          QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_PASSWORD);
       HttpServletRequest startFreeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(startFreeQuizAttemptRequest);
 
@@ -2068,7 +2068,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         assertEquals(Response.Status.OK.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
         QuizAttemptDTO responseBody = (QuizAttemptDTO) startFreeQuizAttemptResponse.getEntity();
-        assertEquals(QUIZ_FACADE_TEST_STUDENT_5_ID_NO_EXISTING_ATTEMPTS, responseBody.getUserId());
+        assertEquals(QUIZ_FACADE_TEST_STUDENT_5_NO_EXISTING_ATTEMPTS_ID, responseBody.getUserId());
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
         assertNull(responseBody.getQuizAssignmentId());
         assertNotNull(responseBody.getQuiz());
@@ -2102,8 +2102,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-            QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
         HttpServletRequest getQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptRequest);
 
@@ -2126,8 +2126,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest getQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptRequest);
 
@@ -2147,8 +2147,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest getQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptRequest);
 
@@ -2168,8 +2168,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest getQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptRequest);
 
@@ -2190,8 +2190,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-          QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
       HttpServletRequest getQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(getQuizAttemptRequest);
 
@@ -2201,7 +2201,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAttemptResponse.getStatus());
 
         QuizAttemptDTO responseBody = (QuizAttemptDTO) getQuizAttemptResponse.getEntity();
-        assertEquals(QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS, responseBody.getUserId());
+        assertEquals(QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID, responseBody.getUserId());
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
         assertEquals(QUIZ_ASSIGNMENT_SECOND_ID, responseBody.getQuizAssignmentId());
         assertNotNull(responseBody.getQuiz());
@@ -2235,8 +2235,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-            QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
         HttpServletRequest getQuizAttemptFeedbackRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptFeedbackRequest);
 
@@ -2295,8 +2295,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest getQuizAttemptFeedbackRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptFeedbackRequest);
 
@@ -2316,8 +2316,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest getQuizAttemptFeedbackRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptFeedbackRequest);
 
@@ -2340,8 +2340,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest getQuizAttemptFeedbackRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptFeedbackRequest);
 
@@ -2351,7 +2351,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           assertEquals(Response.Status.OK.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           QuizAttemptDTO responseBody = (QuizAttemptDTO) getQuizAttemptFeedbackResponse.getEntity();
-          assertEquals(QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS, responseBody.getUserId());
+          assertEquals(QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID, responseBody.getUserId());
           assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
           assertEquals(QUIZ_ASSIGNMENT_ID, responseBody.getQuizAssignmentId());
           assertNull(responseBody.getQuiz());
@@ -2366,8 +2366,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-            QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
         HttpServletRequest getQuizAttemptFeedbackRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptFeedbackRequest);
 
@@ -2377,7 +2377,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           assertEquals(Response.Status.OK.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           QuizAttemptDTO responseBody = (QuizAttemptDTO) getQuizAttemptFeedbackResponse.getEntity();
-          assertEquals(QUIZ_FACADE_TEST_STUDENT_3_ID_WITH_FREE_ATTEMPT, responseBody.getUserId());
+          assertEquals(QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_ID, responseBody.getUserId());
           assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
           assertEquals(QUIZ_ASSIGNMENT_EXPIRED_ID, responseBody.getQuizAssignmentId());
           assertNull(responseBody.getQuiz());
@@ -2392,8 +2392,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest getQuizAttemptFeedbackRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptFeedbackRequest);
 
@@ -2403,7 +2403,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           assertEquals(Response.Status.OK.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           QuizAttemptDTO responseBody = (QuizAttemptDTO) getQuizAttemptFeedbackResponse.getEntity();
-          assertEquals(QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS, responseBody.getUserId());
+          assertEquals(QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID, responseBody.getUserId());
           assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
           assertEquals(QUIZ_ASSIGNMENT_FEEDBACK_MODE_ID, responseBody.getQuizAssignmentId());
           assertNotNull(responseBody.getQuiz());
@@ -2418,8 +2418,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-            QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
         HttpServletRequest getQuizAttemptFeedbackRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(getQuizAttemptFeedbackRequest);
 
@@ -2429,7 +2429,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           assertEquals(Response.Status.OK.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           QuizAttemptDTO responseBody = (QuizAttemptDTO) getQuizAttemptFeedbackResponse.getEntity();
-          assertEquals(QUIZ_FACADE_TEST_STUDENT_3_ID_WITH_FREE_ATTEMPT, responseBody.getUserId());
+          assertEquals(QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_ID, responseBody.getUserId());
           assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
           assertNull(responseBody.getQuizAssignmentId());
           assertNotNull(responseBody.getQuiz());
@@ -2465,8 +2465,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-            QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
         HttpServletRequest completeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(completeQuizAttemptRequest);
 
@@ -2523,8 +2523,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-          QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
       HttpServletRequest completeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(completeQuizAttemptRequest);
 
@@ -2544,8 +2544,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-          QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+          QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
       HttpServletRequest completeQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(completeQuizAttemptRequest);
 
@@ -2555,7 +2555,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         assertEquals(Response.Status.OK.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
         QuizAttemptDTO responseBody = (QuizAttemptDTO) completeQuizAttemptResponse.getEntity();
-        assertEquals(QUIZ_FACADE_TEST_STUDENT_3_ID_WITH_FREE_ATTEMPT, responseBody.getUserId());
+        assertEquals(QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_ID, responseBody.getUserId());
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getQuizId());
         assertEquals(QUIZ_ASSIGNMENT_FEEDBACK_MODE_ID, responseBody.getQuizAssignmentId());
         assertNull(responseBody.getQuiz());
@@ -2574,7 +2574,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, null, QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS)) {
+            markIncompleteQuizAttemptRequest, null, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2632,7 +2632,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
             markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_CANCELLED_ID,
-            QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS)) {
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2654,7 +2654,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
             markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_EXPIRED_ID,
-            QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS)) {
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2696,7 +2696,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_SECOND_ID, QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_SECOND_ID, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
 
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2718,7 +2718,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
             markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_NON_EXISTENT_ID,
-            QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS)) {
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
 
           assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
               markIncompleteQuizAttemptResponse.getStatus());
@@ -2737,7 +2737,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
 
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2758,7 +2758,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2778,7 +2778,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2799,7 +2799,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         replay(markIncompleteQuizAttemptRequest);
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS)) {
+            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
 
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
@@ -2824,12 +2824,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
             markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID,
-            QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS)) {
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
 
           assertEquals(Response.Status.OK.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           QuizUserFeedbackDTO responseBody = (QuizUserFeedbackDTO) markIncompleteQuizAttemptResponse.getEntity();
-          assertEquals(QUIZ_FACADE_TEST_STUDENT_2_ID_WITH_ASSIGNMENTS, responseBody.getUser().getId());
+          assertEquals(QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID, responseBody.getUser().getId());
           assertNotNull(responseBody.getFeedback());
         }
       }
@@ -2847,12 +2847,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
             markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID,
-            QUIZ_FACADE_TEST_STUDENT_4_ID_RESTRICTED_VIEWING_FOR_TEST_TEACHER)) {
+            QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID)) {
 
           assertEquals(Response.Status.OK.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           QuizUserFeedbackDTO responseBody = (QuizUserFeedbackDTO) markIncompleteQuizAttemptResponse.getEntity();
-          assertEquals(QUIZ_FACADE_TEST_STUDENT_4_ID_RESTRICTED_VIEWING_FOR_TEST_TEACHER, responseBody.getUser().getId());
+          assertEquals(QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID, responseBody.getUser().getId());
           assertNull(responseBody.getFeedback());
         }
       }
@@ -2866,12 +2866,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
             markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID,
-            QUIZ_FACADE_TEST_STUDENT_4_ID_RESTRICTED_VIEWING_FOR_TEST_TEACHER)) {
+            QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID)) {
 
           assertEquals(Response.Status.OK.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           QuizUserFeedbackDTO responseBody = (QuizUserFeedbackDTO) markIncompleteQuizAttemptResponse.getEntity();
-          assertEquals(QUIZ_FACADE_TEST_STUDENT_4_ID_RESTRICTED_VIEWING_FOR_TEST_TEACHER, responseBody.getUser().getId());
+          assertEquals(QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID, responseBody.getUser().getId());
           assertNotNull(responseBody.getFeedback());
         }
       }
@@ -2948,8 +2948,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest answerQuestionRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(answerQuestionRequest);
 
@@ -2970,8 +2970,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest answerQuestionRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(answerQuestionRequest);
 
@@ -2991,8 +2991,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest answerQuestionRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(answerQuestionRequest);
 
@@ -3012,8 +3012,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest answerQuestionRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(answerQuestionRequest);
 
@@ -3033,8 +3033,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest answerQuestionRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(answerQuestionRequest);
 
@@ -3054,8 +3054,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest answerQuestionRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(answerQuestionRequest);
 
@@ -3093,8 +3093,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-            QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
         HttpServletRequest answerQuestionRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(answerQuestionRequest);
 
@@ -3120,8 +3120,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest cancelQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(cancelQuizAttemptRequest);
 
@@ -3140,8 +3140,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest cancelQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(cancelQuizAttemptRequest);
 
@@ -3161,8 +3161,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-            QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
         HttpServletRequest cancelQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(cancelQuizAttemptRequest);
 
@@ -3200,8 +3200,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-            QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
         HttpServletRequest cancelQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(cancelQuizAttemptRequest);
 
@@ -3222,8 +3222,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-          QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
       HttpServletRequest cancelQuizAttemptRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(cancelQuizAttemptRequest);
 
@@ -3262,8 +3262,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest logQuizSectionViewRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(logQuizSectionViewRequest);
 
@@ -3283,8 +3283,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest logQuizSectionViewRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(logQuizSectionViewRequest);
 
@@ -3304,8 +3304,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-            QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
         HttpServletRequest logQuizSectionViewRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(logQuizSectionViewRequest);
 
@@ -3343,8 +3343,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
           AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
           AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
           MFARequiredButNotConfiguredException {
-        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_EMAIL_WITH_FREE_ATTEMPT,
-            QUIZ_FACADE_TEST_STUDENT_3_PASSWORD_WITH_FREE_ATTEMPT);
+        LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+            QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
         HttpServletRequest logQuizSectionViewRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
         replay(logQuizSectionViewRequest);
 
@@ -3365,8 +3365,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
         AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
         MFARequiredButNotConfiguredException {
-      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_EMAIL_WITH_ASSIGNMENTS,
-          QUIZ_FACADE_TEST_STUDENT_2_PASSWORD_WITH_ASSIGNMENTS);
+      LoginResult studentLogin = loginAs(httpSession, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
       HttpServletRequest logQuizSectionViewRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
       replay(logQuizSectionViewRequest);
 
