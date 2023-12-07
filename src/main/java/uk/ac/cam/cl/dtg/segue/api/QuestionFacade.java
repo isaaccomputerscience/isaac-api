@@ -259,7 +259,6 @@ public class QuestionFacade extends AbstractSegueFacade {
    * REST end point to provide five questions in random located in the question tile of the student dashboard.
    *
    * @param request    - this allows us to check to see if a user is currently logged in.
-   * @param userIdOfInterest - The user id that the query is focused on
    * @param subjects   - a comma separated list of subjects
    * @return a Response containing a gameboard object or containing a SegueErrorResponse.
    */
@@ -268,23 +267,12 @@ public class QuestionFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   public final Response getRandomQuestions(@Context final HttpServletRequest request,
-                                           @PathParam("user_id") final Long userIdOfInterest,
                                            @QueryParam("subjects") final String subjects)
       throws ContentManagerException, NoUserLoggedInException, NoUserException, SegueDatabaseException {
 
     RegisteredUserDTO currentUser = this.userManager.getCurrentRegisteredUser(request);
 
-    RegisteredUserDTO userOfInterest = this.userManager.getUserDTOById(userIdOfInterest);
-    UserSummaryDTO userOfInterestSummaryObject = userManager.convertToUserSummaryObject(userOfInterest);
-
-    var userContexts = userOfInterestSummaryObject.getRegisteredContexts();
-
-    // decide if the user is allowed to view this data. If user isn't viewing their own data, user viewing
-    // must have a valid connection with the user of interest and be at least a teacher.
-    if (!currentUser.getId().equals(userIdOfInterest)
-        && !userAssociationManager.hasTeacherPermission(currentUser, userOfInterestSummaryObject)) {
-      return SegueErrorResponse.getIncorrectRoleResponse();
-    }
+    var userContexts = currentUser.getRegisteredContexts();
 
     List<String> subjectsList = splitCsvStringQueryParam(subjects);
     List<String> stagesList = new ArrayList<>();
