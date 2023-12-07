@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import org.jboss.resteasy.annotations.GZIP;
 import org.slf4j.Logger;
@@ -63,10 +64,12 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.api.managers.GameManager;
 import uk.ac.cam.cl.dtg.isaac.dos.IUserStreaksManager;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuiz;
+import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.TestCase;
 import uk.ac.cam.cl.dtg.isaac.dos.TestQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
 import uk.ac.cam.cl.dtg.isaac.dto.GameFilter;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
@@ -255,10 +258,9 @@ public class QuestionFacade extends AbstractSegueFacade {
   /**
    * REST end point to provide five questions in random located in the question tile of the student dashboard.
    *
-   * @param request    - this allows us to check to see if a user is currently loggedin.
+   * @param request    - this allows us to check to see if a user is currently logged in.
+   * @param userIdOfInterest - The user id that the query is focused on
    * @param subjects   - a comma separated list of subjects
-   * @param stages     - a comma separated list of stages
-   * @param examBoards - a comma separated list of examBoards
    * @return a Response containing a gameboard object or containing a SegueErrorResponse.
    */
   @GET
@@ -266,14 +268,32 @@ public class QuestionFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   public final Response getRandomQuestions(@Context final HttpServletRequest request,
-                                           @QueryParam("subjects") final String subjects,
-                                           @QueryParam("stages") final String stages,
-                                           @QueryParam("examBoards") final String examBoards)
-      throws ContentManagerException {
+                                           @PathParam("user_id") final Long userIdOfInterest,
+                                           @QueryParam("subjects") final String subjects)
+      throws ContentManagerException, NoUserLoggedInException, NoUserException, SegueDatabaseException {
+
+    RegisteredUserDTO currentUser = this.userManager.getCurrentRegisteredUser(request);
+
+    RegisteredUserDTO userOfInterest = this.userManager.getUserDTOById(userIdOfInterest);
+    UserSummaryDTO userOfInterestSummaryObject = userManager.convertToUserSummaryObject(userOfInterest);
+
+    var userContexts = userOfInterestSummaryObject.getRegisteredContexts();
+
+    // decide if the user is allowed to view this data. If user isn't viewing their own data, user viewing
+    // must have a valid connection with the user of interest and be at least a teacher.
+    if (!currentUser.getId().equals(userIdOfInterest)
+        && !userAssociationManager.hasTeacherPermission(currentUser, userOfInterestSummaryObject)) {
+      return SegueErrorResponse.getIncorrectRoleResponse();
+    }
 
     List<String> subjectsList = splitCsvStringQueryParam(subjects);
-    List<String> stagesList = splitCsvStringQueryParam(stages);
-    List<String> examBoardsList = splitCsvStringQueryParam(examBoards);
+    List<String> stagesList = new ArrayList<>();
+    List<String> examBoardsList = new ArrayList<>();
+
+    for (UserContext uc : userContexts) {
+      stagesList.add(uc.getStage().name());
+      examBoardsList.add(uc.getExamBoard().name());
+    }
 
     GameFilter gameFilter = new GameFilter(
         subjectsList,
