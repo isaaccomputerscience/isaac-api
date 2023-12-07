@@ -992,29 +992,32 @@ public class GameManager {
       throws ContentManagerException {
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
     fieldsToMap.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, uk.ac.cam.cl.dtg.segue.api.Constants.BooleanOperator.AND, Collections.singletonList(QUESTION_TYPE)));
+        TYPE_FIELDNAME, uk.ac.cam.cl.dtg.segue.api.Constants.BooleanOperator.AND,
+        Collections.singletonList(QUESTION_TYPE)));
     fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
     List<ContentDTO> questionsToReturn = Lists.newArrayList();
 
-    while(questionsToReturn.size() < limit){
-    var results =  this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, limit, null);
+    while (questionsToReturn.size() < limit) {
+      var results =  this.contentManager.findByFieldNamesRandomOrder(fieldsToMap,
+          0,
+          limit,
+          null);
 
-    List<ContentDTO> generatedQuestions = results.getResults();
+      List<ContentDTO> generatedQuestions = results.getResults();
 
-    for (ContentDTO question : generatedQuestions) {
-      // Only keep questions that have not been superseded or deprecated.
-      if (question instanceof IsaacQuestionPageDTO) {
-        IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO) question;
-        if ((qp.getSupersededBy() != null
-            && !qp.getSupersededBy().equals(""))
-        || (qp.getDeprecated() != null && !qp.getDeprecated().equals(""))) {
-          // This question has been superseded/deprecated. Don't include it.
-          continue;
+      for (ContentDTO question : generatedQuestions) {
+        // Only keep questions that have not been superseded or deprecated.
+        if (question instanceof IsaacQuestionPageDTO) {
+          IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO) question;
+          if ((qp.getSupersededBy() != null && qp.getSupersededBy().length() != 0)
+              || (qp.getDeprecated() != null && qp.getDeprecated())) {
+            // This question has been superseded/deprecated. Don't include it.
+            continue;
+          }
         }
+        questionsToReturn.add(question);
       }
-      questionsToReturn.add(question);
-    }
     }
     return questionsToReturn.subList(0, limit);
   }
