@@ -264,8 +264,8 @@ public class QuestionFacade extends AbstractSegueFacade {
   /**
    * REST end point to provide five questions in random located in the question tile of the student dashboard.
    *
-   * @param request    - this allows us to check to see if a user is currently logged in.
-   * @param subjects   - a comma separated list of subjects
+   * @param request  - this allows us to check to see if a user is currently logged in.
+   * @param subjects - a comma separated list of subjects
    * @return a Response containing a gameboard object or containing a SegueErrorResponse.
    */
   @GET
@@ -274,53 +274,53 @@ public class QuestionFacade extends AbstractSegueFacade {
   @GZIP
   public final Response getRandomQuestions(@Context final HttpServletRequest request,
                                            @QueryParam("subjects") final String subjects) {
-      try {
-        RegisteredUserDTO currentUser = this.userManager.getCurrentRegisteredUser(request);
-        var userPreferences = this.userPreferenceManager.getUserPreference(
-            "DISPLAY_SETTING",
-            "HIDE_NON_AUDIENCE_CONTENT",
-            currentUser.getId());
+    try {
+      RegisteredUserDTO currentUser = this.userManager.getCurrentRegisteredUser(request);
+      var userPreferences = this.userPreferenceManager.getUserPreference(
+          "DISPLAY_SETTING",
+          "HIDE_NON_AUDIENCE_CONTENT",
+          currentUser.getId());
 
-        GameFilter gameFilter = new GameFilter();
+      GameFilter gameFilter = new GameFilter();
 
-        if (userPreferences.getPreferenceValue()) {
-          var userContexts = currentUser.getRegisteredContexts();
+      if (userPreferences.getPreferenceValue()) {
+        var userContexts = currentUser.getRegisteredContexts();
 
-          List<String> subjectsList = splitCsvStringQueryParam(subjects);
-          List<String> stagesList = new ArrayList<>();
-          List<String> examBoardsList = new ArrayList<>();
+        List<String> subjectsList = splitCsvStringQueryParam(subjects);
+        List<String> stagesList = new ArrayList<>();
+        List<String> examBoardsList = new ArrayList<>();
 
-          for (UserContext uc : userContexts) {
-            stagesList.add(uc.getStage().name());
-            examBoardsList.add(uc.getExamBoard().name());
-          }
-
-          gameFilter = new GameFilter(
-              subjectsList,
-              null,
-              null,
-              null,
-              null,
-              null,
-              stagesList,
-              null,
-              examBoardsList);
+        for (UserContext uc : userContexts) {
+          stagesList.add(uc.getStage().name());
+          examBoardsList.add(uc.getExamBoard().name());
         }
 
-        var questions = this.gameManager.generateRandomQuestions(gameFilter, 5);
-
-        // Return the list of random questions as JSON
-        return Response.ok(questions).build();
-      } catch (NoUserLoggedInException e) {
-        return SegueErrorResponse.getNotLoggedInResponse();
-      } catch (ContentManagerException e) {
-        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error creating random questions")
-            .toResponse();
-      } catch (SegueDatabaseException e) {
-        log.error("Unable to receive user preference for user", e);
-        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error while getting user preferences")
-            .toResponse();
+        gameFilter = new GameFilter(
+            subjectsList,
+            null,
+            null,
+            null,
+            null,
+            null,
+            stagesList,
+            null,
+            examBoardsList);
       }
+
+      var questions = this.gameManager.generateRandomQuestions(gameFilter, 5);
+
+      // Return the list of random questions as JSON
+      return Response.ok(questions).build();
+    } catch (NoUserLoggedInException e) {
+      return SegueErrorResponse.getNotLoggedInResponse();
+    } catch (ContentManagerException e) {
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error creating random questions")
+          .toResponse();
+    } catch (SegueDatabaseException e) {
+      log.error("Unable to receive user preference for user", e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error while getting user preferences")
+          .toResponse();
+    }
   }
 
 
