@@ -62,14 +62,17 @@ import org.jboss.resteasy.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.api.managers.GameManager;
+import uk.ac.cam.cl.dtg.isaac.dos.AbstractUserPreferenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.IUserStreaksManager;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuiz;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.TestCase;
 import uk.ac.cam.cl.dtg.isaac.dos.TestQuestion;
+import uk.ac.cam.cl.dtg.isaac.dos.UserPreference;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserSettings;
 import uk.ac.cam.cl.dtg.isaac.dto.GameFilter;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
@@ -116,6 +119,7 @@ public class QuestionFacade extends AbstractSegueFacade {
   private final QuestionManager questionManager;
   private final UserBadgeManager userBadgeManager;
   private final UserAssociationManager userAssociationManager;
+  private final AbstractUserPreferenceManager userPreferenceManager;
   private IMisuseMonitor misuseMonitor;
   private IUserStreaksManager userStreaksManager;
 
@@ -142,7 +146,8 @@ public class QuestionFacade extends AbstractSegueFacade {
                         final UserAccountManager userManager, final QuestionManager questionManager,
                         final ILogManager logManager, final IMisuseMonitor misuseMonitor,
                         final UserBadgeManager userBadgeManager, final IUserStreaksManager userStreaksManager,
-                        final UserAssociationManager userAssociationManager) {
+                        final UserAssociationManager userAssociationManager,
+                        final AbstractUserPreferenceManager userPreferenceManager) {
     super(properties, logManager);
 
     this.questionManager = questionManager;
@@ -155,6 +160,7 @@ public class QuestionFacade extends AbstractSegueFacade {
     this.userStreaksManager = userStreaksManager;
     this.userBadgeManager = userBadgeManager;
     this.userAssociationManager = userAssociationManager;
+    this.userPreferenceManager = userPreferenceManager;
   }
 
   /**
@@ -270,28 +276,36 @@ public class QuestionFacade extends AbstractSegueFacade {
                                            @QueryParam("subjects") final String subjects) {
       try {
         RegisteredUserDTO currentUser = this.userManager.getCurrentRegisteredUser(request);
+        var userPreferences = this.userPreferenceManager.getUserPreference(
+            "DISPLAY_SETTING",
+            "HIDE_NON_AUDIENCE_CONTENT",
+            currentUser.getId());
 
-        var userContexts = currentUser.getRegisteredContexts();
+        GameFilter gameFilter = new GameFilter();
 
-        List<String> subjectsList = splitCsvStringQueryParam(subjects);
-        List<String> stagesList = new ArrayList<>();
-        List<String> examBoardsList = new ArrayList<>();
+        if (userPreferences.getPreferenceValue()) {
+          var userContexts = currentUser.getRegisteredContexts();
 
-        for (UserContext uc : userContexts) {
-          stagesList.add(uc.getStage().name());
-          examBoardsList.add(uc.getExamBoard().name());
+          List<String> subjectsList = splitCsvStringQueryParam(subjects);
+          List<String> stagesList = new ArrayList<>();
+          List<String> examBoardsList = new ArrayList<>();
+
+          for (UserContext uc : userContexts) {
+            stagesList.add(uc.getStage().name());
+            examBoardsList.add(uc.getExamBoard().name());
+          }
+
+          gameFilter = new GameFilter(
+              subjectsList,
+              null,
+              null,
+              null,
+              null,
+              null,
+              stagesList,
+              null,
+              examBoardsList);
         }
-
-        GameFilter gameFilter = new GameFilter(
-            subjectsList,
-            null,
-            null,
-            null,
-            null,
-            null,
-            stagesList,
-            null,
-            examBoardsList);
 
         var questions = this.gameManager.generateRandomQuestions(gameFilter, 5);
 
@@ -302,7 +316,11 @@ public class QuestionFacade extends AbstractSegueFacade {
       } catch (ContentManagerException e) {
         return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error creating random questions")
             .toResponse();
-    }
+      } catch (SegueDatabaseException e) {
+        log.error("Unable to receive user preference for user", e);
+        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error while getting user preferences")
+            .toResponse();
+      }
   }
 
 

@@ -23,7 +23,7 @@ public class QuestionFacadeIT extends IsaacIntegrationTest {
     IUserStreaksManager userStreaksManager = createMock(PgUserStreakManager.class);
     questionFacade =
         new QuestionFacade(properties, contentMapper, contentManager, gameManager, contentIndex, userAccountManager, questionManager,
-            logManager, misuseMonitor, userBadgeManager, userStreaksManager, userAssociationManager);
+            logManager, misuseMonitor, userBadgeManager, userStreaksManager, userAssociationManager, userPreferenceManager);
   }
 
   @Test
