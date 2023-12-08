@@ -1006,6 +1006,10 @@ public class GameManager {
 
       List<ContentDTO> generatedQuestions = results.getResults();
 
+      if (generatedQuestions.size() < limit) {
+        throw new ContentManagerException("Error in generating random questions");
+      }
+
       for (ContentDTO question : generatedQuestions) {
         // Only keep questions that have not been superseded or deprecated.
         if (question instanceof IsaacQuestionPageDTO) {

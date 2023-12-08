@@ -267,37 +267,42 @@ public class QuestionFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   public final Response getRandomQuestions(@Context final HttpServletRequest request,
-                                           @QueryParam("subjects") final String subjects)
-      throws ContentManagerException, NoUserLoggedInException, NoUserException, SegueDatabaseException {
+                                           @QueryParam("subjects") final String subjects) {
+      try {
+        RegisteredUserDTO currentUser = this.userManager.getCurrentRegisteredUser(request);
 
-    RegisteredUserDTO currentUser = this.userManager.getCurrentRegisteredUser(request);
+        var userContexts = currentUser.getRegisteredContexts();
 
-    var userContexts = currentUser.getRegisteredContexts();
+        List<String> subjectsList = splitCsvStringQueryParam(subjects);
+        List<String> stagesList = new ArrayList<>();
+        List<String> examBoardsList = new ArrayList<>();
 
-    List<String> subjectsList = splitCsvStringQueryParam(subjects);
-    List<String> stagesList = new ArrayList<>();
-    List<String> examBoardsList = new ArrayList<>();
+        for (UserContext uc : userContexts) {
+          stagesList.add(uc.getStage().name());
+          examBoardsList.add(uc.getExamBoard().name());
+        }
 
-    for (UserContext uc : userContexts) {
-      stagesList.add(uc.getStage().name());
-      examBoardsList.add(uc.getExamBoard().name());
+        GameFilter gameFilter = new GameFilter(
+            subjectsList,
+            null,
+            null,
+            null,
+            null,
+            null,
+            stagesList,
+            null,
+            examBoardsList);
+
+        var questions = this.gameManager.generateRandomQuestions(gameFilter, 5);
+
+        // Return the list of random questions as JSON
+        return Response.ok(questions).build();
+      } catch (NoUserLoggedInException e) {
+        return SegueErrorResponse.getNotLoggedInResponse();
+      } catch (ContentManagerException e) {
+        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error creating random questions")
+            .toResponse();
     }
-
-    GameFilter gameFilter = new GameFilter(
-        subjectsList,
-        null,
-        null,
-        null,
-        null,
-        null,
-        stagesList,
-        null,
-        examBoardsList);
-
-    var questions = this.gameManager.generateRandomQuestions(gameFilter, 5);
-
-    // Return the list of random questions as JSON
-    return Response.ok(questions).build();
   }
 
 
