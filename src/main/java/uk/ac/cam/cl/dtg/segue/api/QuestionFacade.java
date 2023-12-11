@@ -276,14 +276,14 @@ public class QuestionFacade extends AbstractSegueFacade {
                                            @QueryParam("subjects") final String subjects) {
     try {
       RegisteredUserDTO currentUser = this.userManager.getCurrentRegisteredUser(request);
-      var userPreferences = this.userPreferenceManager.getUserPreference(
+      var filterQuestionsPreference = this.userPreferenceManager.getUserPreference(
           "DISPLAY_SETTING",
           "HIDE_NON_AUDIENCE_CONTENT",
           currentUser.getId());
 
       GameFilter gameFilter = new GameFilter();
 
-      if (userPreferences.getPreferenceValue()) {
+      if (filterQuestionsPreference != null && filterQuestionsPreference.getPreferenceValue()) {
         var userContexts = currentUser.getRegisteredContexts();
 
         List<String> subjectsList = splitCsvStringQueryParam(subjects);
@@ -314,11 +314,11 @@ public class QuestionFacade extends AbstractSegueFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (ContentManagerException e) {
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error creating random questions")
+      return new SegueErrorResponse(Status.NOT_FOUND, "Error creating random questions")
           .toResponse();
     } catch (SegueDatabaseException e) {
       log.error("Unable to receive user preference for user", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error while getting user preferences")
+      return new SegueErrorResponse(Status.NOT_FOUND, "Error while getting user preferences")
           .toResponse();
     }
   }
