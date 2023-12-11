@@ -56,7 +56,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.GroupManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 
 public class IsaacTest {
   protected static Date somePastDate = new Date(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000);
@@ -114,7 +113,7 @@ public class IsaacTest {
   protected Map<Object, MockConfigurer> defaultsMap = new HashMap<>();
 
   @Before
-  public final void initializeIsaacTest() throws SegueDatabaseException, ContentManagerException {
+  public final void initializeIsaacTest() throws SegueDatabaseException {
     initializeIsaacObjects();
     initializeMocks();
   }
@@ -304,10 +303,8 @@ public class IsaacTest {
       Object[] arguments = getCurrentArguments();
       if ((arguments[0] == student) && (arguments[1] == studentGroup || arguments[1] == studentInactiveGroup)) {
         return true;
-      } else if (arguments[0] == secondStudent && arguments[1] == studentGroup) {
-        return true;
       } else {
-        return false;
+        return arguments[0] == secondStudent && arguments[1] == studentGroup;
       }
     });
     expect(groupManager.getGroupMembershipList(student, false)).andStubReturn(
@@ -337,10 +334,6 @@ public class IsaacTest {
 
   protected List<RegisteredUserDTO> anyOf(RegisteredUserDTO... users) {
     return Arrays.asList(users);
-  }
-
-  protected List<RegisteredUserDTO> studentsTeachersOrAdmin() {
-    return anyOf(teacher, secondTeacher, adminUser);
   }
 
   @SafeVarargs
