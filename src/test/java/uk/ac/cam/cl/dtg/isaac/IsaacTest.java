@@ -18,13 +18,13 @@ package uk.ac.cam.cl.dtg.isaac;
 
 import static org.easymock.EasyMock.anyLong;
 import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.getCurrentArguments;
-import static org.powermock.api.easymock.PowerMock.createMock;
-import static org.powermock.api.easymock.PowerMock.createPartialMockForAllMethodsExcept;
-import static org.powermock.api.easymock.PowerMock.replay;
-import static org.powermock.api.easymock.PowerMock.reset;
-import static org.powermock.api.easymock.PowerMock.verify;
+import static org.easymock.EasyMock.partialMockBuilder;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -275,7 +275,7 @@ public class IsaacTest {
             ownAttempt, ownCompletedAttempt, attemptOnNullFeedbackModeQuiz);
   }
 
-  protected void initializeMocks() throws ContentManagerException, SegueDatabaseException {
+  protected void initializeMocks() throws SegueDatabaseException {
     quizManager = createMock(QuizManager.class);
 
     registerDefaultsFor(quizManager, m -> {
@@ -288,7 +288,10 @@ public class IsaacTest {
       expect(m.extractSectionObjects(studentQuiz)).andStubReturn(ImmutableList.of(quizSection1, quizSection2));
     });
 
-    groupManager = createPartialMockForAllMethodsExcept(GroupManager.class, "filterItemsBasedOnMembershipContext");
+    groupManager = partialMockBuilder(GroupManager.class)
+        .addMockedMethods("getGroupById", "isUserInGroup", "getUserMembershipMapForGroup", "getUsersInGroup")
+        .addMockedMethod("getGroupMembershipList", RegisteredUserDTO.class, boolean.class)
+        .createMock();
     expect(groupManager.getGroupById(anyLong())).andStubAnswer(() -> {
       Object[] arguments = getCurrentArguments();
       if (arguments[0] == studentGroup.getId()) {
