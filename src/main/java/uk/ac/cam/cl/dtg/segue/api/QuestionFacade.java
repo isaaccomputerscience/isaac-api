@@ -283,7 +283,7 @@ public class QuestionFacade extends AbstractSegueFacade {
 
       GameFilter gameFilter = new GameFilter();
 
-      if (filterQuestionsPreference != null && filterQuestionsPreference.getPreferenceValue()) {
+      if (filterQuestionsPreference == null || filterQuestionsPreference.getPreferenceValue()) {
         var userContexts = currentUser.getRegisteredContexts();
 
         List<String> subjectsList = splitCsvStringQueryParam(subjects);
