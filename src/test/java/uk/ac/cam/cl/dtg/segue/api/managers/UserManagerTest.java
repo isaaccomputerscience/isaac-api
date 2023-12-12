@@ -22,7 +22,9 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_EXPIRY_SECONDS_FALLBACK;
@@ -177,8 +179,6 @@ public class UserManagerTest {
 
   /**
    * Test that get current user with valid HMAC works correctly.
-   *
-   * @throws Exception
    */
   @Test
   public final void getCurrentUser_IsAuthenticatedWithValidHMAC_userIsReturned() throws Exception {
@@ -221,15 +221,13 @@ public class UserManagerTest {
     RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
 
     // Assert
-    assertTrue(user != null);
+    assertNotNull(user);
 
     verify(dummyQuestionDatabase, request, dummyMapper);
   }
 
   /**
    * Test that requesting authentication with a bad provider behaves as expected.
-   *
-   * @throws Exception
    */
   @Test
   public final void authenticate_badProviderGiven_authenticationProviderException() throws Exception {
@@ -257,7 +255,7 @@ public class UserManagerTest {
    * Test that a valid OAuth provider (Facebook) provides a redirect response.
    *
    * @throws IOException                            - test exception
-   * @throws AuthenticationProviderMappingException
+   * @throws AuthenticationProviderMappingException - when a string cannot be mapped to a provider
    */
   @Test
   public final void authenticate_selectedValidOAuthProvider_providesRedirectResponseForAuthorization()
@@ -295,7 +293,7 @@ public class UserManagerTest {
     // Assert
     verify(dummyQuestionDatabase, request);
 
-    assertTrue(redirectURI.toString().equals(exampleRedirectUrl));
+    assertEquals(exampleRedirectUrl, redirectURI.toString());
   }
 
   /**
@@ -532,11 +530,9 @@ public class UserManagerTest {
    * Verify that a correct HMAC response works correctly.
    * <br>
    * This method is dependent on the crypto algorithm used.
-   *
-   * @throws Exception
    */
   @Test
-  public final void validateUsersSession_checkForValidHMAC_shouldReturnAsCorrect() throws Exception {
+  public final void validateUsersSession_checkForValidHMAC_shouldReturnAsCorrect() {
     UserAuthenticationManager authManager = buildTestAuthenticationManager();
 
     // method param setup for method under test
@@ -566,11 +562,9 @@ public class UserManagerTest {
 
   /**
    * Verify that a user session which has been tampered with is detected as invalid.
-   *
-   * @throws Exception
    */
   @Test
-  public final void validateUsersSession_badUsersSession_shouldReturnAsIncorrect() throws Exception {
+  public final void validateUsersSession_badUsersSession_shouldReturnAsIncorrect() {
     UserAuthenticationManager authManager = buildTestAuthenticationManager();
 
     // method param setup for method under test
@@ -607,11 +601,9 @@ public class UserManagerTest {
 
   /**
    * Verify that an expired user session is detected as invalid.
-   *
-   * @throws Exception
    */
   @Test
-  public final void validateUsersSession_expiredUsersSession_shouldReturnAsIncorrect() throws Exception {
+  public final void validateUsersSession_expiredUsersSession_shouldReturnAsIncorrect() {
     UserAuthenticationManager authManager = buildTestAuthenticationManager();
 
     // method param setup for method under test
@@ -641,11 +633,9 @@ public class UserManagerTest {
 
   /**
    * Verify that a changed session token is detected.
-   *
-   * @throws Exception
    */
   @Test
-  public final void validateUsersSession_incorrectSessionToken_shouldReturnAsIncorrect() throws Exception {
+  public final void validateUsersSession_incorrectSessionToken_shouldReturnAsIncorrect() {
     UserAuthenticationManager authManager = buildTestAuthenticationManager();
 
     // method param setup for method under test
@@ -769,7 +759,7 @@ public class UserManagerTest {
    */
   private UserAccountManager buildTestUserManager(final AuthenticationProvider provider,
                                                   final IFederatedAuthenticator authenticator) {
-    HashMap<AuthenticationProvider, IAuthenticator> providerMap = new HashMap<AuthenticationProvider, IAuthenticator>();
+    HashMap<AuthenticationProvider, IAuthenticator> providerMap = new HashMap<>();
     providerMap.put(provider, authenticator);
     return new UserAccountManager(dummyDatabase, this.dummyQuestionDatabase, this.dummyPropertiesLoader,
         providerMap, this.dummyMapper, this.dummyQueue, this.dummyUserCache, this.dummyLogManager,
@@ -783,7 +773,7 @@ public class UserManagerTest {
 
   private UserAuthenticationManager buildTestAuthenticationManager(AuthenticationProvider provider,
                                                                    IAuthenticator authenticator) {
-    HashMap<AuthenticationProvider, IAuthenticator> providerMap = new HashMap<AuthenticationProvider, IAuthenticator>();
+    HashMap<AuthenticationProvider, IAuthenticator> providerMap = new HashMap<>();
     providerMap.put(provider, authenticator);
     providerMap.put(AuthenticationProvider.SEGUE, dummyLocalAuth);
     return new UserAuthenticationManager(dummyDatabase, dummyPropertiesLoader, providerMap, dummyQueue);

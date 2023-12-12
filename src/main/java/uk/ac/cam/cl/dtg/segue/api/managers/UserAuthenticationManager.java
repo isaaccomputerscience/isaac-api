@@ -126,7 +126,7 @@ public class UserAuthenticationManager {
    * @param database            - an IUserDataManager that will support persistence.
    * @param properties          - A property loader
    * @param providersToRegister - A map of known authentication providers.
-   * @param emailQueue
+   * @param emailQueue          - A communications queue for managing emails
    */
   @Inject
   public UserAuthenticationManager(final IUserDataManager database,
