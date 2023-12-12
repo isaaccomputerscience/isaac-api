@@ -50,7 +50,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
-import org.powermock.reflect.Whitebox;
 import uk.ac.cam.cl.dtg.isaac.dos.AbstractUserPreferenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.users.AnonymousUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
@@ -558,7 +557,7 @@ public class UserManagerTest {
     replay(dummyQuestionDatabase);
 
     // Act
-    boolean valid = Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", sessionInformation, sessionToken);
+    boolean valid = authManager.isValidUsersSession(sessionInformation, sessionToken);
 
     // Assert
     verify(dummyQuestionDatabase, dummySession, request);
@@ -599,8 +598,7 @@ public class UserManagerTest {
     replay(dummyQuestionDatabase);
 
     // Act
-    boolean valid =
-        Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", tamperedSessionInformation, sessionToken);
+    boolean valid = authManager.isValidUsersSession(tamperedSessionInformation, sessionToken);
 
     // Assert
     verify(dummyQuestionDatabase, dummySession, request);
@@ -634,8 +632,7 @@ public class UserManagerTest {
     replay(dummyQuestionDatabase);
 
     // Act
-    boolean valid =
-        Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", validSessionInformation, sessionToken);
+    boolean valid = authManager.isValidUsersSession(validSessionInformation, sessionToken);
 
     // Assert
     verify(dummyQuestionDatabase, dummySession, request);
@@ -670,9 +667,7 @@ public class UserManagerTest {
     replay(dummyQuestionDatabase);
 
     // Act
-    boolean valid =
-        Whitebox.<Boolean>invokeMethod(authManager, "isValidUsersSession", sessionInformationWithTokenMismatch,
-            correctSessionToken);
+    boolean valid = authManager.isValidUsersSession(sessionInformationWithTokenMismatch, correctSessionToken);
 
     // Assert
     verify(dummyQuestionDatabase, dummySession, request);
@@ -795,10 +790,9 @@ public class UserManagerTest {
   }
 
   private Map<String, String> getSessionInformationAsAMap(UserAuthenticationManager userAuthManager, String userId,
-                                                          String dateExpires, Integer sessionToken)
-      throws Exception {
-    String validHMAC = Whitebox.<String>invokeMethod(userAuthManager, "calculateSessionHMAC", dummyHMACSalt, userId,
-        dateExpires, sessionToken.toString(), null);
+                                                          String dateExpires, Integer sessionToken) {
+    String validHMAC =
+        userAuthManager.calculateSessionHMAC(dummyHMACSalt, userId, dateExpires, sessionToken.toString(), null);
     return ImmutableMap.of(Constants.SESSION_USER_ID, userId, Constants.DATE_EXPIRES, dateExpires, Constants.HMAC,
         validHMAC, Constants.SESSION_TOKEN, sessionToken.toString());
   }
