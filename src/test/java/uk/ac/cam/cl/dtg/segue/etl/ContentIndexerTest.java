@@ -24,7 +24,8 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Maps;
@@ -38,9 +39,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
-import org.junit.Before;
-import org.junit.Test;
-import org.powermock.reflect.Whitebox;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
@@ -65,7 +65,7 @@ public class ContentIndexerTest {
    *
    * @throws Exception - test exception
    */
-  @Before
+  @BeforeEach
   public final void setUp() throws Exception {
     this.database = createMock(GitDb.class);
     this.searchProvider = createMock(ElasticSearchIndexer.class);
@@ -77,8 +77,6 @@ public class ContentIndexerTest {
   /**
    * Test that the buildSearchIndex sends all of the various different segue data
    * to the searchProvider and we haven't forgotten anything.
-   *
-   * @throws Exception
    */
   @Test
   public void buildSearchIndexes_sendContentToSearchProvider_checkSearchProviderIsSentAllImportantObject()
@@ -102,8 +100,8 @@ public class ContentIndexerTest {
     Map<String, String> someUnitsMapRaw2 = ImmutableMap.of("cleanKey", "km", "unit", "km");
 
     Date someCreatedDate = new Date();
-    Map versionMeta = ImmutableMap.of("version", INITIAL_VERSION, "created", someCreatedDate.toString());
-    Map tagsMeta = ImmutableMap.of("tags", someTagsList);
+    Map<String, String> versionMeta = Map.of("version", INITIAL_VERSION, "created", someCreatedDate.toString());
+    Map<String, Set<String>> tagsMeta = Map.of("tags", someTagsList);
 
     Map<Content, List<String>> someContentProblemsMap = Maps.newHashMap();
 
@@ -165,9 +163,8 @@ public class ContentIndexerTest {
         searchProvider, contentMapper);
 
     // Method under test
-    Whitebox.invokeMethod(contentIndexer,
-        "buildElasticSearchIndex",
-        INITIAL_VERSION, contents, someTagsList, someUnitsMap, publishedUnitsMap, someContentProblemsMap);
+    contentIndexer.buildElasticSearchIndex(INITIAL_VERSION, contents, someTagsList, someUnitsMap, publishedUnitsMap,
+        someContentProblemsMap);
 
     verify(searchProvider, contentMapper, objectMapper);
   }
@@ -175,22 +172,18 @@ public class ContentIndexerTest {
   /**
    * Test the flattenContentObjects method and ensure the expected output is
    * generated.
-   *
-   * @throws Exception
    */
   @Test
-  public void flattenContentObjects_flattenMultiTierObject_checkCorrectObjectReturned()
-      throws Exception {
+  public void flattenContentObjects_flattenMultiTierObject_checkCorrectObjectReturned() {
     final int numChildLevels = 5;
     final int numNodes = numChildLevels + 1;
 
     Set<Content> elements = new HashSet<>();
     Content rootNode = createContentHierarchy(numChildLevels, elements);
 
-    Set<Content> contents = Whitebox.invokeMethod(
-        defaultContentIndexer, "flattenContentObjects", rootNode);
+    Set<Content> contents = defaultContentIndexer.flattenContentObjects(rootNode);
 
-    assertTrue(contents.size() == numNodes);
+    assertEquals(numNodes, contents.size());
 
     for (Content c : contents) {
       boolean containsElement = elements.contains(c);
@@ -200,12 +193,12 @@ public class ContentIndexerTest {
       }
     }
 
-    assertTrue(elements.size() == 0);
+    assertEquals(0, elements.size());
   }
 
   private Content createContentHierarchy(final int numLevels,
                                          final Set<Content> flatSet) {
-    List<ContentBase> children = new LinkedList<ContentBase>();
+    List<ContentBase> children = new LinkedList<>();
 
     if (numLevels > 0) {
       Content child = createContentHierarchy(numLevels - 1, flatSet);
@@ -244,7 +237,7 @@ public class ContentIndexerTest {
       Content content) {
     reset(database, searchProvider);
 
-    Map<String, Content> contents = new TreeMap<String, Content>();
+    Map<String, Content> contents = new TreeMap<>();
     contents.put(INITIAL_VERSION, content);
 
     return new GitContentManager(database, searchProvider, contentMapper);
