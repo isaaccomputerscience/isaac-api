@@ -283,7 +283,7 @@ public class QuestionFacade extends AbstractSegueFacade {
 
       GameFilter gameFilter = new GameFilter();
 
-      if (filterQuestionsPreference == null || filterQuestionsPreference.getPreferenceValue()) {
+      if (filterQuestionsPreference != null && filterQuestionsPreference.getPreferenceValue()) {
         var userContexts = currentUser.getRegisteredContexts();
 
         List<String> subjectsList = splitCsvStringQueryParam(subjects);
@@ -317,10 +317,10 @@ public class QuestionFacade extends AbstractSegueFacade {
       return new SegueErrorResponse(Status.NOT_FOUND, "Error creating random questions")
           .toResponse();
     } catch (SegueDatabaseException e) {
-        SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-            "Error while getting user preferences", e);
-        log.error(error.getErrorMessage(), e);
-        return error.toResponse();
+      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
+          "Error while getting user preferences", e);
+      log.error(error.getErrorMessage(), e);
+      return error.toResponse();
     }
   }
 
