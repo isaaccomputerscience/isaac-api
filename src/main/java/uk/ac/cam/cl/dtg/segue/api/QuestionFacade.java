@@ -317,9 +317,10 @@ public class QuestionFacade extends AbstractSegueFacade {
       return new SegueErrorResponse(Status.NOT_FOUND, "Error creating random questions")
           .toResponse();
     } catch (SegueDatabaseException e) {
-      log.error("Unable to receive user preference for user", e);
-      return new SegueErrorResponse(Status.NOT_FOUND, "Error while getting user preferences")
-          .toResponse();
+        SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
+            "Error while getting user preferences", e);
+        log.error(error.getErrorMessage(), e);
+        return error.toResponse();
     }
   }
 
