@@ -45,7 +45,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
-import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.database.GitDb;
 
 /**
@@ -226,20 +225,4 @@ public class ContentIndexerTest {
         "", new LinkedList<>(), false, false, new HashSet<>(), 1);
   }
 
-  /**
-   * Helper method to construct the tests for the validateReferentialIntegrity
-   * method.
-   *
-   * @param content - Content object to be tested
-   * @return An instance of GitContentManager
-   */
-  private GitContentManager validateReferentialIntegrity_setUpTest(
-      Content content) {
-    reset(database, searchProvider);
-
-    Map<String, Content> contents = new TreeMap<>();
-    contents.put(INITIAL_VERSION, content);
-
-    return new GitContentManager(database, searchProvider, contentMapper);
-  }
 }
