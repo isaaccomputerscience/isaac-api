@@ -97,10 +97,10 @@ public class QuestionManager {
    * Create a default Question manager object.
    *
    * @param mapper                     - an auto mapper to allow us to convert to and from QuestionValidationResponseDOs
-   *                                         and DTOs.
+   *                                   and DTOs.
    * @param questionPersistenceManager - for question attempt persistence.
    * @param userPreferenceManager      - An instance of the Abstract User preference manager to check for user
-   *                                         preferences
+   *                                   preferences
    */
   @Inject
   public QuestionManager(final ContentMapper mapper, final IQuestionAttemptManager questionPersistenceManager,
@@ -216,7 +216,7 @@ public class QuestionManager {
    * Note: It will not do anything to related content
    *
    * @param page                  - to augment - this object may be mutated as a result of this method. i.e. BestAttempt
-   *                                    field set on question DTOs.
+   *                              field set on question DTOs.
    * @param userId                - to allow us to provide a per-user experience of question configuration (random seed)
    * @param usersQuestionAttempts - as a map of QuestionPageId to Map of QuestionId to QuestionValidationResponseDO
    * @return augmented page - the return result is by convenience as the page provided as a parameter will be mutated.
@@ -238,7 +238,7 @@ public class QuestionManager {
    * Modify a question objects in a page such that it contains bestAttempt information if we can provide it.
    *
    * @param page                  - the page this object may be mutated as a result of this method. i.e. BestAttempt
-   *                                    field set on question DTOs.
+   *                              field set on question DTOs.
    * @param questionsToAugment    - The flattened list of questions which should be augmented.
    * @param usersQuestionAttempts - as a map of QuestionPageId to Map of QuestionId to QuestionValidationResponseDO
    * @return augmented page - the return result is by convenience as the page provided as a parameter will be mutated.
@@ -505,7 +505,7 @@ public class QuestionManager {
    *
    * @param toExtract - The contentDTO which may have question objects as children.
    * @param result    - The initially empty List which will be mutated to contain references to all of the question
-   *                        objects.
+   *                  objects.
    * @return The modified result array.
    */
   private static List<QuestionDTO> extractQuestionObjectsRecursively(final ContentDTO toExtract,
@@ -630,7 +630,7 @@ public class QuestionManager {
     return answerFromClientDTO;
   }
 
-  public GameFilter CreateGameFilterForRandomQuestions(final RegisteredUserDTO currentUser, final String subjects) {
+  public GameFilter createGameFilterForRandomQuestions(final RegisteredUserDTO currentUser, final String subjects) {
     GameFilter gameFilter = new GameFilter();
 
     UserPreference filterQuestionsPreference = null;

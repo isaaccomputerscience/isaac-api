@@ -263,7 +263,7 @@ public class QuestionFacade extends AbstractSegueFacade {
       return SegueErrorResponse.getNotLoggedInResponse();
     }
 
-    var filter = this.questionManager.CreateGameFilterForRandomQuestions(currentUser, subjects);
+    var filter = this.questionManager.createGameFilterForRandomQuestions(currentUser, subjects);
 
     List<QuestionDTO> questions;
     questions = this.gameManager.generateRandomQuestions(filter, 5);
