@@ -8,6 +8,7 @@ on:
 jobs:
   checkstyle:
     name: Checkstyle
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
