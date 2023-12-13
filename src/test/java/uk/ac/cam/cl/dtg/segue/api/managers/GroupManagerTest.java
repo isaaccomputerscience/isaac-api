@@ -156,7 +156,7 @@ public class GroupManagerTest {
                 somePastDate, "", false),
             new RegisteredUserDTO("A", null, "aNONE@test.com", EmailVerificationStatus.VERIFIED, somePastDate,
                 Gender.FEMALE, somePastDate, "", false))
-        .peek(user -> user.setId((long) ("" + user.getGivenName() + user.getFamilyName()).hashCode()))
+        .peek(user -> user.setId((long) (user.getGivenName() + user.getFamilyName()).hashCode()))
         .collect(Collectors.toList());
 
     List<RegisteredUserDTO> shuffledUsers = new ArrayList<>(users);
