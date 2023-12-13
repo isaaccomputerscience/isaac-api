@@ -25,7 +25,7 @@ import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_MILLISECONDS_IN_SECOND;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_ONE_WEEK;
@@ -123,11 +123,12 @@ public class GroupManagerTest {
 
       // check that the result of the method is whatever comes out of the database
       UserGroupDTO createUserGroup = this.groupManager.createUserGroup(someGroupName, someGroupOwner);
+      assertEquals(mappedGroup, createUserGroup);
 
       // check that what goes into the database is what we passed it.
       assertEquals(someGroupOwner.getId(), capturedGroup.getValue().getOwnerId());
       assertEquals(someGroupName, capturedGroup.getValue().getGroupName());
-      assertTrue(capturedGroup.getValue().getCreated() instanceof Date);
+      assertInstanceOf(Date.class, capturedGroup.getValue().getCreated());
 
     } catch (SegueDatabaseException e) {
       fail("No exception expected");

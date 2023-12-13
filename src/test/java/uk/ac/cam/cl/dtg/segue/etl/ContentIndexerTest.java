@@ -27,11 +27,10 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.util.Maps;
-import com.google.api.client.util.Sets;
-import com.google.common.collect.ImmutableMap;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +45,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.database.GitDb;
+import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 
 /**
  * Test class for the GitContentManager class.
@@ -76,10 +76,13 @@ public class ContentIndexerTest {
   /**
    * Test that the buildSearchIndex sends all of the various different segue data
    * to the searchProvider and we haven't forgotten anything.
+   *
+   * @throws JsonProcessingException if an error occurs during object mapping
+   * @throws SegueSearchException if an error occurs during content indexing
    */
   @Test
   public void buildSearchIndexes_sendContentToSearchProvider_checkSearchProviderIsSentAllImportantObject()
-      throws Exception {
+      throws JsonProcessingException, SegueSearchException {
     reset(database, searchProvider);
     String uniqueObjectId = UUID.randomUUID().toString();
     String uniqueObjectHash = UUID.randomUUID().toString();
@@ -89,20 +92,20 @@ public class ContentIndexerTest {
     content.setId(uniqueObjectId);
     contents.put(uniqueObjectId, content);
 
-    Set<String> someTagsList = Sets.newHashSet();
+    Set<String> someTagsList = new HashSet<>();
 
-    Map<String, String> someUnitsMap = ImmutableMap.of("N", "N", "km", "km");
-    Map<String, String> publishedUnitsMap = ImmutableMap.of("N", "N", "km", "km");
+    Map<String, String> someUnitsMap = Map.of("N", "N", "km", "km");
+    Map<String, String> publishedUnitsMap = Map.of("N", "N", "km", "km");
 
     // This is what is sent to the search provider so needs to be mocked
-    Map<String, String> someUnitsMapRaw = ImmutableMap.of("cleanKey", "N", "unit", "N");
-    Map<String, String> someUnitsMapRaw2 = ImmutableMap.of("cleanKey", "km", "unit", "km");
+    Map<String, String> someUnitsMapRaw = Map.of("cleanKey", "N", "unit", "N");
+    Map<String, String> someUnitsMapRaw2 = Map.of("cleanKey", "km", "unit", "km");
 
     Date someCreatedDate = new Date();
     Map<String, String> versionMeta = Map.of("version", INITIAL_VERSION, "created", someCreatedDate.toString());
     Map<String, Set<String>> tagsMeta = Map.of("tags", someTagsList);
 
-    Map<Content, List<String>> someContentProblemsMap = Maps.newHashMap();
+    Map<Content, List<String>> someContentProblemsMap = new HashMap<>();
 
     // assume in this case that there are no pre-existing indexes for this version
     for (Constants.ContentIndextype contentIndexType : Constants.ContentIndextype.values()) {

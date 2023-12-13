@@ -24,6 +24,7 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -75,6 +76,7 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.CrossSiteRequestForgeryException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.users.IAnonymousUserDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
@@ -179,9 +181,14 @@ public class UserManagerTest {
 
   /**
    * Test that get current user with valid HMAC works correctly.
+   *
+   * @throws JsonProcessingException if an error occurs during object mapping
+   * @throws SegueDatabaseException if an error occurs while accessing the database
+   * @throws NoUserLoggedInException if a user cannot be retrieved from the request
    */
   @Test
-  public final void getCurrentUser_IsAuthenticatedWithValidHMAC_userIsReturned() throws Exception {
+  public final void getCurrentUser_IsAuthenticatedWithValidHMAC_userIsReturned()
+      throws JsonProcessingException, SegueDatabaseException, NoUserLoggedInException {
     UserAccountManager userManager = buildTestUserManager();
     UserAuthenticationManager authManager = buildTestAuthenticationManager();
     HttpServletRequest request = createMock(HttpServletRequest.class);
@@ -228,9 +235,11 @@ public class UserManagerTest {
 
   /**
    * Test that requesting authentication with a bad provider behaves as expected.
+   *
+   * @throws IOException if data cannot be retrieved from the auth provider
    */
   @Test
-  public final void authenticate_badProviderGiven_authenticationProviderException() throws Exception {
+  public final void authenticate_badProviderGiven_authenticationProviderException() throws IOException {
     UserAccountManager userManager = buildTestUserManager();
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
@@ -437,7 +446,7 @@ public class UserManagerTest {
 
     // Assert
     verify(dummySession, request, dummyAuth, dummyQuestionDatabase);
-    assertTrue(u instanceof RegisteredUserDTO);
+    assertInstanceOf(RegisteredUserDTO.class, u);
   }
 
   /**
