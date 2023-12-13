@@ -23,7 +23,7 @@ public class QuestionFacadeIT extends IsaacIntegrationTest {
     IUserStreaksManager userStreaksManager = createMock(PgUserStreakManager.class);
     questionFacade =
         new QuestionFacade(properties, contentMapper, contentManager, gameManager, contentIndex, userAccountManager, questionManager,
-            logManager, misuseMonitor, userBadgeManager, userStreaksManager, userAssociationManager, userPreferenceManager);
+            logManager, misuseMonitor, userBadgeManager, userStreaksManager, userAssociationManager);
   }
 
   @Test
@@ -36,4 +36,15 @@ public class QuestionFacadeIT extends IsaacIntegrationTest {
       assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
     }
   }
+
+  @Test
+  public void getRandomQuestionsTest() {
+    HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
+    String subjects = new String();
+
+    try (Response response = questionFacade.getRandomQuestions(mockRequest, subjects)) {
+      assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+  }
+
 }

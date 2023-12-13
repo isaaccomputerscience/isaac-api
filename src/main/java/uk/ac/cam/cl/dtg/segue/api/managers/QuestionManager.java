@@ -29,6 +29,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -39,16 +40,20 @@ import org.apache.commons.lang3.Validate;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.dos.AbstractUserPreferenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.LightweightQuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.TestCase;
 import uk.ac.cam.cl.dtg.isaac.dos.TestQuestion;
+import uk.ac.cam.cl.dtg.isaac.dos.UserPreference;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Choice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ChoiceQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.DTOMapping;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
+import uk.ac.cam.cl.dtg.isaac.dto.GameFilter;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacItemQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
@@ -86,6 +91,7 @@ public class QuestionManager {
 
   private final ContentMapper mapper;
   private final IQuestionAttemptManager questionAttemptPersistenceManager;
+  private final AbstractUserPreferenceManager userPreferenceManager;
 
   /**
    * Create a default Question manager object.
@@ -93,11 +99,15 @@ public class QuestionManager {
    * @param mapper                     - an auto mapper to allow us to convert to and from QuestionValidationResponseDOs
    *                                         and DTOs.
    * @param questionPersistenceManager - for question attempt persistence.
+   * @param userPreferenceManager      - An instance of the Abstract User preference manager to check for user
+   *                                         preferences
    */
   @Inject
-  public QuestionManager(final ContentMapper mapper, final IQuestionAttemptManager questionPersistenceManager) {
+  public QuestionManager(final ContentMapper mapper, final IQuestionAttemptManager questionPersistenceManager,
+                         final AbstractUserPreferenceManager userPreferenceManager) {
     this.mapper = mapper;
     this.questionAttemptPersistenceManager = questionPersistenceManager;
+    this.userPreferenceManager = userPreferenceManager;
   }
 
   /**
@@ -618,5 +628,54 @@ public class QuestionManager {
       throw new ErrorResponseWrapper(error);
     }
     return answerFromClientDTO;
+  }
+
+  public GameFilter CreateGameFilterForRandomQuestions(final RegisteredUserDTO currentUser, final String subjects) {
+    GameFilter gameFilter = new GameFilter();
+
+    UserPreference filterQuestionsPreference = null;
+    try {
+      filterQuestionsPreference = this.userPreferenceManager.getUserPreference(
+          "DISPLAY_SETTING",
+          "HIDE_NON_AUDIENCE_CONTENT",
+          currentUser.getId());
+    } catch (SegueDatabaseException e) {
+      SegueErrorResponse error = new SegueErrorResponse(Response.Status.INTERNAL_SERVER_ERROR,
+          "Error while getting user preferences", e);
+      log.error(error.getErrorMessage(), e);
+    }
+
+    if (filterQuestionsPreference != null && filterQuestionsPreference.getPreferenceValue()) {
+      var userContexts = currentUser.getRegisteredContexts();
+
+      List<String> subjectsList = splitCsvStringQueryParam(subjects);
+      List<String> stagesList = new ArrayList<>();
+      List<String> examBoardsList = new ArrayList<>();
+
+      for (UserContext uc : userContexts) {
+        stagesList.add(uc.getStage().name());
+        examBoardsList.add(uc.getExamBoard().name());
+      }
+
+      gameFilter = new GameFilter(
+          subjectsList,
+          null,
+          null,
+          null,
+          null,
+          null,
+          stagesList,
+          null,
+          examBoardsList);
+    }
+    return gameFilter;
+  }
+
+  private static List<String> splitCsvStringQueryParam(final String queryParamCsv) {
+    if (null != queryParamCsv && !queryParamCsv.isEmpty()) {
+      return Arrays.asList(queryParamCsv.split(","));
+    } else {
+      return new ArrayList();
+    }
   }
 }

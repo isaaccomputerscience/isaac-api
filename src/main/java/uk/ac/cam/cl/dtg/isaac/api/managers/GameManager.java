@@ -145,7 +145,7 @@ public class GameManager {
    * @param gameFilter Object representing the group of filters to use
    * @param boardOwner The user that should be marked as the creator of the gameBoard.
    * @return a gameboard if possible that satisfies the conditions provided by the parameters. Will return null if no
-   *     questions can be provided.
+   * questions can be provided.
    * @throws NoWildcardException     - when we are unable to provide you with a wildcard object.
    * @throws SegueDatabaseException  - if there is an error contacting the database.
    * @throws ContentManagerException - if there is an error retrieving the content requested.
@@ -229,7 +229,7 @@ public class GameManager {
    * @param gameboardId - to look up.
    * @return the gameboard or null.
    * @throws SegueDatabaseException - if there is a problem retrieving the gameboard in the database or updating the
-   *                                      users gameboard link table.
+   *                                users gameboard link table.
    */
   public final GameboardDTO getGameboard(final String gameboardId) throws SegueDatabaseException {
     if (null == gameboardId || gameboardId.isEmpty()) {
@@ -247,7 +247,7 @@ public class GameManager {
    * @param userQuestionAttempts - so that we can augment the gameboard.
    * @return the gameboard or null.
    * @throws SegueDatabaseException  - if there is a problem retrieving the gameboard in the database or updating the
-   *                                       users gameboard link table.
+   *                                 users gameboard link table.
    * @throws ContentManagerException - if there is an error retrieving the content requested.
    */
   public final GameboardDTO getGameboard(
@@ -268,7 +268,7 @@ public class GameManager {
    * @param gameboardIds - to look up.
    * @return the gameboards or null.
    * @throws SegueDatabaseException - if there is a problem retrieving the gameboards in the database or updating the
-   *                                      users gameboards link table.
+   *                                users gameboards link table.
    */
   public final List<GameboardDTO> getGameboards(final List<String> gameboardIds) throws SegueDatabaseException {
     return this.gameboardPersistenceManager.getGameboardsByIds(gameboardIds);
@@ -981,46 +981,47 @@ public class GameManager {
   }
 
   /**
-   * This generates a set of five question in random.
+   * This generates a set of question in random.
    *
    * @param gameFilter - to enable search
    * @param limit      - to provide a limit of questions
    * @return a list of questions
    * @throws ContentManagerException - if there is a problem accessing the content repository.
    */
-  public List<ContentDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
-      throws ContentManagerException {
+  public List<QuestionDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit) {
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
-    fieldsToMap.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, uk.ac.cam.cl.dtg.segue.api.Constants.BooleanOperator.AND,
+    fieldsToMap.add(new GitContentManager.BooleanSearchClause(TYPE_FIELDNAME, BooleanOperator.AND,
         Collections.singletonList(QUESTION_TYPE)));
     fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
-    List<ContentDTO> questionsToReturn = Lists.newArrayList();
+    List<QuestionDTO> questionsToReturn = Lists.newArrayList();
 
     while (questionsToReturn.size() < limit) {
-      var results =  this.contentManager.findByFieldNamesRandomOrder(fieldsToMap,
-          0,
-          limit,
-          null);
+      ResultsWrapper<ContentDTO> results;
+
+      try {
+        results = this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, limit);
+      } catch (ContentManagerException e) {
+        return new ArrayList();
+      }
 
       List<ContentDTO> generatedQuestions = results.getResults();
-
-      if (generatedQuestions.size() < limit) {
-        throw new ContentManagerException("Error in generating random questions");
-      }
 
       for (ContentDTO question : generatedQuestions) {
         // Only keep questions that have not been superseded or deprecated.
         if (question instanceof IsaacQuestionPageDTO) {
           IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO) question;
-          if ((qp.getSupersededBy() != null && qp.getSupersededBy().length() != 0)
+          if ((qp.getSupersededBy() != null && qp.getSupersededBy().isEmpty())
               || (qp.getDeprecated() != null && qp.getDeprecated())) {
             // This question has been superseded/deprecated. Don't include it.
             continue;
           }
         }
-        questionsToReturn.add(question);
+        questionsToReturn.add((QuestionDTO) question);
+      }
+
+      if (generatedQuestions.size() < limit) {
+        break;
       }
     }
     return questionsToReturn.subList(0, limit);
@@ -1411,7 +1412,6 @@ public class GameManager {
 
     return gameboardDTO;
   }
-
 
 
 }

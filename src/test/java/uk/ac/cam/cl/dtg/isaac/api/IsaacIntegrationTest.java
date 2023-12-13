@@ -262,7 +262,7 @@ public abstract class IsaacIntegrationTest {
 
     contentMapper = new ContentMapper(new Reflections("uk.ac.cam.cl.dtg"));
     PgQuestionAttempts pgQuestionAttempts = new PgQuestionAttempts(postgresSqlDb, contentMapper);
-    questionManager = new QuestionManager(contentMapper, pgQuestionAttempts);
+    questionManager = new QuestionManager(contentMapper, pgQuestionAttempts, userPreferenceManager);
 
     mapperFacade = contentMapper.getAutoMapper();
 

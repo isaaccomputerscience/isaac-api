@@ -16,24 +16,14 @@
 
 package uk.ac.cam.cl.dtg.segue.api;
 
-import static uk.ac.cam.cl.dtg.isaac.api.Constants.HIDE_FROM_FILTER_TAG;
-import static uk.ac.cam.cl.dtg.isaac.api.Constants.QUESTION_TYPE;
-import static uk.ac.cam.cl.dtg.isaac.api.Constants.RELATED_CONTENT_FIELDNAME;
+
 import static uk.ac.cam.cl.dtg.segue.api.Constants.CONTENT_INDEX;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.DEPRECATED_FIELDNAME;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.DIFFICULTY_FIELDNAME;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.EXAM_BOARD_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.LEVEL_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.STAGE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.TAGS_FIELDNAME;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager.extractPageIdFromQuestionId;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
-import com.google.api.client.util.Lists;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,32 +41,22 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import org.jboss.resteasy.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.api.managers.GameManager;
-import uk.ac.cam.cl.dtg.isaac.dos.AbstractUserPreferenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.IUserStreaksManager;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuiz;
-import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.TestCase;
 import uk.ac.cam.cl.dtg.isaac.dos.TestQuestion;
-import uk.ac.cam.cl.dtg.isaac.dos.UserPreference;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
-import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
-import uk.ac.cam.cl.dtg.isaac.dos.users.UserSettings;
-import uk.ac.cam.cl.dtg.isaac.dto.GameFilter;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
@@ -98,7 +78,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
-import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 import uk.ac.cam.cl.dtg.util.RequestIpExtractor;
 
@@ -119,7 +98,6 @@ public class QuestionFacade extends AbstractSegueFacade {
   private final QuestionManager questionManager;
   private final UserBadgeManager userBadgeManager;
   private final UserAssociationManager userAssociationManager;
-  private final AbstractUserPreferenceManager userPreferenceManager;
   private IMisuseMonitor misuseMonitor;
   private IUserStreaksManager userStreaksManager;
 
@@ -146,8 +124,7 @@ public class QuestionFacade extends AbstractSegueFacade {
                         final UserAccountManager userManager, final QuestionManager questionManager,
                         final ILogManager logManager, final IMisuseMonitor misuseMonitor,
                         final UserBadgeManager userBadgeManager, final IUserStreaksManager userStreaksManager,
-                        final UserAssociationManager userAssociationManager,
-                        final AbstractUserPreferenceManager userPreferenceManager) {
+                        final UserAssociationManager userAssociationManager) {
     super(properties, logManager);
 
     this.questionManager = questionManager;
@@ -160,7 +137,6 @@ public class QuestionFacade extends AbstractSegueFacade {
     this.userStreaksManager = userStreaksManager;
     this.userBadgeManager = userBadgeManager;
     this.userAssociationManager = userAssociationManager;
-    this.userPreferenceManager = userPreferenceManager;
   }
 
   /**
@@ -262,66 +238,38 @@ public class QuestionFacade extends AbstractSegueFacade {
   }
 
   /**
-   * REST end point to provide five questions in random located in the question tile of the student dashboard.
+   * REST end point to provide five random questions.
    *
    * @param request  - this allows us to check to see if a user is currently logged in.
    * @param subjects - a comma separated list of subjects
    * @return a Response containing a gameboard object or containing a SegueErrorResponse.
    */
   @GET
-  @Path("/randomQuestions")
+  @Path("/random")
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   public final Response getRandomQuestions(@Context final HttpServletRequest request,
                                            @QueryParam("subjects") final String subjects) {
+    RegisteredUserDTO currentUser;
+
     try {
-      RegisteredUserDTO currentUser = this.userManager.getCurrentRegisteredUser(request);
-      var filterQuestionsPreference = this.userPreferenceManager.getUserPreference(
-          "DISPLAY_SETTING",
-          "HIDE_NON_AUDIENCE_CONTENT",
-          currentUser.getId());
+      currentUser = this.userManager.getCurrentRegisteredUser(request);
 
-      GameFilter gameFilter = new GameFilter();
-
-      if (filterQuestionsPreference != null && filterQuestionsPreference.getPreferenceValue()) {
-        var userContexts = currentUser.getRegisteredContexts();
-
-        List<String> subjectsList = splitCsvStringQueryParam(subjects);
-        List<String> stagesList = new ArrayList<>();
-        List<String> examBoardsList = new ArrayList<>();
-
-        for (UserContext uc : userContexts) {
-          stagesList.add(uc.getStage().name());
-          examBoardsList.add(uc.getExamBoard().name());
-        }
-
-        gameFilter = new GameFilter(
-            subjectsList,
-            null,
-            null,
-            null,
-            null,
-            null,
-            stagesList,
-            null,
-            examBoardsList);
+      if (currentUser == null) {
+        throw new NoUserLoggedInException();
       }
 
-      var questions = this.gameManager.generateRandomQuestions(gameFilter, 5);
-
-      // Return the list of random questions as JSON
-      return Response.ok(questions).build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
-    } catch (ContentManagerException e) {
-      return new SegueErrorResponse(Status.NOT_FOUND, "Error creating random questions")
-          .toResponse();
-    } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Error while getting user preferences", e);
-      log.error(error.getErrorMessage(), e);
-      return error.toResponse();
     }
+
+    var filter = this.questionManager.CreateGameFilterForRandomQuestions(currentUser, subjects);
+
+    List<QuestionDTO> questions;
+    questions = this.gameManager.generateRandomQuestions(filter, 5);
+
+    // Return the list of random questions as JSON
+    return Response.ok(questions).build();
   }
 
 
@@ -530,12 +478,4 @@ public class QuestionFacade extends AbstractSegueFacade {
     }
   }
 
-  // Move these out of the facade
-  private static List<String> splitCsvStringQueryParam(final String queryParamCsv) {
-    if (null != queryParamCsv && !queryParamCsv.isEmpty()) {
-      return Arrays.asList(queryParamCsv.split(","));
-    } else {
-      return null;
-    }
-  }
 }
