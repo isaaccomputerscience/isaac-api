@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.converter.ConverterFactory;
@@ -92,6 +93,22 @@ public class ContentMapper {
     // We need to pre-register different content objects here for the
     // auto-mapping to work
     Set<Class<?>> annotated = configuredReflectionClass.getTypesAnnotatedWith(JsonContentType.class);
+
+    for (Class<?> classToAdd : annotated) {
+      if (Content.class.isAssignableFrom(classToAdd)) {
+        this.registerJsonTypeAndDTOMapping((Class<Content>) classToAdd);
+      }
+    }
+  }
+
+  public ContentMapper(final List<Class<?>> classes) {
+    this();
+    Validate.notNull(classes);
+
+    // We need to pre-register different content objects here for the
+    // auto-mapping to work
+    Set<Class<?>> annotated = classes.stream().filter(c -> c.isAnnotationPresent(JsonContentType.class)).collect(
+        Collectors.toSet());
 
     for (Class<?> classToAdd : annotated) {
       if (Content.class.isAssignableFrom(classToAdd)) {
