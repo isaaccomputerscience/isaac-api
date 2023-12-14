@@ -39,12 +39,11 @@ public class QuestionFacadeIT extends IsaacIntegrationTest {
 
   @Test
   public void getRandomQuestionsTest() {
-    HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
-    String subjects = new String();
+    HttpServletRequest mockRequest = prepareStudentRequest();
+    String subjects = "";
 
     try (Response response = questionFacade.getRandomQuestions(mockRequest, subjects)) {
       assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
   }
-
 }

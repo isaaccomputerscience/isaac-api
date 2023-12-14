@@ -2800,21 +2800,6 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     return errorResponse.readEntity(SegueErrorResponse.class).getErrorMessage();
   }
 
-  private HttpServletRequest prepareUserRequest(String userEmail, String userPassword) {
-    try {
-      LoginResult userLogin = loginAs(httpSession, userEmail, userPassword);
-      HttpServletRequest userRequest = createRequestWithCookies(new Cookie[] {userLogin.cookie});
-      replay(userRequest);
-      return userRequest;
-    } catch (NoCredentialsAvailableException | NoUserException | SegueDatabaseException
-             | AuthenticationProviderMappingException | IncorrectCredentialsProvidedException
-             | AdditionalAuthenticationRequiredException | InvalidKeySpecException | NoSuchAlgorithmException
-             | MFARequiredButNotConfiguredException e) {
-      fail(e);
-      return null;
-    }
-  }
-
   /**
    * As the integration tests do not currently support MFA login, we cannot use the normal login process and have to
    * create cookies manually when testing admin accounts.
@@ -2849,7 +2834,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
   }
 
-  private HttpServletRequest prepareTeacherRequest() {
+  private HttpServletRequest   prepareTeacherRequest() {
     return prepareUserRequest(TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
   }
 
@@ -2859,10 +2844,6 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   private HttpServletRequest prepareTutorRequest() {
     return prepareUserRequest(TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
-  }
-
-  private HttpServletRequest prepareStudentRequest() {
-    return prepareUserRequest(TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
   }
 
   private HttpServletRequest prepareStudentWithAssignmentsRequest() {

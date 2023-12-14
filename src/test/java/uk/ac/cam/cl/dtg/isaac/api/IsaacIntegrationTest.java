@@ -9,6 +9,9 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
+import static org.junit.jupiter.api.Assertions.fail;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_EMAIL;
+import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_STUDENT_PASSWORD;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_LINUX_CONFIG_LOCATION;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EMAIL_SIGNATURE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
@@ -202,7 +205,7 @@ public abstract class IsaacIntegrationTest {
             .withEnv("xpack.security.enabled", "true")
             .withEnv("ELASTIC_PASSWORD", "elastic")
             .withEnv("ingest.geoip.downloader.enabled", "false")
-                .withStartupTimeout(Duration.ofSeconds(120));
+            .withStartupTimeout(Duration.ofSeconds(120));
 
     postgres.start();
     elasticsearch.start();
@@ -393,5 +396,24 @@ public abstract class IsaacIntegrationTest {
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     expect(request.getCookies()).andReturn(cookies).anyTimes();
     return request;
+  }
+
+  protected HttpServletRequest prepareUserRequest(String userEmail, String userPassword) {
+    try {
+      LoginResult userLogin = loginAs(httpSession, userEmail, userPassword);
+      HttpServletRequest userRequest = createRequestWithCookies(new Cookie[] {userLogin.cookie});
+      replay(userRequest);
+      return userRequest;
+    } catch (NoCredentialsAvailableException | NoUserException | SegueDatabaseException
+             | AuthenticationProviderMappingException | IncorrectCredentialsProvidedException
+             | AdditionalAuthenticationRequiredException | InvalidKeySpecException | NoSuchAlgorithmException
+             | MFARequiredButNotConfiguredException e) {
+      fail(e);
+      return null;
+    }
+  }
+
+  protected HttpServletRequest prepareStudentRequest() {
+    return prepareUserRequest(TEST_STUDENT_EMAIL, TEST_STUDENT_PASSWORD);
   }
 }
