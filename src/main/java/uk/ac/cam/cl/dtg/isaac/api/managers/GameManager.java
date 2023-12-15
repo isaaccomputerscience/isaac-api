@@ -988,10 +988,21 @@ public class GameManager {
    * @return a list of questions
    * @throws ContentManagerException - if there is a problem accessing the content repository.
    */
-  public List<QuestionDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit) {
+  public List<QuestionDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
+      throws ContentManagerException {
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
+
     fieldsToMap.add(new GitContentManager.BooleanSearchClause(TYPE_FIELDNAME, BooleanOperator.AND,
         Collections.singletonList(QUESTION_TYPE)));
+
+    // exclude questions marked deprecated
+    fieldsToMap.add(new GitContentManager.BooleanSearchClause(DEPRECATED_FIELDNAME, BooleanOperator.NOT,
+        Collections.singletonList("true")));
+
+    // exclude questions that are superseded by something
+    fieldsToMap.add(new GitContentManager.BooleanSearchClause("supersededBy", BooleanOperator.AND,
+        Collections.singletonList("null")));
+
     fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
     List<QuestionDTO> questionsToReturn = Lists.newArrayList();
@@ -1002,21 +1013,18 @@ public class GameManager {
       try {
         results = this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, limit);
       } catch (ContentManagerException e) {
-        return new ArrayList();
+        throw e;
       }
 
       List<ContentDTO> generatedQuestions = results.getResults();
 
       for (ContentDTO question : generatedQuestions) {
-        // Only keep questions that have not been superseded or deprecated.
-        if (question instanceof IsaacQuestionPageDTO) {
+        // Only keep questions that have not been superseded.
           IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO) question;
-          if ((qp.getSupersededBy() != null && qp.getSupersededBy().isEmpty())
-              || (qp.getDeprecated() != null && qp.getDeprecated())) {
-            // This question has been superseded/deprecated. Don't include it.
+          if (qp.getSupersededBy() != null && !qp.getSupersededBy().isEmpty()) {
+            // This question has been superseded. Don't include it.
             continue;
           }
-        }
         questionsToReturn.add((QuestionDTO) question);
       }
 

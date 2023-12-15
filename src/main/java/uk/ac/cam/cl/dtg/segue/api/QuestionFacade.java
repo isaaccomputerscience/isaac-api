@@ -266,7 +266,12 @@ public class QuestionFacade extends AbstractSegueFacade {
     var filter = this.questionManager.createGameFilterForRandomQuestions(currentUser, subjects);
 
     List<QuestionDTO> questions;
-    questions = this.gameManager.generateRandomQuestions(filter, 5);
+    try {
+      questions = this.gameManager.generateRandomQuestions(filter, 5);
+    } catch (ContentManagerException e) {
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unable to generate questions")
+          .toResponse();
+    }
 
     // Return the list of random questions as JSON
     return Response.ok(questions).build();
