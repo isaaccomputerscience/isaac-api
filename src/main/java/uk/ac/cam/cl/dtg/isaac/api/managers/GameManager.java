@@ -1219,7 +1219,7 @@ public class GameManager {
    * @param gameFilter - filter object containing all the filter information used to make this board.
    * @return A map ready to be passed to a content provider
    */
-  private static List<GitContentManager.BooleanSearchClause> generateFieldToMatchForQuestionFilter(
+  public static List<GitContentManager.BooleanSearchClause> generateFieldToMatchForQuestionFilter(
       final GameFilter gameFilter) {
 
     // Validate that the field sizes are as we expect for tags
