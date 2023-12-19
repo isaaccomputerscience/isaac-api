@@ -136,7 +136,7 @@ public class GameManagerTest {
     );
 
     List<IsaacQuestionPageDTO> questions = new ArrayList<>();
-    for(int i = 0; i < limit; i++) {
+    for (int i = 0; i < limit; i++) {
       IsaacQuestionPageDTO question = createMock(IsaacQuestionPageDTO.class);
       question.setSupersededBy(null);
       questions.add(question);
@@ -154,7 +154,7 @@ public class GameManagerTest {
     replay(dummyContentManager);
 
     // Act
-   var result = gameManager.generateRandomQuestions(new GameFilter(), limit);
+    var result = gameManager.generateRandomQuestions(new GameFilter(), limit);
 
     // Assert
     // Check that the result has the correct number of questions
@@ -167,7 +167,7 @@ public class GameManagerTest {
     // Arrange
     int limit = 5;
     List<IsaacQuestionPageDTO> questions = new ArrayList<>();
-    for(int i = 0; i < limit; i++) {
+    for (int i = 0; i < limit; i++) {
       IsaacQuestionPageDTO question = createMock(IsaacQuestionPageDTO.class);
       questions.add(question);
     }
