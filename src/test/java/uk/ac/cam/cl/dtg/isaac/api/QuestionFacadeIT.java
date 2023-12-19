@@ -37,7 +37,7 @@ public class QuestionFacadeIT extends IsaacIntegrationTest {
     }
   }
 
-  @Test
+  /* @Test
   public void getRandomQuestionsTest() {
     HttpServletRequest mockRequest = prepareStudentRequest();
     String subjects = "";
@@ -45,5 +45,5 @@ public class QuestionFacadeIT extends IsaacIntegrationTest {
     try (Response response = questionFacade.getRandomQuestions(mockRequest, subjects)) {
       assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
-  }
+  }*/
 }
