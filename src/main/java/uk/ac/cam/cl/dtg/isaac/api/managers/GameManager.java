@@ -988,7 +988,7 @@ public class GameManager {
    * @return a list of questions
    * @throws ContentManagerException - if there is a problem accessing the content repository.
    */
-  public List<QuestionDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
+  public List<IsaacQuestionPageDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
       throws ContentManagerException {
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
 
@@ -999,13 +999,9 @@ public class GameManager {
     fieldsToMap.add(new GitContentManager.BooleanSearchClause(DEPRECATED_FIELDNAME, BooleanOperator.NOT,
         Collections.singletonList("true")));
 
-    // exclude questions that are superseded by something
-    fieldsToMap.add(new GitContentManager.BooleanSearchClause("supersededBy", BooleanOperator.AND,
-        Collections.singletonList("null")));
-
     fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
-    List<QuestionDTO> questionsToReturn = Lists.newArrayList();
+    List<IsaacQuestionPageDTO> questionsToReturn = Lists.newArrayList();
 
     while (questionsToReturn.size() < limit) {
       ResultsWrapper<ContentDTO> results;
@@ -1025,14 +1021,18 @@ public class GameManager {
             // This question has been superseded. Don't include it.
             continue;
           }
-        questionsToReturn.add((QuestionDTO) question);
+        questionsToReturn.add(qp);
       }
 
       if (generatedQuestions.size() < limit) {
         break;
       }
     }
-    return questionsToReturn.subList(0, limit);
+    if (questionsToReturn.size() > limit) {
+      return questionsToReturn.subList(0, limit);
+    } else {
+      return questionsToReturn;
+    }
   }
 
   /**

@@ -53,6 +53,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.TestCase;
 import uk.ac.cam.cl.dtg.isaac.dos.TestQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
+import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuestionPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceDTO;
@@ -265,7 +266,7 @@ public class QuestionFacade extends AbstractSegueFacade {
 
     var filter = this.questionManager.createGameFilterForRandomQuestions(currentUser, subjects);
 
-    List<QuestionDTO> questions;
+    List<IsaacQuestionPageDTO> questions;
     try {
       questions = this.gameManager.generateRandomQuestions(filter, 5);
     } catch (ContentManagerException e) {
