@@ -36,14 +36,4 @@ public class QuestionFacadeIT extends IsaacIntegrationTest {
       assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
     }
   }
-
-  /* @Test
-  public void getRandomQuestionsTest() {
-    HttpServletRequest mockRequest = prepareStudentRequest();
-    String subjects = "";
-
-    try (Response response = questionFacade.getRandomQuestions(mockRequest, subjects)) {
-      assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    }
-  }*/
 }
