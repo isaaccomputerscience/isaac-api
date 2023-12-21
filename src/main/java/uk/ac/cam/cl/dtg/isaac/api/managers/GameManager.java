@@ -1022,23 +1022,6 @@ public class GameManager {
     }
   }
 
-    /*  for (ContentDTO question : generatedQuestions) {
-        // Only keep questions that have not been superseded.
-        IsaacQuestionPageDTO qp = (IsaacQuestionPageDTO) question;
-        if (qp.getSupersededBy() != null && !qp.getSupersededBy().isEmpty()) {
-          // This question has been superseded. Don't include it.
-          continue;
-        }
-        questionsToReturn.add(qp);
-      }
-
-    if (questionsToReturn.size() > limit) {
-      return questionsToReturn.subList(0, limit);
-    } else {
-      return questionsToReturn;
-    }
-  } */
-
   /**
    * AugmentGameItemWithAttemptInformation
    * <br>
