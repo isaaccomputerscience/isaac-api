@@ -174,4 +174,41 @@ public class GameManagerTest {
     // Check that the result has the correct number of questions
     assertEquals(limit, result.size());
   }
+
+  @Test
+  public void generateRandomQuestions_appliesExclusionFilterForDeprecatedQuestions() throws
+      ContentManagerException {
+
+    // Arrange
+    GameManager gameManager = new GameManager(
+        this.dummyContentManager,
+        this.dummyGameboardPersistenceManager,
+        this.dummyMapper,
+        this.dummyQuestionManager,
+        "latest"
+    );
+
+    // configure the mock GitContentManager to record the filters that are sent to it by getNextQuestionsForFilter()
+    Capture<List<BooleanSearchClause>> capturedFilters = Capture.newInstance();
+    expect(dummyContentManager.findByFieldNamesRandomOrder(
+        capture(capturedFilters),
+        anyInt(),
+        anyInt(),
+        anyLong())
+    ).andStubReturn(new ResultsWrapper<>());
+    replay(dummyContentManager);
+
+    // Act
+    gameManager.generateRandomQuestions(new GameFilter(), 5);
+
+    // Assert
+    // check that one of the filters sent to GitContentManager was the deprecated question exclusion filter
+    List<BooleanSearchClause> filters = capturedFilters.getValues().get(0);
+    BooleanSearchClause deprecatedFilter = filters.stream()
+        .filter(f -> Objects.equals(f.getField(), "deprecated")).collect(Collectors.toList()).get(0);
+
+    assertNotNull(deprecatedFilter);
+    assertEquals(deprecatedFilter.getOperator(), Constants.BooleanOperator.NOT);
+    assertEquals(deprecatedFilter.getValues(), Collections.singletonList("true"));
+  }
 }
