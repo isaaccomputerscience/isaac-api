@@ -1039,181 +1039,181 @@ public class GameManager {
     }
   } */
 
-    /**
-     * AugmentGameItemWithAttemptInformation
-     * <br>
-     * This method will calculate the question state for use in gameboards based on the question.
-     *
-     * @param gameItem                 - the gameboard item.
-     * @param questionAttemptsFromUser - the user that may or may not have attempted questions in the gameboard.
-     * @return the gameItem passed in having been modified (augmented)), returned for possibility of chaining.
-     * @throws ContentManagerException   - if there is an error retrieving the content requested.
-     * @throws ResourceNotFoundException - if we cannot find the question specified.
-     */
-    private GameboardItem augmentGameItemWithAttemptInformation (
-    final GameboardItem gameItem,
-    final Map<String, ? extends Map<String, ? extends List<? extends LightweightQuestionValidationResponse>>>
-    questionAttemptsFromUser)
+  /**
+   * AugmentGameItemWithAttemptInformation
+   * <br>
+   * This method will calculate the question state for use in gameboards based on the question.
+   *
+   * @param gameItem                 - the gameboard item.
+   * @param questionAttemptsFromUser - the user that may or may not have attempted questions in the gameboard.
+   * @return the gameItem passed in having been modified (augmented)), returned for possibility of chaining.
+   * @throws ContentManagerException   - if there is an error retrieving the content requested.
+   * @throws ResourceNotFoundException - if we cannot find the question specified.
+   */
+  private GameboardItem augmentGameItemWithAttemptInformation(
+      final GameboardItem gameItem,
+      final Map<String, ? extends Map<String, ? extends List<? extends LightweightQuestionValidationResponse>>>
+          questionAttemptsFromUser)
       throws ContentManagerException, ResourceNotFoundException {
-      Validate.notNull(gameItem, "gameItem cannot be null");
-      Validate.notNull(questionAttemptsFromUser, "questionAttemptsFromUser cannot be null");
+    Validate.notNull(gameItem, "gameItem cannot be null");
+    Validate.notNull(questionAttemptsFromUser, "questionAttemptsFromUser cannot be null");
 
-      List<QuestionPartState> questionPartStates = Lists.newArrayList();
-      int questionPartsCorrect = 0;
-      int questionPartsIncorrect = 0;
-      int questionPartsNotAttempted = 0;
-      String questionPageId = gameItem.getId();
+    List<QuestionPartState> questionPartStates = Lists.newArrayList();
+    int questionPartsCorrect = 0;
+    int questionPartsIncorrect = 0;
+    int questionPartsNotAttempted = 0;
+    String questionPageId = gameItem.getId();
 
-      IsaacQuestionPageDTO questionPage = (IsaacQuestionPageDTO) this.contentManager.getContentById(questionPageId);
-      // get all question parts in the question page: depends on each question
-      // having an id that starts with the question page id.
-      Collection<QuestionDTO> listOfQuestionParts = getAllMarkableQuestionPartsDFSOrder(questionPage);
-      Map<String, ? extends List<? extends LightweightQuestionValidationResponse>> questionAttempts =
-          questionAttemptsFromUser.get(questionPageId);
-      if (questionAttempts != null) {
-        for (ContentDTO questionPart : listOfQuestionParts) {
-          List<? extends LightweightQuestionValidationResponse> questionPartAttempts =
-              questionAttempts.get(questionPart.getId());
-          if (questionPartAttempts != null) {
-            // Go through the attempts in reverse chronological order for this question part to determine if
-            // there is a correct answer somewhere.
-            boolean foundCorrectForThisQuestion = false;
-            for (int i = questionPartAttempts.size() - 1; i >= 0; i--) {
-              if (questionPartAttempts.get(i).isCorrect() != null
-                  && questionPartAttempts.get(i).isCorrect()) {
-                foundCorrectForThisQuestion = true;
-                break;
-              }
-            }
-            if (foundCorrectForThisQuestion) {
-              questionPartStates.add(QuestionPartState.CORRECT);
-              questionPartsCorrect++;
-            } else {
-              questionPartStates.add(QuestionPartState.INCORRECT);
-              questionPartsIncorrect++;
-            }
-          } else {
-            questionPartStates.add(QuestionPartState.NOT_ATTEMPTED);
-            questionPartsNotAttempted++;
-          }
-        }
-      } else {
-        questionPartsNotAttempted = listOfQuestionParts.size();
-        questionPartStates = listOfQuestionParts.stream()
-            .map(questionPart -> QuestionPartState.NOT_ATTEMPTED).collect(Collectors.toList());
-      }
-
-      // Get the pass mark for the question page
-      if (questionPage == null) {
-        throw new ResourceNotFoundException(String.format("Unable to locate the question: %s for augmenting",
-            questionPageId));
-      }
-      float passMark = questionPage.getPassMark() != null ? questionPage.getPassMark() : DEFAULT_QUESTION_PASS_MARK;
-      gameItem.setPassMark(passMark);
-      gameItem.setQuestionPartsCorrect(questionPartsCorrect);
-      gameItem.setQuestionPartsIncorrect(questionPartsIncorrect);
-      gameItem.setQuestionPartsNotAttempted(questionPartsNotAttempted);
-      gameItem.setQuestionPartStates(questionPartStates);
-      int questionPartsTotal = questionPartsCorrect + questionPartsIncorrect + questionPartsNotAttempted;
-      gameItem.setQuestionPartsTotal(questionPartsTotal);
-      float percentCorrect = 100f * questionPartsCorrect / questionPartsTotal;
-      float percentIncorrect = 100f * questionPartsIncorrect / questionPartsTotal;
-
-      GameboardItemState state;
-      if (questionPartsCorrect == questionPartsTotal) {
-        state = GameboardItemState.PERFECT;
-      } else if (questionPartsNotAttempted == questionPartsTotal) {
-        state = GameboardItemState.NOT_ATTEMPTED;
-      } else if (percentCorrect >= gameItem.getPassMark()) {
-        state = GameboardItemState.PASSED;
-      } else if (percentIncorrect > (100 - gameItem.getPassMark())) {
-        state = GameboardItemState.FAILED;
-      } else {
-        state = GameboardItemState.IN_PROGRESS;
-      }
-      gameItem.setState(state);
-
-      return gameItem;
-    }
-
-    /**
-     * Generate a random integer value to represent the position of the wildcard tile in the gameboard.
-     *
-     * @return integer between one and GAME_BOARD_SIZE+1
-     */
-    private Integer generateRandomWildCardPosition () {
-      return randomGenerator.nextInt(GAME_BOARD_TARGET_SIZE + 1);
-    }
-
-    /**
-     * Find a wildcard object to add to a gameboard.
-     *
-     * @param mapper       - to convert between contentDTO to wildcard.
-     * @param subjectsList - list of subjects to filter search for
-     * @return wildCard object.
-     * @throws NoWildcardException     - when we are unable to provide you with a wildcard object.
-     * @throws ContentManagerException - if we cannot access the content requested.
-     */
-    private IsaacWildcard getRandomWildcard ( final MapperFacade mapper, final List<String> subjectsList)
-      throws NoWildcardException,
-        ContentManagerException {
-      List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
-
-      fieldsToMap.add(new GitContentManager.BooleanSearchClause(
-          TYPE_FIELDNAME, BooleanOperator.OR, Collections.singletonList(WILDCARD_TYPE)));
-
-      // FIXME - the 999 is a magic number because using NO_SEARCH_LIMIT doesn't work for all elasticsearch queries!
-      ResultsWrapper<ContentDTO> wildcardResults = this.contentManager.findByFieldNamesRandomOrder(
-          fieldsToMap, 0, RANDOM_WILDCARD_SEARCH_LIMIT);
-
-      // try to increase randomness of wildcard results.
-      Collections.shuffle(wildcardResults.getResults());
-
-      List<ContentDTO> wildcards = new ArrayList<>();
-
-      if (null == subjectsList) {
-        // If we have no subject info, just use any wildcard; to match behavior of questions.
-        wildcards.addAll(wildcardResults.getResults());
-      } else {
-        for (ContentDTO c : wildcardResults.getResults()) {
-          boolean match = false;
-          for (String s : subjectsList) {
-            if (c.getTags().contains(s)) {
-              match = true;
+    IsaacQuestionPageDTO questionPage = (IsaacQuestionPageDTO) this.contentManager.getContentById(questionPageId);
+    // get all question parts in the question page: depends on each question
+    // having an id that starts with the question page id.
+    Collection<QuestionDTO> listOfQuestionParts = getAllMarkableQuestionPartsDFSOrder(questionPage);
+    Map<String, ? extends List<? extends LightweightQuestionValidationResponse>> questionAttempts =
+        questionAttemptsFromUser.get(questionPageId);
+    if (questionAttempts != null) {
+      for (ContentDTO questionPart : listOfQuestionParts) {
+        List<? extends LightweightQuestionValidationResponse> questionPartAttempts =
+            questionAttempts.get(questionPart.getId());
+        if (questionPartAttempts != null) {
+          // Go through the attempts in reverse chronological order for this question part to determine if
+          // there is a correct answer somewhere.
+          boolean foundCorrectForThisQuestion = false;
+          for (int i = questionPartAttempts.size() - 1; i >= 0; i--) {
+            if (questionPartAttempts.get(i).isCorrect() != null
+                && questionPartAttempts.get(i).isCorrect()) {
+              foundCorrectForThisQuestion = true;
               break;
             }
           }
-
-          if (match) {
-            wildcards.add(c);
+          if (foundCorrectForThisQuestion) {
+            questionPartStates.add(QuestionPartState.CORRECT);
+            questionPartsCorrect++;
+          } else {
+            questionPartStates.add(QuestionPartState.INCORRECT);
+            questionPartsIncorrect++;
           }
+        } else {
+          questionPartStates.add(QuestionPartState.NOT_ATTEMPTED);
+          questionPartsNotAttempted++;
         }
       }
+    } else {
+      questionPartsNotAttempted = listOfQuestionParts.size();
+      questionPartStates = listOfQuestionParts.stream()
+          .map(questionPart -> QuestionPartState.NOT_ATTEMPTED).collect(Collectors.toList());
+    }
 
-      if (wildcards.size() == 0) {
-        throw new NoWildcardException();
+    // Get the pass mark for the question page
+    if (questionPage == null) {
+      throw new ResourceNotFoundException(String.format("Unable to locate the question: %s for augmenting",
+          questionPageId));
+    }
+    float passMark = questionPage.getPassMark() != null ? questionPage.getPassMark() : DEFAULT_QUESTION_PASS_MARK;
+    gameItem.setPassMark(passMark);
+    gameItem.setQuestionPartsCorrect(questionPartsCorrect);
+    gameItem.setQuestionPartsIncorrect(questionPartsIncorrect);
+    gameItem.setQuestionPartsNotAttempted(questionPartsNotAttempted);
+    gameItem.setQuestionPartStates(questionPartStates);
+    int questionPartsTotal = questionPartsCorrect + questionPartsIncorrect + questionPartsNotAttempted;
+    gameItem.setQuestionPartsTotal(questionPartsTotal);
+    float percentCorrect = 100f * questionPartsCorrect / questionPartsTotal;
+    float percentIncorrect = 100f * questionPartsIncorrect / questionPartsTotal;
+
+    GameboardItemState state;
+    if (questionPartsCorrect == questionPartsTotal) {
+      state = GameboardItemState.PERFECT;
+    } else if (questionPartsNotAttempted == questionPartsTotal) {
+      state = GameboardItemState.NOT_ATTEMPTED;
+    } else if (percentCorrect >= gameItem.getPassMark()) {
+      state = GameboardItemState.PASSED;
+    } else if (percentIncorrect > (100 - gameItem.getPassMark())) {
+      state = GameboardItemState.FAILED;
+    } else {
+      state = GameboardItemState.IN_PROGRESS;
+    }
+    gameItem.setState(state);
+
+    return gameItem;
+  }
+
+  /**
+   * Generate a random integer value to represent the position of the wildcard tile in the gameboard.
+   *
+   * @return integer between one and GAME_BOARD_SIZE+1
+   */
+  private Integer generateRandomWildCardPosition() {
+    return randomGenerator.nextInt(GAME_BOARD_TARGET_SIZE + 1);
+  }
+
+  /**
+   * Find a wildcard object to add to a gameboard.
+   *
+   * @param mapper       - to convert between contentDTO to wildcard.
+   * @param subjectsList - list of subjects to filter search for
+   * @return wildCard object.
+   * @throws NoWildcardException     - when we are unable to provide you with a wildcard object.
+   * @throws ContentManagerException - if we cannot access the content requested.
+   */
+  private IsaacWildcard getRandomWildcard(final MapperFacade mapper, final List<String> subjectsList)
+      throws NoWildcardException,
+      ContentManagerException {
+    List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
+
+    fieldsToMap.add(new GitContentManager.BooleanSearchClause(
+        TYPE_FIELDNAME, BooleanOperator.OR, Collections.singletonList(WILDCARD_TYPE)));
+
+    // FIXME - the 999 is a magic number because using NO_SEARCH_LIMIT doesn't work for all elasticsearch queries!
+    ResultsWrapper<ContentDTO> wildcardResults = this.contentManager.findByFieldNamesRandomOrder(
+        fieldsToMap, 0, RANDOM_WILDCARD_SEARCH_LIMIT);
+
+    // try to increase randomness of wildcard results.
+    Collections.shuffle(wildcardResults.getResults());
+
+    List<ContentDTO> wildcards = new ArrayList<>();
+
+    if (null == subjectsList) {
+      // If we have no subject info, just use any wildcard; to match behavior of questions.
+      wildcards.addAll(wildcardResults.getResults());
+    } else {
+      for (ContentDTO c : wildcardResults.getResults()) {
+        boolean match = false;
+        for (String s : subjectsList) {
+          if (c.getTags().contains(s)) {
+            match = true;
+            break;
+          }
+        }
+
+        if (match) {
+          wildcards.add(c);
+        }
       }
-
-      return mapper.map(wildcards.get(0), IsaacWildcard.class);
     }
 
-    /**
-     * Get a wildcard by id.
-     *
-     * @param id - of wildcard
-     * @return wildcard or an exception.
-     * @throws ContentManagerException - if we cannot access the content requested.
-     */
-    private IsaacWildcard getWildCardById ( final String id) throws ContentManagerException {
-      Map<Map.Entry<BooleanOperator, String>, List<String>> fieldsToMap = Maps.newHashMap();
-
-      fieldsToMap.put(immutableEntry(BooleanOperator.AND, ID_FIELDNAME), Collections.singletonList(id));
-      fieldsToMap.put(immutableEntry(BooleanOperator.AND, TYPE_FIELDNAME), Collections.singletonList(WILDCARD_TYPE));
-
-      Content wildcardResults = this.contentManager.getContentDOById(id);
-
-      return mapper.map(wildcardResults, IsaacWildcard.class);
+    if (wildcards.size() == 0) {
+      throw new NoWildcardException();
     }
+
+    return mapper.map(wildcards.get(0), IsaacWildcard.class);
+  }
+
+  /**
+   * Get a wildcard by id.
+   *
+   * @param id - of wildcard
+   * @return wildcard or an exception.
+   * @throws ContentManagerException - if we cannot access the content requested.
+   */
+  private IsaacWildcard getWildCardById(final String id) throws ContentManagerException {
+    Map<Map.Entry<BooleanOperator, String>, List<String>> fieldsToMap = Maps.newHashMap();
+
+    fieldsToMap.put(immutableEntry(BooleanOperator.AND, ID_FIELDNAME), Collections.singletonList(id));
+    fieldsToMap.put(immutableEntry(BooleanOperator.AND, TYPE_FIELDNAME), Collections.singletonList(WILDCARD_TYPE));
+
+    Content wildcardResults = this.contentManager.getContentDOById(id);
+
+    return mapper.map(wildcardResults, IsaacWildcard.class);
+  }
 
   /**
    * Helper method to generate field to match requirements for search queries (specialised for isaac-filtering rules)
@@ -1226,204 +1226,204 @@ public class GameManager {
   public static List<GitContentManager.BooleanSearchClause> generateFieldToMatchForQuestionFilter(
       final GameFilter gameFilter) {
 
-      // Validate that the field sizes are as we expect for tags
-      // Check that the query provided adheres to the rules we expect
-      if (!validateFilterQuery(gameFilter)) {
-        throw new IllegalArgumentException("Error validating filter query.");
-      }
+    // Validate that the field sizes are as we expect for tags
+    // Check that the query provided adheres to the rules we expect
+    if (!validateFilterQuery(gameFilter)) {
+      throw new IllegalArgumentException("Error validating filter query.");
+    }
 
-      List<GitContentManager.BooleanSearchClause> fieldsToMatch = Lists.newArrayList();
+    List<GitContentManager.BooleanSearchClause> fieldsToMatch = Lists.newArrayList();
 
-      // handle question categories
-      if (null != gameFilter.getQuestionCategories()) {
-        fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-            TAGS_FIELDNAME, BooleanOperator.OR, gameFilter.getQuestionCategories()));
-      }
+    // handle question categories
+    if (null != gameFilter.getQuestionCategories()) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
+          TAGS_FIELDNAME, BooleanOperator.OR, gameFilter.getQuestionCategories()));
+    }
 
-      // Filter on content tags
-      List<String> tagAnds = Lists.newArrayList();
-      List<String> tagOrs = Lists.newArrayList();
+    // Filter on content tags
+    List<String> tagAnds = Lists.newArrayList();
+    List<String> tagOrs = Lists.newArrayList();
 
-      // deal with tags which represent subjects, fields and topics
-      if (null != gameFilter.getSubjects()) {
-        if (gameFilter.getSubjects().size() > 1) {
-          tagOrs.addAll(gameFilter.getSubjects());
-        } else { // should be exactly 1
-          tagAnds.addAll(gameFilter.getSubjects());
+    // deal with tags which represent subjects, fields and topics
+    if (null != gameFilter.getSubjects()) {
+      if (gameFilter.getSubjects().size() > 1) {
+        tagOrs.addAll(gameFilter.getSubjects());
+      } else { // should be exactly 1
+        tagAnds.addAll(gameFilter.getSubjects());
 
-          // ok now we are allowed to look at the fields
-          if (null != gameFilter.getFields()) {
-            // If multiple fields are chosen, don't filter by field at all, unless there are no topics
-            // /!\ This was changed for the CS question finder, and doesn't break the PHY question finder
-            if (gameFilter.getFields().size() == 1) {
-              tagAnds.addAll(gameFilter.getFields());
-            } else if (null == gameFilter.getTopics()) {
-              tagOrs.addAll(gameFilter.getFields());
-            }
-            // Now we look at topics
-            if (null != gameFilter.getTopics()) {
-              if (gameFilter.getTopics().size() > 1) {
-                tagOrs.addAll(gameFilter.getTopics());
-              } else {
-                tagAnds.addAll(gameFilter.getTopics());
-              }
+        // ok now we are allowed to look at the fields
+        if (null != gameFilter.getFields()) {
+          // If multiple fields are chosen, don't filter by field at all, unless there are no topics
+          // /!\ This was changed for the CS question finder, and doesn't break the PHY question finder
+          if (gameFilter.getFields().size() == 1) {
+            tagAnds.addAll(gameFilter.getFields());
+          } else if (null == gameFilter.getTopics()) {
+            tagOrs.addAll(gameFilter.getFields());
+          }
+          // Now we look at topics
+          if (null != gameFilter.getTopics()) {
+            if (gameFilter.getTopics().size() > 1) {
+              tagOrs.addAll(gameFilter.getTopics());
+            } else {
+              tagAnds.addAll(gameFilter.getTopics());
             }
           }
         }
       }
-
-      // deal with adding overloaded tags field for subjects, fields and topics
-      if (tagAnds.size() > 0) {
-        fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, BooleanOperator.AND, tagAnds));
-      }
-      if (tagOrs.size() > 0) {
-        fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, BooleanOperator.OR, tagOrs));
-      }
-
-      // now deal with levels
-      if (null != gameFilter.getLevels()) {
-        List<String> levelsAsStrings = Lists.newArrayList();
-        for (Integer levelInt : gameFilter.getLevels()) {
-          levelsAsStrings.add(levelInt.toString());
-        }
-        fieldsToMatch.add(
-            new GitContentManager.BooleanSearchClause(LEVEL_FIELDNAME, BooleanOperator.OR, levelsAsStrings));
-      }
-
-      // Handle the nested audience fields: stage, difficulty and examBoard
-      if (null != gameFilter.getStages()) {
-        fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-            STAGE_FIELDNAME, BooleanOperator.OR, gameFilter.getStages()));
-      }
-      if (null != gameFilter.getDifficulties()) {
-        fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-            DIFFICULTY_FIELDNAME, BooleanOperator.OR, gameFilter.getDifficulties()));
-      }
-      if (null != gameFilter.getExamBoards()) {
-        fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-            EXAM_BOARD_FIELDNAME, BooleanOperator.OR, gameFilter.getExamBoards()));
-      }
-
-      // handle concepts
-      if (null != gameFilter.getConcepts()) {
-        fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-            RELATED_CONTENT_FIELDNAME, BooleanOperator.OR, gameFilter.getConcepts()));
-      }
-
-      // handle exclusions
-      // exclude questions with no-filter tag
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, BooleanOperator.NOT,
-          Collections.singletonList(HIDE_FROM_FILTER_TAG)));
-
-      // exclude questions marked deprecated
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(DEPRECATED_FIELDNAME, BooleanOperator.NOT,
-          Collections.singletonList("true")));
-
-      return fieldsToMatch;
     }
 
-    /**
-     * Currently only validates subjects, fields and topics.
-     *
-     * @param gameFilter containing the following data: (1) subjects - multiple subjects are only ok if there are not any
-     *                   fields or topics (2) fields - you can have multiple fields if there is precisely one subject.
-     *                   (3) topics - you can have multiple topics if there is precisely one subject. (4) levels -
-     *                   currently not used for validation (5) concepts - currently not used for validation
-     * @return true if the query adheres to the rules specified, false if not.
-     */
-    private static boolean validateFilterQuery ( final GameFilter gameFilter){
-      if (null == gameFilter.getSubjects() && null == gameFilter.getFields() && null == gameFilter.getTopics()) {
-        return true;
-      } else if (null == gameFilter.getSubjects()
-          && (null != gameFilter.getFields() || null != gameFilter.getTopics())) {
-        log.warn("Error validating query: You cannot have a " + "null subject and still specify fields or topics.");
+    // deal with adding overloaded tags field for subjects, fields and topics
+    if (tagAnds.size() > 0) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, BooleanOperator.AND, tagAnds));
+    }
+    if (tagOrs.size() > 0) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, BooleanOperator.OR, tagOrs));
+    }
+
+    // now deal with levels
+    if (null != gameFilter.getLevels()) {
+      List<String> levelsAsStrings = Lists.newArrayList();
+      for (Integer levelInt : gameFilter.getLevels()) {
+        levelsAsStrings.add(levelInt.toString());
+      }
+      fieldsToMatch.add(
+          new GitContentManager.BooleanSearchClause(LEVEL_FIELDNAME, BooleanOperator.OR, levelsAsStrings));
+    }
+
+    // Handle the nested audience fields: stage, difficulty and examBoard
+    if (null != gameFilter.getStages()) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
+          STAGE_FIELDNAME, BooleanOperator.OR, gameFilter.getStages()));
+    }
+    if (null != gameFilter.getDifficulties()) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
+          DIFFICULTY_FIELDNAME, BooleanOperator.OR, gameFilter.getDifficulties()));
+    }
+    if (null != gameFilter.getExamBoards()) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
+          EXAM_BOARD_FIELDNAME, BooleanOperator.OR, gameFilter.getExamBoards()));
+    }
+
+    // handle concepts
+    if (null != gameFilter.getConcepts()) {
+      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
+          RELATED_CONTENT_FIELDNAME, BooleanOperator.OR, gameFilter.getConcepts()));
+    }
+
+    // handle exclusions
+    // exclude questions with no-filter tag
+    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, BooleanOperator.NOT,
+        Collections.singletonList(HIDE_FROM_FILTER_TAG)));
+
+    // exclude questions marked deprecated
+    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(DEPRECATED_FIELDNAME, BooleanOperator.NOT,
+        Collections.singletonList("true")));
+
+    return fieldsToMatch;
+  }
+
+  /**
+   * Currently only validates subjects, fields and topics.
+   *
+   * @param gameFilter containing the following data: (1) subjects - multiple subjects are only ok if there are not any
+   *                   fields or topics (2) fields - you can have multiple fields if there is precisely one subject.
+   *                   (3) topics - you can have multiple topics if there is precisely one subject. (4) levels -
+   *                   currently not used for validation (5) concepts - currently not used for validation
+   * @return true if the query adheres to the rules specified, false if not.
+   */
+  private static boolean validateFilterQuery(final GameFilter gameFilter) {
+    if (null == gameFilter.getSubjects() && null == gameFilter.getFields() && null == gameFilter.getTopics()) {
+      return true;
+    } else if (null == gameFilter.getSubjects()
+        && (null != gameFilter.getFields() || null != gameFilter.getTopics())) {
+      log.warn("Error validating query: You cannot have a " + "null subject and still specify fields or topics.");
+      return false;
+    } else if (null != gameFilter.getSubjects()
+        && null == gameFilter.getFields() && null != gameFilter.getTopics()) {
+      log.warn("Error validating query: You cannot have a null field" + " and still specify subject and topics.");
+      return false;
+    }
+
+    // this variable indicates whether we have found a multiple term query
+    // already.
+    boolean foundMultipleTerms = false;
+
+    // Now check that the subjects are of the correct size
+    if (null != gameFilter.getSubjects() && !gameFilter.getSubjects().isEmpty()) {
+      if (gameFilter.getSubjects().size() > 1) {
+        foundMultipleTerms = true;
+      }
+    }
+
+    if (null != gameFilter.getFields() && !gameFilter.getFields().isEmpty()) {
+      if (foundMultipleTerms) {
+        log.warn("Error validating query: multiple subjects and fields specified.");
         return false;
-      } else if (null != gameFilter.getSubjects()
-          && null == gameFilter.getFields() && null != gameFilter.getTopics()) {
-        log.warn("Error validating query: You cannot have a null field" + " and still specify subject and topics.");
-        return false;
       }
-
-      // this variable indicates whether we have found a multiple term query
-      // already.
-      boolean foundMultipleTerms = false;
-
-      // Now check that the subjects are of the correct size
-      if (null != gameFilter.getSubjects() && !gameFilter.getSubjects().isEmpty()) {
-        if (gameFilter.getSubjects().size() > 1) {
-          foundMultipleTerms = true;
-        }
-      }
-
-      if (null != gameFilter.getFields() && !gameFilter.getFields().isEmpty()) {
-        if (foundMultipleTerms) {
-          log.warn("Error validating query: multiple subjects and fields specified.");
-          return false;
-        }
-      }
+    }
 
     /* We don't check topics since it no longer matters if multiple fields are specified
        (after CS question finder addition).
        This doesn't change how the PHY question finder works, unless the user uses the URL to specify multiple fields
      */
 
-      return true;
-    }
-
-    /**
-     * Provides validation for a given gameboard. For use prior to persistence.
-     *
-     * @param gameboardDTO - to check
-     * @return the gameboard (unchanged) if everything is ok, otherwise an exception will be thrown.
-     * @throws InvalidGameboardException - If the gameboard is considered to be invalid.
-     * @throws NoWildcardException       - if the wildcard cannot be found.
-     */
-    private GameboardDTO validateGameboard ( final GameboardDTO gameboardDTO) throws InvalidGameboardException,
-        NoWildcardException {
-      if (gameboardDTO.getId() != null && gameboardDTO.getId().contains(" ")) {
-        throw new InvalidGameboardException(
-            "Your gameboard must not contain illegal characters e.g. spaces");
-      }
-
-      if (gameboardDTO.getContents().size() > Constants.GAME_BOARD_TARGET_SIZE) {
-        throw new InvalidGameboardException(String.format("Your gameboard must not contain more than %s questions",
-            GAME_BOARD_TARGET_SIZE));
-      }
-
-      if (gameboardDTO.getGameFilter() == null || !validateFilterQuery(gameboardDTO.getGameFilter())) {
-        throw new InvalidGameboardException("Your gameboard must have some valid filter information "
-            + "e.g. subject must be set.");
-      }
-
-      List<String> badQuestions = this.gameboardPersistenceManager.getInvalidQuestionIdsFromGameboard(gameboardDTO);
-      if (badQuestions.size() > 0) {
-        throw new InvalidGameboardException(String.format(
-            "The gameboard provided contains %s invalid (or missing) questions - [%s]", badQuestions.size(),
-            badQuestions));
-      }
-
-      if (gameboardDTO.getTitle().length() > GAMEBOARD_MAX_TITLE_LENGTH) {
-        throw new InvalidGameboardException(String.format(
-            "The gameboard title provided is too long (%s characters) the maximum length is %s",
-            gameboardDTO.getTitle().length(), GAMEBOARD_MAX_TITLE_LENGTH));
-      }
-
-      if (gameboardDTO.getWildCard() == null) {
-        throw new NoWildcardException();
-      }
-
-      // This will throw a NoWildCardException if we cannot locate a valid
-      // wildcard for this gameboard.
-      try {
-        this.getWildCardById(gameboardDTO.getWildCard().getId());
-      } catch (ContentManagerException e) {
-        log.error("Error validating gameboard.", e);
-        throw new InvalidGameboardException(
-            "There was a problem validating the gameboard due to ContentManagerException another exception.");
-      }
-
-      return gameboardDTO;
-    }
-
-
+    return true;
   }
+
+  /**
+   * Provides validation for a given gameboard. For use prior to persistence.
+   *
+   * @param gameboardDTO - to check
+   * @return the gameboard (unchanged) if everything is ok, otherwise an exception will be thrown.
+   * @throws InvalidGameboardException - If the gameboard is considered to be invalid.
+   * @throws NoWildcardException       - if the wildcard cannot be found.
+   */
+  private GameboardDTO validateGameboard(final GameboardDTO gameboardDTO) throws InvalidGameboardException,
+      NoWildcardException {
+    if (gameboardDTO.getId() != null && gameboardDTO.getId().contains(" ")) {
+      throw new InvalidGameboardException(
+          "Your gameboard must not contain illegal characters e.g. spaces");
+    }
+
+    if (gameboardDTO.getContents().size() > Constants.GAME_BOARD_TARGET_SIZE) {
+      throw new InvalidGameboardException(String.format("Your gameboard must not contain more than %s questions",
+          GAME_BOARD_TARGET_SIZE));
+    }
+
+    if (gameboardDTO.getGameFilter() == null || !validateFilterQuery(gameboardDTO.getGameFilter())) {
+      throw new InvalidGameboardException("Your gameboard must have some valid filter information "
+          + "e.g. subject must be set.");
+    }
+
+    List<String> badQuestions = this.gameboardPersistenceManager.getInvalidQuestionIdsFromGameboard(gameboardDTO);
+    if (badQuestions.size() > 0) {
+      throw new InvalidGameboardException(String.format(
+          "The gameboard provided contains %s invalid (or missing) questions - [%s]", badQuestions.size(),
+          badQuestions));
+    }
+
+    if (gameboardDTO.getTitle().length() > GAMEBOARD_MAX_TITLE_LENGTH) {
+      throw new InvalidGameboardException(String.format(
+          "The gameboard title provided is too long (%s characters) the maximum length is %s",
+          gameboardDTO.getTitle().length(), GAMEBOARD_MAX_TITLE_LENGTH));
+    }
+
+    if (gameboardDTO.getWildCard() == null) {
+      throw new NoWildcardException();
+    }
+
+    // This will throw a NoWildCardException if we cannot locate a valid
+    // wildcard for this gameboard.
+    try {
+      this.getWildCardById(gameboardDTO.getWildCard().getId());
+    } catch (ContentManagerException e) {
+      log.error("Error validating gameboard.", e);
+      throw new InvalidGameboardException(
+          "There was a problem validating the gameboard due to ContentManagerException another exception.");
+    }
+
+    return gameboardDTO;
+  }
+
+
+}
