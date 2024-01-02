@@ -2834,7 +2834,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     }
   }
 
-  private HttpServletRequest   prepareTeacherRequest() {
+  private HttpServletRequest prepareTeacherRequest(){
     return prepareUserRequest(TEST_TEACHER_EMAIL, TEST_TEACHER_PASSWORD);
   }
 
