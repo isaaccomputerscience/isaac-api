@@ -1001,13 +1001,7 @@ public class GameManager {
 
     fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
-    ResultsWrapper<ContentDTO> results;
-
-    try {
-      results = this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, limit);
-    } catch (ContentManagerException e) {
-      throw e;
-    }
+    ResultsWrapper<ContentDTO> results = this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, limit);
 
     List<ContentDTO> generatedQuestions = results.getResults();
     List<IsaacQuestionPageDTO> questionsToReturn = generatedQuestions.stream()
@@ -1206,7 +1200,7 @@ public class GameManager {
    * @param gameFilter - filter object containing all the filter information used to make this board.
    * @return A map ready to be passed to a content provider
    */
-  public static List<GitContentManager.BooleanSearchClause> generateFieldToMatchForQuestionFilter(
+  private static List<GitContentManager.BooleanSearchClause> generateFieldToMatchForQuestionFilter(
       final GameFilter gameFilter) {
 
     // Validate that the field sizes are as we expect for tags
@@ -1407,6 +1401,4 @@ public class GameManager {
 
     return gameboardDTO;
   }
-
-
 }
