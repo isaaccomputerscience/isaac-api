@@ -1143,7 +1143,7 @@ public class GameManager {
    */
   public List<IsaacQuestionPageDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
       throws ContentManagerException {
-    // 4 is the 'magic' number that limit is multiplied to make sure we have enough questions to return
+    // 4 is the number that limit is multiplied to make sure we have enough questions to return
     // after filtering out superseded questions
     int limitMultiplier = 4;
 
