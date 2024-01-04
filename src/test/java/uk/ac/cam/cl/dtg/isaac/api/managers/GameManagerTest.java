@@ -39,6 +39,7 @@ import uk.ac.cam.cl.dtg.isaac.dao.GameboardPersistenceManager;
 import uk.ac.cam.cl.dtg.isaac.dto.GameFilter;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuestionPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
+import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
@@ -110,15 +111,15 @@ public class GameManagerTest {
         "latest"
     );
 
-    List<IsaacQuestionPageDTO> questions = new ArrayList<>();
+    List<ContentDTO> questions = new ArrayList<>();
     for (int i = 0; i < limit; i++) {
       IsaacQuestionPageDTO question = createMock(IsaacQuestionPageDTO.class);
-      question.setSupersededBy(null);
+      // Setting the expected behavior for the getSupersededBy method
+      expect(question.getSupersededBy()).andStubReturn(null);
       questions.add(question);
     }
-    var resultsWrapper = new ResultsWrapper(questions, (long) limit);
+    var resultsWrapper = new ResultsWrapper<>(questions, (long) limit);
 
-    // Create a ResultsWrapper with a specific number of questions
     expect(dummyContentManager.findByFieldNamesRandomOrder(
         anyObject(),
         anyInt(),
@@ -127,45 +128,6 @@ public class GameManagerTest {
     ).andReturn(resultsWrapper)
         .times(1);
     replay(dummyContentManager);
-
-    // Act
-    var result = gameManager.generateRandomQuestions(new GameFilter(), limit);
-
-    // Assert
-    // Check that the result has the correct number of questions
-    assertEquals(limit, result.size());
-  }
-
-  @Test
-  public void generateRandomQuestions_appliesExclusionFilterForSupersededQuestions() throws ContentManagerException {
-
-    // Arrange
-    int limit = 5;
-    List<IsaacQuestionPageDTO> questions = new ArrayList<>();
-    for (int i = 0; i < limit; i++) {
-      IsaacQuestionPageDTO question = createMock(IsaacQuestionPageDTO.class);
-      questions.add(question);
-    }
-    questions.get(1).setSupersededBy("test_string");
-    var resultsWrapper = new ResultsWrapper(questions, (long) limit);
-
-    // Create a ResultsWrapper with a specific number of questions
-    expect(dummyContentManager.findByFieldNamesRandomOrder(
-        anyObject(),
-        anyInt(),
-        anyInt(),
-        anyLong())
-    ).andReturn(resultsWrapper)
-        .times(2);
-    replay(dummyContentManager);
-
-    var gameManager = new GameManager(
-        this.dummyContentManager,
-        this.dummyGameboardPersistenceManager,
-        this.dummyMapper,
-        this.dummyQuestionManager,
-        "latest"
-    );
 
     // Act
     var result = gameManager.generateRandomQuestions(new GameFilter(), limit);

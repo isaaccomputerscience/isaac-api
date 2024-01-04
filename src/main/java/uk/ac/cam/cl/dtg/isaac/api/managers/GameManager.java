@@ -1143,6 +1143,10 @@ public class GameManager {
    */
   public List<IsaacQuestionPageDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
       throws ContentManagerException {
+    // 4 is the 'magic' number that limit is multiplied to make sure we have enough questions to return after filtering out
+    // superseded questions
+    int limitMultiplier = 4;
+
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
 
     fieldsToMap.add(new GitContentManager.BooleanSearchClause(TYPE_FIELDNAME, BooleanOperator.AND,
@@ -1154,8 +1158,8 @@ public class GameManager {
 
     fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
-    ResultsWrapper<ContentDTO> results = this.contentManager.findByFieldNamesRandomOrder
-        (fieldsToMap, 0, (limit * 4));
+    ResultsWrapper<ContentDTO> results = this.contentManager.findByFieldNamesRandomOrder(
+        fieldsToMap, 0, (limit * limitMultiplier));
 
     List<ContentDTO> generatedQuestions = results.getResults();
     List<IsaacQuestionPageDTO> questionsToReturn = generatedQuestions.stream()

@@ -111,6 +111,92 @@ public class QuestionManager {
   }
 
   /**
+   * Reflection to try and determine the associated validator for the question being answered.
+   *
+   * @param questionType - the type of question being answered.
+   * @return a Validator
+   */
+  @SuppressWarnings("unchecked")
+  private static IValidator locateValidator(final Class<? extends Question> questionType) {
+    // check we haven't gone too high up the superclass tree
+    if (!Question.class.isAssignableFrom(questionType)) {
+      return null;
+    }
+
+    // Does this class have the correct annotation?
+    if (questionType.isAnnotationPresent(ValidatesWith.class)) {
+
+      log.debug("Validator for question validation found. Using : "
+          + questionType.getAnnotation(ValidatesWith.class).value());
+      Injector injector = SegueGuiceConfigurationModule.getGuiceInjector();
+      return injector.getInstance(questionType.getAnnotation(ValidatesWith.class).value());
+
+    } else if (questionType.equals(Question.class)) {
+      // so if we get here then we haven't found a ValidatesWith class, so
+      // we should just give up and return null.
+      return null;
+    }
+
+    // we will continue our search of the superclasses for the annotation
+    return locateValidator((Class<? extends Question>) questionType.getSuperclass());
+  }
+
+  /**
+   * Extract all of the question objects, recursively, from some content.
+   *
+   * @param content - The contentDTO which may have question objects as children.
+   * @return A list of QuestionDTO found in the content.
+   */
+  public static List<QuestionDTO> extractQuestionObjects(final ContentDTO content) {
+    return QuestionManager.extractQuestionObjectsRecursively(content,
+        new ArrayList<>());
+  }
+
+  /**
+   * Extract all of the questionObjectsRecursively.
+   *
+   * @param toExtract - The contentDTO which may have question objects as children.
+   * @param result    - The initially empty List which will be mutated to contain references to all of the question
+   *                  objects.
+   * @return The modified result array.
+   */
+  private static List<QuestionDTO> extractQuestionObjectsRecursively(final ContentDTO toExtract,
+                                                                     final List<QuestionDTO> result) {
+    if (toExtract instanceof QuestionDTO) {
+      // we found a question so add it to the list.
+      result.add((QuestionDTO) toExtract);
+    }
+
+    if (toExtract.getChildren() != null) {
+      // Go through each child in the content object.
+      for (ContentBaseDTO child : toExtract.getChildren()) {
+        if (child instanceof ContentDTO) {
+          // if it is not a question but it can have children then
+          // continue recursing.
+          ContentDTO childContent = (ContentDTO) child;
+          if (childContent.getChildren() != null) {
+            QuestionManager.extractQuestionObjectsRecursively(childContent, result);
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
+  public static String extractPageIdFromQuestionId(final String questionId) {
+    return questionId.split(Constants.ESCAPED_ID_SEPARATOR)[0];
+  }
+
+  public static List<String> splitCsvStringQueryParam(final String queryParamCsv) {
+    if (null != queryParamCsv && !queryParamCsv.isEmpty()) {
+      return Arrays.asList(queryParamCsv.split(","));
+    } else {
+      return new ArrayList();
+    }
+  }
+
+  /**
    * Validate client answer to recorded answer.
    *
    * @param question        The question to which the answer must be validated against.
@@ -146,37 +232,6 @@ public class QuestionManager {
   }
 
   /**
-   * Reflection to try and determine the associated validator for the question being answered.
-   *
-   * @param questionType - the type of question being answered.
-   * @return a Validator
-   */
-  @SuppressWarnings("unchecked")
-  private static IValidator locateValidator(final Class<? extends Question> questionType) {
-    // check we haven't gone too high up the superclass tree
-    if (!Question.class.isAssignableFrom(questionType)) {
-      return null;
-    }
-
-    // Does this class have the correct annotation?
-    if (questionType.isAnnotationPresent(ValidatesWith.class)) {
-
-      log.debug("Validator for question validation found. Using : "
-          + questionType.getAnnotation(ValidatesWith.class).value());
-      Injector injector = SegueGuiceConfigurationModule.getGuiceInjector();
-      return injector.getInstance(questionType.getAnnotation(ValidatesWith.class).value());
-
-    } else if (questionType.equals(Question.class)) {
-      // so if we get here then we haven't found a ValidatesWith class, so
-      // we should just give up and return null.
-      return null;
-    }
-
-    // we will continue our search of the superclasses for the annotation
-    return locateValidator((Class<? extends Question>) questionType.getSuperclass());
-  }
-
-  /**
    * Reflection to try and determine the associated specifier for the choice given.
    *
    * @param choiceClass - the type of choice given.
@@ -206,7 +261,6 @@ public class QuestionManager {
     // we will continue our search of the superclasses for the annotation
     return locateSpecifier((Class<? extends ChoiceDTO>) choiceClass.getSuperclass());
   }
-
 
   /**
    * This method will ensure any user question attempt information available is used to augment this question object.
@@ -282,7 +336,6 @@ public class QuestionManager {
     }
     return page;
   }
-
 
   /**
    * Converts a QuestionValidationResponse into a QuestionValidationResponseDTO.
@@ -490,49 +543,6 @@ public class QuestionManager {
   }
 
   /**
-   * Extract all of the question objects, recursively, from some content.
-   *
-   * @param content - The contentDTO which may have question objects as children.
-   * @return A list of QuestionDTO found in the content.
-   */
-  public static List<QuestionDTO> extractQuestionObjects(final ContentDTO content) {
-    return QuestionManager.extractQuestionObjectsRecursively(content,
-        new ArrayList<>());
-  }
-
-  /**
-   * Extract all of the questionObjectsRecursively.
-   *
-   * @param toExtract - The contentDTO which may have question objects as children.
-   * @param result    - The initially empty List which will be mutated to contain references to all of the question
-   *                  objects.
-   * @return The modified result array.
-   */
-  private static List<QuestionDTO> extractQuestionObjectsRecursively(final ContentDTO toExtract,
-                                                                     final List<QuestionDTO> result) {
-    if (toExtract instanceof QuestionDTO) {
-      // we found a question so add it to the list.
-      result.add((QuestionDTO) toExtract);
-    }
-
-    if (toExtract.getChildren() != null) {
-      // Go through each child in the content object.
-      for (ContentBaseDTO child : toExtract.getChildren()) {
-        if (child instanceof ContentDTO) {
-          // if it is not a question but it can have children then
-          // continue recursing.
-          ContentDTO childContent = (ContentDTO) child;
-          if (childContent.getChildren() != null) {
-            QuestionManager.extractQuestionObjectsRecursively(childContent, result);
-          }
-        }
-      }
-    }
-
-    return result;
-  }
-
-  /**
    * This is a helper method that will shuffle multiple choice questions and item questions
    * based on a user specified seed.
    *
@@ -605,10 +615,6 @@ public class QuestionManager {
         mapper.getAutoMapper().map(results, ResultsWrapper.class)).build();
   }
 
-  public static String extractPageIdFromQuestionId(final String questionId) {
-    return questionId.split(Constants.ESCAPED_ID_SEPARATOR)[0];
-  }
-
   public ChoiceDTO convertJsonAnswerToChoice(final String jsonAnswer) throws ErrorResponseWrapper {
     ChoiceDTO answerFromClientDTO;
     try {
@@ -640,9 +646,7 @@ public class QuestionManager {
           "HIDE_NON_AUDIENCE_CONTENT",
           currentUser.getId());
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Response.Status.INTERNAL_SERVER_ERROR,
-          "Error while getting user preferences", e);
-      log.error(error.getErrorMessage(), e);
+      log.error("Error while getting user preferences", e);
     }
 
     if (filterQuestionsPreference != null && filterQuestionsPreference.getPreferenceValue()) {
@@ -669,13 +673,5 @@ public class QuestionManager {
           examBoardsList);
     }
     return gameFilter;
-  }
-
-  private static List<String> splitCsvStringQueryParam(final String queryParamCsv) {
-    if (null != queryParamCsv && !queryParamCsv.isEmpty()) {
-      return Arrays.asList(queryParamCsv.split(","));
-    } else {
-      return new ArrayList();
-    }
   }
 }
