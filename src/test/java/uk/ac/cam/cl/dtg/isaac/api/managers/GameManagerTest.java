@@ -150,7 +150,7 @@ public class GameManagerTest {
         "latest"
     );
 
-    // configure the mock GitContentManager to record the filters that are sent to it by getNextQuestionsForFilter()
+    // configure the mock GitContentManager to record the filters that are sent to it by generateRandomQuestions()
     Capture<List<BooleanSearchClause>> capturedFilters = Capture.newInstance();
     expect(dummyContentManager.findByFieldNamesRandomOrder(
         capture(capturedFilters),
