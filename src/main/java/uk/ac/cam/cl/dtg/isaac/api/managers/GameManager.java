@@ -1145,7 +1145,7 @@ public class GameManager {
       throws ContentManagerException {
     // 4 is the number that limit is multiplied to make sure we have enough questions to return
     // after filtering out superseded questions
-    int limitMultiplier = 4;
+    final int limitMultiplier = 4;
 
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
 
