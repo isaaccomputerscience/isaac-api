@@ -158,15 +158,15 @@ public class GameboardsFacade extends AbstractIsaacFacade {
                                                    @QueryParam("levels") final String levels,
                                                    @QueryParam("concepts") final String concepts,
                                                    @QueryParam("questionCategories") final String questionCategories) {
-    List<String> subjectsList = questionManager.splitCsvStringQueryParam(subjects);
-    List<String> fieldsList = questionManager.splitCsvStringQueryParam(fields);
-    List<String> topicsList = questionManager.splitCsvStringQueryParam(topics);
+    List<String> subjectsList = QuestionManager.splitCsvStringQueryParam(subjects);
+    List<String> fieldsList = QuestionManager.splitCsvStringQueryParam(fields);
+    List<String> topicsList = QuestionManager.splitCsvStringQueryParam(topics);
     List<Integer> levelsList = null;
-    List<String> stagesList = questionManager.splitCsvStringQueryParam(stages);
-    List<String> difficultiesList = questionManager.splitCsvStringQueryParam(difficulties);
-    List<String> examBoardsList = questionManager.splitCsvStringQueryParam(examBoards);
-    List<String> conceptsList = questionManager.splitCsvStringQueryParam(concepts);
-    List<String> questionCategoriesList = questionManager.splitCsvStringQueryParam(questionCategories);
+    List<String> stagesList = QuestionManager.splitCsvStringQueryParam(stages);
+    List<String> difficultiesList = QuestionManager.splitCsvStringQueryParam(difficulties);
+    List<String> examBoardsList = QuestionManager.splitCsvStringQueryParam(examBoards);
+    List<String> conceptsList = QuestionManager.splitCsvStringQueryParam(concepts);
+    List<String> questionCategoriesList = QuestionManager.splitCsvStringQueryParam(questionCategories);
 
     if (null != levels && !levels.isEmpty()) {
       String[] levelsAsString = levels.split(",");
