@@ -79,6 +79,7 @@ import uk.ac.cam.cl.dtg.segue.api.ErrorResponseWrapper;
 import uk.ac.cam.cl.dtg.segue.configuration.SegueGuiceConfigurationModule;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
+import uk.ac.cam.cl.dtg.util.StringUtils;
 
 /**
  * This class is responsible for validating correct answers using the ValidatesWith annotation when it is applied on to
@@ -186,14 +187,6 @@ public class QuestionManager {
 
   public static String extractPageIdFromQuestionId(final String questionId) {
     return questionId.split(Constants.ESCAPED_ID_SEPARATOR)[0];
-  }
-
-  public static List<String> splitCsvStringQueryParam(final String queryParamCsv) {
-    if (null != queryParamCsv && !queryParamCsv.isEmpty()) {
-      return Arrays.asList(queryParamCsv.split(","));
-    } else {
-      return null;
-    }
   }
 
   /**
@@ -652,7 +645,7 @@ public class QuestionManager {
     if (filterQuestionsPreference != null && filterQuestionsPreference.getPreferenceValue()) {
       var userContexts = currentUser.getRegisteredContexts();
 
-      List<String> subjectsList = splitCsvStringQueryParam(subjects);
+      List<String> subjectsList = StringUtils.splitCsvStringQueryParam(subjects);
       List<String> stagesList = new ArrayList<>();
       List<String> examBoardsList = new ArrayList<>();
 
