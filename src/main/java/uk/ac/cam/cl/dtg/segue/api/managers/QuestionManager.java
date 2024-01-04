@@ -192,7 +192,7 @@ public class QuestionManager {
     if (null != queryParamCsv && !queryParamCsv.isEmpty()) {
       return Arrays.asList(queryParamCsv.split(","));
     } else {
-      return new ArrayList();
+      return null;
     }
   }
 
