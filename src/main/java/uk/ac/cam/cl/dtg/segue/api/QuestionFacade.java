@@ -255,10 +255,6 @@ public class QuestionFacade extends AbstractSegueFacade {
     try {
       currentUser = this.userManager.getCurrentRegisteredUser(request);
 
-      if (currentUser == null) {
-        throw new NoUserLoggedInException();
-      }
-
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     }
