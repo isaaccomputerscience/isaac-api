@@ -358,7 +358,7 @@ public class GameManager {
    * @param gameFilter Object representing the group of filters to use
    * @param boardOwner The user that should be marked as the creator of the gameBoard.
    * @return a gameboard if possible that satisfies the conditions provided by the parameters. Will return null if no
-   * questions can be provided.
+   *         questions can be provided.
    * @throws NoWildcardException     - when we are unable to provide you with a wildcard object.
    * @throws SegueDatabaseException  - if there is an error contacting the database.
    * @throws ContentManagerException - if there is an error retrieving the content requested.
@@ -1143,8 +1143,8 @@ public class GameManager {
    */
   public List<IsaacQuestionPageDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
       throws ContentManagerException {
-    // 4 is the 'magic' number that limit is multiplied to make sure we have enough questions to return after filtering out
-    // superseded questions
+    // 4 is the 'magic' number that limit is multiplied to make sure we have enough questions to return
+    // after filtering out superseded questions
     int limitMultiplier = 4;
 
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
