@@ -98,8 +98,8 @@ public class QuestionFacade extends AbstractSegueFacade {
   private final QuestionManager questionManager;
   private final UserBadgeManager userBadgeManager;
   private final UserAssociationManager userAssociationManager;
-  private IMisuseMonitor misuseMonitor;
-  private IUserStreaksManager userStreaksManager;
+  private final IMisuseMonitor misuseMonitor;
+  private final IUserStreaksManager userStreaksManager;
 
   /**
    * @param properties             - the fully configured properties loader for the api.
