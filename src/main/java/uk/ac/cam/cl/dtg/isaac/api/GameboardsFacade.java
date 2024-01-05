@@ -82,7 +82,7 @@ import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.StringUtils;
+import uk.ac.cam.cl.dtg.util.QueryUtils;
 
 /**
  * Games boards Facade.
@@ -159,15 +159,15 @@ public class GameboardsFacade extends AbstractIsaacFacade {
                                                    @QueryParam("levels") final String levels,
                                                    @QueryParam("concepts") final String concepts,
                                                    @QueryParam("questionCategories") final String questionCategories) {
-    List<String> subjectsList = StringUtils.splitCsvStringQueryParam(subjects);
-    List<String> fieldsList = StringUtils.splitCsvStringQueryParam(fields);
-    List<String> topicsList = StringUtils.splitCsvStringQueryParam(topics);
+    List<String> subjectsList = QueryUtils.splitCsvStringQueryParam(subjects);
+    List<String> fieldsList = QueryUtils.splitCsvStringQueryParam(fields);
+    List<String> topicsList = QueryUtils.splitCsvStringQueryParam(topics);
     List<Integer> levelsList = null;
-    List<String> stagesList = StringUtils.splitCsvStringQueryParam(stages);
-    List<String> difficultiesList = StringUtils.splitCsvStringQueryParam(difficulties);
-    List<String> examBoardsList = StringUtils.splitCsvStringQueryParam(examBoards);
-    List<String> conceptsList = StringUtils.splitCsvStringQueryParam(concepts);
-    List<String> questionCategoriesList = StringUtils.splitCsvStringQueryParam(questionCategories);
+    List<String> stagesList = QueryUtils.splitCsvStringQueryParam(stages);
+    List<String> difficultiesList = QueryUtils.splitCsvStringQueryParam(difficulties);
+    List<String> examBoardsList = QueryUtils.splitCsvStringQueryParam(examBoards);
+    List<String> conceptsList = QueryUtils.splitCsvStringQueryParam(concepts);
+    List<String> questionCategoriesList = QueryUtils.splitCsvStringQueryParam(questionCategories);
 
     if (null != levels && !levels.isEmpty()) {
       String[] levelsAsString = levels.split(",");

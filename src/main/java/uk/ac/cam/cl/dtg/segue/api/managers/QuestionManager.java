@@ -79,7 +79,7 @@ import uk.ac.cam.cl.dtg.segue.api.ErrorResponseWrapper;
 import uk.ac.cam.cl.dtg.segue.configuration.SegueGuiceConfigurationModule;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
-import uk.ac.cam.cl.dtg.util.StringUtils;
+import uk.ac.cam.cl.dtg.util.QueryUtils;
 
 /**
  * This class is responsible for validating correct answers using the ValidatesWith annotation when it is applied on to
@@ -645,7 +645,7 @@ public class QuestionManager {
     if (filterQuestionsPreference != null && filterQuestionsPreference.getPreferenceValue()) {
       var userContexts = currentUser.getRegisteredContexts();
 
-      List<String> subjectsList = StringUtils.splitCsvStringQueryParam(subjects);
+      List<String> subjectsList = QueryUtils.splitCsvStringQueryParam(subjects);
       List<String> stagesList = new ArrayList<>();
       List<String> examBoardsList = new ArrayList<>();
 
