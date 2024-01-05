@@ -51,6 +51,7 @@ public class GameManagerTest {
   private GameboardPersistenceManager dummyGameboardPersistenceManager;
   private MapperFacade dummyMapper;
   private QuestionManager dummyQuestionManager;
+  private GameManager gameManager;
 
   @Before
   public void setUp() {
@@ -58,20 +59,18 @@ public class GameManagerTest {
     this.dummyGameboardPersistenceManager = createMock(GameboardPersistenceManager.class);
     this.dummyMapper = createMock(MapperFacade.class);
     this.dummyQuestionManager = createMock(QuestionManager.class);
-  }
-
-  @Test
-  public void getNextQuestionsForFilter_appliesExclusionFilterForDeprecatedQuestions() throws
-      ContentManagerException {
-
-    // Arrange
-    GameManager gameManager = new GameManager(
+    this.gameManager = new GameManager(
         this.dummyContentManager,
         this.dummyGameboardPersistenceManager,
         this.dummyMapper,
         this.dummyQuestionManager,
         "latest"
     );
+  }
+
+  @Test
+  public void getNextQuestionsForFilter_appliesExclusionFilterForDeprecatedQuestions() throws
+      ContentManagerException {
 
     // configure the mock GitContentManager to record the filters that are sent to it by getNextQuestionsForFilter()
     Capture<List<BooleanSearchClause>> capturedFilters = Capture.newInstance();
@@ -102,23 +101,16 @@ public class GameManagerTest {
 
     // Arrange
     int limit = 5;
-
-    var gameManager = new GameManager(
-        this.dummyContentManager,
-        this.dummyGameboardPersistenceManager,
-        this.dummyMapper,
-        this.dummyQuestionManager,
-        "latest"
-    );
+    int totalQuestions = 20; // Change to 20 questions
 
     List<ContentDTO> questions = new ArrayList<>();
-    for (int i = 0; i < limit; i++) {
+    for (int i = 0; i < totalQuestions; i++) {
       IsaacQuestionPageDTO question = createMock(IsaacQuestionPageDTO.class);
       // Setting the expected behavior for the getSupersededBy method
       expect(question.getSupersededBy()).andStubReturn(null);
       questions.add(question);
     }
-    var resultsWrapper = new ResultsWrapper<>(questions, (long) limit);
+    var resultsWrapper = new ResultsWrapper<>(questions, (long) totalQuestions);
 
     expect(dummyContentManager.findByFieldNamesRandomOrder(
         anyObject(),
@@ -140,15 +132,6 @@ public class GameManagerTest {
   @Test
   public void generateRandomQuestions_appliesExclusionFilterForDeprecatedQuestions() throws
       ContentManagerException {
-
-    // Arrange
-    GameManager gameManager = new GameManager(
-        this.dummyContentManager,
-        this.dummyGameboardPersistenceManager,
-        this.dummyMapper,
-        this.dummyQuestionManager,
-        "latest"
-    );
 
     // configure the mock GitContentManager to record the filters that are sent to it by generateRandomQuestions()
     Capture<List<BooleanSearchClause>> capturedFilters = Capture.newInstance();
