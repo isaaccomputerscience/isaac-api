@@ -63,10 +63,7 @@ import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.crypto.Mac;
@@ -302,27 +299,35 @@ public class AdminFacade extends AbstractSegueFacade {
                 .toResponse();
       }
 
-      for (Long userid : userIds) {
-        RegisteredUserDTO user = this.userManager.getUserDTOById(userid);
+      List<Long> failedUserIds = new ArrayList<>();
 
-        if (null == user) {
-          throw new NoUserException("No user found with this ID.");
+      for (Long userId : userIds) {
+        try {
+          RegisteredUserDTO user = this.userManager.getUserDTOById(userId);
+
+          if (null == user) {
+            throw new NoUserException("No user found with this ID.");
+          }
+
+          Boolean oldStatus = user.getTeacherPending();
+          this.userManager.updateTeacherPendingFlag(userId, status);
+          log.info(String.format(
+                  "ADMIN user %s has modified the teacher_pending status of %s [%s] from %s to %s",
+                  requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status
+          ));
+        } catch (NoUserException e) {
+          log.error("NoUserException for userId " + userId, e);
+          failedUserIds.add(userId);
         }
+      }
 
-        Boolean oldStatus = user.getTeacherPending();
-        this.userManager.updateTeacherPendingFlag(userid, status);
-        log.info(String.format(
-                "ADMIN user %s has modified the teacher_pending status of %s [%s] from %s to %s",
-                requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status
-        ));
+      if (!failedUserIds.isEmpty()) {
+        String errorMessage = String.format("One or more users could not be found: %s", failedUserIds);
+        return new SegueErrorResponse(Status.BAD_REQUEST, errorMessage).toResponse();
       }
 
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
-    } catch (NoUserException e) {
-      log.error("NoUserException when attempting to modify users.", e);
-      return new SegueErrorResponse(Status.BAD_REQUEST, "One or more users could not be found")
-              .toResponse();
     } catch (SegueDatabaseException e) {
       log.error("Database error while trying to change teacher_pending status", e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
