@@ -90,14 +90,16 @@ import uk.ac.cam.cl.dtg.util.QueryUtils;
 @Path("/")
 @Tag(name = "/gameboards")
 public class GameboardsFacade extends AbstractIsaacFacade {
-  private static final Logger log = LoggerFactory.getLogger(GameboardsFacade.class);
-  private static final String VALID_GAMEBOARD_ID_REGEX = "^[a-z0-9_-]+$";
-  private final QuestionManager questionManager;
-  private final FastTrackManger fastTrackManger;
   private GameManager gameManager;
   private UserAccountManager userManager;
   private UserAssociationManager associationManager;
   private UserBadgeManager userBadgeManager;
+  private static final Logger log = LoggerFactory.getLogger(GameboardsFacade.class);
+  private final QuestionManager questionManager;
+
+  private final FastTrackManger fastTrackManger;
+
+  private static final String VALID_GAMEBOARD_ID_REGEX = "^[a-z0-9_-]+$";
 
   /**
    * GamesFacade. For management of gameboards etc.
