@@ -282,6 +282,57 @@ public class AdminFacade extends AbstractSegueFacade {
   }
 
   /**
+   * This method will allow users to have their teacher pending status mass changed.
+   *
+   * @param request - to help determine access rights.
+   * @param status    - new teacher pending status.
+   * @param userIds - a list of user ids to change en-mass
+   * @return Success shown by returning an ok response
+   */
+  @POST
+  @Path("/users/teacher_pending/{status}")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.APPLICATION_JSON)
+  public synchronized Response modifyUsersTeacherPendingStatus(@Context final HttpServletRequest request,
+                                               @PathParam("status") final Boolean status, final List<Long> userIds) {
+    try {
+      RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
+      if (!isUserAnAdminOrEventManager(userManager, requestingUser)) {
+        return new SegueErrorResponse(Status.FORBIDDEN, "You must be staff to access this endpoint.")
+                .toResponse();
+      }
+
+      for (Long userid : userIds) {
+        RegisteredUserDTO user = this.userManager.getUserDTOById(userid);
+
+        if (null == user) {
+          throw new NoUserException("No user found with this ID.");
+        }
+
+        Boolean oldStatus = user.getTeacherPending();
+        this.userManager.updateTeacherPendingFlag(userid, status);
+        log.info(String.format(
+                "ADMIN user %s has modified the teacher_pending status of %s [%s] from %s to %s",
+                requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status
+        ));
+      }
+
+    } catch (NoUserLoggedInException e) {
+      return SegueErrorResponse.getNotLoggedInResponse();
+    } catch (NoUserException e) {
+      log.error("NoUserException when attempting to modify users.", e);
+      return new SegueErrorResponse(Status.BAD_REQUEST, "One or more users could not be found")
+              .toResponse();
+    } catch (SegueDatabaseException e) {
+      log.error("Database error while trying to change teacher_pending status", e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
+              "Could not save new teacher_pending status to the database").toResponse();
+    }
+
+    return Response.ok().build();
+  }
+
+  /**
    * This method will allow users' email verification status to be changed en-mass.
    *
    * @param request                        - to help determine access rights.
