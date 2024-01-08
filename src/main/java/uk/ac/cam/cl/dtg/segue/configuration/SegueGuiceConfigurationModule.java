@@ -37,6 +37,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_APP_ENVIRONMENT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_CONFIG_LOCATION_ENVIRONMENT_PROPERTY;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_CONFIG_LOCATION_NOT_SPECIFIED_MESSAGE;
 import static uk.ac.cam.cl.dtg.util.ReflectionsUtil.getClasses;
+import static uk.ac.cam.cl.dtg.util.ReflectionsUtil.getSubTypes;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,6 +64,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -72,7 +74,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.Validate;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.quartz.SchedulerException;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.api.managers.AssignmentManager;
@@ -226,7 +227,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   private static IGroupObserver groupObserver = null;
 
   private static Collection<Class<? extends ServletContextListener>> contextListeners;
-  private static final Map<String, Reflections> REFLECTIONS = com.google.common.collect.Maps.newHashMap();
+  private static final Map<String, List<Class<?>>> REFLECTIONS = new HashMap<>();
 
   /**
    * A setter method that is mostly useful for testing. It populates the global properties static value if it has not
@@ -1231,10 +1232,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * @param pkg - class name to use as key
    * @return reflections.
    */
-  public static Reflections getReflectionsClass(final String pkg) {
+  public static List<Class<?>> getReflectionsClass(final String pkg)
+      throws IOException, URISyntaxException, ClassNotFoundException {
     if (!REFLECTIONS.containsKey(pkg)) {
       log.info(String.format("Caching reflections scan on '%s'", pkg));
-      REFLECTIONS.put(pkg, new Reflections(pkg));
+      REFLECTIONS.put(pkg, getClasses(pkg));
     }
     return REFLECTIONS.get(pkg);
   }
@@ -1244,21 +1246,21 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    *
    * @return the list of context listener classes (these should all be singletons).
    */
-  public static Collection<Class<? extends ServletContextListener>> getRegisteredContextListenerClasses() {
+  public static Collection<Class<? extends ServletContextListener>> getRegisteredContextListenerClasses()
+      throws IOException, URISyntaxException, ClassNotFoundException {
 
     if (null == contextListeners) {
       contextListeners = Lists.newArrayList();
 
-      Set<Class<? extends ServletContextListener>> subTypes = getReflectionsClass("uk.ac.cam.cl.dtg.segue")
-          .getSubTypesOf(ServletContextListener.class);
+      Set<Class<?>> subTypes = getSubTypes(getReflectionsClass("uk.ac.cam.cl.dtg.segue"), ServletContextListener.class);
 
-      Set<Class<? extends ServletContextListener>> etlSubTypes = getReflectionsClass("uk.ac.cam.cl.dtg.segue.etl")
-          .getSubTypesOf(ServletContextListener.class);
+      Set<Class<?>> etlSubTypes =
+          getSubTypes(getReflectionsClass("uk.ac.cam.cl.dtg.segue.etl"), ServletContextListener.class);
 
       subTypes.removeAll(etlSubTypes);
 
-      for (Class<? extends ServletContextListener> contextListener : subTypes) {
-        contextListeners.add(contextListener);
+      for (Class<?> contextListener : subTypes) {
+        contextListeners.add((Class<? extends ServletContextListener>) contextListener);
         log.info("Registering context listener class " + contextListener.getCanonicalName());
       }
     }

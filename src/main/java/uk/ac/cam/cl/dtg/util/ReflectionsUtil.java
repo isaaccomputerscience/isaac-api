@@ -8,6 +8,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ReflectionsUtil {
   public static List<Class<?>> getClasses(String packageName) throws ClassNotFoundException, IOException,
@@ -15,7 +17,7 @@ public class ReflectionsUtil {
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
     String path = packageName.replace('.', '/');
     Enumeration<URL> resources = classLoader.getResources(path);
-    List<File> dirs = new ArrayList<File>();
+    List<File> dirs = new ArrayList<>();
     while (resources.hasMoreElements()) {
       URL resource = resources.nextElement();
       URI uri = new URI(resource.toString());
@@ -43,5 +45,9 @@ public class ReflectionsUtil {
       }
     }
     return classes;
+  }
+
+  public static Set<Class<?>> getSubTypes(List<Class<?>> classes, Class<?> parentClass) {
+    return classes.stream().filter(parentClass::isAssignableFrom).collect(Collectors.toSet());
   }
 }
