@@ -617,6 +617,14 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.hubspot.maven.plugins</groupId>
+                <artifactId>prettier-maven-plugin</artifactId>
+                <version>0.21</version>
+                <configuration>
+                    <printWidth>120</printWidth>
+                </configuration>
+            </plugin>
         </plugins>
         <resources>
             <resource>
