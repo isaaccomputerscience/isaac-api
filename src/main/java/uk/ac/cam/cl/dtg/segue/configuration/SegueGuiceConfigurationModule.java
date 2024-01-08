@@ -36,6 +36,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.RASPBERRYPI_OAUTH_SCOPES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_APP_ENVIRONMENT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_CONFIG_LOCATION_ENVIRONMENT_PROPERTY;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_CONFIG_LOCATION_NOT_SPECIFIED_MESSAGE;
+import static uk.ac.cam.cl.dtg.util.ReflectionsUtil.getClasses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +57,7 @@ import jakarta.servlet.ServletContextListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -580,9 +582,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Inject
   @Provides
   @Singleton
-  private static ContentMapper getContentMapper() {
+  private static ContentMapper getContentMapper() throws IOException, URISyntaxException, ClassNotFoundException {
     if (null == mapper) {
-      mapper = new ContentMapper(getReflectionsClass("uk.ac.cam.cl.dtg"));
+      List<Class<?>> c = getClasses("uk.ac.cam.cl.dtg");
+      mapper = new ContentMapper(c);
       log.info("Creating Singleton of the Content Mapper");
     }
 
@@ -873,7 +876,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   @Inject
-  public static MapperFacade getDOtoDTOMapper() {
+  public static MapperFacade getDOtoDTOMapper() throws IOException, URISyntaxException, ClassNotFoundException {
     return SegueGuiceConfigurationModule.getContentMapper().getAutoMapper();
   }
 

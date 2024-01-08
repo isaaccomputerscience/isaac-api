@@ -118,7 +118,6 @@ class ETLConfigurationModule extends AbstractModule {
   @Singleton
   private static ContentMapper getContentMapper() throws IOException, URISyntaxException, ClassNotFoundException {
     if (null == mapper) {
-//      Reflections r = new Reflections("uk.ac.cam.cl.dtg");
       List<Class<?>> c = getClasses("uk.ac.cam.cl.dtg");
       mapper = new ContentMapper(c);
     }
