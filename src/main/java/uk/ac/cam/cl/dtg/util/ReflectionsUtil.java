@@ -47,7 +47,8 @@ public class ReflectionsUtil {
     return classes;
   }
 
-  public static Set<Class<?>> getSubTypes(List<Class<?>> classes, Class<?> parentClass) {
-    return classes.stream().filter(parentClass::isAssignableFrom).collect(Collectors.toSet());
+  @SuppressWarnings("unchecked")
+  public static <T> Set<Class<? extends T>> getSubTypes(List<Class<?>> classes, Class<T> parentClass) {
+    return classes.stream().filter(parentClass::isAssignableFrom).map(c -> (Class<T>) c).collect(Collectors.toSet());
   }
 }

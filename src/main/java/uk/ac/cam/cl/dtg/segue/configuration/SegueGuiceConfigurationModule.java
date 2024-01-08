@@ -1252,15 +1252,16 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     if (null == contextListeners) {
       contextListeners = Lists.newArrayList();
 
-      Set<Class<?>> subTypes = getSubTypes(getReflectionsClass("uk.ac.cam.cl.dtg.segue"), ServletContextListener.class);
+      Set<Class<? extends ServletContextListener>> subTypes =
+          getSubTypes(getReflectionsClass("uk.ac.cam.cl.dtg.segue"), ServletContextListener.class);
 
-      Set<Class<?>> etlSubTypes =
+      Set<Class<? extends ServletContextListener>> etlSubTypes =
           getSubTypes(getReflectionsClass("uk.ac.cam.cl.dtg.segue.etl"), ServletContextListener.class);
 
       subTypes.removeAll(etlSubTypes);
 
-      for (Class<?> contextListener : subTypes) {
-        contextListeners.add((Class<? extends ServletContextListener>) contextListener);
+      for (Class<? extends ServletContextListener> contextListener : subTypes) {
+        contextListeners.add(contextListener);
         log.info("Registering context listener class " + contextListener.getCanonicalName());
       }
     }
