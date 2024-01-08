@@ -94,7 +94,7 @@ public interface IQuizAttemptPersistenceManager {
    * @return A map of assignment ID to quiz attempts.
    */
   Map<Long, QuizAttemptDTO> getByQuizAssignmentIdsAndUserId(List<Long> quizAssignmentIds, Long userId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Get the attempts for a user that are not associated with an assignment.

@@ -148,58 +148,204 @@ public class IsaacTest {
     quizSection2.setId("studentQuiz|section2");
     quizSection2.setChildren(ImmutableList.of(question2, question3));
 
-    studentQuiz = new IsaacQuizDTO("studentQuiz", null, null, null, null, null, null, null,
-        ImmutableList.of(quizSection1, quizSection2), null, null, null, false, null, null, null, true, null,
-        QuizFeedbackMode.OVERALL_MARK, null);
+    studentQuiz =
+      new IsaacQuizDTO(
+        "studentQuiz",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        ImmutableList.of(quizSection1, quizSection2),
+        null,
+        null,
+        null,
+        false,
+        null,
+        null,
+        null,
+        true,
+        null,
+        QuizFeedbackMode.OVERALL_MARK,
+        null
+      );
     teacherQuiz =
-        new IsaacQuizDTO("teacherQuiz", null, null, null, null, null, null, null, null, null, null, null, false, null,
-            null, null, false, ImmutableList.of("STUDENT"), null, null);
+      new IsaacQuizDTO(
+        "teacherQuiz",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        null,
+        null,
+        null,
+        false,
+        ImmutableList.of("STUDENT"),
+        null,
+        null
+      );
     otherQuiz =
-        new IsaacQuizDTO("otherQuiz", null, null, null, null, null, null, null, Collections.singletonList(quizSection1),
-            null, null, null, false, null, null, null, true, null, QuizFeedbackMode.DETAILED_FEEDBACK, null);
+      new IsaacQuizDTO(
+        "otherQuiz",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        Collections.singletonList(quizSection1),
+        null,
+        null,
+        null,
+        false,
+        null,
+        null,
+        null,
+        true,
+        null,
+        QuizFeedbackMode.DETAILED_FEEDBACK,
+        null
+      );
 
     // A bit scrappy, but hopefully sufficient.
     studentQuizDO =
-        new IsaacQuiz("studentQuiz", null, null, null, null, null, null, null, null, null, null, null, false, null,
-            null, null, true, null, null);
+      new IsaacQuiz(
+        "studentQuiz",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        null,
+        null,
+        null,
+        true,
+        null,
+        null
+      );
 
-    student = new RegisteredUserDTO("Some", "Student", "test-student@test.com", EmailVerificationStatus.VERIFIED,
-        somePastDate, Gender.MALE, somePastDate, "", false);
+    student =
+      new RegisteredUserDTO(
+        "Some",
+        "Student",
+        "test-student@test.com",
+        EmailVerificationStatus.VERIFIED,
+        somePastDate,
+        Gender.MALE,
+        somePastDate,
+        "",
+        false
+      );
     student.setRole(Role.STUDENT);
     student.setId(++id);
 
-    teacher = new RegisteredUserDTO("Some", "Teacher", "test-teacher@test.com", EmailVerificationStatus.VERIFIED,
-        somePastDate, Gender.FEMALE, somePastDate, "", false);
+    teacher =
+      new RegisteredUserDTO(
+        "Some",
+        "Teacher",
+        "test-teacher@test.com",
+        EmailVerificationStatus.VERIFIED,
+        somePastDate,
+        Gender.FEMALE,
+        somePastDate,
+        "",
+        false
+      );
     teacher.setRole(Role.TEACHER);
     teacher.setId(++id);
 
     secondTeacher =
-        new RegisteredUserDTO("Second", "Teacher", "second-teacher@test.com", EmailVerificationStatus.VERIFIED,
-            somePastDate, Gender.PREFER_NOT_TO_SAY, somePastDate, "", false);
+      new RegisteredUserDTO(
+        "Second",
+        "Teacher",
+        "second-teacher@test.com",
+        EmailVerificationStatus.VERIFIED,
+        somePastDate,
+        Gender.PREFER_NOT_TO_SAY,
+        somePastDate,
+        "",
+        false
+      );
     secondTeacher.setRole(Role.TEACHER);
     secondTeacher.setId(++id);
 
-    otherTeacher = new RegisteredUserDTO("Other", "Teacher", "other-teacher@test.com", EmailVerificationStatus.VERIFIED,
-        somePastDate, Gender.OTHER, somePastDate, "", false);
+    otherTeacher =
+      new RegisteredUserDTO(
+        "Other",
+        "Teacher",
+        "other-teacher@test.com",
+        EmailVerificationStatus.VERIFIED,
+        somePastDate,
+        Gender.OTHER,
+        somePastDate,
+        "",
+        false
+      );
     otherTeacher.setRole(Role.TEACHER);
     otherTeacher.setId(++id);
 
     noone = null;
 
     secondStudent =
-        new RegisteredUserDTO("Second", "Student", "second-student@test.com", EmailVerificationStatus.VERIFIED,
-            somePastDate, Gender.FEMALE, somePastDate, "", false);
+      new RegisteredUserDTO(
+        "Second",
+        "Student",
+        "second-student@test.com",
+        EmailVerificationStatus.VERIFIED,
+        somePastDate,
+        Gender.FEMALE,
+        somePastDate,
+        "",
+        false
+      );
     secondStudent.setRole(Role.STUDENT);
     secondStudent.setId(++id);
 
-    otherStudent = new RegisteredUserDTO("Other", "Student", "other-student@test.com", EmailVerificationStatus.VERIFIED,
-        somePastDate, Gender.MALE, somePastDate, "", false);
+    otherStudent =
+      new RegisteredUserDTO(
+        "Other",
+        "Student",
+        "other-student@test.com",
+        EmailVerificationStatus.VERIFIED,
+        somePastDate,
+        Gender.MALE,
+        somePastDate,
+        "",
+        false
+      );
     otherStudent.setRole(Role.STUDENT);
     otherStudent.setId(++id);
 
     adminUser =
-        new RegisteredUserDTO("Test", "Admin", "test-admin@test.com", EmailVerificationStatus.VERIFIED, somePastDate,
-            Gender.UNKNOWN, somePastDate, "", false);
+      new RegisteredUserDTO(
+        "Test",
+        "Admin",
+        "test-admin@test.com",
+        EmailVerificationStatus.VERIFIED,
+        somePastDate,
+        Gender.UNKNOWN,
+        somePastDate,
+        "",
+        false
+      );
     adminUser.setRole(Role.ADMIN);
     adminUser.setId(++id);
 
@@ -219,118 +365,217 @@ public class IsaacTest {
     studentGroup.setAdditionalManagers(Collections.singleton(secondTeacherSummary));
 
     studentInactiveGroup =
-        new UserGroupDTO(++id, "studentInactiveGroup", teacher.getId(), somePastDate, somePastDate, false);
+      new UserGroupDTO(++id, "studentInactiveGroup", teacher.getId(), somePastDate, somePastDate, false);
 
     studentGroups = ImmutableList.of(studentGroup.getId(), studentInactiveGroup.getId());
 
     completedAssignment =
-        new QuizAssignmentDTO(++id, studentQuiz.getId(), teacher.getId(), studentGroup.getId(), someFurtherPastDate,
-            somePastDate, QuizFeedbackMode.OVERALL_MARK);
+      new QuizAssignmentDTO(
+        ++id,
+        studentQuiz.getId(),
+        teacher.getId(),
+        studentGroup.getId(),
+        someFurtherPastDate,
+        somePastDate,
+        QuizFeedbackMode.OVERALL_MARK
+      );
     studentAssignment =
-        new QuizAssignmentDTO(++id, studentQuiz.getId(), teacher.getId(), studentGroup.getId(), somePastDate,
-            someFutureDate, QuizFeedbackMode.DETAILED_FEEDBACK);
+      new QuizAssignmentDTO(
+        ++id,
+        studentQuiz.getId(),
+        teacher.getId(),
+        studentGroup.getId(),
+        somePastDate,
+        someFutureDate,
+        QuizFeedbackMode.DETAILED_FEEDBACK
+      );
     overdueAssignment =
-        new QuizAssignmentDTO(++id, studentQuiz.getId(), teacher.getId(), studentGroup.getId(), someFurtherPastDate,
-            somePastDate, QuizFeedbackMode.SECTION_MARKS);
+      new QuizAssignmentDTO(
+        ++id,
+        studentQuiz.getId(),
+        teacher.getId(),
+        studentGroup.getId(),
+        someFurtherPastDate,
+        somePastDate,
+        QuizFeedbackMode.SECTION_MARKS
+      );
     otherAssignment =
-        new QuizAssignmentDTO(++id, teacherQuiz.getId(), teacher.getId(), studentGroup.getId(), somePastDate,
-            someFutureDate, QuizFeedbackMode.OVERALL_MARK);
+      new QuizAssignmentDTO(
+        ++id,
+        teacherQuiz.getId(),
+        teacher.getId(),
+        studentGroup.getId(),
+        somePastDate,
+        someFutureDate,
+        QuizFeedbackMode.OVERALL_MARK
+      );
 
     studentInactiveIgnoredAssignment =
-        new QuizAssignmentDTO(++id, teacherQuiz.getId(), teacher.getId(), studentInactiveGroup.getId(), somePastDate,
-            someFutureDate, QuizFeedbackMode.OVERALL_MARK);
+      new QuizAssignmentDTO(
+        ++id,
+        teacherQuiz.getId(),
+        teacher.getId(),
+        studentInactiveGroup.getId(),
+        somePastDate,
+        someFutureDate,
+        QuizFeedbackMode.OVERALL_MARK
+      );
     studentInactiveAssignment =
-        new QuizAssignmentDTO(++id, teacherQuiz.getId(), teacher.getId(), studentInactiveGroup.getId(),
-            someFurtherPastDate, someFutureDate, QuizFeedbackMode.OVERALL_MARK);
+      new QuizAssignmentDTO(
+        ++id,
+        teacherQuiz.getId(),
+        teacher.getId(),
+        studentInactiveGroup.getId(),
+        someFurtherPastDate,
+        someFutureDate,
+        QuizFeedbackMode.OVERALL_MARK
+      );
 
-    studentAssignments = ImmutableList.of(completedAssignment, studentAssignment, overdueAssignment, otherAssignment,
-        studentInactiveAssignment);
+    studentAssignments =
+      ImmutableList.of(
+        completedAssignment,
+        studentAssignment,
+        overdueAssignment,
+        otherAssignment,
+        studentInactiveAssignment
+      );
 
     teacherAssignmentsToTheirGroups =
-        ImmutableList.<QuizAssignmentDTO>builder().addAll(studentAssignments).add(studentInactiveIgnoredAssignment)
-            .build();
+      ImmutableList
+        .<QuizAssignmentDTO>builder()
+        .addAll(studentAssignments)
+        .add(studentInactiveIgnoredAssignment)
+        .build();
 
     studentAttempt =
-        new QuizAttemptDTO(++id, student.getId(), studentQuiz.getId(), studentAssignment.getId(), somePastDate, null);
+      new QuizAttemptDTO(++id, student.getId(), studentQuiz.getId(), studentAssignment.getId(), somePastDate, null);
     overdueAttempt =
-        new QuizAttemptDTO(++id, student.getId(), studentQuiz.getId(), overdueAssignment.getId(), somePastDate, null);
+      new QuizAttemptDTO(++id, student.getId(), studentQuiz.getId(), overdueAssignment.getId(), somePastDate, null);
     completedAttempt =
-        new QuizAttemptDTO(++id, student.getId(), studentQuiz.getId(), studentAssignment.getId(), somePastDate,
-            new Date());
+      new QuizAttemptDTO(
+        ++id,
+        student.getId(),
+        studentQuiz.getId(),
+        studentAssignment.getId(),
+        somePastDate,
+        new Date()
+      );
     overdueCompletedAttempt =
-        new QuizAttemptDTO(++id, student.getId(), studentQuiz.getId(), overdueAssignment.getId(), somePastDate,
-            new Date());
+      new QuizAttemptDTO(
+        ++id,
+        student.getId(),
+        studentQuiz.getId(),
+        overdueAssignment.getId(),
+        somePastDate,
+        new Date()
+      );
     otherAttempt =
-        new QuizAttemptDTO(++id, student.getId(), teacherQuiz.getId(), otherAssignment.getId(), somePastDate, null);
+      new QuizAttemptDTO(++id, student.getId(), teacherQuiz.getId(), otherAssignment.getId(), somePastDate, null);
 
     ownCompletedAttempt =
-        new QuizAttemptDTO(++id, student.getId(), otherQuiz.getId(), null, somePastDate, somePastDate);
+      new QuizAttemptDTO(++id, student.getId(), otherQuiz.getId(), null, somePastDate, somePastDate);
     ownAttempt = new QuizAttemptDTO(++id, student.getId(), otherQuiz.getId(), null, somePastDate, null);
     attemptOnNullFeedbackModeQuiz =
-        new QuizAttemptDTO(101L, student.getId(), teacherQuiz.getId(), null, somePastDate, somePastDate);
+      new QuizAttemptDTO(101L, student.getId(), teacherQuiz.getId(), null, somePastDate, somePastDate);
 
     studentAttempts =
-        ImmutableList.of(studentAttempt, overdueAttempt, completedAttempt, overdueCompletedAttempt, otherAttempt,
-            ownAttempt, ownCompletedAttempt, attemptOnNullFeedbackModeQuiz);
+      ImmutableList.of(
+        studentAttempt,
+        overdueAttempt,
+        completedAttempt,
+        overdueCompletedAttempt,
+        otherAttempt,
+        ownAttempt,
+        ownCompletedAttempt,
+        attemptOnNullFeedbackModeQuiz
+      );
   }
 
   protected void initializeMocks() throws SegueDatabaseException {
     quizManager = createMock(QuizManager.class);
 
-    registerDefaultsFor(quizManager, m -> {
-      expect(m.getAvailableQuizzes(true, "STUDENT", 0, 9000)).andStubReturn(wrap(studentQuizSummary));
-      expect(m.getAvailableQuizzes(false, "TEACHER", 0, 9000)).andStubReturn(
-          wrap(studentQuizSummary, teacherQuizSummary));
-      expect(m.findQuiz(studentQuiz.getId())).andStubReturn(studentQuiz);
-      expect(m.findQuiz(teacherQuiz.getId())).andStubReturn(teacherQuiz);
-      expect(m.findQuiz(otherQuiz.getId())).andStubReturn(otherQuiz);
-      expect(m.extractSectionObjects(studentQuiz)).andStubReturn(ImmutableList.of(quizSection1, quizSection2));
-    });
+    registerDefaultsFor(
+      quizManager,
+      m -> {
+        expect(m.getAvailableQuizzes(true, "STUDENT", 0, 9000)).andStubReturn(wrap(studentQuizSummary));
+        expect(m.getAvailableQuizzes(false, "TEACHER", 0, 9000))
+          .andStubReturn(wrap(studentQuizSummary, teacherQuizSummary));
+        expect(m.findQuiz(studentQuiz.getId())).andStubReturn(studentQuiz);
+        expect(m.findQuiz(teacherQuiz.getId())).andStubReturn(teacherQuiz);
+        expect(m.findQuiz(otherQuiz.getId())).andStubReturn(otherQuiz);
+        expect(m.extractSectionObjects(studentQuiz)).andStubReturn(ImmutableList.of(quizSection1, quizSection2));
+      }
+    );
 
-    groupManager = partialMockBuilder(GroupManager.class)
+    groupManager =
+      partialMockBuilder(GroupManager.class)
         .addMockedMethods("getGroupById", "isUserInGroup", "getUserMembershipMapForGroup", "getUsersInGroup")
         .addMockedMethod("getGroupMembershipList", RegisteredUserDTO.class, boolean.class)
         .createMock();
-    expect(groupManager.getGroupById(anyLong())).andStubAnswer(() -> {
-      Object[] arguments = getCurrentArguments();
-      if (arguments[0] == studentGroup.getId()) {
-        return studentGroup;
-      } else {
-        throw new SegueDatabaseException("No such group.");
-      }
-    });
-    expect(groupManager.isUserInGroup(anyObject(), anyObject())).andStubAnswer(() -> {
-      Object[] arguments = getCurrentArguments();
-      if ((arguments[0] == student) && (arguments[1] == studentGroup || arguments[1] == studentInactiveGroup)) {
-        return true;
-      } else {
-        return arguments[0] == secondStudent && arguments[1] == studentGroup;
-      }
-    });
-    expect(groupManager.getGroupMembershipList(student, false)).andStubReturn(
-        ImmutableList.of(studentGroup, studentInactiveGroup));
+    expect(groupManager.getGroupById(anyLong()))
+      .andStubAnswer(
+        () -> {
+          Object[] arguments = getCurrentArguments();
+          if (arguments[0] == studentGroup.getId()) {
+            return studentGroup;
+          } else {
+            throw new SegueDatabaseException("No such group.");
+          }
+        }
+      );
+    expect(groupManager.isUserInGroup(anyObject(), anyObject()))
+      .andStubAnswer(
+        () -> {
+          Object[] arguments = getCurrentArguments();
+          if ((arguments[0] == student) && (arguments[1] == studentGroup || arguments[1] == studentInactiveGroup)) {
+            return true;
+          } else {
+            return arguments[0] == secondStudent && arguments[1] == studentGroup;
+          }
+        }
+      );
+    expect(groupManager.getGroupMembershipList(student, false))
+      .andStubReturn(ImmutableList.of(studentGroup, studentInactiveGroup));
     expect(groupManager.getGroupMembershipList(secondStudent, false)).andStubReturn(ImmutableList.of(studentGroup));
-    expect(groupManager.getUserMembershipMapForGroup(studentGroup.getId())).andStubReturn(
+    expect(groupManager.getUserMembershipMapForGroup(studentGroup.getId()))
+      .andStubReturn(
         ImmutableMap.of(
+          student.getId(),
+          new GroupMembershipDTO(
+            studentGroup.getId(),
             student.getId(),
-            new GroupMembershipDTO(studentGroup.getId(), student.getId(), GroupMembershipStatus.ACTIVE, null,
-                somePastDate),
+            GroupMembershipStatus.ACTIVE,
+            null,
+            somePastDate
+          ),
+          secondStudent.getId(),
+          new GroupMembershipDTO(
+            studentGroup.getId(),
             secondStudent.getId(),
-            new GroupMembershipDTO(studentGroup.getId(), secondStudent.getId(), GroupMembershipStatus.ACTIVE, null,
-                somePastDate)
+            GroupMembershipStatus.ACTIVE,
+            null,
+            somePastDate
+          )
         )
-    );
+      );
     Date beforeSomePastDate = new Date(somePastDate.getTime() - 1000L);
-    expect(groupManager.getUserMembershipMapForGroup(studentInactiveGroup.getId())).andStubReturn(
-        Collections.singletonMap(student.getId(),
-            new GroupMembershipDTO(studentGroup.getId(), student.getId(), GroupMembershipStatus.INACTIVE, null,
-                beforeSomePastDate))
-    );
+    expect(groupManager.getUserMembershipMapForGroup(studentInactiveGroup.getId()))
+      .andStubReturn(
+        Collections.singletonMap(
+          student.getId(),
+          new GroupMembershipDTO(
+            studentGroup.getId(),
+            student.getId(),
+            GroupMembershipStatus.INACTIVE,
+            null,
+            beforeSomePastDate
+          )
+        )
+      );
     expect(groupManager.getUsersInGroup(studentGroup)).andStubReturn(ImmutableList.of(student, secondStudent));
 
     replay(quizManager, groupManager);
   }
-
 
   protected List<RegisteredUserDTO> anyOf(RegisteredUserDTO... users) {
     return Arrays.asList(users);

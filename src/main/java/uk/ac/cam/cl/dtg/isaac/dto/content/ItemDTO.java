@@ -22,14 +22,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * DTO to represent items in Item Choices and Questions.
  */
 public class ItemDTO extends ContentDTO {
-
   private String altText;
 
   /**
    * Default constructor required for mapping.
    */
-  public ItemDTO() {
-  }
+  public ItemDTO() {}
 
   // We don't want this field appearing in the DTO JSON!
   @Override
@@ -45,5 +43,4 @@ public class ItemDTO extends ContentDTO {
   public void setAltText(final String altText) {
     this.altText = altText;
   }
-
 }

@@ -11,9 +11,7 @@ public class DuplicateGameboardException extends Exception {
   /**
    * Default constructor.
    */
-  public DuplicateGameboardException() {
-
-  }
+  public DuplicateGameboardException() {}
 
   /**
    * constructor with message.

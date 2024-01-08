@@ -49,7 +49,8 @@ public class PropertiesLoader {
    *             - if we cannot read the file for whatever reason.
    */
   @Inject
-  public PropertiesLoader(final String propertiesFile) throws IOException {
+  public PropertiesLoader(final String propertiesFile)
+    throws IOException {
     this.loadedProperties = new Properties();
     this.propertiesFile = propertiesFile;
     Validate.notBlank(propertiesFile, "Properties file cannot be null");
@@ -152,7 +153,9 @@ public class PropertiesLoader {
       return Integer.parseInt(this.getProperty(key));
     } catch (NumberFormatException e) {
       log.error(
-          String.format("Could not read %1$s from property configuration. Defaulting to %2$d.", key, fallbackValue), e);
+        String.format("Could not read %1$s from property configuration. Defaulting to %2$d.", key, fallbackValue),
+        e
+      );
       return fallbackValue;
     }
   }

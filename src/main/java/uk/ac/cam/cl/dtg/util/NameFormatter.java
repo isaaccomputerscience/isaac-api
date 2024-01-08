@@ -12,8 +12,7 @@ public final class NameFormatter {
   /**
    * It does not make sense to create one of these!
    */
-  private NameFormatter() {
-  }
+  private NameFormatter() {}
 
   /**
    * Form the short version of a teacher name with only a first initial.
@@ -24,7 +23,6 @@ public final class NameFormatter {
   public static String getTeacherNameFromUser(final UserSummaryDTO teacherUser) {
     return formatTeacherName(teacherUser.getGivenName(), teacherUser.getFamilyName());
   }
-
 
   /**
    * Form the short version of a teacher name with only a first initial.

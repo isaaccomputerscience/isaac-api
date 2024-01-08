@@ -31,9 +31,7 @@ public class UserSummaryForAdminUsersDTO extends UserSummaryWithEmailAddressDTO 
   /**
    * UserSummaryDTO.
    */
-  public UserSummaryForAdminUsersDTO() {
-
-  }
+  public UserSummaryForAdminUsersDTO() {}
 
   /**
    * Gets the lastUpdated.
@@ -127,11 +125,19 @@ public class UserSummaryForAdminUsersDTO extends UserSummaryWithEmailAddressDTO 
 
   @Override
   public String toString() {
-    return "lastUpdated=" + "UserSummaryForAdminUsersDTO{" + lastUpdated
-        + ", lastSeen=" + lastSeen
-        + ", registrationDate=" + registrationDate
-        + ", schoolId=" + schoolId
-        + ", schoolOther=" + schoolOther
-        + '}';
+    return (
+      "lastUpdated=" +
+      "UserSummaryForAdminUsersDTO{" +
+      lastUpdated +
+      ", lastSeen=" +
+      lastSeen +
+      ", registrationDate=" +
+      registrationDate +
+      ", schoolId=" +
+      schoolId +
+      ", schoolOther=" +
+      schoolOther +
+      '}'
+    );
   }
 }

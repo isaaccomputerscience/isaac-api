@@ -17,5 +17,7 @@
 package uk.ac.cam.cl.dtg.isaac.dos;
 
 public enum GroupMembershipStatus {
-  ACTIVE, INACTIVE, DELETED
+  ACTIVE,
+  INACTIVE,
+  DELETED
 }

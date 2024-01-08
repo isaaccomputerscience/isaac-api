@@ -38,7 +38,6 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  * by limiting reset requests on a per-IP basis.
  */
 public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
-
   private static final Logger log = LoggerFactory.getLogger(PasswordResetByIPMisuseHandler.class);
 
   private final Integer softThreshold;
@@ -50,14 +49,23 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
 
   @Inject
   public PasswordResetByIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties) {
-    this(emailManager, properties, PASSWORD_RESET_BY_IP_DEFAULT_SOFT_THRESHOLD,
-        PASSWORD_RESET_BY_IP_DEFAULT_HARD_THRESHOLD, NUMBER_SECONDS_IN_ONE_HOUR);
+    this(
+      emailManager,
+      properties,
+      PASSWORD_RESET_BY_IP_DEFAULT_SOFT_THRESHOLD,
+      PASSWORD_RESET_BY_IP_DEFAULT_HARD_THRESHOLD,
+      NUMBER_SECONDS_IN_ONE_HOUR
+    );
   }
 
   @Inject
-  public PasswordResetByIPMisuseHandler(final EmailManager emailManager, final PropertiesLoader properties,
-                                        final Integer softThreshold, final Integer hardThreshold,
-                                        final Integer interval) {
+  public PasswordResetByIPMisuseHandler(
+    final EmailManager emailManager,
+    final PropertiesLoader properties,
+    final Integer softThreshold,
+    final Integer hardThreshold,
+    final Integer interval
+  ) {
     this.properties = properties;
     this.emailManager = emailManager;
     this.softThreshold = softThreshold;
@@ -89,7 +97,12 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
   public void executeSoftThresholdAction(final String message) {
     final String subject = "Soft Threshold limit reached for IP Password Reset endpoint";
     EmailCommunicationMessage e = new EmailCommunicationMessage(
-        properties.getProperty(Constants.SERVER_ADMIN_ADDRESS), subject, message, message, EmailType.ADMIN);
+      properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
+      subject,
+      message,
+      message,
+      EmailType.ADMIN
+    );
     emailManager.addSystemEmailToQueue(e);
     log.warn("Soft threshold limit: " + sanitiseExternalLogValue(message));
   }
@@ -98,9 +111,13 @@ public class PasswordResetByIPMisuseHandler implements IMisuseHandler {
   public void executeHardThresholdAction(final String message) {
     final String subject = "HARD Threshold limit reached for IP Password Reset endpoint";
     EmailCommunicationMessage e = new EmailCommunicationMessage(
-        properties.getProperty(Constants.SERVER_ADMIN_ADDRESS), subject, message, message, EmailType.ADMIN);
+      properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
+      subject,
+      message,
+      message,
+      EmailType.ADMIN
+    );
     emailManager.addSystemEmailToQueue(e);
     log.error("Hard threshold limit: " + sanitiseExternalLogValue(message));
   }
-
 }

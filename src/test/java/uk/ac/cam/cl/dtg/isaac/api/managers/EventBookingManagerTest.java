@@ -77,10 +77,17 @@ public class EventBookingManagerTest {
     this.dummyTransactionManager = createMock(ITransactionManager.class);
     this.dummyTransaction = createMock(ITransaction.class);
     // Replay and Verify this collection of mocks each test to be sure of catching all behaviour!
-    this.mockedObjects = new Object[] {
-        dummyEmailManager, dummyEventBookingPersistenceManager, dummyUserAssociationManager, dummyGroupManager,
-        dummyPropertiesLoader, dummyUserAccountManager, dummyTransactionManager, dummyTransaction
-    };
+    this.mockedObjects =
+      new Object[] {
+        dummyEmailManager,
+        dummyEventBookingPersistenceManager,
+        dummyUserAssociationManager,
+        dummyGroupManager,
+        dummyPropertiesLoader,
+        dummyUserAccountManager,
+        dummyTransactionManager,
+        dummyTransaction
+      };
 
     expect(this.dummyPropertiesLoader.getProperty(HOST_NAME)).andReturn("hostname.com").anyTimes();
     expect(this.dummyPropertiesLoader.getProperty(MAIL_NAME)).andReturn("Isaac Computer Science").anyTimes();
@@ -90,8 +97,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_noExceptionThrown() throws
-      Exception {
+  public void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_noExceptionThrown() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
 
@@ -105,16 +111,21 @@ public class EventBookingManagerTest {
     someStudentUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
     someStudentUser.setRole(Role.STUDENT);
 
-    EventBookingDTO firstBooking = prepareEventBookingDto(BookingStatus.CONFIRMED, someStudentUser.getId(),
-        Role.STUDENT);
+    EventBookingDTO firstBooking = prepareEventBookingDto(
+      BookingStatus.CONFIRMED,
+      someStudentUser.getId(),
+      Role.STUDENT
+    );
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
     expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), someUser.getId()))
-        .andReturn(null).once();
+      .andReturn(null)
+      .once();
 
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testEvent.getId());
     expectLastCall().once();
@@ -124,12 +135,21 @@ public class EventBookingManagerTest {
     dummyTransaction.close();
     expectLastCall().once();
 
-    expect(dummyEventBookingPersistenceManager.createBooking(dummyTransaction, testEvent.getId(), someUser.getId(),
-        BookingStatus
-            .CONFIRMED, someAdditionalInformation)).andReturn(firstBooking).atLeastOnce();
+    expect(
+        dummyEventBookingPersistenceManager.createBooking(
+          dummyTransaction,
+          testEvent.getId(),
+          someUser.getId(),
+          BookingStatus.CONFIRMED,
+          someAdditionalInformation
+        )
+      )
+      .andReturn(firstBooking)
+      .atLeastOnce();
 
-    expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed")).andReturn(new EmailTemplateDTO())
-        .atLeastOnce();
+    expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed"))
+      .andReturn(new EmailTemplateDTO())
+      .atLeastOnce();
 
     dummyEmailManager.sendTemplatedEmailToUser(anyObject(), anyObject(), anyObject(), anyObject(), anyObject());
     expectLastCall().atLeastOnce();
@@ -140,8 +160,8 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_checkStudentNotAllowedOnStudentEventAsCapacityFull_eventFullExceptionThrown() throws
-      Exception {
+  public void requestBooking_checkStudentNotAllowedOnStudentEventAsCapacityFull_eventFullExceptionThrown()
+    throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
 
@@ -152,12 +172,13 @@ public class EventBookingManagerTest {
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
-    expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(),
-        someUser.getId())).andReturn(null)
-        .once();
+    expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), someUser.getId()))
+      .andReturn(null)
+      .once();
 
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testEvent.getId());
     expectLastCall().once();
@@ -178,8 +199,8 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_checkTeacherNotAllowedOnTeacherEventAsCapacityFull_eventFullExceptionThrown() throws
-      Exception {
+  public void requestBooking_checkTeacherNotAllowedOnTeacherEventAsCapacityFull_eventFullExceptionThrown()
+    throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags);
 
@@ -190,12 +211,13 @@ public class EventBookingManagerTest {
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 1L);
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
-    expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(),
-        someUser.getId())).andReturn(null)
-        .once();
+    expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), someUser.getId()))
+      .andReturn(null)
+      .once();
 
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testEvent.getId());
     expectLastCall().once();
@@ -271,12 +293,13 @@ public class EventBookingManagerTest {
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1L);
     placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
-    expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(),
-        someUser.getId())).andReturn(null)
-        .once();
+    expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), someUser.getId()))
+      .andReturn(null)
+      .once();
 
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testEvent.getId());
     expectLastCall().once();
@@ -310,11 +333,13 @@ public class EventBookingManagerTest {
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
     expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), someUser.getId()))
-        .andReturn(null).once();
+      .andReturn(null)
+      .once();
 
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testEvent.getId());
     expectLastCall().once();
@@ -324,11 +349,21 @@ public class EventBookingManagerTest {
     dummyTransaction.close();
     expectLastCall().once();
 
-    expect(dummyEventBookingPersistenceManager.createBooking(dummyTransaction, testEvent.getId(), someUser.getId(),
-        BookingStatus.CONFIRMED, someAdditionalInformation)).andReturn(secondBooking).atLeastOnce();
+    expect(
+        dummyEventBookingPersistenceManager.createBooking(
+          dummyTransaction,
+          testEvent.getId(),
+          someUser.getId(),
+          BookingStatus.CONFIRMED,
+          someAdditionalInformation
+        )
+      )
+      .andReturn(secondBooking)
+      .atLeastOnce();
 
-    expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed")).andReturn(new EmailTemplateDTO())
-        .atLeastOnce();
+    expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed"))
+      .andReturn(new EmailTemplateDTO())
+      .atLeastOnce();
 
     dummyEmailManager.sendTemplatedEmailToUser(anyObject(), anyObject(), anyObject(), anyObject(), anyObject());
     expectLastCall().atLeastOnce();
@@ -360,11 +395,13 @@ public class EventBookingManagerTest {
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
     placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1L);
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
-    expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), firstUserFull
-        .getId())).andReturn(firstBooking).once();
+    expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), firstUserFull.getId()))
+      .andReturn(firstBooking)
+      .once();
 
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testEvent.getId());
     expectLastCall().once();
@@ -374,14 +411,24 @@ public class EventBookingManagerTest {
     dummyTransaction.close();
     expectLastCall().once();
 
-    expect(dummyEventBookingPersistenceManager.createBooking(dummyTransaction, testEvent.getId(), firstUserFull.getId(),
-        BookingStatus.CONFIRMED, someAdditionalInformation)).andReturn(secondBooking).atLeastOnce();
+    expect(
+        dummyEventBookingPersistenceManager.createBooking(
+          dummyTransaction,
+          testEvent.getId(),
+          firstUserFull.getId(),
+          BookingStatus.CONFIRMED,
+          someAdditionalInformation
+        )
+      )
+      .andReturn(secondBooking)
+      .atLeastOnce();
 
     dummyEmailManager.sendTemplatedEmailToUser(anyObject(), anyObject(), anyObject(), anyObject(), anyObject());
     expectLastCall().atLeastOnce();
 
-    expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed")).andReturn(new EmailTemplateDTO())
-        .atLeastOnce();
+    expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed"))
+      .andReturn(new EmailTemplateDTO())
+      .atLeastOnce();
 
     replay(mockedObjects);
     try {
@@ -400,10 +447,16 @@ public class EventBookingManagerTest {
     testCase.event.setNumberOfPlaces(1);
 
     RegisteredUserDTO reservedStudent = testCase.student1;
-    DetailedEventBookingDTO reservedStudentBooking =
-        prepareDetailedEventBookingDto(reservedStudent.getId(), BookingStatus.RESERVED, testCase.event.getId());
-    DetailedEventBookingDTO reservedStudentBookingAfterConfirmation =
-        prepareDetailedEventBookingDto(reservedStudent.getId(), BookingStatus.CONFIRMED, testCase.event.getId());
+    DetailedEventBookingDTO reservedStudentBooking = prepareDetailedEventBookingDto(
+      reservedStudent.getId(),
+      BookingStatus.RESERVED,
+      testCase.event.getId()
+    );
+    DetailedEventBookingDTO reservedStudentBookingAfterConfirmation = prepareDetailedEventBookingDto(
+      reservedStudent.getId(),
+      BookingStatus.CONFIRMED,
+      testCase.event.getId()
+    );
 
     // Expected external calls
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testCase.event.getId());
@@ -414,19 +467,36 @@ public class EventBookingManagerTest {
     dummyTransaction.close();
     expectLastCall().once();
 
-    expect(dummyEventBookingPersistenceManager
-        .getBookingByEventIdAndUserId(testCase.event.getId(), reservedStudent.getId()))
-        .andReturn(reservedStudentBooking).once();
+    expect(
+        dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(
+          testCase.event.getId(),
+          reservedStudent.getId()
+        )
+      )
+      .andReturn(reservedStudentBooking)
+      .once();
     // As a reserved booking exists, expect an update to the booking
-    expect(dummyEventBookingPersistenceManager
-        .updateBookingStatus(eq(dummyTransaction), eq(testCase.event.getId()), eq(reservedStudent.getId()),
-            eq(BookingStatus.CONFIRMED), anyObject()))
-        .andReturn(reservedStudentBookingAfterConfirmation).once();
+    expect(
+        dummyEventBookingPersistenceManager.updateBookingStatus(
+          eq(dummyTransaction),
+          eq(testCase.event.getId()),
+          eq(reservedStudent.getId()),
+          eq(BookingStatus.CONFIRMED),
+          anyObject()
+        )
+      )
+      .andReturn(reservedStudentBookingAfterConfirmation)
+      .once();
     // Send emails
     EmailTemplateDTO emailTemplate = new EmailTemplateDTO();
     expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed")).andReturn(emailTemplate).once();
-    dummyEmailManager.sendTemplatedEmailToUser(eq(reservedStudent), eq(emailTemplate), anyObject(),
-        eq(EmailType.SYSTEM), anyObject());
+    dummyEmailManager.sendTemplatedEmailToUser(
+      eq(reservedStudent),
+      eq(emailTemplate),
+      anyObject(),
+      eq(EmailType.SYSTEM),
+      anyObject()
+    );
     expectLastCall().once();
 
     replay(mockedObjects);
@@ -445,21 +515,29 @@ public class EventBookingManagerTest {
     someUser.setRole(Role.TEACHER);
 
     UserSummaryDTO firstUser = prepareUserSummaryDto(6L, Role.TEACHER);
-    DetailedEventBookingDTO firstBooking =
-        prepareDetailedEventBookingDto(firstUser, BookingStatus.WAITING_LIST, testEvent.getId());
+    DetailedEventBookingDTO firstBooking = prepareDetailedEventBookingDto(
+      firstUser,
+      BookingStatus.WAITING_LIST,
+      testEvent.getId()
+    );
     firstBooking.setAdditionalInformation(someAdditionalInformation);
-    DetailedEventBookingDTO secondBooking =
-        prepareDetailedEventBookingDto(firstUser, BookingStatus.CANCELLED, testEvent.getId());
+    DetailedEventBookingDTO secondBooking = prepareDetailedEventBookingDto(
+      firstUser,
+      BookingStatus.CANCELLED,
+      testEvent.getId()
+    );
     secondBooking.setAdditionalInformation(someAdditionalInformation);
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
     placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1L);
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
     expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), 6L))
-        .andReturn(firstBooking).once();
+      .andReturn(firstBooking)
+      .once();
 
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testEvent.getId());
     expectLastCall().once();
@@ -470,11 +548,20 @@ public class EventBookingManagerTest {
     expectLastCall().once();
 
     expect(
-        dummyEventBookingPersistenceManager.updateBookingStatus(dummyTransaction, testEvent.getId(), someUser.getId(),
-            BookingStatus.CONFIRMED, someAdditionalInformation)).andReturn(secondBooking).atLeastOnce();
+        dummyEventBookingPersistenceManager.updateBookingStatus(
+          dummyTransaction,
+          testEvent.getId(),
+          someUser.getId(),
+          BookingStatus.CONFIRMED,
+          someAdditionalInformation
+        )
+      )
+      .andReturn(secondBooking)
+      .atLeastOnce();
 
     expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed"))
-        .andReturn(new EmailTemplateDTO()).atLeastOnce();
+      .andReturn(new EmailTemplateDTO())
+      .atLeastOnce();
 
     dummyEmailManager.sendTemplatedEmailToUser(anyObject(), anyObject(), anyObject(), anyObject(), anyObject());
     expectLastCall().atLeastOnce();
@@ -500,17 +587,21 @@ public class EventBookingManagerTest {
     someUser.setRole(Role.TEACHER);
 
     UserSummaryDTO firstUser = prepareUserSummaryDto(6L, Role.TEACHER);
-    DetailedEventBookingDTO firstBooking =
-        prepareDetailedEventBookingDto(firstUser, BookingStatus.WAITING_LIST, testEvent.getId());
+    DetailedEventBookingDTO firstBooking = prepareDetailedEventBookingDto(
+      firstUser,
+      BookingStatus.WAITING_LIST,
+      testEvent.getId()
+    );
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 1L);
     placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1L);
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
-    expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), 6L)).andReturn(
-        firstBooking);
+    expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), 6L))
+      .andReturn(firstBooking);
 
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testEvent.getId());
     expectLastCall().once();
@@ -534,8 +625,11 @@ public class EventBookingManagerTest {
     // Create a future event and event booking manager
     EventBookingManager ebm = this.buildEventBookingManager();
     int initialNumberOfPlaces = 1000;
-    IsaacEventPageDTO testEvent =
-        prepareIsaacEventPageDto(ImmutableSet.of("student"), initialNumberOfPlaces, EventStatus.OPEN);
+    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(
+      ImmutableSet.of("student"),
+      initialNumberOfPlaces,
+      EventStatus.OPEN
+    );
 
     // Mock the event booking status count result from the event booking persistence manager
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
@@ -549,21 +643,23 @@ public class EventBookingManagerTest {
     placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 200L);
 
     expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
-        .andReturn(placesAvailableMap).atLeastOnce();
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
     // Run the test for a student event
     replay(mockedObjects);
     Long actualPlacesAvailable = ebm.getPlacesAvailable(testEvent);
     Long expectedPlacesAvailable = (long) initialNumberOfPlaces - 1 - 10;
     assertEquals(
-        "STUDENT events should only count confirmed and waiting list student places in availability calculations",
-        expectedPlacesAvailable, actualPlacesAvailable);
+      "STUDENT events should only count confirmed and waiting list student places in availability calculations",
+      expectedPlacesAvailable,
+      actualPlacesAvailable
+    );
     verify(mockedObjects);
   }
 
   @Test
-  public void getEventPage_checkWaitingListOnlyEventCapacity_capacityCalculatedCorrectly() throws
-      Exception {
+  public void getEventPage_checkWaitingListOnlyEventCapacity_capacityCalculatedCorrectly() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 2, EventStatus.WAITING_LIST_ONLY);
 
@@ -575,20 +671,23 @@ public class EventBookingManagerTest {
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
     placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 1L);
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
     replay(mockedObjects);
     Long placesAvailable = ebm.getPlacesAvailable(testEvent);
     Long expectedPlacesAvailable = 1L;
-    assertEquals("WAITING_LIST_ONLY events should only count confirmed places in availability calculations",
-        placesAvailable, expectedPlacesAvailable);
+    assertEquals(
+      "WAITING_LIST_ONLY events should only count confirmed places in availability calculations",
+      placesAvailable,
+      expectedPlacesAvailable
+    );
     verify(mockedObjects);
   }
 
   @Test
-  public void getEventPage_checkStudentEventReservedBookings_capacityCalculatedCorrectly() throws
-      Exception {
+  public void getEventPage_checkStudentEventReservedBookings_capacityCalculatedCorrectly() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 2, EventStatus.OPEN);
     testEvent.setAllowGroupReservations(true);
@@ -604,14 +703,18 @@ public class EventBookingManagerTest {
     placesAvailableMap.get(BookingStatus.RESERVED).put(Role.STUDENT, 1L);
     placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
 
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
+      .andReturn(placesAvailableMap)
+      .atLeastOnce();
 
     replay(mockedObjects);
     Long placesAvailable = ebm.getPlacesAvailable(testEvent);
     Long expectedPlacesAvailable = 0L;
-    assertEquals("RESERVED bookings should count towards the places available in availability calculations",
-        expectedPlacesAvailable, placesAvailable);
+    assertEquals(
+      "RESERVED bookings should count towards the places available in availability calculations",
+      expectedPlacesAvailable,
+      placesAvailable
+    );
     verify(mockedObjects);
   }
 
@@ -656,30 +759,35 @@ public class EventBookingManagerTest {
 
     // Expected mocked method calls
     expect(dummyUserAssociationManager.lookupTokenDetails(unassociatedEventLeader, testEvent.getIsaacGroupToken()))
-        .andReturn(testAssociationToken);
-    expect(dummyGroupManager.getGroupById(testAssociationToken.getGroupId()))
-        .andReturn(testEventGroup);
+      .andReturn(testAssociationToken);
+    expect(dummyGroupManager.getGroupById(testAssociationToken.getGroupId())).andReturn(testEventGroup);
 
     expect(dummyUserAssociationManager.lookupTokenDetails(associatedEventLeader, testEvent.getIsaacGroupToken()))
-        .andReturn(testAssociationToken);
-    expect(dummyGroupManager.getGroupById(testAssociationToken.getGroupId()))
-        .andReturn(testEventGroup);
+      .andReturn(testAssociationToken);
+    expect(dummyGroupManager.getGroupById(testAssociationToken.getGroupId())).andReturn(testEventGroup);
 
     replay(mockedObjects);
 
     // Expected results
     Map<RegisteredUserDTO, Boolean> expectedResults = ImmutableMap.of(
-        teacher, false,
-        unassociatedEventLeader, false,
-        associatedEventLeader, true,
-        eventManager, true,
-        admin, true
+      teacher,
+      false,
+      unassociatedEventLeader,
+      false,
+      associatedEventLeader,
+      true,
+      eventManager,
+      true,
+      admin,
+      true
     );
 
     for (RegisteredUserDTO user : expectedResults.keySet()) {
-      assertEquals(String.format("Test case: %s", user.getRole()),
-          expectedResults.get(user),
-          eventBookingManager.isUserAbleToManageEvent(user, testEvent));
+      assertEquals(
+        String.format("Test case: %s", user.getRole()),
+        expectedResults.get(user),
+        eventBookingManager.isUserAbleToManageEvent(user, testEvent)
+      );
     }
     verify(mockedObjects);
   }
@@ -693,25 +801,42 @@ public class EventBookingManagerTest {
     }
 
     List<TestCase> testCases = ImmutableList.of(
-        new TestCase() {{
+      new TestCase() {
+
+        {
           eventPageDTO = new IsaacEventPageDTO();
           expected = false;
           assertion = "The default case should return false";
-        }},
-        new TestCase() {{
-          eventPageDTO = new IsaacEventPageDTO() {{
-              setAllowGroupReservations(true);
-            }};
+        }
+      },
+      new TestCase() {
+
+        {
+          eventPageDTO =
+            new IsaacEventPageDTO() {
+
+              {
+                setAllowGroupReservations(true);
+              }
+            };
           expected = true;
           assertion = "Events which allow group reservations should return true";
-        }},
-        new TestCase() {{
-          eventPageDTO = new IsaacEventPageDTO() {{
-              setAllowGroupReservations(false);
-            }};
+        }
+      },
+      new TestCase() {
+
+        {
+          eventPageDTO =
+            new IsaacEventPageDTO() {
+
+              {
+                setAllowGroupReservations(false);
+              }
+            };
           expected = false;
           assertion = "Events which explicitly disallow group reservations should return false";
-        }}
+        }
+      }
     );
 
     for (TestCase testCase : testCases) {
@@ -727,36 +852,65 @@ public class EventBookingManagerTest {
     List<RegisteredUserDTO> students = ImmutableList.of(testCase.student1, testCase.student2);
 
     // Make student two have a cancelled booking
-    DetailedEventBookingDTO student2sCancelledBooking =
-        prepareDetailedEventBookingDto(testCase.student2.getId(), BookingStatus.CANCELLED, testCase.event.getId());
+    DetailedEventBookingDTO student2sCancelledBooking = prepareDetailedEventBookingDto(
+      testCase.student2.getId(),
+      BookingStatus.CANCELLED,
+      testCase.event.getId()
+    );
 
     // Define expected external calls
     dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testCase.event.getId());
     expectLastCall().once();
 
     // Check existing bookings
-    expect(dummyEventBookingPersistenceManager.getBookingsByEventId(testCase.event.getId())).andReturn(
-        ImmutableList.of(student2sCancelledBooking)).once();
-
+    expect(dummyEventBookingPersistenceManager.getBookingsByEventId(testCase.event.getId()))
+      .andReturn(ImmutableList.of(student2sCancelledBooking))
+      .once();
 
     // Make Reservations
     expect(dummyTransactionManager.getTransaction()).andReturn(dummyTransaction).once();
 
-    expect(dummyEventBookingPersistenceManager
-        .getBookingByEventIdAndUserId(testCase.event.getId(), testCase.student1.getId()))
-        .andReturn(null).once();
-    expect(dummyEventBookingPersistenceManager
-        .createBooking(eq(dummyTransaction), eq(testCase.event.getId()), eq(testCase.student1.getId()),
-            eq(testCase.teacher.getId()), eq(BookingStatus.RESERVED), anyObject()))
-        .andReturn(testCase.student1Booking).once();
+    expect(
+        dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(
+          testCase.event.getId(),
+          testCase.student1.getId()
+        )
+      )
+      .andReturn(null)
+      .once();
+    expect(
+        dummyEventBookingPersistenceManager.createBooking(
+          eq(dummyTransaction),
+          eq(testCase.event.getId()),
+          eq(testCase.student1.getId()),
+          eq(testCase.teacher.getId()),
+          eq(BookingStatus.RESERVED),
+          anyObject()
+        )
+      )
+      .andReturn(testCase.student1Booking)
+      .once();
 
-    expect(dummyEventBookingPersistenceManager
-        .getBookingByEventIdAndUserId(testCase.event.getId(), testCase.student2.getId()))
-        .andReturn(student2sCancelledBooking).once();
-    expect(dummyEventBookingPersistenceManager
-        .updateBookingStatus(eq(dummyTransaction), eq(testCase.event.getId()), eq(testCase.student2.getId()),
-            eq(testCase.teacher.getId()), eq(BookingStatus.RESERVED), anyObject()))
-        .andReturn(testCase.student2Booking).once();
+    expect(
+        dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(
+          testCase.event.getId(),
+          testCase.student2.getId()
+        )
+      )
+      .andReturn(student2sCancelledBooking)
+      .once();
+    expect(
+        dummyEventBookingPersistenceManager.updateBookingStatus(
+          eq(dummyTransaction),
+          eq(testCase.event.getId()),
+          eq(testCase.student2.getId()),
+          eq(testCase.teacher.getId()),
+          eq(BookingStatus.RESERVED),
+          anyObject()
+        )
+      )
+      .andReturn(testCase.student2Booking)
+      .once();
 
     dummyTransaction.commit();
     expectLastCall().once();
@@ -764,29 +918,46 @@ public class EventBookingManagerTest {
     expectLastCall().once();
 
     // Send Emails
-    expect(dummyEmailManager.getEmailTemplateDTO(("email-event-reservation-requested"))).andReturn(
-        testCase.reservationEmail).atLeastOnce();
-    expect(dummyEmailManager.getEmailTemplateDTO(("email-event-reservation-recap"))).andReturn(
-        testCase.reservationEmail).atLeastOnce();
+    expect(dummyEmailManager.getEmailTemplateDTO(("email-event-reservation-requested")))
+      .andReturn(testCase.reservationEmail)
+      .atLeastOnce();
+    expect(dummyEmailManager.getEmailTemplateDTO(("email-event-reservation-recap")))
+      .andReturn(testCase.reservationEmail)
+      .atLeastOnce();
 
     expect(dummyUserAccountManager.getUserDTOById(testCase.student1.getId())).andReturn(testCase.student1).times(2);
-    dummyEmailManager.sendTemplatedEmailToUser(eq(testCase.student1), eq(testCase.reservationEmail), anyObject(),
-        eq(EmailType.SYSTEM));
+    dummyEmailManager.sendTemplatedEmailToUser(
+      eq(testCase.student1),
+      eq(testCase.reservationEmail),
+      anyObject(),
+      eq(EmailType.SYSTEM)
+    );
     expectLastCall().once();
 
     expect(dummyUserAccountManager.getUserDTOById(testCase.student2.getId())).andReturn(testCase.student2).times(2);
-    dummyEmailManager.sendTemplatedEmailToUser(eq(testCase.student2), eq(testCase.reservationEmail), anyObject(),
-        eq(EmailType.SYSTEM));
+    dummyEmailManager.sendTemplatedEmailToUser(
+      eq(testCase.student2),
+      eq(testCase.reservationEmail),
+      anyObject(),
+      eq(EmailType.SYSTEM)
+    );
     expectLastCall().once();
 
-    dummyEmailManager.sendTemplatedEmailToUser(eq(testCase.teacher), eq(testCase.reservationEmail), anyObject(),
-        eq(EmailType.SYSTEM));
+    dummyEmailManager.sendTemplatedEmailToUser(
+      eq(testCase.teacher),
+      eq(testCase.reservationEmail),
+      anyObject(),
+      eq(EmailType.SYSTEM)
+    );
     expectLastCall().once();
 
     // Run the test for a student event
     replay(mockedObjects);
-    List<EventBookingDTO> actualResults =
-        eventBookingManager.requestReservations(testCase.event, students, testCase.teacher);
+    List<EventBookingDTO> actualResults = eventBookingManager.requestReservations(
+      testCase.event,
+      students,
+      testCase.teacher
+    );
     List<EventBookingDTO> expectedResults = ImmutableList.of(testCase.student1Booking, testCase.student2Booking);
     assertEquals("N results should be returned unaltered", expectedResults, actualResults);
     verify(mockedObjects);
@@ -794,7 +965,7 @@ public class EventBookingManagerTest {
 
   @Test
   public void requestReservations_reserveSpacesForTwoWhenThereIsOnlyOneAvailableSpace_throwsEventIsFullException()
-      throws Exception {
+    throws Exception {
     EventBookingManager eventBookingManager = buildEventBookingManager();
     ReservationTestDefaults testCase = new ReservationTestDefaults();
     testCase.event.setNumberOfPlaces(1);
@@ -809,7 +980,8 @@ public class EventBookingManagerTest {
     expectLastCall().once();
 
     expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testCase.event.getId(), false))
-        .andReturn(Maps.newHashMap()).once();
+      .andReturn(Maps.newHashMap())
+      .once();
 
     replay(mockedObjects);
     try {
@@ -823,7 +995,7 @@ public class EventBookingManagerTest {
 
   @Test
   public void requestReservations_reserveSpacesForMoreThanAllowed_throwsEventGroupReservationLimitException()
-      throws Exception {
+    throws Exception {
     EventBookingManager eventBookingManager = buildEventBookingManager();
     ReservationTestDefaults testCase = new ReservationTestDefaults();
 
@@ -836,7 +1008,10 @@ public class EventBookingManagerTest {
     Map<BookingStatus, Map<Role, Long>> previousBookingCounts = generatePlacesAvailableMap();
     previousBookingCounts.put(BookingStatus.CONFIRMED, ImmutableMap.of(Role.STUDENT, 1L));
     DetailedEventBookingDTO existingEventBooking = prepareDetailedEventBookingDto(
-        previouslyReservedStudent.getId(), BookingStatus.CONFIRMED, testCase.event.getId());
+      previouslyReservedStudent.getId(),
+      BookingStatus.CONFIRMED,
+      testCase.event.getId()
+    );
     existingEventBooking.setReservedById(testCase.teacher.getId());
 
     // Define expected external calls
@@ -847,12 +1022,11 @@ public class EventBookingManagerTest {
     dummyTransaction.close();
     expectLastCall().once();
 
-    expect(dummyEventBookingPersistenceManager
-        .getEventBookingStatusCounts(testCase.event.getId(), false))
-        .andReturn(previousBookingCounts).once();
-    expect(dummyEventBookingPersistenceManager
-        .getBookingsByEventId(testCase.event.getId()))
-        .andReturn(ImmutableList.of(existingEventBooking));
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testCase.event.getId(), false))
+      .andReturn(previousBookingCounts)
+      .once();
+    expect(dummyEventBookingPersistenceManager.getBookingsByEventId(testCase.event.getId()))
+      .andReturn(ImmutableList.of(existingEventBooking));
 
     replay(mockedObjects);
     try {
@@ -876,8 +1050,11 @@ public class EventBookingManagerTest {
     List<RegisteredUserDTO> students = ImmutableList.of(testCase.student1);
 
     // Make student two have a cancelled booking
-    DetailedEventBookingDTO student2sCancelledReservation =
-        prepareDetailedEventBookingDto(testCase.student2.getId(), BookingStatus.CANCELLED, testCase.event.getId());
+    DetailedEventBookingDTO student2sCancelledReservation = prepareDetailedEventBookingDto(
+      testCase.student2.getId(),
+      BookingStatus.CANCELLED,
+      testCase.event.getId()
+    );
     student2sCancelledReservation.setReservedById(testCase.teacher.getId());
     Map<BookingStatus, Map<Role, Long>> previousBookingCounts = generatePlacesAvailableMap();
     previousBookingCounts.put(BookingStatus.CANCELLED, ImmutableMap.of(Role.STUDENT, 1L));
@@ -888,21 +1065,35 @@ public class EventBookingManagerTest {
 
     // Check existing bookings
     expect(dummyEventBookingPersistenceManager.getBookingsByEventId(testCase.event.getId()))
-        .andReturn(ImmutableList.of(student2sCancelledReservation)).once();
-    expect(dummyEventBookingPersistenceManager
-        .getEventBookingStatusCounts(testCase.event.getId(), false))
-        .andReturn(previousBookingCounts).once();
+      .andReturn(ImmutableList.of(student2sCancelledReservation))
+      .once();
+    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testCase.event.getId(), false))
+      .andReturn(previousBookingCounts)
+      .once();
 
     // Make Reservations
     expect(dummyTransactionManager.getTransaction()).andReturn(dummyTransaction).once();
 
-    expect(dummyEventBookingPersistenceManager
-        .getBookingByEventIdAndUserId(testCase.event.getId(), testCase.student1.getId()))
-        .andReturn(null).once();
-    expect(dummyEventBookingPersistenceManager
-        .createBooking(eq(dummyTransaction), eq(testCase.event.getId()), eq(testCase.student1.getId()),
-            eq(testCase.teacher.getId()), eq(BookingStatus.RESERVED), anyObject()))
-        .andReturn(testCase.student1Booking).once();
+    expect(
+        dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(
+          testCase.event.getId(),
+          testCase.student1.getId()
+        )
+      )
+      .andReturn(null)
+      .once();
+    expect(
+        dummyEventBookingPersistenceManager.createBooking(
+          eq(dummyTransaction),
+          eq(testCase.event.getId()),
+          eq(testCase.student1.getId()),
+          eq(testCase.teacher.getId()),
+          eq(BookingStatus.RESERVED),
+          anyObject()
+        )
+      )
+      .andReturn(testCase.student1Booking)
+      .once();
 
     dummyTransaction.commit();
     expectLastCall().once();
@@ -910,66 +1101,110 @@ public class EventBookingManagerTest {
     expectLastCall().once();
 
     // Send Emails
-    expect(dummyEmailManager.getEmailTemplateDTO(("email-event-reservation-requested"))).andReturn(
-        testCase.reservationEmail).atLeastOnce();
-    expect(dummyEmailManager.getEmailTemplateDTO(("email-event-reservation-recap"))).andReturn(
-        testCase.reservationEmail).atLeastOnce();
+    expect(dummyEmailManager.getEmailTemplateDTO(("email-event-reservation-requested")))
+      .andReturn(testCase.reservationEmail)
+      .atLeastOnce();
+    expect(dummyEmailManager.getEmailTemplateDTO(("email-event-reservation-recap")))
+      .andReturn(testCase.reservationEmail)
+      .atLeastOnce();
 
-    expect(dummyUserAccountManager.getUserDTOById(testCase.student1.getId())).andReturn(testCase.student1)
-        .atLeastOnce();
-    dummyEmailManager.sendTemplatedEmailToUser(eq(testCase.student1), eq(testCase.reservationEmail), anyObject(),
-        eq(EmailType.SYSTEM));
+    expect(dummyUserAccountManager.getUserDTOById(testCase.student1.getId()))
+      .andReturn(testCase.student1)
+      .atLeastOnce();
+    dummyEmailManager.sendTemplatedEmailToUser(
+      eq(testCase.student1),
+      eq(testCase.reservationEmail),
+      anyObject(),
+      eq(EmailType.SYSTEM)
+    );
     expectLastCall().once();
-    dummyEmailManager.sendTemplatedEmailToUser(eq(testCase.teacher), eq(testCase.reservationEmail), anyObject(),
-        eq(EmailType.SYSTEM));
+    dummyEmailManager.sendTemplatedEmailToUser(
+      eq(testCase.teacher),
+      eq(testCase.reservationEmail),
+      anyObject(),
+      eq(EmailType.SYSTEM)
+    );
     expectLastCall().atLeastOnce();
 
     // Run the test for a student event
     replay(mockedObjects);
-    List<EventBookingDTO> actualResults =
-        eventBookingManager.requestReservations(testCase.event, students, testCase.teacher);
+    List<EventBookingDTO> actualResults = eventBookingManager.requestReservations(
+      testCase.event,
+      students,
+      testCase.teacher
+    );
     List<EventBookingDTO> expectedResults = ImmutableList.of(testCase.student1Booking);
-    assertEquals("Student 1 should get reserved despite the existing cancelled reservation", expectedResults,
-        actualResults);
+    assertEquals(
+      "Student 1 should get reserved despite the existing cancelled reservation",
+      expectedResults,
+      actualResults
+    );
     verify(mockedObjects);
   }
 
   static class ReservationTestDefaults {
-    IsaacEventPageDTO event = new IsaacEventPageDTO() {{
+    IsaacEventPageDTO event = new IsaacEventPageDTO() {
+
+      {
         setId("SomeEventId");
         setDate(EventBookingManagerTest.someFutureDate);
-      }};
-    RegisteredUserDTO teacher = new RegisteredUserDTO() {{
+      }
+    };
+    RegisteredUserDTO teacher = new RegisteredUserDTO() {
+
+      {
         setId(10L);
-      }};
-    RegisteredUserDTO student1 = new RegisteredUserDTO() {{
+      }
+    };
+    RegisteredUserDTO student1 = new RegisteredUserDTO() {
+
+      {
         setId(1L);
         setEmail("student1");
         setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-      }};
+      }
+    };
     UserSummaryDTO student1Summary = prepareUserSummaryDto(1L, EmailVerificationStatus.VERIFIED);
-    DetailedEventBookingDTO student1Booking =
-        prepareDetailedEventBookingDto(student1Summary, BookingStatus.RESERVED, "SomeEventId");
-    RegisteredUserDTO student2 = new RegisteredUserDTO() {{
+    DetailedEventBookingDTO student1Booking = prepareDetailedEventBookingDto(
+      student1Summary,
+      BookingStatus.RESERVED,
+      "SomeEventId"
+    );
+    RegisteredUserDTO student2 = new RegisteredUserDTO() {
+
+      {
         setId(2L);
         setEmail("student2");
         setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-      }};
+      }
+    };
     UserSummaryDTO student2Summary = prepareUserSummaryDto(2L, EmailVerificationStatus.VERIFIED);
-    DetailedEventBookingDTO student2Booking =
-        prepareDetailedEventBookingDto(student2Summary, BookingStatus.RESERVED, "SomeEventId");
-    RegisteredUserDTO student3 = new RegisteredUserDTO() {{
+    DetailedEventBookingDTO student2Booking = prepareDetailedEventBookingDto(
+      student2Summary,
+      BookingStatus.RESERVED,
+      "SomeEventId"
+    );
+    RegisteredUserDTO student3 = new RegisteredUserDTO() {
+
+      {
         setId(2L);
         setEmail("student2");
         setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-      }};
+      }
+    };
     EmailTemplateDTO reservationEmail = new EmailTemplateDTO();
   }
 
   private EventBookingManager buildEventBookingManager() {
     return new EventBookingManager(
-        dummyEventBookingPersistenceManager, dummyEmailManager, dummyUserAssociationManager,
-        dummyPropertiesLoader, dummyGroupManager, dummyUserAccountManager, dummyTransactionManager);
+      dummyEventBookingPersistenceManager,
+      dummyEmailManager,
+      dummyUserAssociationManager,
+      dummyPropertiesLoader,
+      dummyGroupManager,
+      dummyUserAccountManager,
+      dummyTransactionManager
+    );
   }
 
   private static Map<BookingStatus, Map<Role, Long>> generatePlacesAvailableMap() {
@@ -982,20 +1217,28 @@ public class EventBookingManagerTest {
   }
 
   private static DetailedEventBookingDTO prepareDetailedEventBookingDto(
-      Long userId, BookingStatus bookingStatus, String eventId) {
+    Long userId,
+    BookingStatus bookingStatus,
+    String eventId
+  ) {
     UserSummaryDTO user = prepareUserSummaryDto(userId);
     return prepareDetailedEventBookingDto(user, bookingStatus, eventId);
   }
 
   private static DetailedEventBookingDTO prepareDetailedEventBookingDto(
-      UserSummaryDTO user, BookingStatus bookingStatus, String eventId) {
+    UserSummaryDTO user,
+    BookingStatus bookingStatus,
+    String eventId
+  ) {
     DetailedEventBookingDTO booking = prepareDetailedEventBookingDto(user, bookingStatus);
     booking.setEventId(eventId);
     return booking;
   }
 
   private static DetailedEventBookingDTO prepareDetailedEventBookingDto(
-      UserSummaryDTO user, BookingStatus bookingStatus) {
+    UserSummaryDTO user,
+    BookingStatus bookingStatus
+  ) {
     DetailedEventBookingDTO booking = new DetailedEventBookingDTO();
     booking.setUserBooked(user);
     booking.setBookingStatus(bookingStatus);
@@ -1040,14 +1283,21 @@ public class EventBookingManagerTest {
   }
 
   private static IsaacEventPageDTO prepareIsaacEventPageDto(
-      Set<String> tags, Integer numberOfPlaces, EventStatus eventStatus) {
+    Set<String> tags,
+    Integer numberOfPlaces,
+    EventStatus eventStatus
+  ) {
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto("someEventId", numberOfPlaces, tags, someFutureDate);
     testEvent.setEventStatus(eventStatus);
     return testEvent;
   }
 
   private static IsaacEventPageDTO prepareIsaacEventPageDto(
-      String eventId, Integer numberOfPlaces, Set<String> tags, Date date) {
+    String eventId,
+    Integer numberOfPlaces,
+    Set<String> tags,
+    Date date
+  ) {
     IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
     testEvent.setId(eventId);
     testEvent.setNumberOfPlaces(numberOfPlaces);

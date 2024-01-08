@@ -22,7 +22,6 @@ package uk.ac.cam.cl.dtg.segue.auth;
  *
  */
 public interface IAuthenticator {
-
   /**
    * Returns a string representation of the providers name.
    *

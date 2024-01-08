@@ -66,9 +66,13 @@ public class ContactFacade extends AbstractSegueFacade {
    * @param logManager   - An instance of the log manager used for recording usage of the CMS.
    */
   @Inject
-  public ContactFacade(final PropertiesLoader properties, final ContentMapper mapper,
-                       final UserAccountManager userManager, final EmailManager emailManager,
-                       final ILogManager logManager) {
+  public ContactFacade(
+    final PropertiesLoader properties,
+    final ContentMapper mapper,
+    final UserAccountManager userManager,
+    final EmailManager emailManager,
+    final ILogManager logManager
+  ) {
     super(properties, logManager);
     this.userManager = userManager;
     this.emailManager = emailManager;
@@ -87,9 +91,13 @@ public class ContactFacade extends AbstractSegueFacade {
   @Consumes(MediaType.APPLICATION_JSON)
   @Operation(summary = "Submit a contact form request.")
   public Response contactUs(final Map<String, String> form, @Context final HttpServletRequest request) {
-    if (StringUtils.isEmpty(form.get("firstName")) || StringUtils.isEmpty(form.get("lastName")) || StringUtils.isEmpty(
-        form.get("emailAddress"))
-        || StringUtils.isEmpty(form.get("subject")) || StringUtils.isEmpty(form.get("message"))) {
+    if (
+      StringUtils.isEmpty(form.get("firstName")) ||
+      StringUtils.isEmpty(form.get("lastName")) ||
+      StringUtils.isEmpty(form.get("emailAddress")) ||
+      StringUtils.isEmpty(form.get("subject")) ||
+      StringUtils.isEmpty(form.get("message"))
+    ) {
       SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST, "Missing form details.");
       return error.toResponse();
     }
@@ -113,21 +121,36 @@ public class ContactFacade extends AbstractSegueFacade {
 
       String message = form.get("message").replace("\n", "\n<br>");
 
-      emailManager.sendContactUsFormEmail(this.getProperties().getProperty(Constants.MAIL_RECEIVERS),
-          new ImmutableMap.Builder<String, Object>()
-              .put("contactGivenName", form.get("firstName"))
-              .put("contactFamilyName", form.get("lastName"))
-              .put("contactUserId", currentUserId)
-              .put("contactUserRole", currentUserRole)
-              .put("contactEmail", form.get("emailAddress"))
-              .put("contactSubject", form.get("subject"))
-              .put("contactMessage", message)
-              .put("replyToName", String.format("%s %s", form.get("firstName"), form.get("lastName")))
-              .build());
+      emailManager.sendContactUsFormEmail(
+        this.getProperties().getProperty(Constants.MAIL_RECEIVERS),
+        new ImmutableMap.Builder<String, Object>()
+          .put("contactGivenName", form.get("firstName"))
+          .put("contactFamilyName", form.get("lastName"))
+          .put("contactUserId", currentUserId)
+          .put("contactUserRole", currentUserRole)
+          .put("contactEmail", form.get("emailAddress"))
+          .put("contactSubject", form.get("subject"))
+          .put("contactMessage", message)
+          .put("replyToName", String.format("%s %s", form.get("firstName"), form.get("lastName")))
+          .build()
+      );
 
-      getLogManager().logEvent(userManager.getCurrentUser(request), request, SegueServerLogType.CONTACT_US_FORM_USED,
-          ImmutableMap.of("message", String.format("%s %s (%s) - %s", form.get("firstName"), form.get("lastName"),
-              form.get("emailAddress"), form.get("message"))));
+      getLogManager()
+        .logEvent(
+          userManager.getCurrentUser(request),
+          request,
+          SegueServerLogType.CONTACT_US_FORM_USED,
+          ImmutableMap.of(
+            "message",
+            String.format(
+              "%s %s (%s) - %s",
+              form.get("firstName"),
+              form.get("lastName"),
+              form.get("emailAddress"),
+              form.get("message")
+            )
+          )
+        );
 
       return Response.ok().build();
     } catch (ContentManagerException e) {

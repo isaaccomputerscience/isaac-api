@@ -20,13 +20,15 @@ import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 
 public class ExceptionSanitiserTest {
-
   ExceptionSanitiser exceptionSanitiser = new ExceptionSanitiser();
 
   @Test
   public void filter_sanitiseError() throws IOException {
-    SegueErrorResponse preFilterError =
-        new SegueErrorResponse(Response.Status.BAD_REQUEST, "Test message", new Exception("Extra detail"));
+    SegueErrorResponse preFilterError = new SegueErrorResponse(
+      Response.Status.BAD_REQUEST,
+      "Test message",
+      new Exception("Extra detail")
+    );
 
     Capture<SegueErrorResponse> replacementErrorCapture = newCapture();
     ContainerRequestContext mockRequestContext = createMock(ResponseContainerRequestContext.class);
@@ -40,8 +42,11 @@ public class ExceptionSanitiserTest {
     exceptionSanitiser.filter(mockRequestContext, mockResponseContext);
 
     String generatedUuid = replacementErrorCapture.getValue().getErrorMessage().substring(59, 95);
-    SegueErrorResponse expectedPostFilterError = new SegueErrorResponse(Response.Status.BAD_REQUEST,
-        "Test message\nPlease report this ID if you contact support: " + generatedUuid + ".", null);
+    SegueErrorResponse expectedPostFilterError = new SegueErrorResponse(
+      Response.Status.BAD_REQUEST,
+      "Test message\nPlease report this ID if you contact support: " + generatedUuid + ".",
+      null
+    );
     SegueErrorResponse actualPostFilterError = replacementErrorCapture.getValue();
 
     verify(mockResponseContext);
@@ -64,6 +69,5 @@ public class ExceptionSanitiserTest {
     exceptionSanitiser.filter(mockRequestContext, mockResponseContext);
 
     verify(mockResponseContext);
-
   }
 }

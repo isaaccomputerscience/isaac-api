@@ -31,30 +31,44 @@ public class SeguePageDTO extends ContentDTO {
 
   @JsonCreator
   public SeguePageDTO(
-      @JsonProperty("id") final String id,
-      @JsonProperty("title") final String title,
-      @JsonProperty("subtitle") final String subtitle,
-      @JsonProperty("type") final String type,
-      @JsonProperty("author") final String author,
-      @JsonProperty("encoding") final String encoding,
-      @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
-      @JsonProperty("layout") final String layout,
-      @JsonProperty("children") final List<ContentBaseDTO> children,
-      @JsonProperty("value") final String value,
-      @JsonProperty("attribution") final String attribution,
-      @JsonProperty("relatedContent") final List<ContentSummaryDTO> relatedContent,
-      @JsonProperty("published") final Boolean published,
-      @JsonProperty("deprecated") final Boolean deprecated,
-      @JsonProperty("tags") final Set<String> tags,
-      @JsonProperty("level") final Integer level) {
-
-    super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, value,
-        attribution, relatedContent, published, deprecated, tags, level);
-
+    @JsonProperty("id") final String id,
+    @JsonProperty("title") final String title,
+    @JsonProperty("subtitle") final String subtitle,
+    @JsonProperty("type") final String type,
+    @JsonProperty("author") final String author,
+    @JsonProperty("encoding") final String encoding,
+    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+    @JsonProperty("layout") final String layout,
+    @JsonProperty("children") final List<ContentBaseDTO> children,
+    @JsonProperty("value") final String value,
+    @JsonProperty("attribution") final String attribution,
+    @JsonProperty("relatedContent") final List<ContentSummaryDTO> relatedContent,
+    @JsonProperty("published") final Boolean published,
+    @JsonProperty("deprecated") final Boolean deprecated,
+    @JsonProperty("tags") final Set<String> tags,
+    @JsonProperty("level") final Integer level
+  ) {
+    super(
+      id,
+      title,
+      subtitle,
+      type,
+      author,
+      encoding,
+      canonicalSourceFile,
+      layout,
+      children,
+      value,
+      attribution,
+      relatedContent,
+      published,
+      deprecated,
+      tags,
+      level
+    );
   }
 
-  public SeguePageDTO() {
-  }
+  public SeguePageDTO() {}
 
   /**
    * Gets the summary.

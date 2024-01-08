@@ -51,8 +51,13 @@ public class GameboardListDTO extends ResultsWrapper<GameboardDTO> {
    * @param totalNotStarted
    *            - The total number of gameboards in the not started state.
    */
-  public GameboardListDTO(final List<GameboardDTO> results, final Long totalResults, final Long totalNotStarted,
-                          final Long totalInProgress, final Long totalCompleted) {
+  public GameboardListDTO(
+    final List<GameboardDTO> results,
+    final Long totalResults,
+    final Long totalNotStarted,
+    final Long totalInProgress,
+    final Long totalCompleted
+  ) {
     super(results, totalResults);
     this.totalCompleted = totalCompleted;
     this.totalInProgress = totalInProgress;

@@ -16,12 +16,10 @@ import uk.ac.cam.cl.dtg.segue.dao.userbadges.IUserBadgePolicy;
  * Created by du220 on 01/05/2018.
  */
 public class TeacherAssignmentsBadgePolicy implements IUserBadgePolicy {
-
   private final AssignmentManager assignmentManager;
   private final GameManager gameManager;
 
-  public TeacherAssignmentsBadgePolicy(final AssignmentManager assignmentManager,
-                                       final GameManager gameManager) {
+  public TeacherAssignmentsBadgePolicy(final AssignmentManager assignmentManager, final GameManager gameManager) {
     this.assignmentManager = assignmentManager;
     this.gameManager = gameManager;
   }
@@ -33,7 +31,6 @@ public class TeacherAssignmentsBadgePolicy implements IUserBadgePolicy {
 
   @Override
   public JsonNode initialiseState(final RegisteredUserDTO user, final ITransaction transaction) {
-
     ArrayNode assignments = JsonNodeFactory.instance.arrayNode();
 
     try {
@@ -49,7 +46,6 @@ public class TeacherAssignmentsBadgePolicy implements IUserBadgePolicy {
 
   @Override
   public JsonNode updateState(final RegisteredUserDTO user, final JsonNode state, final String event) {
-
     Iterator<JsonNode> iter = ((ArrayNode) state.get("assignments")).elements();
 
     while (iter.hasNext()) {
@@ -70,8 +66,7 @@ public class TeacherAssignmentsBadgePolicy implements IUserBadgePolicy {
    * @return the updated arrayNode
    */
   protected ArrayNode updateAssignments(final ArrayNode assignments, final String assignmentId)
-      throws SegueDatabaseException {
-
+    throws SegueDatabaseException {
     if (assignments.has(assignmentId)) {
       return assignments;
     }

@@ -34,8 +34,14 @@ public class SegueSCrypt {
   private final String saltingAlgorithm;
   private final Integer saltSize;
 
-  public SegueSCrypt(final Integer iterations, final Integer blockSize, final Integer parallelismFactor,
-                     final Integer keyLength, final String saltingAlgorithm, final Integer saltSize) {
+  public SegueSCrypt(
+    final Integer iterations,
+    final Integer blockSize,
+    final Integer parallelismFactor,
+    final Integer keyLength,
+    final String saltingAlgorithm,
+    final Integer saltSize
+  ) {
     this.iterations = iterations;
     this.blockSize = blockSize;
     this.parallelismFactor = parallelismFactor;
@@ -52,7 +58,6 @@ public class SegueSCrypt {
    * @return the Base64 encoded hashed password
    */
   public String hashPassword(final String password, final String salt) {
-
     byte[] hashedPassword = computeHash(password, salt, keyLength);
     return new String(Base64.encodeBase64(hashedPassword));
   }

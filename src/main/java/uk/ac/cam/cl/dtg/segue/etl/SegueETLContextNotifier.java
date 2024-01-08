@@ -20,9 +20,7 @@ public class SegueETLContextNotifier implements ServletContextListener {
    * The constructor which will invoke use the Guice injector to get instances of everything that should be notified
    * of any context messages.
    */
-  public SegueETLContextNotifier() {
-
-  }
+  public SegueETLContextNotifier() {}
 
   @Override
   public void contextInitialized(final ServletContextEvent sce) {
@@ -37,5 +35,4 @@ public class SegueETLContextNotifier implements ServletContextListener {
   public void contextDestroyed(final ServletContextEvent sce) {
     log.info("Segue Application Informed of Shut down - Informing listeners.");
   }
-
 }

@@ -62,13 +62,19 @@ public class FacebookUser {
    *            -
    */
   @JsonCreator
-  public FacebookUser(@JsonProperty("id") final String id, @JsonProperty("first_name") final String firstName,
-                      @JsonProperty("email") final String email, @JsonProperty("gender") final String gender,
-                      @JsonProperty("last_name") final String lastName, @JsonProperty("link") final String link,
-                      @JsonProperty("locale") final String locale, @JsonProperty("name") final String name,
-                      @JsonProperty("timezone") final Integer timezone,
-                      @JsonProperty("updated_time") final String updatedTime,
-                      @JsonProperty("verified") final boolean verified) {
+  public FacebookUser(
+    @JsonProperty("id") final String id,
+    @JsonProperty("first_name") final String firstName,
+    @JsonProperty("email") final String email,
+    @JsonProperty("gender") final String gender,
+    @JsonProperty("last_name") final String lastName,
+    @JsonProperty("link") final String link,
+    @JsonProperty("locale") final String locale,
+    @JsonProperty("name") final String name,
+    @JsonProperty("timezone") final Integer timezone,
+    @JsonProperty("updated_time") final String updatedTime,
+    @JsonProperty("verified") final boolean verified
+  ) {
     this.id = id;
     this.firstName = firstName;
     this.email = email;

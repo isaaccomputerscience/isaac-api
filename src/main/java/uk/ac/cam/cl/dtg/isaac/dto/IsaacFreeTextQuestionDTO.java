@@ -25,6 +25,4 @@ import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
  */
 @JsonContentType("isaacFreeTextQuestion")
 @ValidatesWith(IsaacFreeTextValidator.class)
-public class IsaacFreeTextQuestionDTO extends IsaacQuestionBaseDTO {
-
-}
+public class IsaacFreeTextQuestionDTO extends IsaacQuestionBaseDTO {}

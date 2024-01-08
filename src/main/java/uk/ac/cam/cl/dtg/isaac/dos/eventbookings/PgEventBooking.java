@@ -48,9 +48,17 @@ public class PgEventBooking implements EventBooking {
    * @param updated               - the date the booking was last updated
    * @param additionalInformation - additional information to be stored with this booking e.g. dietary requirements.
    */
-  public PgEventBooking(final Long bookingId, final Long userId, final Long reservedById, final String eventId,
-                        final BookingStatus bookingStatus, final Date created, final Date updated,
-                        final Object additionalInformation) throws SegueDatabaseException {
+  public PgEventBooking(
+    final Long bookingId,
+    final Long userId,
+    final Long reservedById,
+    final String eventId,
+    final BookingStatus bookingStatus,
+    final Date created,
+    final Date updated,
+    final Object additionalInformation
+  )
+    throws SegueDatabaseException {
     this.bookingId = bookingId;
     this.userId = userId;
     this.reservedById = reservedById;
@@ -67,7 +75,6 @@ public class PgEventBooking implements EventBooking {
     } else {
       this.additionalInformation = null;
     }
-
   }
 
   @Override

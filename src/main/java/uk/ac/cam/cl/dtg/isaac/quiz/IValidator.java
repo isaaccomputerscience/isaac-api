@@ -16,7 +16,6 @@
 
 package uk.ac.cam.cl.dtg.isaac.quiz;
 
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,7 +46,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
  * @author Stephen Cummins
  */
 public interface IValidator {
-
   /**
    * validateQuestionResponse This method is specifically for single field questions.
    * <br>
@@ -59,7 +57,7 @@ public interface IValidator {
    * @throws ValidatorUnavailableException - If the checking server/code is not working.
    */
   QuestionValidationResponse validateQuestionResponse(Question question, Choice answer)
-      throws ValidatorUnavailableException;
+    throws ValidatorUnavailableException;
 
   /**
    * Create a new list of Choice objects, sorted into correct-first order for checking.
@@ -72,15 +70,16 @@ public interface IValidator {
   default List<Choice> getOrderedChoices(final List<Choice> choices) {
     List<Choice> orderedChoices = Lists.newArrayList(choices);
 
-    orderedChoices.sort((o1, o2) -> {
-      int o1Val = o1.isCorrect() ? 0 : 1;
-      int o2Val = o2.isCorrect() ? 0 : 1;
-      return o1Val - o2Val;
-    });
+    orderedChoices.sort(
+      (o1, o2) -> {
+        int o1Val = o1.isCorrect() ? 0 : 1;
+        int o2Val = o2.isCorrect() ? 0 : 1;
+        return o1Val - o2Val;
+      }
+    );
 
     return orderedChoices;
   }
-
 
   /**
    * Make a JSON HTTP POST request to an external validator, and provide the response JSON as a HashMap.
@@ -90,9 +89,11 @@ public interface IValidator {
    * @return the response JSON, as a HashMap
    * @throws IOException - on failure to communicate with the external validator
    */
-  default HashMap<String, Object> getResponseFromExternalValidator(final String externalValidatorUrl,
-                                                                   final Map<String, String> requestBody)
-      throws IOException {
+  default HashMap<String, Object> getResponseFromExternalValidator(
+    final String externalValidatorUrl,
+    final Map<String, String> requestBody
+  )
+    throws IOException {
     // This is ridiculous. All we want to do is pass some JSON to a REST endpoint and get some JSON back.
     ObjectMapper mapper = new ObjectMapper();
     StringWriter sw = new StringWriter();

@@ -46,6 +46,7 @@ public class PerformanceMonitor implements ContainerRequestFilter, ContainerResp
 
   @Context
   private HttpRequest request;
+
   private final MonitorService monitorService;
 
   /**
@@ -79,24 +80,38 @@ public class PerformanceMonitor implements ContainerRequestFilter, ContainerResp
     long timeInMs = timer.getTime();
 
     if (timeInMs < WARNING_THRESHOLD) {
-      log.debug(String.format("Request: %s %s took %dms",
-          requestContext.getMethod(), request.getUri().getPath(), timeInMs));
+      log.debug(
+        String.format("Request: %s %s took %dms", requestContext.getMethod(), request.getUri().getPath(), timeInMs)
+      );
     } else if (timeInMs < ERROR_THRESHOLD) {
-      log.warn(String.format("Performance Warning: Request: %s %s took %dms and exceeded threshold of %d",
-          requestContext.getMethod(), request.getUri().getPath(), timeInMs, WARNING_THRESHOLD));
+      log.warn(
+        String.format(
+          "Performance Warning: Request: %s %s took %dms and exceeded threshold of %d",
+          requestContext.getMethod(),
+          request.getUri().getPath(),
+          timeInMs,
+          WARNING_THRESHOLD
+        )
+      );
     } else {
-      log.error(String.format("Performance Alert: Request: %s %s took %dms and exceeded threshold of %d",
-          requestContext.getMethod(), request.getUri().getPath(), timeInMs, ERROR_THRESHOLD));
+      log.error(
+        String.format(
+          "Performance Alert: Request: %s %s took %dms and exceeded threshold of %d",
+          requestContext.getMethod(),
+          request.getUri().getPath(),
+          timeInMs,
+          ERROR_THRESHOLD
+        )
+      );
     }
 
     // Record for metrics
     REQUEST_LATENCY_HISTOGRAM
-        .labels(
-            requestContext.getMethod(),
-            monitorService.getPathWithoutPathParamValues(request.getUri()),
-            String.valueOf(responseContext.getStatus())
-        ).observe((double) timeInMs / NUMBER_OF_MILLISECONDS_IN_A_SECOND);
+      .labels(
+        requestContext.getMethod(),
+        monitorService.getPathWithoutPathParamValues(request.getUri()),
+        String.valueOf(responseContext.getStatus())
+      )
+      .observe((double) timeInMs / NUMBER_OF_MILLISECONDS_IN_A_SECOND);
   }
-
-
 }

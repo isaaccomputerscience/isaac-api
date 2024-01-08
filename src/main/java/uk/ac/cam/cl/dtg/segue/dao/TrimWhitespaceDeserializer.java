@@ -35,7 +35,7 @@ public class TrimWhitespaceDeserializer extends JsonDeserializer<String> {
 
   @Override
   public String deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
-      throws IOException, JsonProcessingException, JsonMappingException {
+    throws IOException, JsonProcessingException, JsonMappingException {
     return jsonParser.getText().trim();
   }
 }

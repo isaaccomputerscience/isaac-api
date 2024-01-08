@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class FileAppDataManager implements IAppDataManager<byte[]> {
-
   private static final Logger log = LoggerFactory.getLogger(FileAppDataManager.class);
 
   private final Path storageLocation;
@@ -44,7 +43,6 @@ public class FileAppDataManager implements IAppDataManager<byte[]> {
    *             - if we are unable to get a valid handle on the storage location specified.
    */
   public FileAppDataManager(final String storageLocation) throws IOException {
-
     // verify storage location exists, if not try and create it throw an exception if there is a problem.
     File file = new File(storageLocation);
     if (file.exists() && file.isDirectory()) {
@@ -53,8 +51,9 @@ public class FileAppDataManager implements IAppDataManager<byte[]> {
       // we will attempt to create it then.
       log.info("FileAppManager data directory does not exist. Attempting to create it.");
       if (!file.mkdirs()) {
-        throw new IOException("Unable to create the directory: " + storageLocation
-            + " for use by the FileAppDataManager.");
+        throw new IOException(
+          "Unable to create the directory: " + storageLocation + " for use by the FileAppDataManager."
+        );
       }
     }
 

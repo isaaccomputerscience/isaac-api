@@ -31,15 +31,21 @@ public class QuizAttemptDTO implements IHasQuizSummary {
   private Long userId;
   private String quizId;
   private ContentSummaryDTO quizSummary; // We only need the title really.
+
   @Nullable
   private Long quizAssignmentId;
+
   private Date startDate;
+
   @Nullable
   private Date completedDate;
+
   @Nullable
   private IsaacQuizDTO quiz; // For passing a users answers etc.
+
   @Nullable
   private QuizAssignmentDTO quizAssignment; // For info on setter etc.
+
   private QuizFeedbackMode feedbackMode;
 
   /**
@@ -52,8 +58,14 @@ public class QuizAttemptDTO implements IHasQuizSummary {
    * @param startDate        - When this attempt began.
    * @param completedDate    - When this attempt was marked complete, or null if not yet completed.
    */
-  public QuizAttemptDTO(final Long id, final Long userId, final String quizId, final Long quizAssignmentId,
-                        final Date startDate, @Nullable final Date completedDate) {
+  public QuizAttemptDTO(
+    final Long id,
+    final Long userId,
+    final String quizId,
+    final Long quizAssignmentId,
+    final Date startDate,
+    @Nullable final Date completedDate
+  ) {
     this.id = id;
     this.userId = userId;
     this.quizId = quizId;
@@ -65,9 +77,7 @@ public class QuizAttemptDTO implements IHasQuizSummary {
   /**
    * Default constructor required for AutoMapping.
    */
-  public QuizAttemptDTO() {
-
-  }
+  public QuizAttemptDTO() {}
 
   @Override
   public int hashCode() {

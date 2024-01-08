@@ -27,10 +27,13 @@ class ETLManager {
   private final PropertiesManager contentIndicesStore;
   private final ScheduledExecutorService scheduler;
 
-
   @Inject
-  ETLManager(final ContentIndexer indexer, final SchoolIndexer schoolIndexer, final GitDb database,
-             final PropertiesManager contentIndicesStore) {
+  ETLManager(
+    final ContentIndexer indexer,
+    final SchoolIndexer schoolIndexer,
+    final GitDb database,
+    final PropertiesManager contentIndicesStore
+  ) {
     this.indexer = indexer;
     this.schoolIndexer = schoolIndexer;
     this.database = database;

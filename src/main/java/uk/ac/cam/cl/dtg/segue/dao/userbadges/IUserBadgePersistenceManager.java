@@ -10,7 +10,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  * Created by du220 on 27/04/2018.
  */
 public interface IUserBadgePersistenceManager {
-
   /**
    * Gets the current state of a user badge from the database.
    *
@@ -21,7 +20,7 @@ public interface IUserBadgePersistenceManager {
    * @throws SegueDatabaseException
    */
   UserBadge getBadge(RegisteredUserDTO user, UserBadgeManager.Badge badgeName, ITransaction transaction)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Updates the state of a user badge to the database.
@@ -31,5 +30,4 @@ public interface IUserBadgePersistenceManager {
    * @throws SegueDatabaseException
    */
   void updateBadge(UserBadge badge, ITransaction transaction) throws SegueDatabaseException;
-
 }

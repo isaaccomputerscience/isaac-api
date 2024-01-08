@@ -19,14 +19,12 @@ package uk.ac.cam.cl.dtg.segue.dao.users;
 import uk.ac.cam.cl.dtg.isaac.dos.users.AnonymousUser;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
-
 /**
  * Interface for managing and persisting user specific data in segue.
  *
  * @author Stephen Cummins
  */
 public interface IAnonymousUserDataManager {
-
   /**
    * Save the anonymous user object in the data store.
    *

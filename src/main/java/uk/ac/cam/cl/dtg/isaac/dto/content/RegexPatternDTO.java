@@ -28,9 +28,7 @@ public class RegexPatternDTO extends ChoiceDTO {
   /**
    * Default constructor required for mapping.
    */
-  public RegexPatternDTO() {
-
-  }
+  public RegexPatternDTO() {}
 
   /**
    * @return Whether this regex choice should allow any case to match.

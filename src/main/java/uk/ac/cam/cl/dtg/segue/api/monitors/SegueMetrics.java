@@ -27,66 +27,103 @@ import io.prometheus.client.guava.cache.CacheMetricsCollector;
  * Metric and label naming conventions can be found here: https://prometheus.io/docs/practices/naming/
  */
 public final class SegueMetrics {
-
   // Request Response Time Metrics
-  public static final Histogram REQUEST_LATENCY_HISTOGRAM = Histogram.build()
-      .name("isaac_api_requests")
-      .labelNames("method", "path", "status")
-      .help("Request latency in seconds.").register();
+  public static final Histogram REQUEST_LATENCY_HISTOGRAM = Histogram
+    .build()
+    .name("isaac_api_requests")
+    .labelNames("method", "path", "status")
+    .help("Request latency in seconds.")
+    .register();
 
   // WebSocket Response Time Metrics
-  public static final Histogram WEBSOCKET_LATENCY_HISTOGRAM = Histogram.build()
-      .name("isaac_api_websocket_requests")
-      .labelNames("message")
-      .help("Websocket request response latency in seconds.").register();
+  public static final Histogram WEBSOCKET_LATENCY_HISTOGRAM = Histogram
+    .build()
+    .name("isaac_api_websocket_requests")
+    .labelNames("message")
+    .help("Websocket request response latency in seconds.")
+    .register();
 
   // Validator Time Metrics
-  public static final Histogram VALIDATOR_LATENCY_HISTOGRAM = Histogram.build()
-      .name("isaac_question_validation")
-      .labelNames("validator")
-      .help("Validator latency in seconds.").register();
+  public static final Histogram VALIDATOR_LATENCY_HISTOGRAM = Histogram
+    .build()
+    .name("isaac_question_validation")
+    .labelNames("validator")
+    .help("Validator latency in seconds.")
+    .register();
 
   // Cache Metrics
   public static final CacheMetricsCollector CACHE_METRICS_COLLECTOR = new CacheMetricsCollector().register();
 
   // Websocket Metrics
-  public static final Gauge CURRENT_OPEN_WEBSOCKETS = Gauge.build()
-      .name("segue_websockets").help("Currently open websockets.").register();
-  public static final Counter WEBSOCKETS_OPENED_SUCCESSFULLY = Counter.build()
-      .name("segue_websocket_open_total")
-      .help("Websockets opened successfully (i.e. not exceeding per user limit) since process start.").register();
-  public static final Counter WEBSOCKETS_CLOSED = Counter.build()
-      .name("segue_websocket_close_total").help("Websockets closed since process start.").register();
+  public static final Gauge CURRENT_OPEN_WEBSOCKETS = Gauge
+    .build()
+    .name("segue_websockets")
+    .help("Currently open websockets.")
+    .register();
+  public static final Counter WEBSOCKETS_OPENED_SUCCESSFULLY = Counter
+    .build()
+    .name("segue_websocket_open_total")
+    .help("Websockets opened successfully (i.e. not exceeding per user limit) since process start.")
+    .register();
+  public static final Counter WEBSOCKETS_CLOSED = Counter
+    .build()
+    .name("segue_websocket_close_total")
+    .help("Websockets closed since process start.")
+    .register();
 
   // User Metrics
-  public static final Counter USER_REGISTRATION = Counter.build()
-      .name("segue_user_registration_total").help("User registrations since process start.").register();
+  public static final Counter USER_REGISTRATION = Counter
+    .build()
+    .name("segue_user_registration_total")
+    .help("User registrations since process start.")
+    .register();
 
-  public static final Gauge CURRENT_WEBSOCKET_USERS = Gauge.build()
-      .name("segue_websocket_users").help("Currently number of websocket users/browsers.").register();
+  public static final Gauge CURRENT_WEBSOCKET_USERS = Gauge
+    .build()
+    .name("segue_websocket_users")
+    .help("Currently number of websocket users/browsers.")
+    .register();
   // Anonymous user stats are calculated using metrics on the guava cache which holds a reference to each active user
 
-  public static final Counter LOG_IN_ATTEMPT = Counter.build()
-      .name("segue_log_in_attempt_total").help("Log in attempt since process start.").register();
-  public static final Counter LOG_IN = Counter.build()
-      .name("segue_log_in_total").help("Successful log in since process start.").register();
-  public static final Counter LOG_OUT = Counter.build()
-      .name("segue_log_out_total").help("Log out since process start.").register();
-  public static final Counter PASSWORD_RESET = Counter.build()
-      .name("segue_password_reset_total").help("Password reset requests since process start.").register();
+  public static final Counter LOG_IN_ATTEMPT = Counter
+    .build()
+    .name("segue_log_in_attempt_total")
+    .help("Log in attempt since process start.")
+    .register();
+  public static final Counter LOG_IN = Counter
+    .build()
+    .name("segue_log_in_total")
+    .help("Successful log in since process start.")
+    .register();
+  public static final Counter LOG_OUT = Counter
+    .build()
+    .name("segue_log_out_total")
+    .help("Log out since process start.")
+    .register();
+  public static final Counter PASSWORD_RESET = Counter
+    .build()
+    .name("segue_password_reset_total")
+    .help("Password reset requests since process start.")
+    .register();
 
   // Email Metrics
-  public static final Counter QUEUED_EMAIL = Counter.build()
-      .name("segue_queued_email_total").help("All emails queued since process start").labelNames("type", "sender")
-      .register();
+  public static final Counter QUEUED_EMAIL = Counter
+    .build()
+    .name("segue_queued_email_total")
+    .help("All emails queued since process start")
+    .labelNames("type", "sender")
+    .register();
 
   // Log Event Metrics
-  public static final Counter LOG_EVENT = Counter.build()
-      .name("isaac_log_event").help("Counter for Log Events by type").labelNames("type").register();
+  public static final Counter LOG_EVENT = Counter
+    .build()
+    .name("isaac_log_event")
+    .help("Counter for Log Events by type")
+    .labelNames("type")
+    .register();
 
   /**
    *  Private constructor as it does not make sense to instantiate this class.
    */
-  private SegueMetrics() {
-  }
+  private SegueMetrics() {}
 }

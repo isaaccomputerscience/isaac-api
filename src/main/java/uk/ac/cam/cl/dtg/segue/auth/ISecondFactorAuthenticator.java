@@ -23,7 +23,6 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 public interface ISecondFactorAuthenticator {
-
   /**
    * Determines whether the provided user has 2FA configured on their account or not..
    *
@@ -57,7 +56,7 @@ public interface ISecondFactorAuthenticator {
    * @throws SegueDatabaseException - if we cannot activate 2FA
    */
   boolean activate2FAForUser(RegisteredUserDTO user, String sharedSecret, Integer codeSubmitted)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Core authentication method for verifying user 2FA code.
@@ -69,7 +68,7 @@ public interface ISecondFactorAuthenticator {
    * @throws NoCredentialsAvailableException       - user has not configured 2FA
    */
   boolean authenticate2ndFactor(RegisteredUserDTO user, Integer codeSubmitted)
-      throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException;
+    throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException;
 
   /**
    * Remove 2FA settings for a given user's account.
@@ -80,5 +79,4 @@ public interface ISecondFactorAuthenticator {
    * @throws SegueDatabaseException - if we cannot activate 2FA
    */
   void deactivate2FAForUser(RegisteredUserDTO user) throws SegueDatabaseException;
-
 }

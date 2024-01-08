@@ -20,5 +20,6 @@ package uk.ac.cam.cl.dtg.isaac.dos;
  * Describes the method that was used to create the game board.
  */
 public enum GameboardCreationMethod {
-  FILTER, BUILDER
+  FILTER,
+  BUILDER
 }

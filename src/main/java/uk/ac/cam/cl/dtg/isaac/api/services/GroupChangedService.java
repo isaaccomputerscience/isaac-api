@@ -59,9 +59,13 @@ public class GroupChangedService implements IGroupObserver {
   private final QuizAssignmentManager quizAssignmentManager;
 
   @Inject
-  public GroupChangedService(final EmailManager emailManager, final GroupManager groupManager,
-                             final UserAccountManager userManager, final AssignmentManager assignmentManager,
-                             final QuizAssignmentManager quizAssignmentManager) {
+  public GroupChangedService(
+    final EmailManager emailManager,
+    final GroupManager groupManager,
+    final UserAccountManager userManager,
+    final AssignmentManager assignmentManager,
+    final QuizAssignmentManager quizAssignmentManager
+  ) {
     this.emailManager = emailManager;
     this.userManager = userManager;
     this.assignmentManager = assignmentManager;
@@ -84,10 +88,12 @@ public class GroupChangedService implements IGroupObserver {
 
     // Try to email user to let them know
     try {
-      emailManager.sendTemplatedEmailToUser(user,
-          emailManager.getEmailTemplateDTO("email-template-group-welcome"),
-          this.prepareGroupWelcomeEmailTokenMap(user, group),
-          EmailType.SYSTEM);
+      emailManager.sendTemplatedEmailToUser(
+        user,
+        emailManager.getEmailTemplateDTO("email-template-group-welcome"),
+        this.prepareGroupWelcomeEmailTokenMap(user, group),
+        EmailType.SYSTEM
+      );
     } catch (ContentManagerException e) {
       log.error("Could not send group welcome email due to a content error", e);
     } catch (SegueDatabaseException e) {
@@ -103,9 +109,11 @@ public class GroupChangedService implements IGroupObserver {
    * @return a map of string to string, with some values that may want to be shown in the email.
    * @throws SegueDatabaseException if we can't get the gameboard details.
    */
-  private Map<String, Object> prepareGroupWelcomeEmailTokenMap(final RegisteredUserDTO userDTO,
-                                                               final UserGroupDTO userGroup)
-      throws SegueDatabaseException, ContentManagerException {
+  private Map<String, Object> prepareGroupWelcomeEmailTokenMap(
+    final RegisteredUserDTO userDTO,
+    final UserGroupDTO userGroup
+  )
+    throws SegueDatabaseException, ContentManagerException {
     Validate.notNull(userDTO);
 
     UserSummaryWithEmailAddressDTO groupOwner = userGroup.getOwnerSummary();
@@ -113,10 +121,16 @@ public class GroupChangedService implements IGroupObserver {
 
     String teacherInfo;
     if (!userGroup.getAdditionalManagers().isEmpty()) {
-      teacherInfo = String.format("your teachers %s and %s",
-          userGroup.getAdditionalManagers().stream().map(NameFormatter::getTeacherNameFromUser)
-              .collect(Collectors.joining(", ")),
-          groupOwnerName);
+      teacherInfo =
+        String.format(
+          "your teachers %s and %s",
+          userGroup
+            .getAdditionalManagers()
+            .stream()
+            .map(NameFormatter::getTeacherNameFromUser)
+            .collect(Collectors.joining(", ")),
+          groupOwnerName
+        );
     } else {
       teacherInfo = String.format("your teacher %s", groupOwnerName);
     }
@@ -129,24 +143,27 @@ public class GroupChangedService implements IGroupObserver {
     formatGroupAssignmentsInfo(userGroup, htmlSB, plainTextSB);
 
     return new ImmutableMap.Builder<String, Object>()
-        .put("teacherName", groupOwnerName)
-        .put("teacherInfo", teacherInfo)
-        .put("groupName", groupName)
-        .put("assignmentsInfo", plainTextSB.toString())
-        .put("assignmentsInfo_HTML", htmlSB.toString())
-        .build();
+      .put("teacherName", groupOwnerName)
+      .put("teacherInfo", teacherInfo)
+      .put("groupName", groupName)
+      .put("assignmentsInfo", plainTextSB.toString())
+      .put("assignmentsInfo_HTML", htmlSB.toString())
+      .build();
   }
 
-  private void formatGroupAssignmentsInfo(final UserGroupDTO userGroup, final StringBuilder htmlSB,
-                                          final StringBuilder plainTextSB)
-      throws SegueDatabaseException, ContentManagerException {
+  private void formatGroupAssignmentsInfo(
+    final UserGroupDTO userGroup,
+    final StringBuilder htmlSB,
+    final StringBuilder plainTextSB
+  )
+    throws SegueDatabaseException, ContentManagerException {
     final List<AssignmentDTO> existingAssignments =
-        this.assignmentManager.getAllAssignmentsForSpecificGroups(Collections.singletonList(userGroup), false);
+      this.assignmentManager.getAllAssignmentsForSpecificGroups(Collections.singletonList(userGroup), false);
 
     formatAssignmentLikeList(htmlSB, plainTextSB, existingAssignments, "assignments", assignmentManager);
 
     final List<QuizAssignmentDTO> existingQuizzes =
-        this.quizAssignmentManager.getActiveAssignmentsForGroups(Collections.singletonList(userGroup));
+      this.quizAssignmentManager.getActiveAssignmentsForGroups(Collections.singletonList(userGroup));
 
     if (existingQuizzes != null && !existingQuizzes.isEmpty()) {
       htmlSB.append("<br>");
@@ -156,9 +173,13 @@ public class GroupChangedService implements IGroupObserver {
   }
 
   private <A extends IAssignmentLike> void formatAssignmentLikeList(
-      final StringBuilder htmlSB, final StringBuilder plainTextSB, final List<A> existingAssignments,
-      final String typeOfAssignment, final IAssignmentLike.Details<A> assignmentDetailsService)
-      throws SegueDatabaseException, ContentManagerException {
+    final StringBuilder htmlSB,
+    final StringBuilder plainTextSB,
+    final List<A> existingAssignments,
+    final String typeOfAssignment,
+    final IAssignmentLike.Details<A> assignmentDetailsService
+  )
+    throws SegueDatabaseException, ContentManagerException {
     if (existingAssignments != null) {
       existingAssignments.sort(Comparator.comparing(IAssignmentLike::getCreationDate));
     }
@@ -185,18 +206,26 @@ public class GroupChangedService implements IGroupObserver {
           dueDate = String.format(", due on %s", dateFormat.format(existingAssignment.getDueDate()));
         }
 
-        htmlSB.append(String.format("%d. <a href='%s'>%s</a> (set on %s%s)<br>", i + 1, url,
-            name, dateFormat.format(assignmentStartDate), dueDate));
+        htmlSB.append(
+          String.format(
+            "%d. <a href='%s'>%s</a> (set on %s%s)<br>",
+            i + 1,
+            url,
+            name,
+            dateFormat.format(assignmentStartDate),
+            dueDate
+          )
+        );
 
-        plainTextSB.append(String.format("%d. %s (set on %s%s)\n", i + 1, name,
-            dateFormat.format(assignmentStartDate), dueDate));
+        plainTextSB.append(
+          String.format("%d. %s (set on %s%s)\n", i + 1, name, dateFormat.format(assignmentStartDate), dueDate)
+        );
       }
     } else if (existingAssignments != null) {
       htmlSB.append("No " + typeOfAssignment + " have been set yet.<br>");
       plainTextSB.append("No " + typeOfAssignment + " have been set yet.\n");
     }
   }
-
 
   @Override
   public void onAdditionalManagerAddedToGroup(final UserGroupDTO group, final RegisteredUserDTO additionalManagerUser) {
@@ -218,15 +247,16 @@ public class GroupChangedService implements IGroupObserver {
       }
 
       Map<String, Object> emailProperties = new ImmutableMap.Builder<String, Object>()
-          .put("ownerName", groupOwnerName)
-          .put("ownerEmail", groupOwnerEmail)
-          .put("groupName", groupName)
-          .build();
-      emailManager.sendTemplatedEmailToUser(additionalManagerUser,
-          emailManager.getEmailTemplateDTO("email-template-group-additional-manager-welcome"),
-          emailProperties,
-          EmailType.SYSTEM);
-
+        .put("ownerName", groupOwnerName)
+        .put("ownerEmail", groupOwnerEmail)
+        .put("groupName", groupName)
+        .build();
+      emailManager.sendTemplatedEmailToUser(
+        additionalManagerUser,
+        emailManager.getEmailTemplateDTO("email-template-group-additional-manager-welcome"),
+        emailProperties,
+        EmailType.SYSTEM
+      );
     } catch (ContentManagerException e) {
       log.info("Could not send group additional manager email ", e);
     } catch (NoUserException e) {
@@ -247,19 +277,24 @@ public class GroupChangedService implements IGroupObserver {
     }
 
     Map<String, Object> emailProperties = new ImmutableMap.Builder<String, Object>()
-        .put("groupName", groupName)
-        .build();
+      .put("groupName", groupName)
+      .build();
 
     try {
-      emailManager.sendTemplatedEmailToUser(newOwner,
-          emailManager.getEmailTemplateDTO("email-template-group-manager-promoted"),
-          emailProperties,
-          EmailType.SYSTEM);
+      emailManager.sendTemplatedEmailToUser(
+        newOwner,
+        emailManager.getEmailTemplateDTO("email-template-group-manager-promoted"),
+        emailProperties,
+        EmailType.SYSTEM
+      );
     } catch (ContentManagerException e) {
       log.info("Could not send group additional manager promotion to owner email ", e);
     } catch (SegueDatabaseException e) {
-      log.error("Unable to send group additional manager promotion to owner e-mail due to a database error."
-              + " Failing silently.", e);
+      log.error(
+        "Unable to send group additional manager promotion to owner e-mail due to a database error." +
+        " Failing silently.",
+        e
+      );
     }
   }
 
@@ -287,25 +322,30 @@ public class GroupChangedService implements IGroupObserver {
       }
 
       Map<String, Object> emailProperties = new ImmutableMap.Builder<String, Object>()
-          .put("ownerName", groupOwnerName)
-          .put("ownerEmail", groupOwnerEmail)
-          .put("groupName", groupName)
-          .put("nowOrNoLonger", nowOrNoLonger)
-          .build();
+        .put("ownerName", groupOwnerName)
+        .put("ownerEmail", groupOwnerEmail)
+        .put("groupName", groupName)
+        .put("nowOrNoLonger", nowOrNoLonger)
+        .build();
       for (Long additionalManagerId : group.getAdditionalManagersUserIds()) {
         RegisteredUserDTO additionalManagerUser = userManager.getUserDTOById(additionalManagerId);
-        emailManager.sendTemplatedEmailToUser(additionalManagerUser,
-            emailManager.getEmailTemplateDTO("email-template-group-manager-privileges"),
-            emailProperties,
-            EmailType.SYSTEM);
+        emailManager.sendTemplatedEmailToUser(
+          additionalManagerUser,
+          emailManager.getEmailTemplateDTO("email-template-group-manager-privileges"),
+          emailProperties,
+          EmailType.SYSTEM
+        );
       }
     } catch (ContentManagerException e) {
       log.info("Could not send group additional manager privileges modified email ", e);
     } catch (NoUserException e) {
       log.info(String.format("Could not find owner user object of group %s", group.getId()), e);
     } catch (SegueDatabaseException e) {
-      log.error("Unable to send group additional manager privileges modified e-mail due to a database error."
-              + " Failing silently.", e);
+      log.error(
+        "Unable to send group additional manager privileges modified e-mail due to a database error." +
+        " Failing silently.",
+        e
+      );
     }
   }
 }

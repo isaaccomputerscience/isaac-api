@@ -24,9 +24,9 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ParsonsChoiceDTO;
 @DTOMapping(ParsonsChoiceDTO.class)
 @JsonContentType("parsonsChoice")
 public class ParsonsChoice extends ItemChoice {
+
   /**
    * Default constructor required for mapping.
    */
-  public ParsonsChoice() {
-  }
+  public ParsonsChoice() {}
 }

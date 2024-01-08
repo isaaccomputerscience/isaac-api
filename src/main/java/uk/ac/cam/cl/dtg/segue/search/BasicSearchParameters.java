@@ -19,8 +19,12 @@ public class BasicSearchParameters {
    * @param startIndex - start index for results, e.g. 0 for the first set of results
    * @param limit      - the maximum number of results to return, -1 will attempt to return all results.
    */
-  public BasicSearchParameters(final String indexBase, final String indexType, final Integer startIndex,
-                               final Integer limit) {
+  public BasicSearchParameters(
+    final String indexBase,
+    final String indexType,
+    final Integer startIndex,
+    final Integer limit
+  ) {
     this.indexBase = indexBase;
     this.indexType = indexType;
     this.startIndex = startIndex;
@@ -68,10 +72,12 @@ public class BasicSearchParameters {
       return false;
     }
     BasicSearchParameters otherBSP = (BasicSearchParameters) obj;
-    return Objects.equals(indexBase, otherBSP.indexBase)
-        && Objects.equals(indexType, otherBSP.indexType)
-        && Objects.equals(startIndex, otherBSP.startIndex)
-        && Objects.equals(limit, otherBSP.limit);
+    return (
+      Objects.equals(indexBase, otherBSP.indexBase) &&
+      Objects.equals(indexType, otherBSP.indexType) &&
+      Objects.equals(startIndex, otherBSP.startIndex) &&
+      Objects.equals(limit, otherBSP.limit)
+    );
   }
 
   @Override

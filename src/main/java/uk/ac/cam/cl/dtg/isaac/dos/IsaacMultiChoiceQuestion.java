@@ -26,6 +26,4 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacMultiChoiceQuestionDTO;
  */
 @DTOMapping(IsaacMultiChoiceQuestionDTO.class)
 @JsonContentType("isaacMultiChoiceQuestion")
-public class IsaacMultiChoiceQuestion extends IsaacQuestionBase {
-
-}
+public class IsaacMultiChoiceQuestion extends IsaacQuestionBase {}

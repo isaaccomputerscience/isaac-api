@@ -58,7 +58,6 @@ public class RegistrationMisuseHandler implements IMisuseHandler {
     this.emailManager = emailManager;
   }
 
-
   @Override
   public Integer getSoftThreshold() {
     return SOFT_THRESHOLD;
@@ -82,21 +81,29 @@ public class RegistrationMisuseHandler implements IMisuseHandler {
   @Override
   public void executeSoftThresholdAction(final String message) {
     final String subject = "Soft Threshold limit reached for Registration endpoint";
-    EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
-        subject, message, message, EmailType.ADMIN);
+    EmailCommunicationMessage e = new EmailCommunicationMessage(
+      properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
+      subject,
+      message,
+      message,
+      EmailType.ADMIN
+    );
     emailManager.addSystemEmailToQueue(e);
     log.warn("Lots of registration requests from: " + sanitiseExternalLogValue(message));
-
   }
 
   @Override
   public void executeHardThresholdAction(final String message) {
     final String subject = "HARD Threshold limit reached for Registration endpoint";
 
-    EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
-        subject, message, message, EmailType.ADMIN);
+    EmailCommunicationMessage e = new EmailCommunicationMessage(
+      properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
+      subject,
+      message,
+      message,
+      EmailType.ADMIN
+    );
     emailManager.addSystemEmailToQueue(e);
     log.warn("Too many registration requests from: " + sanitiseExternalLogValue(message));
-
   }
 }

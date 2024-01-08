@@ -57,19 +57,16 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
    *            - An instance of an automapper that can be used for mapping to and from AssignmentDOs and DTOs.
    */
   @Inject
-  public PgQuizAttemptPersistenceManager(final PostgresSqlDb database,
-                                         final MapperFacade mapper) {
+  public PgQuizAttemptPersistenceManager(final PostgresSqlDb database, final MapperFacade mapper) {
     this.database = database;
     this.mapper = mapper;
   }
 
   @Override
   public QuizAttemptDTO getByQuizAssignmentIdAndUserId(final Long quizAssignmentId, final Long userId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     String query = "SELECT * FROM quiz_attempts WHERE quiz_assignment_id = ? AND user_id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_BY_ASSIGNMENT_AND_USER_ASSIGNMENT_ID, quizAssignmentId);
       pst.setLong(FIELD_GET_BY_ASSIGNMENT_AND_USER_USER_ID, userId);
 
@@ -90,8 +87,9 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
     QuizAttemptDO attemptToSave = mapper.map(attempt, QuizAttemptDO.class);
 
     String query = "INSERT INTO quiz_attempts(user_id, quiz_id, quiz_assignment_id, start_date) VALUES (?, ?, ?, ?);";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
     ) {
       pst.setLong(FIELD_SAVE_ATTEMPT_USER_ID, attemptToSave.getUserId());
       pst.setString(FIELD_SAVE_ATTEMPT_QUIZ_ID, attemptToSave.getQuizId());
@@ -123,7 +121,6 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
         log.debug("Saving Quiz Attempt... Quiz Attempt ID: " + attempt.getId() + " Db id : " + attemptId);
         return attemptId;
       }
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
@@ -131,16 +128,13 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
 
   @Override
   public List<QuizAttemptDTO> getByQuizIdAndUserId(final String quizId, final Long userId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     String query = "SELECT * FROM quiz_attempts WHERE quiz_id = ? AND user_id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_GET_BY_QUIZ_AND_USER_QUIZ_ID, quizId);
       pst.setLong(FIELD_GET_BY_QUIZ_AND_USER_USER_ID, userId);
 
       try (ResultSet results = pst.executeQuery()) {
-
         List<QuizAttemptDTO> listOfResults = Lists.newArrayList();
         while (results.next()) {
           listOfResults.add(this.convertToQuizAttemptDTO(this.convertFromSQLToQuizAttemptDO(results)));
@@ -155,9 +149,7 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
   @Override
   public QuizAttemptDTO getById(final Long quizAttemptId) throws SegueDatabaseException {
     String query = "SELECT * FROM quiz_attempts WHERE id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_BY_ID_ATTEMPT_ID, quizAttemptId);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -175,11 +167,9 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
   @Override
   @Nullable
   public Date updateAttemptCompletionStatus(final Long quizAttemptId, final boolean newCompletionStatus)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     String query = "UPDATE quiz_attempts SET completed_date = ? WHERE id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       Date completedDate = newCompletionStatus ? new Date() : null;
       if (completedDate != null) {
         pst.setTimestamp(FIELD_UPDATE_ATTEMPT_COMPLETED_DATE, new java.sql.Timestamp(completedDate.getTime()));
@@ -199,9 +189,7 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
   @Override
   public Set<Long> getCompletedUserIds(final Long assignmentId) throws SegueDatabaseException {
     String query = "SELECT user_id FROM quiz_attempts WHERE quiz_assignment_id = ? AND completed_date IS NOT NULL";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_COMPLETED_USER_IDS_ASSIGNMENT_ID, assignmentId);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -217,9 +205,11 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
   }
 
   @Override
-  public Map<Long, QuizAttemptDTO> getByQuizAssignmentIdsAndUserId(final List<Long> quizAssignmentIds,
-                                                                   final Long userId)
-      throws SegueDatabaseException {
+  public Map<Long, QuizAttemptDTO> getByQuizAssignmentIdsAndUserId(
+    final List<Long> quizAssignmentIds,
+    final Long userId
+  )
+    throws SegueDatabaseException {
     Map<Long, QuizAttemptDTO> mapOfResults = Maps.newHashMap();
     if (quizAssignmentIds.isEmpty()) {
       return mapOfResults; // IN condition below doesn't work with empty list.
@@ -231,12 +221,12 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
       builder.append("?,");
     }
     String quizAssignmentIdsHoles = builder.deleteCharAt(builder.length() - 1).append(")").toString();
-    String query = "SELECT quiz_attempts.* FROM quiz_attempts INNER JOIN quiz_assignments"
-        + " ON quiz_attempts.quiz_assignment_id = quiz_assignments.id"
-        + " WHERE quiz_attempts.user_id = ? AND quiz_assignments.id IN " + quizAssignmentIdsHoles;
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    String query =
+      "SELECT quiz_attempts.* FROM quiz_attempts INNER JOIN quiz_assignments" +
+      " ON quiz_attempts.quiz_assignment_id = quiz_assignments.id" +
+      " WHERE quiz_attempts.user_id = ? AND quiz_assignments.id IN " +
+      quizAssignmentIdsHoles;
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_BY_ASSIGNMENTS_AND_USER_USER_ID, userId);
       int i = FIELD_GET_BY_ASSIGNMENTS_AND_USER_ASSIGNMENTS_INITIAL_INDEX;
       for (Long quizAssignmentId : quizAssignmentIds) {
@@ -245,8 +235,10 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
 
       try (ResultSet results = pst.executeQuery()) {
         while (results.next()) {
-          mapOfResults.put(results.getLong("quiz_assignment_id"),
-              this.convertToQuizAttemptDTO(this.convertFromSQLToQuizAttemptDO(results)));
+          mapOfResults.put(
+            results.getLong("quiz_assignment_id"),
+            this.convertToQuizAttemptDTO(this.convertFromSQLToQuizAttemptDO(results))
+          );
         }
         return mapOfResults;
       }
@@ -258,9 +250,7 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
   @Override
   public List<QuizAttemptDTO> getFreeAttemptsByUserId(final Long userId) throws SegueDatabaseException {
     String query = "SELECT * FROM quiz_attempts WHERE quiz_attempts.user_id = ? AND quiz_assignment_id IS NULL";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_FREE_ATTEMPTS_BY_USER_USER_ID, userId);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -278,9 +268,7 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
   @Override
   public void deleteAttempt(final Long quizAttemptId) throws SegueDatabaseException {
     String query = "DELETE FROM quiz_attempts WHERE id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_DELETE_ATTEMPT_ATTEMPT_ID, quizAttemptId);
 
       pst.executeUpdate();
@@ -320,9 +308,14 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
       completedDate = new Date(sqlResults.getTimestamp("completed_date").getTime());
     }
 
-    return new QuizAttemptDO(sqlResults.getLong("id"), sqlResults.getLong("user_id"),
-        sqlResults.getString("quiz_id"), quizAssignmentId,
-        startDate, completedDate);
+    return new QuizAttemptDO(
+      sqlResults.getLong("id"),
+      sqlResults.getLong("user_id"),
+      sqlResults.getString("quiz_id"),
+      quizAssignmentId,
+      startDate,
+      completedDate
+    );
   }
 
   // Field Constants

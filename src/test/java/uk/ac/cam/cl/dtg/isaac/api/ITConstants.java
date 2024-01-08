@@ -20,12 +20,10 @@ package uk.ac.cam.cl.dtg.isaac.api;
  * Constants for use with IsaacIntegrationTests.
  */
 public final class ITConstants {
-
   // Users
   public static final String TEST_ADMIN_EMAIL = "test-admin@test.com";
   public static final String TEST_ADMIN_PASSWORD = "test1234";
   public static final long TEST_ADMIN_ID = 2L;
-
 
   public static final String TEST_EDITOR_EMAIL = "test-editor@test.com";
   public static final String TEST_EDITOR_PASSWORD = "test1234";
@@ -123,15 +121,17 @@ public final class ITConstants {
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_BOB_FOR_SET_COMPLETE_TEST_ID = 8L;
   public static final Long QUIZ_ASSIGNMENT_ATTEMPT_ALICE_FREE_ID = 12L;
 
-  public static final String QUIZ_TEST_QUESTION_FIRST_ID = "_quiz_test|0ec982f6-e2bf-4974-b777-c50b9471beb1|84c48a78-2a27-4843-866a-c8895aa60e70";
-  public static final String QUIZ_TEST_HIDDEN_FROM_TUTORS_QUESTION_FIRST_ID = "_hidden_from_roles_tutor_quiz_test|0ec982f6-e2bf-4974-b777-c50b9471beb1|84c48a78-2a27-4843-866a-c8895aa60e70";
+  public static final String QUIZ_TEST_QUESTION_FIRST_ID =
+    "_quiz_test|0ec982f6-e2bf-4974-b777-c50b9471beb1|84c48a78-2a27-4843-866a-c8895aa60e70";
+  public static final String QUIZ_TEST_HIDDEN_FROM_TUTORS_QUESTION_FIRST_ID =
+    "_hidden_from_roles_tutor_quiz_test|0ec982f6-e2bf-4974-b777-c50b9471beb1|84c48a78-2a27-4843-866a-c8895aa60e70";
   public static final String QUIZ_TEST_UNKNOWN_QUESTION_ID = "not_a_question";
 
-  public static final String QUIZ_TEST_FIRST_QUESTION_ANSWER = "{\"type\":\"quantity\",\"value\":\"3.0\",\"units\":\"V\"}";
+  public static final String QUIZ_TEST_FIRST_QUESTION_ANSWER =
+    "{\"type\":\"quantity\",\"value\":\"3.0\",\"units\":\"V\"}";
 
   public static final String NOT_LOGGED_IN_ERROR_MESSAGE = "You must be logged in to access this resource.";
   public static final String INCORRECT_ROLE_ERROR_MESSAGE = "You do not have the permissions to complete this action";
 
-  private ITConstants() {
-  }
+  private ITConstants() {}
 }

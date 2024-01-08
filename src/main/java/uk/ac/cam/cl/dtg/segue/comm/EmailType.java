@@ -17,7 +17,7 @@
 package uk.ac.cam.cl.dtg.segue.comm;
 
 /**
- * The types of email we can send. 
+ * The types of email we can send.
  *
  * @author Alistair Stead
  *
@@ -67,6 +67,4 @@ public enum EmailType {
         return false;
     }
   }
-
-
 }

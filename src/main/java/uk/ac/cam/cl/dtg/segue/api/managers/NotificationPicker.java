@@ -61,8 +61,11 @@ public class NotificationPicker {
    *            - the DAO allowing the recording of which notifications have been shown to whom.
    */
   @Inject
-  public NotificationPicker(final GitContentManager contentManager, @Named(CONTENT_INDEX) final String contentIndex,
-                            final PgUserNotifications notifications) {
+  public NotificationPicker(
+    final GitContentManager contentManager,
+    @Named(CONTENT_INDEX) final String contentIndex,
+    final PgUserNotifications notifications
+  ) {
     this.contentManager = contentManager;
     this.contentIndex = contentIndex;
     this.notifications = notifications;
@@ -80,14 +83,18 @@ public class NotificationPicker {
    *             - if something goes wrong consulting the personalisation database.
    */
   public List<ContentDTO> getAvailableNotificationsForUser(final RegisteredUserDTO user)
-      throws ContentManagerException, SegueDatabaseException {
+    throws ContentManagerException, SegueDatabaseException {
     // get users notification record
     List<GitContentManager.BooleanSearchClause> fieldsToMatch = Lists.newArrayList();
-    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, BooleanOperator.AND, Collections.singletonList("notification")));
+    fieldsToMatch.add(
+      new GitContentManager.BooleanSearchClause(
+        TYPE_FIELDNAME,
+        BooleanOperator.AND,
+        Collections.singletonList("notification")
+      )
+    );
 
-    ResultsWrapper<ContentDTO> allContentNotifications = this.contentManager
-        .findByFieldNames(fieldsToMatch, 0, -1);
+    ResultsWrapper<ContentDTO> allContentNotifications = this.contentManager.findByFieldNames(fieldsToMatch, 0, -1);
 
     Map<String, IUserNotification> listOfRecordedNotifications = getMapOfRecordedNotifications(user);
 
@@ -128,7 +135,6 @@ public class NotificationPicker {
         // or they have and they don't want to see it again
         continue;
       }
-
     }
 
     return resultsToReturn;
@@ -144,7 +150,7 @@ public class NotificationPicker {
    *             - if something goes wrong with the DB io step.
    */
   public Map<String, IUserNotification> getMapOfRecordedNotifications(final RegisteredUserDTO user)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     Map<String, IUserNotification> result = Maps.newHashMap();
 
     List<IUserNotification> userNotifications = notifications.getUserNotifications(user.getId());
@@ -170,14 +176,18 @@ public class NotificationPicker {
    * @throws ContentManagerException
    *             - if something goes wrong looking up the content.
    */
-  public void recordNotificationAction(final RegisteredUserDTO user, final String notificationId,
-                                       final NotificationStatus status)
-      throws SegueDatabaseException, ContentManagerException {
+  public void recordNotificationAction(
+    final RegisteredUserDTO user,
+    final String notificationId,
+    final NotificationStatus status
+  )
+    throws SegueDatabaseException, ContentManagerException {
     ContentDTO notification = this.contentManager.getContentById(notificationId);
 
     if (null == notification) {
-      throw new ResourceNotFoundException(String.format(
-          "The resource with id: %s and type Notification could not be found.", notificationId));
+      throw new ResourceNotFoundException(
+        String.format("The resource with id: %s and type Notification could not be found.", notificationId)
+      );
     }
 
     // update the users record with the action they have taken.
@@ -194,16 +204,17 @@ public class NotificationPicker {
    * @throws ContentManagerException
    *             - if something goes wrong looking up the content.
    */
-  public ContentDTO getNotificationById(final String notificationId) throws ContentManagerException,
-      ResourceNotFoundException {
+  public ContentDTO getNotificationById(final String notificationId)
+    throws ContentManagerException, ResourceNotFoundException {
     // get available notifications that still can be displayed
     ContentDTO notification = this.contentManager.getContentById(notificationId);
 
     if (notification instanceof NotificationDTO) {
       return notification;
     } else {
-      throw new ResourceNotFoundException(String.format(
-          "The resource with id: %s and type Notification could not be found.", notificationId));
+      throw new ResourceNotFoundException(
+        String.format("The resource with id: %s and type Notification could not be found.", notificationId)
+      );
     }
   }
 }

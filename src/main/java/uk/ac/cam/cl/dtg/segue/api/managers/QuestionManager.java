@@ -104,8 +104,11 @@ public class QuestionManager {
    *                                   preferences
    */
   @Inject
-  public QuestionManager(final ContentMapper mapper, final IQuestionAttemptManager questionPersistenceManager,
-                         final AbstractUserPreferenceManager userPreferenceManager) {
+  public QuestionManager(
+    final ContentMapper mapper,
+    final IQuestionAttemptManager questionPersistenceManager,
+    final AbstractUserPreferenceManager userPreferenceManager
+  ) {
     this.mapper = mapper;
     this.questionAttemptPersistenceManager = questionPersistenceManager;
     this.userPreferenceManager = userPreferenceManager;
@@ -126,12 +129,11 @@ public class QuestionManager {
 
     // Does this class have the correct annotation?
     if (questionType.isAnnotationPresent(ValidatesWith.class)) {
-
-      log.debug("Validator for question validation found. Using : "
-          + questionType.getAnnotation(ValidatesWith.class).value());
+      log.debug(
+        "Validator for question validation found. Using : " + questionType.getAnnotation(ValidatesWith.class).value()
+      );
       Injector injector = SegueGuiceConfigurationModule.getGuiceInjector();
       return injector.getInstance(questionType.getAnnotation(ValidatesWith.class).value());
-
     } else if (questionType.equals(Question.class)) {
       // so if we get here then we haven't found a ValidatesWith class, so
       // we should just give up and return null.
@@ -149,8 +151,7 @@ public class QuestionManager {
    * @return A list of QuestionDTO found in the content.
    */
   public static List<QuestionDTO> extractQuestionObjects(final ContentDTO content) {
-    return QuestionManager.extractQuestionObjectsRecursively(content,
-        new ArrayList<>());
+    return QuestionManager.extractQuestionObjectsRecursively(content, new ArrayList<>());
   }
 
   /**
@@ -161,8 +162,10 @@ public class QuestionManager {
    *                  objects.
    * @return The modified result array.
    */
-  private static List<QuestionDTO> extractQuestionObjectsRecursively(final ContentDTO toExtract,
-                                                                     final List<QuestionDTO> result) {
+  private static List<QuestionDTO> extractQuestionObjectsRecursively(
+    final ContentDTO toExtract,
+    final List<QuestionDTO> result
+  ) {
     if (toExtract instanceof QuestionDTO) {
       // we found a question so add it to the list.
       result.add((QuestionDTO) toExtract);
@@ -201,27 +204,28 @@ public class QuestionManager {
 
     if (null == validator) {
       log.error("Unable to locate a valid validator for this question " + question.getId());
-      return Response.serverError()
-          .entity("Unable to detect question validator for " + "this object. Unable to verify answer")
-          .build();
+      return Response
+        .serverError()
+        .entity("Unable to detect question validator for " + "this object. Unable to verify answer")
+        .build();
     }
 
     Choice answerFromUser = mapper.getAutoMapper().map(submittedAnswer, Choice.class);
     QuestionValidationResponse validateQuestionResponse;
-    Histogram.Timer validatorTimer =
-        VALIDATOR_LATENCY_HISTOGRAM.labels(validator.getClass().getSimpleName()).startTimer();
+    Histogram.Timer validatorTimer = VALIDATOR_LATENCY_HISTOGRAM
+      .labels(validator.getClass().getSimpleName())
+      .startTimer();
     try {
       validateQuestionResponse = validator.validateQuestionResponse(question, answerFromUser);
     } catch (ValidatorUnavailableException e) {
-      return SegueErrorResponse.getServiceUnavailableResponse(e.getClass().getSimpleName() + ": "
-          + e.getMessage());
+      return SegueErrorResponse.getServiceUnavailableResponse(e.getClass().getSimpleName() + ": " + e.getMessage());
     } finally {
       validatorTimer.observeDuration();
     }
 
-    return Response.ok(
-        mapper.getAutoMapper().map(validateQuestionResponse, QuestionValidationResponseDTO.class)).build();
-
+    return Response
+      .ok(mapper.getAutoMapper().map(validateQuestionResponse, QuestionValidationResponseDTO.class))
+      .build();
   }
 
   /**
@@ -239,12 +243,11 @@ public class QuestionManager {
 
     // Does this class have the correct annotation?
     if (choiceClass.isAnnotationPresent(SpecifiesWith.class)) {
-
-      log.debug("Specifier for specifiation creation found. Using : "
-          + choiceClass.getAnnotation(SpecifiesWith.class).value());
+      log.debug(
+        "Specifier for specifiation creation found. Using : " + choiceClass.getAnnotation(SpecifiesWith.class).value()
+      );
       Injector injector = SegueGuiceConfigurationModule.getGuiceInjector();
       return injector.getInstance(choiceClass.getAnnotation(SpecifiesWith.class).value());
-
     } else if (choiceClass.equals(ChoiceDTO.class)) {
       // so if we get here then we haven't found a SpecifiesWith class, so
       // we should just give up and return null.
@@ -269,9 +272,10 @@ public class QuestionManager {
    * @return augmented page - the return result is by convenience as the page provided as a parameter will be mutated.
    */
   public SeguePageDTO augmentQuestionObjects(
-      final SeguePageDTO page, final String userId,
-      final Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts) {
-
+    final SeguePageDTO page,
+    final String userId,
+    final Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts
+  ) {
     List<QuestionDTO> questionsToAugment = extractQuestionObjects(page);
 
     this.augmentQuestionObjectWithAttemptInformation(page, questionsToAugment, usersQuestionAttempts);
@@ -291,9 +295,10 @@ public class QuestionManager {
    * @return augmented page - the return result is by convenience as the page provided as a parameter will be mutated.
    */
   private SeguePageDTO augmentQuestionObjectWithAttemptInformation(
-      final SeguePageDTO page, final List<QuestionDTO> questionsToAugment,
-      final Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts) {
-
+    final SeguePageDTO page,
+    final List<QuestionDTO> questionsToAugment,
+    final Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts
+  ) {
     if (null == usersQuestionAttempts) {
       return page;
     }
@@ -307,8 +312,7 @@ public class QuestionManager {
       }
 
       QuestionValidationResponse bestAnswer = null;
-      List<QuestionValidationResponse> questionAttempts = usersQuestionAttempts.get(page.getId()).get(
-          question.getId());
+      List<QuestionValidationResponse> questionAttempts = usersQuestionAttempts.get(page.getId()).get(question.getId());
 
       // iterate in reverse order to try and find the correct answer.
       for (int i = questionAttempts.size() - 1; i >= 0; i--) {
@@ -325,7 +329,6 @@ public class QuestionManager {
       }
 
       question.setBestAttempt(this.convertQuestionValidationResponseToDTO(bestAnswer));
-
     }
     return page;
   }
@@ -338,16 +341,19 @@ public class QuestionManager {
    */
   @SuppressWarnings("unchecked")
   public QuestionValidationResponseDTO convertQuestionValidationResponseToDTO(
-      final QuestionValidationResponse questionValidationResponse) {
+    final QuestionValidationResponse questionValidationResponse
+  ) {
     // Determine what kind of ValidationResponse to turn it in to.
     DTOMapping dtoMapping = questionValidationResponse.getClass().getAnnotation(DTOMapping.class);
     if (QuestionValidationResponseDTO.class.isAssignableFrom(dtoMapping.value())) {
-      return mapper.getAutoMapper().map(questionValidationResponse,
-          (Class<? extends QuestionValidationResponseDTO>) dtoMapping.value());
+      return mapper
+        .getAutoMapper()
+        .map(questionValidationResponse, (Class<? extends QuestionValidationResponseDTO>) dtoMapping.value());
     } else {
       log.error("Unable to set best attempt as we cannot match the answer to a DTO type.");
-      throw new ClassCastException("Unable to cast " + questionValidationResponse.getClass()
-          + " to a QuestionValidationResponse.");
+      throw new ClassCastException(
+        "Unable to cast " + questionValidationResponse.getClass() + " to a QuestionValidationResponse."
+      );
     }
   }
 
@@ -357,25 +363,34 @@ public class QuestionManager {
    * @param user             - user that made the attempt.
    * @param questionResponse - the outcome of the attempt to be persisted.
    */
-  public void recordQuestionAttempt(final AbstractSegueUserDTO user,
-                                    final QuestionValidationResponseDTO questionResponse)
-      throws SegueDatabaseException {
-    QuestionValidationResponse questionResponseDO = this.mapper.getAutoMapper().map(questionResponse,
-        QuestionValidationResponse.class);
+  public void recordQuestionAttempt(
+    final AbstractSegueUserDTO user,
+    final QuestionValidationResponseDTO questionResponse
+  )
+    throws SegueDatabaseException {
+    QuestionValidationResponse questionResponseDO =
+      this.mapper.getAutoMapper().map(questionResponse, QuestionValidationResponse.class);
 
     String questionPageId = extractPageIdFromQuestionId(questionResponse.getQuestionId());
     if (user instanceof RegisteredUserDTO) {
       RegisteredUserDTO registeredUser = (RegisteredUserDTO) user;
 
-      this.questionAttemptPersistenceManager.registerQuestionAttempt(registeredUser.getId(),
-          questionPageId, questionResponse.getQuestionId(), questionResponseDO);
+      this.questionAttemptPersistenceManager.registerQuestionAttempt(
+          registeredUser.getId(),
+          questionPageId,
+          questionResponse.getQuestionId(),
+          questionResponseDO
+        );
       log.debug("Question information recorded for user: " + registeredUser.getId());
-
     } else if (user instanceof AnonymousUserDTO) {
       AnonymousUserDTO anonymousUserDTO = (AnonymousUserDTO) user;
 
-      this.questionAttemptPersistenceManager.registerAnonymousQuestionAttempt(anonymousUserDTO.getSessionId(),
-          questionPageId, questionResponse.getQuestionId(), questionResponseDO);
+      this.questionAttemptPersistenceManager.registerAnonymousQuestionAttempt(
+          anonymousUserDTO.getSessionId(),
+          questionPageId,
+          questionResponse.getQuestionId(),
+          questionResponseDO
+        );
     } else {
       log.error("Unexpected user type. Unable to record question response");
     }
@@ -389,7 +404,7 @@ public class QuestionManager {
    * @return a List of TestCases describing the results of the tests
    **/
   public List<TestCase> testQuestion(final String questionType, final TestQuestion testDefinition)
-      throws BadRequestException, ValidatorUnavailableException {
+    throws BadRequestException, ValidatorUnavailableException {
     try {
       MapperFacade autoMapper = mapper.getAutoMapper();
 
@@ -408,10 +423,14 @@ public class QuestionManager {
       // For each test, check its actual results against the response of the validator on the fake question
       List<TestCase> results = Lists.newArrayList();
       for (TestCase testCase : testDefinition.getTestCases()) {
-        Choice inferredChoiceSubclass =
-            autoMapper.map(autoMapper.map(testCase.getAnswer(), ChoiceDTO.class), Choice.class);
-        QuestionValidationResponse questionValidationResponse = questionValidator
-            .validateQuestionResponse(testQuestion, inferredChoiceSubclass);
+        Choice inferredChoiceSubclass = autoMapper.map(
+          autoMapper.map(testCase.getAnswer(), ChoiceDTO.class),
+          Choice.class
+        );
+        QuestionValidationResponse questionValidationResponse = questionValidator.validateQuestionResponse(
+          testQuestion,
+          inferredChoiceSubclass
+        );
         testCase.setCorrect(questionValidationResponse.isCorrect());
         testCase.setExplanation(questionValidationResponse.getExplanation());
         results.add(testCase);
@@ -431,7 +450,9 @@ public class QuestionManager {
    * @throws SegueDatabaseException - if there is a database error.
    */
   public Map<String, Map<String, List<QuestionValidationResponse>>> getQuestionAttemptsByUser(
-      final AbstractSegueUserDTO user) throws SegueDatabaseException {
+    final AbstractSegueUserDTO user
+  )
+    throws SegueDatabaseException {
     Validate.notNull(user);
 
     if (user instanceof RegisteredUserDTO) {
@@ -452,14 +473,16 @@ public class QuestionManager {
    * @throws SegueDatabaseException if there is a database error.
    */
   public Map<Long, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> getMatchingQuestionAttempts(
-      final List<RegisteredUserDTO> users, final List<String> questionPageIds) throws SegueDatabaseException {
+    final List<RegisteredUserDTO> users,
+    final List<String> questionPageIds
+  )
+    throws SegueDatabaseException {
     List<Long> userIds = Lists.newArrayList();
     for (RegisteredUserDTO user : users) {
       userIds.add(user.getId());
     }
 
-    return this.questionAttemptPersistenceManager.getQuestionAttemptsByUsersAndQuestionPrefix(userIds,
-        questionPageIds);
+    return this.questionAttemptPersistenceManager.getQuestionAttemptsByUsersAndQuestionPrefix(userIds, questionPageIds);
   }
 
   /**
@@ -472,8 +495,10 @@ public class QuestionManager {
    * @see #getMatchingQuestionAttempts(List, List)
    */
   public Map<String, Map<String, List<LightweightQuestionValidationResponse>>> getMatchingQuestionAttempts(
-      final RegisteredUserDTO user, final List<String> questionPageIds) throws SegueDatabaseException {
-
+    final RegisteredUserDTO user,
+    final List<String> questionPageIds
+  )
+    throws SegueDatabaseException {
     return this.getMatchingQuestionAttempts(Collections.singletonList(user), questionPageIds).get(user.getId());
   }
 
@@ -484,11 +509,15 @@ public class QuestionManager {
    * @param registeredUser to merge into.
    * @throws SegueDatabaseException - if something goes wrong.
    */
-  public void mergeAnonymousQuestionAttemptsIntoRegisteredUser(final AnonymousUserDTO anonymousUser,
-                                                               final RegisteredUserDTO registeredUser)
-      throws SegueDatabaseException {
+  public void mergeAnonymousQuestionAttemptsIntoRegisteredUser(
+    final AnonymousUserDTO anonymousUser,
+    final RegisteredUserDTO registeredUser
+  )
+    throws SegueDatabaseException {
     this.questionAttemptPersistenceManager.mergeAnonymousQuestionInformationWithRegisteredUserRecord(
-        anonymousUser.getSessionId(), registeredUser.getId());
+        anonymousUser.getSessionId(),
+        registeredUser.getId()
+      );
   }
 
   /**
@@ -500,7 +529,9 @@ public class QuestionManager {
    * @throws SegueDatabaseException - if there is a problem with the database.
    */
   public Map<TimeInterval, Map<Role, Long>> getAnsweredQuestionRolesOverPrevious(
-      final Constants.TimeInterval[] timeIntervals) throws SegueDatabaseException {
+    final Constants.TimeInterval[] timeIntervals
+  )
+    throws SegueDatabaseException {
     return this.questionAttemptPersistenceManager.getAnsweredQuestionRolesOverPrevious(timeIntervals);
   }
 
@@ -515,11 +546,20 @@ public class QuestionManager {
    * @param perDay   - if true, group count by day, otherwise group count by month
    * @return a Map of LocalDates to attempt counts
    */
-  public Map<LocalDate, Long> getUsersQuestionAttemptCountsByDate(final RegisteredUserDTO user,
-                                                                  final Date fromDate, final Date toDate,
-                                                                  final Boolean perDay) throws SegueDatabaseException {
-    Map<Date, Long> questionAttemptCountPerDateByUser = this.questionAttemptPersistenceManager
-        .getQuestionAttemptCountForUserByDateRange(fromDate, toDate, user.getId(), perDay);
+  public Map<LocalDate, Long> getUsersQuestionAttemptCountsByDate(
+    final RegisteredUserDTO user,
+    final Date fromDate,
+    final Date toDate,
+    final Boolean perDay
+  )
+    throws SegueDatabaseException {
+    Map<Date, Long> questionAttemptCountPerDateByUser =
+      this.questionAttemptPersistenceManager.getQuestionAttemptCountForUserByDateRange(
+          fromDate,
+          toDate,
+          user.getId(),
+          perDay
+        );
 
     // Convert the normal java dates into useful joda dates and create a new map.
     Map<LocalDate, Long> result = Maps.newHashMap();
@@ -554,7 +594,7 @@ public class QuestionManager {
         String questionSeed = seed + choiceQuestion.getId();
 
         Boolean randomiseChoices = ((ChoiceQuestionDTO) question).getRandomiseChoices();
-        if (randomiseChoices == null || randomiseChoices) {  // Default to randomised if not set.
+        if (randomiseChoices == null || randomiseChoices) { // Default to randomised if not set.
           if (choiceQuestion.getChoices() != null) {
             Collections.shuffle(choiceQuestion.getChoices(), new Random(questionSeed.hashCode()));
           }
@@ -566,7 +606,7 @@ public class QuestionManager {
         if (question instanceof IsaacItemQuestionDTO) {
           IsaacItemQuestionDTO itemQuestion = (IsaacItemQuestionDTO) question;
           Boolean randomiseItems = itemQuestion.getRandomiseItems();
-          if (randomiseItems == null || randomiseItems) {  // Default to randomised if not set.
+          if (randomiseItems == null || randomiseItems) { // Default to randomised if not set.
             if (itemQuestion.getItems() != null) {
               Collections.shuffle(itemQuestion.getItems(), new Random(questionSeed.hashCode()));
             }
@@ -583,14 +623,14 @@ public class QuestionManager {
    * @return A response containing a QuestionValidationResponse object.
    */
   public final Response generateSpecification(final ChoiceDTO answer) {
-
     ISpecifier specifier = locateSpecifier(answer.getClass());
 
     if (null == specifier) {
       log.error("Unable to locate a valid specifier for this choice: " + answer);
-      return Response.serverError()
-          .entity("Unable to detect question validator for " + "this object. Unable to verify answer")
-          .build();
+      return Response
+        .serverError()
+        .entity("Unable to detect question validator for " + "this object. Unable to verify answer")
+        .build();
     }
 
     Choice answerFromUser = mapper.getAutoMapper().map(answer, Choice.class);
@@ -598,14 +638,12 @@ public class QuestionManager {
     try {
       specification = specifier.createSpecification(answerFromUser);
     } catch (ValidatorUnavailableException e) {
-      return SegueErrorResponse.getServiceUnavailableResponse(e.getClass().getSimpleName() + ":"
-          + e.getMessage());
+      return SegueErrorResponse.getServiceUnavailableResponse(e.getClass().getSimpleName() + ":" + e.getMessage());
     }
 
     ResultsWrapper<String> results = new ResultsWrapper<>(Collections.singletonList(specification), 1L);
 
-    return Response.ok(
-        mapper.getAutoMapper().map(results, ResultsWrapper.class)).build();
+    return Response.ok(mapper.getAutoMapper().map(results, ResultsWrapper.class)).build();
   }
 
   public ChoiceDTO convertJsonAnswerToChoice(final String jsonAnswer) throws ErrorResponseWrapper {
@@ -617,12 +655,18 @@ public class QuestionManager {
       answerFromClientDTO = mapper.getAutoMapper().map(answerFromClient, ChoiceDTO.class);
     } catch (JsonMappingException | JsonParseException e) {
       log.info("Failed to map to any expected input...", e);
-      SegueErrorResponse error = new SegueErrorResponse(Response.Status.NOT_FOUND, "Unable to map response to a "
-          + "Choice object so failing with an error", e);
+      SegueErrorResponse error = new SegueErrorResponse(
+        Response.Status.NOT_FOUND,
+        "Unable to map response to a " + "Choice object so failing with an error",
+        e
+      );
       throw new ErrorResponseWrapper(error);
     } catch (IOException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Response.Status.NOT_FOUND, "Unable to map response to a "
-          + "Choice object so failing with an error", e);
+      SegueErrorResponse error = new SegueErrorResponse(
+        Response.Status.NOT_FOUND,
+        "Unable to map response to a " + "Choice object so failing with an error",
+        e
+      );
       log.error(error.getErrorMessage(), e);
       throw new ErrorResponseWrapper(error);
     }
@@ -634,10 +678,12 @@ public class QuestionManager {
 
     UserPreference filterQuestionsPreference = null;
     try {
-      filterQuestionsPreference = this.userPreferenceManager.getUserPreference(
-          "DISPLAY_SETTING",
-          "HIDE_NON_AUDIENCE_CONTENT",
-          currentUser.getId());
+      filterQuestionsPreference =
+        this.userPreferenceManager.getUserPreference(
+            "DISPLAY_SETTING",
+            "HIDE_NON_AUDIENCE_CONTENT",
+            currentUser.getId()
+          );
     } catch (SegueDatabaseException e) {
       log.error("Error while getting user preferences", e);
     }
@@ -654,16 +700,7 @@ public class QuestionManager {
         examBoardsList.add(uc.getExamBoard().name());
       }
 
-      gameFilter = new GameFilter(
-          subjectsList,
-          null,
-          null,
-          null,
-          null,
-          null,
-          stagesList,
-          null,
-          examBoardsList);
+      gameFilter = new GameFilter(subjectsList, null, null, null, null, null, stagesList, null, examBoardsList);
     }
     return gameFilter;
   }

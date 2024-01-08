@@ -49,9 +49,17 @@ public class AssignmentDTO implements IAssignmentLike {
    * @param dueDate            - the date the assignment is due (should be completed by)
    * @param scheduledStartDate - the date the assignment should be shown to users/groups that it is set to
    */
-  public AssignmentDTO(final Long id, final String gameboardId, final Long ownerUserId, final Long groupId,
-                       final String groupName, final String notes, final Date creationDate, final Date dueDate,
-                       final Date scheduledStartDate) {
+  public AssignmentDTO(
+    final Long id,
+    final String gameboardId,
+    final Long ownerUserId,
+    final Long groupId,
+    final String groupName,
+    final String notes,
+    final Date creationDate,
+    final Date dueDate,
+    final Date scheduledStartDate
+  ) {
     this.id = id;
     this.gameboardId = gameboardId;
     this.ownerUserId = ownerUserId;
@@ -66,9 +74,7 @@ public class AssignmentDTO implements IAssignmentLike {
   /**
    * Default constructor required for AutoMapping.
    */
-  public AssignmentDTO() {
-
-  }
+  public AssignmentDTO() {}
 
   /**
    * Gets the id.
@@ -297,5 +303,4 @@ public class AssignmentDTO implements IAssignmentLike {
   public void setScheduledStartDate(final Date scheduledStartDate) {
     this.scheduledStartDate = scheduledStartDate;
   }
-
 }

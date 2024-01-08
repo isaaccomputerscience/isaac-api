@@ -26,8 +26,12 @@ import uk.ac.cam.cl.dtg.segue.scheduler.SegueScheduledJob;
  */
 public class SegueScheduledSyncMailjetUsersJob extends SegueScheduledJob {
 
-  public SegueScheduledSyncMailjetUsersJob(final String jobKey, final String jobGroupName, final String description,
-                                           final String cronString) {
+  public SegueScheduledSyncMailjetUsersJob(
+    final String jobKey,
+    final String jobGroupName,
+    final String description,
+    final String cronString
+  ) {
     super(jobKey, jobGroupName, description, cronString);
   }
 

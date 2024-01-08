@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 
 public class AnonQuestionAttemptMisuseHandler implements IMisuseHandler {
-
   private static final Logger log = LoggerFactory.getLogger(AnonQuestionAttemptMisuseHandler.class);
 
   private static final Integer SOFT_THRESHOLD = 3;
@@ -34,8 +33,7 @@ public class AnonQuestionAttemptMisuseHandler implements IMisuseHandler {
   /**
    */
   @Inject
-  public AnonQuestionAttemptMisuseHandler() {
-  }
+  public AnonQuestionAttemptMisuseHandler() {}
 
   @Override
   public Integer getSoftThreshold() {
@@ -53,8 +51,7 @@ public class AnonQuestionAttemptMisuseHandler implements IMisuseHandler {
   }
 
   @Override
-  public void executeSoftThresholdAction(final String message) {
-  }
+  public void executeSoftThresholdAction(final String message) {}
 
   @Override
   public void executeHardThresholdAction(final String message) {

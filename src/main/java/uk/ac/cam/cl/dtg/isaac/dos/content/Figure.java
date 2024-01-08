@@ -23,6 +23,4 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.FigureDTO;
  */
 @DTOMapping(FigureDTO.class)
 @JsonContentType("figure")
-public class Figure extends Image {
-
-}
+public class Figure extends Image {}

@@ -46,5 +46,4 @@ public class IsaacSymbolicQuestionDTO extends IsaacQuestionBaseDTO {
   public void setAvailableSymbols(final List<String> availableSymbols) {
     this.availableSymbols = availableSymbols;
   }
-
 }

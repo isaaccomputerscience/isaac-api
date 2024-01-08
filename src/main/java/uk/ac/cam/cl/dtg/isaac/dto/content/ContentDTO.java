@@ -49,22 +49,24 @@ public class ContentDTO extends ContentBaseDTO {
   private Boolean expandable;
 
   @JsonCreator
-  public ContentDTO(@JsonProperty("id") final String id,
-                    @JsonProperty("title") final String title,
-                    @JsonProperty("subtitle") final String subtitle,
-                    @JsonProperty("type") final String type,
-                    @JsonProperty("author") final String author,
-                    @JsonProperty("encoding") final String encoding,
-                    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
-                    @JsonProperty("layout") final String layout,
-                    @JsonProperty("children") final List<ContentBaseDTO> children,
-                    @JsonProperty("value") final String value,
-                    @JsonProperty("attribution") final String attribution,
-                    @JsonProperty("relatedContent") final List<ContentSummaryDTO> relatedContent,
-                    @JsonProperty("published") final Boolean published,
-                    @JsonProperty("deprecated") final Boolean deprecated,
-                    @JsonProperty("tags") final Set<String> tags,
-                    @JsonProperty("level") final Integer level) {
+  public ContentDTO(
+    @JsonProperty("id") final String id,
+    @JsonProperty("title") final String title,
+    @JsonProperty("subtitle") final String subtitle,
+    @JsonProperty("type") final String type,
+    @JsonProperty("author") final String author,
+    @JsonProperty("encoding") final String encoding,
+    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+    @JsonProperty("layout") final String layout,
+    @JsonProperty("children") final List<ContentBaseDTO> children,
+    @JsonProperty("value") final String value,
+    @JsonProperty("attribution") final String attribution,
+    @JsonProperty("relatedContent") final List<ContentSummaryDTO> relatedContent,
+    @JsonProperty("published") final Boolean published,
+    @JsonProperty("deprecated") final Boolean deprecated,
+    @JsonProperty("tags") final Set<String> tags,
+    @JsonProperty("level") final Integer level
+  ) {
     this.setId(id);
     this.title = title;
     this.subtitle = subtitle;
@@ -284,5 +286,4 @@ public class ContentDTO extends ContentBaseDTO {
   public String toString() {
     return super.toString() + " Title: " + this.title;
   }
-
 }

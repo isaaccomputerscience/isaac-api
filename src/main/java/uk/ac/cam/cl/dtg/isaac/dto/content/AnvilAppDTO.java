@@ -27,9 +27,7 @@ public class AnvilAppDTO extends ContentDTO {
   /**
    * AnvilAppDTO.
    */
-  public AnvilAppDTO() {
-
-  }
+  public AnvilAppDTO() {}
 
   /**
    * Gets the appId.

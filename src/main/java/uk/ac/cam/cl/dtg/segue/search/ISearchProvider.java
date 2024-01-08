@@ -31,7 +31,6 @@ import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
  * Interface describing behaviour of search providers.
  */
 public interface ISearchProvider {
-
   String getNestedFieldConnector();
 
   /**
@@ -62,10 +61,12 @@ public interface ISearchProvider {
    * @return Results
    */
   ResultsWrapper<String> matchSearch(
-      BasicSearchParameters basicSearchParameters, List<GitContentManager.BooleanSearchClause> fieldsToMatch,
-      Map<String, Constants.SortOrder> sortInstructions,
-      @Nullable Map<String, AbstractFilterInstruction> filterInstructions
-  ) throws SegueSearchException;
+    BasicSearchParameters basicSearchParameters,
+    List<GitContentManager.BooleanSearchClause> fieldsToMatch,
+    Map<String, Constants.SortOrder> sortInstructions,
+    @Nullable Map<String, AbstractFilterInstruction> filterInstructions
+  )
+    throws SegueSearchException;
 
   /**
    * Executes a fuzzy search on an array of fields and will consider the fieldsThatMustMatchMap.
@@ -84,15 +85,21 @@ public interface ISearchProvider {
    * @return results
    */
   ResultsWrapper<String> fuzzySearch(
-      BasicSearchParameters basicSearchParameters, String searchString, Map<String, List<String>> fieldsThatMustMatch,
-      @Nullable Map<String, AbstractFilterInstruction> filterInstructions, String... fields
-  ) throws SegueSearchException;
+    BasicSearchParameters basicSearchParameters,
+    String searchString,
+    Map<String, List<String>> fieldsThatMustMatch,
+    @Nullable Map<String, AbstractFilterInstruction> filterInstructions,
+    String... fields
+  )
+    throws SegueSearchException;
 
   ResultsWrapper<String> nestedMatchSearch(
-      BasicSearchParameters basicSearchParameters, String searchString,
-      @NotNull BooleanMatchInstruction matchInstruction,
-      @Nullable Map<String, AbstractFilterInstruction> filterInstructions
-  ) throws SegueSearchException;
+    BasicSearchParameters basicSearchParameters,
+    String searchString,
+    @NotNull BooleanMatchInstruction matchInstruction,
+    @Nullable Map<String, AbstractFilterInstruction> filterInstructions
+  )
+    throws SegueSearchException;
 
   /**
    * Executes a terms search using an array of terms on a single field.
@@ -112,9 +119,12 @@ public interface ISearchProvider {
    * @return results
    */
   ResultsWrapper<String> termSearch(
-      BasicSearchParameters basicSearchParameters, String searchTerms, String field,
-      Map<String, AbstractFilterInstruction> filterInstructions
-  ) throws SegueSearchException;
+    BasicSearchParameters basicSearchParameters,
+    String searchTerms,
+    String field,
+    Map<String, AbstractFilterInstruction> filterInstructions
+  )
+    throws SegueSearchException;
 
   /**
    * RandomisedPaginatedMatchSearch The same as paginatedMatchSearch but the results are returned in a random order.
@@ -130,9 +140,12 @@ public interface ISearchProvider {
    * @return results in a random order for a given match search.
    */
   ResultsWrapper<String> randomisedMatchSearch(
-      BasicSearchParameters basicSearchParameters, List<GitContentManager.BooleanSearchClause> fieldsToMatch,
-      Long randomSeed, Map<String, AbstractFilterInstruction> filterInstructions
-  ) throws SegueSearchException;
+    BasicSearchParameters basicSearchParameters,
+    List<GitContentManager.BooleanSearchClause> fieldsToMatch,
+    Long randomSeed,
+    Map<String, AbstractFilterInstruction> filterInstructions
+  )
+    throws SegueSearchException;
 
   /**
    * Query for a list of Results that exactly match a given id.
@@ -148,9 +161,12 @@ public interface ISearchProvider {
    * @return A list of results that match the id prefix.
    */
   ResultsWrapper<String> findByExactMatch(
-      BasicSearchParameters basicSearchParameters, String fieldName, String needle,
-      @Nullable Map<String, AbstractFilterInstruction> filterInstructions
-  ) throws SegueSearchException;
+    BasicSearchParameters basicSearchParameters,
+    String fieldName,
+    String needle,
+    @Nullable Map<String, AbstractFilterInstruction> filterInstructions
+  )
+    throws SegueSearchException;
 
   /**
    * Query for a list of Results that match a given id prefix.
@@ -168,9 +184,12 @@ public interface ISearchProvider {
    * @return A list of results that match the id prefix.
    */
   ResultsWrapper<String> findByPrefix(
-      BasicSearchParameters basicSearchParameters, String fieldname, String prefix,
-      @Nullable Map<String, AbstractFilterInstruction> filterInstructions
-  ) throws SegueSearchException;
+    BasicSearchParameters basicSearchParameters,
+    String fieldname,
+    String prefix,
+    @Nullable Map<String, AbstractFilterInstruction> filterInstructions
+  )
+    throws SegueSearchException;
 
   /**
    * Find content by a regex.
@@ -186,9 +205,12 @@ public interface ISearchProvider {
    * @return A list of results that match the id prefix.
    */
   ResultsWrapper<String> findByRegEx(
-      BasicSearchParameters basicSearchParameters, String fieldname, String regex,
-      @Nullable Map<String, AbstractFilterInstruction> filterInstructions
-  ) throws SegueSearchException;
+    BasicSearchParameters basicSearchParameters,
+    String fieldname,
+    String regex,
+    @Nullable Map<String, AbstractFilterInstruction> filterInstructions
+  )
+    throws SegueSearchException;
 
   /*
    * TODO: We need to change the return type of these two methods to avoid having ES specific things

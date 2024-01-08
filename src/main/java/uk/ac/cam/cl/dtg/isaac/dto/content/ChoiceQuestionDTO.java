@@ -34,9 +34,7 @@ public class ChoiceQuestionDTO extends QuestionDTO {
   /**
    * Default Constructor for mappers.
    */
-  public ChoiceQuestionDTO() {
-
-  }
+  public ChoiceQuestionDTO() {}
 
   /**
    * Gets the choices. Defaults to not return choices.
@@ -76,5 +74,4 @@ public class ChoiceQuestionDTO extends QuestionDTO {
   public void setRandomiseChoices(final Boolean randomiseChoices) {
     this.randomiseChoices = randomiseChoices;
   }
-
 }

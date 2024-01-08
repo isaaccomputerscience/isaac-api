@@ -70,8 +70,12 @@ class SchoolIndexer {
 
     File f = new File(schoolsListPath);
     try {
-      es.indexObject(SCHOOLS_INDEX_BASE, SchoolsIndexType.METADATA.toString(), objectMapper.writeValueAsString(
-          ImmutableMap.of("lastModified", f.lastModified())), "sourceFile");
+      es.indexObject(
+        SCHOOLS_INDEX_BASE,
+        SchoolsIndexType.METADATA.toString(),
+        objectMapper.writeValueAsString(ImmutableMap.of("lastModified", f.lastModified())),
+        "sourceFile"
+      );
     } catch (SegueSearchException e) {
       log.error("Unable to index school list metadata.", e);
     } catch (JsonProcessingException e) {
@@ -87,8 +91,10 @@ class SchoolIndexer {
 
     // Create an alias (could be anything) to prevent this schools index from being garbage-collected by
     // ElasticSearchIndexer.expungeOldIndices
-    List<String> allSchoolTypes = Arrays.stream(SchoolsIndexType.values())
-        .map(SchoolsIndexType::toString).collect(Collectors.toList());
+    List<String> allSchoolTypes = Arrays
+      .stream(SchoolsIndexType.values())
+      .map(SchoolsIndexType::toString)
+      .collect(Collectors.toList());
     es.addOrMoveIndexAlias("schools-latest", SCHOOLS_INDEX_BASE, allSchoolTypes);
   }
 
@@ -102,12 +108,11 @@ class SchoolIndexer {
     // otherwise we need to generate it.
     List<School> schools = com.google.api.client.util.Lists.newArrayList();
 
-    try (FileInputStream fs = new FileInputStream(schoolsListPath);
-         InputStreamReader is = new InputStreamReader(fs, StandardCharsets.UTF_8);
-         CSVReader reader = new CSVReader(is)
+    try (
+      FileInputStream fs = new FileInputStream(schoolsListPath);
+      InputStreamReader is = new InputStreamReader(fs, StandardCharsets.UTF_8);
+      CSVReader reader = new CSVReader(is)
     ) {
-
-
       // use first line to determine field names.
       String[] columns = reader.readNext();
 
@@ -122,15 +127,18 @@ class SchoolIndexer {
       String[] schoolArray;
       while ((schoolArray = reader.readNext()) != null) {
         try {
-          School.SchoolDataSource source = School.SchoolDataSource
-              .valueOf(schoolArray[fieldNameMapping.get(Constants.SCHOOL_DATA_SOURCE_FIELDNAME)]);
+          School.SchoolDataSource source = School.SchoolDataSource.valueOf(
+            schoolArray[fieldNameMapping.get(Constants.SCHOOL_DATA_SOURCE_FIELDNAME)]
+          );
 
-          School schoolToSave = new School(schoolArray[fieldNameMapping.get(Constants.SCHOOL_URN_FIELDNAME)],
-              schoolArray[fieldNameMapping.get(Constants.SCHOOL_ESTABLISHMENT_NAME_FIELDNAME)],
-              schoolArray[fieldNameMapping.get(Constants.SCHOOL_POSTCODE_FIELDNAME)],
-              // CSV file contains string "t" and "f" values to denote true and false, but need a boolean:
-              "t".equals(schoolArray[fieldNameMapping.get(Constants.SCHOOL_CLOSED_FIELDNAME)]),
-              source);
+          School schoolToSave = new School(
+            schoolArray[fieldNameMapping.get(Constants.SCHOOL_URN_FIELDNAME)],
+            schoolArray[fieldNameMapping.get(Constants.SCHOOL_ESTABLISHMENT_NAME_FIELDNAME)],
+            schoolArray[fieldNameMapping.get(Constants.SCHOOL_POSTCODE_FIELDNAME)],
+            // CSV file contains string "t" and "f" values to denote true and false, but need a boolean:
+            "t".equals(schoolArray[fieldNameMapping.get(Constants.SCHOOL_CLOSED_FIELDNAME)]),
+            source
+          );
 
           if (null == schoolToSave.getPostcode() || schoolToSave.getPostcode().isEmpty()) {
             log.warn("School with missing postcode! URN:" + schoolToSave.getUrn());
@@ -139,8 +147,10 @@ class SchoolIndexer {
           schools.add(schoolToSave);
         } catch (IndexOutOfBoundsException e) {
           // This happens when the school does not have the required data
-          log.warn("Unable to load the following school into the school list due to missing required fields. "
-              + Arrays.toString(schoolArray));
+          log.warn(
+            "Unable to load the following school into the school list due to missing required fields. " +
+            Arrays.toString(schoolArray)
+          );
         }
       }
     } catch (FileNotFoundException e) {
@@ -154,5 +164,4 @@ class SchoolIndexer {
 
     return schools;
   }
-
 }

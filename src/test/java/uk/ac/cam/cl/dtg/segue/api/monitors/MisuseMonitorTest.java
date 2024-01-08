@@ -53,7 +53,6 @@ public class MisuseMonitorTest {
     this.dummyCommunicator = createMock(EmailManager.class);
     this.dummyPropertiesLoader = createMock(PropertiesLoader.class);
 
-
     expect(dummyPropertiesLoader.getProperty(Constants.SERVER_ADMIN_ADDRESS)).andReturn("FROM ADDRESS").anyTimes();
     replay(this.dummyPropertiesLoader);
   }
@@ -68,7 +67,9 @@ public class MisuseMonitorTest {
 
     IMisuseMonitor misuseMonitor = new InMemoryMisuseMonitor();
     TokenOwnerLookupMisuseHandler tokenOwnerLookupMisuseHandler = new TokenOwnerLookupMisuseHandler(
-        dummyCommunicator, dummyPropertiesLoader);
+      dummyCommunicator,
+      dummyPropertiesLoader
+    );
 
     misuseMonitor.registerHandler(event, tokenOwnerLookupMisuseHandler);
 
@@ -79,25 +80,36 @@ public class MisuseMonitorTest {
     for (int i = 0; i < tokenOwnerLookupMisuseHandler.getSoftThreshold(); i++) {
       try {
         misuseMonitor.notifyEvent(userId, event);
-
       } catch (SegueResourceMisuseException e) {
-        fail("Exception should not be thrown after " + tokenOwnerLookupMisuseHandler.getSoftThreshold()
-            + " attempts");
+        fail("Exception should not be thrown after " + tokenOwnerLookupMisuseHandler.getSoftThreshold() + " attempts");
       }
     }
 
-    for (int i = TokenOwnerLookupMisuseHandler.SOFT_THRESHOLD; i <= TokenOwnerLookupMisuseHandler.HARD_THRESHOLD + 1;
-         i++) {
+    for (
+      int i = TokenOwnerLookupMisuseHandler.SOFT_THRESHOLD;
+      i <= TokenOwnerLookupMisuseHandler.HARD_THRESHOLD + 1;
+      i++
+    ) {
       try {
         misuseMonitor.notifyEvent(userId, event);
         if (i >= TokenOwnerLookupMisuseHandler.HARD_THRESHOLD) {
-          fail(String.format("Exception not thrown after %s attempts, over limit of %s!", i,
-              TokenOwnerLookupMisuseHandler.HARD_THRESHOLD));
+          fail(
+            String.format(
+              "Exception not thrown after %s attempts, over limit of %s!",
+              i,
+              TokenOwnerLookupMisuseHandler.HARD_THRESHOLD
+            )
+          );
         }
       } catch (SegueResourceMisuseException e) {
         if (i < TokenOwnerLookupMisuseHandler.HARD_THRESHOLD) {
-          fail(String.format("Exception thrown before %s attempts, under limit of %s!", i,
-              TokenOwnerLookupMisuseHandler.HARD_THRESHOLD));
+          fail(
+            String.format(
+              "Exception thrown before %s attempts, under limit of %s!",
+              i,
+              TokenOwnerLookupMisuseHandler.HARD_THRESHOLD
+            )
+          );
         }
       }
     }
@@ -110,16 +122,13 @@ public class MisuseMonitorTest {
    */
   @Test
   public final void emailVerificationRequest_checkForMisuse_emailShouldBeSentAndExceptionShouldOccur() {
-
     String event = EmailVerificationRequestMisuseHandler.class.getSimpleName();
 
     IMisuseMonitor misuseMonitor = new InMemoryMisuseMonitor();
 
-    EmailVerificationRequestMisuseHandler emailVerificationMisuseHandler
-        = new EmailVerificationRequestMisuseHandler();
+    EmailVerificationRequestMisuseHandler emailVerificationMisuseHandler = new EmailVerificationRequestMisuseHandler();
 
     misuseMonitor.registerHandler(event, emailVerificationMisuseHandler);
-
 
     // Create a test user
     RegisteredUser user = new RegisteredUser();
@@ -129,8 +138,7 @@ public class MisuseMonitorTest {
     // Soft threshold
     try {
       //Register the misuse monitor
-      if (misuseMonitor.hasMisused(user.getEmail(),
-          EmailVerificationRequestMisuseHandler.class.getSimpleName())) {
+      if (misuseMonitor.hasMisused(user.getEmail(), EmailVerificationRequestMisuseHandler.class.getSimpleName())) {
         throw new SegueResourceMisuseException("Number of requests exceeded. Triggering Error Response");
       }
 
@@ -144,13 +152,15 @@ public class MisuseMonitorTest {
     // Hard threshold
     try {
       //Register the misuse monitor
-      if (misuseMonitor.hasMisused(user.getEmail(),
-          EmailVerificationRequestMisuseHandler.class.getSimpleName())) {
+      if (misuseMonitor.hasMisused(user.getEmail(), EmailVerificationRequestMisuseHandler.class.getSimpleName())) {
         throw new SegueResourceMisuseException("Number of requests exceeded. Triggering Error Response");
       }
 
-      for (int i = EmailVerificationRequestMisuseHandler.SOFT_THRESHOLD;
-           i < EmailVerificationRequestMisuseHandler.HARD_THRESHOLD; i++) {
+      for (
+        int i = EmailVerificationRequestMisuseHandler.SOFT_THRESHOLD;
+        i < EmailVerificationRequestMisuseHandler.HARD_THRESHOLD;
+        i++
+      ) {
         misuseMonitor.notifyEvent(user.getEmail(), event);
       }
     } catch (SegueResourceMisuseException e) {
@@ -163,16 +173,13 @@ public class MisuseMonitorTest {
    */
   @Test
   public final void userSearchRequest_checkForMisuse_emailShouldBeSentAndExceptionShouldOccur() {
-
     String event = UserSearchMisuseHandler.class.getSimpleName();
 
     IMisuseMonitor misuseMonitor = new InMemoryMisuseMonitor();
 
-    UserSearchMisuseHandler userSearchMisuseHandler
-        = new UserSearchMisuseHandler();
+    UserSearchMisuseHandler userSearchMisuseHandler = new UserSearchMisuseHandler();
 
     misuseMonitor.registerHandler(event, userSearchMisuseHandler);
-
 
     // Create a test user
     RegisteredUser user = new RegisteredUser();
@@ -182,8 +189,7 @@ public class MisuseMonitorTest {
     // Soft threshold
     try {
       //Register the misuse monitor
-      if (misuseMonitor.hasMisused(user.getId().toString(),
-          UserSearchMisuseHandler.class.getSimpleName())) {
+      if (misuseMonitor.hasMisused(user.getId().toString(), UserSearchMisuseHandler.class.getSimpleName())) {
         throw new SegueResourceMisuseException("Number of requests exceeded. Triggering Error Response");
       }
 
@@ -197,13 +203,11 @@ public class MisuseMonitorTest {
     // Hard threshold
     try {
       //Register the misuse monitor
-      if (misuseMonitor.hasMisused(user.getId().toString(),
-          UserSearchMisuseHandler.class.getSimpleName())) {
+      if (misuseMonitor.hasMisused(user.getId().toString(), UserSearchMisuseHandler.class.getSimpleName())) {
         throw new SegueResourceMisuseException("Number of requests exceeded. Triggering Error Response");
       }
 
-      for (int i = UserSearchMisuseHandler.SOFT_THRESHOLD;
-           i < UserSearchMisuseHandler.HARD_THRESHOLD; i++) {
+      for (int i = UserSearchMisuseHandler.SOFT_THRESHOLD; i < UserSearchMisuseHandler.HARD_THRESHOLD; i++) {
         misuseMonitor.notifyEvent(user.getId().toString(), event);
       }
     } catch (SegueResourceMisuseException e) {
@@ -220,8 +224,7 @@ public class MisuseMonitorTest {
 
     IMisuseMonitor misuseMonitor = new InMemoryMisuseMonitor();
 
-    UserSearchMisuseHandler userSearchMisuseHandler
-        = new UserSearchMisuseHandler();
+    UserSearchMisuseHandler userSearchMisuseHandler = new UserSearchMisuseHandler();
 
     misuseMonitor.registerHandler(event, userSearchMisuseHandler);
 
@@ -233,8 +236,7 @@ public class MisuseMonitorTest {
     // Soft threshold
     try {
       //Register the misuse monitor
-      if (misuseMonitor.hasMisused(user.getId().toString(),
-          UserSearchMisuseHandler.class.getSimpleName())) {
+      if (misuseMonitor.hasMisused(user.getId().toString(), UserSearchMisuseHandler.class.getSimpleName())) {
         throw new SegueResourceMisuseException("Number of requests exceeded. Triggering Error Response");
       }
 
@@ -248,18 +250,18 @@ public class MisuseMonitorTest {
     // Hard threshold
     try {
       //Register the misuse monitor
-      if (misuseMonitor.hasMisused(user.getId().toString(),
-          UserSearchMisuseHandler.class.getSimpleName())) {
+      if (misuseMonitor.hasMisused(user.getId().toString(), UserSearchMisuseHandler.class.getSimpleName())) {
         throw new SegueResourceMisuseException("Number of requests exceeded. Triggering Error Response");
       }
 
-      for (int i = UserSearchMisuseHandler.SOFT_THRESHOLD;
-           i < UserSearchMisuseHandler.HARD_THRESHOLD; i++) {
-        if (misuseMonitor.willHaveMisused(user.getId().toString(), event,
-            UserSearchMisuseHandler.HARD_THRESHOLD - i - 1)) {
+      for (int i = UserSearchMisuseHandler.SOFT_THRESHOLD; i < UserSearchMisuseHandler.HARD_THRESHOLD; i++) {
+        if (
+          misuseMonitor.willHaveMisused(user.getId().toString(), event, UserSearchMisuseHandler.HARD_THRESHOLD - i - 1)
+        ) {
           fail();
-        } else if (!misuseMonitor.willHaveMisused(user.getId().toString(), event,
-            UserSearchMisuseHandler.HARD_THRESHOLD - i)) {
+        } else if (
+          !misuseMonitor.willHaveMisused(user.getId().toString(), event, UserSearchMisuseHandler.HARD_THRESHOLD - i)
+        ) {
           fail();
         }
 

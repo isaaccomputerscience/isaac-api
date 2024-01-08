@@ -26,9 +26,7 @@ public class LogicFormulaDTO extends ChoiceDTO {
   /**
    * Default constructor required for mapping.
    */
-  public LogicFormulaDTO() {
-
-  }
+  public LogicFormulaDTO() {}
 
   /**
    * Gets the python expression.

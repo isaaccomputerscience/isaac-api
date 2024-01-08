@@ -38,8 +38,11 @@ public class Location {
    *            - as a decimal value
    */
   @JsonCreator
-  public Location(@JsonProperty("address") final Address address, @JsonProperty("latitude") final Double latitude,
-                  @JsonProperty("longitude") final Double longitude) {
+  public Location(
+    @JsonProperty("address") final Address address,
+    @JsonProperty("latitude") final Double latitude,
+    @JsonProperty("longitude") final Double longitude
+  ) {
     this.address = address;
     this.latitude = latitude;
     this.longitude = longitude;

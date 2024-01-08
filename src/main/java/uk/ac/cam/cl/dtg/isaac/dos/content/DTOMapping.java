@@ -30,7 +30,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DTOMapping {
-
   /**
    * gets the DTO class that any Domain objects should be mapped to and from.
    * <br>

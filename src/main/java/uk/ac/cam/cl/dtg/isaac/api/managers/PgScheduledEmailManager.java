@@ -29,9 +29,7 @@ public class PgScheduledEmailManager {
   public boolean commitToSchedulingEmail(final String emailKey) throws SegueDatabaseException {
     ZonedDateTime now = ZonedDateTime.now();
     String query = "INSERT INTO scheduled_emails(email_id, sent) VALUES (?, ?) ON CONFLICT (email_id) DO NOTHING";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(1, emailKey);
       pst.setTimestamp(2, Timestamp.valueOf(now.toLocalDateTime()));
       int rowsInserted = pst.executeUpdate();

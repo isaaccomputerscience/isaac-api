@@ -22,15 +22,13 @@ import java.util.List;
  * Choice for Item Questions, containing a list of Items.
  */
 public class ItemChoiceDTO extends ChoiceDTO {
-
   private Boolean allowSubsetMatch;
   private List<ItemDTO> items;
 
   /**
    * Default constructor required for mapping.
    */
-  public ItemChoiceDTO() {
-  }
+  public ItemChoiceDTO() {}
 
   public List<ItemDTO> getItems() {
     return items;

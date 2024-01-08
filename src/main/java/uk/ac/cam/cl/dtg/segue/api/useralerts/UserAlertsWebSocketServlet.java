@@ -22,9 +22,8 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  * Created by du220 on 17/07/2017.
  */
 
-@WebServlet(name = "UserAlertsWebSocketServlet", urlPatterns = {"/api/user-alerts/*"})
+@WebServlet(name = "UserAlertsWebSocketServlet", urlPatterns = { "/api/user-alerts/*" })
 public class UserAlertsWebSocketServlet extends JettyWebSocketServlet {
-
   private static final Logger log = LoggerFactory.getLogger(UserAlertsWebSocketServlet.class);
   private static final int BAD_REQUEST = 400;
   private static final int FORBIDDEN = 403;
@@ -33,28 +32,38 @@ public class UserAlertsWebSocketServlet extends JettyWebSocketServlet {
 
   @Override
   public void configure(final JettyWebSocketServletFactory factory) {
-
-    factory.setCreator((servletUpgradeRequest, servletUpgradeResponse) -> SegueContextNotifier.getInjector()
-        .getInstance(UserAlertsWebSocket.class));
-
+    factory.setCreator(
+      (servletUpgradeRequest, servletUpgradeResponse) ->
+        SegueContextNotifier.getInjector().getInstance(UserAlertsWebSocket.class)
+    );
   }
 
   @Override
   protected void service(final HttpServletRequest request, final HttpServletResponse response)
-      throws ServletException, IOException {
+    throws ServletException, IOException {
     // We have been seeing malformed WebSocket requests. Add some debug logging to these:
     if (!"websocket".equalsIgnoreCase(request.getHeader("Upgrade"))) {
       log.debug(
-          String.format("WebSocket Upgrade request from %s has incorrect header 'Upgrade: %s', headers: %s, 'Via: %s'.",
-              getClientIpAddr(request), request.getHeader("Upgrade"),
-              Collections.list(request.getHeaderNames()).toString(),
-              request.getHeader("Via")));
+        String.format(
+          "WebSocket Upgrade request from %s has incorrect header 'Upgrade: %s', headers: %s, 'Via: %s'.",
+          getClientIpAddr(request),
+          request.getHeader("Upgrade"),
+          Collections.list(request.getHeaderNames()).toString(),
+          request.getHeader("Via")
+        )
+      );
     }
     if (null == request.getHeader("Sec-WebSocket-Key")) {
-      log.warn(String.format("WebSocket Upgrade request from %s has missing 'Sec-WebSocket-Key' header."
-              + " 'Sec-WebSocket-Extensions: %s', 'Sec-WebSocket-Version: %s', 'User-Agent: %s'",
-          getClientIpAddr(request), request.getHeader("Sec-WebSocket-Extensions"),
-          request.getHeader("Sec-WebSocket-Version"), request.getHeader("User-Agent")));
+      log.warn(
+        String.format(
+          "WebSocket Upgrade request from %s has missing 'Sec-WebSocket-Key' header." +
+          " 'Sec-WebSocket-Extensions: %s', 'Sec-WebSocket-Version: %s', 'User-Agent: %s'",
+          getClientIpAddr(request),
+          request.getHeader("Sec-WebSocket-Extensions"),
+          request.getHeader("Sec-WebSocket-Version"),
+          request.getHeader("User-Agent")
+        )
+      );
       response.setStatus(BAD_REQUEST);
       return;
     }
@@ -64,8 +73,12 @@ public class UserAlertsWebSocketServlet extends JettyWebSocketServlet {
     if (!hostName.contains("localhost") && (null == origin || !origin.equals("https://" + hostName))) {
       // If we have no origin, or an origin not matching the current hostname; abort the Upgrade request with
       // a HTTP Forbidden. Allow an API running on localhost to bypass these origin checks.
-      log.warn("WebSocket Upgrade request has unexpected Origin: '" + origin + "'. Blocking access to: "
-          + request.getServletPath());
+      log.warn(
+        "WebSocket Upgrade request has unexpected Origin: '" +
+        origin +
+        "'. Blocking access to: " +
+        request.getServletPath()
+      );
       response.setStatus(FORBIDDEN);
       return;
     }

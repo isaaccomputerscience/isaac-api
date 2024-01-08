@@ -83,7 +83,6 @@ public class EmailManagerTest {
    */
   @Before
   public final void setUp() throws Exception {
-
     // Create dummy user
     user = new RegisteredUser();
     user.setId(1L);
@@ -124,11 +123,11 @@ public class EmailManagerTest {
     expect(mockPropertiesLoader.getProperty("HOST_NAME")).andReturn("dev.isaaccomputerscience.org").anyTimes();
     expect(mockPropertiesLoader.getProperty("REPLY_TO_ADDRESS")).andReturn("test-reply@test.com").anyTimes();
     expect(mockPropertiesLoader.getProperty("MAIL_FROM_ADDRESS"))
-        .andReturn("no-reply@isaaccomputerscience.org").anyTimes();
+      .andReturn("no-reply@isaaccomputerscience.org")
+      .anyTimes();
     expect(mockPropertiesLoader.getProperty("MAIL_NAME")).andReturn("Isaac Computer Science").anyTimes();
 
     replay(mockPropertiesLoader);
-
 
     // Create content manager
     mockContentManager = createMock(GitContentManager.class);
@@ -156,12 +155,13 @@ public class EmailManagerTest {
 
     mockAuthenticator = createMock(SegueLocalAuthenticator.class);
 
-    expect(mockAuthenticator.createEmailVerificationTokenForUser(user, user.getEmail())).andAnswer(
+    expect(mockAuthenticator.createEmailVerificationTokenForUser(user, user.getEmail()))
+      .andAnswer(
         () -> {
           user.setEmailVerificationToken("emailVerificationToken");
           return user;
         }
-    );
+      );
 
     replay(mockAuthenticator);
   }
@@ -171,7 +171,6 @@ public class EmailManagerTest {
    * @return - SegueDTO object
    */
   public EmailTemplateDTO createDummyEmailTemplate(final String template) {
-
     EmailTemplateDTO emailTemplateDTO = new EmailTemplateDTO();
     emailTemplateDTO.setSubject("title");
     emailTemplateDTO.setHtmlContent(template);
@@ -188,7 +187,6 @@ public class EmailManagerTest {
    * @return - SegueDTO object
    */
   public ContentDTO createDummyContentTemplate(final String template) {
-
     ContentDTO contentDTO = new ContentDTO();
     contentDTO.setValue(template);
     contentDTO.setAuthor("ags46");
@@ -207,12 +205,18 @@ public class EmailManagerTest {
   public final void sendTemplatedEmailToUser_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
     replay(userManager);
 
-    EmailTemplateDTO template = createDummyEmailTemplate("Hi, {{givenName}}."
-        + "\nThanks for registering!\nYour Isaac email address is: "
-        + "</a href='mailto:{{email}}'>{{email}}<a>.\naddress</a>\n{{sig}}");
+    EmailTemplateDTO template = createDummyEmailTemplate(
+      "Hi, {{givenName}}." +
+      "\nThanks for registering!\nYour Isaac email address is: " +
+      "</a href='mailto:{{email}}'>{{email}}<a>.\naddress</a>\n{{sig}}"
+    );
 
-    ContentDTO htmlTemplate = createDummyContentTemplate("<!DOCTYPE html><html><head><meta charset='utf-8'>"
-        + "<title>Isaac Computer Science project</title></head><body>" + "{{content}}" + "</body></html>");
+    ContentDTO htmlTemplate = createDummyContentTemplate(
+      "<!DOCTYPE html><html><head><meta charset='utf-8'>" +
+      "<title>Isaac Computer Science project</title></head><body>" +
+      "{{content}}" +
+      "</body></html>"
+    );
 
     ContentDTO asciiTemplate = createDummyContentTemplate("{{content}}");
     try {
@@ -224,19 +228,27 @@ public class EmailManagerTest {
       expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
       replay(mockContentManager);
-
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
     }
 
-    EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
-        mockContentManager, logManager, generateGlobalTokenMap());
+    EmailManager manager = new EmailManager(
+      emailCommunicator,
+      userPreferenceManager,
+      mockPropertiesLoader,
+      mockContentManager,
+      logManager,
+      generateGlobalTokenMap()
+    );
     try {
       ImmutableMap<String, Object> emailTokens = ImmutableMap.of("verificationURL", "https://testUrl.com");
-      manager.sendTemplatedEmailToUser(userDTO,
-          manager.getEmailTemplateDTO("email-template-registration-confirmation"),
-          emailTokens, EmailType.SYSTEM);
+      manager.sendTemplatedEmailToUser(
+        userDTO,
+        manager.getEmailTemplateDTO("email-template-registration-confirmation"),
+        emailTokens,
+        EmailType.SYSTEM
+      );
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
@@ -245,15 +257,18 @@ public class EmailManagerTest {
       Assert.fail();
     }
 
-    final String expectedMessagePlainText = "Hi, tester."
-        + "\nThanks for registering!\nYour Isaac email address is: "
-        + "</a href='mailto:test@test.com'>test@test.com<a>.\naddress</a>\nIsaac Computer Science Project";
+    final String expectedMessagePlainText =
+      "Hi, tester." +
+      "\nThanks for registering!\nYour Isaac email address is: " +
+      "</a href='mailto:test@test.com'>test@test.com<a>.\naddress</a>\nIsaac Computer Science Project";
 
-    final String expectedMessageHTML = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Isaac "
-        + "Computer Science project</title></head><body>"
-        + "Hi, tester.\nThanks for registering!\nYour Isaac email address is: "
-        + "</a href='mailto:test@test.com'>test@test.com<a>.\n" + "address</a>\nIsaac "
-        + "Computer Science Project</body></html>";
+    final String expectedMessageHTML =
+      "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Isaac " +
+      "Computer Science project</title></head><body>" +
+      "Hi, tester.\nThanks for registering!\nYour Isaac email address is: " +
+      "</a href='mailto:test@test.com'>test@test.com<a>.\n" +
+      "address</a>\nIsaac " +
+      "Computer Science Project</body></html>";
 
     // Wait for the emailQueue to spin up and send our message
     int i = 0;
@@ -280,10 +295,11 @@ public class EmailManagerTest {
    */
   @Test
   public final void sendFederatedPasswordReset_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
-
-    EmailTemplateDTO template = createDummyEmailTemplate("Hello, {{givenName}}.\n\nYou requested a "
-        + "password reset. However you use {{providerString}} to log in to our site. You need"
-        + " to go to your authentication {{providerWord}} to reset your password.\n\nRegards,\n\n{{sig}}");
+    EmailTemplateDTO template = createDummyEmailTemplate(
+      "Hello, {{givenName}}.\n\nYou requested a " +
+      "password reset. However you use {{providerString}} to log in to our site. You need" +
+      " to go to your authentication {{providerWord}} to reset your password.\n\nRegards,\n\n{{sig}}"
+    );
 
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
     try {
@@ -301,14 +317,22 @@ public class EmailManagerTest {
       Assert.fail();
     }
 
-    EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
-        mockContentManager, logManager, generateGlobalTokenMap());
+    EmailManager manager = new EmailManager(
+      emailCommunicator,
+      userPreferenceManager,
+      mockPropertiesLoader,
+      mockContentManager,
+      logManager,
+      generateGlobalTokenMap()
+    );
     try {
       Map<String, Object> emailTokens = ImmutableMap.of("providerString", "testString", "providerWord", "testWord");
-      manager.sendTemplatedEmailToUser(userDTO,
-          manager.getEmailTemplateDTO("email-template-federated-password-reset"),
-          emailTokens, EmailType.SYSTEM);
-
+      manager.sendTemplatedEmailToUser(
+        userDTO,
+        manager.getEmailTemplateDTO("email-template-federated-password-reset"),
+        emailTokens,
+        EmailType.SYSTEM
+      );
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
@@ -319,9 +343,10 @@ public class EmailManagerTest {
       Assert.fail();
     }
 
-    final String expectedMessage = "Hello, tester.\n\nYou requested a password reset. "
-        + "However you use testString to log in to our site. You need to go to your "
-        + "authentication testWord to reset your password.\n\nRegards,\n\nIsaac Computer Science Project";
+    final String expectedMessage =
+      "Hello, tester.\n\nYou requested a password reset. " +
+      "However you use testString to log in to our site. You need to go to your " +
+      "authentication testWord to reset your password.\n\nRegards,\n\nIsaac Computer Science Project";
 
     // Wait for the emailQueue to spin up and send our message
     int i = 0;
@@ -338,7 +363,6 @@ public class EmailManagerTest {
     assertNotNull(email);
     assertEquals(expectedMessage, email.getPlainTextMessage());
     System.out.println(email.getPlainTextMessage());
-
   }
 
   /**
@@ -348,10 +372,11 @@ public class EmailManagerTest {
    */
   @Test
   public final void sendPasswordReset_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
-
-    EmailTemplateDTO template = createDummyEmailTemplate("Hello, {{givenName}}.\n\nA request has been "
-        + "made to reset the password for the account: </a href='mailto:{{email}}'>{{email}}<a>"
-        + ".\n\nTo reset your password <a href='{{resetURL}}'>Click Here</a>\n\nRegards,\n\n{{sig}}");
+    EmailTemplateDTO template = createDummyEmailTemplate(
+      "Hello, {{givenName}}.\n\nA request has been " +
+      "made to reset the password for the account: </a href='mailto:{{email}}'>{{email}}<a>" +
+      ".\n\nTo reset your password <a href='{{resetURL}}'>Click Here</a>\n\nRegards,\n\n{{sig}}"
+    );
 
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
 
@@ -365,22 +390,31 @@ public class EmailManagerTest {
       expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
       replay(mockContentManager);
-
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
     }
 
-    EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
-        mockContentManager, logManager, generateGlobalTokenMap());
+    EmailManager manager = new EmailManager(
+      emailCommunicator,
+      userPreferenceManager,
+      mockPropertiesLoader,
+      mockContentManager,
+      logManager,
+      generateGlobalTokenMap()
+    );
     try {
-      Map<String, Object> emailValues = ImmutableMap.of("resetURL",
-          "https://dev.isaaccomputerscience.org/resetpassword/resetToken");
+      Map<String, Object> emailValues = ImmutableMap.of(
+        "resetURL",
+        "https://dev.isaaccomputerscience.org/resetpassword/resetToken"
+      );
 
-      manager.sendTemplatedEmailToUser(userDTO,
-          manager.getEmailTemplateDTO("email-template-password-reset"),
-          emailValues, EmailType.SYSTEM);
-
+      manager.sendTemplatedEmailToUser(
+        userDTO,
+        manager.getEmailTemplateDTO("email-template-password-reset"),
+        emailValues,
+        EmailType.SYSTEM
+      );
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
@@ -389,10 +423,11 @@ public class EmailManagerTest {
       Assert.fail();
     }
 
-    final String expectedMessage = "Hello, tester.\n\nA request has been "
-        + "made to reset the password for the account: </a href='mailto:test@test.com'>test@test.com<a>"
-        + ".\n\nTo reset your password <a href='https://dev.isaaccomputerscience.org/resetpassword/resetToken'>"
-        + "Click Here</a>\n\nRegards,\n\nIsaac Computer Science Project";
+    final String expectedMessage =
+      "Hello, tester.\n\nA request has been " +
+      "made to reset the password for the account: </a href='mailto:test@test.com'>test@test.com<a>" +
+      ".\n\nTo reset your password <a href='https://dev.isaaccomputerscience.org/resetpassword/resetToken'>" +
+      "Click Here</a>\n\nRegards,\n\nIsaac Computer Science Project";
 
     // Wait for the emailQueue to spin up and send our message
     int i = 0;
@@ -419,9 +454,11 @@ public class EmailManagerTest {
    */
   @Test(expected = IllegalArgumentException.class)
   public final void sendRegistrationConfirmation_checkForInvalidTemplateTags_throwIllegalArgumentException() {
-    EmailTemplateDTO template = createDummyEmailTemplate("Hi, {{givenName}} {{surname}}.\n"
-        + "Thanks for registering!\nYour Isaac email address is: "
-        + "</a href='mailto:{{email}}'>{{email}}<a>.\naddress</a>\n{{sig}}");
+    EmailTemplateDTO template = createDummyEmailTemplate(
+      "Hi, {{givenName}} {{surname}}.\n" +
+      "Thanks for registering!\nYour Isaac email address is: " +
+      "</a href='mailto:{{email}}'>{{email}}<a>.\naddress</a>\n{{sig}}"
+    );
 
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
     // Create content manager
@@ -433,21 +470,23 @@ public class EmailManagerTest {
       expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
       replay(mockContentManager);
-
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
     }
 
-    EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
-        mockContentManager, logManager, generateGlobalTokenMap());
+    EmailManager manager = new EmailManager(
+      emailCommunicator,
+      userPreferenceManager,
+      mockPropertiesLoader,
+      mockContentManager,
+      logManager,
+      generateGlobalTokenMap()
+    );
     try {
       ImmutableMap<String, Object> emailTokens = ImmutableMap.of("verificationURL", "https://testUrl.com");
 
-      manager.sendTemplatedEmailToUser(userDTO,
-          template,
-          emailTokens, EmailType.SYSTEM);
-
+      manager.sendTemplatedEmailToUser(userDTO, template, emailTokens, EmailType.SYSTEM);
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
@@ -483,14 +522,18 @@ public class EmailManagerTest {
       Assert.fail();
     }
 
-    EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
-        mockContentManager, logManager, generateGlobalTokenMap());
+    EmailManager manager = new EmailManager(
+      emailCommunicator,
+      userPreferenceManager,
+      mockPropertiesLoader,
+      mockContentManager,
+      logManager,
+      generateGlobalTokenMap()
+    );
     try {
       ImmutableMap<String, Object> emailTokens = ImmutableMap.of("verificationURL", "https://testUrl.com");
 
-      manager.sendTemplatedEmailToUser(userDTO,
-          template,
-          emailTokens, EmailType.SYSTEM);
+      manager.sendTemplatedEmailToUser(userDTO, template, emailTokens, EmailType.SYSTEM);
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
@@ -535,15 +578,22 @@ public class EmailManagerTest {
       Assert.fail();
     }
 
-    EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
-        mockContentManager, logManager, generateGlobalTokenMap());
+    EmailManager manager = new EmailManager(
+      emailCommunicator,
+      userPreferenceManager,
+      mockPropertiesLoader,
+      mockContentManager,
+      logManager,
+      generateGlobalTokenMap()
+    );
     try {
-
       ImmutableMap<String, Object> emailTokens = ImmutableMap.of("verificationURL", "https://testUrl.com");
-      manager.sendTemplatedEmailToUser(userDTO,
-          manager.getEmailTemplateDTO("email-template-registration-confirmation"),
-          emailTokens, EmailType.SYSTEM);
-
+      manager.sendTemplatedEmailToUser(
+        userDTO,
+        manager.getEmailTemplateDTO("email-template-registration-confirmation"),
+        emailTokens,
+        EmailType.SYSTEM
+      );
     } catch (ContentManagerException e) {
       e.printStackTrace();
       Assert.fail();
@@ -572,24 +622,42 @@ public class EmailManagerTest {
    */
   @Test
   public void sendCustomEmail_checkNullProperties_replacedWithEmptyString() {
-
-    EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
-        mockContentManager, logManager, generateGlobalTokenMap());
+    EmailManager manager = new EmailManager(
+      emailCommunicator,
+      userPreferenceManager,
+      mockPropertiesLoader,
+      mockContentManager,
+      logManager,
+      generateGlobalTokenMap()
+    );
 
     List<RegisteredUserDTO> allSelectedUsers = Lists.newArrayList();
     allSelectedUsers.add(userDTOWithNulls);
     allSelectedUsers.add(userDTOWithNulls);
 
-    UserPreference userPreference =
-        new UserPreference(userDTOWithNulls.getId(), SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
-            false);
+    UserPreference userPreference = new UserPreference(
+      userDTOWithNulls.getId(),
+      SegueUserPreferences.EMAIL_PREFERENCE.name(),
+      "ASSIGNMENTS",
+      false
+    );
     try {
       expect(
-          userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
-              userDTOWithNulls.getId())).andReturn(userPreference);
+          userPreferenceManager.getUserPreference(
+            SegueUserPreferences.EMAIL_PREFERENCE.name(),
+            "ASSIGNMENTS",
+            userDTOWithNulls.getId()
+          )
+        )
+        .andReturn(userPreference);
       expect(
-          userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
-              userDTOWithNulls.getId())).andReturn(userPreference);
+          userPreferenceManager.getUserPreference(
+            SegueUserPreferences.EMAIL_PREFERENCE.name(),
+            "ASSIGNMENTS",
+            userDTOWithNulls.getId()
+          )
+        )
+        .andReturn(userPreference);
     } catch (SegueDatabaseException e1) {
       e1.printStackTrace();
       Assert.fail();
@@ -597,18 +665,21 @@ public class EmailManagerTest {
     replay(userPreferenceManager);
 
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
-    EmailTemplateDTO emailTemplate = createDummyEmailTemplate("Hello {{givenName}}, "
-        + "how are you {{familyName}}? {{sig}}");
+    EmailTemplateDTO emailTemplate = createDummyEmailTemplate(
+      "Hello {{givenName}}, " + "how are you {{familyName}}? {{sig}}"
+    );
     String contentObjectId = "test-email-template";
 
     try {
       expect(mockContentManager.getContentById(contentObjectId)).andReturn(emailTemplate);
 
       expect(mockContentManager.getContentById("email-template-html"))
-          .andReturn(htmlTemplate).times(allSelectedUsers.size());
+        .andReturn(htmlTemplate)
+        .times(allSelectedUsers.size());
 
       expect(mockContentManager.getContentById("email-template-ascii"))
-          .andReturn(htmlTemplate).times(allSelectedUsers.size());
+        .andReturn(htmlTemplate)
+        .times(allSelectedUsers.size());
 
       expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
@@ -625,7 +696,6 @@ public class EmailManagerTest {
     } catch (ContentManagerException e) {
       Assert.fail();
     }
-
   }
 
   /**
@@ -633,24 +703,42 @@ public class EmailManagerTest {
    */
   @Test
   public void sendCustomContentEmail_checkNullProperties_replacedWithEmptyString() {
-
-    EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
-        mockContentManager, logManager, generateGlobalTokenMap());
+    EmailManager manager = new EmailManager(
+      emailCommunicator,
+      userPreferenceManager,
+      mockPropertiesLoader,
+      mockContentManager,
+      logManager,
+      generateGlobalTokenMap()
+    );
 
     List<RegisteredUserDTO> allSelectedUsers = Lists.newArrayList();
     allSelectedUsers.add(userDTOWithNulls);
     allSelectedUsers.add(userDTOWithNulls);
 
-    UserPreference userPreference =
-        new UserPreference(userDTOWithNulls.getId(), SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
-            false);
+    UserPreference userPreference = new UserPreference(
+      userDTOWithNulls.getId(),
+      SegueUserPreferences.EMAIL_PREFERENCE.name(),
+      "ASSIGNMENTS",
+      false
+    );
     try {
       expect(
-          userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
-              userDTOWithNulls.getId())).andReturn(userPreference);
+          userPreferenceManager.getUserPreference(
+            SegueUserPreferences.EMAIL_PREFERENCE.name(),
+            "ASSIGNMENTS",
+            userDTOWithNulls.getId()
+          )
+        )
+        .andReturn(userPreference);
       expect(
-          userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
-              userDTOWithNulls.getId())).andReturn(userPreference);
+          userPreferenceManager.getUserPreference(
+            SegueUserPreferences.EMAIL_PREFERENCE.name(),
+            "ASSIGNMENTS",
+            userDTOWithNulls.getId()
+          )
+        )
+        .andReturn(userPreference);
     } catch (SegueDatabaseException e1) {
       e1.printStackTrace();
       Assert.fail();
@@ -668,12 +756,13 @@ public class EmailManagerTest {
     emailTemplate.setSubject(subject);
 
     try {
-
       expect(mockContentManager.getContentById("email-template-html"))
-          .andReturn(htmlTemplate).times(allSelectedUsers.size());
+        .andReturn(htmlTemplate)
+        .times(allSelectedUsers.size());
 
       expect(mockContentManager.getContentById("email-template-ascii"))
-          .andReturn(htmlTemplate).times(allSelectedUsers.size());
+        .andReturn(htmlTemplate)
+        .times(allSelectedUsers.size());
 
       expect(mockContentManager.getCurrentContentSHA()).andReturn(CONTENT_VERSION).atLeastOnce();
 
@@ -690,7 +779,6 @@ public class EmailManagerTest {
     } catch (ContentManagerException e) {
       Assert.fail();
     }
-
   }
 
   /**
@@ -698,8 +786,14 @@ public class EmailManagerTest {
    */
   @Test
   public void flattenTokenMap_checkTemplateReplacement_successfulReplacement() {
-    EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
-        mockContentManager, logManager, generateGlobalTokenMap());
+    EmailManager manager = new EmailManager(
+      emailCommunicator,
+      userPreferenceManager,
+      mockPropertiesLoader,
+      mockContentManager,
+      logManager,
+      generateGlobalTokenMap()
+    );
     Date someDate = new Date();
 
     Map<String, Object> inputMap = Maps.newHashMap();
@@ -718,5 +812,4 @@ public class EmailManagerTest {
 
     return globalTokens;
   }
-
 }

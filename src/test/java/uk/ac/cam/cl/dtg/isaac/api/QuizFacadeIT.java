@@ -108,9 +108,9 @@ import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuizSummaryDTO;
 
 public class QuizFacadeIT extends IsaacIntegrationTest {
-
-  Date someFutureDate =
-      new Date(System.currentTimeMillis() + NUMBER_SECONDS_IN_ONE_DAY * NUMBER_MILLISECONDS_IN_SECOND);
+  Date someFutureDate = new Date(
+    System.currentTimeMillis() + NUMBER_SECONDS_IN_ONE_DAY * NUMBER_MILLISECONDS_IN_SECOND
+  );
   Date somePastDate = new Date(System.currentTimeMillis() - NUMBER_SECONDS_IN_ONE_DAY * NUMBER_MILLISECONDS_IN_SECOND);
   private QuizFacade quizFacade;
 
@@ -128,8 +128,19 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   public void setUp() {
     // get an instance of the facade to test
     this.quizFacade =
-        new QuizFacade(properties, logManager, contentManager, quizManager, userAccountManager, userAssociationManager,
-            groupManager, quizAssignmentManager, assignmentService, quizAttemptManager, quizQuestionManager);
+      new QuizFacade(
+        properties,
+        logManager,
+        contentManager,
+        quizManager,
+        userAccountManager,
+        userAssociationManager,
+        groupManager,
+        quizAssignmentManager,
+        assignmentService,
+        quizAttemptManager,
+        quizQuestionManager
+      );
   }
 
   /**
@@ -149,15 +160,20 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     calendar.add(Calendar.SECOND, sessionExpiryTimeInSeconds);
     String sessionExpiryDate = sessionDateFormat.format(calendar.getTime());
 
-    Map<String, String> sessionInformation =
-        userAuthenticationManager.prepareSessionInformation(userId, "0", sessionExpiryDate, hmacKey, null);
+    Map<String, String> sessionInformation = userAuthenticationManager.prepareSessionInformation(
+      userId,
+      "0",
+      sessionExpiryDate,
+      hmacKey,
+      null
+    );
     return userAuthenticationManager.createAuthCookie(sessionInformation, sessionExpiryTimeInSeconds);
   }
 
   private HttpServletRequest prepareAdminRequest() {
     try {
       Cookie adminSessionCookie = createManualCookieForAdmin();
-      HttpServletRequest adminRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
+      HttpServletRequest adminRequest = createRequestWithCookies(new Cookie[] { adminSessionCookie });
       replay(adminRequest);
       return adminRequest;
     } catch (JsonProcessingException e) {
@@ -169,7 +185,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   protected HttpServletRequest prepareUserRequest(String userEmail, String userPassword) {
     try {
       LoginResult userLogin = loginAs(httpSession, userEmail, userPassword);
-      HttpServletRequest userRequest = createRequestWithCookies(new Cookie[] {userLogin.cookie});
+      HttpServletRequest userRequest = createRequestWithCookies(new Cookie[] { userLogin.cookie });
       replay(userRequest);
       return userRequest;
     } catch (Exception e) {
@@ -195,22 +211,29 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
   }
 
   private HttpServletRequest prepareStudentWithAssignmentsRequest() {
-    return prepareUserRequest(QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
-        QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD);
+    return prepareUserRequest(
+      QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_EMAIL,
+      QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_PASSWORD
+    );
   }
 
   private HttpServletRequest prepareStudentWithFreeAttemptRequest() {
-    return prepareUserRequest(QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
-        QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD);
+    return prepareUserRequest(
+      QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_EMAIL,
+      QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_PASSWORD
+    );
   }
 
   private HttpServletRequest prepareStudentWithNoExistingAttemptsRequest() {
-    return prepareUserRequest(QUIZ_FACADE_TEST_STUDENT_5_WITH_NO_EXISTING_ATTEMPTS_EMAIL,
-        QUIZ_FACADE_TEST_STUDENT_5_WITH_NO_EXISTING_ATTEMPTS_PASSWORD);
+    return prepareUserRequest(
+      QUIZ_FACADE_TEST_STUDENT_5_WITH_NO_EXISTING_ATTEMPTS_EMAIL,
+      QUIZ_FACADE_TEST_STUDENT_5_WITH_NO_EXISTING_ATTEMPTS_PASSWORD
+    );
   }
 
   @Nested
   class GetAvailableQuizzesEndpoint {
+
     @Test
     public void asAnonymousUser_isUnauthorised() {
       HttpServletRequest getQuizzesRequest = prepareAnonymousRequest();
@@ -231,8 +254,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
 
-      @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
-          (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
+      @SuppressWarnings("unchecked")
+      ResultsWrapper<QuizSummaryDTO> responseBody = (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
       boolean isTestQuizPresent = isIdPresent(responseBody, QUIZ_TEST_QUIZ_ID);
       boolean isHiddenFromStudentsQuizPresent = isIdPresent(responseBody, QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID);
       boolean isHiddenFromTutorsQuizPresent = isIdPresent(responseBody, QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID);
@@ -252,8 +275,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
 
-      @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
-          (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
+      @SuppressWarnings("unchecked")
+      ResultsWrapper<QuizSummaryDTO> responseBody = (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
       boolean isTestQuizPresent = isIdPresent(responseBody, QUIZ_TEST_QUIZ_ID);
       boolean isHiddenFromStudentsQuizPresent = isIdPresent(responseBody, QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID);
       boolean isHiddenFromTutorsQuizPresent = isIdPresent(responseBody, QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID);
@@ -270,8 +293,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.OK.getStatusCode(), getQuizzesResponse.getStatus());
 
-      @SuppressWarnings("unchecked") ResultsWrapper<QuizSummaryDTO> responseBody =
-          (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
+      @SuppressWarnings("unchecked")
+      ResultsWrapper<QuizSummaryDTO> responseBody = (ResultsWrapper<QuizSummaryDTO>) getQuizzesResponse.getEntity();
       boolean isTestQuizPresent = isIdPresent(responseBody, QUIZ_TEST_QUIZ_ID);
       boolean isHiddenFromStudentsQuizPresent = isIdPresent(responseBody, QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID);
       boolean isHiddenFromTutorsQuizPresent = isIdPresent(responseBody, QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID);
@@ -287,6 +310,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class GetAssignedQuizzes {
+
     @Test
     public void asAnonymousUser_isUnauthorised() {
       HttpServletRequest assignedQuizRequest = prepareAnonymousRequest();
@@ -307,8 +331,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.OK.getStatusCode(), getAssignedQuizzesResponse.getStatus());
 
-      @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-          (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
+      @SuppressWarnings("unchecked")
+      List<QuizAssignmentDTO> responseBody = (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
       assertTrue(responseBody.isEmpty());
     }
 
@@ -320,8 +344,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.OK.getStatusCode(), getAssignedQuizzesResponse.getStatus());
 
-      @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-          (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
+      @SuppressWarnings("unchecked")
+      List<QuizAssignmentDTO> responseBody = (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
       assertEquals(6, responseBody.size());
       boolean isTestQuizPresent = responseBody.stream().anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID));
       assertTrue(isTestQuizPresent);
@@ -335,14 +359,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.OK.getStatusCode(), getAssignedQuizzesResponse.getStatus());
 
-      @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-          (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
+      @SuppressWarnings("unchecked")
+      List<QuizAssignmentDTO> responseBody = (List<QuizAssignmentDTO>) getAssignedQuizzesResponse.getEntity();
       assertTrue(responseBody.isEmpty());
     }
   }
 
   @Nested
   class GetFreeAttempts {
+
     @Test
     public void asAnonymousUser_isUnauthorised() {
       HttpServletRequest getFreeAttemptsRequest = prepareAnonymousRequest();
@@ -363,8 +388,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.OK.getStatusCode(), getFreeAttemptsResponse.getStatus());
 
-      @SuppressWarnings("unchecked") List<QuizAttemptDTO> responseBody =
-          (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
+      @SuppressWarnings("unchecked")
+      List<QuizAttemptDTO> responseBody = (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
       assertTrue(responseBody.isEmpty());
     }
 
@@ -376,8 +401,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.OK.getStatusCode(), getFreeAttemptsResponse.getStatus());
 
-      @SuppressWarnings("unchecked") List<QuizAttemptDTO> responseBody =
-          (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
+      @SuppressWarnings("unchecked")
+      List<QuizAttemptDTO> responseBody = (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
       assertTrue(responseBody.isEmpty());
     }
 
@@ -389,8 +414,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
       assertEquals(Response.Status.OK.getStatusCode(), getFreeAttemptsResponse.getStatus());
 
-      @SuppressWarnings("unchecked") List<QuizAttemptDTO> responseBody =
-          (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
+      @SuppressWarnings("unchecked")
+      List<QuizAttemptDTO> responseBody = (List<QuizAttemptDTO>) getFreeAttemptsResponse.getEntity();
       boolean isTestQuizPresent = responseBody.stream().anyMatch(q -> q.getQuizId().equals(QUIZ_TEST_QUIZ_ID));
       boolean anyReturnedQuizHasAssignment = responseBody.stream().anyMatch(q -> q.getQuizAssignmentId() != null);
       assertTrue(isTestQuizPresent);
@@ -400,8 +425,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class GetQuizAssignment {
+
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void missingQuizId_isBadRequest() {
         HttpServletRequest getQuizAssignmentRequest = prepareAnonymousRequest();
@@ -418,8 +445,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void cancelledAssignment_isBadRequest() {
         HttpServletRequest getQuizAssignmentRequest = prepareTeacherRequest();
 
-        Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignment(getQuizAssignmentRequest, QUIZ_ASSIGNMENT_CANCELLED_ID);
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignment(
+          getQuizAssignmentRequest,
+          QUIZ_ASSIGNMENT_CANCELLED_ID
+        );
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
@@ -430,6 +459,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest getQuizAssignmentRequest = prepareAnonymousRequest();
@@ -481,6 +511,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class ValidUser {
+
       @Test
       public void asTeacher_whoIsGroupManager_returnsListOfAssignments_withFeedbackOnlyForStudentsAllowingAccess() {
         HttpServletRequest getQuizAssignmentRequest = prepareTeacherRequest();
@@ -491,14 +522,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         QuizAssignmentDTO responseBody = (QuizAssignmentDTO) getQuizAssignmentResponse.getEntity();
         assertEquals(QUIZ_ASSIGNMENT_ID, responseBody.getId());
-        boolean isUserFeedbackWithAccessAndFeedbackPresent = responseBody.getUserFeedback().stream()
-            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
-        boolean isUserFeedbackWithNoAccessAndNoFeedbackPresent = responseBody.getUserFeedback().stream()
-            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
-        boolean isUserFeedbackWithAccessButNoFeedbackPresent = responseBody.getUserFeedback().stream()
-            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
-        boolean isUserFeedbackWithNoAccessButFeedbackPresent = responseBody.getUserFeedback().stream()
-            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
+        boolean isUserFeedbackWithAccessAndFeedbackPresent = responseBody
+          .getUserFeedback()
+          .stream()
+          .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
+        boolean isUserFeedbackWithNoAccessAndNoFeedbackPresent = responseBody
+          .getUserFeedback()
+          .stream()
+          .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
+        boolean isUserFeedbackWithAccessButNoFeedbackPresent = responseBody
+          .getUserFeedback()
+          .stream()
+          .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
+        boolean isUserFeedbackWithNoAccessButFeedbackPresent = responseBody
+          .getUserFeedback()
+          .stream()
+          .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
         assertTrue(isUserFeedbackWithAccessAndFeedbackPresent);
         assertTrue(isUserFeedbackWithNoAccessAndNoFeedbackPresent);
         assertFalse(isUserFeedbackWithAccessButNoFeedbackPresent);
@@ -515,14 +554,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         QuizAssignmentDTO responseBody = (QuizAssignmentDTO) getQuizAssignmentResponse.getEntity();
         assertEquals(QUIZ_ASSIGNMENT_ID, responseBody.getId());
-        boolean isUserFeedbackWithAccessAndFeedbackPresent = responseBody.getUserFeedback().stream()
-            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
-        boolean isUserFeedbackWithNoAccessAndNoFeedbackPresent = responseBody.getUserFeedback().stream()
-            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
-        boolean isUserFeedbackWithAccessButNoFeedbackPresent = responseBody.getUserFeedback().stream()
-            .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
-        boolean isUserFeedbackWithNoAccessButFeedbackPresent = responseBody.getUserFeedback().stream()
-            .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
+        boolean isUserFeedbackWithAccessAndFeedbackPresent = responseBody
+          .getUserFeedback()
+          .stream()
+          .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
+        boolean isUserFeedbackWithNoAccessAndNoFeedbackPresent = responseBody
+          .getUserFeedback()
+          .stream()
+          .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
+        boolean isUserFeedbackWithAccessButNoFeedbackPresent = responseBody
+          .getUserFeedback()
+          .stream()
+          .anyMatch(f -> f.getUser().isAuthorisedFullAccess() && f.getFeedback() == null);
+        boolean isUserFeedbackWithNoAccessButFeedbackPresent = responseBody
+          .getUserFeedback()
+          .stream()
+          .anyMatch(f -> !f.getUser().isAuthorisedFullAccess() && f.getFeedback() != null);
         assertTrue(isUserFeedbackWithAccessAndFeedbackPresent);
         assertFalse(isUserFeedbackWithNoAccessAndNoFeedbackPresent);
         assertFalse(isUserFeedbackWithAccessButNoFeedbackPresent);
@@ -533,15 +580,19 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class GetQuizAssignmentAttempt {
+
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void missingQuizAssignmentId_isBadRequest() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareAnonymousRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, null,
-                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          null,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+        );
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -553,8 +604,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void missingUserId_isBadRequest() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareAnonymousRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID, null);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_ID,
+          null
+        );
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -566,9 +620,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void cancelledAssignment_isBadRequest() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareTeacherRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_CANCELLED_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_CANCELLED_ID,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+        );
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -579,13 +635,16 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareAnonymousRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_ID,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+        );
 
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -597,9 +656,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_isForbidden() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareStudentRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_ID,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+        );
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -611,9 +672,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTutor_isForbidden() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareTutorRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_ID,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+        );
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -625,9 +688,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_whoIsNotGroupManager_isForbidden() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareTeacherWhoIsNotGroupManagerRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_ID,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+        );
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -638,12 +703,16 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class CorrectGroupOwnerButInvalidTarget {
+
       @Test
       public void asTeacher_withTargetStudent_whoIsNotInGroup_isForbidden() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareTeacherRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_ID,
+          TEST_STUDENT_ID
+        );
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -655,9 +724,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_withTargetStudentWhoDoesNotGrantViewingPermissions_isForbidden() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareTeacherRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_ID,
+          QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID
+        );
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -669,9 +740,11 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_withTargetStudent_whoHasNotCompletedAssignment_isForbidden() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareTeacherRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_ID,
+          QUIZ_FACADE_TEST_STUDENT_3_WITH_FREE_ATTEMPT_ID
+        );
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -682,13 +755,16 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class ValidRequest {
+
       @Test
       public void asTeacher_withTargetStudent_whoHasCompletedAssignment_returnsQuizAttemptFeedback() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareTeacherRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_ID,
-                QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_ID,
+          QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+        );
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
@@ -698,21 +774,24 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getAttempt().getQuizId());
       }
 
-
       @Test
       public void asAdmin_overridesNoViewingPermissions_returnsQuizAttemptFeedback() {
         HttpServletRequest getQuizAssignmentAttemptRequest = prepareAdminRequest();
 
-        Response getQuizAssignmentAttemptResponse =
-            quizFacade.getQuizAssignmentAttempt(getQuizAssignmentAttemptRequest, QUIZ_ASSIGNMENT_FEEDBACK_MODE_ID,
-                QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID);
+        Response getQuizAssignmentAttemptResponse = quizFacade.getQuizAssignmentAttempt(
+          getQuizAssignmentAttemptRequest,
+          QUIZ_ASSIGNMENT_FEEDBACK_MODE_ID,
+          QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID
+        );
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentAttemptResponse.getStatus());
 
         QuizAttemptFeedbackDTO responseBody = (QuizAttemptFeedbackDTO) getQuizAssignmentAttemptResponse.getEntity();
         assertEquals(QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID, responseBody.getUser().getId());
-        assertEquals(QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID,
-            responseBody.getAttempt().getUserId());
+        assertEquals(
+          QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID,
+          responseBody.getAttempt().getUserId()
+        );
         assertEquals(QUIZ_TEST_QUIZ_ID, responseBody.getAttempt().getQuizId());
       }
     }
@@ -720,71 +799,116 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class CreateQuizAssignment {
+
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void missingQuizId_isBadRequest() {
         HttpServletRequest createQuizAssignmentRequest = prepareAnonymousRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, null, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          null,
+          null,
+          TEST_TEACHERS_AB_GROUP_ID,
+          null,
+          someFutureDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(createQuizAssignmentResponse);
-          assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
-              actualErrorMessage);
+          assertEquals(
+            "A required field was missing. Must provide group and test ids and a test feedback mode.",
+            actualErrorMessage
+          );
         }
       }
 
       @Test
       public void missingGroupId_isBadRequest() {
         HttpServletRequest createQuizAssignmentRequest = prepareAnonymousRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, null, null, someFutureDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          null,
+          null,
+          someFutureDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(createQuizAssignmentResponse);
-          assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
-              actualErrorMessage);
+          assertEquals(
+            "A required field was missing. Must provide group and test ids and a test feedback mode.",
+            actualErrorMessage
+          );
         }
       }
 
       @Test
       public void missingFeedbackMode_isBadRequest() {
         HttpServletRequest createQuizAssignmentRequest = prepareAnonymousRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate, null);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          TEST_TEACHERS_AB_GROUP_ID,
+          null,
+          someFutureDate,
+          null
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(createQuizAssignmentResponse);
-          assertEquals("A required field was missing. Must provide group and test ids and a test feedback mode.",
-              actualErrorMessage);
+          assertEquals(
+            "A required field was missing. Must provide group and test ids and a test feedback mode.",
+            actualErrorMessage
+          );
         }
       }
 
       @Test
       public void unknownQuizId_isNotFound() {
         HttpServletRequest createQuizAssignmentRequest = prepareTeacherRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, UNKNOWN_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          UNKNOWN_QUIZ_ID,
+          null,
+          TEST_TEACHERS_AB_GROUP_ID,
+          null,
+          someFutureDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.NOT_FOUND.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(createQuizAssignmentResponse);
@@ -795,13 +919,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void dueDateInPast_isBadRequest() {
         HttpServletRequest createQuizAssignmentRequest = prepareTeacherRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, somePastDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          TEST_TEACHERS_AB_GROUP_ID,
+          null,
+          somePastDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(createQuizAssignmentResponse);
@@ -812,13 +945,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void duplicateActiveAssignment_isBadRequest() {
         HttpServletRequest createQuizAssignmentRequest = prepareTeacherRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, QUIZ_FACADE_IT_TEST_GROUP_ID, null, someFutureDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          QUIZ_FACADE_IT_TEST_GROUP_ID,
+          null,
+          someFutureDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(createQuizAssignmentResponse);
@@ -829,16 +971,26 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest createQuizAssignmentRequest = prepareAnonymousRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          TEST_TEACHERS_AB_GROUP_ID,
+          null,
+          someFutureDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(createQuizAssignmentResponse);
@@ -849,13 +1001,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void asStudent_isForbidden() {
         HttpServletRequest createQuizAssignmentRequest = prepareStudentRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          TEST_TEACHERS_AB_GROUP_ID,
+          null,
+          someFutureDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(createQuizAssignmentResponse);
@@ -866,13 +1027,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void asTutor_isForbidden() {
         HttpServletRequest createQuizAssignmentRequest = prepareTutorRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          TEST_TEACHERS_AB_GROUP_ID,
+          null,
+          someFutureDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(createQuizAssignmentResponse);
@@ -883,13 +1053,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void asTeacher_whoIsNotGroupManager_isForbidden() {
         HttpServletRequest createQuizAssignmentRequest = prepareTeacherWhoIsNotGroupManagerRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          TEST_TEACHERS_AB_GROUP_ID,
+          null,
+          someFutureDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(createQuizAssignmentResponse);
@@ -900,16 +1079,26 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class ValidUser {
+
       @Test
       public void asTeacher_whoIsGroupManager_returnsQuizAssignment() {
         HttpServletRequest createQuizAssignmentRequest = prepareTeacherRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, TEST_TEACHERS_AB_GROUP_ID, null, someFutureDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          TEST_TEACHERS_AB_GROUP_ID,
+          null,
+          someFutureDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           QuizAssignmentDTO responseBody = (QuizAssignmentDTO) createQuizAssignmentResponse.getEntity();
@@ -925,13 +1114,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void asAdmin_returnsQuizAssignment() {
         HttpServletRequest createQuizAssignmentRequest = prepareAdminRequest();
-        QuizAssignmentDTO assignmentRequest =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, DAVE_TEACHERS_BC_GROUP_ID, null, someFutureDate,
-                QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO assignmentRequest = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          DAVE_TEACHERS_BC_GROUP_ID,
+          null,
+          someFutureDate,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(createQuizAssignmentRequest,
-            assignmentRequest)) {
-
+        try (
+          Response createQuizAssignmentResponse = quizFacade.createQuizAssignment(
+            createQuizAssignmentRequest,
+            assignmentRequest
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), createQuizAssignmentResponse.getStatus());
 
           QuizAssignmentDTO responseBody = (QuizAssignmentDTO) createQuizAssignmentResponse.getEntity();
@@ -948,15 +1146,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class CancelQuizAssignment {
+
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void missingQuizAssignmentId_isBadRequest() {
         HttpServletRequest cancelQuizAssignmentRequest = prepareAnonymousRequest();
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
-            null)) {
-
+        try (
+          Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest, null)
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAssignmentResponse);
@@ -968,10 +1168,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void cancelledAssignment_isBadRequest() {
         HttpServletRequest cancelQuizAssignmentRequest = prepareTeacherRequest();
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_CANCELLED_ID)) {
-
-
+        try (
+          Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(
+            cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_CANCELLED_ID
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAssignmentResponse);
@@ -982,13 +1184,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest cancelQuizAssignmentRequest = prepareAnonymousRequest();
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID)) {
-
+        try (
+          Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(
+            cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAssignmentResponse);
@@ -1000,9 +1206,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_isForbidden() {
         HttpServletRequest cancelQuizAssignmentRequest = prepareStudentRequest();
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID)) {
-
+        try (
+          Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(
+            cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAssignmentResponse);
@@ -1014,9 +1223,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTutor_isForbidden() {
         HttpServletRequest cancelQuizAssignmentRequest = prepareTutorRequest();
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID)) {
-
+        try (
+          Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(
+            cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAssignmentResponse);
@@ -1028,9 +1240,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_whoIsNotGroupManager_isForbidden() {
         HttpServletRequest cancelQuizAssignmentRequest = prepareTeacherWhoIsNotGroupManagerRequest();
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID)) {
-
+        try (
+          Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(
+            cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAssignmentResponse);
@@ -1041,13 +1256,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class ValidUser {
+
       @Test
       public void asTeacher_whoIsGroupManager_returnsNoContent() {
         HttpServletRequest cancelQuizAssignmentRequest = prepareTeacherRequest();
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_FIRST_ID)) {
-
+        try (
+          Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(
+            cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_FIRST_ID
+          )
+        ) {
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
           assertNull(cancelQuizAssignmentResponse.getEntity());
@@ -1058,9 +1277,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asAdmin_returnsNoContent() {
         HttpServletRequest cancelQuizAssignmentRequest = prepareTeacherRequest();
 
-        try (Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(cancelQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_SECOND_ID)) {
-
+        try (
+          Response cancelQuizAssignmentResponse = quizFacade.cancelQuizAssignment(
+            cancelQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_FOR_CANCELLATION_TEST_SECOND_ID
+          )
+        ) {
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelQuizAssignmentResponse.getStatus());
 
           assertNull(cancelQuizAssignmentResponse.getEntity());
@@ -1071,16 +1293,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class UpdateQuizAssignment {
+
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void missingQuizAssignmentId_isBadRequest() {
         HttpServletRequest updateQuizAssignmentRequest = prepareAnonymousRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest, null,
-            quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            null,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1091,12 +1319,23 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void changingQuizAssignmentId_isBadRequest() {
         HttpServletRequest updateQuizAssignmentRequest = prepareAnonymousRequest();
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(QUIZ_ASSIGNMENT_ID, null, null, null, null, null, null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(
+          QUIZ_ASSIGNMENT_ID,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        );
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1107,12 +1346,23 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void changingQuizId_isBadRequest() {
         HttpServletRequest updateQuizAssignmentRequest = prepareAnonymousRequest();
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, QUIZ_TEST_QUIZ_ID, null, null, null, null, null);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(
+          null,
+          QUIZ_TEST_QUIZ_ID,
+          null,
+          null,
+          null,
+          null,
+          null
+        );
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1125,9 +1375,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = prepareAnonymousRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, 1L, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1140,9 +1394,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = prepareAnonymousRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, 1L, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1155,9 +1413,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = prepareAnonymousRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, new Date(), null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1170,9 +1432,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = prepareTeacherRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, somePastDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1185,9 +1451,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = prepareTeacherRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, someFutureDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_CANCELLED_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_CANCELLED_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1198,14 +1468,19 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest updateQuizAssignmentRequest = prepareAnonymousRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1218,9 +1493,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = prepareStudentRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1233,9 +1512,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = prepareTutorRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1248,9 +1531,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = prepareTeacherWhoIsNotGroupManagerRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, null, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(updateQuizAssignmentResponse);
@@ -1261,14 +1548,19 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class ValidUser {
+
       @Test
       public void asTeacher_whoIs_groupManager_settingDueDate_withValidDate_returnsNoContent() {
         HttpServletRequest updateQuizAssignmentRequest = prepareTeacherRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, someFutureDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           assertNull(updateQuizAssignmentResponse.getEntity());
@@ -1278,12 +1570,23 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void asTeacher_whoIs_groupManager_settingFeedbackMode_returnsNoContent() {
         HttpServletRequest updateQuizAssignmentRequest = prepareTeacherRequest();
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, null, QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           assertNull(updateQuizAssignmentResponse.getEntity());
@@ -1295,9 +1598,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
         HttpServletRequest updateQuizAssignmentRequest = prepareAdminRequest();
         QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(null, null, null, null, null, someFutureDate, null);
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           assertNull(updateQuizAssignmentResponse.getEntity());
@@ -1307,12 +1614,23 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       @Test
       public void asAdmin_settingFeedbackMode_returnsNoContent() {
         HttpServletRequest updateQuizAssignmentRequest = prepareAdminRequest();
-        QuizAssignmentDTO quizAssignmentDto =
-            new QuizAssignmentDTO(null, null, null, null, null, null, QuizFeedbackMode.OVERALL_MARK);
+        QuizAssignmentDTO quizAssignmentDto = new QuizAssignmentDTO(
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          QuizFeedbackMode.OVERALL_MARK
+        );
 
-        try (Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(updateQuizAssignmentRequest,
-            QUIZ_ASSIGNMENT_ID, quizAssignmentDto)) {
-
+        try (
+          Response updateQuizAssignmentResponse = quizFacade.updateQuizAssignment(
+            updateQuizAssignmentRequest,
+            QUIZ_ASSIGNMENT_ID,
+            quizAssignmentDto
+          )
+        ) {
           assertEquals(Response.Status.NO_CONTENT.getStatusCode(), updateQuizAssignmentResponse.getStatus());
 
           assertNull(updateQuizAssignmentResponse.getEntity());
@@ -1323,15 +1641,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class PreviewQuiz {
+
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void nullQuizId_isBadRequest() {
         HttpServletRequest previewQuizRequest = prepareTeacherRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            null)) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest, null)
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), previewQuizResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(previewQuizResponse);
@@ -1343,9 +1663,9 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void emptyQuizId_isBadRequest() {
         HttpServletRequest previewQuizRequest = prepareTeacherRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            "")) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest, "")
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), previewQuizResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(previewQuizResponse);
@@ -1357,9 +1677,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void unknownQuizId_isNotFound() {
         HttpServletRequest previewQuizRequest = prepareTeacherRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            UNKNOWN_QUIZ_ID)) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(
+            createNiceMock(Request.class),
+            previewQuizRequest,
+            UNKNOWN_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.NOT_FOUND.getStatusCode(), previewQuizResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(previewQuizResponse);
@@ -1370,13 +1694,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class StandardQuizPermissions {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest previewQuizRequest = prepareAnonymousRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            QUIZ_TEST_QUIZ_ID)) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(
+            createNiceMock(Request.class),
+            previewQuizRequest,
+            QUIZ_TEST_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), previewQuizResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(previewQuizResponse);
@@ -1388,9 +1717,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_isForbidden() {
         HttpServletRequest previewQuizRequest = prepareStudentRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            QUIZ_TEST_QUIZ_ID)) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(
+            createNiceMock(Request.class),
+            previewQuizRequest,
+            QUIZ_TEST_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(previewQuizResponse);
@@ -1402,9 +1735,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTutor_returnsQuiz() {
         HttpServletRequest previewQuizRequest = prepareTutorRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            QUIZ_TEST_QUIZ_ID)) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(
+            createNiceMock(Request.class),
+            previewQuizRequest,
+            QUIZ_TEST_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), previewQuizResponse.getStatus());
 
           IsaacQuizDTO responseBody = (IsaacQuizDTO) previewQuizResponse.getEntity();
@@ -1416,9 +1753,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_returnsQuiz() {
         HttpServletRequest previewQuizRequest = prepareTeacherRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            QUIZ_TEST_QUIZ_ID)) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(
+            createNiceMock(Request.class),
+            previewQuizRequest,
+            QUIZ_TEST_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), previewQuizResponse.getStatus());
 
           IsaacQuizDTO responseBody = (IsaacQuizDTO) previewQuizResponse.getEntity();
@@ -1429,13 +1770,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class RestrictedQuizPermissions {
+
       @Test
       public void asTutor_withQuizThatIsHiddenFromStudentRole_isForbidden() {
         HttpServletRequest previewQuizRequest = prepareTutorRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(
+            createNiceMock(Request.class),
+            previewQuizRequest,
+            QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(previewQuizResponse);
@@ -1447,9 +1793,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTutor_withQuizThatIsHiddenFromTutorRole_isForbidden() {
         HttpServletRequest previewQuizRequest = prepareTutorRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID)) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(
+            createNiceMock(Request.class),
+            previewQuizRequest,
+            QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), previewQuizResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(previewQuizResponse);
@@ -1461,9 +1811,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_withQuizThatIsHiddenFromStudentRole_returnsQuiz() {
         HttpServletRequest previewQuizRequest = prepareTeacherRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(
+            createNiceMock(Request.class),
+            previewQuizRequest,
+            QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), previewQuizResponse.getStatus());
 
           IsaacQuizDTO responseBody = (IsaacQuizDTO) previewQuizResponse.getEntity();
@@ -1475,9 +1829,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_withQuizThatIsHiddenFromTutorRole_returnsQuiz() {
         HttpServletRequest previewQuizRequest = prepareTeacherRequest();
 
-        try (Response previewQuizResponse = quizFacade.previewQuiz(createNiceMock(Request.class), previewQuizRequest,
-            QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID)) {
-
+        try (
+          Response previewQuizResponse = quizFacade.previewQuiz(
+            createNiceMock(Request.class),
+            previewQuizRequest,
+            QUIZ_HIDDEN_FROM_ROLE_TUTORS_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), previewQuizResponse.getStatus());
 
           IsaacQuizDTO responseBody = (IsaacQuizDTO) previewQuizResponse.getEntity();
@@ -1489,13 +1847,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class StartQuizAttempt {
+
     @Test
     public void asStudent_withValidRequest_returnsQuizAttempt() {
       HttpServletRequest startQuizAttemptRequest = prepareStudentWithFreeAttemptRequest();
 
-      try (Response startQuizAttemptResponse = quizFacade.startQuizAttempt(createNiceMock(Request.class),
-          startQuizAttemptRequest, QUIZ_ASSIGNMENT_ID)) {
-
+      try (
+        Response startQuizAttemptResponse = quizFacade.startQuizAttempt(
+          createNiceMock(Request.class),
+          startQuizAttemptRequest,
+          QUIZ_ASSIGNMENT_ID
+        )
+      ) {
         assertEquals(Response.Status.OK.getStatusCode(), startQuizAttemptResponse.getStatus());
 
         QuizAttemptDTO responseBody = (QuizAttemptDTO) startQuizAttemptResponse.getEntity();
@@ -1509,13 +1872,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest startQuizAttemptRequest = prepareAnonymousRequest();
 
-        try (Response startQuizAttemptResponse = quizFacade.startQuizAttempt(createNiceMock(Request.class),
-            startQuizAttemptRequest, QUIZ_ASSIGNMENT_ID)) {
-
+        try (
+          Response startQuizAttemptResponse = quizFacade.startQuizAttempt(
+            createNiceMock(Request.class),
+            startQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), startQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startQuizAttemptResponse);
@@ -1527,9 +1895,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_whoIsNotInGroup_isForbidden() {
         HttpServletRequest startQuizAttemptRequest = prepareStudentRequest();
 
-        try (Response startQuizAttemptResponse = quizFacade.startQuizAttempt(createNiceMock(Request.class),
-            startQuizAttemptRequest, QUIZ_ASSIGNMENT_ID)) {
-
+        try (
+          Response startQuizAttemptResponse = quizFacade.startQuizAttempt(
+            createNiceMock(Request.class),
+            startQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startQuizAttemptResponse);
@@ -1540,13 +1912,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void missingQuizAssignmentId_isBadRequest() {
         HttpServletRequest startQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response startQuizAttemptResponse = quizFacade.startQuizAttempt(createNiceMock(Request.class),
-            startQuizAttemptRequest, null)) {
-
+        try (
+          Response startQuizAttemptResponse = quizFacade.startQuizAttempt(
+            createNiceMock(Request.class),
+            startQuizAttemptRequest,
+            null
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), startQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startQuizAttemptResponse);
@@ -1558,9 +1935,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void cancelledAssignment_isGone() {
         HttpServletRequest startQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response startQuizAttemptResponse = quizFacade.startQuizAttempt(createNiceMock(Request.class),
-            startQuizAttemptRequest, QUIZ_ASSIGNMENT_CANCELLED_ID)) {
-
+        try (
+          Response startQuizAttemptResponse = quizFacade.startQuizAttempt(
+            createNiceMock(Request.class),
+            startQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_CANCELLED_ID
+          )
+        ) {
           assertEquals(Response.Status.GONE.getStatusCode(), startQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startQuizAttemptResponse);
@@ -1572,9 +1953,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void expiredAssignment_isForbidden() {
         HttpServletRequest startQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response startQuizAttemptResponse = quizFacade.startQuizAttempt(createNiceMock(Request.class),
-            startQuizAttemptRequest, QUIZ_ASSIGNMENT_EXPIRED_ID)) {
-
+        try (
+          Response startQuizAttemptResponse = quizFacade.startQuizAttempt(
+            createNiceMock(Request.class),
+            startQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_EXPIRED_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startQuizAttemptResponse);
@@ -1586,9 +1971,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void alreadyAttemptedAssignment_isForbidden() {
         HttpServletRequest startQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response startQuizAttemptResponse = quizFacade.startQuizAttempt(createNiceMock(Request.class),
-            startQuizAttemptRequest, QUIZ_ASSIGNMENT_ID)) {
-
+        try (
+          Response startQuizAttemptResponse = quizFacade.startQuizAttempt(
+            createNiceMock(Request.class),
+            startQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startQuizAttemptResponse);
@@ -1600,13 +1989,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class StartFreeQuizAttempt {
+
     @Test
     public void asStudent_withValidRequest_returnsQuizAttempt() {
       HttpServletRequest startFreeQuizAttemptRequest = prepareStudentWithNoExistingAttemptsRequest();
 
-      try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
-          startFreeQuizAttemptRequest, QUIZ_TEST_QUIZ_ID)) {
-
+      try (
+        Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(
+          createNiceMock(Request.class),
+          startFreeQuizAttemptRequest,
+          QUIZ_TEST_QUIZ_ID
+        )
+      ) {
         assertEquals(Response.Status.OK.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
         QuizAttemptDTO responseBody = (QuizAttemptDTO) startFreeQuizAttemptResponse.getEntity();
@@ -1620,13 +2014,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest startFreeQuizAttemptRequest = prepareAnonymousRequest();
 
-        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
-            startFreeQuizAttemptRequest, QUIZ_TEST_QUIZ_ID)) {
-
+        try (
+          Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(
+            createNiceMock(Request.class),
+            startFreeQuizAttemptRequest,
+            QUIZ_TEST_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startFreeQuizAttemptResponse);
@@ -1638,9 +2037,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_withQuizThatIsHiddenFromStudentRole() {
         HttpServletRequest startFreeQuizAttemptRequest = prepareStudentWithNoExistingAttemptsRequest();
 
-        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
-            startFreeQuizAttemptRequest, QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID)) {
-
+        try (
+          Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(
+            createNiceMock(Request.class),
+            startFreeQuizAttemptRequest,
+            QUIZ_HIDDEN_FROM_ROLE_STUDENTS_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startFreeQuizAttemptResponse);
@@ -1652,15 +2055,20 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_withQuizThatHasBeenAssigned_isForbidden() {
         HttpServletRequest startFreeQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
-            startFreeQuizAttemptRequest, QUIZ_TEST_QUIZ_ID)) {
-
+        try (
+          Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(
+            createNiceMock(Request.class),
+            startFreeQuizAttemptRequest,
+            QUIZ_TEST_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startFreeQuizAttemptResponse);
-          String expectedErrorMessage = "This test has been assigned to you by a teacher. "
-              + "You can not attempt this test freely. If you have already done the test for your teacher, "
-              + "and want to do it again, ask your teacher to allow you another attempt.";
+          String expectedErrorMessage =
+            "This test has been assigned to you by a teacher. " +
+            "You can not attempt this test freely. If you have already done the test for your teacher, " +
+            "and want to do it again, ask your teacher to allow you another attempt.";
           assertEquals(expectedErrorMessage, actualErrorMessage);
         }
       }
@@ -1668,13 +2076,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void missingQuizId_isBadRequest() {
         HttpServletRequest startFreeQuizAttemptRequest = prepareStudentWithNoExistingAttemptsRequest();
 
-        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
-            startFreeQuizAttemptRequest, null)) {
-
+        try (
+          Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(
+            createNiceMock(Request.class),
+            startFreeQuizAttemptRequest,
+            null
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startFreeQuizAttemptResponse);
@@ -1686,9 +2099,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void emptyQuizId_isBadRequest() {
         HttpServletRequest startFreeQuizAttemptRequest = prepareStudentWithNoExistingAttemptsRequest();
 
-        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
-            startFreeQuizAttemptRequest, "")) {
-
+        try (
+          Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(
+            createNiceMock(Request.class),
+            startFreeQuizAttemptRequest,
+            ""
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startFreeQuizAttemptResponse);
@@ -1700,9 +2117,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void unknownQuizId_isNotFound() {
         HttpServletRequest startFreeQuizAttemptRequest = prepareStudentWithNoExistingAttemptsRequest();
 
-        try (Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(createNiceMock(Request.class),
-            startFreeQuizAttemptRequest, UNKNOWN_QUIZ_ID)) {
-
+        try (
+          Response startFreeQuizAttemptResponse = quizFacade.startFreeQuizAttempt(
+            createNiceMock(Request.class),
+            startFreeQuizAttemptRequest,
+            UNKNOWN_QUIZ_ID
+          )
+        ) {
           assertEquals(Response.Status.NOT_FOUND.getStatusCode(), startFreeQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(startFreeQuizAttemptResponse);
@@ -1714,13 +2135,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class GetQuizAttempt {
+
     @Test
     public void validRequest_returnsQuizAttempt() {
       HttpServletRequest getQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-      try (Response getQuizAttemptResponse = quizFacade.getQuizAttempt(getQuizAttemptRequest,
-          QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+      try (
+        Response getQuizAttemptResponse = quizFacade.getQuizAttempt(
+          getQuizAttemptRequest,
+          QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+        )
+      ) {
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAttemptResponse.getStatus());
 
         QuizAttemptDTO responseBody = (QuizAttemptDTO) getQuizAttemptResponse.getEntity();
@@ -1734,13 +2159,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest getQuizAttemptRequest = prepareAnonymousRequest();
 
-        try (Response getQuizAttemptResponse = quizFacade.getQuizAttempt(getQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+        try (
+          Response getQuizAttemptResponse = quizFacade.getQuizAttempt(
+            getQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptResponse);
@@ -1752,9 +2181,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_whoIsNotAttemptCreator_isForbidden() {
         HttpServletRequest getQuizAttemptRequest = prepareStudentWithFreeAttemptRequest();
 
-        try (Response getQuizAttemptResponse = quizFacade.getQuizAttempt(getQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+        try (
+          Response getQuizAttemptResponse = quizFacade.getQuizAttempt(
+            getQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptResponse);
@@ -1765,13 +2197,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void cancelledAssignment_isForbidden() {
         HttpServletRequest getQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response getQuizAttemptResponse = quizFacade.getQuizAttempt(getQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_CANCELLED_ID)) {
-
+        try (
+          Response getQuizAttemptResponse = quizFacade.getQuizAttempt(
+            getQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_CANCELLED_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptResponse);
@@ -1783,9 +2219,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void expiredAssignment_isForbidden() {
         HttpServletRequest getQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response getQuizAttemptResponse = quizFacade.getQuizAttempt(getQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID)) {
-
+        try (
+          Response getQuizAttemptResponse = quizFacade.getQuizAttempt(
+            getQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptResponse);
@@ -1797,9 +2236,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void alreadyCompletedAttempt_isForbidden() {
         HttpServletRequest getQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response getQuizAttemptResponse = quizFacade.getQuizAttempt(getQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
-
+        try (
+          Response getQuizAttemptResponse = quizFacade.getQuizAttempt(
+            getQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptResponse);
@@ -1811,15 +2253,20 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class GetQuizAttemptFeedback {
+
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest getQuizAttemptFeedbackRequest = prepareAnonymousRequest();
 
-        try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
-
+        try (
+          Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(
+            getQuizAttemptFeedbackRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptFeedbackResponse);
@@ -1831,9 +2278,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_whoIsNotAttemptCreator_isForbidden() {
         HttpServletRequest getQuizAttemptFeedbackRequest = prepareStudentWithFreeAttemptRequest();
 
-        try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
-
+        try (
+          Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(
+            getQuizAttemptFeedbackRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptFeedbackResponse);
@@ -1845,9 +2295,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_isForbidden() {
         HttpServletRequest getQuizAttemptFeedbackRequest = prepareTeacherRequest();
 
-        try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
-
+        try (
+          Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(
+            getQuizAttemptFeedbackRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptFeedbackResponse);
@@ -1859,9 +2312,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asAdmin_isForbidden() {
         HttpServletRequest getQuizAttemptFeedbackRequest = prepareAdminRequest();
 
-        try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
-
+        try (
+          Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(
+            getQuizAttemptFeedbackRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptFeedbackResponse);
@@ -1872,13 +2328,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class IncompleteAttempt {
+
       @Test
       public void expiredAssignment_isForbidden() {
         HttpServletRequest getQuizAttemptFeedbackRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID)) {
-
+        try (
+          Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(
+            getQuizAttemptFeedbackRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptFeedbackResponse);
@@ -1890,9 +2350,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void incompleteAttempt_isForbidden() {
         HttpServletRequest getQuizAttemptFeedbackRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+        try (
+          Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(
+            getQuizAttemptFeedbackRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(getQuizAttemptFeedbackResponse);
@@ -1903,13 +2366,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class CompletedAttempt {
+
       @Test
       public void completedAttempt_withAssignmentWithNoDueDate_returnsQuizAttempt() {
         HttpServletRequest getQuizAttemptFeedbackRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
-
+        try (
+          Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(
+            getQuizAttemptFeedbackRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           QuizAttemptDTO responseBody = (QuizAttemptDTO) getQuizAttemptFeedbackResponse.getEntity();
@@ -1926,9 +2393,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void completedAttempt_withAssignmentWithDueDate_returnsQuizAttempt() {
         HttpServletRequest getQuizAttemptFeedbackRequest = prepareStudentWithFreeAttemptRequest();
 
-        try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_BOB_COMPLETE_ID)) {
-
+        try (
+          Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(
+            getQuizAttemptFeedbackRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_BOB_COMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           QuizAttemptDTO responseBody = (QuizAttemptDTO) getQuizAttemptFeedbackResponse.getEntity();
@@ -1945,9 +2415,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void completedAttempt_returnsQuizAttempt_withAppropriateFeedbackMode() {
         HttpServletRequest getQuizAttemptFeedbackRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_FEEDBACK_MODE_ID)) {
-
+        try (
+          Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(
+            getQuizAttemptFeedbackRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_FEEDBACK_MODE_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           QuizAttemptDTO responseBody = (QuizAttemptDTO) getQuizAttemptFeedbackResponse.getEntity();
@@ -1964,9 +2437,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void completedAttempt_withNoAssignment_returnsQuizAttempt() {
         HttpServletRequest getQuizAttemptFeedbackRequest = prepareStudentWithFreeAttemptRequest();
 
-        try (Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(getQuizAttemptFeedbackRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_BOB_FREE_ID)) {
-
+        try (
+          Response getQuizAttemptFeedbackResponse = quizFacade.getQuizAttemptFeedback(
+            getQuizAttemptFeedbackRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_BOB_FREE_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), getQuizAttemptFeedbackResponse.getStatus());
 
           QuizAttemptDTO responseBody = (QuizAttemptDTO) getQuizAttemptFeedbackResponse.getEntity();
@@ -1983,13 +2459,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class CompleteQuizAttempt {
+
     @Test
     public void alreadyCompletedAttempt_isForbidden() {
       HttpServletRequest completeQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-      try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
-          QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID)) {
-
+      try (
+        Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(
+          completeQuizAttemptRequest,
+          QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID
+        )
+      ) {
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
         String actualErrorMessage = readSegueErrorMessage(completeQuizAttemptResponse);
@@ -2001,9 +2481,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     public void validRequest_returnsQuizAttempt() {
       HttpServletRequest completeQuizAttemptRequest = prepareStudentWithFreeAttemptRequest();
 
-      try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
-          QUIZ_ASSIGNMENT_ATTEMPT_BOB_FOR_SET_COMPLETE_TEST_ID)) {
-
+      try (
+        Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(
+          completeQuizAttemptRequest,
+          QUIZ_ASSIGNMENT_ATTEMPT_BOB_FOR_SET_COMPLETE_TEST_ID
+        )
+      ) {
         assertEquals(Response.Status.OK.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
         QuizAttemptDTO responseBody = (QuizAttemptDTO) completeQuizAttemptResponse.getEntity();
@@ -2017,13 +2500,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest completeQuizAttemptRequest = prepareAnonymousRequest();
 
-        try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+        try (
+          Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(
+            completeQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(completeQuizAttemptResponse);
@@ -2035,9 +2522,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_whoIsNotAttemptCreator_isForbidden() {
         HttpServletRequest completeQuizAttemptRequest = prepareStudentWithFreeAttemptRequest();
 
-        try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+        try (
+          Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(
+            completeQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(completeQuizAttemptResponse);
@@ -2049,9 +2539,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_isForbidden() {
         HttpServletRequest completeQuizAttemptRequest = prepareTeacherRequest();
 
-        try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+        try (
+          Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(
+            completeQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(completeQuizAttemptResponse);
@@ -2063,9 +2556,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asAdmin_isForbidden() {
         HttpServletRequest completeQuizAttemptRequest = prepareAdminRequest();
 
-        try (Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(completeQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+        try (
+          Response completeQuizAttemptResponse = quizFacade.completeQuizAttempt(
+            completeQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), completeQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(completeQuizAttemptResponse);
@@ -2077,15 +2573,21 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class MarkIncompleteQuizAttempt {
+
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void missingQuizAssignmentId_isBadRequest() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareAnonymousRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, null, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            null,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2097,9 +2599,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void missingUserId_isBadRequest() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareAnonymousRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, null)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID,
+            null
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2111,9 +2617,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void unknownUserId_isBadRequest() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareTeacherRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_NON_EXISTENT_USER_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID,
+            TEST_NON_EXISTENT_USER_ID
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2125,10 +2635,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void cancelledAssignment_isForbidden() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareTeacherRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_CANCELLED_ID,
-            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_CANCELLED_ID,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2140,10 +2653,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void expiredAssignment_isForbidden() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareTeacherRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_EXPIRED_ID,
-            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_EXPIRED_ID,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2155,9 +2671,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void targetUserIsNotInAssignmentGroup_isBadRequest() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareTeacherRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, TEST_STUDENT_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID,
+            TEST_STUDENT_ID
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2169,10 +2689,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void attemptIsAlreadyIncomplete_isBadRequest() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareTeacherRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_SECOND_ID,
-            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_SECOND_ID,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2184,12 +2707,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void unknownQuizAssignmentId_isInternalServerError() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareTeacherRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_NON_EXISTENT_ID,
-            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
-
-          assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-              markIncompleteQuizAttemptResponse.getStatus());
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_NON_EXISTENT_ID,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+          )
+        ) {
+          assertEquals(
+            Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+            markIncompleteQuizAttemptResponse.getStatus()
+          );
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
           assertEquals("SegueDatabaseException whilst marking test attempt incomplete", actualErrorMessage);
@@ -2199,13 +2727,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareAnonymousRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2217,9 +2750,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_isForbidden() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareStudentRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2231,9 +2768,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTutorIsForbidden() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareTutorRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2245,9 +2786,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_whoIsNotGroupManager_IsForbidden() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareTeacherWhoIsNotGroupManagerRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID, QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(markIncompleteQuizAttemptResponse);
@@ -2258,14 +2803,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class ValidRequest {
+
       @Test
       public void asTeacher_whoIsGroupManager_returnsQuizUserFeedback() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareTeacherRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID,
-            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID,
+            QUIZ_FACADE_TEST_STUDENT_2_WITH_ASSIGNMENTS_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           QuizUserFeedbackDTO responseBody = (QuizUserFeedbackDTO) markIncompleteQuizAttemptResponse.getEntity();
@@ -2278,15 +2827,20 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_withTargetStudentWhoDoesNotGrantViewingPermissions_returnsQuizUserFeedback_withNullFeedback() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareTeacherRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID,
-            QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_SET_INCOMPLETE_TEST_ID,
+            QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           QuizUserFeedbackDTO responseBody = (QuizUserFeedbackDTO) markIncompleteQuizAttemptResponse.getEntity();
-          assertEquals(QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID,
-              responseBody.getUser().getId());
+          assertEquals(
+            QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID,
+            responseBody.getUser().getId()
+          );
           assertNull(responseBody.getFeedback());
         }
       }
@@ -2295,15 +2849,20 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asAdmin_overridesNoViewingPermissions_returnsQuizUserFeedback() {
         HttpServletRequest markIncompleteQuizAttemptRequest = prepareAdminRequest();
 
-        try (Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
-            markIncompleteQuizAttemptRequest, QUIZ_ASSIGNMENT_ID,
-            QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID)) {
-
+        try (
+          Response markIncompleteQuizAttemptResponse = quizFacade.markIncompleteQuizAttempt(
+            markIncompleteQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ID,
+            QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID
+          )
+        ) {
           assertEquals(Response.Status.OK.getStatusCode(), markIncompleteQuizAttemptResponse.getStatus());
 
           QuizUserFeedbackDTO responseBody = (QuizUserFeedbackDTO) markIncompleteQuizAttemptResponse.getEntity();
-          assertEquals(QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID,
-              responseBody.getUser().getId());
+          assertEquals(
+            QUIZ_FACADE_TEST_STUDENT_4_RESTRICTED_VIEWING_FOR_TEST_TEACHER_ID,
+            responseBody.getUser().getId()
+          );
           assertNotNull(responseBody.getFeedback());
         }
       }
@@ -2312,15 +2871,22 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class AnswerQuestion {
+
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void nullAnswer_isBadRequest() {
         HttpServletRequest answerQuestionRequest = prepareAnonymousRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, "questionId", null)) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            "questionId",
+            null
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2332,9 +2898,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void emptyAnswer_isBadRequest() {
         HttpServletRequest answerQuestionRequest = prepareAnonymousRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, "questionId", "")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            "questionId",
+            ""
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2346,9 +2917,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void nullQuestionId_isBadRequest() {
         HttpServletRequest answerQuestionRequest = prepareAnonymousRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, null, "answer")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            null,
+            "answer"
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2360,9 +2936,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void emptyQuestionId_isBadRequest() {
         HttpServletRequest answerQuestionRequest = prepareAnonymousRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, "", "answer")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            "",
+            "answer"
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2374,9 +2955,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void unknownQuestionId_isNotFound() {
         HttpServletRequest answerQuestionRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, QUIZ_TEST_UNKNOWN_QUESTION_ID, "answer")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            QUIZ_TEST_UNKNOWN_QUESTION_ID,
+            "answer"
+          )
+        ) {
           assertEquals(Response.Status.NOT_FOUND.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2389,9 +2975,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void questionIdIsNotInQuiz_isBadRequest() {
         HttpServletRequest answerQuestionRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, QUIZ_TEST_HIDDEN_FROM_TUTORS_QUESTION_FIRST_ID, "answer")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            QUIZ_TEST_HIDDEN_FROM_TUTORS_QUESTION_FIRST_ID,
+            "answer"
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2403,9 +2994,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void completedAttempt_isForbidden() {
         HttpServletRequest answerQuestionRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID, "questionId", "answer")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID,
+            "questionId",
+            "answer"
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2417,9 +3013,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void cancelledAssignment_isForbidden() {
         HttpServletRequest answerQuestionRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_CANCELLED_ID, "questionId", "answer")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_CANCELLED_ID,
+            "questionId",
+            "answer"
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2431,9 +3032,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void expiredAssignment_isForbidden() {
         HttpServletRequest answerQuestionRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID, "questionId", "answer")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID,
+            "questionId",
+            "answer"
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2445,9 +3051,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void unknownAssignmentId_isInternalServerError() {
         HttpServletRequest answerQuestionRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_NON_EXISTENT_ID, QUIZ_TEST_QUESTION_FIRST_ID, "answer")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_NON_EXISTENT_ID,
+            QUIZ_TEST_QUESTION_FIRST_ID,
+            "answer"
+          )
+        ) {
           assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2458,13 +3069,19 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest answerQuestionRequest = prepareAnonymousRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, "questionId", "answer")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            "questionId",
+            "answer"
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2476,9 +3093,14 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_whoIsNotAttemptCreator_isForbidden() {
         HttpServletRequest answerQuestionRequest = prepareStudentWithFreeAttemptRequest();
 
-        try (Response answerQuestionResponse = quizFacade.answerQuestion(answerQuestionRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, "questionId", "answer")) {
-
+        try (
+          Response answerQuestionResponse = quizFacade.answerQuestion(
+            answerQuestionRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            "questionId",
+            "answer"
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), answerQuestionResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(answerQuestionResponse);
@@ -2490,13 +3112,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class AbandonQuizAttempt {
+
     @Test
     public void validRequest_returnsNoContent() {
       HttpServletRequest cancelQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-      try (Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(cancelQuizAttemptRequest,
-          QUIZ_ASSIGNMENT_ATTEMPT_ALICE_FREE_ID)) {
-
+      try (
+        Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(
+          cancelQuizAttemptRequest,
+          QUIZ_ASSIGNMENT_ATTEMPT_ALICE_FREE_ID
+        )
+      ) {
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
         assertNull(cancelQuizAttemptResponse.getEntity());
@@ -2505,12 +3131,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void missingQuizAttemptId_isBadRequest() {
         HttpServletRequest cancelQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
         try (Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(cancelQuizAttemptRequest, null)) {
-
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAttemptResponse);
@@ -2522,9 +3148,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void assignedAttempt_isForbidden() {
         HttpServletRequest cancelQuizAttemptRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(cancelQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+        try (
+          Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(
+            cancelQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAttemptResponse);
@@ -2536,9 +3165,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void completedAttempt_isForbidden() {
         HttpServletRequest cancelQuizAttemptRequest = prepareStudentWithFreeAttemptRequest();
 
-        try (Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(cancelQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_BOB_FREE_ID)) {
-
+        try (
+          Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(
+            cancelQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_BOB_FREE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAttemptResponse);
@@ -2549,13 +3181,17 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest cancelQuizAttemptRequest = prepareAnonymousRequest();
 
-        try (Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(cancelQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+        try (
+          Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(
+            cancelQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAttemptResponse);
@@ -2567,9 +3203,12 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_whoIsNotAttemptCreator_isForbidden() {
         HttpServletRequest cancelQuizAttemptRequest = prepareStudentWithFreeAttemptRequest();
 
-        try (Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(cancelQuizAttemptRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID)) {
-
+        try (
+          Response cancelQuizAttemptResponse = quizFacade.abandonQuizAttempt(
+            cancelQuizAttemptRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelQuizAttemptResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(cancelQuizAttemptResponse);
@@ -2581,13 +3220,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class LogQuizSectionView {
+
     @Test
     public void validRequest_returnsNoContent() {
       HttpServletRequest logQuizSectionViewRequest = prepareStudentWithAssignmentsRequest();
 
-      try (Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(logQuizSectionViewRequest,
-          QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, 1)) {
-
+      try (
+        Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(
+          logQuizSectionViewRequest,
+          QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+          1
+        )
+      ) {
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
         assertNull(logQuizSectionViewResponse.getEntity());
@@ -2596,13 +3240,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void missingSectionNumber_isBadRequest() {
         HttpServletRequest logQuizSectionViewRequest = prepareAnonymousRequest();
 
-        try (Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(logQuizSectionViewRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, null)) {
-
+        try (
+          Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(
+            logQuizSectionViewRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            null
+          )
+        ) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(logQuizSectionViewResponse);
@@ -2614,9 +3263,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void cancelledAssignment_isForbidden() {
         HttpServletRequest logQuizSectionViewRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(logQuizSectionViewRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_CANCELLED_ID, 1)) {
-
+        try (
+          Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(
+            logQuizSectionViewRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_CANCELLED_ID,
+            1
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(logQuizSectionViewResponse);
@@ -2628,9 +3281,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void expiredAssignment_isForbidden() {
         HttpServletRequest logQuizSectionViewRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(logQuizSectionViewRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID, 1)) {
-
+        try (
+          Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(
+            logQuizSectionViewRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_EXPIRED_ID,
+            1
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(logQuizSectionViewResponse);
@@ -2642,9 +3299,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void alreadyCompletedAttempt_isForbidden() {
         HttpServletRequest logQuizSectionViewRequest = prepareStudentWithAssignmentsRequest();
 
-        try (Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(logQuizSectionViewRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID, 1)) {
-
+        try (
+          Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(
+            logQuizSectionViewRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_COMPLETE_ID,
+            1
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(logQuizSectionViewResponse);
@@ -2655,13 +3316,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_isUnauthorised() {
         HttpServletRequest logQuizSectionViewRequest = prepareAnonymousRequest();
 
-        try (Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(logQuizSectionViewRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, 1)) {
-
+        try (
+          Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(
+            logQuizSectionViewRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            1
+          )
+        ) {
           assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(logQuizSectionViewResponse);
@@ -2673,9 +3339,13 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_whoIsNotAttemptCreator_isForbidden() {
         HttpServletRequest logQuizSectionViewRequest = prepareStudentWithFreeAttemptRequest();
 
-        try (Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(logQuizSectionViewRequest,
-            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID, 1)) {
-
+        try (
+          Response logQuizSectionViewResponse = quizFacade.logQuizSectionView(
+            logQuizSectionViewRequest,
+            QUIZ_ASSIGNMENT_ATTEMPT_ALICE_INCOMPLETE_ID,
+            1
+          )
+        ) {
           assertEquals(Response.Status.FORBIDDEN.getStatusCode(), logQuizSectionViewResponse.getStatus());
 
           String actualErrorMessage = readSegueErrorMessage(logQuizSectionViewResponse);
@@ -2687,14 +3357,18 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
   @Nested
   class GetQuizAssignments {
+
     @Nested
     class MissingOrInvalidData {
+
       @Test
       public void unknownGroupId_isInternalServerError() {
         HttpServletRequest getQuizAssignmentsRequest = prepareTeacherRequest();
 
-        Response getQuizAssignmentsResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, UNKNOWN_GROUP_ID);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(
+          getQuizAssignmentsRequest,
+          UNKNOWN_GROUP_ID
+        );
 
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
@@ -2705,6 +3379,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnspecifiedGroupUnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_withNullGroupId_isUnauthorised() {
         HttpServletRequest getQuizAssignmentsRequest = prepareAnonymousRequest();
@@ -2744,12 +3419,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class SpecifiedGroupUnauthorisedOrForbiddenUser {
+
       @Test
       public void asAnonymousUser_withNonNullGroupId_isUnauthorised() {
         HttpServletRequest getQuizAssignmentsRequest = prepareAnonymousRequest();
 
-        Response getQuizAssignmentsResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(
+          getQuizAssignmentsRequest,
+          QUIZ_FACADE_IT_TEST_GROUP_ID
+        );
 
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
@@ -2761,8 +3439,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asStudent_withNonNullGroupId_isForbidden() {
         HttpServletRequest getQuizAssignmentsRequest = prepareStudentRequest();
 
-        Response getQuizAssignmentsResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(
+          getQuizAssignmentsRequest,
+          QUIZ_FACADE_IT_TEST_GROUP_ID
+        );
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
@@ -2774,8 +3454,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTutor_withNonNullGroupId_isForbidden() {
         HttpServletRequest getQuizAssignmentsRequest = prepareTutorRequest();
 
-        Response getQuizAssignmentsResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(
+          getQuizAssignmentsRequest,
+          QUIZ_FACADE_IT_TEST_GROUP_ID
+        );
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
@@ -2787,8 +3469,10 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_whoIsNotGroupManager_withNonNullGroupId_isForbidden() {
         HttpServletRequest getQuizAssignmentsRequest = prepareTeacherWhoIsNotGroupManagerRequest();
 
-        Response getQuizAssignmentsResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(
+          getQuizAssignmentsRequest,
+          QUIZ_FACADE_IT_TEST_GROUP_ID
+        );
 
         assertEquals(Response.Status.FORBIDDEN.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
@@ -2799,6 +3483,7 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
     @Nested
     class UnspecifiedGroupValidRequest {
+
       @Test
       public void asTeacher_withNullGroupId_withAssignments_returnsListOfQuizAssignmentsForAllManagedGroups() {
         HttpServletRequest getQuizAssignmentsRequest = prepareTeacherRequest();
@@ -2807,8 +3492,8 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-            (List<QuizAssignmentDTO>) getQuizAssignmentsResponse.getEntity();
+        @SuppressWarnings("unchecked")
+        List<QuizAssignmentDTO> responseBody = (List<QuizAssignmentDTO>) getQuizAssignmentsResponse.getEntity();
         assertEquals(7, responseBody.size());
       }
 
@@ -2820,25 +3505,28 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-            (List<QuizAssignmentDTO>) getQuizAssignmentsResponse.getEntity();
+        @SuppressWarnings("unchecked")
+        List<QuizAssignmentDTO> responseBody = (List<QuizAssignmentDTO>) getQuizAssignmentsResponse.getEntity();
         assertTrue(responseBody.isEmpty());
       }
     }
 
     @Nested
     class SpecifiedGroupValidRequest {
+
       @Test
       public void asTeacher_whoIsGroupManager_withNonNullGroupId_returnsListOfQuizAssignmentsForGroup() {
         HttpServletRequest getQuizAssignmentsRequest = prepareTeacherRequest();
 
-        Response getQuizAssignmentsResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentsResponse = quizFacade.getQuizAssignments(
+          getQuizAssignmentsRequest,
+          QUIZ_FACADE_IT_TEST_GROUP_ID
+        );
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentsResponse.getStatus());
 
-        @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-            (List<QuizAssignmentDTO>) getQuizAssignmentsResponse.getEntity();
+        @SuppressWarnings("unchecked")
+        List<QuizAssignmentDTO> responseBody = (List<QuizAssignmentDTO>) getQuizAssignmentsResponse.getEntity();
         assertEquals(6, responseBody.size());
       }
 
@@ -2846,13 +3534,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asTeacher_whoIsGroupManager_withOtherNonNullGroupId_returnsListOfQuizAssignmentsForOtherGroup() {
         HttpServletRequest getQuizAssignmentsRequest = prepareTeacherRequest();
 
-        Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_SECONDARY_TEST_GROUP_ID);
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(
+          getQuizAssignmentsRequest,
+          QUIZ_FACADE_IT_SECONDARY_TEST_GROUP_ID
+        );
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-        @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-            (List<QuizAssignmentDTO>) getQuizAssignmentResponse.getEntity();
+        @SuppressWarnings("unchecked")
+        List<QuizAssignmentDTO> responseBody = (List<QuizAssignmentDTO>) getQuizAssignmentResponse.getEntity();
         assertEquals(1, responseBody.size());
       }
 
@@ -2860,13 +3550,15 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
       public void asAdmin_withNonNullGroupId_returnsListOfQuizAssignmentsForGroup() {
         HttpServletRequest getQuizAssignmentsRequest = prepareAdminRequest();
 
-        Response getQuizAssignmentResponse =
-            quizFacade.getQuizAssignments(getQuizAssignmentsRequest, QUIZ_FACADE_IT_TEST_GROUP_ID);
+        Response getQuizAssignmentResponse = quizFacade.getQuizAssignments(
+          getQuizAssignmentsRequest,
+          QUIZ_FACADE_IT_TEST_GROUP_ID
+        );
 
         assertEquals(Response.Status.OK.getStatusCode(), getQuizAssignmentResponse.getStatus());
 
-        @SuppressWarnings("unchecked") List<QuizAssignmentDTO> responseBody =
-            (List<QuizAssignmentDTO>) getQuizAssignmentResponse.getEntity();
+        @SuppressWarnings("unchecked")
+        List<QuizAssignmentDTO> responseBody = (List<QuizAssignmentDTO>) getQuizAssignmentResponse.getEntity();
         assertEquals(6, responseBody.size());
       }
     }

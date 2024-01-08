@@ -36,9 +36,7 @@ public class ChoiceQuestion extends Question {
   /**
    * Default constructors for auto mappers.
    */
-  public ChoiceQuestion() {
-
-  }
+  public ChoiceQuestion() {}
 
   /**
    * Gets the choices.

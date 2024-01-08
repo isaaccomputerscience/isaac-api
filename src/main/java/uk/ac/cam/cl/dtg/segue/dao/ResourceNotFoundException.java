@@ -20,7 +20,6 @@ package uk.ac.cam.cl.dtg.segue.dao;
  * The object requested does not exist.
  */
 public class ResourceNotFoundException extends SegueDatabaseException {
-
   private static final long serialVersionUID = 8735657977878491171L;
 
   /**
@@ -40,5 +39,4 @@ public class ResourceNotFoundException extends SegueDatabaseException {
   public ResourceNotFoundException(final String message, final Exception e) {
     super(message, e);
   }
-
 }

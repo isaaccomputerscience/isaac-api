@@ -31,7 +31,6 @@ import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 @JsonContentType("isaacItemQuestion")
 @ValidatesWith(IsaacItemQuestionValidator.class)
 public class IsaacItemQuestion extends IsaacQuestionBase {
-
   private List<Item> items;
   private Boolean randomiseItems;
 
@@ -60,5 +59,4 @@ public class IsaacItemQuestion extends IsaacQuestionBase {
   public void setRandomiseItems(final Boolean randomiseItems) {
     this.randomiseItems = randomiseItems;
   }
-
 }

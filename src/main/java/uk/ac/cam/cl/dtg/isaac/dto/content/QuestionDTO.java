@@ -33,9 +33,7 @@ public class QuestionDTO extends ContentDTO {
   /**
    * Default constructor for mappers.
    */
-  public QuestionDTO() {
-
-  }
+  public QuestionDTO() {}
 
   /**
    * Gets the answer, defaults to not return to the user.
@@ -93,5 +91,4 @@ public class QuestionDTO extends ContentDTO {
   public void setBestAttempt(final QuestionValidationResponseDTO bestAttempt) {
     this.bestAttempt = bestAttempt;
   }
-
 }

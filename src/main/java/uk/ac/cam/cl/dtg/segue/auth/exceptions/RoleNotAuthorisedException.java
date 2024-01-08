@@ -14,5 +14,4 @@ public class RoleNotAuthorisedException extends Exception {
   public RoleNotAuthorisedException(final String message) {
     super(message);
   }
-
 }

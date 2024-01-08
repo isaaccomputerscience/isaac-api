@@ -26,9 +26,7 @@ public class UserSummaryWithEmailAddressDTO extends UserSummaryDTO {
   /**
    * UserSummaryDTO.
    */
-  public UserSummaryWithEmailAddressDTO() {
-
-  }
+  public UserSummaryWithEmailAddressDTO() {}
 
   /**
    * Gets the email.
@@ -38,7 +36,6 @@ public class UserSummaryWithEmailAddressDTO extends UserSummaryDTO {
   public String getEmail() {
     return email;
   }
-
 
   /**
    * Sets the email.

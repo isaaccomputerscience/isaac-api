@@ -68,8 +68,11 @@ public class SchoolListReader {
 
     String modificationDate;
     try {
-      modificationDate = searchProvider.getById(
-              SCHOOLS_INDEX_BASE, SchoolsIndexType.METADATA.toString(), "sourceFile").getSource().get("lastModified")
+      modificationDate =
+        searchProvider
+          .getById(SCHOOLS_INDEX_BASE, SchoolsIndexType.METADATA.toString(), "sourceFile")
+          .getSource()
+          .get("lastModified")
           .toString();
     } catch (SegueSearchException e) {
       log.error("Failed to retrieve school list modification date", e);
@@ -86,7 +89,7 @@ public class SchoolListReader {
    * @throws UnableToIndexSchoolsException - if there is an error access the index of schools.
    */
   public List<School> findSchoolByNameOrPostCode(final String searchQuery)
-      throws UnableToIndexSchoolsException, SegueSearchException {
+    throws UnableToIndexSchoolsException, SegueSearchException {
     if (!this.ensureSchoolList()) {
       log.error("Unable to ensure school search cache.");
       throw new UnableToIndexSchoolsException("unable to ensure the cache has been populated");
@@ -94,12 +97,22 @@ public class SchoolListReader {
 
     // FIXME: for one release cycle, we need backwards compatibility and so cannot use the fieldsThatMustMatch property
     // It should be set to ImmutableMap.of("closed", ImmutableList.of("false"))
-    List<String> schoolSearchResults = searchProvider.fuzzySearch(
-        new BasicSearchParameters(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString(), 0,
-            DEFAULT_RESULTS_LIMIT),
-        searchQuery, null, null, SCHOOL_URN_FIELDNAME_POJO, SCHOOL_ESTABLISHMENT_NAME_FIELDNAME_POJO,
+    List<String> schoolSearchResults = searchProvider
+      .fuzzySearch(
+        new BasicSearchParameters(
+          SCHOOLS_INDEX_BASE,
+          SchoolsIndexType.SCHOOL_SEARCH.toString(),
+          0,
+          DEFAULT_RESULTS_LIMIT
+        ),
+        searchQuery,
+        null,
+        null,
+        SCHOOL_URN_FIELDNAME_POJO,
+        SCHOOL_ESTABLISHMENT_NAME_FIELDNAME_POJO,
         SCHOOL_POSTCODE_FIELDNAME_POJO
-    ).getResults();
+      )
+      .getResults();
 
     List<School> resultList = Lists.newArrayList();
     for (String schoolString : schoolSearchResults) {
@@ -129,9 +142,8 @@ public class SchoolListReader {
    * @throws JsonMappingException          - if we cannot map to the school class.
    * @throws JsonParseException            - if the school data is malformed
    */
-  public School findSchoolById(final String schoolURN) throws UnableToIndexSchoolsException, JsonParseException,
-      JsonMappingException, IOException, SegueSearchException {
-
+  public School findSchoolById(final String schoolURN)
+    throws UnableToIndexSchoolsException, JsonParseException, JsonMappingException, IOException, SegueSearchException {
     if (!this.ensureSchoolList()) {
       log.error("Unable to ensure school search cache.");
       throw new UnableToIndexSchoolsException("unable to ensure the cache has been populated");
@@ -139,23 +151,36 @@ public class SchoolListReader {
 
     List<String> matchingSchoolList;
 
-    matchingSchoolList = searchProvider.findByExactMatch(
-        new BasicSearchParameters(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString(), 0,
-            DEFAULT_RESULTS_LIMIT),
-        SCHOOL_URN_FIELDNAME.toLowerCase() + "." + UNPROCESSED_SEARCH_FIELD_SUFFIX, schoolURN, null).getResults();
+    matchingSchoolList =
+      searchProvider
+        .findByExactMatch(
+          new BasicSearchParameters(
+            SCHOOLS_INDEX_BASE,
+            SchoolsIndexType.SCHOOL_SEARCH.toString(),
+            0,
+            DEFAULT_RESULTS_LIMIT
+          ),
+          SCHOOL_URN_FIELDNAME.toLowerCase() + "." + UNPROCESSED_SEARCH_FIELD_SUFFIX,
+          schoolURN,
+          null
+        )
+        .getResults();
 
     if (matchingSchoolList.isEmpty()) {
       return null;
     }
 
     if (matchingSchoolList.size() > 1) {
-      log.error("Error occurred while trying to look a school up by id... Found more than one match for "
-          + sanitiseExternalLogValue(schoolURN) + " results: " + matchingSchoolList);
+      log.error(
+        "Error occurred while trying to look a school up by id... Found more than one match for " +
+        sanitiseExternalLogValue(schoolURN) +
+        " results: " +
+        matchingSchoolList
+      );
     }
 
     return mapper.readValue(matchingSchoolList.get(0), School.class);
   }
-
 
   /**
    * Ensure School List has been generated.
@@ -165,7 +190,6 @@ public class SchoolListReader {
   private boolean ensureSchoolList() {
     return searchProvider.hasIndex(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString());
   }
-
 
   /**
    * Method to help determine freshness of data.

@@ -46,9 +46,7 @@ public class EventBookingDTO {
   /**
    * EventBookingDTO.
    */
-  public EventBookingDTO() {
-
-  }
+  public EventBookingDTO() {}
 
   /**
    * @param bookingId
@@ -70,9 +68,17 @@ public class EventBookingDTO {
    * @param status
    *            - the booking status
    */
-  public EventBookingDTO(final Long bookingId, final UserSummaryDTO userBooked, final Long reservedById,
-                         final String eventId, final String eventTitle, final Date eventDate, final Date bookingDate,
-                         final Date lastUpdated, final BookingStatus status) {
+  public EventBookingDTO(
+    final Long bookingId,
+    final UserSummaryDTO userBooked,
+    final Long reservedById,
+    final String eventId,
+    final String eventTitle,
+    final Date eventDate,
+    final Date bookingDate,
+    final Date lastUpdated,
+    final BookingStatus status
+  ) {
     this.bookingId = bookingId;
     this.userBooked = userBooked;
     this.reservedById = reservedById;

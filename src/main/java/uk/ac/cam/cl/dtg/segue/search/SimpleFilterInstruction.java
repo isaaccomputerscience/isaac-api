@@ -26,7 +26,6 @@ public class SimpleFilterInstruction extends AbstractFilterInstruction {
   private final String mustMatchValue;
 
   public SimpleFilterInstruction(final String mustMatchValue) {
-
     this.mustMatchValue = mustMatchValue;
   }
 

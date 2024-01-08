@@ -24,7 +24,6 @@ package uk.ac.cam.cl.dtg.segue.comm;
  *            the type of object it communicates
  */
 public interface ICommunicator<T extends ICommunicationMessage> {
-
   /**
    * Send a message.
    *
@@ -32,5 +31,4 @@ public interface ICommunicator<T extends ICommunicationMessage> {
    * @throws CommunicationException - if there is a failure in sending the message
    */
   void sendMessage(T message) throws CommunicationException;
-
 }

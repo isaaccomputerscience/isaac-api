@@ -67,9 +67,12 @@ public class InfoFacade extends AbstractSegueFacade {
    * @param logManager      - for logging events using the logging api.
    */
   @Inject
-  public InfoFacade(final PropertiesLoader properties, final GitContentManager contentManager,
-                    final SegueJobService segueJobService,
-                    final ILogManager logManager) {
+  public InfoFacade(
+    final PropertiesLoader properties,
+    final GitContentManager contentManager,
+    final SegueJobService segueJobService,
+    final ILogManager logManager
+  ) {
     super(properties, logManager);
     this.contentManager = contentManager;
     this.segueJobService = segueJobService;
@@ -85,8 +88,9 @@ public class InfoFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Get the currently running API build version.")
   public final Response getSegueAppVersion() {
-    ImmutableMap<String, String> result = new ImmutableMap.Builder<String, String>().put("segueVersion",
-        Objects.requireNonNullElse(SegueGuiceConfigurationModule.getSegueVersion(), "unknown")).build();
+    ImmutableMap<String, String> result = new ImmutableMap.Builder<String, String>()
+      .put("segueVersion", Objects.requireNonNullElse(SegueGuiceConfigurationModule.getSegueVersion(), "unknown"))
+      .build();
 
     return Response.ok(result).build();
   }
@@ -109,11 +113,15 @@ public class InfoFacade extends AbstractSegueFacade {
       return cachedResponse;
     }
 
-    ImmutableMap<String, String> result = new ImmutableMap.Builder<String, String>().put("segueEnvironment",
-        this.getProperties().getProperty(SEGUE_APP_ENVIRONMENT)).build();
+    ImmutableMap<String, String> result = new ImmutableMap.Builder<String, String>()
+      .put("segueEnvironment", this.getProperties().getProperty(SEGUE_APP_ENVIRONMENT))
+      .build();
 
-    return Response.ok(result).cacheControl(this.getCacheControl(NUMBER_SECONDS_IN_THIRTY_DAYS, true)).tag(etag)
-        .build();
+    return Response
+      .ok(result)
+      .cacheControl(this.getCacheControl(NUMBER_SECONDS_IN_THIRTY_DAYS, true))
+      .tag(etag)
+      .build();
   }
 
   /**
@@ -126,8 +134,9 @@ public class InfoFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Get the current content version commit SHA.")
   public final Response getLiveVersionInfo() {
-    ImmutableMap<String, String> result = new ImmutableMap.Builder<String, String>().put("liveVersion",
-        this.contentManager.getCurrentContentSHA()).build();
+    ImmutableMap<String, String> result = new ImmutableMap.Builder<String, String>()
+      .put("liveVersion", this.contentManager.getCurrentContentSHA())
+      .build();
 
     return Response.ok(result).build();
   }
@@ -142,9 +151,9 @@ public class InfoFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Get all currently indexed content commit SHAs.")
   public final Response getCachedVersions() {
-
-    ImmutableMap<String, Collection<String>> result = new ImmutableMap.Builder<String, Collection<String>>().put(
-        "cachedVersions", this.contentManager.getCachedContentSHAList()).build();
+    ImmutableMap<String, Collection<String>> result = new ImmutableMap.Builder<String, Collection<String>>()
+      .put("cachedVersions", this.contentManager.getCachedContentSHAList())
+      .build();
 
     return Response.ok(result).build();
   }
@@ -159,10 +168,14 @@ public class InfoFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Check whether the symbolic question checker is running.")
   public Response pingEqualityChecker() {
-
     HttpClient httpClient = new DefaultHttpClient();
-    HttpGet httpGet = new HttpGet("http://" + this.getProperties().getProperty(Constants.EQUALITY_CHECKER_HOST)
-        + ":" + this.getProperties().getProperty(Constants.EQUALITY_CHECKER_PORT) + "/");
+    HttpGet httpGet = new HttpGet(
+      "http://" +
+      this.getProperties().getProperty(Constants.EQUALITY_CHECKER_HOST) +
+      ":" +
+      this.getProperties().getProperty(Constants.EQUALITY_CHECKER_PORT) +
+      "/"
+    );
 
     HttpResponse httpResponse = null;
     try {
@@ -176,7 +189,6 @@ public class InfoFacade extends AbstractSegueFacade {
     } else {
       return Response.ok(ImmutableMap.of("success", false)).build();
     }
-
   }
 
   /**
@@ -190,8 +202,13 @@ public class InfoFacade extends AbstractSegueFacade {
   @Operation(summary = "Check whether the content indexer is running.")
   public Response pingETLServer() {
     HttpClient httpClient = new DefaultHttpClient();
-    HttpGet httpGet = new HttpGet("http://" + getProperties().getProperty("ETL_HOSTNAME") + ":"
-        + getProperties().getProperty("ETL_PORT") + "/isaac-api/api/etl/ping");
+    HttpGet httpGet = new HttpGet(
+      "http://" +
+      getProperties().getProperty("ETL_HOSTNAME") +
+      ":" +
+      getProperties().getProperty("ETL_PORT") +
+      "/isaac-api/api/etl/ping"
+    );
 
     HttpResponse httpResponse = null;
     try {
@@ -205,7 +222,6 @@ public class InfoFacade extends AbstractSegueFacade {
     } else {
       return Response.ok(ImmutableMap.of("success", false)).build();
     }
-
   }
 
   /**
@@ -218,10 +234,14 @@ public class InfoFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Check whether elasticsearch is running.")
   public Response pingElasticSearch() {
-
     HttpClient httpClient = new DefaultHttpClient();
-    HttpGet httpGet = new HttpGet("http://" + getProperties().getProperty("SEARCH_CLUSTER_ADDRESS") + ":"
-        + getProperties().getProperty("SEARCH_CLUSTER_INFO_PORT") + "/_cat/health");
+    HttpGet httpGet = new HttpGet(
+      "http://" +
+      getProperties().getProperty("SEARCH_CLUSTER_ADDRESS") +
+      ":" +
+      getProperties().getProperty("SEARCH_CLUSTER_INFO_PORT") +
+      "/_cat/health"
+    );
 
     HttpResponse httpResponse = null;
     try {
@@ -237,7 +257,6 @@ public class InfoFacade extends AbstractSegueFacade {
     } else {
       return Response.ok(ImmutableMap.of("success", false)).build();
     }
-
   }
 
   /**

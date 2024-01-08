@@ -53,11 +53,17 @@ public class ScheduledAssignmentsEmailJob implements Job {
     if (sendAssignmentEmail) {
       try {
         GameboardDTO gameboard = this.gameManager.getGameboard(assignment.getGameboardId());
-        final String gameboardURL = String.format("https://%s/assignment/%s", this.properties.getProperty(HOST_NAME),
-            gameboard.getId());
-        this.emailService.sendAssignmentEmailToGroup(assignment, gameboard,
+        final String gameboardURL = String.format(
+          "https://%s/assignment/%s",
+          this.properties.getProperty(HOST_NAME),
+          gameboard.getId()
+        );
+        this.emailService.sendAssignmentEmailToGroup(
+            assignment,
+            gameboard,
             ImmutableMap.of("gameboardURL", gameboardURL),
-            "email-template-group-assignment");
+            "email-template-group-assignment"
+          );
       } catch (SegueDatabaseException e) {
         log.error("Exception while trying to send scheduled assignment email", e);
       }
@@ -68,7 +74,7 @@ public class ScheduledAssignmentsEmailJob implements Job {
   public void execute(final JobExecutionContext context) throws JobExecutionException {
     try {
       List<AssignmentDTO> assignments =
-          this.assignmentPersistenceManager.getAssignmentsScheduledForHour(context.getScheduledFireTime());
+        this.assignmentPersistenceManager.getAssignmentsScheduledForHour(context.getScheduledFireTime());
       assignments.forEach(this::startSingleScheduledAssignment);
       log.info("Ran ScheduledAssignmentsEmailJob");
     } catch (SegueDatabaseException e) {

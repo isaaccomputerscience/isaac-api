@@ -148,8 +148,12 @@ public class ContentMapper {
     if (dtoMapping != null && ContentDTO.class.isAssignableFrom(dtoMapping.value())) {
       this.mapOfDOsToDTOs.put(cls, (Class<? extends ContentDTO>) dtoMapping.value());
     } else {
-      log.error("The DTO mapping provided is null or the annotation is not present" + " for the class " + cls
-          + ". This class cannot be auto mapped from DO to DTO.");
+      log.error(
+        "The DTO mapping provided is null or the annotation is not present" +
+        " for the class " +
+        cls +
+        ". This class cannot be auto mapped from DO to DTO."
+      );
     }
   }
 
@@ -337,9 +341,10 @@ public class ContentMapper {
     ItemDeserializer itemDeserializer = new ItemDeserializer(contentDeserializer);
     ChoiceDeserializer choiceDeserializer = new ChoiceDeserializer(contentDeserializer, itemDeserializer);
 
-    QuestionValidationResponseDeserializer validationResponseDeserializer
-        = new QuestionValidationResponseDeserializer(
-        contentDeserializer, choiceDeserializer);
+    QuestionValidationResponseDeserializer validationResponseDeserializer = new QuestionValidationResponseDeserializer(
+      contentDeserializer,
+      choiceDeserializer
+    );
 
     SimpleModule contentDeserializerModule = new SimpleModule("ContentDeserializerModule");
     contentDeserializerModule.addDeserializer(ContentBase.class, contentDeserializer);

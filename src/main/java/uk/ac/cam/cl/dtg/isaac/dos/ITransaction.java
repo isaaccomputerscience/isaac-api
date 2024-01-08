@@ -23,7 +23,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  *  </pre>
  */
 public interface ITransaction extends AutoCloseable {
-
   Object getConnection();
 
   void commit() throws SegueDatabaseException;

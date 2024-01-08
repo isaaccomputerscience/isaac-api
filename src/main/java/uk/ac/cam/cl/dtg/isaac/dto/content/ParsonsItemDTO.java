@@ -20,14 +20,12 @@ package uk.ac.cam.cl.dtg.isaac.dto.content;
  * DTO to represent items in Parsons Choices and Questions.
  */
 public class ParsonsItemDTO extends ItemDTO {
-
   private Integer indentation;
 
   /**
    * Default constructor required for mapping.
    */
-  public ParsonsItemDTO() {
-  }
+  public ParsonsItemDTO() {}
 
   public Integer getIndentation() {
     return indentation;

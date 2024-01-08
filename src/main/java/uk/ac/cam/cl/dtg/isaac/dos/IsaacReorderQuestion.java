@@ -22,12 +22,10 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacReorderQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.quiz.IsaacReorderValidator;
 import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 
-
 /**
  * Content DO for IsaacReorderQuestions.
  */
 @DTOMapping(IsaacReorderQuestionDTO.class)
 @JsonContentType("isaacReorderQuestion")
 @ValidatesWith(IsaacReorderValidator.class)
-public class IsaacReorderQuestion extends IsaacItemQuestion {
-}
+public class IsaacReorderQuestion extends IsaacItemQuestion {}

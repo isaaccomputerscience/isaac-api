@@ -34,9 +34,7 @@ public class QuantityValidationResponse extends QuestionValidationResponse {
   /**
    * Default constructor.
    */
-  public QuantityValidationResponse() {
-
-  }
+  public QuantityValidationResponse() {}
 
   /**
    * Full constructor.
@@ -56,9 +54,15 @@ public class QuantityValidationResponse extends QuestionValidationResponse {
    * @param dateAttempted
    *            -
    */
-  public QuantityValidationResponse(final String questionId, final Choice answer, final Boolean correct,
-                                    final Content explanation, final Boolean correctValue,
-                                    final Boolean correctUnits, final Date dateAttempted) {
+  public QuantityValidationResponse(
+    final String questionId,
+    final Choice answer,
+    final Boolean correct,
+    final Content explanation,
+    final Boolean correctValue,
+    final Boolean correctUnits,
+    final Date dateAttempted
+  ) {
     super(questionId, answer, correct, explanation, dateAttempted);
     this.correctValue = correctValue;
     this.correctUnits = correctUnits;

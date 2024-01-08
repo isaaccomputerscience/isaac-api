@@ -197,7 +197,7 @@ public abstract class AbstractSegueFacade {
    *             - if we are unable to tell because they are not logged in.
    */
   public static boolean isUserAnAdmin(final UserAccountManager userManager, final HttpServletRequest request)
-      throws NoUserLoggedInException {
+    throws NoUserLoggedInException {
     return userManager.checkUserRole(request, Collections.singletonList(Role.ADMIN));
   }
 
@@ -213,7 +213,7 @@ public abstract class AbstractSegueFacade {
    *             - if we are unable to tell because they are not logged in.
    */
   public static boolean isUserAnAdmin(final UserAccountManager userManager, final RegisteredUserDTO userDTO)
-      throws NoUserLoggedInException {
+    throws NoUserLoggedInException {
     return userManager.checkUserRole(userDTO, Collections.singletonList(Role.ADMIN));
   }
 
@@ -228,8 +228,8 @@ public abstract class AbstractSegueFacade {
    * @throws NoUserLoggedInException
    *             - if we are unable to tell because they are not logged in.
    */
-  public static boolean isUserAnEventManager(final UserAccountManager userManager,
-                                             final HttpServletRequest request) throws NoUserLoggedInException {
+  public static boolean isUserAnEventManager(final UserAccountManager userManager, final HttpServletRequest request)
+    throws NoUserLoggedInException {
     return userManager.checkUserRole(request, Collections.singletonList(Role.EVENT_MANAGER));
   }
 
@@ -244,8 +244,8 @@ public abstract class AbstractSegueFacade {
    * @throws NoUserLoggedInException
    *             - if we are unable to tell because they are not logged in.
    */
-  public static boolean isUserAnEventManager(final UserAccountManager userManager,
-                                             final RegisteredUserDTO userDTO) throws NoUserLoggedInException {
+  public static boolean isUserAnEventManager(final UserAccountManager userManager, final RegisteredUserDTO userDTO)
+    throws NoUserLoggedInException {
     return userManager.checkUserRole(userDTO, Collections.singletonList(Role.EVENT_MANAGER));
   }
 
@@ -260,8 +260,11 @@ public abstract class AbstractSegueFacade {
    * @throws NoUserLoggedInException
    *             - if we are unable to tell because they are not logged in.
    */
-  public static boolean isUserAnAdminOrEventManager(final UserAccountManager userManager,
-                                                    final HttpServletRequest request) throws NoUserLoggedInException {
+  public static boolean isUserAnAdminOrEventManager(
+    final UserAccountManager userManager,
+    final HttpServletRequest request
+  )
+    throws NoUserLoggedInException {
     return userManager.checkUserRole(request, Arrays.asList(Role.ADMIN, Role.EVENT_MANAGER));
   }
 
@@ -276,8 +279,11 @@ public abstract class AbstractSegueFacade {
    * @throws NoUserLoggedInException
    *             - if we are unable to tell because they are not logged in.
    */
-  public static boolean isUserAnAdminOrEventManager(final UserAccountManager userManager,
-                                                    final RegisteredUserDTO userDTO) throws NoUserLoggedInException {
+  public static boolean isUserAnAdminOrEventManager(
+    final UserAccountManager userManager,
+    final RegisteredUserDTO userDTO
+  )
+    throws NoUserLoggedInException {
     return userManager.checkUserRole(userDTO, Arrays.asList(Role.ADMIN, Role.EVENT_MANAGER));
   }
 
@@ -293,9 +299,8 @@ public abstract class AbstractSegueFacade {
    *             - if we are unable to tell because they are not logged in.
    */
   public static boolean isUserStaff(final UserAccountManager userManager, final HttpServletRequest request)
-      throws NoUserLoggedInException {
-    return userManager.checkUserRole(request,
-        Arrays.asList(Role.ADMIN, Role.EVENT_MANAGER, Role.CONTENT_EDITOR));
+    throws NoUserLoggedInException {
+    return userManager.checkUserRole(request, Arrays.asList(Role.ADMIN, Role.EVENT_MANAGER, Role.CONTENT_EDITOR));
   }
 
   /**
@@ -310,9 +315,8 @@ public abstract class AbstractSegueFacade {
    *             - if we are unable to tell because they are not logged in.
    */
   public static boolean isUserStaff(final UserAccountManager userManager, final RegisteredUserDTO userDTO)
-      throws NoUserLoggedInException {
-    return userManager.checkUserRole(userDTO,
-        Arrays.asList(Role.ADMIN, Role.EVENT_MANAGER, Role.CONTENT_EDITOR));
+    throws NoUserLoggedInException {
+    return userManager.checkUserRole(userDTO, Arrays.asList(Role.ADMIN, Role.EVENT_MANAGER, Role.CONTENT_EDITOR));
   }
 
   /**
@@ -327,7 +331,7 @@ public abstract class AbstractSegueFacade {
    *             - if we are unable to tell because they are not logged in.
    */
   public static boolean isUserTeacherOrAbove(final UserAccountManager userManager, final RegisteredUserDTO userDTO)
-      throws NoUserLoggedInException {
+    throws NoUserLoggedInException {
     return !userManager.checkUserRole(userDTO, List.of(Role.STUDENT, Role.TUTOR));
   }
 
@@ -343,7 +347,7 @@ public abstract class AbstractSegueFacade {
    *             - if we are unable to tell because they are not logged in.
    */
   public static boolean isUserTutorOrAbove(final UserAccountManager userManager, final RegisteredUserDTO userDTO)
-      throws NoUserLoggedInException {
+    throws NoUserLoggedInException {
     return !userManager.checkUserRole(userDTO, Collections.singletonList(Role.STUDENT));
   }
 }

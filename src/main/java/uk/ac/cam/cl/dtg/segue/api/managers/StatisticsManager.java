@@ -102,7 +102,6 @@ public class StatisticsManager implements IStatisticsManager {
   private static final int LONG_STATS_EVICTION_INTERVAL_MINUTES = 720; // 12 hours
   private static final long LONG_STATS_MAX_ITEMS = 20;
 
-
   /**
    * StatisticsManager.
    *
@@ -117,12 +116,17 @@ public class StatisticsManager implements IStatisticsManager {
    * @param userStreaksManager       - to notify users when their answer streak changes
    */
   @Inject
-  public StatisticsManager(final UserAccountManager userManager, final ILogManager logManager,
-                           final SchoolListReader schoolManager, final GitContentManager contentManager,
-                           @Named(CONTENT_INDEX) final String contentIndex,
-                           final GroupManager groupManager, final QuestionManager questionManager,
-                           final ContentSummarizerService contentSummarizerService,
-                           final IUserStreaksManager userStreaksManager) {
+  public StatisticsManager(
+    final UserAccountManager userManager,
+    final ILogManager logManager,
+    final SchoolListReader schoolManager,
+    final GitContentManager contentManager,
+    @Named(CONTENT_INDEX) final String contentIndex,
+    final GroupManager groupManager,
+    final QuestionManager questionManager,
+    final ContentSummarizerService contentSummarizerService,
+    final IUserStreaksManager userStreaksManager
+  ) {
     this.userManager = userManager;
     this.logManager = logManager;
     this.schoolManager = schoolManager;
@@ -135,9 +139,12 @@ public class StatisticsManager implements IStatisticsManager {
     this.contentSummarizerService = contentSummarizerService;
     this.userStreaksManager = userStreaksManager;
 
-    this.longStatsCache = CacheBuilder.newBuilder()
+    this.longStatsCache =
+      CacheBuilder
+        .newBuilder()
         .expireAfterWrite(LONG_STATS_EVICTION_INTERVAL_MINUTES, TimeUnit.MINUTES)
-        .maximumSize(LONG_STATS_MAX_ITEMS).build();
+        .maximumSize(LONG_STATS_MAX_ITEMS)
+        .build();
   }
 
   /**
@@ -171,24 +178,19 @@ public class StatisticsManager implements IStatisticsManager {
 
   private void addRangedActiveUserStats(final Map<String, Object> result) throws SegueDatabaseException {
     TimeInterval[] timeIntervals = {
-        TimeInterval.SEVEN_DAYS,
-        TimeInterval.THIRTY_DAYS,
-        TimeInterval.NINETY_DAYS,
-        TimeInterval.SIX_MONTHS,
-        TimeInterval.TWO_YEARS
+      TimeInterval.SEVEN_DAYS,
+      TimeInterval.THIRTY_DAYS,
+      TimeInterval.NINETY_DAYS,
+      TimeInterval.SIX_MONTHS,
+      TimeInterval.TWO_YEARS
     };
     result.put("activeUsersOverPrevious", userManager.getActiveRolesOverPrevious(timeIntervals));
   }
 
   private void addRangedAnsweredQuestionStats(final Map<String, Object> result) throws SegueDatabaseException {
-    TimeInterval[] timeIntervals = {
-        TimeInterval.SEVEN_DAYS,
-        TimeInterval.THIRTY_DAYS,
-        TimeInterval.NINETY_DAYS
-    };
+    TimeInterval[] timeIntervals = { TimeInterval.SEVEN_DAYS, TimeInterval.THIRTY_DAYS, TimeInterval.NINETY_DAYS };
     result.put("answeringUsersOverPrevious", questionManager.getAnsweredQuestionRolesOverPrevious(timeIntervals));
   }
-
 
   /**
    * LogCount.
@@ -210,11 +212,9 @@ public class StatisticsManager implements IStatisticsManager {
    * @throws UnableToIndexSchoolsException - if there is a problem getting school details.
    */
   @Override
-  public List<Map<String, Object>> getSchoolStatistics()
-      throws UnableToIndexSchoolsException, SegueSearchException {
+  public List<Map<String, Object>> getSchoolStatistics() throws UnableToIndexSchoolsException, SegueSearchException {
     @SuppressWarnings("unchecked")
-    List<Map<String, Object>> cachedOutput = (List<Map<String, Object>>) this.longStatsCache
-        .getIfPresent(SCHOOL_STATS);
+    List<Map<String, Object>> cachedOutput = (List<Map<String, Object>>) this.longStatsCache.getIfPresent(SCHOOL_STATS);
     if (cachedOutput != null) {
       log.debug("Using cached statistics.");
       return cachedOutput;
@@ -234,7 +234,6 @@ public class StatisticsManager implements IStatisticsManager {
     Map<String, Date> lastSeenUserMap = getLastSeenUserMap();
     List<Map<String, Object>> result = Lists.newArrayList();
     for (Entry<School, List<RegisteredUserDTO>> e : map.entrySet()) {
-
       List<RegisteredUserDTO> teachersConnected = Lists.newArrayList();
       for (RegisteredUserDTO user : e.getValue()) {
         if (user.getRole() != null && user.getRole().equals(Role.TEACHER)) {
@@ -242,33 +241,43 @@ public class StatisticsManager implements IStatisticsManager {
         }
       }
 
-      result.add(ImmutableMap.of(
-          school, e.getKey(),
-          connections, e.getValue().size(),
-          teachers, teachersConnected.size(),
-          numberActive, getNumberOfUsersActiveForLastNDays(e.getValue(), lastSeenUserMap, thirtyDays).size(),
-          teachersActive, getNumberOfUsersActiveForLastNDays(teachersConnected, lastSeenUserMap, thirtyDays).size()
-      ));
+      result.add(
+        ImmutableMap.of(
+          school,
+          e.getKey(),
+          connections,
+          e.getValue().size(),
+          teachers,
+          teachersConnected.size(),
+          numberActive,
+          getNumberOfUsersActiveForLastNDays(e.getValue(), lastSeenUserMap, thirtyDays).size(),
+          teachersActive,
+          getNumberOfUsersActiveForLastNDays(teachersConnected, lastSeenUserMap, thirtyDays).size()
+        )
+      );
     }
 
-    Collections.sort(result, new Comparator<Map<String, Object>>() {
-      /**
-       * Descending numerical order.
-       */
-      @Override
-      public int compare(final Map<String, Object> o1, final Map<String, Object> o2) {
+    Collections.sort(
+      result,
+      new Comparator<Map<String, Object>>() {
 
-        if ((Integer) o1.get(numberActive) < (Integer) o2.get(numberActive)) {
-          return 1;
+        /**
+         * Descending numerical order.
+         */
+        @Override
+        public int compare(final Map<String, Object> o1, final Map<String, Object> o2) {
+          if ((Integer) o1.get(numberActive) < (Integer) o2.get(numberActive)) {
+            return 1;
+          }
+
+          if ((Integer) o1.get(numberActive) > (Integer) o2.get(numberActive)) {
+            return -1;
+          }
+
+          return 0;
         }
-
-        if ((Integer) o1.get(numberActive) > (Integer) o2.get(numberActive)) {
-          return -1;
-        }
-
-        return 0;
       }
-    });
+    );
 
     this.longStatsCache.put(SCHOOL_STATS, result);
 
@@ -283,7 +292,7 @@ public class StatisticsManager implements IStatisticsManager {
    */
   @Override
   public Map<School, List<RegisteredUserDTO>> getUsersBySchool()
-      throws UnableToIndexSchoolsException, SegueSearchException {
+    throws UnableToIndexSchoolsException, SegueSearchException {
     List<RegisteredUserDTO> users;
     Map<School, List<RegisteredUserDTO>> usersBySchool = Maps.newHashMap();
 
@@ -308,7 +317,6 @@ public class StatisticsManager implements IStatisticsManager {
           usersBySchool.get(s).add(user);
         }
       }
-
     } catch (SegueDatabaseException | IOException e) {
       log.error("Segue database error during school frequency calculation", e);
     }
@@ -326,8 +334,8 @@ public class StatisticsManager implements IStatisticsManager {
    * @throws UnableToIndexSchoolsException - if the school list has not been indexed.
    */
   @Override
-  public List<RegisteredUserDTO> getUsersBySchoolId(final String schoolId) throws ResourceNotFoundException,
-      SegueDatabaseException, UnableToIndexSchoolsException, SegueSearchException {
+  public List<RegisteredUserDTO> getUsersBySchoolId(final String schoolId)
+    throws ResourceNotFoundException, SegueDatabaseException, UnableToIndexSchoolsException, SegueSearchException {
     Validate.notNull(schoolId);
 
     List<RegisteredUserDTO> users;
@@ -369,7 +377,6 @@ public class StatisticsManager implements IStatisticsManager {
           lastSeenMap.put(user.getId().toString(), user.getRegistrationDate());
         }
       }
-
     } catch (SegueDatabaseException e) {
       log.error("Unable to get last seen user map", e);
     }
@@ -399,7 +406,7 @@ public class StatisticsManager implements IStatisticsManager {
    */
   @Override
   public Map<String, Object> getUserQuestionInformation(final RegisteredUserDTO userOfInterest)
-      throws SegueDatabaseException, ContentManagerException {
+    throws SegueDatabaseException, ContentManagerException {
     Validate.notNull(userOfInterest);
 
     UserQuestionInformation userQuestionInformation = new UserQuestionInformation();
@@ -407,33 +414,38 @@ public class StatisticsManager implements IStatisticsManager {
     LocalDate now = LocalDate.now();
     LocalDate endOfAugustThisYear = LocalDate.of(now.getYear(), Month.AUGUST, NUMBER_DAYS_IN_LONG_MONTH);
     LocalDate endOfAugustLastYear = LocalDate.of(now.getYear() - 1, Month.AUGUST, NUMBER_DAYS_IN_LONG_MONTH);
-    LocalDate lastDayOfPreviousAcademicYear =
-        now.isAfter(endOfAugustThisYear) ? endOfAugustThisYear : endOfAugustLastYear;
+    LocalDate lastDayOfPreviousAcademicYear = now.isAfter(endOfAugustThisYear)
+      ? endOfAugustThisYear
+      : endOfAugustLastYear;
 
-    Map<String, Map<String, List<QuestionValidationResponse>>> questionAttemptsByUser =
-        questionManager.getQuestionAttemptsByUser(userOfInterest);
+    Map<String, Map<String, List<QuestionValidationResponse>>> questionAttemptsByUser = questionManager.getQuestionAttemptsByUser(
+      userOfInterest
+    );
     Map<String, ContentDTO> questionMap = this.getQuestionMap(questionAttemptsByUser.keySet());
 
     // Loop through each Question attempted:
     for (Entry<String, Map<String, List<QuestionValidationResponse>>> question : questionAttemptsByUser.entrySet()) {
       ContentDTO questionContentDTO = questionMap.get(question.getKey());
       if (null == questionContentDTO) {
-        log.warn(String.format("Excluding missing question (%s) from user progress statistics for user (%s)!",
-            question.getKey(), userOfInterest.getId()));
+        log.warn(
+          String.format(
+            "Excluding missing question (%s) from user progress statistics for user (%s)!",
+            question.getKey(),
+            userOfInterest.getId()
+          )
+        );
         // We no longer have any information on this question, so we won't count it towards statistics!
         continue;
       }
 
-      userQuestionInformation.addMostRecentlyAttemptedQuestionPage(
-          questionContentDTO); // Assumes questionAttemptsByUser is sorted!
+      userQuestionInformation.addMostRecentlyAttemptedQuestionPage(questionContentDTO); // Assumes questionAttemptsByUser is sorted!
       userQuestionInformation.incrementAttemptedQuestions();
-      boolean questionIsCorrect = true;  // Are all Parts of the Question correct?
+      boolean questionIsCorrect = true; // Are all Parts of the Question correct?
       LocalDate mostRecentCorrectQuestionPart = null;
       LocalDate mostRecentAttemptAtQuestion = null;
       // Loop through each Part of the Question:
       for (QuestionDTO questionPart : GameManager.getAllMarkableQuestionPartsDFSOrder(questionContentDTO)) {
-
-        boolean questionPartIsCorrect = false;  // Is this Part of the Question correct?
+        boolean questionPartIsCorrect = false; // Is this Part of the Question correct?
         // Has the user attempted this part of the question at all?
         if (question.getValue().containsKey(questionPart.getId())) {
           userQuestionInformation.incrementAttemptedQuestionParts();
@@ -442,10 +454,12 @@ public class StatisticsManager implements IStatisticsManager {
 
           // Loop through each attempt at the Question Part if they have attempted it:
           for (QuestionValidationResponse validationResponse : question.getValue().get(questionPart.getId())) {
-            LocalDate dateAttempted = LocalDateTime.ofInstant(
-                validationResponse.getDateAttempted().toInstant(), ZoneId.systemDefault()).toLocalDate();
-            if (mostRecentAttemptAtThisQuestionPart == null || dateAttempted.isAfter(
-                mostRecentAttemptAtThisQuestionPart)) {
+            LocalDate dateAttempted = LocalDateTime
+              .ofInstant(validationResponse.getDateAttempted().toInstant(), ZoneId.systemDefault())
+              .toLocalDate();
+            if (
+              mostRecentAttemptAtThisQuestionPart == null || dateAttempted.isAfter(mostRecentAttemptAtThisQuestionPart)
+            ) {
               mostRecentAttemptAtThisQuestionPart = dateAttempted;
             }
             if (validationResponse.isCorrect() != null && validationResponse.isCorrect()) {
@@ -470,8 +484,10 @@ public class StatisticsManager implements IStatisticsManager {
               userQuestionInformation.incrementAttemptedQuestionPartsThisAcademicYear();
             }
 
-            if (mostRecentAttemptAtQuestion == null || mostRecentAttemptAtThisQuestionPart.isAfter(
-                mostRecentAttemptAtQuestion)) {
+            if (
+              mostRecentAttemptAtQuestion == null ||
+              mostRecentAttemptAtThisQuestionPart.isAfter(mostRecentAttemptAtQuestion)
+            ) {
               mostRecentAttemptAtQuestion = mostRecentAttemptAtThisQuestionPart;
             }
           }
@@ -517,8 +533,9 @@ public class StatisticsManager implements IStatisticsManager {
       // If it's correct, count this globally and for the Question's level too:
       if (questionIsCorrect) {
         userQuestionInformation.incrementCorrectQuestions();
-        if (mostRecentCorrectQuestionPart != null && mostRecentCorrectQuestionPart.isAfter(
-            lastDayOfPreviousAcademicYear)) {
+        if (
+          mostRecentCorrectQuestionPart != null && mostRecentCorrectQuestionPart.isAfter(lastDayOfPreviousAcademicYear)
+        ) {
           userQuestionInformation.incrementCorrectQuestionsThisAcademicYear();
         }
         userQuestionInformation.incrementQuestionsCorrectByLevelStats(questionLevel);
@@ -528,8 +545,10 @@ public class StatisticsManager implements IStatisticsManager {
     }
 
     // Collate all the information into the JSON response as a Map:
-    return userQuestionInformation.toMap(this.userManager.convertToUserSummaryObject(userOfInterest),
-        contentSummarizerService::extractContentSummary);
+    return userQuestionInformation.toMap(
+      this.userManager.convertToUserSummaryObject(userOfInterest),
+      contentSummarizerService::extractContentSummary
+    );
   }
 
   /**
@@ -543,10 +562,13 @@ public class StatisticsManager implements IStatisticsManager {
    * @throws SegueDatabaseException - if there is a problem contacting the underlying database
    */
   @Override
-  public Map<String, Map<org.joda.time.LocalDate, Long>> getEventLogsByDate(final Collection<String> eventTypes,
-                                                                            final Date fromDate, final Date toDate,
-                                                                            final boolean binDataByMonth)
-      throws SegueDatabaseException {
+  public Map<String, Map<org.joda.time.LocalDate, Long>> getEventLogsByDate(
+    final Collection<String> eventTypes,
+    final Date fromDate,
+    final Date toDate,
+    final boolean binDataByMonth
+  )
+    throws SegueDatabaseException {
     return this.getEventLogsByDateAndUserList(eventTypes, fromDate, toDate, null, binDataByMonth);
   }
 
@@ -563,9 +585,13 @@ public class StatisticsManager implements IStatisticsManager {
    */
   @Override
   public Map<String, Map<org.joda.time.LocalDate, Long>> getEventLogsByDateAndUserList(
-      final Collection<String> eventTypes,
-      final Date fromDate, final Date toDate, final List<RegisteredUserDTO> userList,
-      final boolean binDataByMonth) throws SegueDatabaseException {
+    final Collection<String> eventTypes,
+    final Date fromDate,
+    final Date toDate,
+    final List<RegisteredUserDTO> userList,
+    final boolean binDataByMonth
+  )
+    throws SegueDatabaseException {
     Validate.notNull(eventTypes);
 
     return this.logManager.getLogCountByDate(eventTypes, fromDate, toDate, userList, binDataByMonth);
@@ -581,10 +607,11 @@ public class StatisticsManager implements IStatisticsManager {
    * @return a collection containing the users who meet the criteria
    */
   @Override
-  public Collection<RegisteredUserDTO> getNumberOfUsersActiveForLastNDays(final Collection<RegisteredUserDTO> users,
-                                                                          final Map<String, Date> lastSeenUserMap,
-                                                                          final int daysFromToday) {
-
+  public Collection<RegisteredUserDTO> getNumberOfUsersActiveForLastNDays(
+    final Collection<RegisteredUserDTO> users,
+    final Map<String, Date> lastSeenUserMap,
+    final int daysFromToday
+  ) {
     Set<RegisteredUserDTO> qualifyingUsers = Sets.newHashSet();
 
     for (RegisteredUserDTO user : users) {
@@ -603,7 +630,6 @@ public class StatisticsManager implements IStatisticsManager {
 
   @Override
   public Map<String, Object> getDetailedUserStatistics(final RegisteredUserDTO userOfInterest) {
-
     // user streak info
     Map<String, Object> userStreakRecord = userStreaksManager.getCurrentStreakRecord(userOfInterest);
     userStreakRecord.put("largestStreak", userStreaksManager.getLongestStreak(userOfInterest));
@@ -628,16 +654,18 @@ public class StatisticsManager implements IStatisticsManager {
   private Map<String, ContentDTO> getQuestionMap(final Collection<String> ids) throws ContentManagerException {
     Map<Map.Entry<BooleanOperator, String>, List<String>> fieldsToMap = Maps.newHashMap();
 
-    fieldsToMap.put(immutableEntry(BooleanOperator.OR, ID_FIELDNAME + '.' + UNPROCESSED_SEARCH_FIELD_SUFFIX),
-        new ArrayList<>(ids));
+    fieldsToMap.put(
+      immutableEntry(BooleanOperator.OR, ID_FIELDNAME + '.' + UNPROCESSED_SEARCH_FIELD_SUFFIX),
+      new ArrayList<>(ids)
+    );
 
-    fieldsToMap.put(immutableEntry(BooleanOperator.OR, TYPE_FIELDNAME),
-        Arrays.asList(QUESTION_TYPE, FAST_TRACK_QUESTION_TYPE));
+    fieldsToMap.put(
+      immutableEntry(BooleanOperator.OR, TYPE_FIELDNAME),
+      Arrays.asList(QUESTION_TYPE, FAST_TRACK_QUESTION_TYPE)
+    );
 
     // Search for questions that match the ids.
-    ResultsWrapper<ContentDTO> allMatchingIds =
-        this.contentManager.getContentMatchingIds(ids,
-            0, ids.size());
+    ResultsWrapper<ContentDTO> allMatchingIds = this.contentManager.getContentMatchingIds(ids, 0, ids.size());
 
     List<ContentDTO> questionsForGameboard = allMatchingIds.getResults();
 

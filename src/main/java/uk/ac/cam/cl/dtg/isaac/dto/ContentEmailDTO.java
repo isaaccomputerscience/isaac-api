@@ -10,8 +10,7 @@ public class ContentEmailDTO {
   /**
    * Default constructor.
    */
-  public ContentEmailDTO() {
-  }
+  public ContentEmailDTO() {}
 
   public List<Long> getUserIds() {
     return userIds;

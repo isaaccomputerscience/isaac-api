@@ -30,9 +30,7 @@ public class Formula extends Choice {
   private String pythonExpression;
   private boolean requiresExactMatch;
 
-  public Formula() {
-
-  }
+  public Formula() {}
 
   /**
    * @return the pythonExpression
@@ -63,5 +61,4 @@ public class Formula extends Choice {
   public void setRequiresExactMatch(final boolean requiresExactMatch) {
     this.requiresExactMatch = requiresExactMatch;
   }
-
 }

@@ -11,7 +11,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
  * Created by du220 on 13/04/2018.
  */
 public interface IUserBadgePolicy {
-
   /**
    * Retrieves the current state of a badge.
    *

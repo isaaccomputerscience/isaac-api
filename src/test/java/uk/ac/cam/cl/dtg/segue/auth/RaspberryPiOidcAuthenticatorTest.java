@@ -26,7 +26,6 @@ import org.junit.Test;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 
 public class RaspberryPiOidcAuthenticatorTest {
-
   RaspberryPiOidcAuthenticator authenticator;
 
   @Before
@@ -35,13 +34,14 @@ public class RaspberryPiOidcAuthenticatorTest {
     URL res = getClass().getClassLoader().getResource("test-rpf-idp-metadata.json");
     String idpMetadataPath = Paths.get(res.toURI()).toFile().getAbsolutePath();
 
-    authenticator = new RaspberryPiOidcAuthenticator(
+    authenticator =
+      new RaspberryPiOidcAuthenticator(
         "test_client_id",
         "test_client_secret",
         "http://localhost:9001",
         "openid",
         idpMetadataPath
-    );
+      );
   }
 
   @Test
@@ -50,12 +50,18 @@ public class RaspberryPiOidcAuthenticatorTest {
 
     // Assert
     assertEquals("https://notreal-auth-v1.raspberrypi.org/", authenticator.getIdpMetadata().getIssuer());
-    assertEquals("https://notreal-auth-v1.raspberrypi.org/oauth2/auth",
-        authenticator.getIdpMetadata().getAuthorizationEndpoint());
-    assertEquals("https://notreal-auth-v1.raspberrypi.org/oauth2/token",
-        authenticator.getIdpMetadata().getTokenEndpoint());
-    assertEquals("https://notreal-auth-v1.raspberrypi.org/.well-known/jwks.json",
-        authenticator.getIdpMetadata().getJwksUri());
+    assertEquals(
+      "https://notreal-auth-v1.raspberrypi.org/oauth2/auth",
+      authenticator.getIdpMetadata().getAuthorizationEndpoint()
+    );
+    assertEquals(
+      "https://notreal-auth-v1.raspberrypi.org/oauth2/token",
+      authenticator.getIdpMetadata().getTokenEndpoint()
+    );
+    assertEquals(
+      "https://notreal-auth-v1.raspberrypi.org/.well-known/jwks.json",
+      authenticator.getIdpMetadata().getJwksUri()
+    );
   }
 
   /**
@@ -85,7 +91,6 @@ public class RaspberryPiOidcAuthenticatorTest {
 
     // Act
     authenticator.getGivenNameFamilyName(idpNickname, idpFullName);
-
     // Assert
     // See signature
   }

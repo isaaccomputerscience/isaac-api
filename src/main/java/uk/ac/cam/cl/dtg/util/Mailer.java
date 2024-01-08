@@ -65,11 +65,13 @@ public class Mailer {
    * @param smtpUsername The SMTP Username.
    * @param smtpPassword The SMTP Password.
    */
-  public Mailer(final String smtpAddress,
-                final String mailAddress,
-                final String smtpPort,
-                final String smtpUsername,
-                final String smtpPassword) {
+  public Mailer(
+    final String smtpAddress,
+    final String mailAddress,
+    final String smtpPort,
+    final String smtpUsername,
+    final String smtpPassword
+  ) {
     this.smtpAddress = smtpAddress;
     this.mailAddress = mailAddress;
     this.smtpPort = smtpPort;
@@ -86,7 +88,7 @@ public class Mailer {
    * @throws AddressException   - if the address is not valid.
    */
   public void sendPlainTextMail(final EmailCommonParameters emailCommonParameters, final String contents)
-      throws MessagingException {
+    throws MessagingException {
     Message msg = this.setupMessage(emailCommonParameters);
 
     msg.setText(contents);
@@ -105,10 +107,13 @@ public class Mailer {
    * @throws MessagingException - if we cannot send the message for some reason.
    * @throws AddressException   - if the address is not valid.
    */
-  public void sendMultiPartMail(final EmailCommonParameters emailCommonParameters, final String plainText,
-                                final String html,
-                                final List<EmailAttachment> attachments) throws MessagingException, AddressException {
-
+  public void sendMultiPartMail(
+    final EmailCommonParameters emailCommonParameters,
+    final String plainText,
+    final String html,
+    final List<EmailAttachment> attachments
+  )
+    throws MessagingException, AddressException {
     Message msg = this.setupMessage(emailCommonParameters);
 
     // Create the text part
@@ -162,24 +167,30 @@ public class Mailer {
     if (null != emailCommonParameters.getOverrideEnvelopeFrom()) {
       envelopeFrom = emailCommonParameters.getOverrideEnvelopeFrom();
     }
-    p.put("mail.smtp.from", envelopeFrom);  // Used for Return-Path
-    p.put("mail.from", emailCommonParameters.getFromAddress()
-        .getAddress()); // Should only affect Message-ID, since From overridden below
+    p.put("mail.smtp.from", envelopeFrom); // Used for Return-Path
+    p.put("mail.from", emailCommonParameters.getFromAddress().getAddress()); // Should only affect Message-ID, since From overridden below
     p.put("mail.smtp.port", smtpPort);
     p.put("mail.smtp.auth", "true");
     // Create the jakarta.mail.Session object needed to send the email.
     // These are expensive to create so cache them based on the properties
     // they are configured with (using fact that hashcodes are equal only if objects equal):
     Integer propertiesHash = p.hashCode();
-    Session s = SESSION_CACHE.computeIfAbsent(propertiesHash, k -> {
-      log.info(String.format("Creating new mail Session with properties: %s", p));
-      return Session.getInstance(p, new Authenticator() {
-        @Override
-        protected PasswordAuthentication getPasswordAuthentication() {
-          return new PasswordAuthentication(smtpUsername, smtpPassword);
-        }
-      });
-    });
+    Session s = SESSION_CACHE.computeIfAbsent(
+      propertiesHash,
+      k -> {
+        log.info(String.format("Creating new mail Session with properties: %s", p));
+        return Session.getInstance(
+          p,
+          new Authenticator() {
+
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+              return new PasswordAuthentication(smtpUsername, smtpPassword);
+            }
+          }
+        );
+      }
+    );
     // Create the message and set the recipients:
     Message msg = new MimeMessage(s);
 
@@ -194,7 +205,7 @@ public class Mailer {
     msg.setSubject(emailCommonParameters.getSubject());
 
     if (null != emailCommonParameters.getReplyTo()) {
-      msg.setReplyTo(new InternetAddress[] {emailCommonParameters.getReplyTo()});
+      msg.setReplyTo(new InternetAddress[] { emailCommonParameters.getReplyTo() });
     }
 
     return msg;

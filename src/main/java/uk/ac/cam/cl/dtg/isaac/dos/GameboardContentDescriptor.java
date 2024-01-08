@@ -6,8 +6,7 @@ public class GameboardContentDescriptor {
   private AudienceContext context;
 
   // Empty constructor necessary fot mappers
-  public GameboardContentDescriptor() {
-  }
+  public GameboardContentDescriptor() {}
 
   public GameboardContentDescriptor(final String id, final String contentType, final AudienceContext context) {
     this.id = id;
@@ -41,10 +40,17 @@ public class GameboardContentDescriptor {
 
   @Override
   public String toString() {
-    return "GameboardContentDescriptor["
-        + "id='" + id + '\''
-        + ", contentType='" + contentType + '\''
-        + ", context=" + context
-        + ']';
+    return (
+      "GameboardContentDescriptor[" +
+      "id='" +
+      id +
+      '\'' +
+      ", contentType='" +
+      contentType +
+      '\'' +
+      ", context=" +
+      context +
+      ']'
+    );
   }
 }

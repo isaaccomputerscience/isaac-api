@@ -70,9 +70,12 @@ public class GlossaryFacade extends AbstractSegueFacade {
    * @param logManager     - for logging events using the logging api.
    */
   @Inject
-  public GlossaryFacade(final PropertiesLoader properties, final GitContentManager contentManager,
-                        @Named(CONTENT_INDEX) final String contentIndex,
-                        final ILogManager logManager) {
+  public GlossaryFacade(
+    final PropertiesLoader properties,
+    final GitContentManager contentManager,
+    @Named(CONTENT_INDEX) final String contentIndex,
+    final ILogManager logManager
+  ) {
     super(properties, logManager);
     this.contentManager = contentManager;
     this.contentIndex = contentIndex;
@@ -89,12 +92,18 @@ public class GlossaryFacade extends AbstractSegueFacade {
   @Path("terms")
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Get all the glossary terms that are indexed.")
-  public final Response getTerms(@QueryParam("start_index") final String startIndex,
-                                 @QueryParam("limit") final String limit) {
-
+  public final Response getTerms(
+    @QueryParam("start_index") final String startIndex,
+    @QueryParam("limit") final String limit
+  ) {
     List<GitContentManager.BooleanSearchClause> fieldsToMatch = Lists.newArrayList();
-    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, BooleanOperator.AND, Collections.singletonList("glossaryTerm")));
+    fieldsToMatch.add(
+      new GitContentManager.BooleanSearchClause(
+        TYPE_FIELDNAME,
+        BooleanOperator.AND,
+        Collections.singletonList("glossaryTerm")
+      )
+    );
 
     ResultsWrapper<ContentDTO> c;
     try {
@@ -115,8 +124,7 @@ public class GlossaryFacade extends AbstractSegueFacade {
 
       c = this.contentManager.findByFieldNames(fieldsToMatch, startIndexOfResults, resultsLimit);
     } catch (ContentManagerException e) {
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content acquisition error.", e).toResponse();
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Content acquisition error.", e).toResponse();
     }
     // Calculate the ETag on last modified date of tags list
     // NOTE: Assumes that the latest version of the content is being used.
@@ -135,7 +143,6 @@ public class GlossaryFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Get the term with the given id.")
   public final Response getTermById(@PathParam("term_id") final String termId) {
-
     if (null == termId) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "Please specify a term_id.").toResponse();
     }
@@ -144,14 +151,15 @@ public class GlossaryFacade extends AbstractSegueFacade {
     try {
       c = this.contentManager.getByIdPrefix(termId, 0, DEFAULT_MAX_WINDOW_SIZE);
       if (null == c) {
-        SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "No glossary term found with id: "
-            + sanitiseExternalLogValue(termId));
+        SegueErrorResponse error = new SegueErrorResponse(
+          Status.NOT_FOUND,
+          "No glossary term found with id: " + sanitiseExternalLogValue(termId)
+        );
         log.debug(error.getErrorMessage());
         return error.toResponse();
       }
     } catch (ContentManagerException e) {
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content acquisition error.", e).toResponse();
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Content acquisition error.", e).toResponse();
     }
     // Calculate the ETag on last modified date of tags list
     // NOTE: Assumes that the latest version of the content is being used.

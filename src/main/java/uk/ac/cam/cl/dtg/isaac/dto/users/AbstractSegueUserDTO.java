@@ -20,6 +20,4 @@ package uk.ac.cam.cl.dtg.isaac.dto.users;
  * Abstract Data Transfer Object to represent an abstract user of the system.
  *
  */
-public abstract class AbstractSegueUserDTO {
-
-}
+public abstract class AbstractSegueUserDTO {}

@@ -24,14 +24,12 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ParsonsItemDTO;
 @DTOMapping(ParsonsItemDTO.class)
 @JsonContentType("parsonsItem")
 public class ParsonsItem extends Item {
-
   private Integer indentation;
 
   /**
    * Default constructor required for mapping.
    */
-  public ParsonsItem() {
-  }
+  public ParsonsItem() {}
 
   /**
    * Constructor to make testing easier.

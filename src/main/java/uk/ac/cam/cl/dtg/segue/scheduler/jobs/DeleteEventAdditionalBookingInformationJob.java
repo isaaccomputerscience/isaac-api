@@ -53,7 +53,6 @@ public class DeleteEventAdditionalBookingInformationJob implements Job {
     properties = injector.getInstance(PropertiesLoader.class);
     contentManager = injector.getInstance(GitContentManager.class);
     database = injector.getInstance(PostgresSqlDb.class);
-
   }
 
   @Override
@@ -70,32 +69,38 @@ public class DeleteEventAdditionalBookingInformationJob implements Job {
     ZonedDateTime now = ZonedDateTime.now();
     ZonedDateTime thirtyDaysAgo = now.plusDays(ADDITIONAL_EVENT_INFORMATION_RETENTION_DAYS_AGO);
     try {
-      ResultsWrapper<ContentDTO> findByFieldNames = this.contentManager.findByFieldNames(
-          ContentService.generateDefaultFieldToMatch(fieldsToMatch),
-          startIndex, DEFAULT_MAX_WINDOW_SIZE, sortInstructions, filterInstructions);
+      ResultsWrapper<ContentDTO> findByFieldNames =
+        this.contentManager.findByFieldNames(
+            ContentService.generateDefaultFieldToMatch(fieldsToMatch),
+            startIndex,
+            DEFAULT_MAX_WINDOW_SIZE,
+            sortInstructions,
+            filterInstructions
+          );
       for (ContentDTO contentResult : findByFieldNames.getResults()) {
         if (contentResult instanceof IsaacEventPageDTO) {
           IsaacEventPageDTO page = (IsaacEventPageDTO) contentResult;
           // Event end date (if present) > 30 days ago, else event date > 30 days ago
           boolean endDate30DaysAgo =
-              page.getEndDate() != null && page.getEndDate().toInstant().isBefore(thirtyDaysAgo.toInstant());
+            page.getEndDate() != null && page.getEndDate().toInstant().isBefore(thirtyDaysAgo.toInstant());
           boolean noEndDateAndStartDate30DaysAgo =
-              page.getEndDate() == null && page.getDate().toInstant().isBefore(thirtyDaysAgo.toInstant());
+            page.getEndDate() == null && page.getDate().toInstant().isBefore(thirtyDaysAgo.toInstant());
           if (endDate30DaysAgo || noEndDateAndStartDate30DaysAgo) {
             String query =
-                "UPDATE event_bookings SET additional_booking_information="
-                    + "jsonb_set(jsonb_set(jsonb_set(jsonb_set(additional_booking_information,"
-                    + " '{emergencyName}', '\"[REMOVED]\"'::JSONB, FALSE),"
-                    + " '{emergencyNumber}', '\"[REMOVED]\"'::JSONB, FALSE),"
-                    + " '{accessibilityRequirements}', '\"[REMOVED]\"'::JSONB, FALSE),"
-                    + " '{medicalRequirements}', '\"[REMOVED]\"'::JSONB, FALSE),"
-                    + " pii_removed=? "
-                    + " WHERE event_id = ?"
-                    + " AND additional_booking_information ??| array['emergencyName', 'emergencyNumber',"
-                    + " 'accessibilityRequirements', 'medicalRequirements']"
-                    + " AND pii_removed IS NULL";
-            try (Connection conn = database.getDatabaseConnection();
-                 PreparedStatement pst = conn.prepareStatement(query)
+              "UPDATE event_bookings SET additional_booking_information=" +
+              "jsonb_set(jsonb_set(jsonb_set(jsonb_set(additional_booking_information," +
+              " '{emergencyName}', '\"[REMOVED]\"'::JSONB, FALSE)," +
+              " '{emergencyNumber}', '\"[REMOVED]\"'::JSONB, FALSE)," +
+              " '{accessibilityRequirements}', '\"[REMOVED]\"'::JSONB, FALSE)," +
+              " '{medicalRequirements}', '\"[REMOVED]\"'::JSONB, FALSE)," +
+              " pii_removed=? " +
+              " WHERE event_id = ?" +
+              " AND additional_booking_information ??| array['emergencyName', 'emergencyNumber'," +
+              " 'accessibilityRequirements', 'medicalRequirements']" +
+              " AND pii_removed IS NULL";
+            try (
+              Connection conn = database.getDatabaseConnection();
+              PreparedStatement pst = conn.prepareStatement(query)
             ) {
               // Check for additional info that needs removing, check if pii has already been removed, if
               // so, don't re-remove
@@ -105,7 +110,8 @@ public class DeleteEventAdditionalBookingInformationJob implements Job {
               int affectedRows = pst.executeUpdate();
               if (affectedRows > 0) {
                 log.info(
-                    "Event " + page.getId() + " had " + affectedRows + " bookings which have been scrubbed of PII");
+                  "Event " + page.getId() + " had " + affectedRows + " bookings which have been scrubbed of PII"
+                );
               }
             }
           }

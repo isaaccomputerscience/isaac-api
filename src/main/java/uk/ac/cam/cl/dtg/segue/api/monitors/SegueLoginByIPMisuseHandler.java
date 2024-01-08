@@ -23,8 +23,11 @@ public class SegueLoginByIPMisuseHandler implements IMisuseHandler {
 
   @Inject
   public SegueLoginByIPMisuseHandler() {
-    this(SEGUE_LOGIN_BY_IP_DEFAULT_SOFT_THRESHOLD, SEGUE_LOGIN_BY_IP_DEFAULT_HARD_THRESHOLD,
-        NUMBER_SECONDS_IN_ONE_HOUR);
+    this(
+      SEGUE_LOGIN_BY_IP_DEFAULT_SOFT_THRESHOLD,
+      SEGUE_LOGIN_BY_IP_DEFAULT_HARD_THRESHOLD,
+      NUMBER_SECONDS_IN_ONE_HOUR
+    );
   }
 
   @Inject

@@ -32,7 +32,6 @@ public class AnonymousUserDTO extends AbstractSegueUserDTO {
   private Date dateCreated;
   private Date lastUpdated;
 
-
   /**
    * Default constructor required for Jackson.
    */
@@ -102,7 +101,6 @@ public class AnonymousUserDTO extends AbstractSegueUserDTO {
   public void setDateCreated(final Date dateCreated) {
     this.dateCreated = dateCreated;
   }
-
 
   /**
    * get date this object was last updated.

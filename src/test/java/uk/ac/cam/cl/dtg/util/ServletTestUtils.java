@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 public class ServletTestUtils {
+
   public static HttpServletRequest createMockServletRequest(HttpSession mockSession) {
     HttpServletRequest mockRequest = createNiceMock(HttpServletRequest.class);
     expect(mockRequest.getHeader("X-Forwarded-For")).andReturn("0.0.0.0").anyTimes();

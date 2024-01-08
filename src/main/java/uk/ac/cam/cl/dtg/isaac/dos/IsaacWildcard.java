@@ -37,27 +37,43 @@ public class IsaacWildcard extends Content {
 
   @JsonCreator
   public IsaacWildcard(
-      @JsonProperty("id") final String id,
-      @JsonProperty("title") final String title,
-      @JsonProperty("subtitle") final String subtitle,
-      @JsonProperty("type") final String type,
-      @JsonProperty("author") final String author,
-      @JsonProperty("encoding") final String encoding,
-      @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
-      @JsonProperty("layout") final String layout,
-      @JsonProperty("children") final List<ContentBase> children,
-      @JsonProperty("value") final String value,
-      @JsonProperty("attribution") final String attribution,
-      @JsonProperty("relatedContent") final List<String> relatedContent,
-      @JsonProperty("published") final boolean published,
-      @JsonProperty("deprecated") final Boolean deprecated,
-      @JsonProperty("tags") final Set<String> tags,
-      @JsonProperty("level") final Integer level,
-      @JsonProperty("description") final String description,
-      @JsonProperty("url") final String url) {
-    super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, value, attribution,
-        relatedContent, published, deprecated, tags, level);
-
+    @JsonProperty("id") final String id,
+    @JsonProperty("title") final String title,
+    @JsonProperty("subtitle") final String subtitle,
+    @JsonProperty("type") final String type,
+    @JsonProperty("author") final String author,
+    @JsonProperty("encoding") final String encoding,
+    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+    @JsonProperty("layout") final String layout,
+    @JsonProperty("children") final List<ContentBase> children,
+    @JsonProperty("value") final String value,
+    @JsonProperty("attribution") final String attribution,
+    @JsonProperty("relatedContent") final List<String> relatedContent,
+    @JsonProperty("published") final boolean published,
+    @JsonProperty("deprecated") final Boolean deprecated,
+    @JsonProperty("tags") final Set<String> tags,
+    @JsonProperty("level") final Integer level,
+    @JsonProperty("description") final String description,
+    @JsonProperty("url") final String url
+  ) {
+    super(
+      id,
+      title,
+      subtitle,
+      type,
+      author,
+      encoding,
+      canonicalSourceFile,
+      layout,
+      children,
+      value,
+      attribution,
+      relatedContent,
+      published,
+      deprecated,
+      tags,
+      level
+    );
     this.description = description;
     this.url = url;
   }
@@ -65,9 +81,7 @@ public class IsaacWildcard extends Content {
   /**
    * Default constructor required for Jackson.
    */
-  public IsaacWildcard() {
-
-  }
+  public IsaacWildcard() {}
 
   /**
    * getDescription.

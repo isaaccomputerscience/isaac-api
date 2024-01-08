@@ -93,10 +93,14 @@ public class AuthorisationFacade extends AbstractSegueFacade {
    * @param misuseMonitor      - so that we can prevent overuse of protected resources.
    */
   @Inject
-  public AuthorisationFacade(final PropertiesLoader properties, final UserAccountManager userManager,
-                             final ILogManager logManager, final UserAssociationManager associationManager,
-                             final GroupManager groupManager,
-                             final IMisuseMonitor misuseMonitor) {
+  public AuthorisationFacade(
+    final PropertiesLoader properties,
+    final UserAccountManager userManager,
+    final ILogManager logManager,
+    final UserAssociationManager associationManager,
+    final GroupManager groupManager,
+    final IMisuseMonitor misuseMonitor
+  ) {
     super(properties, logManager);
     this.userManager = userManager;
     this.associationManager = associationManager;
@@ -138,8 +142,11 @@ public class AuthorisationFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "List all users granted access to the specified user's data.")
-  public Response getUsersWithAccessSpecificUser(@Context final HttpServletRequest request,
-                                                 @PathParam("userId") final Long userId) throws NoUserException {
+  public Response getUsersWithAccessSpecificUser(
+    @Context final HttpServletRequest request,
+    @PathParam("userId") final Long userId
+  )
+    throws NoUserException {
     try {
       RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
 
@@ -149,9 +156,11 @@ public class AuthorisationFacade extends AbstractSegueFacade {
       } else if (isUserStaff(userManager, requestingUser)) {
         user = userManager.getUserDTOById(userId);
       } else {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "You must be an admin user to access the associations of another user.")
-            .toResponse();
+        return new SegueErrorResponse(
+          Status.FORBIDDEN,
+          "You must be an admin user to access the associations of another user."
+        )
+        .toResponse();
       }
 
       List<Long> userIdsWithAccess = Lists.newArrayList();
@@ -159,9 +168,15 @@ public class AuthorisationFacade extends AbstractSegueFacade {
         userIdsWithAccess.add(a.getUserIdReceivingPermission());
       }
 
-      return Response.ok(userManager.convertToDetailedUserSummaryObjectList(userManager.findUsers(userIdsWithAccess),
-              UserSummaryWithEmailAddressDTO.class))
-          .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+      return Response
+        .ok(
+          userManager.convertToDetailedUserSummaryObjectList(
+            userManager.findUsers(userIdsWithAccess),
+            UserSummaryWithEmailAddressDTO.class
+          )
+        )
+        .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
@@ -183,8 +198,10 @@ public class AuthorisationFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Revoke a specific user's access to the current user's data.")
-  public Response revokeOwnerAssociation(@Context final HttpServletRequest request,
-                                         @PathParam("userId") final Long userIdToRevoke) {
+  public Response revokeOwnerAssociation(
+    @Context final HttpServletRequest request,
+    @PathParam("userId") final Long userIdToRevoke
+  ) {
     if (null == userIdToRevoke) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "revokeUserId value must be specified.").toResponse();
     }
@@ -194,8 +211,13 @@ public class AuthorisationFacade extends AbstractSegueFacade {
       RegisteredUserDTO userToRevoke = userManager.getUserDTOById(userIdToRevoke);
       associationManager.revokeAssociation(user, userToRevoke);
 
-      this.getLogManager().logEvent(user, request, SegueServerLogType.REVOKE_USER_ASSOCIATION,
-          ImmutableMap.of(USER_ID_LIST_FKEY_FIELDNAME, Collections.singletonList(userIdToRevoke)));
+      this.getLogManager()
+        .logEvent(
+          user,
+          request,
+          SegueServerLogType.REVOKE_USER_ASSOCIATION,
+          ImmutableMap.of(USER_ID_LIST_FKEY_FIELDNAME, Collections.singletonList(userIdToRevoke))
+        );
 
       return Response.status(Status.NO_CONTENT).build();
     } catch (SegueDatabaseException e) {
@@ -225,13 +247,21 @@ public class AuthorisationFacade extends AbstractSegueFacade {
     try {
       RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
 
-      List<Long> userIdsWithAccess = associationManager.getAssociations(user).stream()
-          .map(UserAssociation::getUserIdReceivingPermission).collect(Collectors.toList());
+      List<Long> userIdsWithAccess = associationManager
+        .getAssociations(user)
+        .stream()
+        .map(UserAssociation::getUserIdReceivingPermission)
+        .collect(Collectors.toList());
 
       associationManager.revokeAllAssociationsByOwnerUser(user);
 
-      this.getLogManager().logEvent(user, request, SegueServerLogType.REVOKE_USER_ASSOCIATION,
-          ImmutableMap.of(USER_ID_LIST_FKEY_FIELDNAME, userIdsWithAccess));
+      this.getLogManager()
+        .logEvent(
+          user,
+          request,
+          SegueServerLogType.REVOKE_USER_ASSOCIATION,
+          ImmutableMap.of(USER_ID_LIST_FKEY_FIELDNAME, userIdsWithAccess)
+        );
 
       return Response.status(Status.NO_CONTENT).build();
     } catch (SegueDatabaseException e) {
@@ -257,8 +287,10 @@ public class AuthorisationFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Release the current user's access to another user's data.")
-  public Response releaseAssociation(@Context final HttpServletRequest request,
-                                     @PathParam("userId") final Long associationOwner) {
+  public Response releaseAssociation(
+    @Context final HttpServletRequest request,
+    @PathParam("userId") final Long associationOwner
+  ) {
     if (null == associationOwner) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "revokeUserId value must be specified.").toResponse();
     }
@@ -269,8 +301,13 @@ public class AuthorisationFacade extends AbstractSegueFacade {
 
       associationManager.revokeAssociation(ownerUser, user);
 
-      this.getLogManager().logEvent(user, request, SegueServerLogType.RELEASE_USER_ASSOCIATION,
-          ImmutableMap.of(USER_ID_LIST_FKEY_FIELDNAME, Collections.singletonList(associationOwner)));
+      this.getLogManager()
+        .logEvent(
+          user,
+          request,
+          SegueServerLogType.RELEASE_USER_ASSOCIATION,
+          ImmutableMap.of(USER_ID_LIST_FKEY_FIELDNAME, Collections.singletonList(associationOwner))
+        );
 
       return Response.status(Status.NO_CONTENT).build();
     } catch (SegueDatabaseException e) {
@@ -301,13 +338,21 @@ public class AuthorisationFacade extends AbstractSegueFacade {
     try {
       RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
 
-      List<Long> userIdsWithAccess = associationManager.getAssociationsForOthers(user).stream()
-          .map(UserAssociation::getUserIdGrantingPermission).collect(Collectors.toList());
+      List<Long> userIdsWithAccess = associationManager
+        .getAssociationsForOthers(user)
+        .stream()
+        .map(UserAssociation::getUserIdGrantingPermission)
+        .collect(Collectors.toList());
 
       associationManager.revokeAllAssociationsByRecipientUser(user);
 
-      this.getLogManager().logEvent(user, request, SegueServerLogType.RELEASE_USER_ASSOCIATION,
-          ImmutableMap.of(USER_ID_LIST_FKEY_FIELDNAME, userIdsWithAccess));
+      this.getLogManager()
+        .logEvent(
+          user,
+          request,
+          SegueServerLogType.RELEASE_USER_ASSOCIATION,
+          ImmutableMap.of(USER_ID_LIST_FKEY_FIELDNAME, userIdsWithAccess)
+        );
 
       return Response.status(Status.NO_CONTENT).build();
     } catch (SegueDatabaseException e) {
@@ -352,8 +397,11 @@ public class AuthorisationFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "List all users the specified user has been granted access by.")
-  public Response getCurrentAccessRightsForSpecificUser(@Context final HttpServletRequest request,
-                                                        @PathParam("userId") final Long userId) throws NoUserException {
+  public Response getCurrentAccessRightsForSpecificUser(
+    @Context final HttpServletRequest request,
+    @PathParam("userId") final Long userId
+  )
+    throws NoUserException {
     try {
       RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
 
@@ -363,9 +411,11 @@ public class AuthorisationFacade extends AbstractSegueFacade {
       } else if (isUserStaff(userManager, requestingUser)) {
         user = userManager.getUserDTOById(userId);
       } else {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "You must be an admin user to access the associations of another user.")
-            .toResponse();
+        return new SegueErrorResponse(
+          Status.FORBIDDEN,
+          "You must be an admin user to access the associations of another user."
+        )
+        .toResponse();
       }
 
       List<Long> userIdsGrantingAccess = Lists.newArrayList();
@@ -374,8 +424,9 @@ public class AuthorisationFacade extends AbstractSegueFacade {
       }
 
       return Response
-          .ok(userManager.convertToUserSummaryObjectList(userManager.findUsers(userIdsGrantingAccess)))
-          .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+        .ok(userManager.convertToUserSummaryObjectList(userManager.findUsers(userIdsGrantingAccess)))
+        .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
@@ -397,8 +448,10 @@ public class AuthorisationFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Get the group join token for the specified group.")
-  public Response getAssociationToken(@Context final HttpServletRequest request,
-                                      @PathParam("groupId") final Long groupId) {
+  public Response getAssociationToken(
+    @Context final HttpServletRequest request,
+    @PathParam("groupId") final Long groupId
+  ) {
     if (null == groupId) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "Group id must be specified.").toResponse();
     }
@@ -409,15 +462,17 @@ public class AuthorisationFacade extends AbstractSegueFacade {
       UserGroupDTO group = this.groupManager.getGroupById(groupId);
 
       if (!GroupManager.isOwnerOrAdditionalManager(group, user.getId())) {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "You do not have permission to create or request a group token for this group. "
-                + "Only owners or additional managers can.").toResponse();
+        return new SegueErrorResponse(
+          Status.FORBIDDEN,
+          "You do not have permission to create or request a group token for this group. " +
+          "Only owners or additional managers can."
+        )
+        .toResponse();
       }
 
       AssociationToken token = associationManager.generateAssociationToken(user, groupId);
 
-      return Response.ok(token).cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
-          .build();
+      return Response.ok(token).cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
     } catch (ResourceNotFoundException e) {
       return new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the group requested.").toResponse();
     } catch (SegueDatabaseException e) {
@@ -444,8 +499,10 @@ public class AuthorisationFacade extends AbstractSegueFacade {
   @Consumes(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "List the users a group join token will grant access to.")
-  public Response getTokenOwnerUserSummary(@Context final HttpServletRequest request,
-                                           @PathParam("token") final String token) {
+  public Response getTokenOwnerUserSummary(
+    @Context final HttpServletRequest request,
+    @PathParam("token") final String token
+  ) {
     if (null == token || token.isEmpty()) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "Token value must be specified.").toResponse();
     }
@@ -458,29 +515,39 @@ public class AuthorisationFacade extends AbstractSegueFacade {
 
       UserGroupDTO group = this.groupManager.getGroupById(associationToken.getGroupId());
 
-      misuseMonitor.notifyEvent(currentRegisteredUser.getId().toString(),
-          TokenOwnerLookupMisuseHandler.class.getSimpleName());
+      misuseMonitor.notifyEvent(
+        currentRegisteredUser.getId().toString(),
+        TokenOwnerLookupMisuseHandler.class.getSimpleName()
+      );
 
       // add owner
       List<UserSummaryWithEmailAddressDTO> usersLinkedToToken = Lists.newArrayList();
-      usersLinkedToToken.add(userManager.convertToUserSummary(
+      usersLinkedToToken.add(
+        userManager.convertToUserSummary(
           userManager.getUserDTOById(associationToken.getOwnerUserId()),
           UserSummaryWithEmailAddressDTO.class
-      ));
+        )
+      );
 
       // add additional managers
       usersLinkedToToken.addAll(group.getAdditionalManagers());
 
-      return Response.ok(usersLinkedToToken)
-          .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+      return Response
+        .ok(usersLinkedToToken)
+        .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (InvalidUserAssociationTokenException e) {
-      log.info(String.format("User (%s) attempted to use a token but it is invalid or no longer exists.",
-          currentRegisteredUser.getId()));
+      log.info(
+        String.format(
+          "User (%s) attempted to use a token but it is invalid or no longer exists.",
+          currentRegisteredUser.getId()
+        )
+      );
 
       return new SegueErrorResponse(Status.BAD_REQUEST, "The token provided is invalid or no longer exists.")
-          .toResponse();
+      .toResponse();
     } catch (SegueDatabaseException e) {
       log.error("Database error while trying to get association token. ", e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error", e).toResponse();
@@ -503,9 +570,11 @@ public class AuthorisationFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   @GZIP
-  @Operation(summary = "Use a group join token to authorise users and join a group.",
-      description = "This should be used after listing the group owners and managers and asking the user's permission"
-          + " to share data.")
+  @Operation(
+    summary = "Use a group join token to authorise users and join a group.",
+    description = "This should be used after listing the group owners and managers and asking the user's permission" +
+    " to share data."
+  )
   public Response useToken(@Context final HttpServletRequest request, @PathParam("token") final String token) {
     if (null == token || token.isEmpty()) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "Token value must be specified.").toResponse();
@@ -521,10 +590,20 @@ public class AuthorisationFacade extends AbstractSegueFacade {
       usersApproved.add(group.getOwnerId());
       usersApproved.addAll(group.getAdditionalManagersUserIds());
 
-      this.getLogManager().logEvent(user, request, SegueServerLogType.CREATE_USER_ASSOCIATION,
-          ImmutableMap.of(ASSOCIATION_TOKEN_FIELDNAME, associationToken.getToken(),
-              GROUP_FK, associationToken.getGroupId(),
-              USER_ID_LIST_FKEY_FIELDNAME, usersApproved));
+      this.getLogManager()
+        .logEvent(
+          user,
+          request,
+          SegueServerLogType.CREATE_USER_ASSOCIATION,
+          ImmutableMap.of(
+            ASSOCIATION_TOKEN_FIELDNAME,
+            associationToken.getToken(),
+            GROUP_FK,
+            associationToken.getGroupId(),
+            USER_ID_LIST_FKEY_FIELDNAME,
+            usersApproved
+          )
+        );
 
       return Response.ok(new ImmutableMap.Builder<String, String>().put("result", "success").build()).build();
     } catch (SegueDatabaseException e) {
@@ -534,7 +613,7 @@ public class AuthorisationFacade extends AbstractSegueFacade {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (InvalidUserAssociationTokenException e) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "The token provided is invalid or no longer exists.")
-          .toResponse();
+      .toResponse();
     }
   }
 }

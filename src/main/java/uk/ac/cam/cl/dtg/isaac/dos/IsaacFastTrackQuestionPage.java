@@ -26,6 +26,4 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacFastTrackQuestionPageDTO;
  */
 @DTOMapping(IsaacFastTrackQuestionPageDTO.class)
 @JsonContentType("isaacFastTrackQuestionPage")
-public class IsaacFastTrackQuestionPage extends IsaacQuestionPage {
-
-}
+public class IsaacFastTrackQuestionPage extends IsaacQuestionPage {}

@@ -24,7 +24,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  *
  */
 public class AccountAlreadyLinkedException extends SegueDatabaseException {
-
   private static final long serialVersionUID = -9089794206162108597L;
 
   /**
@@ -48,5 +47,4 @@ public class AccountAlreadyLinkedException extends SegueDatabaseException {
   public AccountAlreadyLinkedException(final String message, final Exception e) {
     super(message, e);
   }
-
 }

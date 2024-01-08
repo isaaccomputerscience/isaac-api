@@ -20,6 +20,4 @@ package uk.ac.cam.cl.dtg.isaac.dto.content;
  * VideoDTO.
  *
  */
-public class VideoDTO extends MediaDTO {
-
-}
+public class VideoDTO extends MediaDTO {}

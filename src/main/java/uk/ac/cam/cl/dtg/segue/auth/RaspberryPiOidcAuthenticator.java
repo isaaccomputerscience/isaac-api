@@ -85,24 +85,24 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
 
   private static final int CREDENTIAL_CACHE_TTL_MINUTES = 10;
 
-
   @Inject
   public RaspberryPiOidcAuthenticator(
-      @Named(Constants.RASPBERRYPI_CLIENT_ID) final String clientId,
-      @Named(Constants.RASPBERRYPI_CLIENT_SECRET) final String clientSecret,
-      @Named(Constants.RASPBERRYPI_CALLBACK_URI) final String callbackUri,
-      @Named(Constants.RASPBERRYPI_OAUTH_SCOPES) final String oauthScopes,
-      @Named(Constants.RASPBERRYPI_LOCAL_IDP_METADATA_PATH) final String idpMetadataLocation
-  ) throws AuthenticatorSecurityException, IOException {
-
+    @Named(Constants.RASPBERRYPI_CLIENT_ID) final String clientId,
+    @Named(Constants.RASPBERRYPI_CLIENT_SECRET) final String clientSecret,
+    @Named(Constants.RASPBERRYPI_CALLBACK_URI) final String callbackUri,
+    @Named(Constants.RASPBERRYPI_OAUTH_SCOPES) final String oauthScopes,
+    @Named(Constants.RASPBERRYPI_LOCAL_IDP_METADATA_PATH) final String idpMetadataLocation
+  )
+    throws AuthenticatorSecurityException, IOException {
     Validate.notBlank(clientId, "Missing resource %s", clientId);
     Validate.notBlank(clientSecret, "Missing resource %s", clientSecret);
 
     this.httpTransport = new NetHttpTransport();
     this.jsonFactory = new GsonFactory();
 
-    try (InputStream inputStream = new FileInputStream(idpMetadataLocation);
-         InputStreamReader reader = new InputStreamReader(inputStream)
+    try (
+      InputStream inputStream = new FileInputStream(idpMetadataLocation);
+      InputStreamReader reader = new InputStreamReader(inputStream)
     ) {
       this.idpMetadata = OidcDiscoveryResponse.load(this.jsonFactory, reader);
     }
@@ -113,11 +113,12 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
     this.requestedScopes = Arrays.asList(oauthScopes.split(";"));
 
     if (null == credentialStore) {
-      credentialStore = CacheBuilder.newBuilder().expireAfterAccess(CREDENTIAL_CACHE_TTL_MINUTES, TimeUnit.MINUTES)
-          .build();
+      credentialStore =
+        CacheBuilder.newBuilder().expireAfterAccess(CREDENTIAL_CACHE_TTL_MINUTES, TimeUnit.MINUTES).build();
     }
 
-    idTokenVerifier = new IdTokenVerifier.Builder()
+    idTokenVerifier =
+      new IdTokenVerifier.Builder()
         .setCertificatesLocation(this.idpMetadata.getJwksUri())
         .setAudience(Collections.singleton(this.clientId))
         .setIssuer(this.idpMetadata.getIssuer())
@@ -131,7 +132,7 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
 
   @Override
   public synchronized UserFromAuthProvider getUserInfo(final String internalProviderReference)
-      throws NoUserException, IOException, AuthenticatorSecurityException {
+    throws NoUserException, IOException, AuthenticatorSecurityException {
     IdTokenResponse response = credentialStore.getIfPresent(internalProviderReference);
 
     // Make sure we have an ID token
@@ -164,19 +165,20 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
       // unreasonable assumptions about the structure of names, but it's the best we can do.
       List<String> givenNameFamilyName = getGivenNameFamilyName(nickname, fullName);
 
-      EmailVerificationStatus emailStatus =
-          emailVerified ? EmailVerificationStatus.VERIFIED : EmailVerificationStatus.NOT_VERIFIED;
+      EmailVerificationStatus emailStatus = emailVerified
+        ? EmailVerificationStatus.VERIFIED
+        : EmailVerificationStatus.NOT_VERIFIED;
 
       // Use the IdP's unique ID for the user ('sub') as the unique (per identity provider) user ID.
       return new UserFromAuthProvider(
-          sub,
-          givenNameFamilyName.get(0),
-          givenNameFamilyName.get(1),
-          email,
-          emailStatus,
-          null,
-          null,
-          null
+        sub,
+        givenNameFamilyName.get(0),
+        givenNameFamilyName.get(1),
+        email,
+        emailStatus,
+        null,
+        null,
+        null
       );
     }
   }
@@ -184,11 +186,11 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
   @Override
   public String getAuthorizationUrl(final String antiForgeryStateToken) {
     return new AuthorizationCodeRequestUrl(this.idpMetadata.getAuthorizationEndpoint(), this.clientId)
-        .setScopes(requestedScopes)
-        .setRedirectUri(callbackUri)
-        .setState(antiForgeryStateToken)
-        .set(LOGIN_OPTIONS_PARAM_NAME, LOGIN_OPTION_REDIRECT_AFTER_SIGNUP)
-        .build();
+      .setScopes(requestedScopes)
+      .setRedirectUri(callbackUri)
+      .setState(antiForgeryStateToken)
+      .set(LOGIN_OPTIONS_PARAM_NAME, LOGIN_OPTION_REDIRECT_AFTER_SIGNUP)
+      .build();
   }
 
   @Override
@@ -215,22 +217,21 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
     try {
       // Exchange the authorization code for the ID token (and access token) from the IdP's token endpoint
       IdTokenResponse response = (IdTokenResponse) new AuthorizationCodeTokenRequest(
-          httpTransport,
-          jsonFactory,
-          new GenericUrl(this.idpMetadata.getTokenEndpoint()),
-          authorizationCode
+        httpTransport,
+        jsonFactory,
+        new GenericUrl(this.idpMetadata.getTokenEndpoint()),
+        authorizationCode
       )
-          .setResponseClass(IdTokenResponse.class)
-          .setRedirectUri(callbackUri)
-          .setClientAuthentication(new BasicAuthentication(clientId, clientSecret)
-          ).execute();
+        .setResponseClass(IdTokenResponse.class)
+        .setRedirectUri(callbackUri)
+        .setClientAuthentication(new BasicAuthentication(clientId, clientSecret))
+        .execute();
 
       // Store the response containing tokens and generate an ID that can be used to retrieve it later
       String internalCredentialID = UUID.randomUUID().toString();
       credentialStore.put(internalCredentialID, response);
 
       return internalCredentialID;
-
     } catch (IOException e) {
       log.error("An error occurred during code exchange: " + e);
       throw new CodeExchangeException();
@@ -244,7 +245,6 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
     // Verify the signature using the identity provider's public key, as well as the issuer and audience.
     return this.idTokenVerifier.verify(token);
   }
-
 
   /**
    * Based on the nickname and full name from the identity provider, try to come up with something sensible that fits

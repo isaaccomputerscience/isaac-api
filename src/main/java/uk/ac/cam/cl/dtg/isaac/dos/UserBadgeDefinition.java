@@ -12,7 +12,5 @@ import uk.ac.cam.cl.dtg.segue.api.managers.UserBadgeManager;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UserBadgeDefinition {
-
   UserBadgeManager.Badge value();
-
 }

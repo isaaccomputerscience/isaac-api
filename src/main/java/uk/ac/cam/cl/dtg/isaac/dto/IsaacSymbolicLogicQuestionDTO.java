@@ -22,6 +22,4 @@ import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 
 @JsonContentType("isaacSymbolicLogicQuestion")
 @ValidatesWith(IsaacSymbolicLogicValidator.class)
-public class IsaacSymbolicLogicQuestionDTO extends IsaacSymbolicQuestionDTO {
-
-}
+public class IsaacSymbolicLogicQuestionDTO extends IsaacSymbolicQuestionDTO {}

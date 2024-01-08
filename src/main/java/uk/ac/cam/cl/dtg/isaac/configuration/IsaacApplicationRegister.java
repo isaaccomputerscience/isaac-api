@@ -168,29 +168,31 @@ public class IsaacApplicationRegister extends Application {
     String serverUrl = httpScheme + hostName;
 
     Info apiInfo = new Info()
-        .title("Isaac API")
-        .version(SegueGuiceConfigurationModule.getSegueVersion())
-        .description("API for the Isaac platform. Automated use may violate our Terms of Service.")
-        .contact(new Contact()
-            .name(propertiesLoader.getProperty(MAIL_NAME))
-            .url(String.format("%s/contact", serverUrl))
-            .email(propertiesLoader.getProperty(SERVER_ADMIN_ADDRESS)))
-        .termsOfService(String.format("%s/terms", serverUrl));
+      .title("Isaac API")
+      .version(SegueGuiceConfigurationModule.getSegueVersion())
+      .description("API for the Isaac platform. Automated use may violate our Terms of Service.")
+      .contact(
+        new Contact()
+          .name(propertiesLoader.getProperty(MAIL_NAME))
+          .url(String.format("%s/contact", serverUrl))
+          .email(propertiesLoader.getProperty(SERVER_ADMIN_ADDRESS))
+      )
+      .termsOfService(String.format("%s/terms", serverUrl));
     OpenAPI openApi = new OpenAPI()
-        .info(apiInfo)
-        .servers(ImmutableList.of(new Server().description("Isaac API").url("./")));
+      .info(apiInfo)
+      .servers(ImmutableList.of(new Server().description("Isaac API").url("./")));
     SwaggerConfiguration swaggerConfig = new SwaggerConfiguration()
-        .openAPI(openApi)
-        .sortOutput(true)
-        .resourcePackages(ImmutableSet.of("uk.ac.cam.cl.dtg"))
-        .prettyPrint(true);
+      .openAPI(openApi)
+      .sortOutput(true)
+      .resourcePackages(ImmutableSet.of("uk.ac.cam.cl.dtg"))
+      .prettyPrint(true);
 
     try {
       new JaxrsOpenApiContextBuilder<>()
-          .servletConfig(servletConfig)
-          .application(this)
-          .openApiConfiguration(swaggerConfig)
-          .buildContext(true);
+        .servletConfig(servletConfig)
+        .application(this)
+        .openApiConfiguration(swaggerConfig)
+        .buildContext(true);
     } catch (OpenApiConfigurationException e) {
       throw new RuntimeException(e);
     }

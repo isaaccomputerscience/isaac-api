@@ -35,8 +35,10 @@ public class FacebookTokenData {
    *            -
    */
   @JsonCreator
-  public FacebookTokenData(@JsonProperty("app_id") final String appId,
-                           @JsonProperty("is_valid") final boolean isValid) {
+  public FacebookTokenData(
+    @JsonProperty("app_id") final String appId,
+    @JsonProperty("is_valid") final boolean isValid
+  ) {
     this.appId = appId;
     this.isValid = isValid;
   }

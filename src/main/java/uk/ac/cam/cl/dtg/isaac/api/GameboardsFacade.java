@@ -114,12 +114,17 @@ public class GameboardsFacade extends AbstractIsaacFacade {
    * @param fastTrackManger    - for game management of fasttrack questions and concepts
    */
   @Inject
-  public GameboardsFacade(final PropertiesLoader properties, final ILogManager logManager,
-                          final GameManager gameManager, final QuestionManager questionManager,
-                          final UserAccountManager userManager, final UserAssociationManager associationManager,
-                          final UserBadgeManager userBadgeManager, final FastTrackManger fastTrackManger) {
+  public GameboardsFacade(
+    final PropertiesLoader properties,
+    final ILogManager logManager,
+    final GameManager gameManager,
+    final QuestionManager questionManager,
+    final UserAccountManager userManager,
+    final UserAssociationManager associationManager,
+    final UserBadgeManager userBadgeManager,
+    final FastTrackManger fastTrackManger
+  ) {
     super(properties, logManager);
-
     this.userBadgeManager = userBadgeManager;
     this.gameManager = gameManager;
     this.questionManager = questionManager;
@@ -150,17 +155,19 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Get a temporary board of questions matching provided constraints.")
-  public final Response generateTemporaryGameboard(@Context final HttpServletRequest request,
-                                                   @QueryParam("title") final String title,
-                                                   @QueryParam("subjects") final String subjects,
-                                                   @QueryParam("fields") final String fields,
-                                                   @QueryParam("topics") final String topics,
-                                                   @QueryParam("stages") final String stages,
-                                                   @QueryParam("difficulties") final String difficulties,
-                                                   @QueryParam("examBoards") final String examBoards,
-                                                   @QueryParam("levels") final String levels,
-                                                   @QueryParam("concepts") final String concepts,
-                                                   @QueryParam("questionCategories") final String questionCategories) {
+  public final Response generateTemporaryGameboard(
+    @Context final HttpServletRequest request,
+    @QueryParam("title") final String title,
+    @QueryParam("subjects") final String subjects,
+    @QueryParam("fields") final String fields,
+    @QueryParam("topics") final String topics,
+    @QueryParam("stages") final String stages,
+    @QueryParam("difficulties") final String difficulties,
+    @QueryParam("examBoards") final String examBoards,
+    @QueryParam("levels") final String levels,
+    @QueryParam("concepts") final String concepts,
+    @QueryParam("questionCategories") final String questionCategories
+  ) {
     List<String> subjectsList = QueryUtils.splitCsvStringQueryParam(subjects);
     List<String> fieldsList = QueryUtils.splitCsvStringQueryParam(fields);
     List<String> topicsList = QueryUtils.splitCsvStringQueryParam(topics);
@@ -179,8 +186,7 @@ public class GameboardsFacade extends AbstractIsaacFacade {
         try {
           levelsList.add(Integer.parseInt(s));
         } catch (NumberFormatException e) {
-          return new SegueErrorResponse(Status.BAD_REQUEST, "Levels must be numbers if specified.", e)
-              .toResponse();
+          return new SegueErrorResponse(Status.BAD_REQUEST, "Levels must be numbers if specified.", e).toResponse();
         }
       }
     }
@@ -189,14 +195,26 @@ public class GameboardsFacade extends AbstractIsaacFacade {
       AbstractSegueUserDTO boardOwner = this.userManager.getCurrentUser(request);
       GameboardDTO gameboard;
 
-      gameboard = gameManager.generateRandomGameboard(title, new GameFilter(
-          subjectsList, fieldsList, topicsList, levelsList, conceptsList, questionCategoriesList, stagesList,
-          difficultiesList, examBoardsList
-      ), boardOwner);
+      gameboard =
+        gameManager.generateRandomGameboard(
+          title,
+          new GameFilter(
+            subjectsList,
+            fieldsList,
+            topicsList,
+            levelsList,
+            conceptsList,
+            questionCategoriesList,
+            stagesList,
+            difficultiesList,
+            examBoardsList
+          ),
+          boardOwner
+        );
 
       if (null == gameboard) {
-        return new SegueErrorResponse(Status.NO_CONTENT,
-            "We cannot find any questions based on your filter criteria.").toResponse();
+        return new SegueErrorResponse(Status.NO_CONTENT, "We cannot find any questions based on your filter criteria.")
+        .toResponse();
       }
 
       return Response.ok(gameboard).cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
@@ -209,8 +227,7 @@ public class GameboardsFacade extends AbstractIsaacFacade {
       log.error(message, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, message).toResponse();
     } catch (ContentManagerException e1) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested",
-          e1);
+      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested", e1);
       log.error(error.getErrorMessage(), e1);
       return error.toResponse();
     }
@@ -229,26 +246,27 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Get the details of a gameboard.")
-  public final Response getGameboard(@Context final Request request,
-                                     @Context final HttpServletRequest httpServletRequest,
-                                     @PathParam("gameboard_id") final String gameboardId) {
-
+  public final Response getGameboard(
+    @Context final Request request,
+    @Context final HttpServletRequest httpServletRequest,
+    @PathParam("gameboard_id") final String gameboardId
+  ) {
     try {
       GameboardDTO gameboard;
 
       AbstractSegueUserDTO randomUser = this.userManager.getCurrentUser(httpServletRequest);
-      Map<String, Map<String, List<QuestionValidationResponse>>> userQuestionAttempts = this.questionManager
-          .getQuestionAttemptsByUser(randomUser);
+      Map<String, Map<String, List<QuestionValidationResponse>>> userQuestionAttempts =
+        this.questionManager.getQuestionAttemptsByUser(randomUser);
 
       GameboardDTO unAugmentedGameboard = gameManager.getGameboard(gameboardId);
       if (null == unAugmentedGameboard) {
-        return new SegueErrorResponse(Status.NOT_FOUND, "No Gameboard found for the id specified.")
-            .toResponse();
+        return new SegueErrorResponse(Status.NOT_FOUND, "No Gameboard found for the id specified.").toResponse();
       }
 
       // Calculate the ETag
-      EntityTag etag = new EntityTag(unAugmentedGameboard.toString().hashCode()
-          + userQuestionAttempts.toString().hashCode() + "");
+      EntityTag etag = new EntityTag(
+        unAugmentedGameboard.toString().hashCode() + userQuestionAttempts.toString().hashCode() + ""
+      );
 
       Response cachedResponse = generateCachedResponse(request, etag, NEVER_CACHE_WITHOUT_ETAG_CHECK);
       if (cachedResponse != null) {
@@ -259,8 +277,11 @@ public class GameboardsFacade extends AbstractIsaacFacade {
       gameboard = gameManager.getGameboard(gameboardId, randomUser, userQuestionAttempts);
 
       // We decided not to log this on the backend as the front end uses this lots.
-      return Response.ok(gameboard).cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).tag(etag)
-          .build();
+      return Response
+        .ok(gameboard)
+        .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .tag(etag)
+        .build();
     } catch (IllegalArgumentException e) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "Your gameboard filter request is invalid.").toResponse();
     } catch (SegueDatabaseException e) {
@@ -268,8 +289,7 @@ public class GameboardsFacade extends AbstractIsaacFacade {
       log.error(message, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, message).toResponse();
     } catch (ContentManagerException e1) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested",
-          e1);
+      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested", e1);
       log.error(error.getErrorMessage(), e1);
       return error.toResponse();
     }
@@ -291,45 +311,57 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Get the progress of the current user at a FastTrack gameboard.")
-  public final Response getFastTrackConceptFromHistory(@Context final Request request,
-                                                       @Context final HttpServletRequest httpServletRequest,
-                                                       @PathParam("gameboard_id") final String gameboardId,
-                                                       @QueryParam("concept") final String currentConceptTitle,
-                                                       @QueryParam("upper_question_id") final String upperQuestionId) {
-
+  public final Response getFastTrackConceptFromHistory(
+    @Context final Request request,
+    @Context final HttpServletRequest httpServletRequest,
+    @PathParam("gameboard_id") final String gameboardId,
+    @QueryParam("concept") final String currentConceptTitle,
+    @QueryParam("upper_question_id") final String upperQuestionId
+  ) {
     try {
       if (!fastTrackManger.isValidFasTrackGameboardId(gameboardId)) {
         return new SegueErrorResponse(Status.NOT_FOUND, "Gameboard id not a valid FastTrack gameboard id.")
-            .toResponse();
+        .toResponse();
       }
       AbstractSegueUserDTO currentUser = this.userManager.getCurrentUser(httpServletRequest);
       GameboardDTO gameboard = this.gameManager.getGameboard(gameboardId);
 
       Map<String, Map<String, List<QuestionValidationResponse>>> userQuestionAttempts =
-          this.questionManager.getQuestionAttemptsByUser(currentUser);
+        this.questionManager.getQuestionAttemptsByUser(currentUser);
 
       List<GameboardItem> conceptQuestionsProgress = Lists.newArrayList();
       if (upperQuestionId.isEmpty()) {
         List<FastTrackLevel> upperAndLower = Arrays.asList(FastTrackLevel.FT_UPPER, FastTrackLevel.FT_LOWER);
-        conceptQuestionsProgress.addAll(fastTrackManger.getConceptProgress(
-            gameboard, upperAndLower, currentConceptTitle, userQuestionAttempts));
+        conceptQuestionsProgress.addAll(
+          fastTrackManger.getConceptProgress(gameboard, upperAndLower, currentConceptTitle, userQuestionAttempts)
+        );
       } else {
         String upperConceptTitle = fastTrackManger.getConceptFromQuestionId(upperQuestionId);
-        conceptQuestionsProgress.addAll(fastTrackManger.getConceptProgress(
-            gameboard, Collections.singletonList(FastTrackLevel.FT_UPPER), upperConceptTitle, userQuestionAttempts));
-        conceptQuestionsProgress.addAll(fastTrackManger.getConceptProgress(
-            gameboard, Collections.singletonList(FastTrackLevel.FT_LOWER), currentConceptTitle, userQuestionAttempts));
+        conceptQuestionsProgress.addAll(
+          fastTrackManger.getConceptProgress(
+            gameboard,
+            Collections.singletonList(FastTrackLevel.FT_UPPER),
+            upperConceptTitle,
+            userQuestionAttempts
+          )
+        );
+        conceptQuestionsProgress.addAll(
+          fastTrackManger.getConceptProgress(
+            gameboard,
+            Collections.singletonList(FastTrackLevel.FT_LOWER),
+            currentConceptTitle,
+            userQuestionAttempts
+          )
+        );
       }
 
       return Response.ok(conceptQuestionsProgress).build();
-
     } catch (SegueDatabaseException e) {
       String message = "Error whilst trying to access the FastTrack progress in the database.";
       log.error(message, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, message).toResponse();
     } catch (ContentManagerException e1) {
-      SegueErrorResponse error = new SegueErrorResponse(
-          Status.NOT_FOUND, "Error locating the version requested", e1);
+      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested", e1);
       log.error(error.getErrorMessage(), e1);
       return error.toResponse();
     }
@@ -346,12 +378,14 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   @Path("gameboards")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Create a new gameboard from a template GameboardDTO.",
-      description = "Only staff users can provide custom IDs, wildcards or tags.")
+  @Operation(
+    summary = "Create a new gameboard from a template GameboardDTO.",
+    description = "Only staff users can provide custom IDs, wildcards or tags."
+  )
   public final Response createGameboard(
-      @Context final HttpServletRequest request,
-      final GameboardDTO newGameboardObject) {
-
+    @Context final HttpServletRequest request,
+    final GameboardDTO newGameboardObject
+  ) {
     RegisteredUserDTO user;
 
     try {
@@ -361,10 +395,16 @@ public class GameboardsFacade extends AbstractIsaacFacade {
         return new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a gameboard object").toResponse();
       }
 
-      if ((newGameboardObject.getId() != null || newGameboardObject.getTags().size() > 0
-          || newGameboardObject.getWildCard() != null) && !isUserStaff(userManager, user)) {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "You cannot provide a gameboard wildcard, ID or tags.").toResponse();
+      if (
+        (
+          newGameboardObject.getId() != null ||
+          newGameboardObject.getTags().size() > 0 ||
+          newGameboardObject.getWildCard() != null
+        ) &&
+        !isUserStaff(userManager, user)
+      ) {
+        return new SegueErrorResponse(Status.FORBIDDEN, "You cannot provide a gameboard wildcard, ID or tags.")
+        .toResponse();
       }
 
       if (newGameboardObject.getId() != null && !newGameboardObject.getId().matches(VALID_GAMEBOARD_ID_REGEX)) {
@@ -380,31 +420,41 @@ public class GameboardsFacade extends AbstractIsaacFacade {
       persistedGameboard = gameManager.saveNewGameboard(newGameboardObject, user);
 
       if (persistedGameboard.getCreationMethod().equals(GameboardCreationMethod.BUILDER)) {
-        this.userBadgeManager.updateBadge(user, UserBadgeManager.Badge.TEACHER_GAMEBOARDS_CREATED,
-            persistedGameboard.getId());
+        this.userBadgeManager.updateBadge(
+            user,
+            UserBadgeManager.Badge.TEACHER_GAMEBOARDS_CREATED,
+            persistedGameboard.getId()
+          );
       }
-
     } catch (NoWildcardException e) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "No wildcard available. Unable to construct gameboard.")
-          .toResponse();
+      .toResponse();
     } catch (InvalidGameboardException e) {
       return new SegueErrorResponse(Status.BAD_REQUEST, String.format("The gameboard you provided is invalid"), e)
-          .toResponse();
+      .toResponse();
     } catch (SegueDatabaseException e) {
       String message = "Database Error whilst trying to save the gameboard.";
       log.error(message, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, message).toResponse();
     } catch (DuplicateGameboardException e) {
-      return new SegueErrorResponse(Status.BAD_REQUEST, String.format(
-          "Gameboard with that id (%s) already exists. ", newGameboardObject.getId())).toResponse();
+      return new SegueErrorResponse(
+        Status.BAD_REQUEST,
+        String.format("Gameboard with that id (%s) already exists. ", newGameboardObject.getId())
+      )
+      .toResponse();
     } catch (ContentManagerException e) {
       String message = "Content Error whilst trying to save the gameboard.";
       log.error(message, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, message).toResponse();
     }
 
-    this.getLogManager().logEvent(user, request, IsaacServerLogType.CREATE_GAMEBOARD,
-        ImmutableMap.of(GAMEBOARD_ID_FKEY, persistedGameboard.getId()));
+    this.getLogManager()
+      .logEvent(
+        user,
+        request,
+        IsaacServerLogType.CREATE_GAMEBOARD,
+        ImmutableMap.of(GAMEBOARD_ID_FKEY, persistedGameboard.getId())
+      );
 
     return Response.ok(persistedGameboard).build();
   }
@@ -426,12 +476,15 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   @Path("gameboards/{id}")
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
-  @Operation(summary = "Change a gameboards title and link the current user to it.",
-      description = "It is only possible to change the name of a gameboard.")
-  public final Response renameAndSaveGameboard(@Context final HttpServletRequest request,
-                                               @PathParam("id") final String gameboardId,
-                                               @QueryParam("title") final String newGameboardTitle) {
-
+  @Operation(
+    summary = "Change a gameboards title and link the current user to it.",
+    description = "It is only possible to change the name of a gameboard."
+  )
+  public final Response renameAndSaveGameboard(
+    @Context final HttpServletRequest request,
+    @PathParam("id") final String gameboardId,
+    @QueryParam("title") final String newGameboardTitle
+  ) {
     RegisteredUserDTO user;
     try {
       user = userManager.getCurrentRegisteredUser(request);
@@ -441,9 +494,11 @@ public class GameboardsFacade extends AbstractIsaacFacade {
 
     if (null == newGameboardTitle || null == gameboardId) {
       // Gameboard title and id must be there
-      return new SegueErrorResponse(Status.BAD_REQUEST,
-          "You must provide a new gameboard title and the "
-              + "id of the gameboard object in the endpoint path.").toResponse();
+      return new SegueErrorResponse(
+        Status.BAD_REQUEST,
+        "You must provide a new gameboard title and the " + "id of the gameboard object in the endpoint path."
+      )
+      .toResponse();
     }
 
     // Find the existing gameboard with the id given
@@ -452,28 +507,34 @@ public class GameboardsFacade extends AbstractIsaacFacade {
       existingGameboard = gameManager.getGameboard(gameboardId);
       if (null == existingGameboard) {
         // there is no gameboard to persist (the id does not belong to an existing gameboard)
-        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-            "A gameboard with that id was not found.").toResponse();
+        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "A gameboard with that id was not found.")
+        .toResponse();
       }
       // go ahead and persist the gameboard (if it is only temporary) / link it to the users my boards account
       gameManager.linkUserToGameboard(existingGameboard, user);
-      getLogManager().logEvent(user, request, IsaacServerLogType.ADD_BOARD_TO_PROFILE,
-          ImmutableMap.of(GAMEBOARD_ID_FKEY, existingGameboard.getId()));
-
+      getLogManager()
+        .logEvent(
+          user,
+          request,
+          IsaacServerLogType.ADD_BOARD_TO_PROFILE,
+          ImmutableMap.of(GAMEBOARD_ID_FKEY, existingGameboard.getId())
+        );
     } catch (SegueDatabaseException e) {
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Error whilst trying to access the gameboard database.", e).toResponse();
+      return new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Error whilst trying to access the gameboard database.",
+        e
+      )
+      .toResponse();
     }
 
     // Now check if the current title is either null, or not equal to the new title. If so, we want to change it
     if (null == existingGameboard.getTitle() || !existingGameboard.getTitle().equals(newGameboardTitle)) {
-
       // do they have permission?
-      if (null != existingGameboard.getOwnerUserId()
-          && !existingGameboard.getOwnerUserId().equals(user.getId())) {
+      if (null != existingGameboard.getOwnerUserId() && !existingGameboard.getOwnerUserId().equals(user.getId())) {
         // user not logged in return not authorized
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "You are not allowed to change another user's gameboard.").toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "You are not allowed to change another user's gameboard.")
+        .toResponse();
       }
 
       // We can now change the title, and persist this change to the database
@@ -486,8 +547,12 @@ public class GameboardsFacade extends AbstractIsaacFacade {
         log.error(message, e);
         return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, message).toResponse();
       } catch (InvalidGameboardException e) {
-        return new SegueErrorResponse(Status.BAD_REQUEST,
-            String.format("The gameboard you provided is invalid: " + e.getMessage()), e).toResponse();
+        return new SegueErrorResponse(
+          Status.BAD_REQUEST,
+          String.format("The gameboard you provided is invalid: " + e.getMessage()),
+          e
+        )
+        .toResponse();
       }
       return Response.ok(updatedGameboard).build();
     }
@@ -509,11 +574,13 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "List all gameboards linked to the current user.")
-  public final Response getGameboardsByCurrentUser(@Context final HttpServletRequest request,
-                                                   @QueryParam("start_index") final String startIndex,
-                                                   @QueryParam("limit") final String limit,
-                                                   @QueryParam("sort") final String sortInstructions,
-                                                   @QueryParam("show_only") final String showCriteria) {
+  public final Response getGameboardsByCurrentUser(
+    @Context final HttpServletRequest request,
+    @QueryParam("start_index") final String startIndex,
+    @QueryParam("limit") final String limit,
+    @QueryParam("sort") final String sortInstructions,
+    @QueryParam("show_only") final String showCriteria
+  ) {
     RegisteredUserDTO currentUser;
 
     try {
@@ -531,8 +598,8 @@ public class GameboardsFacade extends AbstractIsaacFacade {
           gameboardLimit = Integer.parseInt(limit);
         }
       } catch (NumberFormatException e) {
-        return new SegueErrorResponse(Status.BAD_REQUEST,
-            "The number you entered as the results limit is not valid.").toResponse();
+        return new SegueErrorResponse(Status.BAD_REQUEST, "The number you entered as the results limit is not valid.")
+        .toResponse();
       }
     } else {
       gameboardLimit = Constants.DEFAULT_GAMEBOARDS_RESULTS_LIMIT;
@@ -543,8 +610,8 @@ public class GameboardsFacade extends AbstractIsaacFacade {
       try {
         startIndexAsInteger = Integer.parseInt(startIndex);
       } catch (NumberFormatException e) {
-        return new SegueErrorResponse(Status.BAD_REQUEST,
-            "The number you entered as the start_index is not valid.").toResponse();
+        return new SegueErrorResponse(Status.BAD_REQUEST, "The number you entered as the start_index is not valid.")
+        .toResponse();
       }
     }
 
@@ -557,8 +624,11 @@ public class GameboardsFacade extends AbstractIsaacFacade {
       } else if (showCriteria.toLowerCase().equals("not_attempted")) {
         gameboardShowCriteria = GameboardState.NOT_ATTEMPTED;
       } else {
-        return new SegueErrorResponse(Status.BAD_REQUEST, "Unable to interpret showOnly criteria specified "
-            + showCriteria).toResponse();
+        return new SegueErrorResponse(
+          Status.BAD_REQUEST,
+          "Unable to interpret showOnly criteria specified " + showCriteria
+        )
+        .toResponse();
       }
     }
 
@@ -582,35 +652,48 @@ public class GameboardsFacade extends AbstractIsaacFacade {
         } else if (instruction.equals("completion")) {
           parsedSortInstructions.add(immutableEntry(COMPLETION_FIELDNAME, s));
         } else {
-          return new SegueErrorResponse(Status.BAD_REQUEST, "Sorry we do not recognise the sort instruction "
-              + instruction).toResponse();
+          return new SegueErrorResponse(
+            Status.BAD_REQUEST,
+            "Sorry we do not recognise the sort instruction " + instruction
+          )
+          .toResponse();
         }
       }
     }
 
     GameboardListDTO gameboards;
     try {
-      gameboards = gameManager.getUsersGameboards(currentUser, startIndexAsInteger, gameboardLimit,
-          gameboardShowCriteria, parsedSortInstructions);
+      gameboards =
+        gameManager.getUsersGameboards(
+          currentUser,
+          startIndexAsInteger,
+          gameboardLimit,
+          gameboardShowCriteria,
+          parsedSortInstructions
+        );
     } catch (SegueDatabaseException e) {
       String message = "Error whilst trying to access the gameboard in the database.";
       log.error(message, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, message).toResponse();
     } catch (ContentManagerException e1) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested",
-          e1);
+      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested", e1);
       log.error(error.getErrorMessage(), e1);
       return error.toResponse();
     }
 
-    getLogManager().logEvent(
+    getLogManager()
+      .logEvent(
         currentUser,
         request,
         IsaacServerLogType.VIEW_MY_BOARDS_PAGE,
-        ImmutableMap.builder().put("totalBoards", gameboards.getTotalResults())
-            .put("notStartedTotal", gameboards.getTotalNotStarted())
-            .put("completedTotal", gameboards.getTotalCompleted())
-            .put("inProgressTotal", gameboards.getTotalInProgress()).build());
+        ImmutableMap
+          .builder()
+          .put("totalBoards", gameboards.getTotalResults())
+          .put("notStartedTotal", gameboards.getTotalNotStarted())
+          .put("completedTotal", gameboards.getTotalCompleted())
+          .put("inProgressTotal", gameboards.getTotalInProgress())
+          .build()
+      );
 
     return Response.ok(gameboards).cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
   }
@@ -625,11 +708,14 @@ public class GameboardsFacade extends AbstractIsaacFacade {
    */
   @POST
   @Path("gameboards/user_gameboards/{gameboard_id}")
-  @Operation(summary = "Link a gameboard to the current user.",
-      description = "This will save a persistent copy of the gameboard if it was a temporary board.")
-  public final Response linkUserToGameboard(@Context final HttpServletRequest request,
-                                            @PathParam("gameboard_id") final String gameboardId) {
-
+  @Operation(
+    summary = "Link a gameboard to the current user.",
+    description = "This will save a persistent copy of the gameboard if it was a temporary board."
+  )
+  public final Response linkUserToGameboard(
+    @Context final HttpServletRequest request,
+    @PathParam("gameboard_id") final String gameboardId
+  ) {
     RegisteredUserDTO user;
     try {
       user = userManager.getCurrentRegisteredUser(request);
@@ -639,8 +725,8 @@ public class GameboardsFacade extends AbstractIsaacFacade {
 
     if (null == gameboardId) {
       // Gameboard object must be there and have an id.
-      return new SegueErrorResponse(Status.BAD_REQUEST,
-          "You must provide a gameboard id to be able to link to it.").toResponse();
+      return new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a gameboard id to be able to link to it.")
+      .toResponse();
     }
 
     // find the existing gameboard.
@@ -654,13 +740,21 @@ public class GameboardsFacade extends AbstractIsaacFacade {
 
       // go ahead and persist the gameboard (if it is only temporary) / link it to the users my boards account
       gameManager.linkUserToGameboard(existingGameboard, user);
-      getLogManager().logEvent(user, request, IsaacServerLogType.ADD_BOARD_TO_PROFILE,
-          ImmutableMap.of(GAMEBOARD_ID_FKEY, existingGameboard.getId()));
-
+      getLogManager()
+        .logEvent(
+          user,
+          request,
+          IsaacServerLogType.ADD_BOARD_TO_PROFILE,
+          ImmutableMap.of(GAMEBOARD_ID_FKEY, existingGameboard.getId())
+        );
     } catch (SegueDatabaseException e) {
       log.error("Database error while trying to save gameboard to user link.", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Error whilst trying to access the gameboard database.", e).toResponse();
+      return new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Error whilst trying to access the gameboard database.",
+        e
+      )
+      .toResponse();
     }
 
     return Response.ok().build();
@@ -678,20 +772,27 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   @DELETE
   @Path("gameboards/user_gameboards/{gameboard_id}")
   @Produces(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Unlink the current user from one or a comma separated list of gameboards.",
-      description = "This will not delete or modify the gameboard.")
-  public Response unlinkUserFromGameboard(@Context final HttpServletRequest request,
-                                          @PathParam("gameboard_id") final String gameboardIds) {
-
+  @Operation(
+    summary = "Unlink the current user from one or a comma separated list of gameboards.",
+    description = "This will not delete or modify the gameboard."
+  )
+  public Response unlinkUserFromGameboard(
+    @Context final HttpServletRequest request,
+    @PathParam("gameboard_id") final String gameboardIds
+  ) {
     try {
       RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
       Collection<String> gameboardIdsForDeletion = Arrays.asList(gameboardIds.split(","));
 
       this.gameManager.unlinkUserToGameboard(user, gameboardIdsForDeletion);
 
-      getLogManager().logEvent(user, request, IsaacServerLogType.DELETE_BOARD_FROM_PROFILE,
-          ImmutableMap.of(GAMEBOARD_ID_FKEYS, gameboardIdsForDeletion));
-
+      getLogManager()
+        .logEvent(
+          user,
+          request,
+          IsaacServerLogType.DELETE_BOARD_FROM_PROFILE,
+          ImmutableMap.of(GAMEBOARD_ID_FKEYS, gameboardIdsForDeletion)
+        );
     } catch (SegueDatabaseException e) {
       String message = "Error whilst trying to delete a gameboard.";
       log.error(message, e);
@@ -715,7 +816,6 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   @GZIP
   @Operation(summary = "List all possible gameboard wildcards.")
   public final Response getWildCards(@Context final Request request) {
-
     try {
       List<IsaacWildcard> wildcards = gameManager.getWildcards();
       if (null == wildcards || wildcards.isEmpty()) {
@@ -730,11 +830,13 @@ public class GameboardsFacade extends AbstractIsaacFacade {
         return cachedResponse;
       }
 
-      return Response.ok(wildcards).cacheControl(getCacheControl(NUMBER_SECONDS_IN_TEN_MINUTES, true)).tag(etag)
-          .build();
+      return Response
+        .ok(wildcards)
+        .cacheControl(getCacheControl(NUMBER_SECONDS_IN_TEN_MINUTES, true))
+        .tag(etag)
+        .build();
     } catch (ContentManagerException e1) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested",
-          e1);
+      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested", e1);
       log.error(error.getErrorMessage(), e1);
       return error.toResponse();
     } catch (NoWildcardException e) {

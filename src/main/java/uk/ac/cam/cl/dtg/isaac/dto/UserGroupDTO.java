@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 
-
 /**
  * UserGroupDTO - this object represents a group or label assigned to users who have been placed into a group.
  * <br>
@@ -42,7 +41,6 @@ public class UserGroupDTO {
   private boolean additionalManagerPrivileges;
   private UserSummaryWithEmailAddressDTO ownerSummary;
   private Set<UserSummaryWithEmailAddressDTO> additionalManagers;
-
 
   /**
    * Default Constructor.
@@ -61,9 +59,14 @@ public class UserGroupDTO {
    * @param lastUpdated - the date the group was last updated
    * @param archived    - if the group has been archived
    */
-  public UserGroupDTO(@Nullable final Long id, final String groupName, final Long ownerId, final Date created,
-                      final Date lastUpdated,
-                      final boolean archived) {
+  public UserGroupDTO(
+    @Nullable final Long id,
+    final String groupName,
+    final Long ownerId,
+    final Date created,
+    final Date lastUpdated,
+    final boolean archived
+  ) {
     this.id = id;
     this.groupName = groupName;
     this.ownerId = ownerId;
@@ -307,8 +310,13 @@ public class UserGroupDTO {
 
   @Override
   public String toString() {
-    return String.format("UserGroupDTO [id=%s owner_id=%s name=%s additionalManagers=%s]", id, ownerId, groupName,
-        additionalManagers);
+    return String.format(
+      "UserGroupDTO [id=%s owner_id=%s name=%s additionalManagers=%s]",
+      id,
+      ownerId,
+      groupName,
+      additionalManagers
+    );
   }
 
   /**

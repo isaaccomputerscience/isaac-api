@@ -66,30 +66,53 @@ public class PgEventBookings implements EventBookings {
   }
 
   @Override
-  public EventBooking add(final ITransaction transaction, final String eventId, final Long userId,
-                          final Long reserveById,
-                          final BookingStatus status, final Map<String, String> additionalEventInformation)
-      throws SegueDatabaseException {
+  public EventBooking add(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final Long reserveById,
+    final BookingStatus status,
+    final Map<String, String> additionalEventInformation
+  )
+    throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
       throw new SegueDatabaseException("Incorrect database transaction class type!");
     }
 
-    return addEventBooking((PgTransaction) transaction, eventId, userId, reserveById, status,
-        Objects.requireNonNullElseGet(additionalEventInformation, Maps::newHashMap));
+    return addEventBooking(
+      (PgTransaction) transaction,
+      eventId,
+      userId,
+      reserveById,
+      status,
+      Objects.requireNonNullElseGet(additionalEventInformation, Maps::newHashMap)
+    );
   }
 
   @Override
-  public EventBooking add(final ITransaction transaction, final String eventId, final Long userId,
-                          final BookingStatus status,
-                          final Map<String, String> additionalEventInformation) throws SegueDatabaseException {
+  public EventBooking add(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final BookingStatus status,
+    final Map<String, String> additionalEventInformation
+  )
+    throws SegueDatabaseException {
     return add(transaction, eventId, userId, null, status, additionalEventInformation);
   }
 
   private PgEventBooking addEventBooking(
-      final PgTransaction transaction, final String eventId, final Long userId, final Long reserveById,
-      final BookingStatus status, final Map<String, String> additionalEventInformation) throws SegueDatabaseException {
-    String query = "INSERT INTO event_bookings (id, user_id, reserved_by, event_id, status, created, updated,"
-        + " additional_booking_information) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?::text::jsonb)";
+    final PgTransaction transaction,
+    final String eventId,
+    final Long userId,
+    final Long reserveById,
+    final BookingStatus status,
+    final Map<String, String> additionalEventInformation
+  )
+    throws SegueDatabaseException {
+    String query =
+      "INSERT INTO event_bookings (id, user_id, reserved_by, event_id, status, created, updated," +
+      " additional_booking_information) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?::text::jsonb)";
     Connection conn = transaction.getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
       Date creationDate = new Date();
@@ -103,8 +126,10 @@ public class PgEventBookings implements EventBookings {
       pst.setString(FIELD_ADD_BOOKING_STATUS, status.name());
       pst.setTimestamp(FIELD_ADD_BOOKING_CREATED, new java.sql.Timestamp(creationDate.getTime()));
       pst.setTimestamp(FIELD_ADD_BOOKING_UPDATED, new java.sql.Timestamp(creationDate.getTime()));
-      pst.setString(FIELD_ADD_BOOKING_ADDITIONAL_INFORMATION,
-          objectMapper.writeValueAsString(additionalEventInformation));
+      pst.setString(
+        FIELD_ADD_BOOKING_ADDITIONAL_INFORMATION,
+        objectMapper.writeValueAsString(additionalEventInformation)
+      );
       if (pst.executeUpdate() == 0) {
         throw new SegueDatabaseException("Unable to save event booking.");
       }
@@ -112,13 +137,20 @@ public class PgEventBookings implements EventBookings {
       try (ResultSet generatedKeys = pst.getGeneratedKeys()) {
         if (generatedKeys.next()) {
           Long id = generatedKeys.getLong(1);
-          return new PgEventBooking(id, userId, reserveById, eventId, status, creationDate, creationDate,
-              additionalEventInformation);
+          return new PgEventBooking(
+            id,
+            userId,
+            reserveById,
+            eventId,
+            status,
+            creationDate,
+            creationDate,
+            additionalEventInformation
+          );
         } else {
           throw new SQLException("Creating event booking failed, no ID obtained.");
         }
       }
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     } catch (JsonProcessingException e) {
@@ -127,10 +159,15 @@ public class PgEventBookings implements EventBookings {
   }
 
   @Override
-  public void updateStatus(final ITransaction transaction, final String eventId, final Long userId,
-                           final Long reservingUserId,
-                           final BookingStatus status, final Map<String, String> additionalEventInformation)
-      throws SegueDatabaseException {
+  public void updateStatus(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final Long reservingUserId,
+    final BookingStatus status,
+    final Map<String, String> additionalEventInformation
+  )
+    throws SegueDatabaseException {
     if (additionalEventInformation != null && reservingUserId != null) {
       updateBookingStatus(transaction, eventId, userId, reservingUserId, status, additionalEventInformation);
     } else if (additionalEventInformation != null) {
@@ -154,22 +191,30 @@ public class PgEventBookings implements EventBookings {
    * @throws SegueDatabaseException - if the database goes wrong.
    * @see #updateStatus
    */
-  private void updateBookingStatus(final ITransaction transaction, final String eventId, final Long userId,
-                                   final Long reservingUserId, final BookingStatus status,
-                                   final Map<String, String> additionalEventInformation) throws SegueDatabaseException {
+  private void updateBookingStatus(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final Long reservingUserId,
+    final BookingStatus status,
+    final Map<String, String> additionalEventInformation
+  )
+    throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
       throw new SegueDatabaseException("Incorrect database transaction class type!");
     }
 
     String query =
-        "UPDATE event_bookings SET status = ?, updated = ?, additional_booking_information = ?::text::jsonb,"
-            + " reserved_by = ? WHERE event_id = ? AND user_id = ?;";
+      "UPDATE event_bookings SET status = ?, updated = ?, additional_booking_information = ?::text::jsonb," +
+      " reserved_by = ? WHERE event_id = ? AND user_id = ?;";
     Connection conn = ((PgTransaction) transaction).getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_UPDATE_BOOKING_STATUS, status.name());
       pst.setTimestamp(FIELD_UPDATE_BOOKING_UPDATED, new java.sql.Timestamp(new Date().getTime()));
-      pst.setString(FIELD_UPDATE_BOOKING_BOTH_ADDITIONAL_INFORMATION,
-          objectMapper.writeValueAsString(additionalEventInformation));
+      pst.setString(
+        FIELD_UPDATE_BOOKING_BOTH_ADDITIONAL_INFORMATION,
+        objectMapper.writeValueAsString(additionalEventInformation)
+      );
       pst.setLong(FIELD_UPDATE_BOOKING_BOTH_RESERVED_BY, reservingUserId);
       pst.setString(FIELD_UPDATE_BOOKING_BOTH_EVENT_ID, eventId);
       pst.setLong(FIELD_UPDATE_BOOKING_BOTH_USER_ID, userId);
@@ -197,14 +242,19 @@ public class PgEventBookings implements EventBookings {
    * @throws SegueDatabaseException - if the database goes wrong.
    * @see #updateStatus
    */
-  private void updateBookingStatus(final ITransaction transaction, final String eventId, final Long userId,
-                                   final Long reservingUserId, final BookingStatus status)
-      throws SegueDatabaseException {
+  private void updateBookingStatus(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final Long reservingUserId,
+    final BookingStatus status
+  )
+    throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
       throw new SegueDatabaseException("Incorrect database transaction class type!");
     }
     String query =
-        "UPDATE event_bookings SET status = ?, updated = ?, reserved_by = ? WHERE event_id = ? AND user_id = ?;";
+      "UPDATE event_bookings SET status = ?, updated = ?, reserved_by = ? WHERE event_id = ? AND user_id = ?;";
     Connection conn = ((PgTransaction) transaction).getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_UPDATE_BOOKING_STATUS, status.name());
@@ -233,22 +283,29 @@ public class PgEventBookings implements EventBookings {
    * @throws SegueDatabaseException - if the database goes wrong.
    * @see #updateStatus
    */
-  private void updateBookingStatus(final ITransaction transaction, final String eventId, final Long userId,
-                                   final BookingStatus status,
-                                   final Map<String, String> additionalEventInformation) throws SegueDatabaseException {
+  private void updateBookingStatus(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final BookingStatus status,
+    final Map<String, String> additionalEventInformation
+  )
+    throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
       throw new SegueDatabaseException("Incorrect database transaction class type!");
     }
 
     String query =
-        "UPDATE event_bookings SET status = ?, updated = ?, additional_booking_information = ?::text::jsonb"
-            + " WHERE event_id = ? AND user_id = ?;";
+      "UPDATE event_bookings SET status = ?, updated = ?, additional_booking_information = ?::text::jsonb" +
+      " WHERE event_id = ? AND user_id = ?;";
     Connection conn = ((PgTransaction) transaction).getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_UPDATE_BOOKING_STATUS, status.name());
       pst.setTimestamp(FIELD_UPDATE_BOOKING_UPDATED, new java.sql.Timestamp(new Date().getTime()));
-      pst.setString(FIELD_UPDATE_BOOKING_SINGLE_ADDITIONAL_INFORMATION,
-          objectMapper.writeValueAsString(additionalEventInformation));
+      pst.setString(
+        FIELD_UPDATE_BOOKING_SINGLE_ADDITIONAL_INFORMATION,
+        objectMapper.writeValueAsString(additionalEventInformation)
+      );
       pst.setString(FIELD_UPDATE_BOOKING_SINGLE_EVENT_ID, eventId);
       pst.setLong(FIELD_UPDATE_BOOKING_SINGLE_USER_ID, userId);
 
@@ -274,8 +331,13 @@ public class PgEventBookings implements EventBookings {
    * @throws SegueDatabaseException - if the database goes wrong.
    * @see #updateStatus
    */
-  private void updateBookingStatus(final ITransaction transaction, final String eventId, final Long userId,
-                                   final BookingStatus status) throws SegueDatabaseException {
+  private void updateBookingStatus(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final BookingStatus status
+  )
+    throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
       throw new SegueDatabaseException("Incorrect database transaction class type!");
     }
@@ -300,7 +362,7 @@ public class PgEventBookings implements EventBookings {
 
   @Override
   public void delete(final ITransaction transaction, final String eventId, final Long userId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
       throw new SegueDatabaseException("Incorrect database transaction class type!");
     }
@@ -315,7 +377,6 @@ public class PgEventBookings implements EventBookings {
       if (executeUpdate == 0) {
         throw new ResourceNotFoundException("Could not delete the requested booking.");
       }
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception while trying to delete event booking", e);
     }
@@ -324,9 +385,7 @@ public class PgEventBookings implements EventBookings {
   @Override
   public void deleteAdditionalInformation(final Long userId) throws SegueDatabaseException {
     String query = "UPDATE event_bookings SET additional_booking_information = null WHERE user_id = ?;";
-    try (Connection conn = ds.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = ds.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_DELETE_ADDITIONAL_INFORMATION_USER_ID, userId);
       pst.executeUpdate();
     } catch (SQLException e) {
@@ -342,7 +401,7 @@ public class PgEventBookings implements EventBookings {
    */
   @Override
   public void lockEventUntilTransactionComplete(final ITransaction transaction, final String resourceId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
       throw new SegueDatabaseException("Incorrect database transaction class type!");
     }
@@ -354,8 +413,13 @@ public class PgEventBookings implements EventBookings {
     Connection conn = ((PgTransaction) transaction).getConnection();
     try (PreparedStatement pst = conn.prepareStatement("SELECT pg_advisory_xact_lock(?)")) {
       pst.setLong(FIELD_TRANSACTION_LOCK_CRC, crc.getValue());
-      log.debug(String.format("Attempting to acquire advisory transaction lock on %s (%s)", TABLE_NAME + resourceId,
-          crc.getValue()));
+      log.debug(
+        String.format(
+          "Attempting to acquire advisory transaction lock on %s (%s)",
+          TABLE_NAME + resourceId,
+          crc.getValue()
+        )
+      );
       pst.executeQuery();
     } catch (SQLException e) {
       String msg = String.format("Unable to acquire lock for event (%s).", resourceId);
@@ -370,9 +434,7 @@ public class PgEventBookings implements EventBookings {
     Validate.notNull(bookingId);
 
     String query = "SELECT * FROM event_bookings WHERE id = ?";
-    try (Connection conn = ds.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = ds.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_BY_ID_BOOKING_ID, bookingId);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -404,14 +466,11 @@ public class PgEventBookings implements EventBookings {
    * @see uk.ac.cam.cl.dtg.isaac.dos.eventbookings.EventBookings#iterate()
    */
   @Override
-  public EventBooking findBookingByEventAndUser(final String eventId, final Long userId)
-      throws SegueDatabaseException {
+  public EventBooking findBookingByEventAndUser(final String eventId, final Long userId) throws SegueDatabaseException {
     Validate.notBlank(eventId);
 
     String query = "SELECT * FROM event_bookings WHERE event_id = ? AND user_id = ?";
-    try (Connection conn = ds.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = ds.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_GET_BY_EVENT_AND_USER_EVENT_ID, eventId);
       pst.setLong(FIELD_GET_BY_EVENT_AND_USER_USER_ID, userId);
 
@@ -429,8 +488,10 @@ public class PgEventBookings implements EventBookings {
           throw new ResourceNotFoundException("Unable to locate the booking you requested.");
         } else {
           String msg = String.format(
-              "Found more than one event booking that matches event id (%s) and user id (%s).",
-              sanitiseExternalLogValue(eventId), userId);
+            "Found more than one event booking that matches event id (%s) and user id (%s).",
+            sanitiseExternalLogValue(eventId),
+            userId
+          );
           log.error(msg);
           throw new SegueDatabaseException(msg);
         }
@@ -453,9 +514,10 @@ public class PgEventBookings implements EventBookings {
   @Override
   public Long countAllEventBookings() throws SegueDatabaseException {
     String query = "SELECT COUNT(1) AS TOTAL FROM event_bookings";
-    try (Connection conn = ds.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query);
-         ResultSet results = pst.executeQuery()
+    try (
+      Connection conn = ds.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query);
+      ResultSet results = pst.executeQuery()
     ) {
       results.next();
       return results.getLong("TOTAL");
@@ -465,14 +527,17 @@ public class PgEventBookings implements EventBookings {
   }
 
   @Override
-  public Map<BookingStatus, Map<Role, Long>> getEventBookingStatusCounts(final String eventId,
-                                                                         final boolean includeDeletedUsersInCounts)
-      throws SegueDatabaseException {
+  public Map<BookingStatus, Map<Role, Long>> getEventBookingStatusCounts(
+    final String eventId,
+    final boolean includeDeletedUsersInCounts
+  )
+    throws SegueDatabaseException {
     // Note this method joins at the db table mainly to allow inclusion of deleted users in the counts.
     StringBuilder sb = new StringBuilder();
-    sb.append("SELECT event_bookings.status, users.role, COUNT(event_bookings.id) FROM event_bookings \n"
-        + "INNER JOIN users ON event_bookings.user_id = users.id\n"
-        + "WHERE event_bookings.event_id=?"
+    sb.append(
+      "SELECT event_bookings.status, users.role, COUNT(event_bookings.id) FROM event_bookings \n" +
+      "INNER JOIN users ON event_bookings.user_id = users.id\n" +
+      "WHERE event_bookings.event_id=?"
     );
 
     if (!includeDeletedUsersInCounts) {
@@ -481,9 +546,7 @@ public class PgEventBookings implements EventBookings {
 
     sb.append(" GROUP BY event_bookings.status, users.role;");
 
-    try (Connection conn = ds.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(sb.toString())
-    ) {
+    try (Connection conn = ds.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(sb.toString())) {
       pst.setString(FIELD_GET_STATUS_COUNTS_EVENT_ID, eventId);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -517,20 +580,20 @@ public class PgEventBookings implements EventBookings {
    */
   @Override
   public Iterable<EventBooking> findAllByEventIdAndStatus(final String eventId, @Nullable final BookingStatus status)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     Validate.notBlank(eventId);
 
     StringBuilder sb = new StringBuilder();
-    sb.append("SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id=?"
-        + " AND NOT users.deleted");
+    sb.append(
+      "SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id=?" +
+      " AND NOT users.deleted"
+    );
 
     if (status != null) {
       sb.append(" AND status = ?");
     }
 
-    try (Connection conn = ds.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(sb.toString())
-    ) {
+    try (Connection conn = ds.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(sb.toString())) {
       pst.setString(FIELD_SGET_BY_EVENT_AND_STATUS_EVENT_ID, eventId);
       if (status != null) {
         pst.setString(FIELD_SGET_BY_EVENT_AND_STATUS_STATUS, status.name());
@@ -553,9 +616,7 @@ public class PgEventBookings implements EventBookings {
     Validate.notNull(userId);
 
     String query = "SELECT * FROM event_bookings WHERE user_id = ?";
-    try (Connection conn = ds.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = ds.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_BY_USER_ID_USER_ID, userId);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -575,10 +636,8 @@ public class PgEventBookings implements EventBookings {
     Validate.notNull(userId);
 
     String query =
-        "SELECT distinct on (event_id) * FROM event_bookings WHERE reserved_by = ? AND status != 'CANCELLED'";
-    try (Connection conn = ds.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+      "SELECT distinct on (event_id) * FROM event_bookings WHERE reserved_by = ? AND status != 'CANCELLED'";
+    try (Connection conn = ds.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_RESERVATIONS_BY_USER_ID_RESERVED_BY, userId);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -604,14 +663,14 @@ public class PgEventBookings implements EventBookings {
    */
   private PgEventBooking buildPgEventBooking(final ResultSet results) throws SQLException, SegueDatabaseException {
     return new PgEventBooking(
-        results.getLong("id"),
-        results.getLong("user_id"),
-        results.getLong("reserved_by"),
-        results.getString("event_id"),
-        BookingStatus.valueOf(results.getString("status")),
-        results.getTimestamp("created"),
-        results.getTimestamp("updated"),
-        results.getObject("additional_booking_information")
+      results.getLong("id"),
+      results.getLong("user_id"),
+      results.getLong("reserved_by"),
+      results.getString("event_id"),
+      BookingStatus.valueOf(results.getString("status")),
+      results.getTimestamp("created"),
+      results.getTimestamp("updated"),
+      results.getObject("additional_booking_information")
     );
   }
 

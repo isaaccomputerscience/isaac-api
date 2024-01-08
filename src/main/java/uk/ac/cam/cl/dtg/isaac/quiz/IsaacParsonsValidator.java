@@ -45,18 +45,27 @@ public class IsaacParsonsValidator implements IValidator {
     Validate.notNull(answer);
 
     if (!(question instanceof IsaacParsonsQuestion)) {
-      throw new IllegalArgumentException(String.format(
-          "This validator only works with IsaacParsonsQuestions (%s is not ParsonsQuestion)", question.getId()));
+      throw new IllegalArgumentException(
+        String.format(
+          "This validator only works with IsaacParsonsQuestions (%s is not ParsonsQuestion)",
+          question.getId()
+        )
+      );
     }
 
     if (!(answer instanceof ParsonsChoice)) {
-      throw new IllegalArgumentException(String.format(
-          "Expected ParsonsChoice for IsaacParsonsQuestion: %s. Received (%s) ", question.getId(), answer.getClass()));
+      throw new IllegalArgumentException(
+        String.format(
+          "Expected ParsonsChoice for IsaacParsonsQuestion: %s. Received (%s) ",
+          question.getId(),
+          answer.getClass()
+        )
+      );
     }
 
     // These variables store the important features of the response we'll send.
-    Content feedback = null;                        // The feedback we send the user
-    boolean responseCorrect = false;                // Whether we're right or wrong
+    Content feedback = null; // The feedback we send the user
+    boolean responseCorrect = false; // Whether we're right or wrong
 
     IsaacParsonsQuestion parsonsQuestion = (IsaacParsonsQuestion) question;
     ParsonsChoice submittedChoice = (ParsonsChoice) answer;
@@ -64,14 +73,16 @@ public class IsaacParsonsValidator implements IValidator {
     // STEP 0: Is it even possible to answer this question?
 
     if (null == parsonsQuestion.getChoices() || parsonsQuestion.getChoices().isEmpty()) {
-      log.error("Question does not have any answers. " + question.getId() + " src: "
-          + question.getCanonicalSourceFile());
+      log.error(
+        "Question does not have any answers. " + question.getId() + " src: " + question.getCanonicalSourceFile()
+      );
       feedback = new Content("This question does not have any correct answers!");
     }
 
     if (null == parsonsQuestion.getItems() || parsonsQuestion.getItems().isEmpty()) {
-      log.error("ItemQuestion does not have any items. " + question.getId() + " src: "
-          + question.getCanonicalSourceFile());
+      log.error(
+        "ItemQuestion does not have any items. " + question.getId() + " src: " + question.getCanonicalSourceFile()
+      );
       feedback = new Content("This question does not have any items to choose from!");
     }
 
@@ -99,12 +110,15 @@ public class IsaacParsonsValidator implements IValidator {
 
       // For all the choices on this question...
       for (Choice c : orderedChoices) {
-
         // ... that are of the Formula type, ...
         if (!(c instanceof ParsonsChoice)) {
-          log.error(String.format(
+          log.error(
+            String.format(
               "Validator for question (%s) expected there to be an ParsonsChoice. Instead it found a %s.",
-              parsonsQuestion.getId(), c.getClass().toString()));
+              parsonsQuestion.getId(),
+              c.getClass().toString()
+            )
+          );
           continue;
         }
 
@@ -112,8 +126,9 @@ public class IsaacParsonsValidator implements IValidator {
 
         // ... and that have a python expression ...
         if (null == parsonsChoice.getItems() || parsonsChoice.getItems().isEmpty()) {
-          log.error("Expected list of ParsonsItems, but none found in choice for question id: "
-              + parsonsQuestion.getId());
+          log.error(
+            "Expected list of ParsonsItems, but none found in choice for question id: " + parsonsQuestion.getId()
+          );
           continue;
         }
 
@@ -168,5 +183,4 @@ public class IsaacParsonsValidator implements IValidator {
 
     return new QuestionValidationResponse(question.getId(), answer, responseCorrect, feedback, new Date());
   }
-
 }

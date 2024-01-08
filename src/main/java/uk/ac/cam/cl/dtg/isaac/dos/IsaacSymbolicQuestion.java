@@ -54,5 +54,4 @@ public class IsaacSymbolicQuestion extends IsaacQuestionBase {
   public void setAvailableSymbols(final List<String> availableSymbols) {
     this.availableSymbols = availableSymbols;
   }
-
 }

@@ -30,6 +30,4 @@ import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 @DTOMapping(IsaacGraphSketcherQuestionDTO.class)
 @JsonContentType("isaacGraphSketcherQuestion")
 @ValidatesWith(IsaacGraphSketcherValidator.class)
-public class IsaacGraphSketcherQuestion extends IsaacQuestionBase {
-
-}
+public class IsaacGraphSketcherQuestion extends IsaacQuestionBase {}

@@ -262,7 +262,6 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
         globalProperties = new PropertiesLoader(configLocation);
 
         log.info(String.format("Segue using configuration file: %s", configLocation));
-
       } catch (IOException e) {
         log.error("Error loading properties file.", e);
       }
@@ -277,7 +276,6 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
       this.configureSegueSearch();
       this.configureAuthenticationProviders();
       this.configureApplicationManagers();
-
     } catch (IOException e) {
       e.printStackTrace();
       log.error("IOException during setup process.");
@@ -313,20 +311,23 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
 
     this.bindConstantToProperty(Constants.API_METRICS_EXPORT_PORT, globalProperties);
 
-    this.bind(String.class).toProvider(() -> {
-      // Any binding to String without a matching @Named annotation will always get the empty string
-      // which seems incredibly likely to cause errors and rarely to be intended behaviour,
-      // so throw an error early in DEV and log an error in PROD.
-      try {
-        throw new IllegalArgumentException("Binding a String without a matching @Named annotation");
-      } catch (IllegalArgumentException e) {
-        if (globalProperties.getProperty(SEGUE_APP_ENVIRONMENT).equals(DEV.name())) {
-          throw e;
+    this.bind(String.class)
+      .toProvider(
+        () -> {
+          // Any binding to String without a matching @Named annotation will always get the empty string
+          // which seems incredibly likely to cause errors and rarely to be intended behaviour,
+          // so throw an error early in DEV and log an error in PROD.
+          try {
+            throw new IllegalArgumentException("Binding a String without a matching @Named annotation");
+          } catch (IllegalArgumentException e) {
+            if (globalProperties.getProperty(SEGUE_APP_ENVIRONMENT).equals(DEV.name())) {
+              throw e;
+            }
+            log.error("Binding a String without a matching @Named annotation", e);
+          }
+          return "";
         }
-        log.error("Binding a String without a matching @Named annotation", e);
-      }
-      return "";
-    });
+      );
   }
 
   /**
@@ -343,10 +344,14 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     this.bindConstantToProperty(Constants.POSTGRES_DB_PASSWORD, globalProperties);
 
     // GitDb
-    bind(GitDb.class).toInstance(
-        new GitDb(globalProperties.getProperty(Constants.LOCAL_GIT_DB), globalProperties
-            .getProperty(Constants.REMOTE_GIT_SSH_URL), globalProperties
-            .getProperty(Constants.REMOTE_GIT_SSH_KEY_PATH)));
+    bind(GitDb.class)
+      .toInstance(
+        new GitDb(
+          globalProperties.getProperty(Constants.LOCAL_GIT_DB),
+          globalProperties.getProperty(Constants.REMOTE_GIT_SSH_URL),
+          globalProperties.getProperty(Constants.REMOTE_GIT_SSH_KEY_PATH)
+        )
+      );
 
     bind(IUserGroupPersistenceManager.class).to(PgUserGroupPersistenceManager.class);
     bind(IAssociationDataManager.class).to(PgAssociationDataManager.class);
@@ -368,8 +373,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * Configure user security related classes.
    */
   private void configureAuthenticationProviders() {
-    MapBinder<AuthenticationProvider, IAuthenticator> mapBinder = MapBinder.newMapBinder(binder(),
-        AuthenticationProvider.class, IAuthenticator.class);
+    MapBinder<AuthenticationProvider, IAuthenticator> mapBinder = MapBinder.newMapBinder(
+      binder(),
+      AuthenticationProvider.class,
+      IAuthenticator.class
+    );
 
     this.bindConstantToProperty(Constants.HMAC_SALT, globalProperties);
     //Google reCAPTCHA
@@ -414,10 +422,13 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
 
       // Register the authenticator.
       mapBinder.addBinding(AuthenticationProvider.RASPBERRYPI).to(RaspberryPiOidcAuthenticator.class);
-
     } catch (NullPointerException e) {
-      log.error(String.format("Failed to initialise authenticator %s due to one or more absent config properties.",
-          AuthenticationProvider.RASPBERRYPI));
+      log.error(
+        String.format(
+          "Failed to initialise authenticator %s due to one or more absent config properties.",
+          AuthenticationProvider.RASPBERRYPI
+        )
+      );
     }
 
     // Segue local
@@ -451,12 +462,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     bind(ISecondFactorAuthenticator.class).to(SegueTOTPAuthenticator.class);
   }
 
-
   @Inject
   @Provides
   @Singleton
-  private static IMetricsExporter getMetricsExporter(
-      @Named(Constants.API_METRICS_EXPORT_PORT) final int port) {
+  private static IMetricsExporter getMetricsExporter(@Named(Constants.API_METRICS_EXPORT_PORT) final int port) {
     if (null == metricsExporter) {
       try {
         log.info("Creating MetricsExporter on port (" + port + ")");
@@ -486,10 +495,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   private static RestHighLevelClient getSearchConnectionInformation(
-      @Named(Constants.SEARCH_CLUSTER_ADDRESS) final String address,
-      @Named(Constants.SEARCH_CLUSTER_INFO_PORT) final int port,
-      @Named(Constants.SEARCH_CLUSTER_USERNAME) final String username,
-      @Named(Constants.SEARCH_CLUSTER_PASSWORD) final String password) {
+    @Named(Constants.SEARCH_CLUSTER_ADDRESS) final String address,
+    @Named(Constants.SEARCH_CLUSTER_INFO_PORT) final int port,
+    @Named(Constants.SEARCH_CLUSTER_USERNAME) final String username,
+    @Named(Constants.SEARCH_CLUSTER_PASSWORD) final String password
+  ) {
     if (null == elasticSearchClient) {
       try {
         elasticSearchClient = ElasticSearchProvider.getClient(address, port, username, password);
@@ -528,9 +538,12 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Inject
   @Provides
   @Singleton
-  private static GitContentManager getContentManager(final GitDb database, final ISearchProvider searchProvider,
-                                                     final ContentMapper contentMapper,
-                                                     final PropertiesLoader globalProperties) {
+  private static GitContentManager getContentManager(
+    final GitDb database,
+    final ISearchProvider searchProvider,
+    final ContentMapper contentMapper,
+    final PropertiesLoader globalProperties
+  ) {
     if (null == contentManager) {
       contentManager = new GitContentManager(database, searchProvider, contentMapper, globalProperties);
       log.info("Creating singleton of ContentManager");
@@ -552,9 +565,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Inject
   @Provides
   @Singleton
-  private static ILogManager getLogManager(final PostgresSqlDb database,
-                                           @Named(Constants.LOGGING_ENABLED) final boolean loggingEnabled) {
-
+  private static ILogManager getLogManager(
+    final PostgresSqlDb database,
+    @Named(Constants.LOGGING_ENABLED) final boolean loggingEnabled
+  ) {
     if (null == logManager) {
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -600,23 +614,34 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    */
   @Inject
   @Provides
-  private static SegueLocalAuthenticator getSegueLocalAuthenticator(final IUserDataManager database,
-                                                                    final IPasswordDataManager passwordDataManager,
-                                                                    final PropertiesLoader properties) {
+  private static SegueLocalAuthenticator getSegueLocalAuthenticator(
+    final IUserDataManager database,
+    final IPasswordDataManager passwordDataManager,
+    final PropertiesLoader properties
+  ) {
     ISegueHashingAlgorithm preferredAlgorithm = new SegueSCryptv1();
     ISegueHashingAlgorithm oldAlgorithm1 = new SeguePBKDF2v1();
     ISegueHashingAlgorithm oldAlgorithm2 = new SeguePBKDF2v2();
     ISegueHashingAlgorithm oldAlgorithm3 = new SeguePBKDF2v3();
 
     Map<String, ISegueHashingAlgorithm> possibleAlgorithms = ImmutableMap.of(
-        preferredAlgorithm.hashingAlgorithmName(), preferredAlgorithm,
-        oldAlgorithm1.hashingAlgorithmName(), oldAlgorithm1,
-        oldAlgorithm2.hashingAlgorithmName(), oldAlgorithm2,
-        oldAlgorithm3.hashingAlgorithmName(), oldAlgorithm3
+      preferredAlgorithm.hashingAlgorithmName(),
+      preferredAlgorithm,
+      oldAlgorithm1.hashingAlgorithmName(),
+      oldAlgorithm1,
+      oldAlgorithm2.hashingAlgorithmName(),
+      oldAlgorithm2,
+      oldAlgorithm3.hashingAlgorithmName(),
+      oldAlgorithm3
     );
 
-    return new SegueLocalAuthenticator(database, passwordDataManager, properties, possibleAlgorithms,
-        preferredAlgorithm);
+    return new SegueLocalAuthenticator(
+      database,
+      passwordDataManager,
+      properties,
+      possibleAlgorithms,
+      preferredAlgorithm
+    );
   }
 
   /**
@@ -634,32 +659,41 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Inject
   @Provides
   @Singleton
-  private static EmailManager getMessageCommunicationQueue(final PropertiesLoader properties,
-                                                           final EmailCommunicator emailCommunicator,
-                                                           final AbstractUserPreferenceManager userPreferenceManager,
-                                                           final GitContentManager contentManager,
-                                                           final ILogManager logManager) {
-
+  private static EmailManager getMessageCommunicationQueue(
+    final PropertiesLoader properties,
+    final EmailCommunicator emailCommunicator,
+    final AbstractUserPreferenceManager userPreferenceManager,
+    final GitContentManager contentManager,
+    final ILogManager logManager
+  ) {
     Map<String, String> globalTokens = Maps.newHashMap();
     globalTokens.put("sig", properties.getProperty(EMAIL_SIGNATURE));
-    globalTokens.put("emailPreferencesURL", String.format("https://%s/account#emailpreferences",
-        properties.getProperty(HOST_NAME)));
-    globalTokens.put("myAssignmentsURL", String.format("https://%s/assignments",
-        properties.getProperty(HOST_NAME)));
+    globalTokens.put(
+      "emailPreferencesURL",
+      String.format("https://%s/account#emailpreferences", properties.getProperty(HOST_NAME))
+    );
+    globalTokens.put("myAssignmentsURL", String.format("https://%s/assignments", properties.getProperty(HOST_NAME)));
     String myQuizzesURL = String.format("https://%s/tests", properties.getProperty(HOST_NAME));
     globalTokens.put("myQuizzesURL", myQuizzesURL);
     globalTokens.put("myTestsURL", myQuizzesURL);
-    globalTokens.put("myBookedEventsURL", String.format("https://%s/events?show_booked_only=true",
-        properties.getProperty(HOST_NAME)));
-    globalTokens.put("contactUsURL", String.format("https://%s/contact",
-        properties.getProperty(HOST_NAME)));
-    globalTokens.put("accountURL", String.format("https://%s/account",
-        properties.getProperty(HOST_NAME)));
+    globalTokens.put(
+      "myBookedEventsURL",
+      String.format("https://%s/events?show_booked_only=true", properties.getProperty(HOST_NAME))
+    );
+    globalTokens.put("contactUsURL", String.format("https://%s/contact", properties.getProperty(HOST_NAME)));
+    globalTokens.put("accountURL", String.format("https://%s/account", properties.getProperty(HOST_NAME)));
     globalTokens.put("siteBaseURL", String.format("https://%s", properties.getProperty(HOST_NAME)));
 
     if (null == emailCommunicationQueue) {
-      emailCommunicationQueue = new EmailManager(emailCommunicator, userPreferenceManager, properties,
-          contentManager, logManager, globalTokens);
+      emailCommunicationQueue =
+        new EmailManager(
+          emailCommunicator,
+          userPreferenceManager,
+          properties,
+          contentManager,
+          logManager,
+          globalTokens
+        );
       log.info("Creating singleton of EmailCommunicationQueue");
     }
     return emailCommunicationQueue;
@@ -680,8 +714,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   private UserAuthenticationManager getUserAuthenticationManager(
-      final IUserDataManager database, final PropertiesLoader properties,
-      final Map<AuthenticationProvider, IAuthenticator> providersToRegister, final EmailManager emailQueue) {
+    final IUserDataManager database,
+    final PropertiesLoader properties,
+    final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
+    final EmailManager emailQueue
+  ) {
     if (null == userAuthenticationManager) {
       userAuthenticationManager = new UserAuthenticationManager(database, properties, providersToRegister, emailQueue);
       log.info("Creating singleton of UserAuthenticationManager");
@@ -712,20 +749,36 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Inject
   @Provides
   @Singleton
-  private IUserAccountManager getUserManager(final IUserDataManager database, final QuestionManager questionManager,
-                                             final PropertiesLoader properties,
-                                             final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
-                                             final EmailManager emailQueue,
-                                             final IAnonymousUserDataManager temporaryUserCache,
-                                             final ILogManager logManager, final MapperFacade mapperFacade,
-                                             final UserAuthenticationManager userAuthenticationManager,
-                                             final ISecondFactorAuthenticator secondFactorManager,
-                                             final AbstractUserPreferenceManager userPreferenceManager,
-                                             final SchoolListReader schoolListReader) {
+  private IUserAccountManager getUserManager(
+    final IUserDataManager database,
+    final QuestionManager questionManager,
+    final PropertiesLoader properties,
+    final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
+    final EmailManager emailQueue,
+    final IAnonymousUserDataManager temporaryUserCache,
+    final ILogManager logManager,
+    final MapperFacade mapperFacade,
+    final UserAuthenticationManager userAuthenticationManager,
+    final ISecondFactorAuthenticator secondFactorManager,
+    final AbstractUserPreferenceManager userPreferenceManager,
+    final SchoolListReader schoolListReader
+  ) {
     if (null == userManager) {
-      userManager = new UserAccountManager(database, questionManager, properties, providersToRegister,
-          mapperFacade, emailQueue, temporaryUserCache, logManager, userAuthenticationManager,
-          secondFactorManager, userPreferenceManager, schoolListReader);
+      userManager =
+        new UserAccountManager(
+          database,
+          questionManager,
+          properties,
+          providersToRegister,
+          mapperFacade,
+          emailQueue,
+          temporaryUserCache,
+          logManager,
+          userAuthenticationManager,
+          secondFactorManager,
+          userPreferenceManager,
+          schoolListReader
+        );
       log.info("Creating singleton of UserManager");
     }
 
@@ -767,10 +820,12 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Inject
   @Provides
   @Singleton
-  private GroupManager getGroupManager(final IUserGroupPersistenceManager userGroupDataManager,
-                                       final UserAccountManager userManager, final GameManager gameManager,
-                                       final MapperFacade dtoMapper) {
-
+  private GroupManager getGroupManager(
+    final IUserGroupPersistenceManager userGroupDataManager,
+    final UserAccountManager userManager,
+    final GameManager gameManager,
+    final MapperFacade dtoMapper
+  ) {
     if (null == groupManager) {
       groupManager = new GroupManager(userGroupDataManager, userManager, gameManager, dtoMapper);
       log.info("Creating singleton of GroupManager");
@@ -779,16 +834,19 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     return groupManager;
   }
 
-
   @Inject
   @Provides
   @Singleton
   private IGroupObserver getGroupObserver(
-      final EmailManager emailManager, final GroupManager groupManager, final UserAccountManager userManager,
-      final AssignmentManager assignmentManager, final QuizAssignmentManager quizAssignmentManager) {
+    final EmailManager emailManager,
+    final GroupManager groupManager,
+    final UserAccountManager userManager,
+    final AssignmentManager assignmentManager,
+    final QuizAssignmentManager quizAssignmentManager
+  ) {
     if (null == groupObserver) {
       groupObserver =
-          new GroupChangedService(emailManager, groupManager, userManager, assignmentManager, quizAssignmentManager);
+        new GroupChangedService(emailManager, groupManager, userManager, assignmentManager, quizAssignmentManager);
       log.info("Creating singleton of GroupObserver");
     }
     return groupObserver;
@@ -813,53 +871,79 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
 
       // TODO: We should automatically register all handlers that implement this interface using reflection?
       // register handlers segue specific handlers
-      misuseMonitor.registerHandler(TokenOwnerLookupMisuseHandler.class.getSimpleName(),
-          new TokenOwnerLookupMisuseHandler(emailManager, properties));
+      misuseMonitor.registerHandler(
+        TokenOwnerLookupMisuseHandler.class.getSimpleName(),
+        new TokenOwnerLookupMisuseHandler(emailManager, properties)
+      );
 
-      misuseMonitor.registerHandler(GroupManagerLookupMisuseHandler.class.getSimpleName(),
-          new GroupManagerLookupMisuseHandler(emailManager, properties));
+      misuseMonitor.registerHandler(
+        GroupManagerLookupMisuseHandler.class.getSimpleName(),
+        new GroupManagerLookupMisuseHandler(emailManager, properties)
+      );
 
-      misuseMonitor.registerHandler(EmailVerificationMisuseHandler.class.getSimpleName(),
-          new EmailVerificationMisuseHandler());
+      misuseMonitor.registerHandler(
+        EmailVerificationMisuseHandler.class.getSimpleName(),
+        new EmailVerificationMisuseHandler()
+      );
 
-      misuseMonitor.registerHandler(EmailVerificationRequestMisuseHandler.class.getSimpleName(),
-          new EmailVerificationRequestMisuseHandler());
+      misuseMonitor.registerHandler(
+        EmailVerificationRequestMisuseHandler.class.getSimpleName(),
+        new EmailVerificationRequestMisuseHandler()
+      );
 
-      misuseMonitor.registerHandler(PasswordResetByEmailMisuseHandler.class.getSimpleName(),
-          new PasswordResetByEmailMisuseHandler());
+      misuseMonitor.registerHandler(
+        PasswordResetByEmailMisuseHandler.class.getSimpleName(),
+        new PasswordResetByEmailMisuseHandler()
+      );
 
-      misuseMonitor.registerHandler(PasswordResetByIPMisuseHandler.class.getSimpleName(),
-          new PasswordResetByIPMisuseHandler(emailManager, properties));
+      misuseMonitor.registerHandler(
+        PasswordResetByIPMisuseHandler.class.getSimpleName(),
+        new PasswordResetByIPMisuseHandler(emailManager, properties)
+      );
 
-      misuseMonitor.registerHandler(TeacherPasswordResetMisuseHandler.class.getSimpleName(),
-          new TeacherPasswordResetMisuseHandler());
+      misuseMonitor.registerHandler(
+        TeacherPasswordResetMisuseHandler.class.getSimpleName(),
+        new TeacherPasswordResetMisuseHandler()
+      );
 
-      misuseMonitor.registerHandler(RegistrationMisuseHandler.class.getSimpleName(),
-          new RegistrationMisuseHandler(emailManager, properties));
+      misuseMonitor.registerHandler(
+        RegistrationMisuseHandler.class.getSimpleName(),
+        new RegistrationMisuseHandler(emailManager, properties)
+      );
 
-      misuseMonitor.registerHandler(SegueLoginByEmailMisuseHandler.class.getSimpleName(),
-          new SegueLoginByEmailMisuseHandler(properties));
+      misuseMonitor.registerHandler(
+        SegueLoginByEmailMisuseHandler.class.getSimpleName(),
+        new SegueLoginByEmailMisuseHandler(properties)
+      );
 
-      misuseMonitor.registerHandler(SegueLoginByIPMisuseHandler.class.getSimpleName(),
-          new SegueLoginByIPMisuseHandler());
+      misuseMonitor.registerHandler(
+        SegueLoginByIPMisuseHandler.class.getSimpleName(),
+        new SegueLoginByIPMisuseHandler()
+      );
 
-      misuseMonitor.registerHandler(LogEventMisuseHandler.class.getSimpleName(),
-          new LogEventMisuseHandler(emailManager, properties));
+      misuseMonitor.registerHandler(
+        LogEventMisuseHandler.class.getSimpleName(),
+        new LogEventMisuseHandler(emailManager, properties)
+      );
 
-      misuseMonitor.registerHandler(QuestionAttemptMisuseHandler.class.getSimpleName(),
-          new QuestionAttemptMisuseHandler(properties));
+      misuseMonitor.registerHandler(
+        QuestionAttemptMisuseHandler.class.getSimpleName(),
+        new QuestionAttemptMisuseHandler(properties)
+      );
 
-      misuseMonitor.registerHandler(AnonQuestionAttemptMisuseHandler.class.getSimpleName(),
-          new AnonQuestionAttemptMisuseHandler());
+      misuseMonitor.registerHandler(
+        AnonQuestionAttemptMisuseHandler.class.getSimpleName(),
+        new AnonQuestionAttemptMisuseHandler()
+      );
 
-      misuseMonitor.registerHandler(IPQuestionAttemptMisuseHandler.class.getSimpleName(),
-          new IPQuestionAttemptMisuseHandler(emailManager, properties));
+      misuseMonitor.registerHandler(
+        IPQuestionAttemptMisuseHandler.class.getSimpleName(),
+        new IPQuestionAttemptMisuseHandler(emailManager, properties)
+      );
 
-      misuseMonitor.registerHandler(UserSearchMisuseHandler.class.getSimpleName(),
-          new UserSearchMisuseHandler());
+      misuseMonitor.registerHandler(UserSearchMisuseHandler.class.getSimpleName(), new UserSearchMisuseHandler());
 
-      misuseMonitor.registerHandler(SendEmailMisuseHandler.class.getSimpleName(),
-          new SendEmailMisuseHandler());
+      misuseMonitor.registerHandler(SendEmailMisuseHandler.class.getSimpleName(), new SendEmailMisuseHandler());
     }
 
     return misuseMonitor;
@@ -913,10 +997,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   @Inject
-  private static PostgresSqlDb getPostgresDB(@Named(Constants.POSTGRES_DB_URL) final String databaseUrl,
-                                             @Named(Constants.POSTGRES_DB_USER) final String username,
-                                             @Named(Constants.POSTGRES_DB_PASSWORD) final String password) {
-
+  private static PostgresSqlDb getPostgresDB(
+    @Named(Constants.POSTGRES_DB_URL) final String databaseUrl,
+    @Named(Constants.POSTGRES_DB_USER) final String username,
+    @Named(Constants.POSTGRES_DB_PASSWORD) final String password
+  ) {
     if (null == postgresDB) {
       postgresDB = new PostgresSqlDb(databaseUrl, username, password);
       log.info("Created Singleton of PostgresDb wrapper");
@@ -944,18 +1029,30 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   @Inject
-  private static StatisticsManager getStatsManager(final UserAccountManager userManager,
-                                                   final ILogManager logManager, final SchoolListReader schoolManager,
-                                                   final GitContentManager contentManager,
-                                                   @Named(CONTENT_INDEX) final String contentIndex,
-                                                   final GroupManager groupManager,
-                                                   final QuestionManager questionManager,
-                                                   final ContentSummarizerService contentSummarizerService,
-                                                   final IUserStreaksManager userStreaksManager) {
-
+  private static StatisticsManager getStatsManager(
+    final UserAccountManager userManager,
+    final ILogManager logManager,
+    final SchoolListReader schoolManager,
+    final GitContentManager contentManager,
+    @Named(CONTENT_INDEX) final String contentIndex,
+    final GroupManager groupManager,
+    final QuestionManager questionManager,
+    final ContentSummarizerService contentSummarizerService,
+    final IUserStreaksManager userStreaksManager
+  ) {
     if (null == statsManager) {
-      statsManager = new StatisticsManager(userManager, logManager, schoolManager, contentManager, contentIndex,
-          groupManager, questionManager, contentSummarizerService, userStreaksManager);
+      statsManager =
+        new StatisticsManager(
+          userManager,
+          logManager,
+          schoolManager,
+          contentManager,
+          contentIndex,
+          groupManager,
+          questionManager,
+          contentSummarizerService,
+          userStreaksManager
+        );
       log.info("Created Singleton of Statistics Manager");
     }
 
@@ -966,91 +1063,100 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Singleton
   @Inject
   private static SegueJobService getSegueJobService(final PropertiesLoader properties, final PostgresSqlDb database)
-      throws SchedulerException {
+    throws SchedulerException {
     if (null == segueJobService) {
       String mailjetKey = properties.getProperty(MAILJET_API_KEY);
       String mailjetSecret = properties.getProperty(MAILJET_API_SECRET);
       String eventPrePostEmails = properties.getProperty(EVENT_PRE_POST_EMAILS);
       boolean eventPrePostEmailsEnabled =
-          null != eventPrePostEmails && !eventPrePostEmails.isEmpty() && Boolean.parseBoolean(eventPrePostEmails);
+        null != eventPrePostEmails && !eventPrePostEmails.isEmpty() && Boolean.parseBoolean(eventPrePostEmails);
 
       SegueScheduledJob piiSqlJob = new SegueScheduledDatabaseScriptJob(
-          "PIIDeleteScheduledJob",
-          "SQLMaintenance",
-          "SQL scheduled job that deletes PII",
-          "0 0 2 * * ?", "db_scripts/scheduled/pii-delete-task.sql");
+        "PIIDeleteScheduledJob",
+        "SQLMaintenance",
+        "SQL scheduled job that deletes PII",
+        "0 0 2 * * ?",
+        "db_scripts/scheduled/pii-delete-task.sql"
+      );
 
       SegueScheduledJob cleanUpOldAnonymousUsers = new SegueScheduledDatabaseScriptJob(
-          "cleanAnonymousUsers",
-          "SQLMaintenance",
-          "SQL scheduled job that deletes old AnonymousUsers",
-          "0 30 2 * * ?", "db_scripts/scheduled/anonymous-user-clean-up.sql");
+        "cleanAnonymousUsers",
+        "SQLMaintenance",
+        "SQL scheduled job that deletes old AnonymousUsers",
+        "0 30 2 * * ?",
+        "db_scripts/scheduled/anonymous-user-clean-up.sql"
+      );
 
       SegueScheduledJob cleanUpExpiredReservations = new SegueScheduledDatabaseScriptJob(
-          "cleanUpExpiredReservations",
-          "SQLMaintenence",
-          "SQL scheduled job that deletes expired reservations for the event booking system",
-          "0 0 7 * * ?", "db_scripts/scheduled/expired-reservations-clean-up.sql");
+        "cleanUpExpiredReservations",
+        "SQLMaintenence",
+        "SQL scheduled job that deletes expired reservations for the event booking system",
+        "0 0 7 * * ?",
+        "db_scripts/scheduled/expired-reservations-clean-up.sql"
+      );
 
       SegueScheduledJob deleteEventAdditionalBookingInformation = SegueScheduledJob.createCustomJob(
-          "deleteEventAdditionalBookingInformation",
-          "JavaJob",
-          "Delete event additional booking information a given period after an event has taken place",
-          "0 0 7 * * ?",
-          Maps.newHashMap(),
-          new DeleteEventAdditionalBookingInformationJob()
+        "deleteEventAdditionalBookingInformation",
+        "JavaJob",
+        "Delete event additional booking information a given period after an event has taken place",
+        "0 0 7 * * ?",
+        Maps.newHashMap(),
+        new DeleteEventAdditionalBookingInformationJob()
       );
 
       SegueScheduledJob deleteEventAdditionalBookingInformationOneYearJob = SegueScheduledJob.createCustomJob(
-          "deleteEventAdditionalBookingInformationOneYear",
-          "JavaJob",
-          "Delete event additional booking information a year after an event has taken place if not already removed",
-          "0 0 7 * * ?",
-          Maps.newHashMap(),
-          new DeleteEventAdditionalBookingInformationOneYearJob()
+        "deleteEventAdditionalBookingInformationOneYear",
+        "JavaJob",
+        "Delete event additional booking information a year after an event has taken place if not already removed",
+        "0 0 7 * * ?",
+        Maps.newHashMap(),
+        new DeleteEventAdditionalBookingInformationOneYearJob()
       );
 
       SegueScheduledJob eventReminderEmail = SegueScheduledJob.createCustomJob(
-          "eventReminderEmail",
-          "JavaJob",
-          "Send scheduled reminder emails to events",
-          "0 0 7 * * ?",
-          Maps.newHashMap(),
-          new EventReminderEmailJob()
+        "eventReminderEmail",
+        "JavaJob",
+        "Send scheduled reminder emails to events",
+        "0 0 7 * * ?",
+        Maps.newHashMap(),
+        new EventReminderEmailJob()
       );
 
       SegueScheduledJob eventFeedbackEmail = SegueScheduledJob.createCustomJob(
-          "eventFeedbackEmail",
-          "JavaJob",
-          "Send scheduled feedback emails to events",
-          "0 0 20 * * ?",
-          Maps.newHashMap(),
-          new EventFeedbackEmailJob()
+        "eventFeedbackEmail",
+        "JavaJob",
+        "Send scheduled feedback emails to events",
+        "0 0 20 * * ?",
+        Maps.newHashMap(),
+        new EventFeedbackEmailJob()
       );
 
       SegueScheduledJob scheduledAssignmentsEmail = SegueScheduledJob.createCustomJob(
-          "scheduledAssignmentsEmail",
-          "JavaJob",
-          "Send scheduled assignment notification emails to groups",
-          "0 0 * ? * * *",
-          Maps.newHashMap(),
-          new ScheduledAssignmentsEmailJob()
+        "scheduledAssignmentsEmail",
+        "JavaJob",
+        "Send scheduled assignment notification emails to groups",
+        "0 0 * ? * * *",
+        Maps.newHashMap(),
+        new ScheduledAssignmentsEmailJob()
       );
 
       SegueScheduledJob syncMailjetUsers = new SegueScheduledSyncMailjetUsersJob(
-          "syncMailjetUsersJob",
-          "JavaJob",
-          "Sync users to mailjet",
-          "0 0 0/4 ? * * *");
+        "syncMailjetUsersJob",
+        "JavaJob",
+        "Sync users to mailjet",
+        "0 0 0/4 ? * * *"
+      );
 
-      List<SegueScheduledJob> configuredScheduledJobs = new ArrayList<>(Arrays.asList(
+      List<SegueScheduledJob> configuredScheduledJobs = new ArrayList<>(
+        Arrays.asList(
           piiSqlJob,
           cleanUpOldAnonymousUsers,
           cleanUpExpiredReservations,
           deleteEventAdditionalBookingInformation,
           deleteEventAdditionalBookingInformationOneYearJob,
           scheduledAssignmentsEmail
-      ));
+        )
+      );
 
       // Simply removing jobs from configuredScheduledJobs won't de-register them if they
       // are currently configured, so the constructor takes a list of jobs to remove too.
@@ -1070,7 +1176,6 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
         scheduledJobsToRemove.add(eventFeedbackEmail);
       }
       segueJobService = new SegueJobService(database, configuredScheduledJobs, scheduledJobsToRemove);
-
     }
 
     return segueJobService;
@@ -1079,9 +1184,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   @Inject
-  private static IExternalAccountManager getExternalAccountManager(final PropertiesLoader properties,
-                                                                   final PostgresSqlDb database) {
-
+  private static IExternalAccountManager getExternalAccountManager(
+    final PropertiesLoader properties,
+    final PostgresSqlDb database
+  ) {
     if (null == externalAccountManager) {
       String mailjetKey = properties.getProperty(MAILJET_API_KEY);
       String mailjetSecret = properties.getProperty(MAILJET_API_SECRET);
@@ -1089,9 +1195,13 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
       if (null != mailjetKey && null != mailjetSecret && !mailjetKey.isEmpty() && !mailjetSecret.isEmpty()) {
         // If MailJet is configured, initialise the sync:
         IExternalAccountDataManager externalAccountDataManager = new PgExternalAccountPersistenceManager(database);
-        MailJetApiClientWrapper mailJetApiClientWrapper = new MailJetApiClientWrapper(mailjetKey, mailjetSecret,
-            properties.getProperty(MAILJET_NEWS_LIST_ID), properties.getProperty(MAILJET_EVENTS_LIST_ID),
-            properties.getProperty(MAILJET_LEGAL_LIST_ID));
+        MailJetApiClientWrapper mailJetApiClientWrapper = new MailJetApiClientWrapper(
+          mailjetKey,
+          mailjetSecret,
+          properties.getProperty(MAILJET_NEWS_LIST_ID),
+          properties.getProperty(MAILJET_EVENTS_LIST_ID),
+          properties.getProperty(MAILJET_LEGAL_LIST_ID)
+        );
 
         log.info("Created singleton of ExternalAccountManager.");
         externalAccountManager = new ExternalAccountManager(mailJetApiClientWrapper, externalAccountDataManager);
@@ -1120,16 +1230,17 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Inject
   @Provides
   @Singleton
-  private static GameboardPersistenceManager getGameboardPersistenceManager(final PostgresSqlDb database,
-                                                                            final GitContentManager contentManager,
-                                                                            final MapperFacade mapper,
-                                                                            final ObjectMapper objectMapper,
-                                                                            final URIManager uriManager,
-                                                                            @Named(CONTENT_INDEX)
-                                                                            final String contentIndex) {
+  private static GameboardPersistenceManager getGameboardPersistenceManager(
+    final PostgresSqlDb database,
+    final GitContentManager contentManager,
+    final MapperFacade mapper,
+    final ObjectMapper objectMapper,
+    final URIManager uriManager,
+    @Named(CONTENT_INDEX) final String contentIndex
+  ) {
     if (null == gameboardPersistenceManager) {
-      gameboardPersistenceManager = new GameboardPersistenceManager(database, contentManager, mapper,
-          objectMapper, uriManager, contentIndex);
+      gameboardPersistenceManager =
+        new GameboardPersistenceManager(database, contentManager, mapper, objectMapper, uriManager, contentIndex);
       log.info("Creating Singleton of GameboardPersistenceManager");
     }
 
@@ -1153,11 +1264,15 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   private static AssignmentManager getAssignmentManager(
-      final IAssignmentPersistenceManager assignmentPersistenceManager, final GroupManager groupManager,
-      final EmailService emailService, final GameManager gameManager, final PropertiesLoader properties) {
+    final IAssignmentPersistenceManager assignmentPersistenceManager,
+    final GroupManager groupManager,
+    final EmailService emailService,
+    final GameManager gameManager,
+    final PropertiesLoader properties
+  ) {
     if (null == assignmentManager) {
       assignmentManager =
-          new AssignmentManager(assignmentPersistenceManager, groupManager, emailService, gameManager, properties);
+        new AssignmentManager(assignmentPersistenceManager, groupManager, emailService, gameManager, properties);
       log.info("Creating Singleton AssignmentManager");
     }
     return assignmentManager;
@@ -1173,9 +1288,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Singleton
   @Inject
   private static IsaacSymbolicValidator getSymbolicValidator(final PropertiesLoader properties) {
-
-    return new IsaacSymbolicValidator(properties.getProperty(Constants.EQUALITY_CHECKER_HOST),
-        properties.getProperty(Constants.EQUALITY_CHECKER_PORT));
+    return new IsaacSymbolicValidator(
+      properties.getProperty(Constants.EQUALITY_CHECKER_HOST),
+      properties.getProperty(Constants.EQUALITY_CHECKER_PORT)
+    );
   }
 
   /**
@@ -1188,9 +1304,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Singleton
   @Inject
   private static IsaacSymbolicLogicValidator getSymbolicLogicValidator(final PropertiesLoader properties) {
-
-    return new IsaacSymbolicLogicValidator(properties.getProperty(Constants.EQUALITY_CHECKER_HOST),
-        properties.getProperty(Constants.EQUALITY_CHECKER_PORT));
+    return new IsaacSymbolicLogicValidator(
+      properties.getProperty(Constants.EQUALITY_CHECKER_HOST),
+      properties.getProperty(Constants.EQUALITY_CHECKER_PORT)
+    );
   }
 
   /**
@@ -1242,15 +1359,14 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * @return the list of context listener classes (these should all be singletons).
    */
   public static Collection<Class<? extends ServletContextListener>> getRegisteredContextListenerClasses() {
-
     if (null == contextListeners) {
       contextListeners = Lists.newArrayList();
 
       Set<Class<? extends ServletContextListener>> subTypes = getReflectionsClass("uk.ac.cam.cl.dtg.segue")
-          .getSubTypesOf(ServletContextListener.class);
+        .getSubTypesOf(ServletContextListener.class);
 
       Set<Class<? extends ServletContextListener>> etlSubTypes = getReflectionsClass("uk.ac.cam.cl.dtg.segue.etl")
-          .getSubTypesOf(ServletContextListener.class);
+        .getSubTypesOf(ServletContextListener.class);
 
       subTypes.removeAll(etlSubTypes);
 

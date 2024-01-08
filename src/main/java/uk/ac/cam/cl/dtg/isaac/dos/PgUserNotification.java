@@ -30,9 +30,7 @@ public class PgUserNotification implements IUserNotification {
   /**
    *
    */
-  public PgUserNotification() {
-
-  }
+  public PgUserNotification() {}
 
   /**
    * @param userId - of the user who has responded
@@ -40,8 +38,12 @@ public class PgUserNotification implements IUserNotification {
    * @param status - status of the notification
    * @param created - date the entry was made.
    */
-  public PgUserNotification(final Long userId, final String contentNotificationid, final NotificationStatus status,
-                            final Date created) {
+  public PgUserNotification(
+    final Long userId,
+    final String contentNotificationid,
+    final NotificationStatus status,
+    final Date created
+  ) {
     this.userId = userId;
     this.contentNotificationId = contentNotificationid;
     this.status = status;

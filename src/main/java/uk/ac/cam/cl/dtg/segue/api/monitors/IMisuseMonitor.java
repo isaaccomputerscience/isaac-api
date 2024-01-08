@@ -25,7 +25,6 @@ import uk.ac.cam.cl.dtg.segue.api.managers.SegueResourceMisuseException;
  * This interface provides a mechanism for monitoring and imposing limits on resource access.
  */
 public interface IMisuseMonitor {
-
   /**
    * Method to notify the monitor that an event which is protected has been triggered.
    *
@@ -53,7 +52,7 @@ public interface IMisuseMonitor {
    *             - this only happens when the hard threshold has been reached and indicates possible misuse.
    */
   void notifyEvent(String agentIdentifier, String eventLabel, Integer adjustmentValue)
-      throws SegueResourceMisuseException;
+    throws SegueResourceMisuseException;
 
   /**
    * Allows inspection of internal state such that we can give early warning as to whether user has reached threshold

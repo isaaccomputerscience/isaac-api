@@ -5,13 +5,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.eclipse.jgit.transport.SshConfigStore;
 
-
 /**
  * A SshConfigStore used by JGit to configure the SSH sessions it creates.
  * ETL will use the same settings regardless of host and ignore existing on-disk configs.
  */
 public class ETLInMemorySshConfigStore implements SshConfigStore {
-
   private final InMemoryHostConfig inMemoryHostConfig;
 
   /**
@@ -42,7 +40,6 @@ public class ETLInMemorySshConfigStore implements SshConfigStore {
    * A HostConfig that ignores config options on disk, instead using those passed in via the constructor.
    */
   public static class InMemoryHostConfig implements HostConfig {
-
     private final Map<String, List<String>> config;
 
     /**
@@ -68,18 +65,20 @@ public class ETLInMemorySshConfigStore implements SshConfigStore {
 
     @Override
     public Map<String, String> getOptions() {
-      return config.entrySet()
-          .stream()
-          .filter(e -> null != e.getValue() && e.getValue().size() == 1 && null != e.getValue().get(0))
-          .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
+      return config
+        .entrySet()
+        .stream()
+        .filter(e -> null != e.getValue() && e.getValue().size() == 1 && null != e.getValue().get(0))
+        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
     }
 
     @Override
     public Map<String, List<String>> getMultiValuedOptions() {
-      return config.entrySet()
-          .stream()
-          .filter(e -> null != e.getValue() && e.getValue().size() > 1)
-          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+      return config
+        .entrySet()
+        .stream()
+        .filter(e -> null != e.getValue() && e.getValue().size() > 1)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
   }
 }

@@ -153,12 +153,20 @@ public class AdminFacade extends AbstractSegueFacade {
    * @param misuseMonitor          - misuse monitor.
    */
   @Inject
-  public AdminFacade(final PropertiesLoader properties, final UserAccountManager userManager,
-                     final GitContentManager contentManager, @Named(CONTENT_INDEX) final String contentIndex,
-                     final ILogManager logManager, final StatisticsManager statsManager,
-                     final SchoolListReader schoolReader, final AbstractUserPreferenceManager userPreferenceManager,
-                     final EventBookingManager eventBookingManager, final SegueJobService segueJobService,
-                     final IExternalAccountManager externalAccountManager, final IMisuseMonitor misuseMonitor) {
+  public AdminFacade(
+    final PropertiesLoader properties,
+    final UserAccountManager userManager,
+    final GitContentManager contentManager,
+    @Named(CONTENT_INDEX) final String contentIndex,
+    final ILogManager logManager,
+    final StatisticsManager statsManager,
+    final SchoolListReader schoolReader,
+    final AbstractUserPreferenceManager userPreferenceManager,
+    final EventBookingManager eventBookingManager,
+    final SegueJobService segueJobService,
+    final IExternalAccountManager externalAccountManager,
+    final IMisuseMonitor misuseMonitor
+  ) {
     super(properties, logManager);
     this.userManager = userManager;
     this.contentManager = contentManager;
@@ -185,12 +193,13 @@ public class AdminFacade extends AbstractSegueFacade {
   public Response getStatistics(@Context final HttpServletRequest request) {
     try {
       if (!isUserStaff(userManager, request)) {
-        return new SegueErrorResponse(Status.FORBIDDEN, "You must be an admin to access this endpoint.")
-            .toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "You must be an admin to access this endpoint.").toResponse();
       }
 
-      return Response.ok(statsManager.getGeneralStatistics())
-          .cacheControl(getCacheControl(NUMBER_SECONDS_IN_FIVE_MINUTES, false)).build();
+      return Response
+        .ok(statsManager.getGeneralStatistics())
+        .cacheControl(getCacheControl(NUMBER_SECONDS_IN_FIVE_MINUTES, false))
+        .build();
     } catch (SegueDatabaseException e) {
       log.error("Unable to load general statistics.", e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error", e).toResponse();
@@ -211,27 +220,27 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/users/change_role/{role}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public synchronized Response modifyUsersRole(@Context final HttpServletRequest request,
-                                               @PathParam("role") final String role, final List<Long> userIds) {
+  public synchronized Response modifyUsersRole(
+    @Context final HttpServletRequest request,
+    @PathParam("role") final String role,
+    final List<Long> userIds
+  ) {
     try {
       RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdminOrEventManager(userManager, requestingUser)) {
-        return new SegueErrorResponse(Status.FORBIDDEN, "You must be staff to access this endpoint.")
-            .toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "You must be staff to access this endpoint.").toResponse();
       }
 
       Role requestedRole = Role.valueOf(role);
 
       if (userIds.contains(requestingUser.getId())) {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "Aborted - you cannot modify your own role.")
-            .toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "Aborted - you cannot modify your own role.").toResponse();
       }
 
       // can't promote anyone to a role higher than yourself
       if (requestedRole.ordinal() >= requestingUser.getRole().ordinal()) {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "Cannot change to role equal or higher than your own.").toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "Cannot change to role equal or higher than your own.")
+        .toResponse();
       }
 
       // fail fast - break if any of the users given already have the role they are being elevated to
@@ -244,16 +253,20 @@ public class AdminFacade extends AbstractSegueFacade {
 
         // if a user already has this role, abort
         if (user.getRole() != null && user.getRole() == requestedRole) {
-          return new SegueErrorResponse(Status.BAD_REQUEST,
-              "Aborted - cannot demote one or more users "
-                  + "who have roles equal or higher than new role").toResponse();
+          return new SegueErrorResponse(
+            Status.BAD_REQUEST,
+            "Aborted - cannot demote one or more users " + "who have roles equal or higher than new role"
+          )
+          .toResponse();
         }
 
         // if a user has a higher role than the requester, abort
         if (user.getRole() != null && user.getRole().ordinal() >= requestingUser.getRole().ordinal()) {
-          return new SegueErrorResponse(Status.FORBIDDEN,
-              "Aborted - cannot demote one or more users "
-                  + "who have roles equal or higher than you,").toResponse();
+          return new SegueErrorResponse(
+            Status.FORBIDDEN,
+            "Aborted - cannot demote one or more users " + "who have roles equal or higher than you,"
+          )
+          .toResponse();
         }
       }
 
@@ -261,26 +274,32 @@ public class AdminFacade extends AbstractSegueFacade {
         RegisteredUserDTO user = this.userManager.getUserDTOById(userid);
         Role oldRole = user.getRole();
         this.userManager.updateUserRole(userid, requestedRole);
-        log.info(String.format(
+        log.info(
+          String.format(
             "ADMIN user %s has modified the role of %s [%s] to %s",
-            requestingUser.getEmail(), user.getEmail(), user.getId(), user.getRole()
-        ));
-        this.getLogManager().logEvent(requestingUser, request, SegueServerLogType.CHANGE_USER_ROLE,
-            ImmutableMap.of(USER_ID_FKEY_FIELDNAME, user.getId(),
-                "oldRole", oldRole,
-                "newRole", requestedRole));
+            requestingUser.getEmail(),
+            user.getEmail(),
+            user.getId(),
+            user.getRole()
+          )
+        );
+        this.getLogManager()
+          .logEvent(
+            requestingUser,
+            request,
+            SegueServerLogType.CHANGE_USER_ROLE,
+            ImmutableMap.of(USER_ID_FKEY_FIELDNAME, user.getId(), "oldRole", oldRole, "newRole", requestedRole)
+          );
       }
-
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (NoUserException e) {
       log.error("NoUserException when attempting to demote users.", e);
-      return new SegueErrorResponse(Status.BAD_REQUEST, "One or more users could not be found")
-          .toResponse();
+      return new SegueErrorResponse(Status.BAD_REQUEST, "One or more users could not be found").toResponse();
     } catch (SegueDatabaseException e) {
       log.error("Database error while trying to change user role", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Could not save new role to the database").toResponse();
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Could not save new role to the database")
+      .toResponse();
     }
 
     return Response.ok().build();
@@ -300,25 +319,24 @@ public class AdminFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   public synchronized Response modifyUsersEmailVerificationStatus(
-      @Context final HttpServletRequest request,
-      @PathParam("emailVerificationStatus") final String emailVerificationStatus,
-      @PathParam("checkEmailsExistBeforeApplying") final boolean checkEmailsExistBeforeApplying,
-      final List<String> emails) {
+    @Context final HttpServletRequest request,
+    @PathParam("emailVerificationStatus") final String emailVerificationStatus,
+    @PathParam("checkEmailsExistBeforeApplying") final boolean checkEmailsExistBeforeApplying,
+    final List<String> emails
+  ) {
     try {
       RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdminOrEventManager(userManager, requestingUser)) {
-        return new SegueErrorResponse(Status.FORBIDDEN, "You must be staff to access this endpoint.")
-            .toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "You must be staff to access this endpoint.").toResponse();
       }
 
-      EmailVerificationStatus requestedEmailVerificationStatus = EmailVerificationStatus
-          .valueOf(emailVerificationStatus);
+      EmailVerificationStatus requestedEmailVerificationStatus = EmailVerificationStatus.valueOf(
+        emailVerificationStatus
+      );
 
       if (emails.contains(requestingUser.getEmail())) {
-        return new SegueErrorResponse(Status.FORBIDDEN, "Aborted - you cannot modify yourself.")
-            .toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "Aborted - you cannot modify yourself.").toResponse();
       }
-
 
       if (checkEmailsExistBeforeApplying) {
         // fail fast - break if any of the users given already have the role they are being elevated to
@@ -335,16 +353,17 @@ public class AdminFacade extends AbstractSegueFacade {
       for (String email : emails) {
         this.userManager.updateUserEmailVerificationStatus(email, requestedEmailVerificationStatus);
       }
-
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (NoUserException e) {
       log.error("NoUserException when attempting to change users verification status.", e);
-      return new SegueErrorResponse(Status.BAD_REQUEST, "One or more users could not be found")
-          .toResponse();
+      return new SegueErrorResponse(Status.BAD_REQUEST, "One or more users could not be found").toResponse();
     } catch (SegueDatabaseException e) {
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Could not save new email verification status to the database").toResponse();
+      return new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Could not save new email verification status to the database"
+      )
+      .toResponse();
     }
 
     return Response.ok().build();
@@ -362,12 +381,15 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/users/change_email_verification_status/delivery_failed")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Update a list of possible account emails as delivery failed.",
-      description = "This endpoint requires a Bearer token in the Authorization header and not a Segue cookie.")
+  @Operation(
+    summary = "Update a list of possible account emails as delivery failed.",
+    description = "This endpoint requires a Bearer token in the Authorization header and not a Segue cookie."
+  )
   public synchronized Response setUsersEmailVerificationStatusFailed(
-      @Context final HttpServletRequest request,
-      @HeaderParam("Authorization") final String providedAuthHeader,
-      final List<String> emails) {
+    @Context final HttpServletRequest request,
+    @HeaderParam("Authorization") final String providedAuthHeader,
+    final List<String> emails
+  ) {
     try {
       String endpointToken = this.getProperties().getProperty(Constants.EMAIL_VERIFICATION_ENDPOINT_TOKEN);
       if (null == endpointToken || endpointToken.isEmpty()) {
@@ -383,20 +405,31 @@ public class AdminFacade extends AbstractSegueFacade {
       String remoteIpAddress = RequestIpExtractor.getClientIpAddr(request);
       String expectedHeader = "Bearer " + endpointToken;
       if (!expectedHeader.equals(providedAuthHeader)) {
-        log.warn(String.format("Request from (%s) attempted to set email delivery statuses with invalid token!",
-            remoteIpAddress));
+        log.warn(
+          String.format(
+            "Request from (%s) attempted to set email delivery statuses with invalid token!",
+            remoteIpAddress
+          )
+        );
         return new SegueErrorResponse(Status.UNAUTHORIZED, "Unauthorised").toResponse();
       }
 
       for (String email : emails) {
         this.userManager.updateUserEmailVerificationStatus(email, EmailVerificationStatus.DELIVERY_FAILED);
       }
-      log.info(String.format("Request from (%s) updated the status of %s emails to DELIVERY_FAILED.", remoteIpAddress,
-          emails.size()));
-
+      log.info(
+        String.format(
+          "Request from (%s) updated the status of %s emails to DELIVERY_FAILED.",
+          remoteIpAddress,
+          emails.size()
+        )
+      );
     } catch (SegueDatabaseException e) {
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Could not save new email verification status to the database").toResponse();
+      return new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Could not save new email verification status to the database"
+      )
+      .toResponse();
     }
 
     return Response.ok().build();
@@ -414,11 +447,14 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/users/delivery_failed_notification")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Update a possible account email as delivery failed.",
-      description = "This endpoint requires a valid HMAC from MailGun.")
-  public Response notifySingleDeliveryFailure(@Context final HttpServletRequest request,
-                                              final Map<String, Object> webhookPayload) {
-
+  @Operation(
+    summary = "Update a possible account email as delivery failed.",
+    description = "This endpoint requires a valid HMAC from MailGun."
+  )
+  public Response notifySingleDeliveryFailure(
+    @Context final HttpServletRequest request,
+    final Map<String, Object> webhookPayload
+  ) {
     String trustedSigningKey = getProperties().getProperty(MAILGUN_SECRET_KEY);
     if (null == trustedSigningKey || trustedSigningKey.isEmpty()) {
       return SegueErrorResponse.getNotImplementedResponse();
@@ -445,8 +481,13 @@ public class AdminFacade extends AbstractSegueFacade {
       log.info(String.format("Request from (%s) updated the status of 1 email to DELIVERY_FAILED.", remoteIpAddress));
 
       return Response.ok().build();
-    } catch (NoSuchAlgorithmException | InvalidKeyException | SegueDatabaseException | ClassCastException
-             | NullPointerException e) {
+    } catch (
+      NoSuchAlgorithmException
+      | InvalidKeyException
+      | SegueDatabaseException
+      | ClassCastException
+      | NullPointerException e
+    ) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unable to process request.").toResponse();
     }
   }
@@ -463,11 +504,15 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/users/delivery_failed_notification/{providerToken}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Update a list of possible account emails as delivery failed.",
-      description = "This endpoint expects the body to be in MailJet format.")
-  public Response notifyExternalDeliveryFailure(@Context final HttpServletRequest request,
-                                                @PathParam("providerToken") final String providerToken,
-                                                final List<Map<String, Object>> eventDetailsList) {
+  @Operation(
+    summary = "Update a list of possible account emails as delivery failed.",
+    description = "This endpoint expects the body to be in MailJet format."
+  )
+  public Response notifyExternalDeliveryFailure(
+    @Context final HttpServletRequest request,
+    @PathParam("providerToken") final String providerToken,
+    final List<Map<String, Object>> eventDetailsList
+  ) {
     try {
       final String expectedProviderToken = getProperties().getProperty(MAILJET_WEBHOOK_TOKEN);
       if (null == expectedProviderToken || expectedProviderToken.isEmpty()) {
@@ -496,8 +541,13 @@ public class AdminFacade extends AbstractSegueFacade {
         }
       }
       String remoteIpAddress = RequestIpExtractor.getClientIpAddr(request);
-      log.info(String.format("Request from (%s) updated the status of %s emails to DELIVERY_FAILED.", remoteIpAddress,
-          eventDetailsList.size()));
+      log.info(
+        String.format(
+          "Request from (%s) updated the status of %s emails to DELIVERY_FAILED.",
+          remoteIpAddress,
+          eventDetailsList.size()
+        )
+      );
       return Response.ok().build();
     } catch (SegueDatabaseException | ClassCastException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unable to process request.").toResponse();
@@ -516,11 +566,15 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/users/unsubscription_notification/{providerToken}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Unsubscribe a list of possible account emails from an email type.",
-      description = "This endpoint expects the body to be in MailJet format.")
-  public Response notifyExternalUnsubscriptionEvent(@Context final HttpServletRequest request,
-                                                    @PathParam("providerToken") final String providerToken,
-                                                    final List<Map<String, Object>> eventDetailsList) {
+  @Operation(
+    summary = "Unsubscribe a list of possible account emails from an email type.",
+    description = "This endpoint expects the body to be in MailJet format."
+  )
+  public Response notifyExternalUnsubscriptionEvent(
+    @Context final HttpServletRequest request,
+    @PathParam("providerToken") final String providerToken,
+    final List<Map<String, Object>> eventDetailsList
+  ) {
     try {
       final String expectedProviderToken = getProperties().getProperty(MAILJET_WEBHOOK_TOKEN);
       if (null == expectedProviderToken || expectedProviderToken.isEmpty()) {
@@ -536,34 +590,53 @@ public class AdminFacade extends AbstractSegueFacade {
         String recipientEmail = (String) eventDetails.get("email");
         Integer mailjetListId = (Integer) eventDetails.get("mj_list_id");
         EmailType unsubscribedEmailType = EmailType.NEWS_AND_UPDATES;
-        if (null != mailjetListId && getProperties().getProperty(MAILJET_NEWS_LIST_ID)
-            .equals(mailjetListId.toString())) {
+        if (
+          null != mailjetListId && getProperties().getProperty(MAILJET_NEWS_LIST_ID).equals(mailjetListId.toString())
+        ) {
           unsubscribedEmailType = EmailType.NEWS_AND_UPDATES;
-        } else if (null != mailjetListId && getProperties().getProperty(MAILJET_EVENTS_LIST_ID)
-            .equals(mailjetListId.toString())) {
+        } else if (
+          null != mailjetListId && getProperties().getProperty(MAILJET_EVENTS_LIST_ID).equals(mailjetListId.toString())
+        ) {
           unsubscribedEmailType = EmailType.EVENTS;
         } else {
-          log.warn(String.format("User with email (%s) attempted to unsubscribe from unrecognised list (%s)!",
-              sanitiseInternalLogValue(recipientEmail), mailjetListId));
+          log.warn(
+            String.format(
+              "User with email (%s) attempted to unsubscribe from unrecognised list (%s)!",
+              sanitiseInternalLogValue(recipientEmail),
+              mailjetListId
+            )
+          );
         }
         // Find and unsubscribe user:
         if (recipientEmail != null && !recipientEmail.isEmpty()) {
           try {
             RegisteredUserDTO user = userManager.getUserDTOByEmail(recipientEmail);
-            UserPreference preferenceToSave =
-                new UserPreference(user.getId(), SegueUserPreferences.EMAIL_PREFERENCE.name(),
-                    unsubscribedEmailType.name(), false);
+            UserPreference preferenceToSave = new UserPreference(
+              user.getId(),
+              SegueUserPreferences.EMAIL_PREFERENCE.name(),
+              unsubscribedEmailType.name(),
+              false
+            );
             userPreferencesToUpdate.add(preferenceToSave);
           } catch (NoUserException e) {
-            log.warn(String.format("User with email (%s) attempted to unsubscribe, but no Isaac account found!",
-                sanitiseInternalLogValue(recipientEmail)));
+            log.warn(
+              String.format(
+                "User with email (%s) attempted to unsubscribe, but no Isaac account found!",
+                sanitiseInternalLogValue(recipientEmail)
+              )
+            );
           }
         }
       }
       userPreferenceManager.saveUserPreferences(userPreferencesToUpdate);
       String remoteIpAddress = RequestIpExtractor.getClientIpAddr(request);
-      log.info(String.format("Request from (%s) unsubscribed %s emails from NEWS_AND_UPDATES emails.", remoteIpAddress,
-          userPreferencesToUpdate.size()));
+      log.info(
+        String.format(
+          "Request from (%s) unsubscribed %s emails from NEWS_AND_UPDATES emails.",
+          remoteIpAddress,
+          userPreferencesToUpdate.size()
+        )
+      );
       return Response.ok().build();
     } catch (SegueDatabaseException | ClassCastException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unable to process request.").toResponse();
@@ -585,24 +658,23 @@ public class AdminFacade extends AbstractSegueFacade {
         log.info("Triggering properties reload ...");
         this.getProperties().triggerPropertiesRefresh();
 
-        ImmutableMap<String, String> response = new ImmutableMap.Builder<String, String>().put("result",
-            "success").build();
+        ImmutableMap<String, String> response = new ImmutableMap.Builder<String, String>()
+          .put("result", "success")
+          .build();
 
         return Response.ok(response).build();
       } else {
         return new SegueErrorResponse(Status.FORBIDDEN, "You must be an administrator to use this function.")
-            .toResponse();
+        .toResponse();
       }
-
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (IOException e) {
       log.error("Unable to trigger property refresh", e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unable to trigger properties refresh", e)
-          .toResponse();
+      .toResponse();
     }
   }
-
 
   /**
    * Rest end point to allow content editors to see the content which failed to import into segue.
@@ -617,16 +689,16 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/content_problems")
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
-  public Response getContentProblems(@Context final HttpServletRequest request,
-                                     @Context final Request requestForCaching) {
-    Map<Content, List<String>> problemMap = this.contentManager.getProblemMap(
-    );
+  public Response getContentProblems(
+    @Context final HttpServletRequest request,
+    @Context final Request requestForCaching
+  ) {
+    Map<Content, List<String>> problemMap = this.contentManager.getProblemMap();
 
     if (this.getProperties().getProperty(Constants.SEGUE_APP_ENVIRONMENT).equals(EnvironmentType.PROD.name())) {
       try {
         if (!isUserStaff(userManager, request)) {
-          return new SegueErrorResponse(Status.FORBIDDEN, "You must be an admin to access this endpoint.")
-              .toResponse();
+          return new SegueErrorResponse(Status.FORBIDDEN, "You must be an admin to access this endpoint.").toResponse();
         }
       } catch (NoUserLoggedInException e) {
         return SegueErrorResponse.getNotLoggedInResponse();
@@ -666,15 +738,12 @@ public class AdminFacade extends AbstractSegueFacade {
 
       if (partialContentWithErrors.getId() != null) {
         try {
-
-          boolean success = this.contentManager.getContentById(partialContentWithErrors.getId(),
-              true) != null;
+          boolean success = this.contentManager.getContentById(partialContentWithErrors.getId(), true) != null;
 
           errorRecord.put("successfulIngest", success);
           if (success) {
             failures--;
           }
-
         } catch (ContentManagerException e) {
           e.printStackTrace();
         }
@@ -694,11 +763,11 @@ public class AdminFacade extends AbstractSegueFacade {
       errorRecord.put("listOfErrors", listOfErrors);
       // we only want one error record per canonical path so batch them together if we have seen it before.
       if (lookupMap.containsKey(partialContentWithErrors.getCanonicalSourceFile())) {
-        Map<String, Object> existingErrorRecord
-            = lookupMap.get(partialContentWithErrors.getCanonicalSourceFile());
+        Map<String, Object> existingErrorRecord = lookupMap.get(partialContentWithErrors.getCanonicalSourceFile());
 
-        if (existingErrorRecord.get("successfulIngest").equals(false)
-            || errorRecord.get("successfulIngest").equals(false)) {
+        if (
+          existingErrorRecord.get("successfulIngest").equals(false) || errorRecord.get("successfulIngest").equals(false)
+        ) {
           existingErrorRecord.put("successfulIngest", false);
         }
 
@@ -715,9 +784,11 @@ public class AdminFacade extends AbstractSegueFacade {
     responseBuilder.put("failedFiles", failures);
     responseBuilder.put("currentLiveVersion", this.contentManager.getCurrentContentSHA());
 
-    return Response.ok(responseBuilder.build())
-        .cacheControl(getCacheControl(NUMBER_SECONDS_IN_MINUTE, false)).tag(etag)
-        .build();
+    return Response
+      .ok(responseBuilder.build())
+      .cacheControl(getCacheControl(NUMBER_SECONDS_IN_MINUTE, false))
+      .tag(etag)
+      .build();
   }
 
   /**
@@ -738,28 +809,30 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/users")
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
-  public Response findUsers(@Context final HttpServletRequest httpServletRequest, @Context final Request request,
-                            @QueryParam("id") final Long userId, @QueryParam("email") @Nullable final String email,
-                            @QueryParam("familyName") @Nullable final String familyName,
-                            @QueryParam("role") @Nullable final Role role,
-                            @QueryParam("schoolOther") @Nullable final String schoolOther,
-                            @QueryParam("schoolURN") @Nullable final String schoolURN) {
-
+  public Response findUsers(
+    @Context final HttpServletRequest httpServletRequest,
+    @Context final Request request,
+    @QueryParam("id") final Long userId,
+    @QueryParam("email") @Nullable final String email,
+    @QueryParam("familyName") @Nullable final String familyName,
+    @QueryParam("role") @Nullable final Role role,
+    @QueryParam("schoolOther") @Nullable final String schoolOther,
+    @QueryParam("schoolURN") @Nullable final String schoolURN
+  ) {
     RegisteredUserDTO currentUser;
     try {
       currentUser = userManager.getCurrentRegisteredUser(httpServletRequest);
       if (!isUserAnAdminOrEventManager(userManager, currentUser)) {
-        return new SegueErrorResponse(Status.FORBIDDEN, "You are not authorised to access this function.")
-            .toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "You are not authorised to access this function.").toResponse();
       }
 
       misuseMonitor.notifyEvent(currentUser.getId().toString(), UserSearchMisuseHandler.class.getSimpleName());
-
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueResourceMisuseException e) {
-      return SegueErrorResponse
-          .getRateThrottledResponse("You have exceeded the number of requests allowed for this endpoint");
+      return SegueErrorResponse.getRateThrottledResponse(
+        "You have exceeded the number of requests allowed for this endpoint"
+      );
     }
 
     try {
@@ -800,37 +873,52 @@ public class AdminFacade extends AbstractSegueFacade {
       } else {
         foundUsers = this.userManager.findUsers(userPrototype);
       }
-      Map<Long, RegisteredUserDTO> userMapById =
-          foundUsers.parallelStream().collect(Collectors.toMap(RegisteredUserDTO::getId, Function.identity()));
+      Map<Long, RegisteredUserDTO> userMapById = foundUsers
+        .parallelStream()
+        .collect(Collectors.toMap(RegisteredUserDTO::getId, Function.identity()));
 
       // Calculate the ETag
-      EntityTag etag = new EntityTag(foundUsers.size() + foundUsers.toString().hashCode()
-          + userPrototype.toString().hashCode() + "");
+      EntityTag etag = new EntityTag(
+        foundUsers.size() + foundUsers.toString().hashCode() + userPrototype.toString().hashCode() + ""
+      );
 
       Response cachedResponse = generateCachedResponse(request, etag);
       if (cachedResponse != null) {
         return cachedResponse;
       }
 
-      int searchResultsLimit = this.getProperties()
+      int searchResultsLimit =
+        this.getProperties()
           .getIntegerPropertyOrFallback(SEARCH_RESULTS_HARD_LIMIT, SEARCH_RESULTS_HARD_LIMIT_FALLBACK);
 
       if (foundUsers.size() > searchResultsLimit) {
-        log.warn(String.format("%s user (%s) search returned %d results, limiting to " + searchResultsLimit + ".",
-            currentUser.getRole(), currentUser.getEmail(), foundUsers.size()));
+        log.warn(
+          String.format(
+            "%s user (%s) search returned %d results, limiting to " + searchResultsLimit + ".",
+            currentUser.getRole(),
+            currentUser.getEmail(),
+            foundUsers.size()
+          )
+        );
         foundUsers = foundUsers.subList(0, searchResultsLimit);
       }
-      log.info(String.format("%s user (%s) did a search across all users based on user prototype {%s}",
-          currentUser.getRole(), currentUser.getEmail(), userPrototype));
+      log.info(
+        String.format(
+          "%s user (%s) did a search across all users based on user prototype {%s}",
+          currentUser.getRole(),
+          currentUser.getEmail(),
+          userPrototype
+        )
+      );
 
-      return Response.ok(
-              this.userManager.convertToDetailedUserSummaryObjectList(foundUsers, UserSummaryForAdminUsersDTO.class))
-          .tag(etag)
-          .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
-          .build();
+      return Response
+        .ok(this.userManager.convertToDetailedUserSummaryObjectList(foundUsers, UserSummaryForAdminUsersDTO.class))
+        .tag(etag)
+        .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (SegueDatabaseException e) {
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Database error while looking up user information.").toResponse();
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error while looking up user information.")
+      .toResponse();
     }
   }
 
@@ -845,32 +933,41 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/users/{user_id}")
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
-  public Response findUsers(@Context final HttpServletRequest httpServletRequest,
-                            @PathParam("user_id") final Long userId) {
-
+  public Response findUsers(
+    @Context final HttpServletRequest httpServletRequest,
+    @PathParam("user_id") final Long userId
+  ) {
     RegisteredUserDTO currentUser;
     try {
       currentUser = userManager.getCurrentRegisteredUser(httpServletRequest);
       if (!isUserAnAdminOrEventManager(userManager, currentUser)) {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "You must be logged in as an admin to access this function.").toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "You must be logged in as an admin to access this function.")
+        .toResponse();
       }
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     }
 
     try {
-      log.info(String.format("%s user (%s) did a user id lookup based on user id {%s}", currentUser.getRole(),
-          currentUser.getEmail(), userId));
+      log.info(
+        String.format(
+          "%s user (%s) did a user id lookup based on user id {%s}",
+          currentUser.getRole(),
+          currentUser.getEmail(),
+          userId
+        )
+      );
 
-      return Response.ok(this.userManager.getUserDTOById(userId))
-          .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+      return Response
+        .ok(this.userManager.getUserDTOById(userId))
+        .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (SegueDatabaseException e) {
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Database error while looking up user information.").toResponse();
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error while looking up user information.")
+      .toResponse();
     } catch (NoUserException e) {
-      return new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the user with the requested id: "
-          + userId).toResponse();
+      return new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the user with the requested id: " + userId)
+      .toResponse();
     }
   }
 
@@ -884,40 +981,47 @@ public class AdminFacade extends AbstractSegueFacade {
   @DELETE
   @Path("/users/{user_id}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response deleteUserAccount(@Context final HttpServletRequest httpServletRequest,
-                                    @PathParam("user_id") final Long userId) {
+  public Response deleteUserAccount(
+    @Context final HttpServletRequest httpServletRequest,
+    @PathParam("user_id") final Long userId
+  ) {
     try {
       RegisteredUserDTO currentlyLoggedInUser = this.userManager.getCurrentRegisteredUser(httpServletRequest);
       if (!isUserAnAdmin(userManager, currentlyLoggedInUser)) {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "You must be logged in as an admin to access this function.").toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "You must be logged in as an admin to access this function.")
+        .toResponse();
       }
 
       if (currentlyLoggedInUser.getId().equals(userId)) {
-        return new SegueErrorResponse(Status.BAD_REQUEST, "You are not allowed to delete yourself.")
-            .toResponse();
+        return new SegueErrorResponse(Status.BAD_REQUEST, "You are not allowed to delete yourself.").toResponse();
       }
 
       RegisteredUserDTO userToDelete = this.userManager.getUserDTOById(userId);
 
       this.userManager.deleteUserAccount(userToDelete);
       this.eventBookingManager.deleteUsersAdditionalInformationBooking(userToDelete);
-      getLogManager().logEvent(currentlyLoggedInUser, httpServletRequest, SegueServerLogType.DELETE_USER_ACCOUNT,
-          ImmutableMap.of(USER_ID_FKEY_FIELDNAME, userToDelete.getId()));
+      getLogManager()
+        .logEvent(
+          currentlyLoggedInUser,
+          httpServletRequest,
+          SegueServerLogType.DELETE_USER_ACCOUNT,
+          ImmutableMap.of(USER_ID_FKEY_FIELDNAME, userToDelete.getId())
+        );
 
-      log.info("Admin User: " + currentlyLoggedInUser.getEmail() + " has just deleted the user account with id: "
-          + userId);
+      log.info(
+        "Admin User: " + currentlyLoggedInUser.getEmail() + " has just deleted the user account with id: " + userId
+      );
 
       return Response.noContent().build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
       log.error("Unable to delete account", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Database error while looking up user information.").toResponse();
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error while looking up user information.")
+      .toResponse();
     } catch (NoUserException e) {
-      return new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the user with the requested id: "
-          + userId).toResponse();
+      return new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the user with the requested id: " + userId)
+      .toResponse();
     }
   }
 
@@ -932,41 +1036,58 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/users/merge")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response mergeUserAccounts(@Context final HttpServletRequest httpServletRequest,
-                                    final UserIdMergeDTO userIdMergeDTO) {
+  public Response mergeUserAccounts(
+    @Context final HttpServletRequest httpServletRequest,
+    final UserIdMergeDTO userIdMergeDTO
+  ) {
     try {
       RegisteredUserDTO currentlyLoggedInUser = this.userManager.getCurrentRegisteredUser(httpServletRequest);
       if (!isUserAnAdmin(userManager, currentlyLoggedInUser)) {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "You must be logged in as an admin to access this function.").toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "You must be logged in as an admin to access this function.")
+        .toResponse();
       }
 
       if (currentlyLoggedInUser.getId().equals(userIdMergeDTO.getSourceId())) {
-        return new SegueErrorResponse(Status.BAD_REQUEST, "You are not allowed to be the merge source.")
-            .toResponse();
+        return new SegueErrorResponse(Status.BAD_REQUEST, "You are not allowed to be the merge source.").toResponse();
       }
 
       RegisteredUserDTO targetUser = this.userManager.getUserDTOById(userIdMergeDTO.getTargetId());
       RegisteredUserDTO sourceUser = this.userManager.getUserDTOById(userIdMergeDTO.getSourceId());
 
       this.userManager.mergeUserAccounts(targetUser, sourceUser);
-      getLogManager().logEvent(currentlyLoggedInUser, httpServletRequest, SegueServerLogType.ADMIN_MERGE_USER,
-          ImmutableMap.of(USER_ID_FKEY_FIELDNAME, targetUser.getId(), OLD_USER_ID_FKEY_FIELDNAME, sourceUser.getId()));
+      getLogManager()
+        .logEvent(
+          currentlyLoggedInUser,
+          httpServletRequest,
+          SegueServerLogType.ADMIN_MERGE_USER,
+          ImmutableMap.of(USER_ID_FKEY_FIELDNAME, targetUser.getId(), OLD_USER_ID_FKEY_FIELDNAME, sourceUser.getId())
+        );
 
-      log.info("Admin User: " + currentlyLoggedInUser.getEmail()
-          + " has just merged the target user account with id: " + userIdMergeDTO.getTargetId()
-          + " with the source user account with id: " + userIdMergeDTO.getSourceId());
+      log.info(
+        "Admin User: " +
+        currentlyLoggedInUser.getEmail() +
+        " has just merged the target user account with id: " +
+        userIdMergeDTO.getTargetId() +
+        " with the source user account with id: " +
+        userIdMergeDTO.getSourceId()
+      );
 
       return Response.noContent().build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
       log.error("Unable to merge accounts", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Database error while looking up user information.").toResponse();
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error while looking up user information.")
+      .toResponse();
     } catch (NoUserException e) {
-      return new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the users with the requested ids: "
-          + userIdMergeDTO.getTargetId() + ", " + userIdMergeDTO.getSourceId()).toResponse();
+      return new SegueErrorResponse(
+        Status.NOT_FOUND,
+        "Unable to locate the users with the requested ids: " +
+        userIdMergeDTO.getTargetId() +
+        ", " +
+        userIdMergeDTO.getSourceId()
+      )
+      .toResponse();
     }
   }
 
@@ -980,20 +1101,27 @@ public class AdminFacade extends AbstractSegueFacade {
   @POST
   @Path("/live_version/{version}")
   @Produces(MediaType.APPLICATION_JSON)
-  public synchronized Response changeLiveVersion(@Context final HttpServletRequest request,
-                                                 @PathParam("version") final String version) {
-
+  public synchronized Response changeLiveVersion(
+    @Context final HttpServletRequest request,
+    @PathParam("version") final String version
+  ) {
     try {
       RegisteredUserDTO currentUser = userManager.getCurrentRegisteredUser(request);
       if (isUserAnAdmin(userManager, currentUser)) {
-
         String oldLiveVersion = contentManager.getCurrentContentSHA();
 
         HttpClient httpClient = new DefaultHttpClient();
 
-        HttpPost httpPost = new HttpPost("http://" + getProperties().getProperty("ETL_HOSTNAME") + ":"
-            + getProperties().getProperty("ETL_PORT") + "/isaac-api/api/etl/set_version_alias/"
-            + this.contentIndex + "/" + version);
+        HttpPost httpPost = new HttpPost(
+          "http://" +
+          getProperties().getProperty("ETL_HOSTNAME") +
+          ":" +
+          getProperties().getProperty("ETL_PORT") +
+          "/isaac-api/api/etl/set_version_alias/" +
+          this.contentIndex +
+          "/" +
+          version
+        );
 
         httpPost.addHeader("Content-Type", "application/json");
 
@@ -1002,18 +1130,23 @@ public class AdminFacade extends AbstractSegueFacade {
         HttpEntity e = httpResponse.getEntity();
 
         if (httpResponse.getStatusLine().getStatusCode() == Response.Status.OK.getStatusCode()) {
-          log.info(currentUser.getEmail() + " changed live version from " + oldLiveVersion + " to "
-              + sanitiseInternalLogValue(version) + ".");
+          log.info(
+            currentUser.getEmail() +
+            " changed live version from " +
+            oldLiveVersion +
+            " to " +
+            sanitiseInternalLogValue(version) +
+            "."
+          );
           return Response.ok().build();
         } else {
           SegueErrorResponse r = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, IOUtils.toString(e.getContent()));
           r.setBypassGenericSiteErrorPage(true);
           return r.toResponse();
         }
-
       } else {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "You must be logged in as an admin to access this function.").toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "You must be logged in as an admin to access this function.")
+        .toResponse();
       }
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
@@ -1044,13 +1177,22 @@ public class AdminFacade extends AbstractSegueFacade {
       }
       if (!details.containsKey("eventLabel") || !details.containsKey("agentIdentifier")) {
         return SegueErrorResponse.getBadRequestResponse(
-            "Request body should contain the keys 'eventLabel' and 'agentIdentifier'.");
+          "Request body should contain the keys 'eventLabel' and 'agentIdentifier'."
+        );
       }
       String agentIdentifier = details.get("agentIdentifier");
       String eventLabel = details.get("eventLabel");
       misuseMonitor.resetMisuseCount(agentIdentifier, eventLabel);
-      log.info(sanitiseInternalLogValue(String.format("Admin user (%s) reset misuse monitor '%s' for agent id (%s)!",
-          user.getEmail(), eventLabel, agentIdentifier)));
+      log.info(
+        sanitiseInternalLogValue(
+          String.format(
+            "Admin user (%s) reset misuse monitor '%s' for agent id (%s)!",
+            user.getEmail(),
+            eventLabel,
+            agentIdentifier
+          )
+        )
+      );
       return Response.ok().build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
@@ -1071,11 +1213,8 @@ public class AdminFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   public Response getDiagnostics(@Context final Request request, @Context final HttpServletRequest httpServletRequest) {
-
     try {
-
       if (isUserAnAdmin(userManager, httpServletRequest)) {
-
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> diagnosticReport = Maps.newHashMap();
         Map<String, Object> websocketReport = Maps.newHashMap();
@@ -1100,17 +1239,18 @@ public class AdminFacade extends AbstractSegueFacade {
         diagnosticReport.put("numAnonymousUsers", userManager.getNumberOfAnonymousUsers());
 
         return Response.ok(diagnosticReport).build();
-
       } else {
-        return new SegueErrorResponse(Status.FORBIDDEN,
-            "You must be logged in as an admin to access this function.").toResponse();
+        return new SegueErrorResponse(Status.FORBIDDEN, "You must be logged in as an admin to access this function.")
+        .toResponse();
       }
-
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Database error while looking up number of anonymous users.", e);
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Database error while looking up number of anonymous users.",
+        e
+      );
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     }
@@ -1138,8 +1278,12 @@ public class AdminFacade extends AbstractSegueFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (ExternalAccountSynchronisationException e) {
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Fatal error while attempting to synchronise users!", e).toResponse();
+      return new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Fatal error while attempting to synchronise users!",
+        e
+      )
+      .toResponse();
     }
   }
 
@@ -1171,16 +1315,18 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/misuse_stats")
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Get a summary of the site misuse statistics.")
-  public Response getUserMisuseStatistics(@Context final HttpServletRequest request,
-                                          @QueryParam("limit") final Long limit) {
+  public Response getUserMisuseStatistics(
+    @Context final HttpServletRequest request,
+    @QueryParam("limit") final Long limit
+  ) {
     try {
       RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdmin(userManager, user)) {
         return SegueErrorResponse.getIncorrectRoleResponse();
       }
-      return Response.ok(
-              misuseMonitor.getMisuseStatistics(Objects.requireNonNullElse(limit, DEFAULT_MISUSE_STATISTICS_LIMIT)))
-          .build();
+      return Response
+        .ok(misuseMonitor.getMisuseStatistics(Objects.requireNonNullElse(limit, DEFAULT_MISUSE_STATISTICS_LIMIT)))
+        .build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     }

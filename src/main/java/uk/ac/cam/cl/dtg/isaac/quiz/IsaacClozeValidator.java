@@ -48,25 +48,30 @@ public class IsaacClozeValidator implements IValidator {
     Validate.notNull(answer);
 
     if (!(question instanceof IsaacClozeQuestion)) {
-      throw new IllegalArgumentException(String.format(
-          "This validator only works with IsaacClozeQuestions (%s is not ClozeQuestion)", question.getId()));
+      throw new IllegalArgumentException(
+        String.format("This validator only works with IsaacClozeQuestions (%s is not ClozeQuestion)", question.getId())
+      );
     }
 
     if (!(answer instanceof ItemChoice)) {
-      throw new IllegalArgumentException(String.format(
-          "Expected ItemChoice for IsaacClozeQuestions: %s. Received (%s) ", question.getId(), answer.getClass()));
+      throw new IllegalArgumentException(
+        String.format(
+          "Expected ItemChoice for IsaacClozeQuestions: %s. Received (%s) ",
+          question.getId(),
+          answer.getClass()
+        )
+      );
     }
 
     // These variables store the important features of the response we'll send.
-    Content feedback = null;                        // The feedback we send the user
-    boolean responseCorrect = false;                // Whether we're right or wrong
-    List<Boolean> itemsCorrect = null;              // Individual item feedback.
+    Content feedback = null; // The feedback we send the user
+    boolean responseCorrect = false; // Whether we're right or wrong
+    List<Boolean> itemsCorrect = null; // Individual item feedback.
 
     IsaacClozeQuestion clozeQuestion = (IsaacClozeQuestion) question;
     ItemChoice submittedChoice = (ItemChoice) answer;
     boolean detailedItemFeedback =
-        clozeQuestion.getDetailedItemFeedback() != null && clozeQuestion.getDetailedItemFeedback();
-
+      clozeQuestion.getDetailedItemFeedback() != null && clozeQuestion.getDetailedItemFeedback();
 
     List<String> submittedItemIds = Collections.emptyList();
     Set<String> allowedItemIds = Collections.emptySet();
@@ -74,12 +79,14 @@ public class IsaacClozeValidator implements IValidator {
     // STEP 0: Is it even possible to answer this question?
 
     if (null == clozeQuestion.getChoices() || clozeQuestion.getChoices().isEmpty()) {
-      log.error("Question does not have any answers. " + question.getId() + " src: "
-          + question.getCanonicalSourceFile());
+      log.error(
+        "Question does not have any answers. " + question.getId() + " src: " + question.getCanonicalSourceFile()
+      );
       feedback = new Content("This question does not have any correct answers!");
     } else if (null == clozeQuestion.getItems() || clozeQuestion.getItems().isEmpty()) {
-      log.error("ItemQuestion does not have any items. " + question.getId() + " src: "
-          + question.getCanonicalSourceFile());
+      log.error(
+        "ItemQuestion does not have any items. " + question.getId() + " src: " + question.getCanonicalSourceFile()
+      );
       feedback = new Content("This question does not have any items to choose from!");
     }
 
@@ -92,8 +99,9 @@ public class IsaacClozeValidator implements IValidator {
         feedback = new Content("Your answer is not in a recognised format!");
       } else {
         allowedItemIds =
-            Stream.concat(Stream.of(NULL_CLOZE_ITEM_ID), clozeQuestion.getItems().stream().map(Item::getId))
-                .collect(Collectors.toSet());
+          Stream
+            .concat(Stream.of(NULL_CLOZE_ITEM_ID), clozeQuestion.getItems().stream().map(Item::getId))
+            .collect(Collectors.toSet());
         submittedItemIds = submittedChoice.getItems().stream().map(Item::getId).collect(Collectors.toList());
         if (!allowedItemIds.containsAll(submittedItemIds)) {
           feedback = new Content("Your answer contained unrecognised items.");
@@ -112,11 +120,15 @@ public class IsaacClozeValidator implements IValidator {
 
       // For all the choices on this question...
       for (Choice c : orderedChoices) {
-
         // ... that are ItemChoices (and not subclasses) ...
         if (!ItemChoice.class.equals(c.getClass())) {
-          log.error(String.format("Expected ItemChoice in question (%s), instead found %s!", clozeQuestion.getId(),
-              c.getClass().toString()));
+          log.error(
+            String.format(
+              "Expected ItemChoice in question (%s), instead found %s!",
+              clozeQuestion.getId(),
+              c.getClass().toString()
+            )
+          );
           continue;
         }
 
@@ -124,17 +136,28 @@ public class IsaacClozeValidator implements IValidator {
 
         // ... and that have valid items ...
         if (null == itemChoice.getItems() || itemChoice.getItems().isEmpty()) {
-          log.error(String.format("Expected list of Items, but none found in choice for question id (%s)!",
-              clozeQuestion.getId()));
+          log.error(
+            String.format(
+              "Expected list of Items, but none found in choice for question id (%s)!",
+              clozeQuestion.getId()
+            )
+          );
           continue;
         }
         if (itemChoice.getItems().stream().anyMatch(i -> i.getClass() != Item.class)) {
-          log.error(String.format("Expected list of Items, but something else found in choice for question id (%s)!",
-              clozeQuestion.getId()));
+          log.error(
+            String.format(
+              "Expected list of Items, but something else found in choice for question id (%s)!",
+              clozeQuestion.getId()
+            )
+          );
           continue;
         }
-        List<String> trustedChoiceItemIds =
-            itemChoice.getItems().stream().map(Item::getId).collect(Collectors.toList());
+        List<String> trustedChoiceItemIds = itemChoice
+          .getItems()
+          .stream()
+          .map(Item::getId)
+          .collect(Collectors.toList());
 
         // ... look for a match to the submitted answer.
         if (trustedChoiceItemIds.size() != submittedItemIds.size()) {
@@ -165,8 +188,12 @@ public class IsaacClozeValidator implements IValidator {
           if (NULL_CLOZE_ITEM_ID.equals(trustedItemId)) {
             // It doesn't matter what the submission has here, but only if we are allowed subset matching:
             if (!allowSubsetMatch) {
-              log.error(String.format("ItemChoice does not allow subset match but contains NULL item in question (%s)!",
-                  clozeQuestion.getId()));
+              log.error(
+                String.format(
+                  "ItemChoice does not allow subset match but contains NULL item in question (%s)!",
+                  clozeQuestion.getId()
+                )
+              );
               itemMatch = false;
             }
           } else {
@@ -205,5 +232,4 @@ public class IsaacClozeValidator implements IValidator {
   public List<Choice> getOrderedChoices(final List<Choice> choices) {
     return IsaacItemQuestionValidator.getOrderedChoicesWithSubsets(choices);
   }
-
 }

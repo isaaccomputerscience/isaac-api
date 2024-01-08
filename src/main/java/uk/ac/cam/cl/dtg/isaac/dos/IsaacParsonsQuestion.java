@@ -22,7 +22,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacParsonsQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.quiz.IsaacParsonsValidator;
 import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 
-
 /**
  * Content DO for IsaacParsonsQuestions.
  */
@@ -30,7 +29,6 @@ import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 @JsonContentType("isaacParsonsQuestion")
 @ValidatesWith(IsaacParsonsValidator.class)
 public class IsaacParsonsQuestion extends IsaacItemQuestion {
-
   private Boolean disableIndentation;
 
   public Boolean getDisableIndentation() {

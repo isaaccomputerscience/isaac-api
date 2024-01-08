@@ -33,9 +33,7 @@ public class FormulaValidationResponse extends QuestionValidationResponse {
   /**
    * Default constructor.
    */
-  public FormulaValidationResponse() {
-
-  }
+  public FormulaValidationResponse() {}
 
   /**
    * Full constructor.
@@ -53,9 +51,14 @@ public class FormulaValidationResponse extends QuestionValidationResponse {
    * @param dateAttempted
    *            -
    */
-  public FormulaValidationResponse(final String questionId, final Choice answer,
-                                   final Content explanation, final Boolean correct,
-                                   final String matchType, final Date dateAttempted) {
+  public FormulaValidationResponse(
+    final String questionId,
+    final Choice answer,
+    final Content explanation,
+    final Boolean correct,
+    final String matchType,
+    final Date dateAttempted
+  ) {
     super(questionId, answer, correct, explanation, dateAttempted);
     this.matchType = matchType;
   }

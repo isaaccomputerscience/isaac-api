@@ -34,8 +34,7 @@ public class ItemValidationResponseDTO extends QuestionValidationResponseDTO {
   /**
    * Default constructor for Jackson.
    */
-  public ItemValidationResponseDTO() {
-  }
+  public ItemValidationResponseDTO() {}
 
   /**
    * Full constructor.
@@ -47,9 +46,14 @@ public class ItemValidationResponseDTO extends QuestionValidationResponseDTO {
    * @param explanation   - explanation.
    * @param dateAttempted - dateAttempted.
    */
-  public ItemValidationResponseDTO(final String questionId, final ChoiceDTO answer,
-                                   final Boolean correct, final List<Boolean> itemsCorrect,
-                                   final ContentDTO explanation, final Date dateAttempted) {
+  public ItemValidationResponseDTO(
+    final String questionId,
+    final ChoiceDTO answer,
+    final Boolean correct,
+    final List<Boolean> itemsCorrect,
+    final ContentDTO explanation,
+    final Date dateAttempted
+  ) {
     super(questionId, answer, correct, explanation, dateAttempted);
     this.itemsCorrect = itemsCorrect;
   }

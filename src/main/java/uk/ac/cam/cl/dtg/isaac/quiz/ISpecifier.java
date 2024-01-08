@@ -16,7 +16,6 @@
 
 package uk.ac.cam.cl.dtg.isaac.quiz;
 
-
 import uk.ac.cam.cl.dtg.isaac.dos.content.Choice;
 
 /**
@@ -27,7 +26,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Choice;
  *
  */
 public interface ISpecifier {
-
   /**
    * This method is specifically for single field questions.
    * <br>
@@ -37,6 +35,5 @@ public interface ISpecifier {
    * @return a string describing the specification.
    * @throws ValidatorUnavailableException - If the checking server/code is not working.
    */
-  String createSpecification(Choice answer)
-      throws ValidatorUnavailableException;
+  String createSpecification(Choice answer) throws ValidatorUnavailableException;
 }

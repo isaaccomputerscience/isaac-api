@@ -32,9 +32,7 @@ public class Choice extends Content {
   /**
    * Default Constructor required for mappers.
    */
-  public Choice() {
-
-  }
+  public Choice() {}
 
   /**
    * Gets the correct.

@@ -431,9 +431,12 @@ public class IsaacClozeValidatorTest {
     invalidQuestionType.setId("invalidQuestionType");
 
     // This should throw an exception:
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      validator.validateQuestionResponse(invalidQuestionType, new ItemChoice());
-    });
+    Exception exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> {
+        validator.validateQuestionResponse(invalidQuestionType, new ItemChoice());
+      }
+    );
     assertTrue(exception.getMessage().contains("only works with IsaacClozeQuestions"));
   }
 
@@ -445,9 +448,12 @@ public class IsaacClozeValidatorTest {
     IsaacClozeQuestion clozeQuestion = new IsaacClozeQuestion();
 
     // This should throw an exception:
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      validator.validateQuestionResponse(clozeQuestion, new Choice());
-    });
+    Exception exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> {
+        validator.validateQuestionResponse(clozeQuestion, new Choice());
+      }
+    );
     assertTrue(exception.getMessage().contains("Expected ItemChoice for IsaacClozeQuestion"));
   }
 }

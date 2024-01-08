@@ -53,9 +53,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
     }
 
     String query = "SELECT * FROM user_totp WHERE user_id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_SHARED_SECRET_USER_ID, userId);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -68,7 +66,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
 
   @Override
   public TOTPSharedSecret save2FASharedSecret(final Long userId, final TOTPSharedSecret credsToSave)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     // determine if it is a create or update
     TOTPSharedSecret lc = this.get2FASharedSecret(userId);
 
@@ -77,8 +75,10 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
       lc = this.createCredentials(credsToSave);
     } else {
       // update
-      lc = this.updateCredentials(
-          new TOTPSharedSecret(lc.getUserId(), credsToSave.getSharedSecret(), lc.getCreated(), new Date()));
+      lc =
+        this.updateCredentials(
+            new TOTPSharedSecret(lc.getUserId(), credsToSave.getSharedSecret(), lc.getCreated(), new Date())
+          );
     }
 
     return lc;
@@ -93,8 +93,9 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
    */
   private TOTPSharedSecret createCredentials(final TOTPSharedSecret credsToSave) throws SegueDatabaseException {
     String query = "INSERT INTO user_totp(user_id, shared_secret, created, last_updated) VALUES (?, ?, ?,?);";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
     ) {
       setValueHelper(pst, FIELD_CREATE_CREDENTIALS_USER_ID, credsToSave.getUserId());
       setValueHelper(pst, FIELD_CREATE_CREDENTIALS_SHARED_SECRET, credsToSave.getSharedSecret());
@@ -106,7 +107,6 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
       }
 
       return credsToSave;
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
@@ -126,9 +126,7 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
     }
 
     String query = "UPDATE user_totp SET shared_secret = ?, last_updated = ? WHERE user_id = ?;";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_SHARED_SECRET, credsToSave.getSharedSecret());
       setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_LAST_UPDATED, credsToSave.getLastUpdated());
       setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_USER_ID, credsToSave.getUserId());
@@ -151,15 +149,11 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
    */
   @Override
   public void delete2FACredentials(final Long userId) throws SegueDatabaseException {
-
     String query = "DELETE FROM user_totp WHERE user_id = ?;";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       setValueHelper(pst, FIELD_DELETE_CREDENTIALS_USER_ID, userId);
 
       pst.executeUpdate();
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
@@ -185,8 +179,9 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
     }
 
     if (listOfResults.size() > 1) {
-      throw new SegueDatabaseException("Ambiguous result, expected single result and found more than one"
-          + listOfResults);
+      throw new SegueDatabaseException(
+        "Ambiguous result, expected single result and found more than one" + listOfResults
+      );
     }
 
     return listOfResults.get(0);
@@ -200,11 +195,12 @@ public class PgTOTPDataManager extends AbstractPgDataManager implements ITOTPDat
    * @throws SQLException if we can't get a value required.
    */
   private TOTPSharedSecret buildTOTPSharedSecret(final ResultSet results) throws SQLException {
-
-    return new TOTPSharedSecret(results.getLong("user_id"),
-        results.getString("shared_secret"),
-        results.getTimestamp("created"),
-        results.getTimestamp("last_updated"));
+    return new TOTPSharedSecret(
+      results.getLong("user_id"),
+      results.getString("shared_secret"),
+      results.getTimestamp("created"),
+      results.getTimestamp("last_updated")
+    );
   }
 
   // Field Constants

@@ -6,9 +6,7 @@ public class QuizSummaryDTO extends ContentSummaryDTO {
   private boolean visibleToStudents;
   private List<String> hiddenFromRoles;
 
-  public QuizSummaryDTO() {
-
-  }
+  public QuizSummaryDTO() {}
 
   public boolean getVisibleToStudents() {
     return visibleToStudents;

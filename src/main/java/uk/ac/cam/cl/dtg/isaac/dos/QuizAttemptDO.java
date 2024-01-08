@@ -28,9 +28,12 @@ public class QuizAttemptDO {
   private Long id;
   private Long userId;
   private String quizId;
+
   @Nullable
   private Long quizAssignmentId;
+
   private Date startDate;
+
   @Nullable
   private Date completedDate;
 
@@ -44,8 +47,14 @@ public class QuizAttemptDO {
    * @param startDate        - When this attempt began.
    * @param completedDate    - When this attempt was marked complete, or null if not yet completed.
    */
-  public QuizAttemptDO(final Long id, final Long userId, final String quizId, final Long quizAssignmentId,
-                       final Date startDate, @Nullable final Date completedDate) {
+  public QuizAttemptDO(
+    final Long id,
+    final Long userId,
+    final String quizId,
+    final Long quizAssignmentId,
+    final Date startDate,
+    @Nullable final Date completedDate
+  ) {
     this.id = id;
     this.userId = userId;
     this.quizId = quizId;
@@ -57,9 +66,7 @@ public class QuizAttemptDO {
   /**
    * Default constructor required for AutoMapping.
    */
-  public QuizAttemptDO() {
-
-  }
+  public QuizAttemptDO() {}
 
   @Override
   public int hashCode() {

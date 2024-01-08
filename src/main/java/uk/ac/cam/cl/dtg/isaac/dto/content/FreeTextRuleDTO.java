@@ -23,8 +23,7 @@ public class FreeTextRuleDTO extends ChoiceDTO {
   private boolean allowsMisspelling;
   private Integer proximityDistance;
 
-  public FreeTextRuleDTO() {
-  }
+  public FreeTextRuleDTO() {}
 
   public void setCaseInsensitive(final boolean caseInsensitive) {
     this.caseInsensitive = caseInsensitive;

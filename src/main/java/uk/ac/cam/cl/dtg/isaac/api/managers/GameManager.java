@@ -124,9 +124,13 @@ public class GameManager {
    * @param contentIndex                - the current content index of interest.
    */
   @Inject
-  public GameManager(final GitContentManager contentManager,
-                     final GameboardPersistenceManager gameboardPersistenceManager, final MapperFacade mapper,
-                     final QuestionManager questionManager, @Named(CONTENT_INDEX) final String contentIndex) {
+  public GameManager(
+    final GitContentManager contentManager,
+    final GameboardPersistenceManager gameboardPersistenceManager,
+    final MapperFacade mapper,
+    final QuestionManager questionManager,
+    @Named(CONTENT_INDEX) final String contentIndex
+  ) {
     this.contentManager = contentManager;
     this.gameboardPersistenceManager = gameboardPersistenceManager;
     this.questionManager = questionManager;
@@ -160,7 +164,6 @@ public class GameManager {
   private static List<QuestionDTO> filterQuestionParts(final Collection<ContentDTO> contentToFilter) {
     List<QuestionDTO> results = Lists.newArrayList();
     for (ContentDTO possibleQuestion : contentToFilter) {
-
       if (!(possibleQuestion instanceof QuestionDTO) || possibleQuestion instanceof IsaacQuickQuestionDTO) {
         // we are not interested if this is not a question or if it is a quick question.
         continue;
@@ -204,8 +207,8 @@ public class GameManager {
    * @return A map ready to be passed to a content provider
    */
   private static List<GitContentManager.BooleanSearchClause> generateFieldToMatchForQuestionFilter(
-      final GameFilter gameFilter) {
-
+    final GameFilter gameFilter
+  ) {
     // Validate that the field sizes are as we expect for tags
     // Check that the query provided adheres to the rules we expect
     if (!validateFilterQuery(gameFilter)) {
@@ -216,8 +219,13 @@ public class GameManager {
 
     // handle question categories
     if (null != gameFilter.getQuestionCategories()) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          TAGS_FIELDNAME, BooleanOperator.OR, gameFilter.getQuestionCategories()));
+      fieldsToMatch.add(
+        new GitContentManager.BooleanSearchClause(
+          TAGS_FIELDNAME,
+          BooleanOperator.OR,
+          gameFilter.getQuestionCategories()
+        )
+      );
     }
 
     // Filter on content tags
@@ -267,37 +275,60 @@ public class GameManager {
         levelsAsStrings.add(levelInt.toString());
       }
       fieldsToMatch.add(
-          new GitContentManager.BooleanSearchClause(LEVEL_FIELDNAME, BooleanOperator.OR, levelsAsStrings));
+        new GitContentManager.BooleanSearchClause(LEVEL_FIELDNAME, BooleanOperator.OR, levelsAsStrings)
+      );
     }
 
     // Handle the nested audience fields: stage, difficulty and examBoard
     if (null != gameFilter.getStages()) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          STAGE_FIELDNAME, BooleanOperator.OR, gameFilter.getStages()));
+      fieldsToMatch.add(
+        new GitContentManager.BooleanSearchClause(STAGE_FIELDNAME, BooleanOperator.OR, gameFilter.getStages())
+      );
     }
     if (null != gameFilter.getDifficulties()) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          DIFFICULTY_FIELDNAME, BooleanOperator.OR, gameFilter.getDifficulties()));
+      fieldsToMatch.add(
+        new GitContentManager.BooleanSearchClause(
+          DIFFICULTY_FIELDNAME,
+          BooleanOperator.OR,
+          gameFilter.getDifficulties()
+        )
+      );
     }
     if (null != gameFilter.getExamBoards()) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          EXAM_BOARD_FIELDNAME, BooleanOperator.OR, gameFilter.getExamBoards()));
+      fieldsToMatch.add(
+        new GitContentManager.BooleanSearchClause(EXAM_BOARD_FIELDNAME, BooleanOperator.OR, gameFilter.getExamBoards())
+      );
     }
 
     // handle concepts
     if (null != gameFilter.getConcepts()) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          RELATED_CONTENT_FIELDNAME, BooleanOperator.OR, gameFilter.getConcepts()));
+      fieldsToMatch.add(
+        new GitContentManager.BooleanSearchClause(
+          RELATED_CONTENT_FIELDNAME,
+          BooleanOperator.OR,
+          gameFilter.getConcepts()
+        )
+      );
     }
 
     // handle exclusions
     // exclude questions with no-filter tag
-    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, BooleanOperator.NOT,
-        Collections.singletonList(HIDE_FROM_FILTER_TAG)));
+    fieldsToMatch.add(
+      new GitContentManager.BooleanSearchClause(
+        TAGS_FIELDNAME,
+        BooleanOperator.NOT,
+        Collections.singletonList(HIDE_FROM_FILTER_TAG)
+      )
+    );
 
     // exclude questions marked deprecated
-    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(DEPRECATED_FIELDNAME, BooleanOperator.NOT,
-        Collections.singletonList("true")));
+    fieldsToMatch.add(
+      new GitContentManager.BooleanSearchClause(
+        DEPRECATED_FIELDNAME,
+        BooleanOperator.NOT,
+        Collections.singletonList("true")
+      )
+    );
 
     return fieldsToMatch;
   }
@@ -314,12 +345,10 @@ public class GameManager {
   private static boolean validateFilterQuery(final GameFilter gameFilter) {
     if (null == gameFilter.getSubjects() && null == gameFilter.getFields() && null == gameFilter.getTopics()) {
       return true;
-    } else if (null == gameFilter.getSubjects()
-        && (null != gameFilter.getFields() || null != gameFilter.getTopics())) {
+    } else if (null == gameFilter.getSubjects() && (null != gameFilter.getFields() || null != gameFilter.getTopics())) {
       log.warn("Error validating query: You cannot have a " + "null subject and still specify fields or topics.");
       return false;
-    } else if (null != gameFilter.getSubjects()
-        && null == gameFilter.getFields() && null != gameFilter.getTopics()) {
+    } else if (null != gameFilter.getSubjects() && null == gameFilter.getFields() && null != gameFilter.getTopics()) {
       log.warn("Error validating query: You cannot have a null field" + " and still specify subject and topics.");
       return false;
     }
@@ -364,9 +393,11 @@ public class GameManager {
    * @throws ContentManagerException - if there is an error retrieving the content requested.
    */
   public GameboardDTO generateRandomGameboard(
-      final String title, final GameFilter gameFilter, final AbstractSegueUserDTO boardOwner)
-      throws NoWildcardException, SegueDatabaseException, ContentManagerException {
-
+    final String title,
+    final GameFilter gameFilter,
+    final AbstractSegueUserDTO boardOwner
+  )
+    throws NoWildcardException, SegueDatabaseException, ContentManagerException {
     Long boardOwnerId;
     if (boardOwner instanceof RegisteredUserDTO) {
       boardOwnerId = ((RegisteredUserDTO) boardOwner).getId();
@@ -375,11 +406,12 @@ public class GameManager {
       boardOwnerId = null;
     }
 
-    Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts = questionManager
-        .getQuestionAttemptsByUser(boardOwner);
+    Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts = questionManager.getQuestionAttemptsByUser(
+      boardOwner
+    );
 
     List<GameboardItem> selectionOfGameboardQuestions =
-        this.getSelectedGameboardQuestions(gameFilter, usersQuestionAttempts);
+      this.getSelectedGameboardQuestions(gameFilter, usersQuestionAttempts);
 
     if (!selectionOfGameboardQuestions.isEmpty()) {
       String uuid = UUID.randomUUID().toString();
@@ -387,9 +419,18 @@ public class GameManager {
       // filter game board ready questions to make up a decent gameboard.
       log.debug("Created gameboard " + uuid);
 
-      GameboardDTO gameboardDTO = new GameboardDTO(uuid, title, selectionOfGameboardQuestions,
-          getRandomWildcard(mapper, gameFilter.getSubjects()), generateRandomWildCardPosition(),
-          new Date(), gameFilter, boardOwnerId, GameboardCreationMethod.FILTER, Sets.newHashSet());
+      GameboardDTO gameboardDTO = new GameboardDTO(
+        uuid,
+        title,
+        selectionOfGameboardQuestions,
+        getRandomWildcard(mapper, gameFilter.getSubjects()),
+        generateRandomWildCardPosition(),
+        new Date(),
+        gameFilter,
+        boardOwnerId,
+        GameboardCreationMethod.FILTER,
+        Sets.newHashSet()
+      );
 
       this.gameboardPersistenceManager.temporarilyStoreGameboard(gameboardDTO);
 
@@ -407,7 +448,7 @@ public class GameManager {
    * @throws SegueDatabaseException - if there is a problem persisting the gameboard in the database.
    */
   public void linkUserToGameboard(final GameboardDTO gameboardToLink, final RegisteredUserDTO userToLinkTo)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     // if the gameboard has no owner we should add the user who is first linking to it as the owner.
     if (gameboardToLink.getOwnerUserId() == null) {
       gameboardToLink.setOwnerUserId(userToLinkTo.getId());
@@ -418,8 +459,7 @@ public class GameManager {
       this.permanentlyStoreGameboard(gameboardToLink);
     }
 
-    this.gameboardPersistenceManager.createOrUpdateUserLinkToGameboard(userToLinkTo.getId(),
-        gameboardToLink.getId());
+    this.gameboardPersistenceManager.createOrUpdateUserLinkToGameboard(userToLinkTo.getId(), gameboardToLink.getId());
   }
 
   /**
@@ -430,7 +470,7 @@ public class GameManager {
    * @throws SegueDatabaseException - If there is a problem with the operation.
    */
   public void unlinkUserToGameboard(final RegisteredUserDTO user, final Collection<String> gameboardsToUnlink)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     this.gameboardPersistenceManager.removeUserLinkToGameboard(user.getId(), gameboardsToUnlink);
   }
 
@@ -464,13 +504,17 @@ public class GameManager {
    * @throws ContentManagerException - if there is an error retrieving the content requested.
    */
   public final GameboardDTO getGameboard(
-      final String gameboardId, final AbstractSegueUserDTO user,
-      final Map<String, Map<String, List<QuestionValidationResponse>>> userQuestionAttempts
-  ) throws SegueDatabaseException, ContentManagerException {
-
+    final String gameboardId,
+    final AbstractSegueUserDTO user,
+    final Map<String, Map<String, List<QuestionValidationResponse>>> userQuestionAttempts
+  )
+    throws SegueDatabaseException, ContentManagerException {
     // we need to augment the DTO with whether this gameboard is in a users my boards list.
     return augmentGameboardWithQuestionAttemptInformationAndUserInformation(
-        this.gameboardPersistenceManager.getGameboardById(gameboardId), userQuestionAttempts, user);
+      this.gameboardPersistenceManager.getGameboardById(gameboardId),
+      userQuestionAttempts,
+      user
+    );
   }
 
   /**
@@ -500,9 +544,10 @@ public class GameManager {
    * @throws ContentManagerException - if there is a problem resolving content
    */
   public final List<GameboardDTO> getGameboards(
-      final List<String> gameboardIds,
-      final Map<String, Map<String, List<QuestionValidationResponse>>> userQuestionAttempts
-  ) throws SegueDatabaseException, ContentManagerException {
+    final List<String> gameboardIds,
+    final Map<String, Map<String, List<QuestionValidationResponse>>> userQuestionAttempts
+  )
+    throws SegueDatabaseException, ContentManagerException {
     if (null == gameboardIds || gameboardIds.isEmpty()) {
       return new ArrayList<>();
     }
@@ -527,19 +572,26 @@ public class GameManager {
    * @throws SegueDatabaseException  - if there is a problem retrieving the gameboards in the database.
    * @throws ContentManagerException - if there is a problem resolving content
    */
-  public final List<GameboardDTO> getGameboardsWithAttempts(final List<String> gameboardIds,
-                                                            final RegisteredUserDTO user)
-      throws SegueDatabaseException, ContentManagerException {
+  public final List<GameboardDTO> getGameboardsWithAttempts(
+    final List<String> gameboardIds,
+    final RegisteredUserDTO user
+  )
+    throws SegueDatabaseException, ContentManagerException {
     if (null == gameboardIds || gameboardIds.isEmpty()) {
       return new ArrayList<>();
     }
 
     List<GameboardDTO> gameboardsByIds = this.gameboardPersistenceManager.getGameboardsByIds(gameboardIds);
-    List<String> questionPageIds =
-        gameboardsByIds.stream().map(GameboardDTO::getContents).flatMap(Collection::stream).map(GameboardItem::getId)
-            .collect(Collectors.toList());
-    Map<String, Map<String, List<LightweightQuestionValidationResponse>>> userQuestionAttempts =
-        questionManager.getMatchingQuestionAttempts(user, questionPageIds);
+    List<String> questionPageIds = gameboardsByIds
+      .stream()
+      .map(GameboardDTO::getContents)
+      .flatMap(Collection::stream)
+      .map(GameboardItem::getId)
+      .collect(Collectors.toList());
+    Map<String, Map<String, List<LightweightQuestionValidationResponse>>> userQuestionAttempts = questionManager.getMatchingQuestionAttempts(
+      user,
+      questionPageIds
+    );
     for (GameboardDTO gb : gameboardsByIds) {
       augmentGameboardWithQuestionAttemptInformation(gb, userQuestionAttempts);
     }
@@ -581,12 +633,14 @@ public class GameManager {
    * @throws SegueDatabaseException  - if there is a problem retrieving the gameboards from the database.
    * @throws ContentManagerException - if there is an error retrieving the content requested.
    */
-  public final GameboardListDTO getUsersGameboards(final RegisteredUserDTO user, @Nullable final Integer startIndex,
-                                                   @Nullable final Integer limit,
-                                                   @Nullable final GameboardState showOnly,
-                                                   @Nullable final List<Map.Entry<String, SortOrder>> sortInstructions)
-      throws SegueDatabaseException,
-      ContentManagerException {
+  public final GameboardListDTO getUsersGameboards(
+    final RegisteredUserDTO user,
+    @Nullable final Integer startIndex,
+    @Nullable final Integer limit,
+    @Nullable final GameboardState showOnly,
+    @Nullable final List<Map.Entry<String, SortOrder>> sortInstructions
+  )
+    throws SegueDatabaseException, ContentManagerException {
     Validate.notNull(user);
 
     List<GameboardDTO> usersGameboards = this.gameboardPersistenceManager.getGameboardsByUserId(user);
@@ -594,11 +648,16 @@ public class GameManager {
       return new GameboardListDTO();
     }
 
-    List<String> questionPageIds =
-        usersGameboards.stream().map(GameboardDTO::getContents).flatMap(Collection::stream).map(GameboardItem::getId)
-            .collect(Collectors.toList());
-    Map<String, Map<String, List<LightweightQuestionValidationResponse>>> questionAttemptsFromUser =
-        questionManager.getMatchingQuestionAttempts(user, questionPageIds);
+    List<String> questionPageIds = usersGameboards
+      .stream()
+      .map(GameboardDTO::getContents)
+      .flatMap(Collection::stream)
+      .map(GameboardItem::getId)
+      .collect(Collectors.toList());
+    Map<String, Map<String, List<LightweightQuestionValidationResponse>>> questionAttemptsFromUser = questionManager.getMatchingQuestionAttempts(
+      user,
+      questionPageIds
+    );
 
     List<GameboardDTO> resultToReturn = Lists.newArrayList();
 
@@ -635,6 +694,7 @@ public class GameManager {
 
     ComparatorChain<GameboardDTO> comparatorForSorting = new ComparatorChain<GameboardDTO>();
     Comparator<GameboardDTO> defaultComparitor = new Comparator<GameboardDTO>() {
+
       @Override
       public int compare(final GameboardDTO o1, final GameboardDTO o2) {
         return o1.getLastVisited().getTime() > o2.getLastVisited().getTime() ? -1 : 1;
@@ -654,47 +714,59 @@ public class GameManager {
         }
 
         if (sortInstruction.getKey().equals(CREATED_DATE_FIELDNAME)) {
-          comparatorForSorting.addComparator((o1, o2) -> {
-            if (o1.getCreationDate().getTime() == o2.getCreationDate().getTime()) {
-              return 0;
-            } else {
-              return o1.getCreationDate().getTime() > o2.getCreationDate().getTime() ? -1 : 1;
-            }
-          }, reverseOrder);
+          comparatorForSorting.addComparator(
+            (o1, o2) -> {
+              if (o1.getCreationDate().getTime() == o2.getCreationDate().getTime()) {
+                return 0;
+              } else {
+                return o1.getCreationDate().getTime() > o2.getCreationDate().getTime() ? -1 : 1;
+              }
+            },
+            reverseOrder
+          );
         } else if (sortInstruction.getKey().equals(VISITED_DATE_FIELDNAME)) {
-          comparatorForSorting.addComparator((o1, o2) -> {
-            if (o1.getLastVisited().getTime() == o2.getLastVisited().getTime()) {
-              return 0;
-            } else {
-              return o1.getLastVisited().getTime() > o2.getLastVisited().getTime() ? -1 : 1;
-            }
-          }, reverseOrder);
+          comparatorForSorting.addComparator(
+            (o1, o2) -> {
+              if (o1.getLastVisited().getTime() == o2.getLastVisited().getTime()) {
+                return 0;
+              } else {
+                return o1.getLastVisited().getTime() > o2.getLastVisited().getTime() ? -1 : 1;
+              }
+            },
+            reverseOrder
+          );
         } else if (sortInstruction.getKey().equals(TITLE_FIELDNAME)) {
-          comparatorForSorting.addComparator((o1, o2) -> {
-            if (o1.getTitle() == null && o2.getTitle() == null) {
-              return 0;
-            }
-            if (o1.getTitle() == null) {
-              return 1;
-            }
-            if (o2.getTitle() == null) {
-              return -1;
-            }
-            return o1.getTitle().compareTo(o2.getTitle());
-          }, reverseOrder);
+          comparatorForSorting.addComparator(
+            (o1, o2) -> {
+              if (o1.getTitle() == null && o2.getTitle() == null) {
+                return 0;
+              }
+              if (o1.getTitle() == null) {
+                return 1;
+              }
+              if (o2.getTitle() == null) {
+                return -1;
+              }
+              return o1.getTitle().compareTo(o2.getTitle());
+            },
+            reverseOrder
+          );
         } else if (sortInstruction.getKey().equals(COMPLETION_FIELDNAME)) {
-          comparatorForSorting.addComparator((o1, o2) -> {
-            if (o1.getPercentageCompleted() == null && o2.getPercentageCompleted() == null) {
-              return 0;
-            }
-            if (o1.getPercentageCompleted() == null) {
-              return 1;
-            }
-            if (o2.getPercentageCompleted() == null) {
-              return -1;
-            }
-            return o1.getPercentageCompleted().compareTo(o2.getPercentageCompleted());
-          }, reverseOrder);
+          comparatorForSorting.addComparator(
+            (o1, o2) -> {
+              if (o1.getPercentageCompleted() == null && o2.getPercentageCompleted() == null) {
+                return 0;
+              }
+              if (o1.getPercentageCompleted() == null) {
+                return 1;
+              }
+              if (o2.getPercentageCompleted() == null) {
+                return -1;
+              }
+              return o1.getPercentageCompleted().compareTo(o2.getPercentageCompleted());
+            },
+            reverseOrder
+          );
         }
       }
     }
@@ -717,8 +789,13 @@ public class GameManager {
     // fully augment only those we are returning.
     this.gameboardPersistenceManager.augmentGameboardItems(sublistOfGameboards);
 
-    return new GameboardListDTO(sublistOfGameboards, (long) resultToReturn.size(),
-        totalNotStarted, totalInProgress, totalCompleted);
+    return new GameboardListDTO(
+      sublistOfGameboards,
+      (long) resultToReturn.size(),
+      totalNotStarted,
+      totalInProgress,
+      totalCompleted
+    );
   }
 
   /**
@@ -732,8 +809,7 @@ public class GameManager {
    * @throws ContentManagerException     - if we are unable to lookup the required content.
    */
   public GameboardDTO saveNewGameboard(final GameboardDTO gameboardDTO, final RegisteredUserDTO owner)
-      throws NoWildcardException, InvalidGameboardException, SegueDatabaseException, DuplicateGameboardException,
-      ContentManagerException {
+    throws NoWildcardException, InvalidGameboardException, SegueDatabaseException, DuplicateGameboardException, ContentManagerException {
     Validate.notNull(gameboardDTO);
     Validate.notNull(owner);
 
@@ -770,8 +846,7 @@ public class GameManager {
    * @return useful for providing an indication of how many people are sharing boards.
    * @throws SegueDatabaseException - if there is a problem updating the gameboard.
    */
-  public Map<String, Integer> getNumberOfConnectedUsersByGameboard()
-      throws SegueDatabaseException {
+  public Map<String, Integer> getNumberOfConnectedUsersByGameboard() throws SegueDatabaseException {
     Map<String, List<String>> boardToUserIdMapping = this.gameboardPersistenceManager.getBoardToUserIdMapping();
 
     Map<String, Integer> result = Maps.newTreeMap();
@@ -791,7 +866,7 @@ public class GameManager {
    * @throws SegueDatabaseException - if there is a problem updating the gameboard.
    */
   public GameboardDTO updateGameboardTitle(final GameboardDTO gameboardWithUpdatedTitle)
-      throws SegueDatabaseException, InvalidGameboardException {
+    throws SegueDatabaseException, InvalidGameboardException {
     this.validateGameboard(gameboardWithUpdatedTitle);
     return this.gameboardPersistenceManager.updateGameboardTitle(gameboardWithUpdatedTitle);
   }
@@ -806,27 +881,35 @@ public class GameManager {
    * @throws ContentManagerException - if we can't look up the question page details.
    */
   public List<ImmutablePair<RegisteredUserDTO, List<GameboardItem>>> gatherGameProgressData(
-      final List<RegisteredUserDTO> users, final GameboardDTO gameboard) throws SegueDatabaseException,
-      ContentManagerException {
+    final List<RegisteredUserDTO> users,
+    final GameboardDTO gameboard
+  )
+    throws SegueDatabaseException, ContentManagerException {
     Validate.notNull(users);
     Validate.notNull(gameboard);
 
     List<ImmutablePair<RegisteredUserDTO, List<GameboardItem>>> result = Lists.newArrayList();
 
-    List<String> questionPageIds =
-        gameboard.getContents().stream().map(GameboardItem::getId).collect(Collectors.toList());
+    List<String> questionPageIds = gameboard
+      .getContents()
+      .stream()
+      .map(GameboardItem::getId)
+      .collect(Collectors.toList());
 
-    Map<Long, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>>
-        questionAttemptsForAllUsersOfInterest =
-        questionManager.getMatchingQuestionAttempts(users, questionPageIds);
+    Map<Long, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> questionAttemptsForAllUsersOfInterest = questionManager.getMatchingQuestionAttempts(
+      users,
+      questionPageIds
+    );
 
     for (RegisteredUserDTO user : users) {
       List<GameboardItem> userGameItems = Lists.newArrayList();
 
       for (GameboardItem observerGameItem : gameboard.getContents()) {
         GameboardItem userGameItem = new GameboardItem(observerGameItem);
-        this.augmentGameItemWithAttemptInformation(userGameItem,
-            questionAttemptsForAllUsersOfInterest.get(user.getId()));
+        this.augmentGameItemWithAttemptInformation(
+            userGameItem,
+            questionAttemptsForAllUsersOfInterest.get(user.getId())
+          );
         userGameItems.add(userGameItem);
       }
       result.add(new ImmutablePair<>(user, userGameItems));
@@ -845,14 +928,19 @@ public class GameManager {
   public List<IsaacWildcard> getWildcards() throws NoWildcardException, ContentManagerException {
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
 
-    fieldsToMap.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, BooleanOperator.OR, Collections.singletonList(WILDCARD_TYPE)));
+    fieldsToMap.add(
+      new GitContentManager.BooleanSearchClause(
+        TYPE_FIELDNAME,
+        BooleanOperator.OR,
+        Collections.singletonList(WILDCARD_TYPE)
+      )
+    );
 
     Map<String, SortOrder> sortInstructions = Maps.newHashMap();
     sortInstructions.put(TITLE_FIELDNAME + "." + UNPROCESSED_SEARCH_FIELD_SUFFIX, SortOrder.ASC);
 
-    ResultsWrapper<ContentDTO> wildcardResults = this.contentManager.findByFieldNames(
-        fieldsToMap, 0, -1, sortInstructions);
+    ResultsWrapper<ContentDTO> wildcardResults =
+      this.contentManager.findByFieldNames(fieldsToMap, 0, -1, sortInstructions);
 
     if (wildcardResults.getTotalResults() == 0) {
       throw new NoWildcardException();
@@ -876,7 +964,7 @@ public class GameManager {
    * @throws ContentManagerException if there is a problem with the content requested.
    */
   public Collection<QuestionDTO> getAllMarkableQuestionPartsDFSOrder(final String questionPageId)
-      throws ContentManagerException {
+    throws ContentManagerException {
     Validate.notBlank(questionPageId);
 
     // do a depth first traversal of the question page to get the correct order of questions
@@ -895,13 +983,13 @@ public class GameManager {
    * @throws ContentManagerException - if there is an error retrieving the content requested.
    */
   private GameboardDTO augmentGameboardWithQuestionAttemptInformationAndUserInformation(
-      final GameboardDTO gameboardDTO,
-      final Map<String, Map<String, List<QuestionValidationResponse>>> questionAttemptsFromUser,
-      final AbstractSegueUserDTO user
-  ) throws SegueDatabaseException, ContentManagerException {
+    final GameboardDTO gameboardDTO,
+    final Map<String, Map<String, List<QuestionValidationResponse>>> questionAttemptsFromUser,
+    final AbstractSegueUserDTO user
+  )
+    throws SegueDatabaseException, ContentManagerException {
     if (user instanceof RegisteredUserDTO) {
-      gameboardDTO
-          .setSavedToCurrentUser(this.isBoardLinkedToUser((RegisteredUserDTO) user, gameboardDTO.getId()));
+      gameboardDTO.setSavedToCurrentUser(this.isBoardLinkedToUser((RegisteredUserDTO) user, gameboardDTO.getId()));
     }
 
     this.augmentGameboardWithQuestionAttemptInformation(gameboardDTO, questionAttemptsFromUser);
@@ -918,9 +1006,10 @@ public class GameManager {
    * @throws ContentManagerException - if there is an error retrieving the content requested.
    */
   private GameboardDTO augmentGameboardWithQuestionAttemptInformation(
-      final GameboardDTO gameboardDTO, final Map<String, ? extends Map<String,
-      ? extends List<? extends LightweightQuestionValidationResponse>>> questionAttemptsFromUser)
-      throws ContentManagerException {
+    final GameboardDTO gameboardDTO,
+    final Map<String, ? extends Map<String, ? extends List<? extends LightweightQuestionValidationResponse>>> questionAttemptsFromUser
+  )
+    throws ContentManagerException {
     if (null == gameboardDTO) {
       return null;
     }
@@ -937,10 +1026,14 @@ public class GameManager {
       try {
         this.augmentGameItemWithAttemptInformation(gameItem, questionAttemptsFromUser);
       } catch (ResourceNotFoundException e) {
-        log.info(String.format(
-            "The gameboard '%s' references an unavailable question '%s'"
-                + " - treating it as if it never existed for marking!",
-            gameboardDTO.getId(), gameItem.getId()));
+        log.info(
+          String.format(
+            "The gameboard '%s' references an unavailable question '%s'" +
+            " - treating it as if it never existed for marking!",
+            gameboardDTO.getId(),
+            gameItem.getId()
+          )
+        );
         continue;
       }
 
@@ -967,21 +1060,30 @@ public class GameManager {
    * @return list of augmented gameboard items.
    */
   public List<GameboardItem> getGameboardItemProgress(
-      @NotNull final List<ContentDTO> questions,
-      final Map<String, Map<String, List<QuestionValidationResponse>>> userQuestionAttempts,
-      @Nullable final GameFilter gameFilter) {
-
-    return questions.stream()
-        .map(q -> this.gameboardPersistenceManager.convertToGameboardItem(
-            q, new GameboardContentDescriptor(q.getId(), QUESTION_TYPE, AudienceContext.fromFilter(gameFilter))))
-        .map(questionItem -> {
+    @NotNull final List<ContentDTO> questions,
+    final Map<String, Map<String, List<QuestionValidationResponse>>> userQuestionAttempts,
+    @Nullable final GameFilter gameFilter
+  ) {
+    return questions
+      .stream()
+      .map(
+        q ->
+          this.gameboardPersistenceManager.convertToGameboardItem(
+              q,
+              new GameboardContentDescriptor(q.getId(), QUESTION_TYPE, AudienceContext.fromFilter(gameFilter))
+            )
+      )
+      .map(
+        questionItem -> {
           try {
             this.augmentGameItemWithAttemptInformation(questionItem, userQuestionAttempts);
           } catch (ContentManagerException | ResourceNotFoundException e) {
             log.error("Unable to augment '" + questionItem.getId() + "' with user attempt information");
           }
           return questionItem;
-        }).collect(Collectors.toList());
+        }
+      )
+      .collect(Collectors.toList());
   }
 
   /**
@@ -993,7 +1095,7 @@ public class GameManager {
    * @throws SegueDatabaseException if there is a database error
    */
   private boolean isBoardLinkedToUser(final RegisteredUserDTO user, final String gameboardId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     return this.gameboardPersistenceManager.isBoardLinkedToUser(user.getId(), gameboardId);
   }
 
@@ -1016,14 +1118,13 @@ public class GameManager {
    * @throws ContentManagerException - if there is an error retrieving the content requested.
    */
   private List<GameboardItem> getSelectedGameboardQuestions(
-      final GameFilter gameFilter,
-      final Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts
-  ) throws ContentManagerException {
-
+    final GameFilter gameFilter,
+    final Map<String, Map<String, List<QuestionValidationResponse>>> usersQuestionAttempts
+  )
+    throws ContentManagerException {
     Long seed = randomGenerator.nextLong();
     int searchIndex = 0;
-    List<GameboardItem> selectionOfGameboardQuestions = this.getNextQuestionsForFilter(gameFilter, searchIndex,
-        seed);
+    List<GameboardItem> selectionOfGameboardQuestions = this.getNextQuestionsForFilter(gameFilter, searchIndex, seed);
 
     if (selectionOfGameboardQuestions.isEmpty()) {
       // no questions found just return an empty list.
@@ -1041,12 +1142,12 @@ public class GameManager {
           questionState = gameboardItem.getState();
         } catch (ResourceNotFoundException e) {
           throw new ContentManagerException(
-              "Resource not found exception, this shouldn't happen as the selectionOfGameboardQuestions "
-                  + "should only show available content.");
+            "Resource not found exception, this shouldn't happen as the selectionOfGameboardQuestions " +
+            "should only show available content."
+          );
         }
 
-        if (questionState.equals(GameboardItemState.PASSED)
-            || questionState.equals(GameboardItemState.PERFECT)) {
+        if (questionState.equals(GameboardItemState.PASSED) || questionState.equals(GameboardItemState.PERFECT)) {
           completedQuestions.add(gameboardItem);
         } else {
           gameboardReadyQuestions.add(gameboardItem);
@@ -1096,18 +1197,27 @@ public class GameManager {
    * @return a list of gameboard items.
    * @throws ContentManagerException - if there is a problem accessing the content repository.
    */
-  public List<GameboardItem> getNextQuestionsForFilter(final GameFilter gameFilter, final int index,
-                                                       final Long randomSeed) throws ContentManagerException {
+  public List<GameboardItem> getNextQuestionsForFilter(
+    final GameFilter gameFilter,
+    final int index,
+    final Long randomSeed
+  )
+    throws ContentManagerException {
     // get some questions
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
-    fieldsToMap.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, BooleanOperator.AND, Collections.singletonList(QUESTION_TYPE)));
+    fieldsToMap.add(
+      new GitContentManager.BooleanSearchClause(
+        TYPE_FIELDNAME,
+        BooleanOperator.AND,
+        Collections.singletonList(QUESTION_TYPE)
+      )
+    );
     fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
     // Search for questions that match the fields to map variable.
 
-    ResultsWrapper<ContentDTO> results = this.contentManager.findByFieldNamesRandomOrder(
-        fieldsToMap, index, MAX_QUESTIONS_TO_SEARCH, randomSeed);
+    ResultsWrapper<ContentDTO> results =
+      this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, index, MAX_QUESTIONS_TO_SEARCH, randomSeed);
 
     List<ContentDTO> questionsForGameboard = results.getResults();
 
@@ -1125,8 +1235,11 @@ public class GameManager {
         }
       }
 
-      GameboardItem questionInfo = this.gameboardPersistenceManager.convertToGameboardItem(
-          c, new GameboardContentDescriptor(c.getId(), QUESTION_TYPE, AudienceContext.fromFilter(gameFilter)));
+      GameboardItem questionInfo =
+        this.gameboardPersistenceManager.convertToGameboardItem(
+            c,
+            new GameboardContentDescriptor(c.getId(), QUESTION_TYPE, AudienceContext.fromFilter(gameFilter))
+          );
       selectionOfGameboardQuestions.add(questionInfo);
     }
 
@@ -1142,30 +1255,41 @@ public class GameManager {
    * @throws ContentManagerException - if there is a problem accessing the content repository.
    */
   public List<IsaacQuestionPageDTO> generateRandomQuestions(final GameFilter gameFilter, final int limit)
-      throws ContentManagerException {
+    throws ContentManagerException {
     // 4 is the number that limit is multiplied to make sure we have enough questions to return
     // after filtering out superseded questions
     final int limitMultiplier = 4;
 
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
 
-    fieldsToMap.add(new GitContentManager.BooleanSearchClause(TYPE_FIELDNAME, BooleanOperator.AND,
-        Collections.singletonList(QUESTION_TYPE)));
+    fieldsToMap.add(
+      new GitContentManager.BooleanSearchClause(
+        TYPE_FIELDNAME,
+        BooleanOperator.AND,
+        Collections.singletonList(QUESTION_TYPE)
+      )
+    );
 
     // exclude questions marked deprecated
-    fieldsToMap.add(new GitContentManager.BooleanSearchClause(DEPRECATED_FIELDNAME, BooleanOperator.NOT,
-        Collections.singletonList("true")));
+    fieldsToMap.add(
+      new GitContentManager.BooleanSearchClause(
+        DEPRECATED_FIELDNAME,
+        BooleanOperator.NOT,
+        Collections.singletonList("true")
+      )
+    );
 
     fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
-    ResultsWrapper<ContentDTO> results = this.contentManager.findByFieldNamesRandomOrder(
-        fieldsToMap, 0, (limit * limitMultiplier));
+    ResultsWrapper<ContentDTO> results =
+      this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, (limit * limitMultiplier));
 
     List<ContentDTO> generatedQuestions = results.getResults();
-    List<IsaacQuestionPageDTO> questionsToReturn = generatedQuestions.stream()
-        .map(question -> (IsaacQuestionPageDTO) question)
-        .filter(qp -> qp.getSupersededBy() == null || qp.getSupersededBy().isEmpty())
-        .collect(Collectors.toList());
+    List<IsaacQuestionPageDTO> questionsToReturn = generatedQuestions
+      .stream()
+      .map(question -> (IsaacQuestionPageDTO) question)
+      .filter(qp -> qp.getSupersededBy() == null || qp.getSupersededBy().isEmpty())
+      .collect(Collectors.toList());
 
     if (questionsToReturn.size() > limit) {
       return questionsToReturn.subList(0, limit);
@@ -1186,10 +1310,10 @@ public class GameManager {
    * @throws ResourceNotFoundException - if we cannot find the question specified.
    */
   private GameboardItem augmentGameItemWithAttemptInformation(
-      final GameboardItem gameItem,
-      final Map<String, ? extends Map<String, ? extends List<? extends LightweightQuestionValidationResponse>>>
-          questionAttemptsFromUser)
-      throws ContentManagerException, ResourceNotFoundException {
+    final GameboardItem gameItem,
+    final Map<String, ? extends Map<String, ? extends List<? extends LightweightQuestionValidationResponse>>> questionAttemptsFromUser
+  )
+    throws ContentManagerException, ResourceNotFoundException {
     Validate.notNull(gameItem, "gameItem cannot be null");
     Validate.notNull(questionAttemptsFromUser, "questionAttemptsFromUser cannot be null");
 
@@ -1203,19 +1327,20 @@ public class GameManager {
     // get all question parts in the question page: depends on each question
     // having an id that starts with the question page id.
     Collection<QuestionDTO> listOfQuestionParts = getAllMarkableQuestionPartsDFSOrder(questionPage);
-    Map<String, ? extends List<? extends LightweightQuestionValidationResponse>> questionAttempts =
-        questionAttemptsFromUser.get(questionPageId);
+    Map<String, ? extends List<? extends LightweightQuestionValidationResponse>> questionAttempts = questionAttemptsFromUser.get(
+      questionPageId
+    );
     if (questionAttempts != null) {
       for (ContentDTO questionPart : listOfQuestionParts) {
-        List<? extends LightweightQuestionValidationResponse> questionPartAttempts =
-            questionAttempts.get(questionPart.getId());
+        List<? extends LightweightQuestionValidationResponse> questionPartAttempts = questionAttempts.get(
+          questionPart.getId()
+        );
         if (questionPartAttempts != null) {
           // Go through the attempts in reverse chronological order for this question part to determine if
           // there is a correct answer somewhere.
           boolean foundCorrectForThisQuestion = false;
           for (int i = questionPartAttempts.size() - 1; i >= 0; i--) {
-            if (questionPartAttempts.get(i).isCorrect() != null
-                && questionPartAttempts.get(i).isCorrect()) {
+            if (questionPartAttempts.get(i).isCorrect() != null && questionPartAttempts.get(i).isCorrect()) {
               foundCorrectForThisQuestion = true;
               break;
             }
@@ -1234,14 +1359,15 @@ public class GameManager {
       }
     } else {
       questionPartsNotAttempted = listOfQuestionParts.size();
-      questionPartStates = listOfQuestionParts.stream()
-          .map(questionPart -> QuestionPartState.NOT_ATTEMPTED).collect(Collectors.toList());
+      questionPartStates =
+        listOfQuestionParts.stream().map(questionPart -> QuestionPartState.NOT_ATTEMPTED).collect(Collectors.toList());
     }
 
     // Get the pass mark for the question page
     if (questionPage == null) {
-      throw new ResourceNotFoundException(String.format("Unable to locate the question: %s for augmenting",
-          questionPageId));
+      throw new ResourceNotFoundException(
+        String.format("Unable to locate the question: %s for augmenting", questionPageId)
+      );
     }
     float passMark = questionPage.getPassMark() != null ? questionPage.getPassMark() : DEFAULT_QUESTION_PASS_MARK;
     gameItem.setPassMark(passMark);
@@ -1290,16 +1416,20 @@ public class GameManager {
    * @throws ContentManagerException - if we cannot access the content requested.
    */
   private IsaacWildcard getRandomWildcard(final MapperFacade mapper, final List<String> subjectsList)
-      throws NoWildcardException,
-      ContentManagerException {
+    throws NoWildcardException, ContentManagerException {
     List<GitContentManager.BooleanSearchClause> fieldsToMap = Lists.newArrayList();
 
-    fieldsToMap.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, BooleanOperator.OR, Collections.singletonList(WILDCARD_TYPE)));
+    fieldsToMap.add(
+      new GitContentManager.BooleanSearchClause(
+        TYPE_FIELDNAME,
+        BooleanOperator.OR,
+        Collections.singletonList(WILDCARD_TYPE)
+      )
+    );
 
     // FIXME - the 999 is a magic number because using NO_SEARCH_LIMIT doesn't work for all elasticsearch queries!
-    ResultsWrapper<ContentDTO> wildcardResults = this.contentManager.findByFieldNamesRandomOrder(
-        fieldsToMap, 0, RANDOM_WILDCARD_SEARCH_LIMIT);
+    ResultsWrapper<ContentDTO> wildcardResults =
+      this.contentManager.findByFieldNamesRandomOrder(fieldsToMap, 0, RANDOM_WILDCARD_SEARCH_LIMIT);
 
     // try to increase randomness of wildcard results.
     Collections.shuffle(wildcardResults.getResults());
@@ -1358,34 +1488,43 @@ public class GameManager {
    * @throws InvalidGameboardException - If the gameboard is considered to be invalid.
    * @throws NoWildcardException       - if the wildcard cannot be found.
    */
-  private GameboardDTO validateGameboard(final GameboardDTO gameboardDTO) throws InvalidGameboardException,
-      NoWildcardException {
+  private GameboardDTO validateGameboard(final GameboardDTO gameboardDTO)
+    throws InvalidGameboardException, NoWildcardException {
     if (gameboardDTO.getId() != null && gameboardDTO.getId().contains(" ")) {
-      throw new InvalidGameboardException(
-          "Your gameboard must not contain illegal characters e.g. spaces");
+      throw new InvalidGameboardException("Your gameboard must not contain illegal characters e.g. spaces");
     }
 
     if (gameboardDTO.getContents().size() > Constants.GAME_BOARD_TARGET_SIZE) {
-      throw new InvalidGameboardException(String.format("Your gameboard must not contain more than %s questions",
-          GAME_BOARD_TARGET_SIZE));
+      throw new InvalidGameboardException(
+        String.format("Your gameboard must not contain more than %s questions", GAME_BOARD_TARGET_SIZE)
+      );
     }
 
     if (gameboardDTO.getGameFilter() == null || !validateFilterQuery(gameboardDTO.getGameFilter())) {
-      throw new InvalidGameboardException("Your gameboard must have some valid filter information "
-          + "e.g. subject must be set.");
+      throw new InvalidGameboardException(
+        "Your gameboard must have some valid filter information " + "e.g. subject must be set."
+      );
     }
 
     List<String> badQuestions = this.gameboardPersistenceManager.getInvalidQuestionIdsFromGameboard(gameboardDTO);
     if (badQuestions.size() > 0) {
-      throw new InvalidGameboardException(String.format(
-          "The gameboard provided contains %s invalid (or missing) questions - [%s]", badQuestions.size(),
-          badQuestions));
+      throw new InvalidGameboardException(
+        String.format(
+          "The gameboard provided contains %s invalid (or missing) questions - [%s]",
+          badQuestions.size(),
+          badQuestions
+        )
+      );
     }
 
     if (gameboardDTO.getTitle().length() > GAMEBOARD_MAX_TITLE_LENGTH) {
-      throw new InvalidGameboardException(String.format(
+      throw new InvalidGameboardException(
+        String.format(
           "The gameboard title provided is too long (%s characters) the maximum length is %s",
-          gameboardDTO.getTitle().length(), GAMEBOARD_MAX_TITLE_LENGTH));
+          gameboardDTO.getTitle().length(),
+          GAMEBOARD_MAX_TITLE_LENGTH
+        )
+      );
     }
 
     if (gameboardDTO.getWildCard() == null) {
@@ -1399,7 +1538,8 @@ public class GameManager {
     } catch (ContentManagerException e) {
       log.error("Error validating gameboard.", e);
       throw new InvalidGameboardException(
-          "There was a problem validating the gameboard due to ContentManagerException another exception.");
+        "There was a problem validating the gameboard due to ContentManagerException another exception."
+      );
     }
 
     return gameboardDTO;

@@ -25,7 +25,6 @@ import java.util.List;
  * @author Alistair Stead
  */
 public class EmailCommunicationMessage implements ICommunicationMessage {
-
   private final Long userId;
 
   private final String plainTextMessage;
@@ -64,13 +63,20 @@ public class EmailCommunicationMessage implements ICommunicationMessage {
    * @param replyToName          the reply to name for the email message
    * @param attachments          list of attachments for the message
    */
-  public EmailCommunicationMessage(@Nullable final Long userId, final String recipientAddress,
-                                   final String subject, final String plainTextMessage,
-                                   final String htmlMessage, final EmailType emailType,
-                                   @Nullable final String overrideFromAddress, @Nullable final String overrideFromName,
-                                   @Nullable final String overrideEnvelopeFrom,
-                                   @Nullable final String replyToAddress, @Nullable final String replyToName,
-                                   @Nullable final List<EmailAttachment> attachments) {
+  public EmailCommunicationMessage(
+    @Nullable final Long userId,
+    final String recipientAddress,
+    final String subject,
+    final String plainTextMessage,
+    final String htmlMessage,
+    final EmailType emailType,
+    @Nullable final String overrideFromAddress,
+    @Nullable final String overrideFromName,
+    @Nullable final String overrideEnvelopeFrom,
+    @Nullable final String replyToAddress,
+    @Nullable final String replyToName,
+    @Nullable final List<EmailAttachment> attachments
+  ) {
     this.userId = userId;
     this.plainTextMessage = plainTextMessage;
     this.recipientAddress = recipientAddress;
@@ -92,8 +98,13 @@ public class EmailCommunicationMessage implements ICommunicationMessage {
    * @param htmlMessage      html message in email
    * @param emailType        the type of the message
    */
-  public EmailCommunicationMessage(final String recipientAddress, final String subject, final String plainTextMessage,
-                                   final String htmlMessage, final EmailType emailType) {
+  public EmailCommunicationMessage(
+    final String recipientAddress,
+    final String subject,
+    final String plainTextMessage,
+    final String htmlMessage,
+    final EmailType emailType
+  ) {
     this.userId = null;
     this.plainTextMessage = plainTextMessage;
     this.recipientAddress = recipientAddress;

@@ -37,8 +37,7 @@ public class SegueContextNotifier implements ServletContextListener {
     metricsExporter = injector.getInstance(IMetricsExporter.class);
 
     listeners = Lists.newArrayList();
-    Collection<Class<? extends ServletContextListener>> registeredContextListenerClasses
-        = SegueGuiceConfigurationModule.getRegisteredContextListenerClasses();
+    Collection<Class<? extends ServletContextListener>> registeredContextListenerClasses = SegueGuiceConfigurationModule.getRegisteredContextListenerClasses();
     // use guice to initialise everything that needs to be kept informed of
     // the servlet context.
     for (Class<? extends ServletContextListener> segueListener : registeredContextListenerClasses) {
@@ -75,5 +74,4 @@ public class SegueContextNotifier implements ServletContextListener {
       listener.contextDestroyed(sce);
     }
   }
-
 }

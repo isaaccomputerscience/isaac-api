@@ -39,9 +39,13 @@ public class SeguePBKDF2 {
   private final String saltingAlgorithm;
   private final Integer saltSize;
 
-  public SeguePBKDF2(final String algorithm, final Integer keyLength, final Integer iterations,
-                     final String saltingAlgorithm, final Integer saltSize) {
-
+  public SeguePBKDF2(
+    final String algorithm,
+    final Integer keyLength,
+    final Integer iterations,
+    final String saltingAlgorithm,
+    final Integer saltSize
+  ) {
     this.algorithm = algorithm;
     this.keyLength = keyLength;
     this.iterations = iterations;
@@ -58,8 +62,8 @@ public class SeguePBKDF2 {
    * @throws NoSuchAlgorithmException - if the configured algorithm is not valid.
    * @throws InvalidKeySpecException  - if the preconfigured key spec is invalid.
    */
-  public String hashPassword(final String password, final String salt) throws NoSuchAlgorithmException,
-      InvalidKeySpecException {
+  public String hashPassword(final String password, final String salt)
+    throws NoSuchAlgorithmException, InvalidKeySpecException {
     BigInteger hashedPassword = new BigInteger(computeHash(password, salt, keyLength));
 
     return new String(Base64.encodeBase64(hashedPassword.toByteArray()));
@@ -76,7 +80,7 @@ public class SeguePBKDF2 {
    * @throws InvalidKeySpecException  - if the preconfigured key spec is invalid.
    */
   public byte[] computeHash(final String str, final String salt, final int keyLength)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
+    throws NoSuchAlgorithmException, InvalidKeySpecException {
     char[] strChars = str.toCharArray();
     byte[] saltBytes = salt.getBytes();
 

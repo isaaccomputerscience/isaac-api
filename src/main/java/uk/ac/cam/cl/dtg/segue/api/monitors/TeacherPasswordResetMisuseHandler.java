@@ -34,7 +34,6 @@ import uk.ac.cam.cl.dtg.util.LogUtils;
  *
  */
 public class TeacherPasswordResetMisuseHandler implements IMisuseHandler {
-
   private static final Logger log = LoggerFactory.getLogger(TeacherPasswordResetMisuseHandler.class);
 
   private static final Integer SOFT_THRESHOLD = 15;
@@ -45,10 +44,7 @@ public class TeacherPasswordResetMisuseHandler implements IMisuseHandler {
    *
    */
   @Inject
-  public TeacherPasswordResetMisuseHandler() {
-
-  }
-
+  public TeacherPasswordResetMisuseHandler() {}
 
   @Override
   public Integer getSoftThreshold() {
@@ -79,5 +75,4 @@ public class TeacherPasswordResetMisuseHandler implements IMisuseHandler {
   public void executeHardThresholdAction(final String message) {
     log.error("Hard threshold limit: " + sanitiseExternalLogValue(message));
   }
-
 }

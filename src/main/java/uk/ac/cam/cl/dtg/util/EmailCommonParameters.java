@@ -6,10 +6,13 @@ import jakarta.mail.internet.InternetAddress;
 public class EmailCommonParameters {
   private final String[] recipient;
   private final InternetAddress fromAddress;
+
   @Nullable
   private final String overrideEnvelopeFrom;
+
   @Nullable
   private final InternetAddress replyTo;
+
   private final String subject;
 
   /**
@@ -22,9 +25,13 @@ public class EmailCommonParameters {
    * @param replyTo              - (nullable) the e-mail address that should be used as the reply-to address
    * @param subject              - The message subject
    */
-  public EmailCommonParameters(final String[] recipient, final InternetAddress fromAddress,
-                               @Nullable final String overrideEnvelopeFrom,
-                               final @Nullable InternetAddress replyTo, final String subject) {
+  public EmailCommonParameters(
+    final String[] recipient,
+    final InternetAddress fromAddress,
+    @Nullable final String overrideEnvelopeFrom,
+    final @Nullable InternetAddress replyTo,
+    final String subject
+  ) {
     this.recipient = recipient;
     this.fromAddress = fromAddress;
     this.overrideEnvelopeFrom = overrideEnvelopeFrom;

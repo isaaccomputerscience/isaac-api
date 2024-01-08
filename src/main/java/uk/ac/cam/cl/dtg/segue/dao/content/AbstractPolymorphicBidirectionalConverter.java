@@ -1,6 +1,5 @@
 package uk.ac.cam.cl.dtg.segue.dao.content;
 
-
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 
@@ -28,9 +27,9 @@ public abstract class AbstractPolymorphicBidirectionalConverter<S, D> extends Bi
        https://github.com/orika-mapper/orika/commit/554396579c96b3356c3c31ceb2e236cba0ffbaba
      */
     boolean forwardConvertable =
-        this.sourceType.isAssignableFrom(sourceType) && this.destinationType.equals(destinationType);
+      this.sourceType.isAssignableFrom(sourceType) && this.destinationType.equals(destinationType);
     boolean reverseConvertable =
-        this.destinationType.isAssignableFrom(sourceType) && this.sourceType.equals(destinationType);
+      this.destinationType.isAssignableFrom(sourceType) && this.sourceType.equals(destinationType);
     return forwardConvertable || reverseConvertable;
   }
 }

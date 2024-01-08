@@ -45,16 +45,13 @@ public class SegueETLApplicationRegister extends Application {
     injector = ETLConfigurationModule.getGuiceInjector();
 
     setupSwaggerApiAdvertiser();
-
   }
 
   @Override
   public final Set<Object> getSingletons() {
     // check to see if we have already registered singletons as we don't want this happening more than once.
     if (singletons.isEmpty()) {
-
       this.singletons.add(injector.getInstance(ETLFacade.class));
-
     }
     return this.singletons;
   }
@@ -75,5 +72,4 @@ public class SegueETLApplicationRegister extends Application {
   private void setupSwaggerApiAdvertiser() {
     // TODO: is this worth it?
   }
-
 }

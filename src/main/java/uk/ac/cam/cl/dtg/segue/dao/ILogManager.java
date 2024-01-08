@@ -66,8 +66,12 @@ public interface ILogManager {
    *            object
    * @throws SegueDatabaseException
    */
-  void logExternalEvent(AbstractSegueUserDTO user, HttpServletRequest httpRequest, String eventType,
-                        Object eventDetails);
+  void logExternalEvent(
+    AbstractSegueUserDTO user,
+    HttpServletRequest httpRequest,
+    String eventType,
+    Object eventDetails
+  );
 
   /**
    * Log an event with the persistence logging framework without looking up the user from the database.
@@ -126,7 +130,7 @@ public interface ILogManager {
    *             - if there is a problem contacting the underlying database
    */
   Collection<LogEvent> getLogsByType(String type, Date fromDate, Date toDate, List<RegisteredUserDTO> usersOfInterest)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Convenience method to find out how many of a particular type of event have been logged.
@@ -157,9 +161,14 @@ public interface ILogManager {
    * @return a map of type -- > localDate -- > number of events
    * @throws SegueDatabaseException - if there is a problem contacting the underlying database
    */
-  Map<String, Map<LocalDate, Long>> getLogCountByDate(Collection<String> eventTypes, Date fromDate, Date toDate,
-                                                      List<RegisteredUserDTO> usersOfInterest, boolean binDataByMonth)
-      throws SegueDatabaseException;
+  Map<String, Map<LocalDate, Long>> getLogCountByDate(
+    Collection<String> eventTypes,
+    Date fromDate,
+    Date toDate,
+    List<RegisteredUserDTO> usersOfInterest,
+    boolean binDataByMonth
+  )
+    throws SegueDatabaseException;
 
   /**
    * @return get a set of all ip addresses ever seen in the log events.

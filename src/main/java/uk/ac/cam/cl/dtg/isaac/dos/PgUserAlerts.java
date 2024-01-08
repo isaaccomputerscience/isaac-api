@@ -13,7 +13,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
 public class PgUserAlerts implements IUserAlerts {
-
   private final PostgresSqlDb db;
 
   @Inject
@@ -23,22 +22,21 @@ public class PgUserAlerts implements IUserAlerts {
 
   private PgUserAlert buildPgUserAlert(final ResultSet result) throws SQLException {
     return new PgUserAlert(
-        result.getLong("id"),
-        result.getLong("user_id"),
-        result.getString("message"),
-        result.getString("link"),
-        result.getTimestamp("created"),
-        result.getTimestamp("seen"),
-        result.getTimestamp("clicked"),
-        result.getTimestamp("dismissed"));
+      result.getLong("id"),
+      result.getLong("user_id"),
+      result.getString("message"),
+      result.getString("link"),
+      result.getTimestamp("created"),
+      result.getTimestamp("seen"),
+      result.getTimestamp("clicked"),
+      result.getTimestamp("dismissed")
+    );
   }
 
   @Override
   public List<IUserAlert> getUserAlerts(final Long userId) throws SegueDatabaseException {
     String query = "SELECT * FROM user_alerts WHERE user_id = ? ORDER BY created ASC";
-    try (Connection conn = db.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = db.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_ALERTS_USER_ID, userId);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -55,11 +53,9 @@ public class PgUserAlerts implements IUserAlerts {
 
   @Override
   public IUserAlert createAlert(final Long userId, final String message, final String link)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     String query = "INSERT INTO user_alerts (user_id, message, link, created) VALUES (?, ?, ?, ?) RETURNING *";
-    try (Connection conn = db.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = db.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_CREATE_ALERT_USER_ID, userId);
       pst.setString(FIELD_CREATE_ALERT_MESSAGE, message);
       pst.setString(FIELD_CREATE_ALERT_LINK, link);
@@ -80,7 +76,7 @@ public class PgUserAlerts implements IUserAlerts {
 
   @Override
   public void recordAlertEvent(final Long alertId, final IUserAlert.AlertEvents eventType)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     String query = "UPDATE user_alerts SET ";
     switch (eventType) {
       case SEEN:
@@ -96,9 +92,7 @@ public class PgUserAlerts implements IUserAlerts {
         throw new IllegalStateException("Unexpected value: " + eventType);
     }
     query += "= ?  WHERE id = ?";
-    try (Connection conn = db.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = db.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setTimestamp(FIELD_RECORD_EVENT_TIMESTAMP, new Timestamp(System.currentTimeMillis()));
       pst.setLong(FIELD_RECORD_EVENT_ALERT_ID, alertId);
 

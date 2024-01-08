@@ -27,5 +27,4 @@ import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
  */
 @JsonContentType("isaacGraphSketcherQuestion")
 @ValidatesWith(IsaacGraphSketcherValidator.class)
-public class IsaacGraphSketcherQuestionDTO extends IsaacSymbolicQuestionDTO {
-}
+public class IsaacGraphSketcherQuestionDTO extends IsaacSymbolicQuestionDTO {}

@@ -41,7 +41,6 @@ class ETLConfigurationModule extends AbstractModule {
 
   ETLConfigurationModule() {
     if (globalProperties == null) {
-
       // check the following places to determine where config file location may be.
       // 1) system env variable, 2) java param (system property), 3) use a default from the constant file.
       String configLocation = SystemUtils.IS_OS_LINUX ? DEFAULT_LINUX_CONFIG_LOCATION : null;
@@ -60,11 +59,9 @@ class ETLConfigurationModule extends AbstractModule {
         globalProperties = new PropertiesLoader(configLocation);
 
         log.info(String.format("Segue using configuration file: %s", configLocation));
-
       } catch (IOException e) {
         log.error("Error loading properties file.", e);
       }
-
     }
   }
 
@@ -81,7 +78,6 @@ class ETLConfigurationModule extends AbstractModule {
   @Override
   protected void configure() {
     try {
-
       bind(PropertiesLoader.class).toInstance(globalProperties);
 
       this.bindConstantToProperty(Constants.SEARCH_CLUSTER_NAME, globalProperties);
@@ -92,17 +88,18 @@ class ETLConfigurationModule extends AbstractModule {
       this.bindConstantToProperty(Constants.SCHOOL_CSV_LIST_PATH, globalProperties);
 
       // GitDb
-      bind(GitDb.class).toInstance(
-          new GitDb(globalProperties.getProperty(Constants.LOCAL_GIT_DB), globalProperties
-              .getProperty(Constants.REMOTE_GIT_SSH_URL), globalProperties
-              .getProperty(Constants.REMOTE_GIT_SSH_KEY_PATH)));
-
+      bind(GitDb.class)
+        .toInstance(
+          new GitDb(
+            globalProperties.getProperty(Constants.LOCAL_GIT_DB),
+            globalProperties.getProperty(Constants.REMOTE_GIT_SSH_URL),
+            globalProperties.getProperty(Constants.REMOTE_GIT_SSH_KEY_PATH)
+          )
+        );
     } catch (IOException e) {
       e.printStackTrace();
       log.error("IOException during setup process.");
     }
-
-
   }
 
   /**
@@ -129,8 +126,12 @@ class ETLConfigurationModule extends AbstractModule {
   @Inject
   @Provides
   @Singleton
-  private static ETLManager getETLManager(final ContentIndexer contentIndexer, final SchoolIndexer schoolIndexer,
-                                          final GitDb db) throws IOException {
+  private static ETLManager getETLManager(
+    final ContentIndexer contentIndexer,
+    final SchoolIndexer schoolIndexer,
+    final GitDb db
+  )
+    throws IOException {
     if (null == etlManager) {
       PropertiesManager contentIndicesStore = getContentIndicesStore();
       etlManager = new ETLManager(contentIndexer, schoolIndexer, db, contentIndicesStore);
@@ -153,11 +154,11 @@ class ETLConfigurationModule extends AbstractModule {
   @Provides
   @Singleton
   private static RestHighLevelClient getSearchConnectionInformation(
-      @Named(Constants.SEARCH_CLUSTER_ADDRESS) final String address,
-      @Named(Constants.SEARCH_CLUSTER_INFO_PORT) final int port,
-      @Named(Constants.SEARCH_CLUSTER_USERNAME) final String username,
-      @Named(Constants.SEARCH_CLUSTER_PASSWORD) final String password) {
-
+    @Named(Constants.SEARCH_CLUSTER_ADDRESS) final String address,
+    @Named(Constants.SEARCH_CLUSTER_INFO_PORT) final int port,
+    @Named(Constants.SEARCH_CLUSTER_USERNAME) final String username,
+    @Named(Constants.SEARCH_CLUSTER_PASSWORD) final String password
+  ) {
     if (null == elasticSearchClient) {
       try {
         elasticSearchClient = ElasticSearchIndexer.getClient(address, port, username, password);
@@ -174,9 +175,11 @@ class ETLConfigurationModule extends AbstractModule {
   @Inject
   @Provides
   @Singleton
-  private SchoolIndexer getSchoolListIndexer(@Named(Constants.SCHOOL_CSV_LIST_PATH) final String schoolListPath,
-                                             final ElasticSearchIndexer es,
-                                             final ContentMapper mapper) {
+  private SchoolIndexer getSchoolListIndexer(
+    @Named(Constants.SCHOOL_CSV_LIST_PATH) final String schoolListPath,
+    final ElasticSearchIndexer es,
+    final ContentMapper mapper
+  ) {
     if (null == schoolIndexer) {
       schoolIndexer = new SchoolIndexer(es, mapper, schoolListPath);
       log.info("Creating singleton of SchoolListReader");

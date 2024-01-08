@@ -33,7 +33,6 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
  *
  */
 public interface IFederatedAuthenticator extends IAuthenticator {
-
   /**
    * Send a request to the Provider's API to retrieve the user's information.
    *
@@ -46,6 +45,6 @@ public interface IFederatedAuthenticator extends IAuthenticator {
    * @throws IOException
    * @throws AuthenticatorSecurityException
    */
-  UserFromAuthProvider getUserInfo(String internalProviderReference) throws NoUserException, IOException,
-      AuthenticatorSecurityException;
+  UserFromAuthProvider getUserInfo(String internalProviderReference)
+    throws NoUserException, IOException, AuthenticatorSecurityException;
 }

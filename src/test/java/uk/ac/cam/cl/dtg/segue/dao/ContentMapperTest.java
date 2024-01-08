@@ -11,7 +11,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 
 public class ContentMapperTest {
-
   private ContentMapper contentMapper;
 
   @Before

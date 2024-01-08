@@ -54,8 +54,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
    *            - An instance of an automapper that can be used for mapping to and from AssignmentDOs and DTOs.
    */
   @Inject
-  public PgQuizAssignmentPersistenceManager(final PostgresSqlDb database,
-                                            final MapperFacade mapper) {
+  public PgQuizAssignmentPersistenceManager(final PostgresSqlDb database, final MapperFacade mapper) {
     this.database = database;
     this.mapper = mapper;
   }
@@ -65,25 +64,30 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
     QuizAssignmentDO assignmentToSave = mapper.map(assignment, QuizAssignmentDO.class);
 
     String query =
-        "INSERT INTO quiz_assignments(quiz_id, group_id, owner_user_id, creation_date, due_date, quiz_feedback_mode)"
-            + " VALUES (?, ?, ?, ?, ?, ?);";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+      "INSERT INTO quiz_assignments(quiz_id, group_id, owner_user_id, creation_date, due_date, quiz_feedback_mode)" +
+      " VALUES (?, ?, ?, ?, ?, ?);";
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
     ) {
       pst.setString(FIELD_SAVE_ASSIGNMENT_QUIZ_ID, assignmentToSave.getQuizId());
       pst.setLong(FIELD_SAVE_ASSIGNMENT_GROUP_ID, assignmentToSave.getGroupId());
       pst.setLong(FIELD_SAVE_ASSIGNMENT_OWNER_USER_ID, assignmentToSave.getOwnerUserId());
 
       if (assignmentToSave.getCreationDate() != null) {
-        pst.setTimestamp(FIELD_SAVE_ASSIGNMENT_CREATION_DATE,
-            new java.sql.Timestamp(assignmentToSave.getCreationDate().getTime()));
+        pst.setTimestamp(
+          FIELD_SAVE_ASSIGNMENT_CREATION_DATE,
+          new java.sql.Timestamp(assignmentToSave.getCreationDate().getTime())
+        );
       } else {
         pst.setTimestamp(FIELD_SAVE_ASSIGNMENT_CREATION_DATE, new java.sql.Timestamp(new Date().getTime()));
       }
 
       if (assignmentToSave.getDueDate() != null) {
-        pst.setTimestamp(FIELD_SAVE_ASSIGNMENT_DUE_DATE,
-            new java.sql.Timestamp(assignmentToSave.getDueDate().getTime()));
+        pst.setTimestamp(
+          FIELD_SAVE_ASSIGNMENT_DUE_DATE,
+          new java.sql.Timestamp(assignmentToSave.getDueDate().getTime())
+        );
       } else {
         pst.setNull(FIELD_SAVE_ASSIGNMENT_DUE_DATE, Types.TIMESTAMP);
       }
@@ -105,7 +109,6 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
         log.debug("Saving Quiz Assignment... Quiz Assignment ID: " + assignment.getId() + " Db id : " + assignmentId);
         return assignmentId;
       }
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
@@ -113,16 +116,13 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
 
   @Override
   public List<QuizAssignmentDTO> getAssignmentsByQuizIdAndGroup(final String quizId, final Long groupId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     String query = "SELECT * FROM quiz_assignments WHERE quiz_id = ? AND group_id = ? AND NOT deleted";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_GET_ASSIGNMENTS_BY_QUIZ_AND_GROUP_QUIZ_ID, quizId);
       pst.setLong(FIELD_GET_ASSIGNMENTS_BY_QUIZ_AND_GROUP_GROUP_ID, groupId);
 
       try (ResultSet results = pst.executeQuery()) {
-
         List<QuizAssignmentDTO> listOfResults = Lists.newArrayList();
 
         while (results.next()) {
@@ -149,8 +149,9 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
       sb.append("?").append(i < groupIds.size() - 1 ? ", " : "");
     }
     sb.append(") AND NOT deleted ORDER BY creation_date");
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(sb.toString())
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(sb.toString())
     ) {
       int i = FIELD_GET_ASSIGNMENTS_BY_GROUP_LIST_INITIAL_INDEX;
       for (Long id : groupIds) {
@@ -159,7 +160,6 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
       }
 
       try (ResultSet results = pst.executeQuery()) {
-
         while (results.next()) {
           listOfResults.add(this.convertToQuizAssignmentDTO(this.convertFromSQLToQuizAssignmentDO(results)));
         }
@@ -173,11 +173,9 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
 
   @Override
   public QuizAssignmentDTO getAssignmentById(final Long quizAssignmentId)
-      throws SegueDatabaseException, AssignmentCancelledException {
+    throws SegueDatabaseException, AssignmentCancelledException {
     String query = "SELECT * FROM quiz_assignments WHERE id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       // Deleted quiz assignments are filtered below with a specific error
       pst.setLong(FIELD_GET_ASSIGNMENT_BY_ID_ASSIGNMENT_ID, quizAssignmentId);
 
@@ -198,9 +196,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
   @Override
   public void cancelAssignment(final Long quizAssignmentId) throws SegueDatabaseException {
     String query = "UPDATE quiz_assignments SET deleted = true WHERE id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_CANCEL_ASSIGNMENT_ASSIGNMENT_ID, quizAssignmentId);
 
       pst.execute();
@@ -211,12 +207,11 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
 
   @Override
   public void updateAssignment(final Long quizAssignmentId, final QuizAssignmentDTO updates)
-      throws SegueDatabaseException {
-    String query = "UPDATE quiz_assignments SET quiz_feedback_mode = COALESCE(?, quiz_feedback_mode),"
-        + "due_date = COALESCE(?, due_date) WHERE id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    throws SegueDatabaseException {
+    String query =
+      "UPDATE quiz_assignments SET quiz_feedback_mode = COALESCE(?, quiz_feedback_mode)," +
+      "due_date = COALESCE(?, due_date) WHERE id = ?";
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       if (updates.getQuizFeedbackMode() != null) {
         pst.setString(FIELD_UPDATE_ASSIGNMENT_FEEDBACK_MODE, updates.getQuizFeedbackMode().name());
       } else {
@@ -265,9 +260,15 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
       preciseDueDate = new Date(sqlResults.getTimestamp("due_date").getTime());
     }
 
-    return new QuizAssignmentDO(sqlResults.getLong("id"), sqlResults.getString("quiz_id"),
-        sqlResults.getLong("owner_user_id"), sqlResults.getLong("group_id"), preciseDate,
-        preciseDueDate, QuizFeedbackMode.valueOf(sqlResults.getString("quiz_feedback_mode")));
+    return new QuizAssignmentDO(
+      sqlResults.getLong("id"),
+      sqlResults.getString("quiz_id"),
+      sqlResults.getLong("owner_user_id"),
+      sqlResults.getLong("group_id"),
+      preciseDate,
+      preciseDueDate,
+      QuizFeedbackMode.valueOf(sqlResults.getString("quiz_feedback_mode"))
+    );
   }
 
   // Field Constants

@@ -45,18 +45,24 @@ public class IsaacItemQuestionValidator implements IValidator {
     Validate.notNull(answer);
 
     if (!(question instanceof IsaacItemQuestion)) {
-      throw new IllegalArgumentException(String.format(
-          "This validator only works with IsaacItemQuestions (%s is not ItemQuestion)", question.getId()));
+      throw new IllegalArgumentException(
+        String.format("This validator only works with IsaacItemQuestions (%s is not ItemQuestion)", question.getId())
+      );
     }
 
     if (!(answer instanceof ItemChoice)) {
-      throw new IllegalArgumentException(String.format(
-          "Expected ItemChoice for IsaacItemQuestion: %s. Received (%s) ", question.getId(), answer.getClass()));
+      throw new IllegalArgumentException(
+        String.format(
+          "Expected ItemChoice for IsaacItemQuestion: %s. Received (%s) ",
+          question.getId(),
+          answer.getClass()
+        )
+      );
     }
 
     // These variables store the important features of the response we'll send.
-    Content feedback = null;                        // The feedback we send the user
-    boolean responseCorrect = false;                // Whether we're right or wrong
+    Content feedback = null; // The feedback we send the user
+    boolean responseCorrect = false; // Whether we're right or wrong
 
     IsaacItemQuestion itemQuestion = (IsaacItemQuestion) question;
     ItemChoice submittedChoice = (ItemChoice) answer;
@@ -64,14 +70,16 @@ public class IsaacItemQuestionValidator implements IValidator {
     // STEP 0: Is it even possible to answer this question?
 
     if (null == itemQuestion.getChoices() || itemQuestion.getChoices().isEmpty()) {
-      log.error("Question does not have any answers. " + question.getId() + " src: "
-          + question.getCanonicalSourceFile());
+      log.error(
+        "Question does not have any answers. " + question.getId() + " src: " + question.getCanonicalSourceFile()
+      );
       feedback = new Content("This question does not have any correct answers!");
     }
 
     if (null == itemQuestion.getItems() || itemQuestion.getItems().isEmpty()) {
-      log.error("ItemQuestion does not have any items. " + question.getId() + " src: "
-          + question.getCanonicalSourceFile());
+      log.error(
+        "ItemQuestion does not have any items. " + question.getId() + " src: " + question.getCanonicalSourceFile()
+      );
       feedback = new Content("This question does not have any items to choose from!");
     }
 
@@ -104,12 +112,15 @@ public class IsaacItemQuestionValidator implements IValidator {
 
       // For all the choices on this question...
       for (Choice c : orderedChoices) {
-
         // ... that are ItemChoices, ...
         if (!(c instanceof ItemChoice)) {
-          log.error(String.format(
+          log.error(
+            String.format(
               "Validator for question (%s) expected there to be an ItemChoice. Instead it found a %s.",
-              itemQuestion.getId(), c.getClass().toString()));
+              itemQuestion.getId(),
+              c.getClass().toString()
+            )
+          );
           continue;
         }
 
@@ -169,27 +180,31 @@ public class IsaacItemQuestionValidator implements IValidator {
        Choices without a null value for allowSubsetMatch are considered 'strict'
        for the ordering.
      */
-    orderedChoices.sort((o1, o2) -> {
-      int o1Val = 1;
-      int o2Val = 1;
-      Boolean subsetMatch;
-      if (o1 instanceof ItemChoice) {
-        subsetMatch = ((ItemChoice) o1).isAllowSubsetMatch();
-        o1Val = (null != subsetMatch && subsetMatch) ? 1 : 0;
+    orderedChoices.sort(
+      (o1, o2) -> {
+        int o1Val = 1;
+        int o2Val = 1;
+        Boolean subsetMatch;
+        if (o1 instanceof ItemChoice) {
+          subsetMatch = ((ItemChoice) o1).isAllowSubsetMatch();
+          o1Val = (null != subsetMatch && subsetMatch) ? 1 : 0;
+        }
+        if (o2 instanceof ItemChoice) {
+          subsetMatch = ((ItemChoice) o2).isAllowSubsetMatch();
+          o2Val = (null != subsetMatch && subsetMatch) ? 1 : 0;
+        }
+        return o1Val - o2Val;
       }
-      if (o2 instanceof ItemChoice) {
-        subsetMatch = ((ItemChoice) o2).isAllowSubsetMatch();
-        o2Val = (null != subsetMatch && subsetMatch) ? 1 : 0;
-      }
-      return o1Val - o2Val;
-    });
+    );
 
     // Then sort in order of correctness
-    orderedChoices.sort((o1, o2) -> {
-      int o1Val = o1.isCorrect() ? 0 : 1;
-      int o2Val = o2.isCorrect() ? 0 : 1;
-      return o1Val - o2Val;
-    });
+    orderedChoices.sort(
+      (o1, o2) -> {
+        int o1Val = o1.isCorrect() ? 0 : 1;
+        int o2Val = o2.isCorrect() ? 0 : 1;
+        return o1Val - o2Val;
+      }
+    );
 
     /* This should leave us with the following ordering:
         0 Correct strict

@@ -40,12 +40,15 @@ public class UnhandledExceptionMapper implements ExceptionMapper<Exception> {
   public Response toResponse(final Exception e) {
     UUID generatedUuid = UUID.randomUUID();
     String logMessage = String.format(
-        "Unhandled exception captured. Assigned ID: %1$s. Exception at: %2$s on %3$s %4$s",
-        generatedUuid, e.getClass().getSimpleName(), request.getMethod(), request.getRequestURI()
+      "Unhandled exception captured. Assigned ID: %1$s. Exception at: %2$s on %3$s %4$s",
+      generatedUuid,
+      e.getClass().getSimpleName(),
+      request.getMethod(),
+      request.getRequestURI()
     );
     String responseMessage = String.format(
-        "An unhandled error occurred!\nPlease report this ID if you contact support: %1$s.",
-        generatedUuid
+      "An unhandled error occurred!\nPlease report this ID if you contact support: %1$s.",
+      generatedUuid
     );
     log.error(logMessage, e);
     return new SegueErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, responseMessage, null).toResponse();

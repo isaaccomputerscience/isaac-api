@@ -15,13 +15,11 @@ import uk.ac.cam.cl.dtg.segue.scheduler.SegueJobService;
 
 // NOTE: This was a proof of concept but I'm not too sure we actually need this entire test suite.
 public class InfoFacadeIT extends IsaacIntegrationTest {
-
   public InfoFacade infoFacade;
 
   @BeforeEach
   public void setUp() throws RuntimeException, IOException {
-    SegueJobService segueJobService =
-        createNiceMock(SegueJobService.class); // new SegueJobService(new ArrayList<>(), postgresSqlDb);
+    SegueJobService segueJobService = createNiceMock(SegueJobService.class); // new SegueJobService(new ArrayList<>(), postgresSqlDb);
     infoFacade = new InfoFacade(properties, contentManager, segueJobService, logManager);
   }
 
@@ -84,6 +82,5 @@ public class InfoFacadeIT extends IsaacIntegrationTest {
     Response response = infoFacade.pingElasticSearch();
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
   }
-
   // NOTE: The other methods are probably less useful to test unless we also bring up the checkers
 }

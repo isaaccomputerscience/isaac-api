@@ -22,7 +22,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacClozeQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.quiz.IsaacClozeValidator;
 import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 
-
 /**
  * Content DO for IsaacClozeQuestions.
  */
@@ -30,7 +29,6 @@ import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 @JsonContentType("isaacClozeQuestion")
 @ValidatesWith(IsaacClozeValidator.class)
 public class IsaacClozeQuestion extends IsaacItemQuestion {
-
   private Boolean withReplacement;
   // Detailed feedback option not needed in the client so not in DTO:
   private Boolean detailedItemFeedback;

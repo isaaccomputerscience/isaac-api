@@ -61,7 +61,6 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
   private final Map<String, ISegueHashingAlgorithm> possibleAlgorithms;
   private final ISegueHashingAlgorithm preferredAlgorithm;
 
-
   /**
    * Creates a segue local authenticator object to validate and create passwords to be stored by the Segue CMS.
    *
@@ -72,10 +71,13 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
    * @param preferredAlgorithm  - preferred algorithm for use in hashing operations
    */
   @Inject
-  public SegueLocalAuthenticator(final IUserDataManager userDataManager, final IPasswordDataManager passwordDataManager,
-                                 final PropertiesLoader properties,
-                                 final Map<String, ISegueHashingAlgorithm> possibleAlgorithms,
-                                 final ISegueHashingAlgorithm preferredAlgorithm) {
+  public SegueLocalAuthenticator(
+    final IUserDataManager userDataManager,
+    final IPasswordDataManager passwordDataManager,
+    final PropertiesLoader properties,
+    final Map<String, ISegueHashingAlgorithm> possibleAlgorithms,
+    final ISegueHashingAlgorithm preferredAlgorithm
+  ) {
     this.userDataManager = userDataManager;
     this.properties = properties;
     this.possibleAlgorithms = possibleAlgorithms;
@@ -90,7 +92,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
 
   @Override
   public void setOrChangeUsersPassword(final RegisteredUser userToSetPasswordFor, final String plainTextPassword)
-      throws InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
+    throws InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
     ensureValidPassword(plainTextPassword);
 
     this.updateUsersPasswordWithoutValidation(userToSetPasswordFor, plainTextPassword);
@@ -98,9 +100,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
 
   @Override
   public RegisteredUser authenticate(final String usersEmailAddress, final String plainTextPassword)
-      throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException,
-      SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
-
+    throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
     if (null == usersEmailAddress || null == plainTextPassword) {
       throw new IncorrectCredentialsProvidedException(LOGIN_INCORRECT_CREDENTIALS_MESSAGE);
     }
@@ -122,12 +122,9 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
     // work out what algorithm is being used.
     ISegueHashingAlgorithm hashingAlgorithmUsed = this.possibleAlgorithms.get(luc.getSecurityScheme());
 
-    if (hashingAlgorithmUsed.hashPassword(plainTextPassword, luc.getSecureSalt()).equals(
-        luc.getPassword())) {
-
+    if (hashingAlgorithmUsed.hashPassword(plainTextPassword, luc.getSecureSalt()).equals(luc.getPassword())) {
       // success, now check if we should rehash the password or not.
       if (!preferredAlgorithm.hashingAlgorithmName().equals(hashingAlgorithmUsed.hashingAlgorithmName())) {
-
         // update the password
         this.updateUsersPasswordWithoutValidation(localUserAccount, plainTextPassword);
         log.info(String.format("Account id (%s) password algorithm automatically upgraded.", localUserAccount.getId()));
@@ -154,16 +151,20 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
   }
 
   @Override
-  public RegisteredUser createEmailVerificationTokenForUser(final RegisteredUser userToAttachVerificationToken,
-                                                            final String email) {
+  public RegisteredUser createEmailVerificationTokenForUser(
+    final RegisteredUser userToAttachVerificationToken,
+    final String email
+  ) {
     Validate.notNull(userToAttachVerificationToken);
     Validate.notNull(email, "Email used for verification cannot be null");
 
     // Generate HMAC
     String key = properties.getProperty(HMAC_SALT);
-    String token = UserAuthenticationManager.calculateHMAC(key, email).replace("=", "")
-        .replace("/", "")
-        .replace("+", "");
+    String token = UserAuthenticationManager
+      .calculateHMAC(key, email)
+      .replace("=", "")
+      .replace("/", "")
+      .replace("+", "");
     userToAttachVerificationToken.setEmailToVerify(email);
     userToAttachVerificationToken.setEmailVerificationToken(token);
     return userToAttachVerificationToken;
@@ -179,9 +180,11 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
       // Check if the email corresponds to the token
       String key = properties.getProperty(HMAC_SALT);
       String email = user.getEmailToVerify();
-      String hmacToken = UserAuthenticationManager.calculateHMAC(key, email).replace("=", "")
-          .replace("/", "")
-          .replace("+", "");
+      String hmacToken = UserAuthenticationManager
+        .calculateHMAC(key, email)
+        .replace("=", "")
+        .replace("/", "")
+        .replace("+", "");
       return userToken.equals(hmacToken);
     }
     return false;
@@ -189,7 +192,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
 
   @Override
   public String createPasswordResetTokenForUser(final RegisteredUser userToAttachToken)
-      throws SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
+    throws SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
     Validate.notNull(userToAttachToken);
 
     LocalUserCredential luc = passwordDataManager.getLocalUserCredential(userToAttachToken.getId());
@@ -199,19 +202,42 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
       // when checking real passwords.
       // If new password algorithms are implemented that use short keys and/or a larger charset than Base64 does
       // this may become an issue, although unlikely because short keys are risky and Base64 is an encoding safe charset
-      luc = new LocalUserCredential(userToAttachToken.getId(),
-          "LOCKED@" + new String(Base64.encodeBase64(this.preferredAlgorithm.computeHash(UUID.randomUUID().toString(),
-              UUID.randomUUID().toString(), SHORT_KEY_LENGTH))),
-          new String(Base64.encodeBase64(this.preferredAlgorithm.computeHash(UUID.randomUUID().toString(),
-              UUID.randomUUID().toString(), SHORT_KEY_LENGTH))),
-          this.preferredAlgorithm.hashingAlgorithmName());
+      luc =
+        new LocalUserCredential(
+          userToAttachToken.getId(),
+          "LOCKED@" +
+          new String(
+            Base64.encodeBase64(
+              this.preferredAlgorithm.computeHash(
+                  UUID.randomUUID().toString(),
+                  UUID.randomUUID().toString(),
+                  SHORT_KEY_LENGTH
+                )
+            )
+          ),
+          new String(
+            Base64.encodeBase64(
+              this.preferredAlgorithm.computeHash(
+                  UUID.randomUUID().toString(),
+                  UUID.randomUUID().toString(),
+                  SHORT_KEY_LENGTH
+                )
+            )
+          ),
+          this.preferredAlgorithm.hashingAlgorithmName()
+        );
     }
 
     // Trim the "=" padding off the end of the base64 encoded token so that the URL that is
     // eventually generated is correctly parsed in email clients
-    String token = new String(Base64.encodeBase64(this.preferredAlgorithm.computeHash(UUID.randomUUID().toString(),
-        luc.getSecureSalt(), SHORT_KEY_LENGTH))).replace("=", "").replace("/", "")
-        .replace("+", "");
+    String token = new String(
+      Base64.encodeBase64(
+        this.preferredAlgorithm.computeHash(UUID.randomUUID().toString(), luc.getSecureSalt(), SHORT_KEY_LENGTH)
+      )
+    )
+      .replace("=", "")
+      .replace("/", "")
+      .replace("+", "");
 
     luc.setResetToken(token);
 
@@ -273,15 +299,20 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
    * @param plainTextPassword    - the new password.
    * @throws SegueDatabaseException
    */
-  private void updateUsersPasswordWithoutValidation(final RegisteredUser userToSetPasswordFor,
-                                                    final String plainTextPassword)
-      throws SegueDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException {
+  private void updateUsersPasswordWithoutValidation(
+    final RegisteredUser userToSetPasswordFor,
+    final String plainTextPassword
+  )
+    throws SegueDatabaseException, NoSuchAlgorithmException, InvalidKeySpecException {
     String passwordSalt = preferredAlgorithm.generateSalt();
     String hashedPassword = preferredAlgorithm.hashPassword(plainTextPassword, passwordSalt);
 
     LocalUserCredential luc = new LocalUserCredential(
-        userToSetPasswordFor.getId(),
-        hashedPassword, passwordSalt, preferredAlgorithm.hashingAlgorithmName());
+      userToSetPasswordFor.getId(),
+      hashedPassword,
+      passwordSalt,
+      preferredAlgorithm.hashingAlgorithmName()
+    );
 
     // now we want to update the database
     passwordDataManager.createOrUpdateLocalUserCredential(luc);

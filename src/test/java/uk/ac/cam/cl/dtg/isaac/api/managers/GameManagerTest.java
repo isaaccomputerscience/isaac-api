@@ -59,27 +59,22 @@ public class GameManagerTest {
     this.dummyGameboardPersistenceManager = createMock(GameboardPersistenceManager.class);
     this.dummyMapper = createMock(MapperFacade.class);
     this.dummyQuestionManager = createMock(QuestionManager.class);
-    this.gameManager = new GameManager(
+    this.gameManager =
+      new GameManager(
         this.dummyContentManager,
         this.dummyGameboardPersistenceManager,
         this.dummyMapper,
         this.dummyQuestionManager,
         "latest"
-    );
+      );
   }
 
   @Test
-  public void getNextQuestionsForFilter_appliesExclusionFilterForDeprecatedQuestions() throws
-      ContentManagerException {
-
+  public void getNextQuestionsForFilter_appliesExclusionFilterForDeprecatedQuestions() throws ContentManagerException {
     // configure the mock GitContentManager to record the filters that are sent to it by getNextQuestionsForFilter()
     Capture<List<BooleanSearchClause>> capturedFilters = Capture.newInstance();
-    expect(dummyContentManager.findByFieldNamesRandomOrder(
-        capture(capturedFilters),
-        anyInt(),
-        anyInt(),
-        anyLong())
-    ).andStubReturn(new ResultsWrapper<>());
+    expect(dummyContentManager.findByFieldNamesRandomOrder(capture(capturedFilters), anyInt(), anyInt(), anyLong()))
+      .andStubReturn(new ResultsWrapper<>());
     replay(dummyContentManager);
 
     // Act
@@ -88,8 +83,11 @@ public class GameManagerTest {
     // Assert
     // check that one of the filters sent to GitContentManager was the deprecated question exclusion filter
     List<BooleanSearchClause> filters = capturedFilters.getValues().get(0);
-    BooleanSearchClause deprecatedFilter = filters.stream()
-        .filter(f -> Objects.equals(f.getField(), "deprecated")).collect(Collectors.toList()).get(0);
+    BooleanSearchClause deprecatedFilter = filters
+      .stream()
+      .filter(f -> Objects.equals(f.getField(), "deprecated"))
+      .collect(Collectors.toList())
+      .get(0);
 
     assertNotNull(deprecatedFilter);
     assertEquals(deprecatedFilter.getOperator(), Constants.BooleanOperator.NOT);
@@ -98,7 +96,6 @@ public class GameManagerTest {
 
   @Test
   public void generateRandomQuestions_returnsCorrectNumberOfQuestions() throws ContentManagerException {
-
     // Arrange
     int limit = 5;
     int totalQuestions = 20; // Change to 20 questions
@@ -112,13 +109,9 @@ public class GameManagerTest {
     }
     var resultsWrapper = new ResultsWrapper<>(questions, (long) totalQuestions);
 
-    expect(dummyContentManager.findByFieldNamesRandomOrder(
-        anyObject(),
-        anyInt(),
-        anyInt(),
-        anyLong())
-    ).andReturn(resultsWrapper)
-        .times(1);
+    expect(dummyContentManager.findByFieldNamesRandomOrder(anyObject(), anyInt(), anyInt(), anyLong()))
+      .andReturn(resultsWrapper)
+      .times(1);
     replay(dummyContentManager);
 
     // Act
@@ -130,17 +123,11 @@ public class GameManagerTest {
   }
 
   @Test
-  public void generateRandomQuestions_appliesExclusionFilterForDeprecatedQuestions() throws
-      ContentManagerException {
-
+  public void generateRandomQuestions_appliesExclusionFilterForDeprecatedQuestions() throws ContentManagerException {
     // configure the mock GitContentManager to record the filters that are sent to it by generateRandomQuestions()
     Capture<List<BooleanSearchClause>> capturedFilters = Capture.newInstance();
-    expect(dummyContentManager.findByFieldNamesRandomOrder(
-        capture(capturedFilters),
-        anyInt(),
-        anyInt(),
-        anyLong())
-    ).andStubReturn(new ResultsWrapper<>());
+    expect(dummyContentManager.findByFieldNamesRandomOrder(capture(capturedFilters), anyInt(), anyInt(), anyLong()))
+      .andStubReturn(new ResultsWrapper<>());
     replay(dummyContentManager);
 
     // Act
@@ -149,8 +136,11 @@ public class GameManagerTest {
     // Assert
     // check that one of the filters sent to GitContentManager was the deprecated question exclusion filter
     List<BooleanSearchClause> filters = capturedFilters.getValues().get(0);
-    BooleanSearchClause deprecatedFilter = filters.stream()
-        .filter(f -> Objects.equals(f.getField(), "deprecated")).collect(Collectors.toList()).get(0);
+    BooleanSearchClause deprecatedFilter = filters
+      .stream()
+      .filter(f -> Objects.equals(f.getField(), "deprecated"))
+      .collect(Collectors.toList())
+      .get(0);
 
     assertNotNull(deprecatedFilter);
     assertEquals(deprecatedFilter.getOperator(), Constants.BooleanOperator.NOT);

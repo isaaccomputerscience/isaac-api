@@ -38,8 +38,7 @@ public class UnmarkedInputQuestionValidator implements IValidator {
   private static final Logger log = LoggerFactory.getLogger(UnmarkedInputQuestionValidator.class);
 
   @Override
-  public final QuestionValidationResponse validateQuestionResponse(final Question question,
-                                                                   final Choice answer) {
+  public final QuestionValidationResponse validateQuestionResponse(final Question question, final Choice answer) {
     Validate.notNull(question);
     Validate.notNull(answer);
 
@@ -48,8 +47,13 @@ public class UnmarkedInputQuestionValidator implements IValidator {
     if (question instanceof ChoiceQuestion) {
       choiceQuestion = (ChoiceQuestion) question;
 
-      return new QuestionValidationResponse(question.getId(), answer, null, (Content) choiceQuestion.getAnswer(),
-          new Date());
+      return new QuestionValidationResponse(
+        question.getId(),
+        answer,
+        null,
+        (Content) choiceQuestion.getAnswer(),
+        new Date()
+      );
     } else {
       log.error("Expected to be able to cast the question as a ChoiceQuestion " + "but this cast failed.");
       throw new ClassCastException("Incorrect type of question received. Unable to validate.");

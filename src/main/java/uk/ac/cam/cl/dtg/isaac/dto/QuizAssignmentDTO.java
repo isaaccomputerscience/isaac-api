@@ -53,8 +53,15 @@ public class QuizAssignmentDTO implements IAssignmentLike, IHasQuizSummary {
    * @param dueDate          - the optional date the assignment should be completed by.
    * @param quizFeedbackMode - what level of feedback to give to students.
    */
-  public QuizAssignmentDTO(final Long id, final String quizId, final Long ownerUserId, final Long groupId,
-                           final Date creationDate, final Date dueDate, final QuizFeedbackMode quizFeedbackMode) {
+  public QuizAssignmentDTO(
+    final Long id,
+    final String quizId,
+    final Long ownerUserId,
+    final Long groupId,
+    final Date creationDate,
+    final Date dueDate,
+    final QuizFeedbackMode quizFeedbackMode
+  ) {
     this.id = id;
     this.quizId = quizId;
     this.ownerUserId = ownerUserId;
@@ -67,9 +74,7 @@ public class QuizAssignmentDTO implements IAssignmentLike, IHasQuizSummary {
   /**
    * Default constructor required for AutoMapping.
    */
-  public QuizAssignmentDTO() {
-
-  }
+  public QuizAssignmentDTO() {}
 
   /**
    * Gets the id.
@@ -262,14 +267,24 @@ public class QuizAssignmentDTO implements IAssignmentLike, IHasQuizSummary {
 
   @Override
   public String toString() {
-    return "QuizAssignmentDTO ["
-        + "id=" + id
-        + ", quizId='" + quizId + '\''
-        + ", groupId=" + groupId
-        + ", ownerUserId=" + ownerUserId
-        + ", creationDate=" + creationDate
-        + ", dueDate=" + dueDate
-        + ", quizFeedbackMode=" + quizFeedbackMode
-        + ']';
+    return (
+      "QuizAssignmentDTO [" +
+      "id=" +
+      id +
+      ", quizId='" +
+      quizId +
+      '\'' +
+      ", groupId=" +
+      groupId +
+      ", ownerUserId=" +
+      ownerUserId +
+      ", creationDate=" +
+      creationDate +
+      ", dueDate=" +
+      dueDate +
+      ", quizFeedbackMode=" +
+      quizFeedbackMode +
+      ']'
+    );
   }
 }

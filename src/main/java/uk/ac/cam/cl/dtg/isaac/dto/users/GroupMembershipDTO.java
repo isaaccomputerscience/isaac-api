@@ -19,7 +19,6 @@ package uk.ac.cam.cl.dtg.isaac.dto.users;
 import java.util.Date;
 import uk.ac.cam.cl.dtg.isaac.dos.GroupMembershipStatus;
 
-
 /**
  * GroupMembership DTO - this object represents a users membership to a group.
  */
@@ -33,9 +32,7 @@ public class GroupMembershipDTO {
   /**
    * Default Constructor.
    */
-  public GroupMembershipDTO() {
-
-  }
+  public GroupMembershipDTO() {}
 
   /**
    * @param groupId - the group id
@@ -44,8 +41,13 @@ public class GroupMembershipDTO {
    * @param created - the date the membership object was created
    * @param updated - the date the membership object was last updated
    */
-  public GroupMembershipDTO(final Long groupId, final Long userId, final GroupMembershipStatus status,
-                            final Date created, final Date updated) {
+  public GroupMembershipDTO(
+    final Long groupId,
+    final Long userId,
+    final GroupMembershipStatus status,
+    final Date created,
+    final Date updated
+  ) {
     this.groupId = groupId;
     this.userId = userId;
     this.status = status;

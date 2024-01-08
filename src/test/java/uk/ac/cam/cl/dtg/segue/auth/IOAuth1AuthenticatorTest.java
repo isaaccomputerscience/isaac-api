@@ -39,8 +39,7 @@ public abstract class IOAuth1AuthenticatorTest extends IOAuthAuthenticatorTest {
    */
   @Test
   public final void getAuthorizationUrl_returnsNonNullUrl() throws IOException {
-    String urlString = oauth1Authenticator
-        .getAuthorizationUrl(new OAuth1Token(someToken, someTokenSecret));
+    String urlString = oauth1Authenticator.getAuthorizationUrl(new OAuth1Token(someToken, someTokenSecret));
     assertTrue(urlString != null);
     URL url = new URL(urlString);
     assertTrue(url.getAuthority() != null);

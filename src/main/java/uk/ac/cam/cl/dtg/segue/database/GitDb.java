@@ -60,7 +60,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.etl.ETLInMemorySshConfigStore;
 
-
 /**
  * This class is a representation of the Git Database and provides some helper methods to allow file access.
  * <br>
@@ -92,7 +91,7 @@ public class GitDb {
    */
   @Inject
   public GitDb(final String repoLocation, final String sshFetchUrl, final String privateKeyFileLocation)
-      throws IOException {
+    throws IOException {
     Validate.notBlank(repoLocation);
 
     this.sshFetchUrl = sshFetchUrl;
@@ -136,8 +135,8 @@ public class GitDb {
    *             - This method is intended to only locate one file at a time. If your search matches multiple files
    *             then this exception will be thrown.
    */
-  public ByteArrayOutputStream getFileByCommitSHA(final String sha, final String fullFilePath) throws IOException,
-      UnsupportedOperationException {
+  public ByteArrayOutputStream getFileByCommitSHA(final String sha, final String fullFilePath)
+    throws IOException, UnsupportedOperationException {
     if (null == sha || null == fullFilePath) {
       return null;
     }
@@ -183,8 +182,14 @@ public class GitDb {
     }
 
     revWalk.dispose();
-    log.debug("Retrieved Commit Id: " + commitId.getName() + " Searching for: " + sanitiseExternalLogValue(fullFilePath)
-        + " found: " + path);
+    log.debug(
+      "Retrieved Commit Id: " +
+      commitId.getName() +
+      " Searching for: " +
+      sanitiseExternalLogValue(fullFilePath) +
+      " found: " +
+      path
+    );
     ObjectLoader loader = repository.open(objectId);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -206,8 +211,8 @@ public class GitDb {
    * @throws UnsupportedOperationException
    *             - if git does not support the operation requested.
    */
-  public TreeWalk getTreeWalk(final String sha, final String searchString) throws IOException,
-      UnsupportedOperationException {
+  public TreeWalk getTreeWalk(final String sha, final String searchString)
+    throws IOException, UnsupportedOperationException {
     Validate.notBlank(sha);
     Validate.notNull(searchString);
 
@@ -264,7 +269,6 @@ public class GitDb {
           return true;
         }
       }
-
     } catch (NoHeadException e) {
       log.error("Git returned a no head exception. Unable to list all commits.");
       e.printStackTrace();
@@ -300,7 +304,6 @@ public class GitDb {
           return rev.getCommitTime();
         }
       }
-
     } catch (NoHeadException e) {
       log.error("Git returned a no head exception. Unable to list all commits.");
       e.printStackTrace();
@@ -332,7 +335,6 @@ public class GitDb {
       for (RevCommit rev : logs) {
         logList.add(rev);
       }
-
     } catch (GitAPIException e) {
       log.error("Git returned an API exception. While trying to to list all commits.", e);
     } catch (IOException e) {
@@ -355,20 +357,27 @@ public class GitDb {
       TrackingRefUpdate refUpdate = result.getTrackingRefUpdate("refs/remotes/origin/master");
       if (refUpdate != null) {
         if (refUpdate.getResult() == RefUpdate.Result.LOCK_FAILURE) {
-          log.error("Failed to fetch. The git repository may be corrupted. "
-              + "Hopefully, this will not be a problem.");
+          log.error(
+            "Failed to fetch. The git repository may be corrupted. " + "Hopefully, this will not be a problem."
+          );
         } else {
           log.info("Fetched latest from git. Latest version is: " + this.getHeadSha());
         }
       }
     } catch (TransportException e) {
-      log.error("Failed to authenticate with the remote content repository via SSH. Ensure the 'Git' section of "
-          + "segue-config.properties has valid values, particularly that the key at "
-          + "'REMOTE_GIT_SSH_KEY_PATH' exists.", e);
+      log.error(
+        "Failed to authenticate with the remote content repository via SSH. Ensure the 'Git' section of " +
+        "segue-config.properties has valid values, particularly that the key at " +
+        "'REMOTE_GIT_SSH_KEY_PATH' exists.",
+        e
+      );
     } catch (InvalidRemoteException e) {
-      log.error("Failed to pull the latest from the remote content repository via SSH. Ensure the URL at "
-          + "'REMOTE_GIT_SSH_URL' in the 'Git' section of segue-config.properties is correct, "
-          + "and the private key at 'REMOTE_GIT_SSH_KEY_PATH' is valid for that repository.", e);
+      log.error(
+        "Failed to pull the latest from the remote content repository via SSH. Ensure the URL at " +
+        "'REMOTE_GIT_SSH_URL' in the 'Git' section of segue-config.properties is correct, " +
+        "and the private key at 'REMOTE_GIT_SSH_KEY_PATH' is valid for that repository.",
+        e
+      );
     } catch (GitAPIException e) {
       log.error("Error while trying to pull the latest from the remote repository.", e);
     }
@@ -391,7 +400,6 @@ public class GitDb {
         log.warn("Problem fetching head from remote. Providing local head instead.");
         result = gitHandle.getRepository().resolve(Constants.HEAD).getName();
       }
-
     } catch (RevisionSyntaxException | IOException e) {
       log.error("Error getting the head from the repository.", e);
     }
@@ -410,12 +418,12 @@ public class GitDb {
 
     // configure the factory to use the above options, and create
     ConfigStoreFactory inMemorySshConfigStoreFactory = (homeDir, configFile, localUserName) ->
-        new ETLInMemorySshConfigStore(sshConfig);
+      new ETLInMemorySshConfigStore(sshConfig);
     SshdSessionFactory factory = new SshdSessionFactoryBuilder()
-        .setHomeDirectory(FS.DETECTED.userHome())
-        .setSshDirectory(new File(FS.DETECTED.userHome(), "/.ssh"))
-        .setConfigStoreFactory(inMemorySshConfigStoreFactory)
-        .build(new JGitKeyCache());
+      .setHomeDirectory(FS.DETECTED.userHome())
+      .setSshDirectory(new File(FS.DETECTED.userHome(), "/.ssh"))
+      .setConfigStoreFactory(inMemorySshConfigStoreFactory)
+      .build(new JGitKeyCache());
 
     // set the factory as the default provider for SSH sessions
     if (this.sshFetchUrl != null) {

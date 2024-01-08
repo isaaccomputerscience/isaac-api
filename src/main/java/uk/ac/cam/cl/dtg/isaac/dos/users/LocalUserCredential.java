@@ -35,18 +35,19 @@ public class LocalUserCredential {
   private Date created;
   private Date lastUpdated;
 
-  public LocalUserCredential() {
+  public LocalUserCredential() {}
 
-  }
-
-  public LocalUserCredential(final Long userId, final String password, final String secureSalt,
-                             final String securityScheme) {
+  public LocalUserCredential(
+    final Long userId,
+    final String password,
+    final String secureSalt,
+    final String securityScheme
+  ) {
     this.userId = userId;
     this.password = password;
     this.secureSalt = secureSalt;
     this.securityScheme = securityScheme;
   }
-
 
   public Long getUserId() {
     return userId;

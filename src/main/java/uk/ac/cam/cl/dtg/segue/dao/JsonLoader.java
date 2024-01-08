@@ -32,9 +32,7 @@ public final class JsonLoader {
   /**
    * Prevent this class from being instantiated.
    */
-  private JsonLoader() {
-
-  }
+  private JsonLoader() {}
 
   /**
    * Deserialize json into a class of a given type.
@@ -56,7 +54,7 @@ public final class JsonLoader {
    *             - failure during IO.
    */
   public static <T> T load(final String json, final Class<T> c, final boolean ignoreUnknown)
-      throws JsonParseException, JsonMappingException, IOException {
+    throws JsonParseException, JsonMappingException, IOException {
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, !ignoreUnknown);
     return mapper.readValue(json, c);
   }
@@ -78,8 +76,8 @@ public final class JsonLoader {
    * @throws IOException
    *             - failure during IO.
    */
-  public static <T> T load(final String json, final Class<T> c) throws JsonParseException, JsonMappingException,
-      IOException {
+  public static <T> T load(final String json, final Class<T> c)
+    throws JsonParseException, JsonMappingException, IOException {
     return load(json, c, false);
   }
 }

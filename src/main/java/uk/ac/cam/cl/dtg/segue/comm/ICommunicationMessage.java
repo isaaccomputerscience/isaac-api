@@ -16,7 +16,6 @@
 
 package uk.ac.cam.cl.dtg.segue.comm;
 
-
 /**
  * Message interface.
  *
@@ -24,10 +23,8 @@ package uk.ac.cam.cl.dtg.segue.comm;
  *
  */
 public interface ICommunicationMessage {
-
   /**
    * @return the priority of the message
    */
   int getPriority();
-
 }

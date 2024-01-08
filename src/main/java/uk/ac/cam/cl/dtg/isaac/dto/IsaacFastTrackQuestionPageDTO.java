@@ -20,6 +20,4 @@ package uk.ac.cam.cl.dtg.isaac.dto;
  * IsaacFastTrackQuestion Page DTO.
  *
  */
-public class IsaacFastTrackQuestionPageDTO extends IsaacQuestionPageDTO {
-
-}
+public class IsaacFastTrackQuestionPageDTO extends IsaacQuestionPageDTO {}

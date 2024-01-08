@@ -24,6 +24,4 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.VideoDTO;
  */
 @DTOMapping(VideoDTO.class)
 @JsonContentType("video")
-public class Video extends Media {
-
-}
+public class Video extends Media {}

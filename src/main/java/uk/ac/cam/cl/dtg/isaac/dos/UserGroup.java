@@ -37,9 +37,7 @@ public class UserGroup {
   /**
    * Default Constructor.
    */
-  public UserGroup() {
-
-  }
+  public UserGroup() {}
 
   /**
    * Fully injected constructor.
@@ -53,9 +51,16 @@ public class UserGroup {
    * @param additionalManagerPrivileges - whether additional managers have additional permissions to modify the group
    * @param lastUpdated                 - the date the group was last updated
    */
-  public UserGroup(@Nullable final Long id, final String groupName, final Long ownerId, final GroupStatus status,
-                   final Date created,
-                   final boolean archived, final boolean additionalManagerPrivileges, final Date lastUpdated) {
+  public UserGroup(
+    @Nullable final Long id,
+    final String groupName,
+    final Long ownerId,
+    final GroupStatus status,
+    final Date created,
+    final boolean archived,
+    final boolean additionalManagerPrivileges,
+    final Date lastUpdated
+  ) {
     this.id = id;
     this.groupName = groupName;
     this.ownerId = ownerId;

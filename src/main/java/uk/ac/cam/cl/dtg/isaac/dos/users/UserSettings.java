@@ -28,7 +28,6 @@ import java.util.Map;
  * @author James Sharkey
  */
 public class UserSettings {
-
   private RegisteredUser registeredUser;
   private String passwordCurrent;
   private Map<String, Map<String, Boolean>> userPreferences;
@@ -44,9 +43,10 @@ public class UserSettings {
    *                                     set or acknowledged on the server.
    */
   @JsonCreator
-  public UserSettings(@JsonProperty("registeredUser") final RegisteredUser registeredUser,
-                      @JsonProperty("userPreferences") final Map<String, Map<String, Boolean>> userPreferences,
-                      @JsonProperty("registeredUserContexts") final List<UserContext> registeredUserContexts
+  public UserSettings(
+    @JsonProperty("registeredUser") final RegisteredUser registeredUser,
+    @JsonProperty("userPreferences") final Map<String, Map<String, Boolean>> userPreferences,
+    @JsonProperty("registeredUserContexts") final List<UserContext> registeredUserContexts
   ) {
     this.registeredUser = registeredUser;
     this.userPreferences = userPreferences;

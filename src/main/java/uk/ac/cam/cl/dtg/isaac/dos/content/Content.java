@@ -35,7 +35,7 @@ import uk.ac.cam.cl.dtg.segue.dao.TrimWhitespaceListDeserializer;
  */
 @DTOMapping(ContentDTO.class)
 @JsonContentType("content")
-@JsonIgnoreProperties({"_id"})
+@JsonIgnoreProperties({ "_id" })
 public class Content extends ContentBase {
   private String title;
   private String subtitle;
@@ -54,22 +54,24 @@ public class Content extends ContentBase {
   private Boolean expandable;
 
   @JsonCreator
-  public Content(@JsonProperty("id") final String id,
-                 @JsonProperty("title") final String title,
-                 @JsonProperty("subtitle") final String subtitle,
-                 @JsonProperty("type") final String type,
-                 @JsonProperty("author") final String author,
-                 @JsonProperty("encoding") final String encoding,
-                 @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
-                 @JsonProperty("layout") final String layout,
-                 @JsonProperty("children") final List<ContentBase> children,
-                 @JsonProperty("value") final String value,
-                 @JsonProperty("attribution") final String attribution,
-                 @JsonProperty("relatedContent") final List<String> relatedContent,
-                 @JsonProperty("published") final Boolean published,
-                 @JsonProperty("deprecated") final Boolean deprecated,
-                 @JsonProperty("tags") final Set<String> tags,
-                 @JsonProperty("level") final Integer level) {
+  public Content(
+    @JsonProperty("id") final String id,
+    @JsonProperty("title") final String title,
+    @JsonProperty("subtitle") final String subtitle,
+    @JsonProperty("type") final String type,
+    @JsonProperty("author") final String author,
+    @JsonProperty("encoding") final String encoding,
+    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+    @JsonProperty("layout") final String layout,
+    @JsonProperty("children") final List<ContentBase> children,
+    @JsonProperty("value") final String value,
+    @JsonProperty("attribution") final String attribution,
+    @JsonProperty("relatedContent") final List<String> relatedContent,
+    @JsonProperty("published") final Boolean published,
+    @JsonProperty("deprecated") final Boolean deprecated,
+    @JsonProperty("tags") final Set<String> tags,
+    @JsonProperty("level") final Integer level
+  ) {
     this.setId(id);
     this.title = title;
     this.subtitle = subtitle;
@@ -95,7 +97,6 @@ public class Content extends ContentBase {
     if (null == this.getTags()) {
       this.setTags(new HashSet<String>());
     }
-
   }
 
   /**
@@ -297,5 +298,4 @@ public class Content extends ContentBase {
   public String toString() {
     return super.toString() + " Title: " + this.title;
   }
-
 }

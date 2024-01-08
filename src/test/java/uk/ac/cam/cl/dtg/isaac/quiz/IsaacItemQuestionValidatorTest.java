@@ -99,7 +99,6 @@ public class IsaacItemQuestionValidatorTest {
   */
   @Test
   public final void isaacItemQuestionValidator_CorrectItemsSubsetMatchEnabled_CorrectResponseShouldBeReturned() {
-
     // Enable subset matching on the second choice in the list (the correct one)
     ((ItemChoice) someItemQuestion.getChoices().get(1)).setAllowSubsetMatch(true);
 
@@ -123,7 +122,7 @@ public class IsaacItemQuestionValidatorTest {
     ItemChoice c = new ItemChoice();
     Item submittedItem1 = new Item("id001", null);
     Item submittedItem3 = new Item("id003", null);
-    c.setItems(ImmutableList.of(submittedItem3, submittedItem1));  // Reverse order, shouldn't matter!
+    c.setItems(ImmutableList.of(submittedItem3, submittedItem1)); // Reverse order, shouldn't matter!
 
     // Test response:
     QuestionValidationResponse response = validator.validateQuestionResponse(someItemQuestion, c);
@@ -174,7 +173,6 @@ public class IsaacItemQuestionValidatorTest {
   */
   @Test
   public final void isaacItemQuestionValidator_CorrectChoiceSubsetPrecedence_CorrectResponseShouldBeReturned() {
-
     // Enable subset matching on both of the choices in the list
     ((ItemChoice) someItemQuestion.getChoices().get(0)).setAllowSubsetMatch(true);
     ((ItemChoice) someItemQuestion.getChoices().get(1)).setAllowSubsetMatch(true);
@@ -197,7 +195,6 @@ public class IsaacItemQuestionValidatorTest {
   */
   @Test
   public final void isaacItemQuestionValidator_CorrectChoiceSubsetOfSubmitted_CorrectResponseShouldBeReturned() {
-
     // Enable subset matching on the correct choice
     ((ItemChoice) someItemQuestion.getChoices().get(1)).setAllowSubsetMatch(true);
 
@@ -218,7 +215,6 @@ public class IsaacItemQuestionValidatorTest {
   */
   @Test
   public final void isaacItemQuestionValidator_IncorrectOverCorrectSubsetPrecedence_IncorrectResponseShouldBeReturned() {
-
     IsaacItemQuestion itemQuestion = new IsaacItemQuestion();
 
     List<Choice> answerList = Lists.newArrayList();
@@ -260,7 +256,6 @@ public class IsaacItemQuestionValidatorTest {
   */
   @Test
   public final void isaacItemQuestionValidator_SubmittedSubsetOfCorrectChoice_CorrectResponseShouldBeReturned() {
-
     // Set up the question object:
     IsaacItemQuestion itemQuestion = new IsaacItemQuestion();
 

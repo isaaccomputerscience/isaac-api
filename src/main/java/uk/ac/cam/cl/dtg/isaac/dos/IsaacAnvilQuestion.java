@@ -33,9 +33,7 @@ public class IsaacAnvilQuestion extends IsaacQuestionBase {
   /**
    *
    */
-  public IsaacAnvilQuestion() {
-
-  }
+  public IsaacAnvilQuestion() {}
 
   /**
    * Gets the anvilApp.
@@ -55,5 +53,4 @@ public class IsaacAnvilQuestion extends IsaacQuestionBase {
   public void setAnvilApp(final AnvilApp anvilApp) {
     this.anvilApp = anvilApp;
   }
-
 }

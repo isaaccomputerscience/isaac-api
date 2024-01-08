@@ -8,9 +8,7 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  * Created by du220 on 18/01/2018.
  */
 public interface IUserAccountManager {
-
   RegisteredUserDTO getUserDTOById(Long id) throws NoUserException, SegueDatabaseException;
 
   RegisteredUserDTO getUserDTOById(Long id, boolean includeDeleted) throws NoUserException, SegueDatabaseException;
-
 }

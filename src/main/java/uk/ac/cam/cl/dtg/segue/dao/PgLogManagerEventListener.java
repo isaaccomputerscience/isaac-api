@@ -26,5 +26,4 @@ public class PgLogManagerEventListener extends LogManagerEventPublisher {
   public PgLogManagerEventListener(final PgLogManager logManager) {
     super(logManager);
   }
-
 }

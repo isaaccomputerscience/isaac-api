@@ -63,9 +63,13 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
    * @param properties                       - instance of properties loader
    */
   @Inject
-  public QuizAssignmentManager(final IQuizAssignmentPersistenceManager quizAssignmentPersistenceManager,
-                               final EmailService emailService, final QuizManager quizManager,
-                               final GroupManager groupManager, final PropertiesLoader properties) {
+  public QuizAssignmentManager(
+    final IQuizAssignmentPersistenceManager quizAssignmentPersistenceManager,
+    final EmailService emailService,
+    final QuizManager quizManager,
+    final GroupManager groupManager,
+    final PropertiesLoader properties
+  ) {
     this.quizAssignmentPersistenceManager = quizAssignmentPersistenceManager;
     this.quizManager = quizManager;
     this.emailService = emailService;
@@ -82,7 +86,7 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
    * @throws ContentManagerException - if we cannot find the quiz in the content.
    */
   public QuizAssignmentDTO createAssignment(final QuizAssignmentDTO newAssignment)
-      throws SegueDatabaseException, ContentManagerException {
+    throws SegueDatabaseException, ContentManagerException {
     Validate.isTrue(newAssignment.getId() == null, "The id field must be empty.");
     Validate.notNull(newAssignment.getQuizId());
     Validate.notNull(newAssignment.getGroupId());
@@ -93,15 +97,21 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
       throw new DueBeforeNowException();
     }
 
-    List<QuizAssignmentDTO> existingQuizAssignments =
-        quizAssignmentPersistenceManager.getAssignmentsByQuizIdAndGroup(newAssignment.getQuizId(),
-            newAssignment.getGroupId());
+    List<QuizAssignmentDTO> existingQuizAssignments = quizAssignmentPersistenceManager.getAssignmentsByQuizIdAndGroup(
+      newAssignment.getQuizId(),
+      newAssignment.getGroupId()
+    );
 
     if (existingQuizAssignments.size() != 0) {
       if (existingQuizAssignments.stream().anyMatch(qa -> qa.getDueDate() == null || qa.dueDateIsAfter(now))) {
-        log.error(String.format("Duplicated Test Assignment Exception"
-                + " - cannot assign the same work %s to a group %s when due date not passed",
-                        sanitiseExternalLogValue(newAssignment.getQuizId()), newAssignment.getGroupId()));
+        log.error(
+          String.format(
+            "Duplicated Test Assignment Exception" +
+            " - cannot assign the same work %s to a group %s when due date not passed",
+            sanitiseExternalLogValue(newAssignment.getQuizId()),
+            newAssignment.getGroupId()
+          )
+        );
         throw new DuplicateAssignmentException("You cannot reassign a test until the due date has passed.");
       }
     }
@@ -113,8 +123,12 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
 
     String quizURL = getAssignmentLikeUrl(newAssignment);
 
-    emailService.sendAssignmentEmailToGroup(newAssignment, quiz, ImmutableMap.of("quizURL", quizURL),
-        "email-template-group-quiz-assignment");
+    emailService.sendAssignmentEmailToGroup(
+      newAssignment,
+      quiz,
+      ImmutableMap.of("quizURL", quizURL),
+      "email-template-group-quiz-assignment"
+    );
 
     return newAssignment;
   }
@@ -126,7 +140,7 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
   }
 
   public QuizAssignmentDTO getById(final Long quizAssignmentId)
-      throws SegueDatabaseException, AssignmentCancelledException {
+    throws SegueDatabaseException, AssignmentCancelledException {
     return this.quizAssignmentPersistenceManager.getAssignmentById(quizAssignmentId);
   }
 
@@ -135,20 +149,22 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
   }
 
   public List<QuizAssignmentDTO> getActiveQuizAssignments(final IsaacQuizDTO quiz, final RegisteredUserDTO user)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     List<QuizAssignmentDTO> allAssignedAndDueQuizzes = getAllActiveAssignments(user);
-    return allAssignedAndDueQuizzes.stream().filter(qa -> qa.getQuizId().equals(quiz.getId()))
-        .collect(Collectors.toList());
+    return allAssignedAndDueQuizzes
+      .stream()
+      .filter(qa -> qa.getQuizId().equals(quiz.getId()))
+      .collect(Collectors.toList());
   }
 
   public List<QuizAssignmentDTO> getAssignmentsForGroups(final List<UserGroupDTO> groups)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     List<Long> groupIds = groups.stream().map(UserGroupDTO::getId).collect(Collectors.toList());
     return this.quizAssignmentPersistenceManager.getAssignmentsByGroupList(groupIds);
   }
 
   public List<QuizAssignmentDTO> getActiveAssignmentsForGroups(final List<UserGroupDTO> groups)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     List<QuizAssignmentDTO> assignments = getAssignmentsForGroups(groups);
     return filterActiveAssignments(assignments);
   }
@@ -171,12 +187,14 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
 
   private List<QuizAssignmentDTO> filterActiveAssignments(final List<QuizAssignmentDTO> assignments) {
     Date now = new Date();
-    return assignments.stream().filter(qa -> qa.getDueDate() == null || qa.dueDateIsAfter(now))
-        .collect(Collectors.toList());
+    return assignments
+      .stream()
+      .filter(qa -> qa.getDueDate() == null || qa.dueDateIsAfter(now))
+      .collect(Collectors.toList());
   }
 
   public void updateAssignment(final QuizAssignmentDTO assignment, final QuizAssignmentDTO updates)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     this.quizAssignmentPersistenceManager.updateAssignment(assignment.getId(), updates);
   }
 
@@ -196,8 +214,6 @@ public class QuizAssignmentManager implements IAssignmentLike.Details<QuizAssign
 
   @Override
   public String getAssignmentLikeUrl(final QuizAssignmentDTO assignment) {
-    return String.format("https://%s/quiz/assignment/%s",
-        properties.getProperty(HOST_NAME),
-        assignment.getId());
+    return String.format("https://%s/quiz/assignment/%s", properties.getProperty(HOST_NAME), assignment.getId());
   }
 }

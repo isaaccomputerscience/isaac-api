@@ -71,8 +71,12 @@ public class LogEventFacade extends AbstractSegueFacade {
    * @param userManager   - So we can attribute log events to a given user.
    */
   @Inject
-  public LogEventFacade(final PropertiesLoader properties, final ILogManager logManager,
-                        final IMisuseMonitor misuseMonitor, final UserAccountManager userManager) {
+  public LogEventFacade(
+    final PropertiesLoader properties,
+    final ILogManager logManager,
+    final IMisuseMonitor misuseMonitor,
+    final UserAccountManager userManager
+  ) {
     super(properties, logManager);
     this.misuseMonitor = misuseMonitor;
     this.userManager = userManager;
@@ -88,28 +92,40 @@ public class LogEventFacade extends AbstractSegueFacade {
   @POST
   @Path("/")
   @Consumes(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Record a new log event from the current user.",
-      description = "The 'type' field must be provided and must not be a reserved value.")
+  @Operation(
+    summary = "Record a new log event from the current user.",
+    description = "The 'type' field must be provided and must not be a reserved value."
+  )
   public Response postLog(@Context final HttpServletRequest httpRequest, final Map<String, Object> eventJSON) {
     if (null == eventJSON || eventJSON.get(TYPE_FIELDNAME) == null) {
       log.error("Error during log operation, no event type specified. Event: " + sanitiseExternalLogValue(eventJSON));
-      return new SegueErrorResponse(Status.BAD_REQUEST, "Unable to record log message as the log has no "
-          + TYPE_FIELDNAME + " property.").toResponse();
+      return new SegueErrorResponse(
+        Status.BAD_REQUEST,
+        "Unable to record log message as the log has no " + TYPE_FIELDNAME + " property."
+      )
+      .toResponse();
     }
 
     String eventType = (String) eventJSON.get(TYPE_FIELDNAME);
 
     // To maintain data integrity - don't allow the client to report events reserved for the server
     if (SEGUE_SERVER_LOG_TYPES.contains(eventType) || ISAAC_SERVER_LOG_TYPES.contains(eventType)) {
-      return new SegueErrorResponse(Status.FORBIDDEN, "Unable to record log message, restricted '"
-          + TYPE_FIELDNAME + "' value.").toResponse();
+      return new SegueErrorResponse(
+        Status.FORBIDDEN,
+        "Unable to record log message, restricted '" + TYPE_FIELDNAME + "' value."
+      )
+      .toResponse();
     }
 
     // Temporarily log log event types which are not included in our accepted list of client log types.
     // After a few weeks we should fail on the case where it is an unknown type.
     if (!ISAAC_CLIENT_LOG_TYPES.contains(eventType)) {
-      log.error(String.format("Warning: Log Event '%s' is not included in ISAAC_CLIENT_LOG_TYPES",
-          sanitiseExternalLogValue(eventType)));
+      log.error(
+        String.format(
+          "Warning: Log Event '%s' is not included in ISAAC_CLIENT_LOG_TYPES",
+          sanitiseExternalLogValue(eventType)
+        )
+      );
     }
 
     try {
@@ -125,24 +141,35 @@ public class LogEventFacade extends AbstractSegueFacade {
       try {
         misuseMonitor.notifyEvent(uid, LogEventMisuseHandler.class.getSimpleName(), httpRequest.getContentLength());
       } catch (SegueResourceMisuseException e) {
-        log.error(String.format("Logging Event Failed - log event requested (%s bytes) "
-                + "and would exceed daily limit size limit (%s bytes) ", httpRequest.getContentLength(),
-            Constants.MAX_LOG_REQUEST_BODY_SIZE_IN_BYTES));
-        return SegueErrorResponse.getRateThrottledResponse(String.format(
+        log.error(
+          String.format(
+            "Logging Event Failed - log event requested (%s bytes) " +
+            "and would exceed daily limit size limit (%s bytes) ",
+            httpRequest.getContentLength(),
+            Constants.MAX_LOG_REQUEST_BODY_SIZE_IN_BYTES
+          )
+        );
+        return SegueErrorResponse.getRateThrottledResponse(
+          String.format(
             "Log event request (%s bytes) would exceed limit for this endpoint.",
-            httpRequest.getContentLength()));
+            httpRequest.getContentLength()
+          )
+        );
       }
 
       // remove the type information as we don't need it.
       eventJSON.remove(TYPE_FIELDNAME);
 
       this.getLogManager()
-          .logExternalEvent(this.userManager.getCurrentUser(httpRequest), httpRequest, eventType, eventJSON);
+        .logExternalEvent(this.userManager.getCurrentUser(httpRequest), httpRequest, eventType, eventJSON);
 
       return Response.ok().cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Database error while looking up user information.", e);
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Database error while looking up user information.",
+        e
+      );
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     }

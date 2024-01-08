@@ -28,9 +28,7 @@ public class InvalidSessionException extends Exception {
   /**
    * Default constructor.
    */
-  public InvalidSessionException() {
-
-  }
+  public InvalidSessionException() {}
 
   /**
    * Constructor with message.

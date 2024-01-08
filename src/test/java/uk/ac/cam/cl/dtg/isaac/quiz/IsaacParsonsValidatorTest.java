@@ -104,7 +104,7 @@ public class IsaacParsonsValidatorTest {
     ParsonsChoice c = new ParsonsChoice();
     ParsonsItem submittedItem1 = new ParsonsItem("id001", null, 0);
     ParsonsItem submittedItem3 = new ParsonsItem("id003", null, 1);
-    c.setItems(ImmutableList.of(submittedItem3, submittedItem1));  // Reverse order!
+    c.setItems(ImmutableList.of(submittedItem3, submittedItem1)); // Reverse order!
 
     // Test response:
     QuestionValidationResponse response = validator.validateQuestionResponse(someParsonsQuestion, c);
@@ -119,7 +119,7 @@ public class IsaacParsonsValidatorTest {
     // Set up user answer:
     ParsonsChoice c = new ParsonsChoice();
     ParsonsItem submittedItem1 = new ParsonsItem("id001", null, 0);
-    ParsonsItem submittedItem3 = new ParsonsItem("id003", null, 0);  // Wrong indentation!
+    ParsonsItem submittedItem3 = new ParsonsItem("id003", null, 0); // Wrong indentation!
     c.setItems(ImmutableList.of(submittedItem1, submittedItem3));
 
     // Test response:

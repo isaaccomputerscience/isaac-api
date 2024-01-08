@@ -29,9 +29,7 @@ public class AssociationToken {
   /**
    *
    */
-  public AssociationToken() {
-
-  }
+  public AssociationToken() {}
 
   /**
    * AssociationToken - Default Constructor.

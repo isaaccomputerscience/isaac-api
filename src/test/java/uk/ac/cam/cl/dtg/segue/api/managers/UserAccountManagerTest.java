@@ -48,7 +48,6 @@ import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 public class UserAccountManagerTest {
-
   private PgUsers database;
   private EmailManager emailManager;
   private SchoolListReader schoolListReader;
@@ -76,9 +75,20 @@ public class UserAccountManagerTest {
     replay(propertiesLoader);
 
     userAccountManager =
-        new UserAccountManager(database, questionmanager, propertiesLoader, providersToRegister, dtoMapper,
-            emailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorAuthenticator,
-            userPreferenceManager, schoolListReader);
+      new UserAccountManager(
+        database,
+        questionmanager,
+        propertiesLoader,
+        providersToRegister,
+        dtoMapper,
+        emailManager,
+        pgAnonymousUsers,
+        logManager,
+        userAuthenticationManager,
+        secondFactorAuthenticator,
+        userPreferenceManager,
+        schoolListReader
+      );
   }
 
   @ParameterizedTest
@@ -90,33 +100,33 @@ public class UserAccountManagerTest {
 
   private static Stream<Arguments> namesToTest() {
     return Stream.of(
-        Arguments.of(true, "testname"), // Lowercase is valid
-        Arguments.of(true, "TESTNAME"), // Uppercase is valid
-        Arguments.of(true, "TestName"), // Mixture of cases is valid
-        Arguments.of(true, "TestName123"), // Numbers are valid
-        Arguments.of(true, "Test_Name"), // Underscores are valid
-        Arguments.of(true, "Test Name"), // Double-barrelled names with spaces are valid
-        Arguments.of(true, "Test-Name"), // Double-barrelled names with hyphens are valid
-        Arguments.of(true, "O'Name"), // Apostrophes are valid
-        // Accented and non-English characters are valid.
-        // Please note, this is not an exhustive test - unicode supports thousands of such characters
-        Arguments.of(true, "ÃëóûÿĉĐŗǥȕḍṦμϱнӯ"),
-        Arguments.of(false, null), // Null is not valid
-        Arguments.of(false, ""), // Empty string is not valid
-        Arguments.of(false, " "), // Only whitespace is not valid
-        Arguments.of(false, "a".repeat(256)), // Names exceeding the maximum length of 255 characters are not valid
-        // Other special characters are not permitted
-        Arguments.of(false, "Test!Name"),
-        Arguments.of(false, "Test?Name"),
-        Arguments.of(false, "Test#Name"),
-        Arguments.of(false, "Test.Name"),
-        Arguments.of(false, "Test,Name"),
-        Arguments.of(false, "Test*Name"),
-        Arguments.of(false, "Test<Name"),
-        Arguments.of(false, "Test>Name"),
-        Arguments.of(false, "Test:Name"),
-        Arguments.of(false, "Test;Name"),
-        Arguments.of(false, "Test/Name")
+      Arguments.of(true, "testname"), // Lowercase is valid
+      Arguments.of(true, "TESTNAME"), // Uppercase is valid
+      Arguments.of(true, "TestName"), // Mixture of cases is valid
+      Arguments.of(true, "TestName123"), // Numbers are valid
+      Arguments.of(true, "Test_Name"), // Underscores are valid
+      Arguments.of(true, "Test Name"), // Double-barrelled names with spaces are valid
+      Arguments.of(true, "Test-Name"), // Double-barrelled names with hyphens are valid
+      Arguments.of(true, "O'Name"), // Apostrophes are valid
+      // Accented and non-English characters are valid.
+      // Please note, this is not an exhustive test - unicode supports thousands of such characters
+      Arguments.of(true, "ÃëóûÿĉĐŗǥȕḍṦμϱнӯ"),
+      Arguments.of(false, null), // Null is not valid
+      Arguments.of(false, ""), // Empty string is not valid
+      Arguments.of(false, " "), // Only whitespace is not valid
+      Arguments.of(false, "a".repeat(256)), // Names exceeding the maximum length of 255 characters are not valid
+      // Other special characters are not permitted
+      Arguments.of(false, "Test!Name"),
+      Arguments.of(false, "Test?Name"),
+      Arguments.of(false, "Test#Name"),
+      Arguments.of(false, "Test.Name"),
+      Arguments.of(false, "Test,Name"),
+      Arguments.of(false, "Test*Name"),
+      Arguments.of(false, "Test<Name"),
+      Arguments.of(false, "Test>Name"),
+      Arguments.of(false, "Test:Name"),
+      Arguments.of(false, "Test;Name"),
+      Arguments.of(false, "Test/Name")
     );
   }
 
@@ -129,34 +139,34 @@ public class UserAccountManagerTest {
 
   private static Stream<Arguments> emailsToTest() {
     return Stream.of(
-        Arguments.of(true, "testemail@test.com"), // Standard email format is valid
-        // Alternate pattern for twitter|google|facebook is valid
-        Arguments.of(true, "testemail-twitter"),
-        Arguments.of(true, "testemail-google"),
-        Arguments.of(true, "testemail-facebook"),
-        Arguments.of(true, "test!#$%&'+-=?^_`.{|}~email@test.com"), // Some special characters are permitted
-        Arguments.of(true, "testemail@test.co.uk"), // Multiple seperated .s are valid
-        Arguments.of(false, null), // Null is not valid
-        Arguments.of(false, ""), // Empty string is not valid
-        Arguments.of(false, " "), // Only whitespace is not valid
-        Arguments.of(false, "test.email@testcom"), // Email must have at least one . after the @
-        Arguments.of(false, "testemailtest.com"), // Standard email must include an @
-        Arguments.of(false, "testemail@test."), // Email must have be at least character after the last .
-        Arguments.of(false, "testemail@.com"), // Email must have at least one character between the @ and the last .
-        Arguments.of(false, "testemail@test..com"), // Email cannot contain consecutive full stops
-        // Other special characters are not permitted
-        Arguments.of(false, "test\"email@test.com"),
-        Arguments.of(false, "test(email@test.com"),
-        Arguments.of(false, "test)email@test.com"),
-        Arguments.of(false, "test*email@test.com"),
-        Arguments.of(false, "test/email@test.com"),
-        Arguments.of(false, "test<email@test.com"),
-        Arguments.of(false, "test>email@test.com"),
-        Arguments.of(false, "test:email@test.com"),
-        Arguments.of(false, "test;email@test.com"),
-        // Other alternate endings are not permitted
-        Arguments.of(false, "testemail-example"),
-        Arguments.of(false, "testemail-twittter")
+      Arguments.of(true, "testemail@test.com"), // Standard email format is valid
+      // Alternate pattern for twitter|google|facebook is valid
+      Arguments.of(true, "testemail-twitter"),
+      Arguments.of(true, "testemail-google"),
+      Arguments.of(true, "testemail-facebook"),
+      Arguments.of(true, "test!#$%&'+-=?^_`.{|}~email@test.com"), // Some special characters are permitted
+      Arguments.of(true, "testemail@test.co.uk"), // Multiple seperated .s are valid
+      Arguments.of(false, null), // Null is not valid
+      Arguments.of(false, ""), // Empty string is not valid
+      Arguments.of(false, " "), // Only whitespace is not valid
+      Arguments.of(false, "test.email@testcom"), // Email must have at least one . after the @
+      Arguments.of(false, "testemailtest.com"), // Standard email must include an @
+      Arguments.of(false, "testemail@test."), // Email must have be at least character after the last .
+      Arguments.of(false, "testemail@.com"), // Email must have at least one character between the @ and the last .
+      Arguments.of(false, "testemail@test..com"), // Email cannot contain consecutive full stops
+      // Other special characters are not permitted
+      Arguments.of(false, "test\"email@test.com"),
+      Arguments.of(false, "test(email@test.com"),
+      Arguments.of(false, "test)email@test.com"),
+      Arguments.of(false, "test*email@test.com"),
+      Arguments.of(false, "test/email@test.com"),
+      Arguments.of(false, "test<email@test.com"),
+      Arguments.of(false, "test>email@test.com"),
+      Arguments.of(false, "test:email@test.com"),
+      Arguments.of(false, "test;email@test.com"),
+      // Other alternate endings are not permitted
+      Arguments.of(false, "testemail-example"),
+      Arguments.of(false, "testemail-twittter")
     );
   }
 
@@ -191,27 +201,34 @@ public class UserAccountManagerTest {
 
   @Test
   public void sendRoleChangeRequestEmail_success()
-      throws UnableToIndexSchoolsException, ContentManagerException, IOException, SegueDatabaseException,
-      MissingRequiredFieldException {
+    throws UnableToIndexSchoolsException, ContentManagerException, IOException, SegueDatabaseException, MissingRequiredFieldException {
     School school = prepareSchoolWithUrn();
     expect(schoolListReader.findSchoolById("1")).andReturn(school);
     replay(schoolListReader);
 
     Map<String, Object> expectedEmailDetails = Map.of(
-        "contactGivenName", "GivenName",
-        "contactFamilyName", "FamilyName",
-        "contactUserId", 1L,
-        "contactUserRole", STUDENT,
-        "contactEmail", "test@test.com",
-        "contactSubject", "Teacher Account Request",
-        "contactMessage", "Hello,\n<br>\n<br>"
-            + "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>"
-            + "My school is: SchoolName, Postcode\n<br>"
-            + "A link to my school website with a staff list showing my name and email"
-            + " (or a phone number to contact the school) is: school staff url\n<br>\n<br>\n<br>"
-            + "Any other information: more information\n<br>\n<br>"
-            + "Thanks, \n<br>\n<br>GivenName FamilyName",
-        "replyToName", "GivenName FamilyName"
+      "contactGivenName",
+      "GivenName",
+      "contactFamilyName",
+      "FamilyName",
+      "contactUserId",
+      1L,
+      "contactUserRole",
+      STUDENT,
+      "contactEmail",
+      "test@test.com",
+      "contactSubject",
+      "Teacher Account Request",
+      "contactMessage",
+      "Hello,\n<br>\n<br>" +
+      "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>" +
+      "My school is: SchoolName, Postcode\n<br>" +
+      "A link to my school website with a staff list showing my name and email" +
+      " (or a phone number to contact the school) is: school staff url\n<br>\n<br>\n<br>" +
+      "Any other information: more information\n<br>\n<br>" +
+      "Thanks, \n<br>\n<br>GivenName FamilyName",
+      "replyToName",
+      "GivenName FamilyName"
     );
     emailManager.sendContactUsFormEmail("admin@localhost", expectedEmailDetails);
     expectLastCall();
@@ -221,8 +238,10 @@ public class UserAccountManagerTest {
     replay(request);
     RegisteredUserDTO user = prepareRegisteredUserDtoWithDetails();
     Map<String, String> requestDetails = Map.of(
-        "verificationDetails", "school staff url",
-        "otherDetails", "more information"
+      "verificationDetails",
+      "school staff url",
+      "otherDetails",
+      "more information"
     );
 
     userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails);
@@ -233,26 +252,33 @@ public class UserAccountManagerTest {
 
   @Test
   public void sendRoleChangeRequestEmail_successNoOtherDetails()
-      throws UnableToIndexSchoolsException, ContentManagerException, IOException, SegueDatabaseException,
-      MissingRequiredFieldException {
+    throws UnableToIndexSchoolsException, ContentManagerException, IOException, SegueDatabaseException, MissingRequiredFieldException {
     School school = prepareSchoolWithUrn();
     expect(schoolListReader.findSchoolById("1")).andReturn(school);
     replay(schoolListReader);
 
     Map<String, Object> expectedEmailDetails = Map.of(
-        "contactGivenName", "GivenName",
-        "contactFamilyName", "FamilyName",
-        "contactUserId", 1L,
-        "contactUserRole", STUDENT,
-        "contactEmail", "test@test.com",
-        "contactSubject", "Teacher Account Request",
-        "contactMessage", "Hello,\n<br>\n<br>"
-            + "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>"
-            + "My school is: SchoolName, Postcode\n<br>"
-            + "A link to my school website with a staff list showing my name and email"
-            + " (or a phone number to contact the school) is: school staff url\n<br>\n<br>\n<br>"
-            + "Thanks, \n<br>\n<br>GivenName FamilyName",
-        "replyToName", "GivenName FamilyName"
+      "contactGivenName",
+      "GivenName",
+      "contactFamilyName",
+      "FamilyName",
+      "contactUserId",
+      1L,
+      "contactUserRole",
+      STUDENT,
+      "contactEmail",
+      "test@test.com",
+      "contactSubject",
+      "Teacher Account Request",
+      "contactMessage",
+      "Hello,\n<br>\n<br>" +
+      "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>" +
+      "My school is: SchoolName, Postcode\n<br>" +
+      "A link to my school website with a staff list showing my name and email" +
+      " (or a phone number to contact the school) is: school staff url\n<br>\n<br>\n<br>" +
+      "Thanks, \n<br>\n<br>GivenName FamilyName",
+      "replyToName",
+      "GivenName FamilyName"
     );
     emailManager.sendContactUsFormEmail("admin@localhost", expectedEmailDetails);
     expectLastCall();
@@ -261,9 +287,7 @@ public class UserAccountManagerTest {
     HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     replay(request);
     RegisteredUserDTO user = prepareRegisteredUserDtoWithDetails();
-    Map<String, String> requestDetails = Map.of(
-        "verificationDetails", "school staff url"
-    );
+    Map<String, String> requestDetails = Map.of("verificationDetails", "school staff url");
 
     userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails);
 
@@ -273,7 +297,7 @@ public class UserAccountManagerTest {
 
   @Test
   public void sendRoleChangeRequestEmail_missingSchool()
-      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    throws UnableToIndexSchoolsException, SegueSearchException, IOException {
     expect(schoolListReader.findSchoolById("1")).andReturn(null);
     replay(schoolListReader);
 
@@ -281,20 +305,27 @@ public class UserAccountManagerTest {
     replay(request);
     RegisteredUserDTO user = prepareRegisteredUserDtoWithDetails();
     Map<String, String> requestDetails = Map.of(
-        "verificationDetails", "school staff url",
-        "otherDetails", "more information"
+      "verificationDetails",
+      "school staff url",
+      "otherDetails",
+      "more information"
     );
 
-    assertThrows(MissingRequiredFieldException.class,
-        () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails));
+    assertThrows(
+      MissingRequiredFieldException.class,
+      () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails)
+    );
 
     verify(schoolListReader);
   }
 
   @ParameterizedTest(name = "{index} {0}")
   @MethodSource("sendRoleChangeRequestEmail_invalidVerificationDetails")
-  public void sendRoleChangeRequestEmail_invalidVerificationDetails(String ignoredTestLabel, Map<String, String> requestDetails)
-      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+  public void sendRoleChangeRequestEmail_invalidVerificationDetails(
+    String ignoredTestLabel,
+    Map<String, String> requestDetails
+  )
+    throws UnableToIndexSchoolsException, SegueSearchException, IOException {
     School school = prepareSchoolWithUrn();
     expect(schoolListReader.findSchoolById("1")).andReturn(school);
     replay(schoolListReader);
@@ -303,27 +334,28 @@ public class UserAccountManagerTest {
     replay(request);
     RegisteredUserDTO user = prepareRegisteredUserDtoWithDetails();
 
-    assertThrows(MissingRequiredFieldException.class,
-        () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails));
+    assertThrows(
+      MissingRequiredFieldException.class,
+      () -> userAccountManager.sendRoleChangeRequestEmail(request, user, TEACHER, requestDetails)
+    );
 
     verify(schoolListReader);
   }
 
   private static Stream<Arguments> sendRoleChangeRequestEmail_invalidVerificationDetails() {
     return Stream.of(
-        Arguments.of("missingVerificationDetails", Map.of(
-            "otherDetails", "more information"
-        )),
-        Arguments.of("nullVerificationDetails", new HashMap<>() {
-              {
-                put("verificationDetails", null);
-                put("otherDetails", "more information");
-              }
-            }),
-        Arguments.of("emptyVerificationDetails", Map.of(
-                "verificationDetails", "",
-            "otherDetails", "more information"
-        ))
+      Arguments.of("missingVerificationDetails", Map.of("otherDetails", "more information")),
+      Arguments.of(
+        "nullVerificationDetails",
+        new HashMap<>() {
+
+          {
+            put("verificationDetails", null);
+            put("otherDetails", "more information");
+          }
+        }
+      ),
+      Arguments.of("emptyVerificationDetails", Map.of("verificationDetails", "", "otherDetails", "more information"))
     );
   }
 
@@ -348,7 +380,7 @@ public class UserAccountManagerTest {
 
   @Test
   public void getSchoolNameWithPostcode_validUrn()
-      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    throws UnableToIndexSchoolsException, SegueSearchException, IOException {
     School school = prepareSchoolWithUrn();
     expect(schoolListReader.findSchoolById("1")).andReturn(school);
     replay(schoolListReader);
@@ -364,7 +396,7 @@ public class UserAccountManagerTest {
 
   @Test
   public void getSchoolNameWithPostcode_unknownUrn()
-      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    throws UnableToIndexSchoolsException, SegueSearchException, IOException {
     expect(schoolListReader.findSchoolById("1")).andReturn(null);
     replay(schoolListReader);
 
@@ -379,7 +411,7 @@ public class UserAccountManagerTest {
 
   @Test
   public void getSchoolNameWithPostcode_errorOnUrn()
-      throws UnableToIndexSchoolsException, SegueSearchException, IOException {
+    throws UnableToIndexSchoolsException, SegueSearchException, IOException {
     expect(schoolListReader.findSchoolById("1")).andThrow(new SegueSearchException("Error"));
     replay(schoolListReader);
 
@@ -414,12 +446,12 @@ public class UserAccountManagerTest {
 
   private static Stream<Arguments> getSchoolNameWithPostcode_urnlessUsers() {
     return Stream.of(
-        Arguments.of("Also a school", prepareRegisteredUserDtoWithSchoolOther(null, "Also a school")),
-        Arguments.of("Also a school", prepareRegisteredUserDtoWithSchoolOther("", "Also a school")),
-        Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther(null, null)),
-        Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther("", null)),
-        Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther(null, "")),
-        Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther("", ""))
+      Arguments.of("Also a school", prepareRegisteredUserDtoWithSchoolOther(null, "Also a school")),
+      Arguments.of("Also a school", prepareRegisteredUserDtoWithSchoolOther("", "Also a school")),
+      Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther(null, null)),
+      Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther("", null)),
+      Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther(null, "")),
+      Arguments.of(null, prepareRegisteredUserDtoWithSchoolOther("", ""))
     );
   }
 

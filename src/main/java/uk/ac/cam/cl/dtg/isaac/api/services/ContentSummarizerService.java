@@ -41,8 +41,10 @@ public class ContentSummarizerService {
    * @param summaryClass - the subclass of ContentSummaryDTO to use for the summary object, to allow flexibility
    * @return ContentSummaryDTO.
    */
-  public ContentSummaryDTO extractContentSummary(final ContentDTO content,
-                                                 final Class<? extends ContentSummaryDTO> summaryClass) {
+  public ContentSummaryDTO extractContentSummary(
+    final ContentDTO content,
+    final Class<? extends ContentSummaryDTO> summaryClass
+  ) {
     if (null == content) {
       return null;
     }
@@ -73,13 +75,17 @@ public class ContentSummarizerService {
    * @return list of shorter ContentSummaryDTO objects.
    */
   public ResultsWrapper<ContentSummaryDTO> extractContentSummaryFromResultsWrapper(
-      final ResultsWrapper<ContentDTO> contentList, final Class<? extends ContentSummaryDTO> summaryClass) {
+    final ResultsWrapper<ContentDTO> contentList,
+    final Class<? extends ContentSummaryDTO> summaryClass
+  ) {
     if (null == contentList) {
       return null;
     }
 
-    ResultsWrapper<ContentSummaryDTO> contentSummaryResults =
-        new ResultsWrapper<>(new ArrayList<>(), contentList.getTotalResults());
+    ResultsWrapper<ContentSummaryDTO> contentSummaryResults = new ResultsWrapper<>(
+      new ArrayList<>(),
+      contentList.getTotalResults()
+    );
 
     for (ContentDTO content : contentList.getResults()) {
       ContentSummaryDTO contentInfo = extractContentSummary(content, summaryClass);
@@ -98,7 +104,8 @@ public class ContentSummarizerService {
    * @see ContentSummarizerService#extractContentSummaryFromResultsWrapper(ResultsWrapper, Class)
    */
   public ResultsWrapper<ContentSummaryDTO> extractContentSummaryFromResultsWrapper(
-      final ResultsWrapper<ContentDTO> contentList) {
+    final ResultsWrapper<ContentDTO> contentList
+  ) {
     return extractContentSummaryFromResultsWrapper(contentList, ContentSummaryDTO.class);
   }
 }

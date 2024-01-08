@@ -101,9 +101,14 @@ public class EmailFacade extends AbstractSegueFacade {
    * @param misuseMonitor  - misuse monitor.
    */
   @Inject
-  public EmailFacade(final PropertiesLoader properties, final ILogManager logManager,
-                     final EmailManager emailManager, final UserAccountManager userManager,
-                     final GitContentManager contentManager, final IMisuseMonitor misuseMonitor) {
+  public EmailFacade(
+    final PropertiesLoader properties,
+    final ILogManager logManager,
+    final EmailManager emailManager,
+    final UserAccountManager userManager,
+    final GitContentManager contentManager,
+    final IMisuseMonitor misuseMonitor
+  ) {
     super(properties, logManager);
     this.contentManager = contentManager;
     this.emailManager = emailManager;
@@ -126,11 +131,14 @@ public class EmailFacade extends AbstractSegueFacade {
   @Path("/email/viewinbrowser/{id}")
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
-  @Operation(summary = "Get an email by ID.",
-      description = "The details of the current user will be used to fill in template fields.")
-  public final Response getEmailInBrowserById(@Context final HttpServletRequest request,
-                                              @PathParam("id") final String id) {
-
+  @Operation(
+    summary = "Get an email by ID.",
+    description = "The details of the current user will be used to fill in template fields."
+  )
+  public final Response getEmailInBrowserById(
+    @Context final HttpServletRequest request,
+    @PathParam("id") final String id
+  ) {
     RegisteredUserDTO currentUser;
     try {
       currentUser = this.userManager.getCurrentRegisteredUser(request);
@@ -145,20 +153,23 @@ public class EmailFacade extends AbstractSegueFacade {
       c = this.contentManager.getContentById(id);
 
       if (null == c) {
-        SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "No content found with id: "
-            + sanitiseExternalLogValue(id));
+        SegueErrorResponse error = new SegueErrorResponse(
+          Status.NOT_FOUND,
+          "No content found with id: " + sanitiseExternalLogValue(id)
+        );
         log.info(error.getErrorMessage());
         return error.toResponse();
       }
-
     } catch (IllegalArgumentException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Error while trying to map to a content object.", e);
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Error while trying to map to a content object.",
+        e
+      );
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     } catch (ContentManagerException e1) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested",
-          e1);
+      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested", e1);
       log.error(error.getErrorMessage(), e1);
       return error.toResponse();
     }
@@ -168,8 +179,10 @@ public class EmailFacade extends AbstractSegueFacade {
     if (c instanceof EmailTemplateDTO) {
       emailTemplateDTO = (EmailTemplateDTO) c;
     } else {
-      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Content is of incorrect type: "
-          + sanitiseExternalLogValue(id));
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.NOT_FOUND,
+        "Content is of incorrect type: " + sanitiseExternalLogValue(id)
+      );
       log.debug(error.getErrorMessage());
       return error.toResponse();
     }
@@ -184,8 +197,14 @@ public class EmailFacade extends AbstractSegueFacade {
       // Sanitizes inputs from users
       EmailManager.sanitizeEmailParameters(previewProperties);
 
-      EmailCommunicationMessage ecm = this.emailManager.constructMultiPartEmail(currentUser.getId(),
-          currentUser.getEmail(), emailTemplateDTO, previewProperties, EmailType.SYSTEM);
+      EmailCommunicationMessage ecm =
+        this.emailManager.constructMultiPartEmail(
+            currentUser.getId(),
+            currentUser.getEmail(),
+            emailTemplateDTO,
+            previewProperties,
+            EmailType.SYSTEM
+          );
 
       HashMap<String, String> previewMap = Maps.newHashMap();
       previewMap.put("subject", emailTemplateDTO.getSubject());
@@ -199,18 +218,24 @@ public class EmailFacade extends AbstractSegueFacade {
 
       return Response.ok(previewMap).build();
     } catch (ResourceNotFoundException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content could not be found: " + sanitiseExternalLogValue(id));
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Content could not be found: " + sanitiseExternalLogValue(id)
+      );
       log.warn(error.getErrorMessage());
       return error.toResponse();
     } catch (ContentManagerException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content is of incorrect type: " + sanitiseExternalLogValue(id));
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Content is of incorrect type: " + sanitiseExternalLogValue(id)
+      );
       log.debug(error.getErrorMessage());
       return error.toResponse();
     } catch (IllegalArgumentException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-          "Cannot generate email with non-authorised fields: " + sanitiseExternalLogValue(id));
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.BAD_REQUEST,
+        "Cannot generate email with non-authorised fields: " + sanitiseExternalLogValue(id)
+      );
       log.info(error.getErrorMessage());
       return error.toResponse();
     }
@@ -229,9 +254,10 @@ public class EmailFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Verify an email verification token is valid for use.")
-  public Response validateEmailVerificationRequest(@PathParam("userid") final Long userId,
-                                                   @PathParam("token") final String token) {
-
+  public Response validateEmailVerificationRequest(
+    @PathParam("userid") final Long userId,
+    @PathParam("token") final String token
+  ) {
     try {
       misuseMonitor.notifyEvent(userId.toString(), EmailVerificationMisuseHandler.class.getSimpleName());
       userManager.processEmailVerification(userId, token);
@@ -239,14 +265,17 @@ public class EmailFacade extends AbstractSegueFacade {
       // assume that if there are no exceptions that it worked.
       return Response.ok().build();
     } catch (SegueResourceMisuseException e) {
-      return SegueErrorResponse
-          .getRateThrottledResponse("You have exceeded the number of requests allowed for this endpoint");
+      return SegueErrorResponse.getRateThrottledResponse(
+        "You have exceeded the number of requests allowed for this endpoint"
+      );
     } catch (InvalidTokenException | NoUserException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST, "Token invalid or expired.");
       return error.toResponse();
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "There was an error processing your request.");
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "There was an error processing your request."
+      );
       log.error("Invalid email token request");
       return error.toResponse();
     }
@@ -264,10 +293,14 @@ public class EmailFacade extends AbstractSegueFacade {
   @Path("/users/verifyemail")
   @Consumes(MediaType.APPLICATION_JSON)
   @GZIP
-  @Operation(summary = "Initiate an email verification request.",
-      description = "The email to verify must be provided as 'email' in the request body.")
-  public Response generateEmailVerificationToken(@Context final HttpServletRequest request,
-                                                 final Map<String, String> payload) {
+  @Operation(
+    summary = "Initiate an email verification request.",
+    description = "The email to verify must be provided as 'email' in the request body."
+  )
+  public Response generateEmailVerificationToken(
+    @Context final HttpServletRequest request,
+    final Map<String, String> payload
+  ) {
     try {
       String email = payload.get("email");
       if (email == null || email.isEmpty()) {
@@ -278,15 +311,21 @@ public class EmailFacade extends AbstractSegueFacade {
 
       userManager.emailVerificationRequest(request, email);
 
-      this.getLogManager().logEvent(userManager.getCurrentUser(request), request,
+      this.getLogManager()
+        .logEvent(
+          userManager.getCurrentUser(request),
+          request,
           SegueServerLogType.EMAIL_VERIFICATION_REQUEST_RECEIVED,
-          ImmutableMap.of(Constants.LOCAL_AUTH_EMAIL_VERIFICATION_TOKEN_FIELDNAME, email));
+          ImmutableMap.of(Constants.LOCAL_AUTH_EMAIL_VERIFICATION_TOKEN_FIELDNAME, email)
+        );
 
       return Response.ok().build();
-
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Error sending verification message.", e);
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Error sending verification message.",
+        e
+      );
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     } catch (MissingRequiredFieldException | NumberFormatException e) {
@@ -294,8 +333,12 @@ public class EmailFacade extends AbstractSegueFacade {
       log.error(String.format("Invalid parameters sent to /users/verifyemail endpoint: (%s)", e.getMessage()));
       return error.toResponse();
     } catch (SegueResourceMisuseException e) {
-      log.error(String.format("VerifyEmail request endpoint has reached hard limit (%s)",
-          sanitiseExternalLogValue(payload.get("email"))));
+      log.error(
+        String.format(
+          "VerifyEmail request endpoint has reached hard limit (%s)",
+          sanitiseExternalLogValue(payload.get("email"))
+        )
+      );
       return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
     }
   }
@@ -317,10 +360,12 @@ public class EmailFacade extends AbstractSegueFacade {
   @Consumes(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Send an email to all users of a specific role.")
-  public final Response sendEmails(@Context final HttpServletRequest request,
-                                   @PathParam("contentid") final String contentId,
-                                   @PathParam("emailtype") final String emailTypeString,
-                                   final Map<String, Boolean> roles) {
+  public final Response sendEmails(
+    @Context final HttpServletRequest request,
+    @PathParam("contentid") final String contentId,
+    @PathParam("emailtype") final String emailTypeString,
+    final Map<String, Boolean> roles
+  ) {
     EmailType emailType;
     List<RegisteredUserDTO> allSelectedUsers = Lists.newArrayList();
 
@@ -354,25 +399,30 @@ public class EmailFacade extends AbstractSegueFacade {
       }
 
       if (allSelectedUsers.size() == 0) {
-        SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-            "There are no users in the groups you have selected!.");
+        SegueErrorResponse error = new SegueErrorResponse(
+          Status.BAD_REQUEST,
+          "There are no users in the groups you have selected!."
+        );
         log.error(error.getErrorMessage());
         return error.toResponse();
       }
 
       emailManager.sendCustomEmail(sender, contentId, allSelectedUsers, emailType);
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "There was an error processing your request.");
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "There was an error processing your request."
+      );
       log.error(error.getErrorMessage());
       return error.toResponse();
     } catch (IllegalArgumentException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-          "An unknown type of role was supplied.");
+      SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST, "An unknown type of role was supplied.");
       log.debug(error.getErrorMessage());
     } catch (ContentManagerException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "There was an error retrieving content.");
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "There was an error retrieving content."
+      );
       log.debug(error.getErrorMessage());
     } catch (NoUserLoggedInException e2) {
       return SegueErrorResponse.getNotLoggedInResponse();
@@ -398,10 +448,12 @@ public class EmailFacade extends AbstractSegueFacade {
   @Consumes(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Send an email to a list of user IDs.")
-  public final Response sendEmailsToUserIds(@Context final HttpServletRequest request,
-                                            @PathParam("contentid") final String contentId,
-                                            @PathParam("emailtype") final String emailTypeString,
-                                            final List<Long> userIds) {
+  public final Response sendEmailsToUserIds(
+    @Context final HttpServletRequest request,
+    @PathParam("contentid") final String contentId,
+    @PathParam("emailtype") final String emailTypeString,
+    final List<Long> userIds
+  ) {
     EmailType emailType;
     Set<RegisteredUserDTO> allSelectedUsers = Sets.newHashSet();
 
@@ -419,14 +471,23 @@ public class EmailFacade extends AbstractSegueFacade {
       }
 
       if (isUserAnEventManager(userManager, sender)) {
-        if (misuseMonitor.willHaveMisused(sender.getId().toString(),
-            SendEmailMisuseHandler.class.getSimpleName(), userIds.size())) {
+        if (
+          misuseMonitor.willHaveMisused(
+            sender.getId().toString(),
+            SendEmailMisuseHandler.class.getSimpleName(),
+            userIds.size()
+          )
+        ) {
           return SegueErrorResponse.getRateThrottledResponse(
-              "You would have exceeded the number of emails you are allowed to send per day."
-                  + " No emails have been sent.");
+            "You would have exceeded the number of emails you are allowed to send per day." +
+            " No emails have been sent."
+          );
         }
-        misuseMonitor.notifyEvent(sender.getId().toString(),
-            SendEmailMisuseHandler.class.getSimpleName(), userIds.size());
+        misuseMonitor.notifyEvent(
+          sender.getId().toString(),
+          SendEmailMisuseHandler.class.getSimpleName(),
+          userIds.size()
+        );
       }
 
       for (Long userId : userIds) {
@@ -445,31 +506,37 @@ public class EmailFacade extends AbstractSegueFacade {
       }
 
       if (allSelectedUsers.size() == 0) {
-        SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-            "There are no users in the groups you have selected!.");
+        SegueErrorResponse error = new SegueErrorResponse(
+          Status.BAD_REQUEST,
+          "There are no users in the groups you have selected!."
+        );
         log.error(error.getErrorMessage());
         return error.toResponse();
       }
 
       emailManager.sendCustomEmail(sender, contentId, new ArrayList<>(allSelectedUsers), emailType);
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "There was an error processing your request.");
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "There was an error processing your request."
+      );
       log.error(error.getErrorMessage());
       return error.toResponse();
     } catch (IllegalArgumentException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-          "An unknown type of user was supplied.");
+      SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST, "An unknown type of user was supplied.");
       log.debug(error.getErrorMessage());
     } catch (ContentManagerException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "There was an error retrieving content.");
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "There was an error retrieving content."
+      );
       log.debug(error.getErrorMessage());
     } catch (NoUserLoggedInException e2) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueResourceMisuseException e) {
-      return SegueErrorResponse
-          .getRateThrottledResponse("You have exceeded the number of emails you are allowed to send per day.");
+      return SegueErrorResponse.getRateThrottledResponse(
+        "You have exceeded the number of emails you are allowed to send per day."
+      );
     }
 
     return Response.ok().build();
@@ -491,17 +558,21 @@ public class EmailFacade extends AbstractSegueFacade {
   @Consumes(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Send an email to a list of user IDs.")
-  public final Response sendProvidedEmailWithUserIds(@Context final HttpServletRequest request,
-                                                     @PathParam("emailtype") final String emailTypeString,
-                                                     final ContentEmailDTO providedTemplate) {
+  public final Response sendProvidedEmailWithUserIds(
+    @Context final HttpServletRequest request,
+    @PathParam("emailtype") final String emailTypeString,
+    final ContentEmailDTO providedTemplate
+  ) {
     final EmailTemplateDTO emailTemplate = providedTemplate.getEmailTemplate();
 
-    if (Strings.isNullOrEmpty(emailTemplate.getPlainTextContent())
-        || Strings.isNullOrEmpty(emailTemplate.getHtmlContent())
-        || Strings.isNullOrEmpty(emailTemplate.getSubject())
+    if (
+      Strings.isNullOrEmpty(emailTemplate.getPlainTextContent()) ||
+      Strings.isNullOrEmpty(emailTemplate.getHtmlContent()) ||
+      Strings.isNullOrEmpty(emailTemplate.getSubject())
     ) {
       return SegueErrorResponse.getBadRequestResponse(
-          "Response must include plaintextTemplate, htmlTemplate and emailSubject");
+        "Response must include plaintextTemplate, htmlTemplate and emailSubject"
+      );
     }
 
     final List<Long> userIds = providedTemplate.getUserIds();
@@ -523,14 +594,23 @@ public class EmailFacade extends AbstractSegueFacade {
       }
 
       if (isUserAnEventManager(userManager, sender)) {
-        if (misuseMonitor.willHaveMisused(sender.getId().toString(),
-            SendEmailMisuseHandler.class.getSimpleName(), userIds.size())) {
-          return SegueErrorResponse
-              .getRateThrottledResponse("You would have exceeded the number of emails you are allowed to send per day."
-                  + " No emails have been sent.");
+        if (
+          misuseMonitor.willHaveMisused(
+            sender.getId().toString(),
+            SendEmailMisuseHandler.class.getSimpleName(),
+            userIds.size()
+          )
+        ) {
+          return SegueErrorResponse.getRateThrottledResponse(
+            "You would have exceeded the number of emails you are allowed to send per day." +
+            " No emails have been sent."
+          );
         }
-        misuseMonitor.notifyEvent(sender.getId().toString(),
-            SendEmailMisuseHandler.class.getSimpleName(), userIds.size());
+        misuseMonitor.notifyEvent(
+          sender.getId().toString(),
+          SendEmailMisuseHandler.class.getSimpleName(),
+          userIds.size()
+        );
       }
 
       for (Long userId : userIds) {
@@ -549,31 +629,37 @@ public class EmailFacade extends AbstractSegueFacade {
       }
 
       if (allSelectedUsers.size() == 0) {
-        SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-            "There are no users in the groups you have selected!.");
+        SegueErrorResponse error = new SegueErrorResponse(
+          Status.BAD_REQUEST,
+          "There are no users in the groups you have selected!."
+        );
         log.error(error.getErrorMessage());
         return error.toResponse();
       }
 
       emailManager.sendCustomContentEmail(sender, emailTemplate, new ArrayList<>(allSelectedUsers), emailType);
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "There was an error processing your request.");
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "There was an error processing your request."
+      );
       log.error(error.getErrorMessage());
       return error.toResponse();
     } catch (IllegalArgumentException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
-          "An unknown type of user was supplied.");
+      SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST, "An unknown type of user was supplied.");
       log.debug(error.getErrorMessage());
     } catch (ContentManagerException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "There was an error retrieving content.");
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "There was an error retrieving content."
+      );
       log.debug(error.getErrorMessage());
     } catch (NoUserLoggedInException e2) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueResourceMisuseException e) {
-      return SegueErrorResponse
-          .getRateThrottledResponse("You have exceeded the number of emails you are allowed to send per day.");
+      return SegueErrorResponse.getRateThrottledResponse(
+        "You have exceeded the number of emails you are allowed to send per day."
+      );
     }
 
     return Response.ok().build();

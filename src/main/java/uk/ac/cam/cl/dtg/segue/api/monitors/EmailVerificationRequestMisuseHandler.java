@@ -43,10 +43,7 @@ public class EmailVerificationRequestMisuseHandler implements IMisuseHandler {
    *
    */
   @Inject
-  public EmailVerificationRequestMisuseHandler() {
-
-  }
-
+  public EmailVerificationRequestMisuseHandler() {}
 
   @Override
   public Integer getSoftThreshold() {
@@ -72,5 +69,4 @@ public class EmailVerificationRequestMisuseHandler implements IMisuseHandler {
   public void executeHardThresholdAction(final String message) {
     log.error("Hard threshold limit: " + sanitiseExternalLogValue(message));
   }
-
 }

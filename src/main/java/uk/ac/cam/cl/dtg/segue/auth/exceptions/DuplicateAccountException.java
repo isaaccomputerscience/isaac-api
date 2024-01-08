@@ -46,5 +46,4 @@ public class DuplicateAccountException extends SegueDatabaseException {
   public DuplicateAccountException(final String message, final Exception e) {
     super(message, e);
   }
-
 }

@@ -1,6 +1,5 @@
 package uk.ac.cam.cl.dtg.segue.dao.content;
 
-
 import ma.glasnost.orika.CustomConverter;
 import ma.glasnost.orika.metadata.Type;
 

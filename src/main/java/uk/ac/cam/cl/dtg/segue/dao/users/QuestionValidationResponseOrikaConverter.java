@@ -31,20 +31,20 @@ import uk.ac.cam.cl.dtg.segue.dao.content.AbstractPolymorphicBidirectionalConver
  * <br>
  * Responsible for converting QuestionValidationResponse objects to their correct subtype.
  */
-public class QuestionValidationResponseOrikaConverter extends
-    AbstractPolymorphicBidirectionalConverter<QuestionValidationResponse, QuestionValidationResponseDTO> {
+public class QuestionValidationResponseOrikaConverter
+  extends AbstractPolymorphicBidirectionalConverter<QuestionValidationResponse, QuestionValidationResponseDTO> {
 
   /**
    * Constructs an Orika Converter specialises in selecting the correct subclass for choice objects.
    */
-  public QuestionValidationResponseOrikaConverter() {
-
-  }
+  public QuestionValidationResponseOrikaConverter() {}
 
   @Override
-  public QuestionValidationResponseDTO convertTo(final QuestionValidationResponse source,
-                                                 final Type<QuestionValidationResponseDTO> destinationType,
-                                                 final MappingContext context) {
+  public QuestionValidationResponseDTO convertTo(
+    final QuestionValidationResponse source,
+    final Type<QuestionValidationResponseDTO> destinationType,
+    final MappingContext context
+  ) {
     if (null == source) {
       return null;
     }
@@ -63,9 +63,11 @@ public class QuestionValidationResponseOrikaConverter extends
   }
 
   @Override
-  public QuestionValidationResponse convertFrom(final QuestionValidationResponseDTO source,
-                                                final Type<QuestionValidationResponse> destinationType,
-                                                final MappingContext context) {
+  public QuestionValidationResponse convertFrom(
+    final QuestionValidationResponseDTO source,
+    final Type<QuestionValidationResponse> destinationType,
+    final MappingContext context
+  ) {
     if (null == source) {
       return null;
     }

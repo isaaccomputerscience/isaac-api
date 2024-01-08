@@ -23,7 +23,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  * Interface representing an abstract persistence mechanism for passwords.
  */
 public interface IPasswordDataManager {
-
   /**
    * getLocalUserCredential.
    *

@@ -23,14 +23,16 @@ import java.util.Date;
  *
  */
 public interface IUserNotification {
-
   /**
    * Represents the status of a notification.
    */
   enum NotificationStatus {
     // DISMISSED is left in for backwards compatibility; we now use the more obvious ACKNOWLEDGE for when a user
     // actually interacts positively with the notification.
-    ACKNOWLEDGED, POSTPONED, DISABLED, DISMISSED
+    ACKNOWLEDGED,
+    POSTPONED,
+    DISABLED,
+    DISMISSED
   }
 
   /**
@@ -76,5 +78,4 @@ public interface IUserNotification {
    *            the date this was created.
    */
   void setCreated(Date created);
-
 }

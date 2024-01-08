@@ -34,7 +34,6 @@ import uk.ac.cam.cl.dtg.util.LogUtils;
  *
  */
 public class UserSearchMisuseHandler implements IMisuseHandler {
-
   private static final Logger log = LoggerFactory.getLogger(UserSearchMisuseHandler.class);
 
   public static final Integer SOFT_THRESHOLD = 60;
@@ -45,10 +44,7 @@ public class UserSearchMisuseHandler implements IMisuseHandler {
    *
    */
   @Inject
-  public UserSearchMisuseHandler() {
-
-  }
-
+  public UserSearchMisuseHandler() {}
 
   @Override
   public Integer getSoftThreshold() {

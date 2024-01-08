@@ -27,9 +27,7 @@ public class ImageDTO extends MediaDTO {
   /**
    * Constructor for Mappers.
    */
-  public ImageDTO() {
-
-  }
+  public ImageDTO() {}
 
   /**
    * Gets the clickUrl.

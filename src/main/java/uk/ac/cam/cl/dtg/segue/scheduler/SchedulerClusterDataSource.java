@@ -22,12 +22,10 @@ import org.quartz.utils.ConnectionProvider;
 import uk.ac.cam.cl.dtg.segue.configuration.SegueGuiceConfigurationModule;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
-
 /**
  * This class is a shim to reuse the existing datasource created by guice for quartz cluster management.
  */
 public class SchedulerClusterDataSource implements ConnectionProvider {
-
   private static PostgresSqlDb ds;
 
   public SchedulerClusterDataSource() {
@@ -41,13 +39,8 @@ public class SchedulerClusterDataSource implements ConnectionProvider {
   }
 
   @Override
-  public void shutdown() {
-
-  }
+  public void shutdown() {}
 
   @Override
-  public void initialize() {
-
-  }
-
+  public void initialize() {}
 }

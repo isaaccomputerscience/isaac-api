@@ -50,7 +50,6 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  *
  */
 public class GameboardsFacadeTest {
-
   private PropertiesLoader dummyPropertiesLoader = null;
   private GameManager dummyGameManager = null;
   private ILogManager dummyLogManager = null;
@@ -77,7 +76,8 @@ public class GameboardsFacadeTest {
     this.userBadgeManager = createMock(UserBadgeManager.class);
     this.fastTrackManager = createMock(FastTrackManger.class);
     expect(this.dummyPropertiesLoader.getProperty(Constants.FASTTRACK_GAMEBOARD_WHITELIST))
-        .andReturn("ft_board_1,ft_board_2").anyTimes();
+      .andReturn("ft_board_1,ft_board_2")
+      .anyTimes();
     replay(this.dummyPropertiesLoader);
   }
 
@@ -88,10 +88,17 @@ public class GameboardsFacadeTest {
    */
   @Test
   public final void isaacEndPoint_checkEmptyGameboardCausesErrorNoUser_SegueErrorResponseShouldBeReturned()
-      throws NoWildcardException, SegueDatabaseException, ContentManagerException {
+    throws NoWildcardException, SegueDatabaseException, ContentManagerException {
     GameboardsFacade gameboardFacade = new GameboardsFacade(
-        dummyPropertiesLoader, dummyLogManager, dummyGameManager, questionManager,
-        userManager, userAssociationManager, userBadgeManager, fastTrackManager);
+      dummyPropertiesLoader,
+      dummyLogManager,
+      dummyGameManager,
+      questionManager,
+      userManager,
+      userAssociationManager,
+      userBadgeManager,
+      fastTrackManager
+    );
 
     HttpServletRequest dummyRequest = createMock(HttpServletRequest.class);
     String subjects = "computerscience";
@@ -106,16 +113,32 @@ public class GameboardsFacadeTest {
     String examBoards = "wjec";
 
     expect(
-        dummyGameManager.generateRandomGameboard(EasyMock.<String>anyObject(), EasyMock.<GameFilter>anyObject(),
-            EasyMock.<AbstractSegueUserDTO>anyObject())).andReturn(null).atLeastOnce();
+        dummyGameManager.generateRandomGameboard(
+          EasyMock.<String>anyObject(),
+          EasyMock.<GameFilter>anyObject(),
+          EasyMock.<AbstractSegueUserDTO>anyObject()
+        )
+      )
+      .andReturn(null)
+      .atLeastOnce();
 
-    expect(userManager.getCurrentUser(dummyRequest)).andReturn(new AnonymousUserDTO("testID"))
-        .atLeastOnce();
+    expect(userManager.getCurrentUser(dummyRequest)).andReturn(new AnonymousUserDTO("testID")).atLeastOnce();
 
     replay(dummyGameManager);
 
-    Response r = gameboardFacade.generateTemporaryGameboard(dummyRequest, title, subjects, fields, topics,
-        stages, difficulties, examBoards, levels, concepts, questionCategory);
+    Response r = gameboardFacade.generateTemporaryGameboard(
+      dummyRequest,
+      title,
+      subjects,
+      fields,
+      topics,
+      stages,
+      difficulties,
+      examBoards,
+      levels,
+      concepts,
+      questionCategory
+    );
 
     assertEquals(r.getStatus(), Status.NO_CONTENT.getStatusCode());
     verify(dummyGameManager);

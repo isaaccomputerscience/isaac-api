@@ -10,7 +10,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.GraphChoiceDTO;
 @DTOMapping(GraphChoiceDTO.class)
 @JsonContentType("graphChoice")
 public class GraphChoice extends Choice {
-
   /**
    * GraphChoice data, in JSON string format.
    */

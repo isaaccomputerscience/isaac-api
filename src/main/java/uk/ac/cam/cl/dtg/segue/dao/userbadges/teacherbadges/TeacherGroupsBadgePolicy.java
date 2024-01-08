@@ -15,7 +15,6 @@ import uk.ac.cam.cl.dtg.segue.dao.userbadges.IUserBadgePolicy;
  * Created by du220 on 01/05/2018.
  */
 public class TeacherGroupsBadgePolicy implements IUserBadgePolicy {
-
   private final GroupManager groupManager;
 
   public TeacherGroupsBadgePolicy(final GroupManager groupManager) {
@@ -29,7 +28,6 @@ public class TeacherGroupsBadgePolicy implements IUserBadgePolicy {
 
   @Override
   public JsonNode initialiseState(final RegisteredUserDTO user, final ITransaction transaction) {
-
     ArrayNode groups = JsonNodeFactory.instance.arrayNode();
 
     try {
@@ -45,7 +43,6 @@ public class TeacherGroupsBadgePolicy implements IUserBadgePolicy {
 
   @Override
   public JsonNode updateState(final RegisteredUserDTO user, final JsonNode state, final String event) {
-
     Iterator<JsonNode> iter = ((ArrayNode) state.get("groups")).elements();
 
     while (iter.hasNext()) {

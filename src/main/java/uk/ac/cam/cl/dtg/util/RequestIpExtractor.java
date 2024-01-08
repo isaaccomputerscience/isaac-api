@@ -29,8 +29,7 @@ public final class RequestIpExtractor {
   /**
    It does not make sense to create one of these!
    */
-  private RequestIpExtractor() {
-  }
+  private RequestIpExtractor() {}
 
   /**
    * Extract client ip address.

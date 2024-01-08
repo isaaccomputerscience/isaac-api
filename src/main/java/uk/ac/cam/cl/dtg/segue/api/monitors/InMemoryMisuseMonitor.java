@@ -53,7 +53,10 @@ public class InMemoryMisuseMonitor implements IMisuseMonitor {
    */
   @Inject
   public InMemoryMisuseMonitor() {
-    nonPersistentDatabase = CacheBuilder.newBuilder().expireAfterAccess(2, TimeUnit.DAYS)
+    nonPersistentDatabase =
+      CacheBuilder
+        .newBuilder()
+        .expireAfterAccess(2, TimeUnit.DAYS)
         .<String, Map<String, Map.Entry<Date, Integer>>>build();
     handlerMap = Maps.newConcurrentMap();
   }
@@ -65,15 +68,19 @@ public class InMemoryMisuseMonitor implements IMisuseMonitor {
 
   @Override
   public synchronized void notifyEvent(final String agentIdentifier, final String eventLabel)
-      throws SegueResourceMisuseException {
+    throws SegueResourceMisuseException {
     Validate.notBlank(agentIdentifier);
     Validate.notBlank(eventLabel);
     this.notifyEvent(agentIdentifier, eventLabel, 1);
   }
 
   @Override
-  public synchronized void notifyEvent(final String agentIdentifier, final String eventLabel,
-                                       final Integer adjustmentValue) throws SegueResourceMisuseException {
+  public synchronized void notifyEvent(
+    final String agentIdentifier,
+    final String eventLabel,
+    final Integer adjustmentValue
+  )
+    throws SegueResourceMisuseException {
     Validate.notBlank(agentIdentifier);
     Validate.notBlank(eventLabel);
     Validate.notNull(adjustmentValue);
@@ -95,7 +102,6 @@ public class InMemoryMisuseMonitor implements IMisuseMonitor {
         existingHistory.put(eventLabel, immutableEntry(new Date(), adjustmentValue));
         log.debug("New Event " + existingHistory.get(eventLabel));
       } else {
-
         // deal with expired events
         if (!isCountStillFresh(entry.getKey(), handler.getAccountingIntervalInSeconds())) {
           existingHistory.put(eventLabel, immutableEntry(new Date(), adjustmentValue));
@@ -110,16 +116,19 @@ public class InMemoryMisuseMonitor implements IMisuseMonitor {
         int previousValue = entry.getValue() - adjustmentValue;
 
         // deal with threshold violations
-        if (handler.getSoftThreshold() != null
-            && previousValue < handler.getSoftThreshold() && entry.getValue() >= handler
-            .getSoftThreshold()) {
-          handler.executeSoftThresholdAction(String.format("(%s) has exceeded the soft limit!",
-              agentIdentifier));
+        if (
+          handler.getSoftThreshold() != null &&
+          previousValue < handler.getSoftThreshold() &&
+          entry.getValue() >= handler.getSoftThreshold()
+        ) {
+          handler.executeSoftThresholdAction(String.format("(%s) has exceeded the soft limit!", agentIdentifier));
         }
 
-        if (handler.getHardThreshold() != null
-            && previousValue < handler.getHardThreshold() && entry.getValue() >= handler
-            .getHardThreshold()) {
+        if (
+          handler.getHardThreshold() != null &&
+          previousValue < handler.getHardThreshold() &&
+          entry.getValue() >= handler.getHardThreshold()
+        ) {
           String errMessage = String.format("(%s) has exceeded the hard limit!", agentIdentifier);
 
           handler.executeHardThresholdAction(errMessage);
@@ -138,8 +147,11 @@ public class InMemoryMisuseMonitor implements IMisuseMonitor {
   }
 
   @Override
-  public boolean willHaveMisused(final String agentIdentifier, final String eventToCheck,
-                                 final Integer adjustmentValue) {
+  public boolean willHaveMisused(
+    final String agentIdentifier,
+    final String eventToCheck,
+    final Integer adjustmentValue
+  ) {
     Map<String, Entry<Date, Integer>> existingHistory = nonPersistentDatabase.getIfPresent(agentIdentifier);
 
     if (null == existingHistory || existingHistory.get(eventToCheck) == null) {
@@ -149,8 +161,10 @@ public class InMemoryMisuseMonitor implements IMisuseMonitor {
     Entry<Date, Integer> entry = existingHistory.get(eventToCheck);
     IMisuseHandler handler = handlerMap.get(eventToCheck);
 
-    return isCountStillFresh(entry.getKey(), handler.getAccountingIntervalInSeconds())
-        && entry.getValue() + adjustmentValue >= handler.getHardThreshold();
+    return (
+      isCountStillFresh(entry.getKey(), handler.getAccountingIntervalInSeconds()) &&
+      entry.getValue() + adjustmentValue >= handler.getHardThreshold()
+    );
   }
 
   @Override
@@ -167,29 +181,42 @@ public class InMemoryMisuseMonitor implements IMisuseMonitor {
   @Override
   public Map<String, List<MisuseStatisticDTO>> getMisuseStatistics(final long n) {
     Map<String, Map<String, Entry<Date, Integer>>> cache = nonPersistentDatabase.asMap();
-    return handlerMap.keySet().stream()
-        .map(eventLabel -> {
+    return handlerMap
+      .keySet()
+      .stream()
+      .map(
+        eventLabel -> {
           Integer softThreshold = handlerMap.get(eventLabel).getSoftThreshold();
           return Map.entry(
-              eventLabel,
-              cache.entrySet().stream()
-                  .map(e -> Pair.of(e.getKey(), e.getValue().get(eventLabel)))
-                  .filter(e -> null != e.getRight())
-                  .sorted(Comparator.comparingInt((Entry<String, Entry<Date, Integer>> e) -> e.getValue().getValue())
-                      .reversed())
-                  .limit(n)
-                  .map((Pair<String, Entry<Date, Integer>> e) -> {
-                    String agentIdentifier = e.getKey();
-                    Entry<Date, Integer> misuseEntry = e.getValue();
-                    return new MisuseStatisticDTO(
-                        agentIdentifier, eventLabel, hasMisused(agentIdentifier, eventLabel),
-                        misuseEntry.getValue() >= softThreshold,
-                        misuseEntry.getKey(), misuseEntry.getValue()
-                    );
-                  })
-                  .collect(Collectors.toList())
+            eventLabel,
+            cache
+              .entrySet()
+              .stream()
+              .map(e -> Pair.of(e.getKey(), e.getValue().get(eventLabel)))
+              .filter(e -> null != e.getRight())
+              .sorted(
+                Comparator.comparingInt((Entry<String, Entry<Date, Integer>> e) -> e.getValue().getValue()).reversed()
+              )
+              .limit(n)
+              .map(
+                (Pair<String, Entry<Date, Integer>> e) -> {
+                  String agentIdentifier = e.getKey();
+                  Entry<Date, Integer> misuseEntry = e.getValue();
+                  return new MisuseStatisticDTO(
+                    agentIdentifier,
+                    eventLabel,
+                    hasMisused(agentIdentifier, eventLabel),
+                    misuseEntry.getValue() >= softThreshold,
+                    misuseEntry.getKey(),
+                    misuseEntry.getValue()
+                  );
+                }
+              )
+              .collect(Collectors.toList())
           );
-        }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+        }
+      )
+      .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
   }
 
   /**

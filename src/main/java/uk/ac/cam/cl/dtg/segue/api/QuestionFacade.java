@@ -16,7 +16,6 @@
 
 package uk.ac.cam.cl.dtg.segue.api;
 
-
 import static uk.ac.cam.cl.dtg.segue.api.Constants.CONTENT_INDEX;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK;
@@ -118,15 +117,21 @@ public class QuestionFacade extends AbstractSegueFacade {
    *                               users
    */
   @Inject
-  public QuestionFacade(final PropertiesLoader properties, final ContentMapper mapper,
-                        final GitContentManager contentManager, final GameManager gameManager,
-                        @Named(CONTENT_INDEX) final String contentIndex,
-                        final UserAccountManager userManager, final QuestionManager questionManager,
-                        final ILogManager logManager, final IMisuseMonitor misuseMonitor,
-                        final UserBadgeManager userBadgeManager, final IUserStreaksManager userStreaksManager,
-                        final UserAssociationManager userAssociationManager) {
+  public QuestionFacade(
+    final PropertiesLoader properties,
+    final ContentMapper mapper,
+    final GitContentManager contentManager,
+    final GameManager gameManager,
+    @Named(CONTENT_INDEX) final String contentIndex,
+    final UserAccountManager userManager,
+    final QuestionManager questionManager,
+    final ILogManager logManager,
+    final IMisuseMonitor misuseMonitor,
+    final UserBadgeManager userBadgeManager,
+    final IUserStreaksManager userStreaksManager,
+    final UserAssociationManager userAssociationManager
+  ) {
     super(properties, logManager);
-
     this.questionManager = questionManager;
     this.mapper = mapper;
     this.contentManager = contentManager;
@@ -149,24 +154,39 @@ public class QuestionFacade extends AbstractSegueFacade {
   @GET
   @Path("{question_id}/answer")
   @Operation(summary = "Provide users who try to cheat with a guide to the location of our help page.")
-  public Response getQuestionAnswer(@Context final HttpServletRequest request,
-                                    @PathParam("question_id") final String questionId) {
-    String errorMessage =
-        String.format("We do not provide answers to questions. See https://%s/solving_problems for more help!",
-            getProperties().getProperty(HOST_NAME));
+  public Response getQuestionAnswer(
+    @Context final HttpServletRequest request,
+    @PathParam("question_id") final String questionId
+  ) {
+    String errorMessage = String.format(
+      "We do not provide answers to questions. See https://%s/solving_problems for more help!",
+      getProperties().getProperty(HOST_NAME)
+    );
     try {
       AbstractSegueUserDTO currentUser = this.userManager.getCurrentUser(request);
       if (currentUser instanceof RegisteredUserDTO) {
-        log.warn(String.format("MethodNotAllowed: User (%s) attempted to GET the answer to the question '%s'!",
-            ((RegisteredUserDTO) currentUser).getId(), sanitiseExternalLogValue(questionId)));
+        log.warn(
+          String.format(
+            "MethodNotAllowed: User (%s) attempted to GET the answer to the question '%s'!",
+            ((RegisteredUserDTO) currentUser).getId(),
+            sanitiseExternalLogValue(questionId)
+          )
+        );
       } else {
-        log.warn(String.format("MethodNotAllowed: Anonymous user attempted to GET the answer to the question '%s'!",
-            sanitiseExternalLogValue(questionId)));
+        log.warn(
+          String.format(
+            "MethodNotAllowed: Anonymous user attempted to GET the answer to the question '%s'!",
+            sanitiseExternalLogValue(questionId)
+          )
+        );
       }
       return new SegueErrorResponse(Status.METHOD_NOT_ALLOWED, errorMessage).toResponse();
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Database error while looking up user information.", e);
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Database error while looking up user information.",
+        e
+      );
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     }
@@ -186,21 +206,24 @@ public class QuestionFacade extends AbstractSegueFacade {
   @Path("answered_questions/{user_id}")
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Return a count of question attempts per month.")
-  public Response getQuestionsAnswered(@Context final HttpServletRequest request,
-                                       @PathParam("user_id") final Long userIdOfInterest,
-                                       @QueryParam("from_date") final Long fromDate,
-                                       @QueryParam("to_date") final Long toDate,
-                                       @QueryParam("per_day") final Boolean perDay) {
+  public Response getQuestionsAnswered(
+    @Context final HttpServletRequest request,
+    @PathParam("user_id") final Long userIdOfInterest,
+    @QueryParam("from_date") final Long fromDate,
+    @QueryParam("to_date") final Long toDate,
+    @QueryParam("per_day") final Boolean perDay
+  ) {
     try {
-
       if (null == fromDate || null == toDate) {
-        return new SegueErrorResponse(Status.BAD_REQUEST,
-            "You must specify the from_date and to_date you are interested in.").toResponse();
+        return new SegueErrorResponse(
+          Status.BAD_REQUEST,
+          "You must specify the from_date and to_date you are interested in."
+        )
+        .toResponse();
       }
 
       if (fromDate > toDate) {
-        return new SegueErrorResponse(Status.BAD_REQUEST,
-            "The from_date must be before the to_date!").toResponse();
+        return new SegueErrorResponse(Status.BAD_REQUEST, "The from_date must be before the to_date!").toResponse();
       }
 
       RegisteredUserDTO currentUser = this.userManager.getCurrentRegisteredUser(request);
@@ -210,8 +233,10 @@ public class QuestionFacade extends AbstractSegueFacade {
 
       // decide if the user is allowed to view this data. If user isn't viewing their own data, user viewing
       // must have a valid connection with the user of interest and be at least a teacher.
-      if (!currentUser.getId().equals(userIdOfInterest)
-          && !userAssociationManager.hasTeacherPermission(currentUser, userOfInterestSummaryObject)) {
+      if (
+        !currentUser.getId().equals(userIdOfInterest) &&
+        !userAssociationManager.hasTeacherPermission(currentUser, userOfInterestSummaryObject)
+      ) {
         return SegueErrorResponse.getIncorrectRoleResponse();
       }
 
@@ -222,10 +247,17 @@ public class QuestionFacade extends AbstractSegueFacade {
         fromDateObject = userOfInterest.getRegistrationDate();
       }
 
-      return Response.ok(
-              this.questionManager.getUsersQuestionAttemptCountsByDate(userOfInterest, fromDateObject, new Date(toDate),
-                  perDay))
-          .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+      return Response
+        .ok(
+          this.questionManager.getUsersQuestionAttemptCountsByDate(
+              userOfInterest,
+              fromDateObject,
+              new Date(toDate),
+              perDay
+            )
+        )
+        .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (NoUserException e) {
@@ -233,7 +265,7 @@ public class QuestionFacade extends AbstractSegueFacade {
     } catch (SegueDatabaseException e) {
       log.error("Unable to look up user event history for user " + userIdOfInterest, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error while looking up event information")
-          .toResponse();
+      .toResponse();
     }
   }
 
@@ -248,8 +280,10 @@ public class QuestionFacade extends AbstractSegueFacade {
   @Path("/random")
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
-  public final Response getRandomQuestions(@Context final HttpServletRequest request,
-                                           @QueryParam("subjects") final String subjects) {
+  public final Response getRandomQuestions(
+    @Context final HttpServletRequest request,
+    @QueryParam("subjects") final String subjects
+  ) {
     RegisteredUserDTO currentUser;
 
     try {
@@ -264,14 +298,12 @@ public class QuestionFacade extends AbstractSegueFacade {
     try {
       questions = this.gameManager.generateRandomQuestions(filter, 5);
     } catch (ContentManagerException e) {
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unable to generate questions")
-          .toResponse();
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unable to generate questions").toResponse();
     }
 
     // Return the list of random questions as JSON
     return Response.ok(questions).build();
   }
-
 
   /**
    * Record that a user has answered a question.
@@ -286,21 +318,24 @@ public class QuestionFacade extends AbstractSegueFacade {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
-  @Operation(summary = "Submit an answer to a question.",
-      description = "The answer must be the correct Choice subclass for the question with the provided ID.")
-  public Response answerQuestion(@Context final HttpServletRequest request,
-                                 @PathParam("question_id") final String questionId, final String jsonAnswer) {
+  @Operation(
+    summary = "Submit an answer to a question.",
+    description = "The answer must be the correct Choice subclass for the question with the provided ID."
+  )
+  public Response answerQuestion(
+    @Context final HttpServletRequest request,
+    @PathParam("question_id") final String questionId,
+    final String jsonAnswer
+  ) {
     if (null == jsonAnswer || jsonAnswer.isEmpty()) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "No answer received.").toResponse();
     }
 
     Content contentBasedOnId;
     try {
-      contentBasedOnId = this.contentManager.getContentDOById(
-          questionId);
+      contentBasedOnId = this.contentManager.getContentDOById(questionId);
     } catch (ContentManagerException e1) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested",
-          e1);
+      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested", e1);
       log.error(error.getErrorMessage(), e1);
       return error.toResponse();
     }
@@ -309,8 +344,10 @@ public class QuestionFacade extends AbstractSegueFacade {
     if (contentBasedOnId instanceof Question) {
       question = (Question) contentBasedOnId;
     } else {
-      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND,
-          "No question object found for given id: " + sanitiseExternalLogValue(questionId));
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.NOT_FOUND,
+        "No question object found for given id: " + sanitiseExternalLogValue(questionId)
+      );
       log.warn(error.getErrorMessage());
       return error.toResponse();
     }
@@ -343,22 +380,26 @@ public class QuestionFacade extends AbstractSegueFacade {
       if (currentUser instanceof RegisteredUserDTO) {
         try {
           // Monitor misuse on a per-question per-registered user basis, with higher limits:
-          misuseMonitor.notifyEvent(((RegisteredUserDTO) currentUser).getId().toString() + "|" + questionId,
-              QuestionAttemptMisuseHandler.class.getSimpleName());
+          misuseMonitor.notifyEvent(
+            ((RegisteredUserDTO) currentUser).getId().toString() + "|" + questionId,
+            QuestionAttemptMisuseHandler.class.getSimpleName()
+          );
         } catch (SegueResourceMisuseException e) {
           this.getLogManager()
-              .logEvent(currentUser, request, SegueServerLogType.QUESTION_ATTEMPT_RATE_LIMITED, response.getEntity());
+            .logEvent(currentUser, request, SegueServerLogType.QUESTION_ATTEMPT_RATE_LIMITED, response.getEntity());
           String message = "You have made too many attempts at this question part. Please try again later.";
           return SegueErrorResponse.getRateThrottledResponse(message);
         }
       } else {
         try {
           // Monitor misuse on a per-question per-anonymous user basis:
-          misuseMonitor.notifyEvent(((AnonymousUserDTO) currentUser).getSessionId() + "|" + questionId,
-              AnonQuestionAttemptMisuseHandler.class.getSimpleName());
+          misuseMonitor.notifyEvent(
+            ((AnonymousUserDTO) currentUser).getSessionId() + "|" + questionId,
+            AnonQuestionAttemptMisuseHandler.class.getSimpleName()
+          );
         } catch (SegueResourceMisuseException e) {
           this.getLogManager()
-              .logEvent(currentUser, request, SegueServerLogType.QUESTION_ATTEMPT_RATE_LIMITED, response.getEntity());
+            .logEvent(currentUser, request, SegueServerLogType.QUESTION_ATTEMPT_RATE_LIMITED, response.getEntity());
           String message = "You have made too many attempts at this question part. Please log in or try again later.";
           return SegueErrorResponse.getRateThrottledResponse(message);
         }
@@ -367,11 +408,13 @@ public class QuestionFacade extends AbstractSegueFacade {
           // If we see serious misuse, this could be moved to *before* the attempt validation and checking,
           // to save server load. Since this occurs after the anon user notify event, that will catch most
           // misuse and this will catch misuse ignoring cookies or with repeated new anon accounts.
-          misuseMonitor.notifyEvent(RequestIpExtractor.getClientIpAddr(request),
-              IPQuestionAttemptMisuseHandler.class.getSimpleName());
+          misuseMonitor.notifyEvent(
+            RequestIpExtractor.getClientIpAddr(request),
+            IPQuestionAttemptMisuseHandler.class.getSimpleName()
+          );
         } catch (SegueResourceMisuseException e) {
           this.getLogManager()
-              .logEvent(currentUser, request, SegueServerLogType.QUESTION_ATTEMPT_RATE_LIMITED, response.getEntity());
+            .logEvent(currentUser, request, SegueServerLogType.QUESTION_ATTEMPT_RATE_LIMITED, response.getEntity());
           String message = "Too many question attempts! Please either create an account, log in, or try again later.";
           return SegueErrorResponse.getRateThrottledResponse(message);
         }
@@ -379,8 +422,7 @@ public class QuestionFacade extends AbstractSegueFacade {
 
       // If we get to this point, this is a valid question attempt. Record it.
       if (response.getEntity() instanceof QuestionValidationResponseDTO) {
-        questionManager.recordQuestionAttempt(currentUser,
-            (QuestionValidationResponseDTO) response.getEntity());
+        questionManager.recordQuestionAttempt(currentUser, (QuestionValidationResponseDTO) response.getEntity());
       }
 
       this.getLogManager().logEvent(currentUser, request, SegueServerLogType.ANSWER_QUESTION, response.getEntity());
@@ -391,14 +433,15 @@ public class QuestionFacade extends AbstractSegueFacade {
       }
 
       return response;
-
     } catch (IllegalArgumentException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST, "Bad request - " + e.getMessage(), e);
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error =
-          new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Unable to save question attempt. Try again later!");
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Unable to save question attempt. Try again later!"
+      );
       log.error("Unable to to record question attempt.", e);
       return error.toResponse();
     } catch (ErrorResponseWrapper responseWrapper) {
@@ -421,8 +464,11 @@ public class QuestionFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Test a list of choices with some expected answer values")
-  public Response testQuestion(@Context final HttpServletRequest request,
-                               @QueryParam("type") final String questionType, final String testJson) {
+  public Response testQuestion(
+    @Context final HttpServletRequest request,
+    @QueryParam("type") final String questionType,
+    final String testJson
+  ) {
     try {
       RegisteredUserDTO currentUser = userManager.getCurrentRegisteredUser(request);
       if (!isUserStaff(userManager, currentUser)) {
@@ -432,7 +478,6 @@ public class QuestionFacade extends AbstractSegueFacade {
       TestQuestion testDefinition = mapper.getSharedContentObjectMapper().readValue(testJson, TestQuestion.class);
       List<TestCase> results = questionManager.testQuestion(questionType, testDefinition);
       return Response.ok(results).build();
-
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (ValidatorUnavailableException | IOException e) {

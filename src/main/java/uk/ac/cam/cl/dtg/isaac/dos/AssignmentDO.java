@@ -44,8 +44,16 @@ public class AssignmentDO {
    * @param scheduledStartDate - the date and time the assignment should have notification emails sent to its group
    *                                 (using Quartz)
    */
-  public AssignmentDO(final Long id, final String gameboardId, final Long ownerUserId, final Long groupId,
-                      final String notes, final Date creationDate, final Date dueDate, final Date scheduledStartDate) {
+  public AssignmentDO(
+    final Long id,
+    final String gameboardId,
+    final Long ownerUserId,
+    final Long groupId,
+    final String notes,
+    final Date creationDate,
+    final Date dueDate,
+    final Date scheduledStartDate
+  ) {
     this.id = id;
     this.gameboardId = gameboardId;
     this.ownerUserId = ownerUserId;
@@ -59,9 +67,7 @@ public class AssignmentDO {
   /**
    * Default constructor required for AutoMapping.
    */
-  public AssignmentDO() {
-
-  }
+  public AssignmentDO() {}
 
   /**
    * Gets the id.
@@ -218,7 +224,6 @@ public class AssignmentDO {
   public void setDueDate(final Date dueDate) {
     this.dueDate = dueDate;
   }
-
 
   /**
    * get the date of when the assignment should be displayed to users.

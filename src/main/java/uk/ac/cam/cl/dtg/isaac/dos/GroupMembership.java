@@ -18,7 +18,6 @@ package uk.ac.cam.cl.dtg.isaac.dos;
 
 import java.util.Date;
 
-
 /**
  * GroupMembership Object - this object represents a users membership to a group.
  */
@@ -32,9 +31,7 @@ public class GroupMembership {
   /**
    * Default Constructor.
    */
-  public GroupMembership() {
-
-  }
+  public GroupMembership() {}
 
   /**
    * @param groupId - the group id
@@ -43,8 +40,13 @@ public class GroupMembership {
    * @param created - the date the membership object was created
    * @param updated - the date the membership object was last updated
    */
-  public GroupMembership(final Long groupId, final Long userId, final GroupMembershipStatus status, final Date created,
-                         final Date updated) {
+  public GroupMembership(
+    final Long groupId,
+    final Long userId,
+    final GroupMembershipStatus status,
+    final Date created,
+    final Date updated
+  ) {
     this.groupId = groupId;
     this.userId = userId;
     this.status = status;

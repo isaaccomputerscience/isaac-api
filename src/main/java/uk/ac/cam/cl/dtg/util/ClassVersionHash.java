@@ -7,8 +7,7 @@ import org.slf4j.Logger;
 
 public final class ClassVersionHash {
 
-  private ClassVersionHash() {
-  }
+  private ClassVersionHash() {}
 
   public static String hashClass(final Class c) {
     try {

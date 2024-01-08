@@ -34,9 +34,7 @@ public class LogEvent {
   /**
    * Create a log event.
    */
-  public LogEvent() {
-
-  }
+  public LogEvent() {}
 
   /**
    * Create a log event.
@@ -49,8 +47,15 @@ public class LogEvent {
    * @param ipAddress        - IP address of the user
    * @param timestamp        - when the log happened.
    */
-  public LogEvent(final String eventType, final String eventDetailsType, final Object eventDetails,
-                  final String userId, final boolean anonymousUser, final String ipAddress, final Date timestamp) {
+  public LogEvent(
+    final String eventType,
+    final String eventDetailsType,
+    final Object eventDetails,
+    final String userId,
+    final boolean anonymousUser,
+    final String ipAddress,
+    final Date timestamp
+  ) {
     this.eventType = eventType;
     this.eventDetailsType = eventDetailsType;
     this.eventDetails = eventDetails;

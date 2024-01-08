@@ -53,9 +53,12 @@ public class SegueTOTPAuthenticator implements ISecondFactorAuthenticator {
   }
 
   @Override
-  public boolean activate2FAForUser(final RegisteredUserDTO user, final String sharedSecret,
-                                    final Integer verificationCode)
-      throws SegueDatabaseException {
+  public boolean activate2FAForUser(
+    final RegisteredUserDTO user,
+    final String sharedSecret,
+    final Integer verificationCode
+  )
+    throws SegueDatabaseException {
     TOTPSharedSecret toSave = new TOTPSharedSecret(user.getId(), sharedSecret, new Date(), new Date());
 
     if (googleAuthenticator.authorize(sharedSecret, verificationCode)) {
@@ -68,7 +71,7 @@ public class SegueTOTPAuthenticator implements ISecondFactorAuthenticator {
 
   @Override
   public boolean authenticate2ndFactor(final RegisteredUserDTO user, final Integer verificationCode)
-      throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException {
+    throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException {
     TOTPSharedSecret storedSharedSecret = this.dataManager.get2FASharedSecret(user.getId());
 
     if (null == storedSharedSecret) {

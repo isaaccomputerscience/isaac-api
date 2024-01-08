@@ -34,9 +34,7 @@ public class QuestionValidationResponseDTO {
   /**
    * Default Constructor for mappers.
    */
-  public QuestionValidationResponseDTO() {
-
-  }
+  public QuestionValidationResponseDTO() {}
 
   /**
    * Full constructor.
@@ -52,8 +50,13 @@ public class QuestionValidationResponseDTO {
    * @param dateAttempted
    *            -
    */
-  public QuestionValidationResponseDTO(final String questionId, final ChoiceDTO answer, final Boolean correct,
-                                       final ContentDTO explanation, final Date dateAttempted) {
+  public QuestionValidationResponseDTO(
+    final String questionId,
+    final ChoiceDTO answer,
+    final Boolean correct,
+    final ContentDTO explanation,
+    final Date dateAttempted
+  ) {
     this.questionId = questionId;
     this.answer = answer;
     this.correct = correct;
@@ -158,7 +161,18 @@ public class QuestionValidationResponseDTO {
 
   @Override
   public String toString() {
-    return "QuestionValidationResponseDTO [questionId=" + questionId + ", answer=" + answer + ", correct="
-        + correct + ", explanation=" + explanation + ", dateAttempted=" + dateAttempted + "]";
+    return (
+      "QuestionValidationResponseDTO [questionId=" +
+      questionId +
+      ", answer=" +
+      answer +
+      ", correct=" +
+      correct +
+      ", explanation=" +
+      explanation +
+      ", dateAttempted=" +
+      dateAttempted +
+      "]"
+    );
   }
 }

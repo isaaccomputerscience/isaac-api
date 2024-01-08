@@ -23,7 +23,6 @@ import java.util.concurrent.PriorityBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Abstract message queue class.
  *
@@ -33,11 +32,11 @@ import org.slf4j.LoggerFactory;
  *            type of message to send
  */
 public abstract class AbstractCommunicationQueue<T extends ICommunicationMessage> {
-
   /**
    * Comparator that tells the priority queue which email should be sent first.
    */
   private Comparator<ICommunicationMessage> emailPriorityComparator = new Comparator<ICommunicationMessage>() {
+
     @Override
     public int compare(final ICommunicationMessage first, final ICommunicationMessage second) {
       if (first.getPriority() == second.getPriority()) {
@@ -48,18 +47,18 @@ public abstract class AbstractCommunicationQueue<T extends ICommunicationMessage
         return 1;
       }
     }
-
   };
 
-  private PriorityBlockingQueue<T> messageSenderRunnableQueue =
-      new PriorityBlockingQueue<T>(100, emailPriorityComparator);
+  private PriorityBlockingQueue<T> messageSenderRunnableQueue = new PriorityBlockingQueue<T>(
+    100,
+    emailPriorityComparator
+  );
 
   private static final Logger log = LoggerFactory.getLogger(AbstractCommunicationQueue.class);
 
   private ICommunicator<T> communicator;
 
   private final ExecutorService executorService;
-
 
   /**
    * FIFO queue manager that sends messages.
@@ -81,7 +80,6 @@ public abstract class AbstractCommunicationQueue<T extends ICommunicationMessage
     executorService.submit(new MessageSenderRunnable());
     log.debug("Added to the email queue. Current size: " + messageSenderRunnableQueue.size());
   }
-
 
   /**
    * @return an object from the head of the queue

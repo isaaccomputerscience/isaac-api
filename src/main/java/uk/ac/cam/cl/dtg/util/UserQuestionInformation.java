@@ -35,11 +35,11 @@ public class UserQuestionInformation {
   private final Map<String, Integer> questionAttemptsByTypeStats = Maps.newHashMap();
   private final Map<String, Integer> questionsCorrectByTypeStats = Maps.newHashMap();
   private final List<ContentDTO> questionPagesNotComplete = Lists.newArrayList();
-  private final Queue<ContentDTO> mostRecentlyAttemptedQuestionPages =
-      new CircularFifoQueue<>(PROGRESS_MAX_RECENT_QUESTIONS);
+  private final Queue<ContentDTO> mostRecentlyAttemptedQuestionPages = new CircularFifoQueue<>(
+    PROGRESS_MAX_RECENT_QUESTIONS
+  );
 
-  public UserQuestionInformation() {
-  }
+  public UserQuestionInformation() {}
 
   public void incrementCorrectQuestions() {
     correctQuestions++;
@@ -113,13 +113,18 @@ public class UserQuestionInformation {
     }
   }
 
-  private void incrementQuestionAttemptsByStageAndDifficulty(final Stage currentStage,
-                                                             final Difficulty currentDifficulty) {
+  private void incrementQuestionAttemptsByStageAndDifficulty(
+    final Stage currentStage,
+    final Difficulty currentDifficulty
+  ) {
     if (questionAttemptsByStageAndDifficultyStats.containsKey(currentStage)) {
       if (questionAttemptsByStageAndDifficultyStats.get(currentStage).containsKey(currentDifficulty)) {
-        questionAttemptsByStageAndDifficultyStats.get(currentStage)
-            .put(currentDifficulty,
-                questionAttemptsByStageAndDifficultyStats.get(currentStage).get(currentDifficulty) + 1);
+        questionAttemptsByStageAndDifficultyStats
+          .get(currentStage)
+          .put(
+            currentDifficulty,
+            questionAttemptsByStageAndDifficultyStats.get(currentStage).get(currentDifficulty) + 1
+          );
       } else {
         questionAttemptsByStageAndDifficultyStats.get(currentStage).put(currentDifficulty, 1);
       }
@@ -130,13 +135,18 @@ public class UserQuestionInformation {
     }
   }
 
-  private void incrementQuestionsCorrectByStageAndDifficulty(final Stage currentStage,
-                                                             final Difficulty currentDifficulty) {
+  private void incrementQuestionsCorrectByStageAndDifficulty(
+    final Stage currentStage,
+    final Difficulty currentDifficulty
+  ) {
     if (questionsCorrectByStageAndDifficultyStats.containsKey(currentStage)) {
       if (questionsCorrectByStageAndDifficultyStats.get(currentStage).containsKey(currentDifficulty)) {
-        questionsCorrectByStageAndDifficultyStats.get(currentStage)
-            .put(currentDifficulty,
-                questionsCorrectByStageAndDifficultyStats.get(currentStage).get(currentDifficulty) + 1);
+        questionsCorrectByStageAndDifficultyStats
+          .get(currentStage)
+          .put(
+            currentDifficulty,
+            questionsCorrectByStageAndDifficultyStats.get(currentStage).get(currentDifficulty) + 1
+          );
       } else {
         questionsCorrectByStageAndDifficultyStats.get(currentStage).put(currentDifficulty, 1);
       }
@@ -188,19 +198,24 @@ public class UserQuestionInformation {
   }
 
   public void addMostRecentlyAttemptedQuestionPage(final ContentDTO questionContentDTO) {
-    mostRecentlyAttemptedQuestionPages.add(questionContentDTO);  // Assumes questionAttemptsByUser is sorted!
+    mostRecentlyAttemptedQuestionPages.add(questionContentDTO); // Assumes questionAttemptsByUser is sorted!
   }
 
-  public Map<String, Object> toMap(final UserSummaryDTO userOfInterestSummary,
-                                   final Function<ContentDTO, ContentSummaryDTO> contentSummarisationFunction) {
+  public Map<String, Object> toMap(
+    final UserSummaryDTO userOfInterestSummary,
+    final Function<ContentDTO, ContentSummaryDTO> contentSummarisationFunction
+  ) {
     // Collate all the information into the JSON response as a Map:
     Map<String, Object> questionInfo = Maps.newHashMap();
     List<ContentSummaryDTO> mostRecentlyAttemptedQuestionsList = mostRecentlyAttemptedQuestionPages
-        .stream().map(contentSummarisationFunction).collect(Collectors.toList());
-    Collections.reverse(
-        mostRecentlyAttemptedQuestionsList);  // We want most-recent first order and streams cannot reverse.
+      .stream()
+      .map(contentSummarisationFunction)
+      .collect(Collectors.toList());
+    Collections.reverse(mostRecentlyAttemptedQuestionsList); // We want most-recent first order and streams cannot reverse.
     List<ContentSummaryDTO> questionsNotCompleteList = questionPagesNotComplete
-        .stream().map(contentSummarisationFunction).collect(Collectors.toList());
+      .stream()
+      .map(contentSummarisationFunction)
+      .collect(Collectors.toList());
 
     questionInfo.put("totalQuestionsAttempted", attemptedQuestions);
     questionInfo.put("totalQuestionsCorrect", correctQuestions);

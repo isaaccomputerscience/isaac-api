@@ -76,10 +76,13 @@ public class QuizManager {
    * @param mapper                   - so we can convert cached content DOs to DTOs.
    */
   @Inject
-  public QuizManager(final PropertiesLoader properties, final ContentService contentService,
-                     final GitContentManager contentManager,
-                     final ContentSummarizerService contentSummarizerService,
-                     final ContentMapper mapper) {
+  public QuizManager(
+    final PropertiesLoader properties,
+    final ContentService contentService,
+    final GitContentManager contentManager,
+    final ContentSummarizerService contentSummarizerService,
+    final ContentMapper mapper
+  ) {
     this.properties = properties;
     this.contentService = contentService;
     this.contentManager = contentManager;
@@ -88,27 +91,43 @@ public class QuizManager {
   }
 
   public ResultsWrapper<ContentSummaryDTO> getAvailableQuizzes(
-      final boolean onlyVisibleToStudents, final String visibleToRole, @Nullable final Integer startIndex,
-      @Nullable final Integer limit)
-      throws ContentManagerException {
-
+    final boolean onlyVisibleToStudents,
+    final String visibleToRole,
+    @Nullable final Integer startIndex,
+    @Nullable final Integer limit
+  )
+    throws ContentManagerException {
     List<GitContentManager.BooleanSearchClause> fieldsToMatch = Lists.newArrayList();
-    fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, Constants.BooleanOperator.AND, Collections.singletonList(QUIZ_TYPE)));
+    fieldsToMatch.add(
+      new GitContentManager.BooleanSearchClause(
+        TYPE_FIELDNAME,
+        Constants.BooleanOperator.AND,
+        Collections.singletonList(QUIZ_TYPE)
+      )
+    );
 
     // TODO: remove deprecated onlyVisibleToStudents check and argument!
     if (onlyVisibleToStudents) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(
-          VISIBLE_TO_STUDENTS_FIELDNAME, Constants.BooleanOperator.AND,
-          Collections.singletonList(Boolean.toString(true))));
+      fieldsToMatch.add(
+        new GitContentManager.BooleanSearchClause(
+          VISIBLE_TO_STUDENTS_FIELDNAME,
+          Constants.BooleanOperator.AND,
+          Collections.singletonList(Boolean.toString(true))
+        )
+      );
     }
     if (null != visibleToRole) {
-      fieldsToMatch.add(new GitContentManager.BooleanSearchClause(HIDDEN_FROM_ROLES_FIELDNAME,
-          BooleanOperator.NOT, Collections.singletonList(visibleToRole)));
+      fieldsToMatch.add(
+        new GitContentManager.BooleanSearchClause(
+          HIDDEN_FROM_ROLES_FIELDNAME,
+          BooleanOperator.NOT,
+          Collections.singletonList(visibleToRole)
+        )
+      );
     }
 
     ResultsWrapper<ContentDTO> content =
-        this.contentService.findMatchingContent(null, fieldsToMatch, startIndex, limit);
+      this.contentService.findMatchingContent(null, fieldsToMatch, startIndex, limit);
 
     return this.contentSummarizerService.extractContentSummaryFromResultsWrapper(content, QuizSummaryDTO.class);
   }
@@ -156,11 +175,21 @@ public class QuizManager {
           quiz = this.contentSummarizerService.extractContentSummary(this.findQuiz(quizId), QuizSummaryDTO.class);
         } catch (ContentManagerException e) {
           if (item instanceof QuizAttemptDTO) {
-            log.warn("Attempt (" + ((QuizAttemptDTO) item).getId() + ") exists with test ID ("
-                + item.getQuizId() + ") that does not exist!");
+            log.warn(
+              "Attempt (" +
+              ((QuizAttemptDTO) item).getId() +
+              ") exists with test ID (" +
+              item.getQuizId() +
+              ") that does not exist!"
+            );
           } else if (item instanceof QuizAssignmentDTO) {
-            log.warn("Assignment (" + ((QuizAssignmentDTO) item).getId() + ") exists with test ID ("
-                + sanitiseExternalLogValue(item.getQuizId()) + ") that does not exist!");
+            log.warn(
+              "Assignment (" +
+              ((QuizAssignmentDTO) item).getId() +
+              ") exists with test ID (" +
+              sanitiseExternalLogValue(item.getQuizId()) +
+              ") that does not exist!"
+            );
           }
         }
         quizCache.put(quizId, quiz);
@@ -187,14 +216,20 @@ public class QuizManager {
       }
       return quiz.getChildren().stream().map(c -> (IsaacQuizSectionDTO) c).collect(Collectors.toList());
     } else {
-      return quiz.getChildren().stream().flatMap(c -> {
-        if (c instanceof IsaacQuizSectionDTO) {
-          return Stream.of((IsaacQuizSectionDTO) c);
-        } else {
-          log.warn("Test id " + quiz.getId() + " contains top-level non-section with id " + c.getId());
-          return Stream.empty();
-        }
-      }).collect(Collectors.toList());
+      return quiz
+        .getChildren()
+        .stream()
+        .flatMap(
+          c -> {
+            if (c instanceof IsaacQuizSectionDTO) {
+              return Stream.of((IsaacQuizSectionDTO) c);
+            } else {
+              log.warn("Test id " + quiz.getId() + " contains top-level non-section with id " + c.getId());
+              return Stream.empty();
+            }
+          }
+        )
+        .collect(Collectors.toList());
     }
   }
 }

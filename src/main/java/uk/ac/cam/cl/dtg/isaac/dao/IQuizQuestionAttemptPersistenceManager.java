@@ -23,11 +23,11 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 public interface IQuizQuestionAttemptPersistenceManager {
   void registerQuestionAttempt(Long quizAttemptId, QuestionValidationResponse questionResponseDO)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   Map<String, List<QuestionValidationResponse>> getAllAnswersForQuizAttempt(Long quizAttemptId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   Map<Long, Map<String, List<QuestionValidationResponse>>> getAllAnswersForQuizAssignment(Long quizAssignmentId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 }

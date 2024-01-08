@@ -58,7 +58,7 @@ public class QuizAttemptManagerTest extends AbstractManagerTest {
 
   @Test(expected = AttemptCompletedException.class)
   public void fetchOrCreateWithExistingCompletedAttemptFails()
-      throws AttemptCompletedException, SegueDatabaseException {
+    throws AttemptCompletedException, SegueDatabaseException {
     withMock(quizAttemptPersistenceManager, forStudentAssignmentReturn(completedAttempt));
 
     quizAttemptManager.fetchOrCreate(studentAssignment, student);
@@ -66,11 +66,13 @@ public class QuizAttemptManagerTest extends AbstractManagerTest {
 
   @Test
   public void fetchOrCreateCreatesNewAttempt() throws AttemptCompletedException, SegueDatabaseException {
-    withMock(quizAttemptPersistenceManager,
-        forStudentAssignmentReturn(null),
-        m -> expect(
-            m.saveAttempt(attemptMatcher(student.getId(), studentAssignment.getId(), studentAssignment.getQuizId())))
-            .andReturn(TEST_ID));
+    withMock(
+      quizAttemptPersistenceManager,
+      forStudentAssignmentReturn(null),
+      m ->
+        expect(m.saveAttempt(attemptMatcher(student.getId(), studentAssignment.getId(), studentAssignment.getQuizId())))
+          .andReturn(TEST_ID)
+    );
 
     QuizAttemptDTO attempt = quizAttemptManager.fetchOrCreate(studentAssignment, student);
     assertEquals(TEST_ID, attempt.getId());
@@ -86,9 +88,11 @@ public class QuizAttemptManagerTest extends AbstractManagerTest {
 
   @Test
   public void fetchOrCreateFreeQuizWithExistingCompletedAttemptCreatesNewAttempt() throws SegueDatabaseException {
-    withMock(quizAttemptPersistenceManager,
-        forStudentQuizReturn(Collections.singletonList(completedAttempt)),
-        returnTestIdForSaveAttempt());
+    withMock(
+      quizAttemptPersistenceManager,
+      forStudentQuizReturn(Collections.singletonList(completedAttempt)),
+      returnTestIdForSaveAttempt()
+    );
 
     QuizAttemptDTO attempt = quizAttemptManager.fetchOrCreateFreeQuiz(studentQuiz, student);
     assertEquals(TEST_ID, attempt.getId());
@@ -96,9 +100,11 @@ public class QuizAttemptManagerTest extends AbstractManagerTest {
 
   @Test
   public void fetchOrCreateFreeQuizCreatesNewAttempt() throws SegueDatabaseException {
-    withMock(quizAttemptPersistenceManager,
-        forStudentQuizReturn(Collections.emptyList()),
-        returnTestIdForSaveAttempt());
+    withMock(
+      quizAttemptPersistenceManager,
+      forStudentQuizReturn(Collections.emptyList()),
+      returnTestIdForSaveAttempt()
+    );
 
     QuizAttemptDTO attempt = quizAttemptManager.fetchOrCreateFreeQuiz(studentQuiz, student);
     assertEquals(TEST_ID, attempt.getId());
@@ -106,10 +112,12 @@ public class QuizAttemptManagerTest extends AbstractManagerTest {
 
   @Test
   public void augmentAssignmentsFor() throws SegueDatabaseException {
-    withMock(quizAttemptPersistenceManager,
-        m -> expect(
-            m.getByQuizAssignmentIdsAndUserId(Collections.singletonList(studentAssignment.getId()), student.getId()))
-            .andReturn(Collections.singletonMap(studentAssignment.getId(), studentAttempt)));
+    withMock(
+      quizAttemptPersistenceManager,
+      m ->
+        expect(m.getByQuizAssignmentIdsAndUserId(Collections.singletonList(studentAssignment.getId()), student.getId()))
+          .andReturn(Collections.singletonMap(studentAssignment.getId(), studentAttempt))
+    );
     quizAttemptManager.augmentAssignmentsFor(student, Collections.singletonList(studentAssignment));
 
     assertEquals(studentAttempt, studentAssignment.getAttempt());
@@ -124,30 +132,33 @@ public class QuizAttemptManagerTest extends AbstractManagerTest {
   }
 
   private MockConfigurer<IQuizAttemptPersistenceManager> returnTestIdForSaveAttempt() {
-    return m -> expect(m.saveAttempt(attemptMatcher(student.getId(), null, studentQuiz.getId())))
-        .andReturn(TEST_ID);
+    return m -> expect(m.saveAttempt(attemptMatcher(student.getId(), null, studentQuiz.getId()))).andReturn(TEST_ID);
   }
 
   private static QuizAttemptDTO attemptMatcher(final Long userId, final Long assignmentId, final String quizId) {
-    EasyMock.reportMatcher(new IArgumentMatcher() {
-      @Override
-      public boolean matches(Object argument) {
-        if (argument instanceof QuizAttemptDTO) {
-          QuizAttemptDTO attempt = (QuizAttemptDTO) argument;
-          return attempt.getUserId().equals(userId)
-              && Objects.equals(attempt.getQuizAssignmentId(), assignmentId)
-              && attempt.getQuizId().equals(quizId)
-              && new Date().getTime() - attempt.getStartDate().getTime() < 1000;
-        }
-        return false;
-      }
+    EasyMock.reportMatcher(
+      new IArgumentMatcher() {
 
-      @Override
-      public void appendTo(StringBuffer buffer) {
-        buffer.append("attempt(userId=" + userId + ", assignmentId=" + assignmentId + ", quizId=" + quizId + ")");
+        @Override
+        public boolean matches(Object argument) {
+          if (argument instanceof QuizAttemptDTO) {
+            QuizAttemptDTO attempt = (QuizAttemptDTO) argument;
+            return (
+              attempt.getUserId().equals(userId) &&
+              Objects.equals(attempt.getQuizAssignmentId(), assignmentId) &&
+              attempt.getQuizId().equals(quizId) &&
+              new Date().getTime() - attempt.getStartDate().getTime() < 1000
+            );
+          }
+          return false;
+        }
+
+        @Override
+        public void appendTo(StringBuffer buffer) {
+          buffer.append("attempt(userId=" + userId + ", assignmentId=" + assignmentId + ", quizId=" + quizId + ")");
+        }
       }
-    });
+    );
     return null;
   }
-
 }

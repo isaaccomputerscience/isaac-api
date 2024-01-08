@@ -31,8 +31,10 @@ public class GlossaryTermDTO extends ContentDTO {
   private String examBoard;
 
   @JsonCreator
-  public GlossaryTermDTO(@JsonProperty("explanation") final ContentDTO explanation,
-                         @JsonProperty("examBoard") final String examBoard) {
+  public GlossaryTermDTO(
+    @JsonProperty("explanation") final ContentDTO explanation,
+    @JsonProperty("examBoard") final String examBoard
+  ) {
     this.explanation = explanation;
     this.examBoard = examBoard != null ? examBoard : "";
   }

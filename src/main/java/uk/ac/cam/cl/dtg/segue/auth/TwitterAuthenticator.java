@@ -55,7 +55,6 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
  * @author nr378
  */
 public class TwitterAuthenticator implements IOAuth1Authenticator {
-
   private static final Logger log = LoggerFactory.getLogger(TwitterAuthenticator.class);
 
   private final JsonFactory jsonFactory;
@@ -79,9 +78,11 @@ public class TwitterAuthenticator implements IOAuth1Authenticator {
    * @param callbackUri
    */
   @Inject
-  public TwitterAuthenticator(@Named(Constants.TWITTER_CLIENT_ID) final String clientId,
-                              @Named(Constants.TWITTER_SECRET) final String clientSecret,
-                              @Named(Constants.TWITTER_CALLBACK_URI) final String callbackUri) {
+  public TwitterAuthenticator(
+    @Named(Constants.TWITTER_CLIENT_ID) final String clientId,
+    @Named(Constants.TWITTER_SECRET) final String clientSecret,
+    @Named(Constants.TWITTER_CALLBACK_URI) final String callbackUri
+  ) {
     this.jsonFactory = new JacksonFactory();
     this.httpTransport = new NetHttpTransport();
 
@@ -148,12 +149,17 @@ public class TwitterAuthenticator implements IOAuth1Authenticator {
       tokenResponse.setRefreshToken(accessToken.getTokenSecret());
       tokenResponse.setExpiresInSeconds(Long.MAX_VALUE);
 
-      Builder builder = new AuthorizationCodeFlow.Builder(BearerToken.authorizationHeaderAccessMethod(),
-          httpTransport, jsonFactory, new GenericUrl(TOKEN_EXCHANGE_URL),
-          new ClientParametersAuthentication(clientId, clientSecret), clientId, AUTH_URL);
+      Builder builder = new AuthorizationCodeFlow.Builder(
+        BearerToken.authorizationHeaderAccessMethod(),
+        httpTransport,
+        jsonFactory,
+        new GenericUrl(TOKEN_EXCHANGE_URL),
+        new ClientParametersAuthentication(clientId, clientSecret),
+        clientId,
+        AUTH_URL
+      );
 
-      AuthorizationCodeFlow flow = builder.setDataStoreFactory(MemoryDataStoreFactory.getDefaultInstance())
-          .build();
+      AuthorizationCodeFlow flow = builder.setDataStoreFactory(MemoryDataStoreFactory.getDefaultInstance()).build();
 
       Credential credential = flow.createAndStoreCredential(tokenResponse, authorizationCode);
 
@@ -170,7 +176,7 @@ public class TwitterAuthenticator implements IOAuth1Authenticator {
 
   @Override
   public synchronized UserFromAuthProvider getUserInfo(final String internalProviderReference)
-      throws NoUserException, IOException {
+    throws NoUserException, IOException {
     Credential credentials = credentialStore.get(internalProviderReference);
     twitter.setOAuthAccessToken(new AccessToken(credentials.getAccessToken(), credentials.getRefreshToken()));
 
@@ -200,8 +206,16 @@ public class TwitterAuthenticator implements IOAuth1Authenticator {
           log.warn("No email address provided by Twitter! Using (" + email + ") instead");
         }
 
-        return new UserFromAuthProvider(String.valueOf(userInfo.getId()), givenName, familyName, email,
-            emailStatus, null, null, null);
+        return new UserFromAuthProvider(
+          String.valueOf(userInfo.getId()),
+          givenName,
+          familyName,
+          email,
+          emailStatus,
+          null,
+          null,
+          null
+        );
       } else {
         throw new NoUserException("No user could be created from provider details!");
       }

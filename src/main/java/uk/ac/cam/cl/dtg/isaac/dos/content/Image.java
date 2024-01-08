@@ -30,9 +30,7 @@ public class Image extends Media {
   /**
    * Default constructor required for mapping purposes.
    */
-  public Image() {
-
-  }
+  public Image() {}
 
   /**
    * Gets the clickUrl.

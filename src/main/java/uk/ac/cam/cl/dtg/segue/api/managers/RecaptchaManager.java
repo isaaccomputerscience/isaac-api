@@ -32,7 +32,6 @@ public class RecaptchaManager {
     }
   }
 
-
   public synchronized boolean verifyRecaptcha(final String response) {
     try {
       if (!response.isEmpty()) {

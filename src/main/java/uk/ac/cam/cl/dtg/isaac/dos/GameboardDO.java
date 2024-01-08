@@ -31,6 +31,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.GameFilter;
 public class GameboardDO {
   @JsonProperty("_id")
   private String id;
+
   private String title;
   private List<GameboardContentDescriptor> contents;
   private IsaacWildcard wildCard;
@@ -65,10 +66,18 @@ public class GameboardDO {
    * @param tags
    *            - Set of tags associated with the game board.
    */
-  public GameboardDO(final String id, final String title, final List<GameboardContentDescriptor> contents,
-                     final IsaacWildcard wildCard, final Integer wildcardPosition, final Date creationDate,
-                     final GameFilter gameFilter, final Long ownerUserId,
-                     final GameboardCreationMethod creationMethod, final Set<String> tags) {
+  public GameboardDO(
+    final String id,
+    final String title,
+    final List<GameboardContentDescriptor> contents,
+    final IsaacWildcard wildCard,
+    final Integer wildcardPosition,
+    final Date creationDate,
+    final GameFilter gameFilter,
+    final Long ownerUserId,
+    final GameboardCreationMethod creationMethod,
+    final Set<String> tags
+  ) {
     this.id = id;
     this.title = title;
     this.contents = contents;
@@ -270,17 +279,31 @@ public class GameboardDO {
 
   @Override
   public String toString() {
-    return "GameboardDO ["
-        + "id='" + id + '\''
-        + ", title='" + title + '\''
-        + ", contents=" + contents
-        + ", wildCard=" + wildCard
-        + ", wildCardPosition=" + wildCardPosition
-        + ", creationDate=" + creationDate
-        + ", gameFilter=" + gameFilter
-        + ", ownerUserId=" + ownerUserId
-        + ", creationMethod=" + creationMethod
-        + ", tags=" + tags
-        + ']';
+    return (
+      "GameboardDO [" +
+      "id='" +
+      id +
+      '\'' +
+      ", title='" +
+      title +
+      '\'' +
+      ", contents=" +
+      contents +
+      ", wildCard=" +
+      wildCard +
+      ", wildCardPosition=" +
+      wildCardPosition +
+      ", creationDate=" +
+      creationDate +
+      ", gameFilter=" +
+      gameFilter +
+      ", ownerUserId=" +
+      ownerUserId +
+      ", creationMethod=" +
+      creationMethod +
+      ", tags=" +
+      tags +
+      ']'
+    );
   }
 }

@@ -64,9 +64,13 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
    * @param properties                   - instance of properties loader
    */
   @Inject
-  public AssignmentManager(final IAssignmentPersistenceManager assignmentPersistenceManager,
-                           final GroupManager groupManager, final EmailService emailService,
-                           final GameManager gameManager, final PropertiesLoader properties) {
+  public AssignmentManager(
+    final IAssignmentPersistenceManager assignmentPersistenceManager,
+    final GroupManager groupManager,
+    final EmailService emailService,
+    final GameManager gameManager,
+    final PropertiesLoader properties
+  ) {
     this.assignmentPersistenceManager = assignmentPersistenceManager;
     this.groupManager = groupManager;
     this.emailService = emailService;
@@ -90,8 +94,11 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
     }
 
     List<Long> groupIds = groups.stream().map(UserGroupDTO::getId).collect(Collectors.toList());
-    List<AssignmentDTO> assignments = this.groupManager.filterItemsBasedOnMembershipContext(
-        this.assignmentPersistenceManager.getAssignmentsByGroupList(groupIds), user.getId());
+    List<AssignmentDTO> assignments =
+      this.groupManager.filterItemsBasedOnMembershipContext(
+          this.assignmentPersistenceManager.getAssignmentsByGroupList(groupIds),
+          user.getId()
+        );
 
     return assignments;
   }
@@ -118,7 +125,6 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
     return this.assignmentPersistenceManager.getAssignmentById(assignmentId);
   }
 
-
   /**
    * create Assignment.
    *
@@ -131,10 +137,19 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
     Validate.notNull(newAssignment.getGameboardId());
     Validate.notNull(newAssignment.getGroupId());
 
-    if (assignmentPersistenceManager.getAssignmentsByGameboardAndGroup(newAssignment.getGameboardId(),
-        newAssignment.getGroupId()).size() != 0) {
-      log.error(String.format("Duplicated Assignment Exception - cannot assign the same work %s to a group %s",
-          sanitiseExternalLogValue(newAssignment.getGameboardId()), newAssignment.getGroupId()));
+    if (
+      assignmentPersistenceManager
+        .getAssignmentsByGameboardAndGroup(newAssignment.getGameboardId(), newAssignment.getGroupId())
+        .size() !=
+      0
+    ) {
+      log.error(
+        String.format(
+          "Duplicated Assignment Exception - cannot assign the same work %s to a group %s",
+          sanitiseExternalLogValue(newAssignment.getGameboardId()),
+          newAssignment.getGroupId()
+        )
+      );
       throw new DuplicateAssignmentException("You cannot assign the same work to a group more than once.");
     }
 
@@ -143,14 +158,21 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
 
     // Get assignment gameboard in order to generate URL which will be added to the notification email
     GameboardDTO gameboard = gameManager.getGameboard(newAssignment.getGameboardId());
-    final String gameboardURL = String.format("https://%s/assignment/%s", properties.getProperty(HOST_NAME),
-        gameboard.getId());
+    final String gameboardURL = String.format(
+      "https://%s/assignment/%s",
+      properties.getProperty(HOST_NAME),
+      gameboard.getId()
+    );
 
     // If there is no date to schedule the assignment for, or the start date is in the past...
     if (null == newAssignment.getScheduledStartDate()) {
       // Send the notification email immediately
-      emailService.sendAssignmentEmailToGroup(newAssignment, gameboard, ImmutableMap.of("gameboardURL", gameboardURL),
-          "email-template-group-assignment");
+      emailService.sendAssignmentEmailToGroup(
+        newAssignment,
+        gameboard,
+        ImmutableMap.of("gameboardURL", gameboardURL),
+        "email-template-group-assignment"
+      );
     }
     // Otherwise, the assignment email will be scheduled by a Quartz job on the hour of the scheduledStartDate
 
@@ -178,21 +200,29 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
    * @throws SegueDatabaseException - if we cannot complete a required database operation.
    */
   public List<AssignmentDTO> getAllAssignmentsForSpecificGroups(
-      final Collection<UserGroupDTO> groups, final boolean includeAssignmentsScheduledInFuture)
-      throws SegueDatabaseException {
+    final Collection<UserGroupDTO> groups,
+    final boolean includeAssignmentsScheduledInFuture
+  )
+    throws SegueDatabaseException {
     Validate.notNull(groups);
     if (groups.isEmpty()) {
       return new ArrayList<>();
     }
     // Filter out assignments that haven't started yet, and augment AssignmentDTOs with group names (useful for
     // displaying group related stuff in the front-end)
-    Map<Long, String> groupIdToName =
-        groups.stream().collect(Collectors.toMap(UserGroupDTO::getId, UserGroupDTO::getGroupName));
+    Map<Long, String> groupIdToName = groups
+      .stream()
+      .collect(Collectors.toMap(UserGroupDTO::getId, UserGroupDTO::getGroupName));
     List<AssignmentDTO> assignments =
-        this.assignmentPersistenceManager.getAssignmentsByGroupList(groupIdToName.keySet()).stream().filter(
-            a -> includeAssignmentsScheduledInFuture || null == a.getScheduledStartDate() || a.getScheduledStartDate()
-                .before(new Date()))
-            .collect(Collectors.toList());
+      this.assignmentPersistenceManager.getAssignmentsByGroupList(groupIdToName.keySet())
+        .stream()
+        .filter(
+          a ->
+            includeAssignmentsScheduledInFuture ||
+            null == a.getScheduledStartDate() ||
+            a.getScheduledStartDate().before(new Date())
+        )
+        .collect(Collectors.toList());
     assignments.forEach(assignment -> assignment.setGroupName(groupIdToName.get(assignment.getGroupId())));
     return assignments;
   }
@@ -218,9 +248,9 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
    * @throws SegueDatabaseException - if we cannot complete a required database operation.
    */
   public AssignmentDTO findAssignmentByGameboardAndGroup(final String gameboardId, final Long groupId)
-      throws SegueDatabaseException {
-    List<AssignmentDTO> assignments = this.assignmentPersistenceManager.getAssignmentsByGameboardAndGroup(
-        gameboardId, groupId);
+    throws SegueDatabaseException {
+    List<AssignmentDTO> assignments =
+      this.assignmentPersistenceManager.getAssignmentsByGameboardAndGroup(gameboardId, groupId);
 
     if (assignments.size() == 0) {
       return null;
@@ -228,8 +258,9 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
       return assignments.get(0);
     }
 
-    throw new SegueDatabaseException(String.format(
-        "Duplicate Assignment (group: %s) (gameboard: %s) Exception: %s", groupId, gameboardId, assignments));
+    throw new SegueDatabaseException(
+      String.format("Duplicate Assignment (group: %s) (gameboard: %s) Exception: %s", groupId, gameboardId, assignments)
+    );
   }
 
   @Override
@@ -244,8 +275,10 @@ public class AssignmentManager implements IAssignmentLike.Details<AssignmentDTO>
 
   @Override
   public String getAssignmentLikeUrl(final AssignmentDTO existingAssignment) {
-    return String.format("https://%s/assignment/%s",
-        properties.getProperty(HOST_NAME),
-        existingAssignment.getGameboardId());
+    return String.format(
+      "https://%s/assignment/%s",
+      properties.getProperty(HOST_NAME),
+      existingAssignment.getGameboardId()
+    );
   }
 }

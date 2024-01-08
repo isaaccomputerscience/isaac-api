@@ -28,7 +28,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SpecifiesWith {
-
   /**
    * The {@link ISpecifier} class that this Choice relates to.
    *

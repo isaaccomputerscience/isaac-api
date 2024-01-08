@@ -52,8 +52,13 @@ public class QuestionValidationResponse extends LightweightQuestionValidationRes
    * @param dateAttempted
    *            -
    */
-  public QuestionValidationResponse(final String questionId, final Choice answer, final Boolean correct,
-                                    final Content explanation, final Date dateAttempted) {
+  public QuestionValidationResponse(
+    final String questionId,
+    final Choice answer,
+    final Boolean correct,
+    final Content explanation,
+    final Date dateAttempted
+  ) {
     super(questionId, correct, dateAttempted);
     this.answer = answer;
     this.explanation = explanation;
@@ -99,12 +104,18 @@ public class QuestionValidationResponse extends LightweightQuestionValidationRes
 
   @Override
   public String toString() {
-    return "QuestionValidationResponse [questionId=" + super.getQuestionId()
-        + ", answer=" + answer
-        + ", correct=" + super.isCorrect()
-        + ", explanation=" + explanation
-        + ", dateAttempted=" + super.getDateAttempted()
-        + "]";
+    return (
+      "QuestionValidationResponse [questionId=" +
+      super.getQuestionId() +
+      ", answer=" +
+      answer +
+      ", correct=" +
+      super.isCorrect() +
+      ", explanation=" +
+      explanation +
+      ", dateAttempted=" +
+      super.getDateAttempted() +
+      "]"
+    );
   }
-
 }

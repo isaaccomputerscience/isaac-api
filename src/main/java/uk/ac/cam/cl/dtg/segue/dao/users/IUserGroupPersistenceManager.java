@@ -30,7 +30,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  * Interface for data manager classes that deal with group data.
  */
 public interface IUserGroupPersistenceManager {
-
   /**
    * Get all groups by owner.
    *
@@ -103,7 +102,7 @@ public interface IUserGroupPersistenceManager {
    * @throws SegueDatabaseException - if an error occurs.
    */
   void setUsersGroupMembershipStatus(Long userId, Long groupId, GroupMembershipStatus newStatus)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Remove a user from a group.
@@ -206,7 +205,7 @@ public interface IUserGroupPersistenceManager {
    * @throws SegueDatabaseException - if we cannot contact the database.
    */
   List<UserGroup> getGroupsByAdditionalManager(Long additionalManagerId, @Nullable Boolean archivedGroupsOnly)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Add a user to the additional manager list for a group.

@@ -36,9 +36,7 @@ public class NotificationDTO extends ContentDTO {
   /**
    *
    */
-  public NotificationDTO() {
-
-  }
+  public NotificationDTO() {}
 
   /**
    * Gets the externalReference.

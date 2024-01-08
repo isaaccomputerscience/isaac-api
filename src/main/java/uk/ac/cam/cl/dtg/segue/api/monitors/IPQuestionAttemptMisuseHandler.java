@@ -28,11 +28,10 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 public class IPQuestionAttemptMisuseHandler implements IMisuseHandler {
-
   private static final Logger log = LoggerFactory.getLogger(IPQuestionAttemptMisuseHandler.class);
 
-  private static final Integer SOFT_THRESHOLD = 120;  // Two attempts per minute for an hour, or 24 anonymous users.
-  private static final Integer HARD_THRESHOLD = 240;  // One every fifteen seconds for an hour; far too high!
+  private static final Integer SOFT_THRESHOLD = 120; // Two attempts per minute for an hour, or 24 anonymous users.
+  private static final Integer HARD_THRESHOLD = 240; // One every fifteen seconds for an hour; far too high!
   private static final Integer ACCOUNTING_INTERVAL = Constants.NUMBER_SECONDS_IN_ONE_HOUR;
 
   private final PropertiesLoader properties;
@@ -71,10 +70,16 @@ public class IPQuestionAttemptMisuseHandler implements IMisuseHandler {
   @Override
   public void executeHardThresholdAction(final String message) {
     final String subject = "HARD Threshold limit reached for IP Address based Question Attempts!";
-    EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
-        subject, message, message, EmailType.ADMIN);
+    EmailCommunicationMessage e = new EmailCommunicationMessage(
+      properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
+      subject,
+      message,
+      message,
+      EmailType.ADMIN
+    );
     emailManager.addSystemEmailToQueue(e);
-    log.warn("Too many requests from an IP Address: " + sanitiseExternalLogValue(message)
-        + " This may be a scripted attack!");
+    log.warn(
+      "Too many requests from an IP Address: " + sanitiseExternalLogValue(message) + " This may be a scripted attack!"
+    );
   }
 }

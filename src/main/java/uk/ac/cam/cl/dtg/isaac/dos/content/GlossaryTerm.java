@@ -34,9 +34,7 @@ public class GlossaryTerm extends Content {
   /**
    * Default constructor, required for mappers.
    */
-  public GlossaryTerm() {
-
-  }
+  public GlossaryTerm() {}
 
   /**
    * Gets the explanation.

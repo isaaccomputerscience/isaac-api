@@ -33,22 +33,19 @@ import uk.ac.cam.cl.dtg.segue.dao.content.AbstractPolymorphicConverter;
  * at converting between highly nested data structures.
  */
 public class AnonymousUserQuestionAttemptsOrikaConverter
-    extends
-    AbstractPolymorphicConverter<Map<String, Map<String, List<QuestionValidationResponse>>>,
-        Map<String, Map<String, List<QuestionValidationResponseDTO>>>> {
+  extends AbstractPolymorphicConverter<Map<String, Map<String, List<QuestionValidationResponse>>>, Map<String, Map<String, List<QuestionValidationResponseDTO>>>> {
 
   /**
    * Constructs an Orika Converter specialises in selecting the correct subclass for choice objects.
    */
-  public AnonymousUserQuestionAttemptsOrikaConverter() {
-
-  }
+  public AnonymousUserQuestionAttemptsOrikaConverter() {}
 
   @Override
   public Map<String, Map<String, List<QuestionValidationResponseDTO>>> convert(
-      final Map<String, Map<String, List<QuestionValidationResponse>>> source,
-      final Type<? extends Map<String, Map<String, List<QuestionValidationResponseDTO>>>> destinationType,
-      final MappingContext context) {
+    final Map<String, Map<String, List<QuestionValidationResponse>>> source,
+    final Type<? extends Map<String, Map<String, List<QuestionValidationResponseDTO>>>> destinationType,
+    final MappingContext context
+  ) {
     // convert in one direction
     if (null == source) {
       return null;

@@ -62,10 +62,11 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
 
   @Override
   public UserGroup createGroup(final UserGroup group) throws SegueDatabaseException {
-    String query = "INSERT INTO groups(group_name, owner_id, group_status, created, last_updated)"
-        + " VALUES (?, ?, ?, ?, ?);";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+    String query =
+      "INSERT INTO groups(group_name, owner_id, group_status, created, last_updated)" + " VALUES (?, ?, ?, ?, ?);";
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
     ) {
       pst.setString(FIELD_CREATE_GROUP_GROUP_NAME, group.getGroupName());
       pst.setLong(FIELD_CREATE_GROUP_OWNER_ID, group.getOwnerId());
@@ -90,14 +91,12 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
         if (generatedKeys.next()) {
           Long id = generatedKeys.getLong(1);
           group.setId(id);
-
         } else {
           throw new SQLException("Creating group failed, no ID obtained.");
         }
       }
 
       return group;
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
@@ -110,11 +109,10 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
       group.setStatus(GroupStatus.ACTIVE);
     }
 
-    String query = "UPDATE groups SET group_name=?, owner_id=?, created=?, archived=?,"
-        + " additional_manager_privileges=?, group_status=?, last_updated=? WHERE id = ?;";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    String query =
+      "UPDATE groups SET group_name=?, owner_id=?, created=?, archived=?," +
+      " additional_manager_privileges=?, group_status=?, last_updated=? WHERE id = ?;";
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_EDIT_GROUP_GROUP_NAME, group.getGroupName());
       pst.setLong(FIELD_EDIT_GROUP_OWNER_ID, group.getOwnerId());
       pst.setTimestamp(FIELD_EDIT_GROUP_CREATED, new Timestamp(group.getCreated().getTime()));
@@ -143,8 +141,9 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
     }
 
     String query = "INSERT INTO group_memberships(group_id, user_id, status, created, updated) VALUES (?, ?, ?, ?, ?);";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
     ) {
       pst.setLong(FIELD_ADD_USER_GROUP_ID, groupId);
       pst.setLong(FIELD_ADD_USER_USER_ID, userId);
@@ -157,29 +156,28 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
       if (affectedRows == 0) {
         throw new SQLException("Adding a user to a group failed, no rows changed");
       }
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
   }
 
   @Override
-  public void setUsersGroupMembershipStatus(final Long userId, final Long groupId,
-                                            final GroupMembershipStatus newStatus) throws SegueDatabaseException {
+  public void setUsersGroupMembershipStatus(
+    final Long userId,
+    final Long groupId,
+    final GroupMembershipStatus newStatus
+  )
+    throws SegueDatabaseException {
     String query = "UPDATE group_memberships SET status=? ,updated=? WHERE user_id = ? AND group_id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_SET_MEMBERSHIP_STATUS_MEMBERSHIP_STATUS, newStatus.name());
       pst.setTimestamp(FIELD_SET_MEMBERSHIP_STATUS_UPDATED, new Timestamp(new Date().getTime()));
       pst.setLong(FIELD_SET_MEMBERSHIP_STATUS_USER_ID, userId);
       pst.setLong(FIELD_SET_MEMBERSHIP_STATUS_GROUP_ID, groupId);
 
-
       if (pst.executeUpdate() == 0) {
         throw new SegueDatabaseException("Unable to update membership status.");
       }
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
@@ -190,7 +188,6 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
     this.setUsersGroupMembershipStatus(userId, groupId, GroupMembershipStatus.DELETED);
   }
 
-
   @Override
   public List<UserGroup> getGroupsByOwner(final Long ownerUserId) throws SegueDatabaseException {
     return this.getGroupsByOwner(ownerUserId, null);
@@ -198,7 +195,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
 
   @Override
   public List<UserGroup> getGroupsByOwner(final Long ownerUserId, @Nullable final Boolean archivedGroupsOnly)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     String pstString = "SELECT * FROM groups WHERE owner_id = ?";
     if (archivedGroupsOnly != null) {
       pstString = pstString + " AND archived = ?";
@@ -207,7 +204,6 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
     pstString = pstString + " AND group_status <> '" + GroupStatus.DELETED.name() + "'";
 
     return getGroupsBySQLPst(pstString, ownerUserId, archivedGroupsOnly);
-
   }
 
   @Override
@@ -216,11 +212,13 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
   }
 
   @Override
-  public List<UserGroup> getGroupsByAdditionalManager(final Long additionalManagerId,
-                                                      @Nullable final Boolean archivedGroupsOnly)
-      throws SegueDatabaseException {
+  public List<UserGroup> getGroupsByAdditionalManager(
+    final Long additionalManagerId,
+    @Nullable final Boolean archivedGroupsOnly
+  )
+    throws SegueDatabaseException {
     String pstString =
-        "SELECT * FROM groups WHERE id IN (SELECT group_id FROM group_additional_managers WHERE user_id = ?)";
+      "SELECT * FROM groups WHERE id IN (SELECT group_id FROM group_additional_managers WHERE user_id = ?)";
 
     if (archivedGroupsOnly != null) {
       pstString = pstString + " AND archived = ?";
@@ -235,9 +233,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
   public Long getGroupCount() throws SegueDatabaseException {
     // We don't want to count 'deleted' groups:
     String query = "SELECT COUNT(1) AS TOTAL FROM groups WHERE group_status <> ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_GET_GROUP_COUNT_GROUP_STATUS, GroupStatus.DELETED.name());
 
       try (ResultSet results = pst.executeQuery()) {
@@ -258,15 +254,17 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
   public UserGroup findGroupById(final Long groupId, final boolean includeDeletedGroups) throws SegueDatabaseException {
     try {
       if (includeDeletedGroups) {
-        try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement("SELECT * FROM groups WHERE id = ?")
+        try (
+          Connection conn = database.getDatabaseConnection();
+          PreparedStatement pst = conn.prepareStatement("SELECT * FROM groups WHERE id = ?")
         ) {
           pst.setLong(FIELD_GET_BY_ID_GROUP_ID, groupId);
           return buildFindGroupByIdResults(pst);
         }
       } else {
-        try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement("SELECT * FROM groups WHERE id = ? AND group_status <> ?")
+        try (
+          Connection conn = database.getDatabaseConnection();
+          PreparedStatement pst = conn.prepareStatement("SELECT * FROM groups WHERE id = ? AND group_status <> ?")
         ) {
           pst.setLong(FIELD_GET_BY_ID_GROUP_ID, groupId);
           pst.setString(FIELD_GET_BY_ID_GROUP_STATUS, GroupStatus.DELETED.name());
@@ -305,8 +303,9 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
 
     try {
       if (markAsDeleted) {
-        try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement("UPDATE groups SET group_status=? WHERE id = ?;")
+        try (
+          Connection conn = database.getDatabaseConnection();
+          PreparedStatement pst = conn.prepareStatement("UPDATE groups SET group_status=? WHERE id = ?;")
         ) {
           pst.setString(FIELD_MARK_GROUP_DELETED_GROUP_STATUS, GroupStatus.DELETED.name());
           pst.setLong(FIELD_MARK_GROUP_DELETED_ID, groupId);
@@ -316,8 +315,9 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
           }
         }
       } else {
-        try (Connection conn = database.getDatabaseConnection();
-             PreparedStatement pst = conn.prepareStatement("DELETE FROM groups WHERE id = ?")
+        try (
+          Connection conn = database.getDatabaseConnection();
+          PreparedStatement pst = conn.prepareStatement("DELETE FROM groups WHERE id = ?")
         ) {
           pst.setLong(FIELD_DELETE_GROUP_GROUP_ID, groupId);
           pst.execute();
@@ -335,11 +335,10 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
 
   @Override
   public Map<Long, GroupMembership> getGroupMembershipMap(final Long groupId) throws SegueDatabaseException {
-    String query = "SELECT * FROM group_memberships INNER JOIN groups ON "
-        + "groups.id = group_memberships.group_id WHERE group_id = ? AND status <> ? AND group_status <> ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    String query =
+      "SELECT * FROM group_memberships INNER JOIN groups ON " +
+      "groups.id = group_memberships.group_id WHERE group_id = ? AND status <> ? AND group_status <> ?";
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_MEMBERSHIP_MAP_GROUP_ID, groupId);
       pst.setString(FIELD_GET_MEMBERSHIP_MAP_MEMBERSHIP_STATUS, GroupMembershipStatus.DELETED.name());
       pst.setString(FIELD_GET_MEMBERSHIP_MAP_GROUP_STATUS, GroupStatus.DELETED.name());
@@ -366,9 +365,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
    */
   private boolean hasMembershipForGroup(final Long userId, final Long groupId) throws SegueDatabaseException {
     String query = "SELECT COUNT(1) AS TOTAL FROM group_memberships WHERE group_id = ? AND user_id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_HAS_MEMBERSHIP_GROUP_ID, groupId);
       pst.setLong(FIELD_HAS_MEMBERSHIP_USER_ID, userId);
 
@@ -379,16 +376,14 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception: Unable to count groups", e);
     }
-
   }
 
   @Override
   public Collection<UserGroup> getGroupMembershipList(final Long userId) throws SegueDatabaseException {
-    String query = "SELECT * FROM groups INNER JOIN group_memberships ON groups.id = group_memberships.group_id"
-        + " WHERE user_id = ? AND status <> ? AND group_status <> ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    String query =
+      "SELECT * FROM groups INNER JOIN group_memberships ON groups.id = group_memberships.group_id" +
+      " WHERE user_id = ? AND status <> ? AND group_status <> ?";
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_MEMBERSHIP_LIST_USER_ID, userId);
       pst.setString(FIELD_GET_MEMBERSHIP_LIST_MEMBERSHIP_STATUS, GroupMembershipStatus.DELETED.name());
       pst.setString(FIELD_GET_MEMBERSHIP_LIST_GROUP_STATUS, GroupStatus.DELETED.name());
@@ -408,9 +403,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
   @Override
   public Set<Long> getAdditionalManagerSetByGroupId(final Long groupId) throws SegueDatabaseException {
     String query = "SELECT * FROM group_additional_managers WHERE group_id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_MANAGER_SET_BY_GROUP_ID_GROUP_ID, groupId);
 
       // on this occasion we do not care if the group is deleted.
@@ -430,8 +423,9 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
   @Override
   public void addUserAdditionalManagerList(final Long userId, final Long groupId) throws SegueDatabaseException {
     String query = "INSERT INTO group_additional_managers(group_id, user_id, created) VALUES (?, ?, ?);";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
     ) {
       pst.setLong(FIELD_ADD_ADDITIONAL_MANAGER_GROUP_ID, groupId);
       pst.setLong(FIELD_ADD_ADDITIONAL_MANAGER_USER_ID, userId);
@@ -442,7 +436,6 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
       if (affectedRows == 0) {
         throw new SQLException("Adding a user to the additional manager list failed, no rows changed");
       }
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
@@ -451,9 +444,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
   @Override
   public void removeUserFromAdditionalManagerList(final Long userId, final Long groupId) throws SegueDatabaseException {
     String query = "DELETE FROM group_additional_managers WHERE group_id = ? AND user_id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_REMOVE_ADDITIONAL_MANAGER_GROUP_ID, groupId);
       pst.setLong(FIELD_REMOVE_ADDITIONAL_MANAGER_USER_ID, userId);
 
@@ -471,22 +462,35 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
    * @throws SQLException - if we cannot extract a required property from the results set.
    */
   private UserGroup buildGroup(final ResultSet set) throws SQLException {
-    return new UserGroup(set.getLong("id"), set.getString("group_name"), set.getLong("owner_id"),
-        GroupStatus.valueOf(set.getString("group_status")), set.getDate("created"),
-        set.getBoolean("archived"), set.getBoolean("additional_manager_privileges"),
-        set.getDate("last_updated"));
+    return new UserGroup(
+      set.getLong("id"),
+      set.getString("group_name"),
+      set.getLong("owner_id"),
+      GroupStatus.valueOf(set.getString("group_status")),
+      set.getDate("created"),
+      set.getBoolean("archived"),
+      set.getBoolean("additional_manager_privileges"),
+      set.getDate("last_updated")
+    );
   }
 
   private GroupMembership buildMembershipRecord(final ResultSet set) throws SQLException {
-    return new GroupMembership(set.getLong("group_id"), set.getLong("user_id"),
-        GroupMembershipStatus.valueOf(set.getString("status")), set.getDate("created"), set.getDate("updated"));
+    return new GroupMembership(
+      set.getLong("group_id"),
+      set.getLong("user_id"),
+      GroupMembershipStatus.valueOf(set.getString("status")),
+      set.getDate("created"),
+      set.getDate("updated")
+    );
   }
 
-  private List<UserGroup> getGroupsBySQLPst(final String pstString, final Long userId,
-                                            @Nullable final Boolean archivedGroupsOnly) throws SegueDatabaseException {
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(pstString)
-    ) {
+  private List<UserGroup> getGroupsBySQLPst(
+    final String pstString,
+    final Long userId,
+    @Nullable final Boolean archivedGroupsOnly
+  )
+    throws SegueDatabaseException {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(pstString)) {
       pst.setLong(FIELD_GET_GROUPS_BY_PST_USER_ID, userId);
 
       if (archivedGroupsOnly != null) {

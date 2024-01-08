@@ -68,8 +68,12 @@ public class NotificationFacade extends AbstractSegueFacade {
    * @param notificationPicker - so we can identify which notifications are relevant.
    */
   @Inject
-  public NotificationFacade(final PropertiesLoader properties, final ILogManager logManager,
-                            final UserAccountManager userManager, final NotificationPicker notificationPicker) {
+  public NotificationFacade(
+    final PropertiesLoader properties,
+    final ILogManager logManager,
+    final UserAccountManager userManager,
+    final NotificationPicker notificationPicker
+  ) {
     super(properties, logManager);
     this.userManager = userManager;
     this.notificationPicker = notificationPicker;
@@ -83,24 +87,26 @@ public class NotificationFacade extends AbstractSegueFacade {
   @Path("/")
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
-  @Operation(summary = "List any notifications for the current user.",
-      description = "This is the old notification delivery method. Newer notifications may be WebSocket based.")
+  @Operation(
+    summary = "List any notifications for the current user.",
+    description = "This is the old notification delivery method. Newer notifications may be WebSocket based."
+  )
   public Response getMyNotifications(@Context final HttpServletRequest request) {
     try {
       List<ContentDTO> listOfNotifications;
       try {
-        listOfNotifications = notificationPicker.getAvailableNotificationsForUser(this.userManager
-            .getCurrentRegisteredUser(request));
-
+        listOfNotifications =
+          notificationPicker.getAvailableNotificationsForUser(this.userManager.getCurrentRegisteredUser(request));
       } catch (ContentManagerException e) {
-        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Problem locating the content", e)
-            .toResponse();
+        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Problem locating the content", e).toResponse();
       } catch (SegueDatabaseException e) {
         log.error("Database Error", e);
         return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Internal Database Error", e).toResponse();
       }
-      return Response.ok(listOfNotifications)
-          .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+      return Response
+        .ok(listOfNotifications)
+        .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     }
@@ -118,11 +124,15 @@ public class NotificationFacade extends AbstractSegueFacade {
   @Path("/{notification_id}/{response_from_user}")
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
-  @Operation(summary = "Record user response to a notification.",
-      description = "The response should be one of: ACKNOWLEDGED, POSTPONED, DISABLED.")
-  public Response updateNotificationStatus(@Context final HttpServletRequest request,
-                                           @PathParam("notification_id") final String notificationId,
-                                           @PathParam("response_from_user") final String responseFromUser) {
+  @Operation(
+    summary = "Record user response to a notification.",
+    description = "The response should be one of: ACKNOWLEDGED, POSTPONED, DISABLED."
+  )
+  public Response updateNotificationStatus(
+    @Context final HttpServletRequest request,
+    @PathParam("notification_id") final String notificationId,
+    @PathParam("response_from_user") final String responseFromUser
+  ) {
     RegisteredUserDTO user;
 
     try {
@@ -140,8 +150,11 @@ public class NotificationFacade extends AbstractSegueFacade {
       log.error("Content Error", e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Content Manager Error", e).toResponse();
     } catch (IllegalArgumentException e) {
-      return new SegueErrorResponse(Status.BAD_REQUEST,
-          "Illegal response: Must be either: DISMISSED, POSTPONED or DISABLED").toResponse();
+      return new SegueErrorResponse(
+        Status.BAD_REQUEST,
+        "Illegal response: Must be either: DISMISSED, POSTPONED or DISABLED"
+      )
+      .toResponse();
     }
 
     return Response.noContent().build();

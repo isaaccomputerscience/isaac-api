@@ -22,6 +22,4 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
  * IsaacConcept Page DTO.
  *
  */
-public class IsaacConceptPageDTO extends SeguePageDTO {
-
-}
+public class IsaacConceptPageDTO extends SeguePageDTO {}

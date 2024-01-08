@@ -72,35 +72,52 @@ public class IsaacEventPage extends Content {
   private Boolean privateEvent;
 
   @JsonCreator
-  public IsaacEventPage(@JsonProperty("id") final String id,
-                        @JsonProperty("title") final String title,
-                        @JsonProperty("subtitle") final String subtitle,
-                        @JsonProperty("type") final String type,
-                        @JsonProperty("author") final String author,
-                        @JsonProperty("encoding") final String encoding,
-                        @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
-                        @JsonProperty("layout") final String layout,
-                        @JsonProperty("children") final List<ContentBase> children,
-                        @JsonProperty("relatedContent") final List<String> relatedContent,
-                        @JsonProperty("version") final boolean published,
-                        @JsonProperty("deprecated") final Boolean deprecated,
-                        @JsonProperty("tags") final Set<String> tags,
-                        @JsonProperty("date") final Date date,
-                        @JsonProperty("end_date") final Date endDate,
-                        @JsonProperty("bookingDeadline") final Date bookingDeadline,
-                        @JsonProperty("prepWorkDeadline") final Date prepWorkDeadline,
-                        @JsonProperty("location") final Location location,
-                        @JsonProperty("preResources") final List<ExternalReference> preResources,
-                        @JsonProperty("postResources") final List<ExternalReference> postResources,
-                        @JsonProperty("eventThumbnail") final Image eventThumbnail,
-                        @JsonProperty("numberOfPlaces") final Integer numberOfPlaces,
-                        @JsonProperty("EventStatus") final EventStatus eventStatus,
-                        @JsonProperty("groupReservationLimit") final Integer groupReservationLimit,
-                        @JsonProperty("allowGroupReservations") final Boolean allowGroupReservations,
-                        @JsonProperty("privateEvent") final Boolean privateEvent) {
-    super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, null,
-        null, relatedContent, published, deprecated, tags, null);
-
+  public IsaacEventPage(
+    @JsonProperty("id") final String id,
+    @JsonProperty("title") final String title,
+    @JsonProperty("subtitle") final String subtitle,
+    @JsonProperty("type") final String type,
+    @JsonProperty("author") final String author,
+    @JsonProperty("encoding") final String encoding,
+    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+    @JsonProperty("layout") final String layout,
+    @JsonProperty("children") final List<ContentBase> children,
+    @JsonProperty("relatedContent") final List<String> relatedContent,
+    @JsonProperty("version") final boolean published,
+    @JsonProperty("deprecated") final Boolean deprecated,
+    @JsonProperty("tags") final Set<String> tags,
+    @JsonProperty("date") final Date date,
+    @JsonProperty("end_date") final Date endDate,
+    @JsonProperty("bookingDeadline") final Date bookingDeadline,
+    @JsonProperty("prepWorkDeadline") final Date prepWorkDeadline,
+    @JsonProperty("location") final Location location,
+    @JsonProperty("preResources") final List<ExternalReference> preResources,
+    @JsonProperty("postResources") final List<ExternalReference> postResources,
+    @JsonProperty("eventThumbnail") final Image eventThumbnail,
+    @JsonProperty("numberOfPlaces") final Integer numberOfPlaces,
+    @JsonProperty("EventStatus") final EventStatus eventStatus,
+    @JsonProperty("groupReservationLimit") final Integer groupReservationLimit,
+    @JsonProperty("allowGroupReservations") final Boolean allowGroupReservations,
+    @JsonProperty("privateEvent") final Boolean privateEvent
+  ) {
+    super(
+      id,
+      title,
+      subtitle,
+      type,
+      author,
+      encoding,
+      canonicalSourceFile,
+      layout,
+      children,
+      null,
+      null,
+      relatedContent,
+      published,
+      deprecated,
+      tags,
+      null
+    );
     this.date = date;
     this.endDate = endDate;
     this.bookingDeadline = bookingDeadline;
@@ -112,7 +129,7 @@ public class IsaacEventPage extends Content {
     this.numberOfPlaces = numberOfPlaces;
     this.eventStatus = eventStatus;
     this.groupReservationLimit =
-        groupReservationLimit != null ? groupReservationLimit : EVENT_GROUP_RESERVATION_DEFAULT_LIMIT;
+      groupReservationLimit != null ? groupReservationLimit : EVENT_GROUP_RESERVATION_DEFAULT_LIMIT;
     this.allowGroupReservations = allowGroupReservations != null ? allowGroupReservations : false;
     this.privateEvent = privateEvent;
   }
@@ -120,9 +137,7 @@ public class IsaacEventPage extends Content {
   /**
    * Default constructor required for Jackson.
    */
-  public IsaacEventPage() {
-
-  }
+  public IsaacEventPage() {}
 
   /**
    * Gets the date.
@@ -406,7 +421,6 @@ public class IsaacEventPage extends Content {
   public void setEmailEventDetails(final String emailEventDetails) {
     this.emailEventDetails = emailEventDetails;
   }
-
 
   /**
    * Get text about the event for the confirmed emails.

@@ -24,7 +24,6 @@ import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
  * Data Object to represent a user has linked their local account to an external authenticators account.
  */
 public class LinkedAccount {
-
   private String id;
   private String localUserId;
   private AuthenticationProvider provider;
@@ -33,9 +32,7 @@ public class LinkedAccount {
   /**
    * Default constructor for linkedAccount.
    */
-  public LinkedAccount() {
-
-  }
+  public LinkedAccount() {}
 
   /**
    * Linked Account Constructor.
@@ -46,9 +43,12 @@ public class LinkedAccount {
    * @param providerUserId - provider's user Id.
    */
   @JsonCreator
-  public LinkedAccount(@JsonProperty("id") final String id, @JsonProperty("localUserId") final String localUserId,
-                       @JsonProperty("provider") final AuthenticationProvider provider,
-                       @JsonProperty("providerId") final String providerUserId) {
+  public LinkedAccount(
+    @JsonProperty("id") final String id,
+    @JsonProperty("localUserId") final String localUserId,
+    @JsonProperty("provider") final AuthenticationProvider provider,
+    @JsonProperty("providerId") final String providerUserId
+  ) {
     this.id = id;
     this.localUserId = localUserId;
     this.provider = provider;
@@ -126,5 +126,4 @@ public class LinkedAccount {
   public final void setProviderUserId(final String providerUserId) {
     this.providerUserId = providerUserId;
   }
-
 }

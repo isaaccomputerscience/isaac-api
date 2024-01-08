@@ -38,30 +38,46 @@ public class IsaacFeaturedProfileDTO extends ContentDTO {
 
   @JsonCreator
   public IsaacFeaturedProfileDTO(
-      @JsonProperty("id") final String id,
-      @JsonProperty("title") final String title,
-      @JsonProperty("subtitle") final String subtitle,
-      @JsonProperty("type") final String type,
-      @JsonProperty("author") final String author,
-      @JsonProperty("encoding") final String encoding,
-      @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
-      @JsonProperty("layout") final String layout,
-      @JsonProperty("children") final List<ContentBaseDTO> children,
-      @JsonProperty("value") final String value,
-      @JsonProperty("attribution") final String attribution,
-      @JsonProperty("relatedContent") final List<ContentSummaryDTO> relatedContent,
-      @JsonProperty("version") final boolean published,
-      @JsonProperty("tags") final Set<String> tags,
-      @JsonProperty("deprecated") final Boolean deprecated,
-      @JsonProperty("level") final Integer level,
-      @JsonProperty("src") final String src,
-      @JsonProperty("altText") final String altText,
-      @JsonProperty("emailAddress") final String emailAddress,
-      @JsonProperty("image") final ImageDTO image,
-      @JsonProperty("homepage") final String homepage) {
-    super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, value,
-        attribution, relatedContent, published, deprecated, tags, level);
-
+    @JsonProperty("id") final String id,
+    @JsonProperty("title") final String title,
+    @JsonProperty("subtitle") final String subtitle,
+    @JsonProperty("type") final String type,
+    @JsonProperty("author") final String author,
+    @JsonProperty("encoding") final String encoding,
+    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+    @JsonProperty("layout") final String layout,
+    @JsonProperty("children") final List<ContentBaseDTO> children,
+    @JsonProperty("value") final String value,
+    @JsonProperty("attribution") final String attribution,
+    @JsonProperty("relatedContent") final List<ContentSummaryDTO> relatedContent,
+    @JsonProperty("version") final boolean published,
+    @JsonProperty("tags") final Set<String> tags,
+    @JsonProperty("deprecated") final Boolean deprecated,
+    @JsonProperty("level") final Integer level,
+    @JsonProperty("src") final String src,
+    @JsonProperty("altText") final String altText,
+    @JsonProperty("emailAddress") final String emailAddress,
+    @JsonProperty("image") final ImageDTO image,
+    @JsonProperty("homepage") final String homepage
+  ) {
+    super(
+      id,
+      title,
+      subtitle,
+      type,
+      author,
+      encoding,
+      canonicalSourceFile,
+      layout,
+      children,
+      value,
+      attribution,
+      relatedContent,
+      published,
+      deprecated,
+      tags,
+      level
+    );
     this.emailAddress = emailAddress;
     this.image = image;
   }
@@ -69,9 +85,7 @@ public class IsaacFeaturedProfileDTO extends ContentDTO {
   /**
    * Default constructor required for Jackson.
    */
-  public IsaacFeaturedProfileDTO() {
-
-  }
+  public IsaacFeaturedProfileDTO() {}
 
   /**
    * Gets the emailAddress.

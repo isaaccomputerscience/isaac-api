@@ -24,14 +24,12 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ItemDTO;
 @DTOMapping(ItemDTO.class)
 @JsonContentType("item")
 public class Item extends Content {
-
   private String altText;
 
   /**
    * Default constructor required for mapping.
    */
-  public Item() {
-  }
+  public Item() {}
 
   /**
    * Constructor to make testing easier.

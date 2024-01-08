@@ -16,7 +16,6 @@
 
 package uk.ac.cam.cl.dtg.segue.configuration.exceptionmappers;
 
-
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
@@ -41,8 +40,12 @@ public class JacksonInvalidFormatExceptionMapper implements ExceptionMapper<Inva
 
   @Override
   public Response toResponse(final InvalidFormatException e) {
-    String message = String.format("%s on %s request to %s", e.getClass().getSimpleName(), request.getMethod(),
-        request.getRequestURI());
+    String message = String.format(
+      "%s on %s request to %s",
+      e.getClass().getSimpleName(),
+      request.getMethod(),
+      request.getRequestURI()
+    );
     log.error(message);
     return SegueErrorResponse.getBadRequestResponse("Invalid Format");
   }

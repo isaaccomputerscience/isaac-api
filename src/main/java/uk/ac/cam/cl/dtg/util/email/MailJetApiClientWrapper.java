@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MailJetApiClientWrapper {
-
   private static final Logger log = LoggerFactory.getLogger(MailJetApiClientWrapper.class);
   private final MailjetClient mailjetClient;
   private final String newsListId;
@@ -53,13 +52,14 @@ public class MailJetApiClientWrapper {
    * @param mailjetLegalListId  - MailJet list ID for legal notices (all users)
    */
   @Inject
-  public MailJetApiClientWrapper(final String mailjetApiKey, final String mailjetApiSecret,
-                                 final String mailjetNewsListId, final String mailjetEventsListId,
-                                 final String mailjetLegalListId) {
-    ClientOptions options = ClientOptions.builder()
-        .apiKey(mailjetApiKey)
-        .apiSecretKey(mailjetApiSecret)
-        .build();
+  public MailJetApiClientWrapper(
+    final String mailjetApiKey,
+    final String mailjetApiSecret,
+    final String mailjetNewsListId,
+    final String mailjetEventsListId,
+    final String mailjetLegalListId
+  ) {
+    ClientOptions options = ClientOptions.builder().apiKey(mailjetApiKey).apiSecretKey(mailjetApiSecret).build();
 
     this.mailjetClient = new MailjetClient(options);
     this.newsListId = mailjetNewsListId;
@@ -142,15 +142,22 @@ public class MailJetApiClientWrapper {
    * @param emailVerificationStatus - verification status of user for contact details
    * @throws MailjetException - if underlying MailjetClient throws an exception
    */
-  public void updateUserProperties(final String mailjetId, final String firstName, final String role,
-                                   final String emailVerificationStatus) throws MailjetException {
+  public void updateUserProperties(
+    final String mailjetId,
+    final String firstName,
+    final String role,
+    final String emailVerificationStatus
+  )
+    throws MailjetException {
     Validate.notNull(mailjetId);
     MailjetRequest request = new MailjetRequest(Contactdata.resource, mailjetId)
-        .property(Contactdata.DATA, new JSONArray()
-            .put(new JSONObject().put("Name", "firstname").put("value", firstName))
-            .put(new JSONObject().put("Name", "role").put("value", role))
-            .put(new JSONObject().put("Name", "verification_status").put("value", emailVerificationStatus))
-        );
+    .property(
+        Contactdata.DATA,
+        new JSONArray()
+          .put(new JSONObject().put("Name", "firstname").put("value", firstName))
+          .put(new JSONObject().put("Name", "role").put("value", role))
+          .put(new JSONObject().put("Name", "verification_status").put("value", emailVerificationStatus))
+      );
     MailjetResponse response = mailjetClient.put(request);
     if (response.getTotal() != 1) {
       throw new MailjetException("Failed to update user!" + response.getTotal());
@@ -165,25 +172,36 @@ public class MailJetApiClientWrapper {
    * @param eventsEmails - subscription action to take for events emails
    * @throws MailjetException - if underlying MailjetClient throws an exception
    */
-  public void updateUserSubscriptions(final String mailjetId, final MailJetSubscriptionAction newsEmails,
-                                      final MailJetSubscriptionAction eventsEmails) throws MailjetException {
+  public void updateUserSubscriptions(
+    final String mailjetId,
+    final MailJetSubscriptionAction newsEmails,
+    final MailJetSubscriptionAction eventsEmails
+  )
+    throws MailjetException {
     Validate.notNull(mailjetId);
     MailjetRequest request = new MailjetRequest(ContactManagecontactslists.resource, mailjetId)
-        .property(ContactManagecontactslists.CONTACTSLISTS, new JSONArray()
-            .put(new JSONObject()
-                .put(ContactslistImportList.LISTID, legalListId)
-                .put(ContactslistImportList.ACTION, MailJetSubscriptionAction.FORCE_SUBSCRIBE.getValue()))
-            .put(new JSONObject()
-                .put(ContactslistImportList.LISTID, newsListId)
-                .put(ContactslistImportList.ACTION, newsEmails.getValue()))
-            .put(new JSONObject()
-                .put(ContactslistImportList.LISTID, eventsListId)
-                .put(ContactslistImportList.ACTION, eventsEmails.getValue()))
-        );
+    .property(
+        ContactManagecontactslists.CONTACTSLISTS,
+        new JSONArray()
+          .put(
+            new JSONObject()
+              .put(ContactslistImportList.LISTID, legalListId)
+              .put(ContactslistImportList.ACTION, MailJetSubscriptionAction.FORCE_SUBSCRIBE.getValue())
+          )
+          .put(
+            new JSONObject()
+              .put(ContactslistImportList.LISTID, newsListId)
+              .put(ContactslistImportList.ACTION, newsEmails.getValue())
+          )
+          .put(
+            new JSONObject()
+              .put(ContactslistImportList.LISTID, eventsListId)
+              .put(ContactslistImportList.ACTION, eventsEmails.getValue())
+          )
+      );
     MailjetResponse response = mailjetClient.post(request);
     if (response.getTotal() != 1) {
       throw new MailjetException("Failed to update user subscriptions!" + response.getTotal());
     }
   }
-
 }

@@ -36,20 +36,17 @@ public class PgUserStreakManager implements IUserStreaksManager {
     this.database = database;
   }
 
-
   @Override
   public Map<String, Object> getCurrentStreakRecord(final RegisteredUserDTO user) {
-
     Map<String, Object> streakRecord = Maps.newHashMap();
     streakRecord.put("currentActivity", 0);
     streakRecord.put("currentStreak", 0);
 
-    String query = "SELECT * FROM user_streaks_current_progress(?) LEFT JOIN user_streaks(?)"
-        + " ON user_streaks_current_progress.currentdate - user_streaks.enddate <= 1"
-        + " AND user_streaks.startdate <= user_streaks_current_progress.currentdate";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    String query =
+      "SELECT * FROM user_streaks_current_progress(?) LEFT JOIN user_streaks(?)" +
+      " ON user_streaks_current_progress.currentdate - user_streaks.enddate <= 1" +
+      " AND user_streaks.startdate <= user_streaks_current_progress.currentdate";
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(1, user.getId());
       pst.setLong(2, user.getId());
 
@@ -67,11 +64,8 @@ public class PgUserStreakManager implements IUserStreaksManager {
 
   @Override
   public int getLongestStreak(final RegisteredUserDTO user) {
-
     String query = "SELECT * FROM user_streaks(?) ORDER BY streaklength DESC LIMIT 1";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(1, user.getId());
 
       try (ResultSet results = pst.executeQuery()) {
@@ -88,17 +82,15 @@ public class PgUserStreakManager implements IUserStreaksManager {
 
   @Override
   public Map<String, Object> getCurrentWeeklyStreakRecord(final RegisteredUserDTO user) {
-
     Map<String, Object> streakRecord = Maps.newHashMap();
     streakRecord.put("currentActivity", 0);
     streakRecord.put("currentStreak", 0);
 
-    String query = "SELECT * FROM user_streaks_weekly_current_progress(?) LEFT JOIN user_streaks_weekly(?)"
-        + " ON user_streaks_weekly_current_progress.currentweek - user_streaks_weekly.enddate <= 7"
-        + " AND user_streaks_weekly.startdate <= user_streaks_weekly_current_progress.currentweek";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    String query =
+      "SELECT * FROM user_streaks_weekly_current_progress(?) LEFT JOIN user_streaks_weekly(?)" +
+      " ON user_streaks_weekly_current_progress.currentweek - user_streaks_weekly.enddate <= 7" +
+      " AND user_streaks_weekly.startdate <= user_streaks_weekly_current_progress.currentweek";
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(1, user.getId());
       pst.setLong(2, user.getId());
 
@@ -116,11 +108,8 @@ public class PgUserStreakManager implements IUserStreaksManager {
 
   @Override
   public int getLongestWeeklyStreak(final RegisteredUserDTO user) {
-
     String query = "SELECT * FROM user_streaks_weekly(?) ORDER BY streaklength DESC LIMIT 1";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(1, user.getId());
 
       try (ResultSet results = pst.executeQuery()) {
@@ -138,16 +127,29 @@ public class PgUserStreakManager implements IUserStreaksManager {
   public void notifyUserOfStreakChange(final RegisteredUserDTO user) {
     long userId = user.getId();
     try {
-      IUserAlert alert = new PgUserAlert(null, userId,
-          objectMapper.writeValueAsString(ImmutableMap.of("dailyStreakRecord", this.getCurrentStreakRecord(user),
-              "weeklyStreakRecord", this.getCurrentWeeklyStreakRecord(user))),
-          "progress", new Timestamp(System.currentTimeMillis()), null, null, null);
+      IUserAlert alert = new PgUserAlert(
+        null,
+        userId,
+        objectMapper.writeValueAsString(
+          ImmutableMap.of(
+            "dailyStreakRecord",
+            this.getCurrentStreakRecord(user),
+            "weeklyStreakRecord",
+            this.getCurrentWeeklyStreakRecord(user)
+          )
+        ),
+        "progress",
+        new Timestamp(System.currentTimeMillis()),
+        null,
+        null,
+        null
+      );
 
       UserAlertsWebSocket.notifyUserOfAlert(userId, alert);
     } catch (JsonProcessingException e) {
-      log.error(String.format("Unable to serialize user streak change JSON for user %s: %s",
-          user.getId(), e.getMessage()));
+      log.error(
+        String.format("Unable to serialize user streak change JSON for user %s: %s", user.getId(), e.getMessage())
+      );
     }
   }
-
 }

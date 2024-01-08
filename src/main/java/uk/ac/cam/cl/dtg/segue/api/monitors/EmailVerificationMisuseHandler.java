@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class EmailVerificationMisuseHandler implements IMisuseHandler {
-
   private static final Logger log = LoggerFactory.getLogger(EmailVerificationMisuseHandler.class);
 
   private static final Integer SOFT_THRESHOLD = 5;
@@ -44,10 +43,7 @@ public class EmailVerificationMisuseHandler implements IMisuseHandler {
    *
    */
   @Inject
-  public EmailVerificationMisuseHandler() {
-
-  }
-
+  public EmailVerificationMisuseHandler() {}
 
   @Override
   public Integer getSoftThreshold() {

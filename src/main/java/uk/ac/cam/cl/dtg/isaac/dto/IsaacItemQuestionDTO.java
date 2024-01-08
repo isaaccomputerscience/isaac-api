@@ -26,7 +26,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ItemDTO;
  */
 @JsonContentType("isaacItemQuestion")
 public class IsaacItemQuestionDTO extends IsaacQuestionBaseDTO {
-
   private List<ItemDTO> items;
   private Boolean randomiseItems;
 

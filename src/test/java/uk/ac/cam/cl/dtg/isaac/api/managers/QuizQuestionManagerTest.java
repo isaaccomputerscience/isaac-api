@@ -57,7 +57,6 @@ import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 
 public class QuizQuestionManagerTest extends AbstractManagerTest {
-
   private QuizQuestionManager quizQuestionManager;
 
   private QuestionManager questionManager;
@@ -85,17 +84,25 @@ public class QuizQuestionManagerTest extends AbstractManagerTest {
     quizAttemptManager = createMock(QuizAttemptManager.class);
 
     quizQuestionManager =
-        new QuizQuestionManager(questionManager, contentMapper, quizQuestionAttemptPersistenceManager, quizManager,
-            quizAttemptManager);
+      new QuizQuestionManager(
+        questionManager,
+        contentMapper,
+        quizQuestionAttemptPersistenceManager,
+        quizManager,
+        quizAttemptManager
+      );
 
     expect(contentMapper.getAutoMapper()).andStubReturn(mapperFacade);
     expect(mapperFacade.map(correctAnswer, ChoiceDTO.class)).andStubReturn(correctAnswerDTO);
     expect(mapperFacade.map(wrongAnswer, ChoiceDTO.class)).andStubReturn(wrongAnswerDTO);
 
-    registerDefaultsFor(questionManager, m -> {
-      expect(m.convertQuestionValidationResponseToDTO(wrongResponse)).andStubReturn(wrongResponseDTO);
-      expect(m.convertQuestionValidationResponseToDTO(correctResponse)).andStubReturn(correctResponseDTO);
-    });
+    registerDefaultsFor(
+      questionManager,
+      m -> {
+        expect(m.convertQuestionValidationResponseToDTO(wrongResponse)).andStubReturn(wrongResponseDTO);
+        expect(m.convertQuestionValidationResponseToDTO(correctResponse)).andStubReturn(correctResponseDTO);
+      }
+    );
 
     replay(quizQuestionAttemptPersistenceManager, questionManager, contentMapper, mapperFacade, quizAttemptManager);
   }
@@ -111,32 +118,38 @@ public class QuizQuestionManagerTest extends AbstractManagerTest {
     Content wrongExplanation = new Content();
     ContentDTO wrongExplanationDTO = new ContentDTO();
     correctResponse =
-        new QuestionValidationResponse(question.getId(), correctAnswer, true, correctExplanation, somePastDate);
+      new QuestionValidationResponse(question.getId(), correctAnswer, true, correctExplanation, somePastDate);
     wrongResponse =
-        new QuestionValidationResponse(question.getId(), wrongAnswer, false, wrongExplanation, somePastDate);
+      new QuestionValidationResponse(question.getId(), wrongAnswer, false, wrongExplanation, somePastDate);
 
     correctResponseDTO =
-        new QuestionValidationResponseDTO(question.getId(), correctAnswerDTO, true, correctExplanationDTO,
-            somePastDate);
+      new QuestionValidationResponseDTO(question.getId(), correctAnswerDTO, true, correctExplanationDTO, somePastDate);
     wrongResponseDTO =
-        new QuestionValidationResponseDTO(question.getId(), wrongAnswerDTO, false, wrongExplanationDTO, somePastDate);
+      new QuestionValidationResponseDTO(question.getId(), wrongAnswerDTO, false, wrongExplanationDTO, somePastDate);
 
     quantityResponse =
-        new QuantityValidationResponse(question.getId(), correctAnswer, true, correctExplanation, true, true,
-            somePastDate);
+      new QuantityValidationResponse(
+        question.getId(),
+        correctAnswer,
+        true,
+        correctExplanation,
+        true,
+        true,
+        somePastDate
+      );
 
     questions = ImmutableList.of(question, question2, question3);
-    answerMap = ImmutableMap.of(
-        question, correctResponse,
-        question2, wrongResponse); // question3 is unanswered.
+    answerMap = ImmutableMap.of(question, correctResponse, question2, wrongResponse); // question3 is unanswered.
   }
 
   @Test
   public void augmentQuestionObjectWithAttemptInformationCanRemoveCorrectAndExplanation()
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     for (boolean includeCorrect : Arrays.asList(true, false)) {
       quizQuestionManager.augmentQuestionObjectWithAttemptInformation(
-          Collections.singletonMap(question, wrongResponse), includeCorrect);
+        Collections.singletonMap(question, wrongResponse),
+        includeCorrect
+      );
 
       assertEquals(includeCorrect, question.getBestAttempt().isCorrect() != null);
       assertEquals(includeCorrect, question.getBestAttempt().getExplanation() != null);
@@ -146,22 +159,30 @@ public class QuizQuestionManagerTest extends AbstractManagerTest {
   @Test
   public void getAnswerMapUsesLatestAttempt() throws SegueDatabaseException {
     Map<List<QuestionValidationResponse>, Optional<QuestionValidationResponse>> optionsToTest = ImmutableMap.of(
-        Collections.emptyList(), Optional.empty(),
-        singletonList(correctResponse), Optional.of(correctResponse),
-        singletonList(wrongResponse), Optional.of(wrongResponse),
-        Arrays.asList(correctResponse, wrongResponse), Optional.of(wrongResponse),
-        Arrays.asList(wrongResponse, correctResponse), Optional.of(correctResponse)
+      Collections.emptyList(),
+      Optional.empty(),
+      singletonList(correctResponse),
+      Optional.of(correctResponse),
+      singletonList(wrongResponse),
+      Optional.of(wrongResponse),
+      Arrays.asList(correctResponse, wrongResponse),
+      Optional.of(wrongResponse),
+      Arrays.asList(wrongResponse, correctResponse),
+      Optional.of(correctResponse)
     );
 
     for (final Map.Entry<List<QuestionValidationResponse>, Optional<QuestionValidationResponse>> option : optionsToTest.entrySet()) {
-      withMock(quizQuestionAttemptPersistenceManager, m -> {
-        expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
-            .andReturn(Collections.singletonMap(
-                question.getId(),
-                option.getKey()));
-      });
-      Map<QuestionDTO, QuestionValidationResponse> answerMap =
-          quizQuestionManager.getAnswerMap(studentAttempt, singletonList(question));
+      withMock(
+        quizQuestionAttemptPersistenceManager,
+        m -> {
+          expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
+            .andReturn(Collections.singletonMap(question.getId(), option.getKey()));
+        }
+      );
+      Map<QuestionDTO, QuestionValidationResponse> answerMap = quizQuestionManager.getAnswerMap(
+        studentAttempt,
+        singletonList(question)
+      );
 
       QuestionValidationResponse answer = answerMap.get(question);
 
@@ -172,7 +193,9 @@ public class QuizQuestionManagerTest extends AbstractManagerTest {
   @Test
   public void quantityValidationResponseIsStrippedCorrectly() throws SegueDatabaseException {
     quizQuestionManager.augmentQuestionObjectWithAttemptInformation(
-        Collections.singletonMap(question, quantityResponse), false);
+      Collections.singletonMap(question, quantityResponse),
+      false
+    );
 
     // Don't return a QuantityValidationResponseDTO
     assertEquals(QuestionValidationResponseDTO.class, question.getBestAttempt().getClass());
@@ -180,32 +203,44 @@ public class QuizQuestionManagerTest extends AbstractManagerTest {
 
   @Test
   public void augmentQuestionsForUserShufflesQuestionChoices() throws SegueDatabaseException {
-    withMock(quizQuestionAttemptPersistenceManager, m -> {
-      expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
-          .andReturn(Collections.singletonMap(
-              question.getId(),
-              singletonList(correctResponse)));
-    });
+    withMock(
+      quizQuestionAttemptPersistenceManager,
+      m -> {
+        expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
+          .andReturn(Collections.singletonMap(question.getId(), singletonList(correctResponse)));
+      }
+    );
 
-    withMock(questionManager, m -> {
-      m.shuffleChoiceQuestionsChoices(student.getId().toString(), questions);
-    });
+    withMock(
+      questionManager,
+      m -> {
+        m.shuffleChoiceQuestionsChoices(student.getId().toString(), questions);
+      }
+    );
 
     quizQuestionManager.augmentQuestionsForUser(studentQuiz, studentAttempt, true);
   }
 
   @Test
   public void augmentFeedbackFor() throws SegueDatabaseException, ContentManagerException {
-    withMock(quizQuestionAttemptPersistenceManager, m -> {
-      expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
-          .andReturn(answerMap.entrySet().stream().collect(Collectors.toMap(
-              a -> a.getKey().getId(),
-              a -> singletonList(a.getValue())
-          )));
-    });
+    withMock(
+      quizQuestionAttemptPersistenceManager,
+      m -> {
+        expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
+          .andReturn(
+            answerMap
+              .entrySet()
+              .stream()
+              .collect(Collectors.toMap(a -> a.getKey().getId(), a -> singletonList(a.getValue())))
+          );
+      }
+    );
 
-    QuizAttemptDTO resultAttempt =
-        quizQuestionManager.augmentFeedbackFor(studentAttempt, studentQuiz, QuizFeedbackMode.DETAILED_FEEDBACK);
+    QuizAttemptDTO resultAttempt = quizQuestionManager.augmentFeedbackFor(
+      studentAttempt,
+      studentQuiz,
+      QuizFeedbackMode.DETAILED_FEEDBACK
+    );
 
     assertNotNull(resultAttempt.getQuiz());
     assertNotNull(resultAttempt.getQuiz().getIndividualFeedback());
@@ -220,9 +255,12 @@ public class QuizQuestionManagerTest extends AbstractManagerTest {
 
   @Test
   public void augmentFeedbackForWithNoneFeedbackModeDoesNoWork()
-      throws SegueDatabaseException, ContentManagerException {
-    QuizAttemptDTO resultAttempt =
-        quizQuestionManager.augmentFeedbackFor(studentAttempt, studentQuiz, QuizFeedbackMode.NONE);
+    throws SegueDatabaseException, ContentManagerException {
+    QuizAttemptDTO resultAttempt = quizQuestionManager.augmentFeedbackFor(
+      studentAttempt,
+      studentQuiz,
+      QuizFeedbackMode.NONE
+    );
 
     assertNull(resultAttempt.getQuiz());
     assertNull(question.getBestAttempt());
@@ -231,15 +269,19 @@ public class QuizQuestionManagerTest extends AbstractManagerTest {
   @Test
   public void getIndividualQuizFeedback() throws ContentManagerException {
     List<QuizFeedbackMode> modes = ImmutableList.of(
-        QuizFeedbackMode.NONE,
-        QuizFeedbackMode.OVERALL_MARK,
-        QuizFeedbackMode.SECTION_MARKS,
-        QuizFeedbackMode.DETAILED_FEEDBACK
+      QuizFeedbackMode.NONE,
+      QuizFeedbackMode.OVERALL_MARK,
+      QuizFeedbackMode.SECTION_MARKS,
+      QuizFeedbackMode.DETAILED_FEEDBACK
     );
 
     for (QuizFeedbackMode feedbackMode : modes) {
-      QuizFeedbackDTO result =
-          quizQuestionManager.getIndividualQuizFeedback(studentQuiz, feedbackMode, questions, answerMap);
+      QuizFeedbackDTO result = quizQuestionManager.getIndividualQuizFeedback(
+        studentQuiz,
+        feedbackMode,
+        questions,
+        answerMap
+      );
       switch (feedbackMode) {
         case NONE:
           assertNull(result);
@@ -264,9 +306,12 @@ public class QuizQuestionManagerTest extends AbstractManagerTest {
 
   @Test
   public void getIndividualQuizFeedbackCalculations() throws ContentManagerException {
-    QuizFeedbackDTO result =
-        quizQuestionManager.getIndividualQuizFeedback(studentQuiz, QuizFeedbackMode.SECTION_MARKS, questions,
-            answerMap);
+    QuizFeedbackDTO result = quizQuestionManager.getIndividualQuizFeedback(
+      studentQuiz,
+      QuizFeedbackMode.SECTION_MARKS,
+      questions,
+      answerMap
+    );
 
     assertStudentMarks(result);
   }
@@ -275,23 +320,35 @@ public class QuizQuestionManagerTest extends AbstractManagerTest {
   public void getAssignmentFeedback() throws ContentManagerException, SegueDatabaseException {
     List<RegisteredUserDTO> groupMembers = this.groupManager.getUsersInGroup(studentGroup);
 
-    withMock(quizAttemptManager,
-        m -> expect(m.getCompletedUserIds(studentAssignment)).andReturn(singleton(student.getId())));
-    withMock(quizQuestionAttemptPersistenceManager,
-        m -> expect(m.getAllAnswersForQuizAssignment(studentAssignment.getId())).andReturn(
-            ImmutableMap.of(student.getId(), answerMap.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().getId(),
-                entry -> singletonList(entry.getValue()))))
-        ));
+    withMock(
+      quizAttemptManager,
+      m -> expect(m.getCompletedUserIds(studentAssignment)).andReturn(singleton(student.getId()))
+    );
+    withMock(
+      quizQuestionAttemptPersistenceManager,
+      m ->
+        expect(m.getAllAnswersForQuizAssignment(studentAssignment.getId()))
+          .andReturn(
+            ImmutableMap.of(
+              student.getId(),
+              answerMap
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(entry -> entry.getKey().getId(), entry -> singletonList(entry.getValue())))
+            )
+          )
+    );
 
-    Map<RegisteredUserDTO, QuizFeedbackDTO> feedback =
-        quizQuestionManager.getAssignmentTeacherFeedback(studentQuiz, studentAssignment, groupMembers);
+    Map<RegisteredUserDTO, QuizFeedbackDTO> feedback = quizQuestionManager.getAssignmentTeacherFeedback(
+      studentQuiz,
+      studentAssignment,
+      groupMembers
+    );
 
     assertFalse(feedback.get(secondStudent).isComplete());
     assertStudentMarks(feedback.get(student));
     assertEquals(new Integer(3), studentQuiz.getTotal());
   }
-
 
   private void assertStudentMarks(QuizFeedbackDTO result) {
     assertMarks(1, 1, 1, result.getOverallMark());

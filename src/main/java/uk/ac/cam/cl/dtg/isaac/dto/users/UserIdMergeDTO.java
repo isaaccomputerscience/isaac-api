@@ -24,8 +24,7 @@ public class UserIdMergeDTO {
   private Long targetId;
   private Long sourceId;
 
-  public UserIdMergeDTO() {
-  }
+  public UserIdMergeDTO() {}
 
   public Long getTargetId() {
     return targetId;

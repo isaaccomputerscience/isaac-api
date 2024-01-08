@@ -32,7 +32,6 @@ public class UserSummaryWithEmailAddressAndGenderDto extends UserSummaryWithEmai
     return gender;
   }
 
-
   /**
    * Sets the gender.
    *

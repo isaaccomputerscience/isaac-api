@@ -49,9 +49,7 @@ public class ChoiceOrikaConverter extends AbstractPolymorphicBidirectionalConver
   /**
    * Constructs an Orika Converter specialises in selecting the correct subclass for choice objects.
    */
-  public ChoiceOrikaConverter() {
-
-  }
+  public ChoiceOrikaConverter() {}
 
   @Override
   public ChoiceDTO convertTo(final Choice source, final Type<ChoiceDTO> destinationType, final MappingContext context) {

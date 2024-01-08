@@ -25,7 +25,6 @@ public class SimpleExclusionInstruction extends AbstractFilterInstruction {
   private final String mustNotMatchValue;
 
   public SimpleExclusionInstruction(final String mustNotMatchValue) {
-
     this.mustNotMatchValue = mustNotMatchValue;
   }
 

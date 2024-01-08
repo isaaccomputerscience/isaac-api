@@ -26,7 +26,6 @@ import uk.ac.cam.cl.dtg.util.LogUtils;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 public class QuestionAttemptMisuseHandler implements IMisuseHandler {
-
   private static final Logger log = LoggerFactory.getLogger(QuestionAttemptMisuseHandler.class);
 
   private static final Integer SOFT_THRESHOLD = 10;
@@ -34,7 +33,6 @@ public class QuestionAttemptMisuseHandler implements IMisuseHandler {
   private static final Integer ACCOUNTING_INTERVAL = Constants.NUMBER_SECONDS_IN_FIFTEEN_MINUTES;
 
   private Integer overrideHardThreshold;
-
 
   /**
    * @param properties - so that we can look up properties set.
@@ -66,8 +64,7 @@ public class QuestionAttemptMisuseHandler implements IMisuseHandler {
   }
 
   @Override
-  public void executeSoftThresholdAction(final String message) {
-  }
+  public void executeSoftThresholdAction(final String message) {}
 
   @Override
   public void executeHardThresholdAction(final String message) {

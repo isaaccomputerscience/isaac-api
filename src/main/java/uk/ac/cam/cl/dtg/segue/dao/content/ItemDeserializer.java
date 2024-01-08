@@ -51,8 +51,7 @@ public class ItemDeserializer extends JsonDeserializer<Item> {
 
   @Override
   public Item deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
-      throws IOException {
-
+    throws IOException {
     ObjectNode root = getSingletonItemMapper().readTree(jsonParser);
 
     if (null == root.get("type")) {

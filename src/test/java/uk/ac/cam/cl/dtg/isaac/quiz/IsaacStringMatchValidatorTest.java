@@ -356,7 +356,6 @@ public class IsaacStringMatchValidatorTest {
     assertTrue(response.isCorrect());
   }
 
-
   /*
  Test that incorrect case-sensitive match takes priority over case-insensitive correct match.
 */
@@ -388,7 +387,6 @@ public class IsaacStringMatchValidatorTest {
     QuestionValidationResponse response = validator.validateQuestionResponse(someStringMatchQuestion, c);
     assertFalse(response.isCorrect());
   }
-
 
   //  ---------- Tests from here test invalid questions themselves ----------
 

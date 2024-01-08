@@ -72,9 +72,17 @@ public class GameFilter {
    * @param examBoards
    *            - List of examBoards used to get the gameboard
    */
-  public GameFilter(final List<String> subjects, final List<String> fields, final List<String> topics,
-                    final List<Integer> levels, final List<String> concepts, final List<String> questionCategories,
-                    final List<String> stages, final List<String> difficulties, final List<String> examBoards) {
+  public GameFilter(
+    final List<String> subjects,
+    final List<String> fields,
+    final List<String> topics,
+    final List<Integer> levels,
+    final List<String> concepts,
+    final List<String> questionCategories,
+    final List<String> stages,
+    final List<String> difficulties,
+    final List<String> examBoards
+  ) {
     this.subjects = subjects;
     this.fields = fields;
     this.topics = topics;
@@ -335,5 +343,4 @@ public class GameFilter {
       return questionCategories.equals(other.questionCategories);
     }
   }
-
 }

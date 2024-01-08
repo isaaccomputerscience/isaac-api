@@ -29,9 +29,7 @@ public class Quantity extends Choice {
   /**
    * Default constructor required for mapping.
    */
-  public Quantity() {
-
-  }
+  public Quantity() {}
 
   /**
    * Additional constructor to help unit testing.
@@ -40,7 +38,6 @@ public class Quantity extends Choice {
    */
   public Quantity(final String value) {
     this.setValue(value);
-
   }
 
   /**
@@ -52,7 +49,6 @@ public class Quantity extends Choice {
   public Quantity(final String value, final String units) {
     this.setValue(value);
     this.units = units;
-
   }
 
   /**

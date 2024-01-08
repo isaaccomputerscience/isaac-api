@@ -37,24 +37,27 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 @Provider
 @PreMatching
 public class SessionValidator implements ContainerRequestFilter, ContainerResponseFilter {
-
   private static final Logger log = LoggerFactory.getLogger(SessionValidator.class);
 
   private final UserAuthenticationManager userAuthenticationManager;
   private final PropertiesLoader properties;
   private final Integer sessionExpirySeconds;
+
   @Context
   private HttpServletRequest httpServletRequest;
+
   @Context
   private HttpServletResponse httpServletResponse;
 
   @Inject
-  public SessionValidator(final UserAuthenticationManager userAuthenticationManager,
-                          final PropertiesLoader properties) {
+  public SessionValidator(
+    final UserAuthenticationManager userAuthenticationManager,
+    final PropertiesLoader properties
+  ) {
     this.userAuthenticationManager = userAuthenticationManager;
     this.properties = properties;
-    this.sessionExpirySeconds = this.properties.getIntegerPropertyOrFallback(
-        SESSION_EXPIRY_SECONDS_DEFAULT, SESSION_EXPIRY_SECONDS_FALLBACK);
+    this.sessionExpirySeconds =
+      this.properties.getIntegerPropertyOrFallback(SESSION_EXPIRY_SECONDS_DEFAULT, SESSION_EXPIRY_SECONDS_FALLBACK);
   }
 
   @Override
@@ -63,7 +66,8 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
     if (authCookie != null && !userAuthenticationManager.isSessionValid(httpServletRequest)) {
       log.warn("Request made with invalid segue auth cookie - closing session");
       invalidateSession();
-      containerRequestContext.abortWith(Response
+      containerRequestContext.abortWith(
+        Response
           .status(Response.Status.BAD_REQUEST)
           .entity("Authentication cookie is invalid")
           .cookie(userAuthenticationManager.createAuthLogoutNewCookie())
@@ -73,12 +77,18 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
   }
 
   @Override
-  public void filter(final ContainerRequestContext containerRequestContext,
-                     final ContainerResponseContext containerResponseContext)
-      throws IOException {
+  public void filter(
+    final ContainerRequestContext containerRequestContext,
+    final ContainerResponseContext containerResponseContext
+  )
+    throws IOException {
     Cookie authCookie = containerRequestContext.getCookies().get(SEGUE_AUTH_COOKIE);
-    if (authCookie != null && !isPartialLoginCookie(authCookie) && !isLogoutCookiePresent(httpServletResponse)
-        && wasRequestValid(containerResponseContext)) {
+    if (
+      authCookie != null &&
+      !isPartialLoginCookie(authCookie) &&
+      !isLogoutCookiePresent(httpServletResponse) &&
+      wasRequestValid(containerResponseContext)
+    ) {
       try {
         jakarta.servlet.http.Cookie newAuthCookie = generateRefreshedSegueAuthCookie(authCookie);
         httpServletResponse.addCookie(newAuthCookie);
@@ -111,8 +121,10 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
   }
 
   private static boolean wasRequestValid(final ContainerResponseContext containerResponseContext) {
-    return ((ContainerResponseContextImpl) containerResponseContext).getJaxrsResponse().getStatus()
-        == Response.Status.OK.getStatusCode();
+    return (
+      ((ContainerResponseContextImpl) containerResponseContext).getJaxrsResponse().getStatus() ==
+      Response.Status.OK.getStatusCode()
+    );
   }
 
   private jakarta.servlet.http.Cookie generateRefreshedSegueAuthCookie(final Cookie authCookie) throws IOException {
@@ -122,8 +134,10 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
     String updatedHMAC = userAuthenticationManager.calculateUpdatedHMAC(sessionInformation);
     sessionInformation.put(HMAC, updatedHMAC);
 
-    jakarta.servlet.http.Cookie newAuthCookie =
-        userAuthenticationManager.createAuthCookie(sessionInformation, sessionExpirySeconds);
+    jakarta.servlet.http.Cookie newAuthCookie = userAuthenticationManager.createAuthCookie(
+      sessionInformation,
+      sessionExpirySeconds
+    );
     return newAuthCookie;
   }
 

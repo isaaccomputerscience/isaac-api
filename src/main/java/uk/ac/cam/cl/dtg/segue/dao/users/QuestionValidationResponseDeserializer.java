@@ -48,9 +48,10 @@ public class QuestionValidationResponseDeserializer extends JsonDeserializer<Que
    * @param contentDeserializer -
    * @param choiceDeserializer  -
    */
-  public QuestionValidationResponseDeserializer(final ContentBaseDeserializer contentDeserializer,
-                                                final ChoiceDeserializer choiceDeserializer) {
-
+  public QuestionValidationResponseDeserializer(
+    final ContentBaseDeserializer contentDeserializer,
+    final ChoiceDeserializer choiceDeserializer
+  ) {
     // only do this once as it is quite expensive.
     if (null == mapper) {
       SimpleModule contentDeserializerModule = new SimpleModule("ContentDeserializerModule");
@@ -63,15 +64,17 @@ public class QuestionValidationResponseDeserializer extends JsonDeserializer<Que
   }
 
   @Override
-  public QuestionValidationResponse deserialize(final JsonParser jsonParser,
-                                                final DeserializationContext deserializationContext)
-      throws IOException {
-
+  public QuestionValidationResponse deserialize(
+    final JsonParser jsonParser,
+    final DeserializationContext deserializationContext
+  )
+    throws IOException {
     ObjectNode root = (ObjectNode) mapper.readTree(jsonParser);
 
     if (null == root.get("answer")) {
       throw new JsonMappingException(
-          "Error: unable to parse content as there is no answer property within the json input.");
+        "Error: unable to parse content as there is no answer property within the json input."
+      );
     }
 
     // Have to get the raw json out otherwise we dates do not serialize properly.

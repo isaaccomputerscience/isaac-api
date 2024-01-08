@@ -31,9 +31,7 @@ public class AnvilApp extends Content {
   /**
    * AnvilApp.
    */
-  public AnvilApp() {
-
-  }
+  public AnvilApp() {}
 
   /**
    * Gets the appId.

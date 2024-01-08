@@ -30,9 +30,7 @@ public class Address {
   /**
    * Address.
    */
-  public Address() {
-
-  }
+  public Address() {}
 
   /**
    * @param addressLine1
@@ -48,8 +46,14 @@ public class Address {
    * @param country
    *            - as a string
    */
-  public Address(final String addressLine1, final String addressLine2, final String town, final String county,
-                 final String postalCode, final String country) {
+  public Address(
+    final String addressLine1,
+    final String addressLine2,
+    final String town,
+    final String county,
+    final String postalCode,
+    final String country
+  ) {
     this.addressLine1 = addressLine1;
     this.addressLine2 = addressLine2;
     this.town = town;
@@ -172,7 +176,6 @@ public class Address {
     this.country = country;
   }
 
-
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -271,5 +274,4 @@ public class Address {
     }
     return true;
   }
-
 }

@@ -39,29 +39,44 @@ public class IsaacPod extends Content {
 
   @JsonCreator
   public IsaacPod(
-      @JsonProperty("id") final String id,
-      @JsonProperty("title") final String title,
-      @JsonProperty("subtitle") final String subtitle,
-      @JsonProperty("type") final String type,
-      @JsonProperty("author") final String author,
-      @JsonProperty("encoding") final String encoding,
-      @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
-      @JsonProperty("layout") final String layout,
-      @JsonProperty("children") final List<ContentBase> children,
-      @JsonProperty("value") final String value,
-      @JsonProperty("attribution") final String attribution,
-      @JsonProperty("relatedContent") final List<String> relatedContent,
-      @JsonProperty("version") final boolean published,
-      @JsonProperty("deprecated") final Boolean deprecated,
-      @JsonProperty("tags") final Set<String> tags,
-      @JsonProperty("level") final Integer level,
-      @JsonProperty("emailAddress") final String emailAddress,
-      @JsonProperty("image") final Image image,
-      @JsonProperty("url") final String url) {
-    super(id, title, subtitle, type, author, encoding,
-        canonicalSourceFile, layout, children, value, attribution,
-        relatedContent, published, deprecated, tags, level);
-
+    @JsonProperty("id") final String id,
+    @JsonProperty("title") final String title,
+    @JsonProperty("subtitle") final String subtitle,
+    @JsonProperty("type") final String type,
+    @JsonProperty("author") final String author,
+    @JsonProperty("encoding") final String encoding,
+    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+    @JsonProperty("layout") final String layout,
+    @JsonProperty("children") final List<ContentBase> children,
+    @JsonProperty("value") final String value,
+    @JsonProperty("attribution") final String attribution,
+    @JsonProperty("relatedContent") final List<String> relatedContent,
+    @JsonProperty("version") final boolean published,
+    @JsonProperty("deprecated") final Boolean deprecated,
+    @JsonProperty("tags") final Set<String> tags,
+    @JsonProperty("level") final Integer level,
+    @JsonProperty("emailAddress") final String emailAddress,
+    @JsonProperty("image") final Image image,
+    @JsonProperty("url") final String url
+  ) {
+    super(
+      id,
+      title,
+      subtitle,
+      type,
+      author,
+      encoding,
+      canonicalSourceFile,
+      layout,
+      children,
+      value,
+      attribution,
+      relatedContent,
+      published,
+      deprecated,
+      tags,
+      level
+    );
     this.url = url;
     this.image = image;
   }
@@ -69,9 +84,7 @@ public class IsaacPod extends Content {
   /**
    * Default constructor required for Jackson.
    */
-  public IsaacPod() {
-
-  }
+  public IsaacPod() {}
 
   /**
    * Gets the image.

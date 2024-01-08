@@ -22,7 +22,6 @@ import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 public class QuizManagerTest extends AbstractManagerTest {
-
   private QuizManager quizManager;
   private PropertiesLoader properties;
   private IsaacQuizDTO brokenQuiz;
@@ -45,8 +44,9 @@ public class QuizManagerTest extends AbstractManagerTest {
 
   @Test
   public void extractSectionObjectsInDev() throws ContentManagerException {
-    withMock(properties, m ->
-        expect(m.getProperty(Constants.SEGUE_APP_ENVIRONMENT)).andStubReturn(Constants.EnvironmentType.DEV.name())
+    withMock(
+      properties,
+      m -> expect(m.getProperty(Constants.SEGUE_APP_ENVIRONMENT)).andStubReturn(Constants.EnvironmentType.DEV.name())
     );
 
     List<IsaacQuizSectionDTO> sections = quizManager.extractSectionObjects(studentQuiz);
@@ -57,8 +57,9 @@ public class QuizManagerTest extends AbstractManagerTest {
 
   @Test
   public void extractSectionObjectsInProd() throws ContentManagerException {
-    withMock(properties, m ->
-        expect(m.getProperty(Constants.SEGUE_APP_ENVIRONMENT)).andStubReturn(Constants.EnvironmentType.PROD.name())
+    withMock(
+      properties,
+      m -> expect(m.getProperty(Constants.SEGUE_APP_ENVIRONMENT)).andStubReturn(Constants.EnvironmentType.PROD.name())
     );
 
     List<IsaacQuizSectionDTO> sections = quizManager.extractSectionObjects(studentQuiz);

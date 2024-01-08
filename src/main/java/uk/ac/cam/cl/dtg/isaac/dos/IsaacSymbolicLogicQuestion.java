@@ -25,5 +25,4 @@ import uk.ac.cam.cl.dtg.isaac.quiz.ValidatesWith;
 @DTOMapping(IsaacSymbolicLogicQuestionDTO.class)
 @JsonContentType("isaacSymbolicLogicQuestion")
 @ValidatesWith(IsaacSymbolicLogicValidator.class)
-public class IsaacSymbolicLogicQuestion extends IsaacSymbolicQuestion {
-}
+public class IsaacSymbolicLogicQuestion extends IsaacSymbolicQuestion {}

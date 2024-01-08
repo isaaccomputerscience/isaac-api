@@ -22,5 +22,4 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.JsonContentType;
  * Content DTO for IsaacReorderQuestions.
  */
 @JsonContentType("isaacReorderQuestion")
-public class IsaacReorderQuestionDTO extends IsaacItemQuestionDTO {
-}
+public class IsaacReorderQuestionDTO extends IsaacItemQuestionDTO {}

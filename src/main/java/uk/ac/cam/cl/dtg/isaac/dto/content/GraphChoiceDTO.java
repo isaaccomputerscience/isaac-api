@@ -30,9 +30,7 @@ public class GraphChoiceDTO extends ChoiceDTO {
   /**
    * Default constructor required for mapping.
    */
-  public GraphChoiceDTO() {
-
-  }
+  public GraphChoiceDTO() {}
 
   /**
    * Gets the graph data.
@@ -52,5 +50,4 @@ public class GraphChoiceDTO extends ChoiceDTO {
   public final void setGraphSpec(final String graphSpec) {
     this.graphSpec = graphSpec;
   }
-
 }

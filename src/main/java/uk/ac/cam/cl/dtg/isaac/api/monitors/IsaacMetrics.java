@@ -22,9 +22,9 @@ package uk.ac.cam.cl.dtg.isaac.api.monitors;
  * Metric and label naming conventions can be found here: https://prometheus.io/docs/practices/naming/
  */
 public final class IsaacMetrics {
+
   /**
    *  Private constructor as it does not make sense to instantiate this class.
    */
-  private IsaacMetrics() {
-  }
+  private IsaacMetrics() {}
 }

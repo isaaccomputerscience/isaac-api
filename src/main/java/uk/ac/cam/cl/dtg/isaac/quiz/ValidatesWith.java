@@ -30,7 +30,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidatesWith {
-
   /**
    * The {@link IValidator} class that this Question relates to.
    *

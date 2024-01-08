@@ -62,12 +62,15 @@ public class SyncMailjetUsersJob implements Job {
       PrintWriter printWriter = new PrintWriter(stringWriter);
       e.printStackTrace(printWriter);
       String exception = stringWriter.toString();
-      EmailCommunicationMessage email =
-          new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
-              subject, exception, exception, EmailType.ADMIN);
+      EmailCommunicationMessage email = new EmailCommunicationMessage(
+        properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
+        subject,
+        exception,
+        exception,
+        EmailType.ADMIN
+      );
       emailManager.addSystemEmailToQueue(email);
       log.error("Failed to synchronise users");
     }
-
   }
 }

@@ -20,5 +20,9 @@ package uk.ac.cam.cl.dtg.isaac.dos.users;
  * @author Stephen Cummins
  */
 public enum Gender {
-  MALE, FEMALE, OTHER, PREFER_NOT_TO_SAY, UNKNOWN
+  MALE,
+  FEMALE,
+  OTHER,
+  PREFER_NOT_TO_SAY,
+  UNKNOWN
 }

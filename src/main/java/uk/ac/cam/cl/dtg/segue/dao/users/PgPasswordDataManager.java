@@ -52,9 +52,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
     }
 
     String query = "SELECT * FROM user_credentials WHERE user_id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_CREDENTIAL_USER_ID, userId);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -68,9 +66,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
   @Override
   public LocalUserCredential getLocalUserCredentialByResetToken(final String token) throws SegueDatabaseException {
     String query = "SELECT * FROM user_credentials WHERE reset_token = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_GET_CREDENTIAL_BY_RESET_TOKEN_TOKEN, token);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -83,7 +79,7 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
 
   @Override
   public LocalUserCredential createOrUpdateLocalUserCredential(final LocalUserCredential credsToSave)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     // determine if it is a create or update
     LocalUserCredential lc = this.getLocalUserCredential(credsToSave.getUserId());
 
@@ -100,10 +96,11 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
 
   private LocalUserCredential createCredentials(final LocalUserCredential credsToSave) throws SegueDatabaseException {
     String query =
-        "INSERT INTO user_credentials(user_id, password, security_scheme, secure_salt, reset_token, reset_expiry,"
-            + " last_updated) VALUES (?, ?, ?, ?, ?, ?, ?);";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+      "INSERT INTO user_credentials(user_id, password, security_scheme, secure_salt, reset_token, reset_expiry," +
+      " last_updated) VALUES (?, ?, ?, ?, ?, ?, ?);";
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
     ) {
       setValueHelper(pst, FIELD_CREATE_CREDENTIALS_USER_ID, credsToSave.getUserId());
       setValueHelper(pst, FIELD_CREATE_CREDENTIALS_PASSWORD, credsToSave.getPassword());
@@ -129,11 +126,10 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
       throw new SegueDatabaseException("The credentials you have tried to update do not exist.");
     }
 
-    String query = "UPDATE user_credentials SET password = ?, security_scheme = ?, secure_salt = ?,"
-        + " reset_token = ?, reset_expiry = ?, last_updated = ? WHERE user_id = ?;";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    String query =
+      "UPDATE user_credentials SET password = ?, security_scheme = ?, secure_salt = ?," +
+      " reset_token = ?, reset_expiry = ?, last_updated = ? WHERE user_id = ?;";
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_PASSWORD, credsToSave.getPassword());
       setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_SECURITY_SCHEME, credsToSave.getSecurityScheme());
       setValueHelper(pst, FIELD_UPDATE_CREDENTIALS_SECURE_SALT, credsToSave.getSecureSalt());
@@ -151,7 +147,6 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
       throw new SegueDatabaseException("Postgres exception", e);
     }
   }
-
 
   /**
    * findOne helper method to ensure that only one result matches the search criteria.
@@ -173,8 +168,9 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
     }
 
     if (listOfResults.size() > 1) {
-      throw new SegueDatabaseException("Ambiguous result, expected single result and found more than one"
-          + listOfResults);
+      throw new SegueDatabaseException(
+        "Ambiguous result, expected single result and found more than one" + listOfResults
+      );
     }
 
     return listOfResults.get(0);

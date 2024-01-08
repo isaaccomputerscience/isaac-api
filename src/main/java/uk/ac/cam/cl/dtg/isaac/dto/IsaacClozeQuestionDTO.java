@@ -23,7 +23,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.JsonContentType;
  */
 @JsonContentType("isaacClozeQuestion")
 public class IsaacClozeQuestionDTO extends IsaacItemQuestionDTO {
-
   private Boolean withReplacement;
 
   public Boolean getWithReplacement() {

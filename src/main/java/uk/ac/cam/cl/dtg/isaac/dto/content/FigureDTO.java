@@ -20,6 +20,4 @@ package uk.ac.cam.cl.dtg.isaac.dto.content;
  * Figure DTO.
  *
  */
-public class FigureDTO extends ImageDTO {
-
-}
+public class FigureDTO extends ImageDTO {}

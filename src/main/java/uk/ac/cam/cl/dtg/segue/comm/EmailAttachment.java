@@ -20,7 +20,6 @@ package uk.ac.cam.cl.dtg.segue.comm;
  * POJO for representing an email attachment.
  */
 public class EmailAttachment {
-
   private final String fileName;
   private final String mimeType;
   private final Object attachment;

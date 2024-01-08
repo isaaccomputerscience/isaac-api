@@ -54,21 +54,26 @@ public class UserBadgeManager {
    * @param transactionManager          manages transactions for atomicity of badge state updates
    */
   @Inject
-  public UserBadgeManager(final IUserBadgePersistenceManager userBadgePersistenceManager,
-                          final GroupManager groupManager,
-                          final EventBookingManager bookingManager, final AssignmentManager assignmentManager,
-                          final GameManager gameManager, final GitContentManager contentManager,
-                          @Named(CONTENT_INDEX) final String contentIndex,
-                          final ITransactionManager transactionManager) {
-
+  public UserBadgeManager(
+    final IUserBadgePersistenceManager userBadgePersistenceManager,
+    final GroupManager groupManager,
+    final EventBookingManager bookingManager,
+    final AssignmentManager assignmentManager,
+    final GameManager gameManager,
+    final GitContentManager contentManager,
+    @Named(CONTENT_INDEX) final String contentIndex,
+    final ITransactionManager transactionManager
+  ) {
     this.userBadgePersistenceManager = userBadgePersistenceManager;
     this.transactionManager = transactionManager;
 
     badgePolicies.put(Badge.TEACHER_GROUPS_CREATED, new TeacherGroupsBadgePolicy(groupManager));
     badgePolicies.put(Badge.TEACHER_ASSIGNMENTS_SET, new TeacherAssignmentsBadgePolicy(assignmentManager, gameManager));
     badgePolicies.put(Badge.TEACHER_GAMEBOARDS_CREATED, new TeacherGameboardsBadgePolicy(gameManager));
-    badgePolicies.put(Badge.TEACHER_CPD_EVENTS_ATTENDED,
-        new TeacherCpdBadgePolicy(bookingManager, contentManager, contentIndex));
+    badgePolicies.put(
+      Badge.TEACHER_CPD_EVENTS_ATTENDED,
+      new TeacherCpdBadgePolicy(bookingManager, contentManager, contentIndex)
+    );
   }
 
   /**
@@ -79,9 +84,7 @@ public class UserBadgeManager {
    * @return user badge object
    * @throws SegueDatabaseException
    */
-  public UserBadge getOrCreateBadge(final RegisteredUserDTO user, final Badge badgeName)
-      throws SegueDatabaseException {
-
+  public UserBadge getOrCreateBadge(final RegisteredUserDTO user, final Badge badgeName) throws SegueDatabaseException {
     // start database transaction to ensure atomicity of badge state update (if required)
     try (ITransaction transaction = transactionManager.getTransaction()) {
       UserBadge badge = userBadgePersistenceManager.getBadge(user, badgeName, transaction);
@@ -107,15 +110,12 @@ public class UserBadgeManager {
    */
   @SuppressWarnings("checkstyle:EmptyBlock") // Resolve when the to-do is implemented
   public UserBadge updateBadge(final RegisteredUserDTO user, final Badge badgeName, final String event)
-      throws SegueDatabaseException {
-
+    throws SegueDatabaseException {
     // start a database transaction as an update occurs across two queries
     try (ITransaction transaction = transactionManager.getTransaction()) {
-
       UserBadge badge = userBadgePersistenceManager.getBadge(user, badgeName, transaction);
 
       if (null != badge.getState()) {
-
         JsonNode state = badge.getState();
         int oldLevel = badgePolicies.get(badgeName).getLevel(state);
 
@@ -127,7 +127,6 @@ public class UserBadgeManager {
         }
 
         badge.setState(newState);
-
       } else {
         badge.setState(badgePolicies.get(badgeName).initialiseState(user, transaction));
       }
@@ -148,14 +147,12 @@ public class UserBadgeManager {
    * @return a map of badge names to values
    */
   public Map<String, Object> getAllUserBadges(final RegisteredUserDTO user) {
-
     Map<String, Object> badges = Maps.newHashMap();
 
     try {
       for (Badge badgeName : Badge.values()) {
         UserBadge badge = getOrCreateBadge(user, badgeName);
-        badges.put(badge.getBadgeName().name(),
-            badgePolicies.get(badge.getBadgeName()).getLevel(badge.getState()));
+        badges.put(badge.getBadgeName().name(), badgePolicies.get(badge.getBadgeName()).getLevel(badge.getState()));
       }
     } catch (SegueDatabaseException e) {
       e.printStackTrace();

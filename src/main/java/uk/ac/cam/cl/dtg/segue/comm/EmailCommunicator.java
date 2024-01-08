@@ -46,12 +46,14 @@ public class EmailCommunicator implements ICommunicator<EmailCommunicationMessag
    * @param mailName           The name email will be sent from.
    */
   @Inject
-  public EmailCommunicator(@Named(Constants.MAILER_SMTP_SERVER) final String smtpAddress,
-                           @Named(Constants.MAILER_SMTP_PORT) final String smtpPort,
-                           @Named(Constants.MAILER_SMTP_USERNAME) final String smtpUsername,
-                           @Named(Constants.MAILER_SMTP_PASSWORD) final String smtpPassword,
-                           @Named(Constants.MAIL_FROM_ADDRESS) final String defaultFromAddress,
-                           @Named(Constants.MAIL_NAME) final String mailName) {
+  public EmailCommunicator(
+    @Named(Constants.MAILER_SMTP_SERVER) final String smtpAddress,
+    @Named(Constants.MAILER_SMTP_PORT) final String smtpPort,
+    @Named(Constants.MAILER_SMTP_USERNAME) final String smtpUsername,
+    @Named(Constants.MAILER_SMTP_PASSWORD) final String smtpPassword,
+    @Named(Constants.MAIL_FROM_ADDRESS) final String defaultFromAddress,
+    @Named(Constants.MAIL_NAME) final String mailName
+  ) {
     Validate.notNull(smtpAddress);
     Validate.notNull(defaultFromAddress);
 
@@ -93,12 +95,29 @@ public class EmailCommunicator implements ICommunicator<EmailCommunicationMessag
       }
 
       if (email.getHTMLMessage() == null) {
-        mailer.sendPlainTextMail(new EmailCommonParameters(new String[] {email.getRecipientAddress()}, fromAddress,
-            overrideEnvelopeFrom, replyTo, email.getSubject()), email.getPlainTextMessage());
+        mailer.sendPlainTextMail(
+          new EmailCommonParameters(
+            new String[] { email.getRecipientAddress() },
+            fromAddress,
+            overrideEnvelopeFrom,
+            replyTo,
+            email.getSubject()
+          ),
+          email.getPlainTextMessage()
+        );
       } else {
-        mailer.sendMultiPartMail(new EmailCommonParameters(new String[] {email.getRecipientAddress()}, fromAddress,
-                overrideEnvelopeFrom, replyTo, email.getSubject()), email.getPlainTextMessage(), email.getHTMLMessage(),
-            email.getAttachments());
+        mailer.sendMultiPartMail(
+          new EmailCommonParameters(
+            new String[] { email.getRecipientAddress() },
+            fromAddress,
+            overrideEnvelopeFrom,
+            replyTo,
+            email.getSubject()
+          ),
+          email.getPlainTextMessage(),
+          email.getHTMLMessage(),
+          email.getAttachments()
+        );
       }
     } catch (MessagingException | UnsupportedEncodingException e) {
       throw new CommunicationException(e);

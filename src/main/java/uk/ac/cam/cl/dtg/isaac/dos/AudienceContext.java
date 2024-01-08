@@ -21,6 +21,7 @@ public class AudienceContext {
       return null;
     }
     return new AudienceContext() {
+
       {
         if (gameFilter.getStages() != null) {
           setStage(gameFilter.getStages().stream().map(Stage::valueOf).collect(Collectors.toList()));
@@ -35,8 +36,7 @@ public class AudienceContext {
     };
   }
 
-  public AudienceContext() {
-  }
+  public AudienceContext() {}
 
   public List<Stage> getStage() {
     return stage;

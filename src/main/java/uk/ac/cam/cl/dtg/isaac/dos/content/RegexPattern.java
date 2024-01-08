@@ -29,9 +29,7 @@ public class RegexPattern extends Choice {
   private Boolean multiLineRegex;
   private Boolean matchWholeString;
 
-  public RegexPattern() {
-
-  }
+  public RegexPattern() {}
 
   /**
    * @return Whether this regex choice should allow any case to match.

@@ -39,7 +39,6 @@ public abstract class IOAuthAuthenticatorTest {
 
   protected IOAuthAuthenticator authenticator;
 
-
   /**
    * Verify that the authenticator correctly identifies itself.
    */
@@ -47,7 +46,6 @@ public abstract class IOAuthAuthenticatorTest {
   public final void getAuthenticationProvider_returnsNonNullProvider() {
     assertTrue(authenticator.getAuthenticationProvider() != null);
   }
-
 
   /**
    * Verify that the extractAuthCode method returns the correct value.
@@ -74,7 +72,7 @@ public abstract class IOAuthAuthenticatorTest {
    */
   @Test
   public final void getUserInfo_nullReference_throwsException()
-      throws NoUserException, IOException, AuthenticatorSecurityException {
+    throws NoUserException, IOException, AuthenticatorSecurityException {
     try {
       authenticator.getUserInfo(null);
       fail("Exception should have been thrown.");
@@ -82,5 +80,4 @@ public abstract class IOAuthAuthenticatorTest {
       // fine
     }
   }
-
 }

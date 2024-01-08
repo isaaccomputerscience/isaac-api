@@ -22,7 +22,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 public interface IQuizAssignmentPersistenceManager {
-
   /**
    * Save an Quiz assignment.
    *
@@ -43,8 +42,7 @@ public interface IQuizAssignmentPersistenceManager {
    * @return the assignments of this quiz to that group.
    * @throws SegueDatabaseException - if there is an error when accessing the database.
    */
-  List<QuizAssignmentDTO> getAssignmentsByQuizIdAndGroup(String quizId, Long groupId)
-      throws SegueDatabaseException;
+  List<QuizAssignmentDTO> getAssignmentsByQuizIdAndGroup(String quizId, Long groupId) throws SegueDatabaseException;
 
   /**
    * Get a list of QuizAssignmentDTO objects for these groups.
@@ -62,7 +60,7 @@ public interface IQuizAssignmentPersistenceManager {
    * @return The quiz assignment.
    */
   QuizAssignmentDTO getAssignmentById(Long quizAssignmentId)
-      throws SegueDatabaseException, AssignmentCancelledException;
+    throws SegueDatabaseException, AssignmentCancelledException;
 
   /**
    * Cancel (soft delete) a quiz assignment.

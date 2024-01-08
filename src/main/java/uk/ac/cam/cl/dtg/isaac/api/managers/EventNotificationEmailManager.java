@@ -52,7 +52,6 @@ public class EventNotificationEmailManager {
   private final EmailManager emailManager;
   private final PgScheduledEmailManager pgScheduledEmailManager;
 
-
   /**
    * This class is required by quartz and must be executable by any instance of the segue api relying only on the
    * jobdata context provided.
@@ -65,12 +64,14 @@ public class EventNotificationEmailManager {
    * @param pgScheduledEmailManager - for scheduling the sending of emails
    */
   @Inject
-  public EventNotificationEmailManager(final PropertiesLoader properties,
-                                       final GitContentManager contentManager,
-                                       final EventBookingManager bookingManager,
-                                       final UserAccountManager userAccountManager,
-                                       final EmailManager emailManager,
-                                       final PgScheduledEmailManager pgScheduledEmailManager) {
+  public EventNotificationEmailManager(
+    final PropertiesLoader properties,
+    final GitContentManager contentManager,
+    final EventBookingManager bookingManager,
+    final UserAccountManager userAccountManager,
+    final EmailManager emailManager,
+    final PgScheduledEmailManager pgScheduledEmailManager
+  ) {
     this.properties = properties;
     this.contentManager = contentManager;
     this.bookingManager = bookingManager;
@@ -79,29 +80,38 @@ public class EventNotificationEmailManager {
     this.pgScheduledEmailManager = pgScheduledEmailManager;
   }
 
-  public void sendBookingStatusFilteredEmailForEvent(final IsaacEventPageDTO event, final String templateId,
-                                                     final List<BookingStatus> bookingStatuses)
-      throws SegueDatabaseException {
+  public void sendBookingStatusFilteredEmailForEvent(
+    final IsaacEventPageDTO event,
+    final String templateId,
+    final List<BookingStatus> bookingStatuses
+  )
+    throws SegueDatabaseException {
     List<DetailedEventBookingDTO> eventBookings = bookingManager.adminGetBookingsByEventId(event.getId());
-    List<Long> ids = eventBookings.stream()
-        .filter(detailedEventBookingDTO -> bookingStatuses == null || bookingStatuses.contains(
-            detailedEventBookingDTO.getBookingStatus()))
-        .map(DetailedEventBookingDTO::getUserBooked)
-        .map(UserSummaryDTO::getId)
-        .distinct().collect(Collectors.toList());
+    List<Long> ids = eventBookings
+      .stream()
+      .filter(
+        detailedEventBookingDTO ->
+          bookingStatuses == null || bookingStatuses.contains(detailedEventBookingDTO.getBookingStatus())
+      )
+      .map(DetailedEventBookingDTO::getUserBooked)
+      .map(UserSummaryDTO::getId)
+      .distinct()
+      .collect(Collectors.toList());
     for (Long id : ids) {
       try {
         RegisteredUserDTO user = userAccountManager.getUserDTOById(id);
-        emailManager.sendTemplatedEmailToUser(user,
-            emailManager.getEmailTemplateDTO(templateId),
-            new ImmutableMap.Builder<String, Object>()
-                .put("event.emailEventDetails",
-                    event.getEmailEventDetails() == null ? "" : event.getEmailEventDetails())
-                .put("event", event)
-                .build(),
-            EmailType.SYSTEM);
-        log.debug(String.format("Sent email to user: %s %s, at: %s", user.getGivenName(), user.getFamilyName(),
-            user.getEmail()));
+        emailManager.sendTemplatedEmailToUser(
+          user,
+          emailManager.getEmailTemplateDTO(templateId),
+          new ImmutableMap.Builder<String, Object>()
+            .put("event.emailEventDetails", event.getEmailEventDetails() == null ? "" : event.getEmailEventDetails())
+            .put("event", event)
+            .build(),
+          EmailType.SYSTEM
+        );
+        log.debug(
+          String.format("Sent email to user: %s %s, at: %s", user.getGivenName(), user.getFamilyName(), user.getEmail())
+        );
       } catch (NoUserException e) {
         log.error(String.format("No user found with ID: %s", id));
       } catch (ContentManagerException e) {
@@ -111,7 +121,7 @@ public class EventNotificationEmailManager {
   }
 
   private void commitAndSendStatusFilteredEmail(IsaacEventPageDTO event, String emailKeyPostfix, String templateId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     String emailKey = String.format("%s@%s", event.getId(), emailKeyPostfix);
     /*
     Confirmed and Attended statuses are both included for both pre- and post-event emails.
@@ -135,15 +145,21 @@ public class EventNotificationEmailManager {
     ZonedDateTime now = ZonedDateTime.now();
     ZonedDateTime threeDaysAhead = now.plusDays(EMAIL_EVENT_REMINDER_DAYS_AHEAD);
     Date endOfToday = Date.from(now.with(LocalTime.MAX).toInstant());
-    DateRangeFilterInstruction
-        eventsWithinThreeDays = new DateRangeFilterInstruction(new Date(), Date.from(threeDaysAhead.toInstant()));
+    DateRangeFilterInstruction eventsWithinThreeDays = new DateRangeFilterInstruction(
+      new Date(),
+      Date.from(threeDaysAhead.toInstant())
+    );
     filterInstructions.put(DATE_FIELDNAME, eventsWithinThreeDays);
 
     try {
-      ResultsWrapper<ContentDTO> findByFieldNames = this.contentManager.findByFieldNames(
-          ContentService.generateDefaultFieldToMatch(fieldsToMatch), startIndex, DEFAULT_MAX_WINDOW_SIZE,
-          sortInstructions,
-          filterInstructions);
+      ResultsWrapper<ContentDTO> findByFieldNames =
+        this.contentManager.findByFieldNames(
+            ContentService.generateDefaultFieldToMatch(fieldsToMatch),
+            startIndex,
+            DEFAULT_MAX_WINDOW_SIZE,
+            sortInstructions,
+            filterInstructions
+          );
       for (ContentDTO contentResult : findByFieldNames.getResults()) {
         if (contentResult instanceof IsaacEventPageDTO) {
           IsaacEventPageDTO event = (IsaacEventPageDTO) contentResult;
@@ -175,14 +191,20 @@ public class EventNotificationEmailManager {
     ZonedDateTime sixtyDaysAgo = now.plusDays(EMAIL_EVENT_FEEDBACK_DAYS_AGO);
 
     DateRangeFilterInstruction eventsInLastSixtyDays = new DateRangeFilterInstruction(
-        Date.from(sixtyDaysAgo.toInstant()), new Date());
+      Date.from(sixtyDaysAgo.toInstant()),
+      new Date()
+    );
     filterInstructions.put(DATE_FIELDNAME, eventsInLastSixtyDays);
 
     try {
-      ResultsWrapper<ContentDTO> findByFieldNames = this.contentManager.findByFieldNames(
-          ContentService.generateDefaultFieldToMatch(fieldsToMatch), startIndex, DEFAULT_MAX_WINDOW_SIZE,
-          sortInstructions,
-          filterInstructions);
+      ResultsWrapper<ContentDTO> findByFieldNames =
+        this.contentManager.findByFieldNames(
+            ContentService.generateDefaultFieldToMatch(fieldsToMatch),
+            startIndex,
+            DEFAULT_MAX_WINDOW_SIZE,
+            sortInstructions,
+            filterInstructions
+          );
       for (ContentDTO contentResult : findByFieldNames.getResults()) {
         if (contentResult instanceof IsaacEventPageDTO) {
           IsaacEventPageDTO event = (IsaacEventPageDTO) contentResult;
@@ -192,13 +214,13 @@ public class EventNotificationEmailManager {
           }
           // Event end date (if present) is today or before, else event date is today or before
           boolean endDateToday =
-              event.getEndDate() != null && event.getEndDate().toInstant().isBefore(new Date().toInstant());
+            event.getEndDate() != null && event.getEndDate().toInstant().isBefore(new Date().toInstant());
           boolean noEndDateAndStartDateToday =
-              event.getEndDate() == null && event.getDate().toInstant().isBefore(new Date().toInstant());
+            event.getEndDate() == null && event.getDate().toInstant().isBefore(new Date().toInstant());
           if (endDateToday || noEndDateAndStartDateToday) {
             List<ExternalReference> postResources = event.getPostResources();
             boolean postResourcesPresent =
-                postResources != null && !postResources.isEmpty() && !postResources.contains(null);
+              postResources != null && !postResources.isEmpty() && !postResources.contains(null);
             if (postResourcesPresent) {
               commitAndSendStatusFilteredEmail(event, "post", "event_feedback");
             }
@@ -209,5 +231,4 @@ public class EventNotificationEmailManager {
       log.error("Failed to send scheduled event feedback emails: ", e);
     }
   }
-
 }

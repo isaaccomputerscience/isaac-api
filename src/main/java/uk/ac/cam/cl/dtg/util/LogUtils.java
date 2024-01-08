@@ -5,8 +5,9 @@ import static org.apache.commons.text.StringEscapeUtils.escapeJava;
 import java.util.Map;
 
 public final class LogUtils {
-  private LogUtils() {
-  }
+
+  private LogUtils() {}
+
   /* While there is currently no difference in the handling of 'internal' and 'external' value sources, I have tried
    to distinguish between values in log statements that could be provided by general users of the platform and values
    that are sourced from the database or used in log statements that should only be reached by trusted sources such as

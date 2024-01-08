@@ -31,9 +31,7 @@ public class UserAssociation {
   /**
    * UserAssociation.
    */
-  public UserAssociation() {
-
-  }
+  public UserAssociation() {}
 
   /**
    * UserAssociation.
@@ -45,8 +43,11 @@ public class UserAssociation {
    * @param created
    *            - date
    */
-  public UserAssociation(final Long userIdGrantingPermission,
-                         final Long userIdReceivingPermission, final Date created) {
+  public UserAssociation(
+    final Long userIdGrantingPermission,
+    final Long userIdReceivingPermission,
+    final Date created
+  ) {
     this.userIdGrantingPermission = userIdGrantingPermission;
     this.userIdReceivingPermission = userIdReceivingPermission;
     this.created = created;

@@ -47,8 +47,12 @@ public class EventBookingPersistenceManager {
    * @param objectMapper   - Instance of objectmapper so we can deal with jsonb
    */
   @Inject
-  public EventBookingPersistenceManager(final PostgresSqlDb database, final UserAccountManager userManager,
-                                        final GitContentManager contentManager, final ObjectMapper objectMapper) {
+  public EventBookingPersistenceManager(
+    final PostgresSqlDb database,
+    final UserAccountManager userManager,
+    final GitContentManager contentManager,
+    final ObjectMapper objectMapper
+  ) {
     this.database = database;
     this.userManager = userManager;
     this.contentManager = contentManager;
@@ -91,7 +95,7 @@ public class EventBookingPersistenceManager {
    * @throws SegueDatabaseException - if an error occurs.
    */
   public DetailedEventBookingDTO getBookingByEventIdAndUserId(final String eventId, final Long userId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     return this.convertToDTO(dao.findBookingByEventAndUser(eventId, userId));
   }
 
@@ -107,11 +111,15 @@ public class EventBookingPersistenceManager {
    * @return The newly updated event booking
    * @throws SegueDatabaseException - if an error occurs.
    */
-  public DetailedEventBookingDTO updateBookingStatus(final ITransaction transaction, final String eventId,
-                                                     final Long userId, final Long reservingUserId,
-                                                     final BookingStatus bookingStatus,
-                                                     final Map<String, String> additionalEventInformation)
-      throws SegueDatabaseException {
+  public DetailedEventBookingDTO updateBookingStatus(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final Long reservingUserId,
+    final BookingStatus bookingStatus,
+    final Map<String, String> additionalEventInformation
+  )
+    throws SegueDatabaseException {
     dao.updateStatus(transaction, eventId, userId, reservingUserId, bookingStatus, additionalEventInformation);
     return this.getBookingByEventIdAndUserId(eventId, userId);
   }
@@ -127,11 +135,14 @@ public class EventBookingPersistenceManager {
    * @return The newly updated event booking
    * @throws SegueDatabaseException - if an error occurs.
    */
-  public DetailedEventBookingDTO updateBookingStatus(final ITransaction transaction, final String eventId,
-                                                     final Long userId,
-                                                     final BookingStatus bookingStatus,
-                                                     final Map<String, String> additionalEventInformation)
-      throws SegueDatabaseException {
+  public DetailedEventBookingDTO updateBookingStatus(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final BookingStatus bookingStatus,
+    final Map<String, String> additionalEventInformation
+  )
+    throws SegueDatabaseException {
     return updateBookingStatus(transaction, eventId, userId, null, bookingStatus, additionalEventInformation);
   }
 
@@ -153,9 +164,11 @@ public class EventBookingPersistenceManager {
    * @return Map of booking status, role to count
    * @throws SegueDatabaseException - if something is wrong with the database
    */
-  public Map<BookingStatus, Map<Role, Long>> getEventBookingStatusCounts(final String eventId,
-                                                                         final boolean includeDeletedUsersInCounts)
-      throws SegueDatabaseException {
+  public Map<BookingStatus, Map<Role, Long>> getEventBookingStatusCounts(
+    final String eventId,
+    final boolean includeDeletedUsersInCounts
+  )
+    throws SegueDatabaseException {
     return dao.getEventBookingStatusCounts(eventId, includeDeletedUsersInCounts);
   }
 
@@ -213,9 +226,15 @@ public class EventBookingPersistenceManager {
    * @return the newly created booking.
    * @throws SegueDatabaseException - if an error occurs.
    */
-  public EventBookingDTO createBooking(final ITransaction transaction, final String eventId, final Long userId,
-                                       final Long reservingId, final BookingStatus status,
-                                       final Map<String, String> additionalInformation) throws SegueDatabaseException {
+  public EventBookingDTO createBooking(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final Long reservingId,
+    final BookingStatus status,
+    final Map<String, String> additionalInformation
+  )
+    throws SegueDatabaseException {
     return this.convertToDTO(dao.add(transaction, eventId, userId, reservingId, status, additionalInformation));
   }
 
@@ -228,9 +247,14 @@ public class EventBookingPersistenceManager {
    * @return the newly created booking.
    * @throws SegueDatabaseException - if an error occurs.
    */
-  public EventBookingDTO createBooking(final ITransaction transaction, final String eventId, final Long userId,
-                                       final BookingStatus status,
-                                       final Map<String, String> additionalInformation) throws SegueDatabaseException {
+  public EventBookingDTO createBooking(
+    final ITransaction transaction,
+    final String eventId,
+    final Long userId,
+    final BookingStatus status,
+    final Map<String, String> additionalInformation
+  )
+    throws SegueDatabaseException {
     return this.convertToDTO(dao.add(transaction, eventId, userId, status, additionalInformation));
   }
 
@@ -246,7 +270,10 @@ public class EventBookingPersistenceManager {
     try {
       final EventBooking bookingByEventAndUser = dao.findBookingByEventAndUser(eventId, userId);
       List<BookingStatus> bookedStatuses = Arrays.asList(
-          BookingStatus.CONFIRMED, BookingStatus.ATTENDED, BookingStatus.ABSENT);
+        BookingStatus.CONFIRMED,
+        BookingStatus.ATTENDED,
+        BookingStatus.ABSENT
+      );
       return bookingByEventAndUser != null && bookedStatuses.contains(bookingByEventAndUser.getBookingStatus());
     } catch (ResourceNotFoundException e) {
       return false;
@@ -260,7 +287,7 @@ public class EventBookingPersistenceManager {
    * @throws SegueDatabaseException - if an error occurs.
    */
   public void deleteBooking(final ITransaction transaction, final String eventId, final Long userId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     dao.delete(transaction, eventId, userId);
   }
 
@@ -279,7 +306,7 @@ public class EventBookingPersistenceManager {
    * @param resourceId  - the ID of the event to be locked.
    */
   public void lockEventUntilTransactionComplete(final ITransaction transaction, final String resourceId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     dao.lockEventUntilTransactionComplete(transaction, resourceId);
   }
 
@@ -290,16 +317,17 @@ public class EventBookingPersistenceManager {
    * @throws SegueDatabaseException - if an error occurs.
    */
   private DetailedEventBookingDTO convertToDTO(final EventBooking eb, final IsaacEventPageDTO eventInformation)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     DetailedEventBookingDTO result = new DetailedEventBookingDTO();
 
     try {
       // Note: This will pull back deleted users for the purpose of the events system
       // Note: This will also pull in PII that should be of no interest to anyone
       // DANGER: The User DTO gets silently upgraded to one containing the email address here
-      UserSummaryWithEmailAddressAndGenderDto user = userManager
-              .convertToUserSummary(userManager.getUserDTOById(eb
-          .getUserId(), true), UserSummaryWithEmailAddressAndGenderDto.class);
+      UserSummaryWithEmailAddressAndGenderDto user = userManager.convertToUserSummary(
+        userManager.getUserDTOById(eb.getUserId(), true),
+        UserSummaryWithEmailAddressAndGenderDto.class
+      );
       result.setReservedById(eb.getReservedById());
       result.setUserBooked(user);
       result.setBookingId(eb.getId());
@@ -372,9 +400,11 @@ public class EventBookingPersistenceManager {
    * @return list of converted dtos.
    * @throws SegueDatabaseException - if an error occurs.
    */
-  private List<DetailedEventBookingDTO> convertToDTO(final List<EventBooking> toConvert,
-                                                     final IsaacEventPageDTO eventDetails)
-      throws SegueDatabaseException {
+  private List<DetailedEventBookingDTO> convertToDTO(
+    final List<EventBooking> toConvert,
+    final IsaacEventPageDTO eventDetails
+  )
+    throws SegueDatabaseException {
     List<DetailedEventBookingDTO> result = Lists.newArrayList();
 
     for (EventBooking e : toConvert) {

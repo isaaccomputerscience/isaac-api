@@ -78,8 +78,8 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
   private static final String FACEBOOK_API_VERSION = "2.12";
 
   private static final String AUTH_URL = "https://graph.facebook.com/v" + FACEBOOK_API_VERSION + "/oauth/authorize";
-  private static final String TOKEN_EXCHANGE_URL = "https://graph.facebook.com/v" + FACEBOOK_API_VERSION
-      + "/oauth/access_token";
+  private static final String TOKEN_EXCHANGE_URL =
+    "https://graph.facebook.com/v" + FACEBOOK_API_VERSION + "/oauth/access_token";
   private static final String USER_INFO_URL = "https://graph.facebook.com/v" + FACEBOOK_API_VERSION + "/me";
   private static final String TOKEN_VERIFICATION_URL = "https://graph.facebook.com/debug_token";
 
@@ -95,11 +95,13 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
    * @param requestedFields The facebook user info fields requested by this application
    */
   @Inject
-  public FacebookAuthenticator(@Named(Constants.FACEBOOK_CLIENT_ID) final String clientId,
-                               @Named(Constants.FACEBOOK_SECRET) final String clientSecret,
-                               @Named(Constants.FACEBOOK_CALLBACK_URI) final String callbackUri,
-                               @Named(Constants.FACEBOOK_OAUTH_SCOPES) final String requestedScopes,
-                               @Named(Constants.FACEBOOK_USER_FIELDS) final String requestedFields) {
+  public FacebookAuthenticator(
+    @Named(Constants.FACEBOOK_CLIENT_ID) final String clientId,
+    @Named(Constants.FACEBOOK_SECRET) final String clientSecret,
+    @Named(Constants.FACEBOOK_CALLBACK_URI) final String callbackUri,
+    @Named(Constants.FACEBOOK_OAUTH_SCOPES) final String requestedScopes,
+    @Named(Constants.FACEBOOK_USER_FIELDS) final String requestedFields
+  ) {
     this.jsonFactory = new JacksonFactory();
     this.httpTransport = new NetHttpTransport();
 
@@ -151,11 +153,14 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
   }
 
   @Override
-  public String exchangeCode(final String authorizationCode)
-      throws CodeExchangeException {
+  public String exchangeCode(final String authorizationCode) throws CodeExchangeException {
     try {
-      AuthorizationCodeTokenRequest request = new AuthorizationCodeTokenRequest(httpTransport, jsonFactory,
-          new GenericUrl(TOKEN_EXCHANGE_URL), authorizationCode);
+      AuthorizationCodeTokenRequest request = new AuthorizationCodeTokenRequest(
+        httpTransport,
+        jsonFactory,
+        new GenericUrl(TOKEN_EXCHANGE_URL),
+        authorizationCode
+      );
 
       request.setClientAuthentication(new ClientParametersAuthentication(clientId, clientSecret));
       request.setRedirectUri(callbackUri);
@@ -165,16 +170,19 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
       String accessToken;
       Long expires;
       if (response.get("error") != null) {
-        throw new CodeExchangeException("Server responded with the following error"
-            + response.get("error") + " given the request" + request.toString());
+        throw new CodeExchangeException(
+          "Server responded with the following error" +
+          response.get("error") +
+          " given the request" +
+          request.toString()
+        );
       }
 
       if (response.getAccessToken() != null && response.getExpiresInSeconds() != null) {
         accessToken = response.getAccessToken();
         expires = response.getExpiresInSeconds();
       } else {
-        throw new IOException(
-            "access_token or expires_in values were not found");
+        throw new IOException("access_token or expires_in values were not found");
       }
 
       TokenResponse tokenResponse = new TokenResponse();
@@ -183,13 +191,18 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
 
       // I don't really want to use the flow storage but it seems to be
       // easier to get credentials this way.
-      Builder builder = new AuthorizationCodeFlow.Builder(BearerToken.authorizationHeaderAccessMethod(),
-          httpTransport, jsonFactory, new GenericUrl(TOKEN_EXCHANGE_URL),
-          new ClientParametersAuthentication(clientId, clientSecret), clientId, AUTH_URL);
+      Builder builder = new AuthorizationCodeFlow.Builder(
+        BearerToken.authorizationHeaderAccessMethod(),
+        httpTransport,
+        jsonFactory,
+        new GenericUrl(TOKEN_EXCHANGE_URL),
+        new ClientParametersAuthentication(clientId, clientSecret),
+        clientId,
+        AUTH_URL
+      );
       builder.setScopes(requestedScopes);
 
-      AuthorizationCodeFlow flow = builder.setDataStoreFactory(MemoryDataStoreFactory.getDefaultInstance())
-          .build();
+      AuthorizationCodeFlow flow = builder.setDataStoreFactory(MemoryDataStoreFactory.getDefaultInstance()).build();
 
       Credential credential = flow.createAndStoreCredential(tokenResponse, authorizationCode);
       String internalReferenceToken = UUID.randomUUID().toString();
@@ -213,7 +226,7 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
 
   @Override
   public synchronized UserFromAuthProvider getUserInfo(final String internalProviderReference)
-      throws NoUserException, AuthenticatorSecurityException {
+    throws NoUserException, AuthenticatorSecurityException {
     Credential credentials = credentialStore.get(internalProviderReference);
 
     if (verifyAccessTokenIsValid(credentials)) {
@@ -221,7 +234,8 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
     } else {
       log.error("Unable to verify access token - it could be an indication of fraud.");
       throw new AuthenticatorSecurityException(
-          "Access token is invalid - the client id returned by the identity provider does not match ours.");
+        "Access token is invalid - the client id returned by the identity provider does not match ours."
+      );
     }
 
     FacebookUser userInfo = null;
@@ -230,8 +244,7 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
       GenericUrl url = new GenericUrl(USER_INFO_URL + "?fields=" + requestedFields);
       url.set("access_token", credentials.getAccessToken());
 
-      userInfo = JsonLoader.load(inputStreamToString(url.toURL().openStream()),
-          FacebookUser.class, true);
+      userInfo = JsonLoader.load(inputStreamToString(url.toURL().openStream()), FacebookUser.class, true);
 
       log.debug("Retrieved User info from Facebook");
     } catch (IOException e) {
@@ -239,8 +252,9 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
     }
 
     if (userInfo != null && userInfo.getId() != null) {
-      EmailVerificationStatus emailStatus =
-          userInfo.isVerified() ? EmailVerificationStatus.VERIFIED : EmailVerificationStatus.NOT_VERIFIED;
+      EmailVerificationStatus emailStatus = userInfo.isVerified()
+        ? EmailVerificationStatus.VERIFIED
+        : EmailVerificationStatus.NOT_VERIFIED;
       String email = userInfo.getEmail();
       if (null == email) {
         email = userInfo.getId() + "-facebook";
@@ -248,8 +262,16 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
         log.warn("No email address provided by Facebook! Using (" + email + ") instead");
       }
 
-      return new UserFromAuthProvider(userInfo.getId(), userInfo.getFirstName(),
-          userInfo.getLastName(), email, emailStatus, null, null, null);
+      return new UserFromAuthProvider(
+        userInfo.getId(),
+        userInfo.getFirstName(),
+        userInfo.getLastName(),
+        email,
+        emailStatus,
+        null,
+        null,
+        null
+      );
     } else {
       throw new NoUserException("No user could be created from provider details!");
     }
@@ -269,8 +291,11 @@ public class FacebookAuthenticator implements IOAuth2Authenticator {
       urlBuilder.set("access_token", clientId + "|" + clientSecret);
       urlBuilder.set("input_token", credentials.getAccessToken());
 
-      FacebookTokenInfo info = JsonLoader.load(inputStreamToString(urlBuilder.toURL().openStream()),
-          FacebookTokenInfo.class, true);
+      FacebookTokenInfo info = JsonLoader.load(
+        inputStreamToString(urlBuilder.toURL().openStream()),
+        FacebookTokenInfo.class,
+        true
+      );
       return info.getData().getAppId().equals(clientId) && info.getData().isValid();
     } catch (IOException e) {
       log.error("IO error while trying to validate oauth2 security token.");

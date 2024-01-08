@@ -148,8 +148,10 @@ public class UserAccountManager implements IUserAccountManager {
 
   private final Pattern restrictedSignupEmailRegex;
   private static final int USER_NAME_MAX_LENGTH = 255;
-  private static final Pattern USER_NAME_PERMITTED_CHARS_REGEX =
-      Pattern.compile("^[\\p{L}\\d_\\-' ]+$", Pattern.CANON_EQ);
+  private static final Pattern USER_NAME_PERMITTED_CHARS_REGEX = Pattern.compile(
+    "^[\\p{L}\\d_\\-' ]+$",
+    Pattern.CANON_EQ
+  );
   private static final Pattern EMAIL_PERMITTED_CHARS_REGEX = Pattern.compile("^[a-zA-Z0-9!#$%&'+\\-=?^_`.{|}~@]+$");
   private static final Pattern EMAIL_CONSECUTIVE_FULL_STOP_REGEX = Pattern.compile("\\.\\.");
 
@@ -173,16 +175,20 @@ public class UserAccountManager implements IUserAccountManager {
    * @param schoolListReader          - to look up a users school.
    */
   @Inject
-  public UserAccountManager(final IUserDataManager database, final QuestionManager questionDb,
-                            final PropertiesLoader properties,
-                            final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
-                            final MapperFacade dtoMapper,
-                            final EmailManager emailQueue, final IAnonymousUserDataManager temporaryUserCache,
-                            final ILogManager logManager, final UserAuthenticationManager userAuthenticationManager,
-                            final ISecondFactorAuthenticator secondFactorManager,
-                            final AbstractUserPreferenceManager userPreferenceManager,
-                            final SchoolListReader schoolListReader) {
-
+  public UserAccountManager(
+    final IUserDataManager database,
+    final QuestionManager questionDb,
+    final PropertiesLoader properties,
+    final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
+    final MapperFacade dtoMapper,
+    final EmailManager emailQueue,
+    final IAnonymousUserDataManager temporaryUserCache,
+    final ILogManager logManager,
+    final UserAuthenticationManager userAuthenticationManager,
+    final ISecondFactorAuthenticator secondFactorManager,
+    final AbstractUserPreferenceManager userPreferenceManager,
+    final SchoolListReader schoolListReader
+  ) {
     Validate.notNull(properties.getProperty(HMAC_SALT));
     Validate.notNull(properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
     Validate.notNull(properties.getProperty(HOST_NAME));
@@ -227,7 +233,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws AuthenticationProviderMappingException - as per exception description.
    */
   public URI authenticate(final HttpServletRequest request, final String provider)
-      throws IOException, AuthenticationProviderMappingException {
+    throws IOException, AuthenticationProviderMappingException {
     return this.userAuthenticationManager.getThirdPartyAuthURI(request, provider);
   }
 
@@ -246,7 +252,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws AuthenticationProviderMappingException - as per exception description.
    */
   public URI initiateLinkAccountToUserFlow(final HttpServletRequest request, final String provider)
-      throws IOException, AuthenticationProviderMappingException {
+    throws IOException, AuthenticationProviderMappingException {
     // record our intention to link an account.
     request.getSession().setAttribute(LINK_ACCOUNT_PARAM_NAME, Boolean.TRUE);
 
@@ -273,19 +279,23 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws CodeExchangeException                  - as per exception description.
    * @throws AuthenticationCodeException            - as per exception description.
    */
-  public RegisteredUserDTO authenticateCallback(final HttpServletRequest request,
-                                                final HttpServletResponse response, final String provider)
-      throws AuthenticationProviderMappingException,
-      AuthenticatorSecurityException, NoUserException, IOException, SegueDatabaseException,
-      AuthenticationCodeException, CodeExchangeException, CrossSiteRequestForgeryException {
+  public RegisteredUserDTO authenticateCallback(
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final String provider
+  )
+    throws AuthenticationProviderMappingException, AuthenticatorSecurityException, NoUserException, IOException, SegueDatabaseException, AuthenticationCodeException, CodeExchangeException, CrossSiteRequestForgeryException {
     IAuthenticator authenticator = this.userAuthenticationManager.mapToProvider(provider);
     // get the auth provider user data.
-    UserFromAuthProvider providerUserDO = this.userAuthenticationManager.getThirdPartyUserInformation(request,
-        provider);
+    UserFromAuthProvider providerUserDO =
+      this.userAuthenticationManager.getThirdPartyUserInformation(request, provider);
 
     // if the UserFromAuthProvider exists then this is a login request so process it.
-    RegisteredUser userFromLinkedAccount = this.userAuthenticationManager.getSegueUserFromLinkedAccount(
-        authenticator.getAuthenticationProvider(), providerUserDO.getProviderUserId());
+    RegisteredUser userFromLinkedAccount =
+      this.userAuthenticationManager.getSegueUserFromLinkedAccount(
+          authenticator.getAuthenticationProvider(),
+          providerUserDO.getProviderUserId()
+        );
     if (userFromLinkedAccount != null) {
       return this.logUserIn(request, response, userFromLinkedAccount);
     }
@@ -295,42 +305,59 @@ public class UserAccountManager implements IUserAccountManager {
     if (null != currentUser) {
       Boolean intentionToLinkRegistered = (Boolean) request.getSession().getAttribute(LINK_ACCOUNT_PARAM_NAME);
       if (intentionToLinkRegistered == null || !intentionToLinkRegistered) {
-        throw new SegueDatabaseException("User is already authenticated - "
-            + "expected request to link accounts but none was found.");
+        throw new SegueDatabaseException(
+          "User is already authenticated - " + "expected request to link accounts but none was found."
+        );
       }
 
       List<AuthenticationProvider> usersProviders = this.database.getAuthenticationProvidersByUser(currentUser);
       if (!usersProviders.contains(authenticator.getAuthenticationProvider())) {
         // create linked account
-        this.userAuthenticationManager.linkProviderToExistingAccount(currentUser,
-            authenticator.getAuthenticationProvider(), providerUserDO);
+        this.userAuthenticationManager.linkProviderToExistingAccount(
+            currentUser,
+            authenticator.getAuthenticationProvider(),
+            providerUserDO
+          );
         // clear link accounts intention until next time
         request.removeAttribute(LINK_ACCOUNT_PARAM_NAME);
       }
 
       return this.convertUserDOToUserDTO(getCurrentRegisteredUserDO(request));
     } else {
-      if (providerUserDO.getEmail() != null && !providerUserDO.getEmail().isEmpty()
-          && this.findUserByEmail(providerUserDO.getEmail()) != null) {
-        log.warn("A user tried to use unknown provider '" + sanitiseExternalLogValue(capitalizeFully(provider))
-            + "' to log in to an account with matching email (" + providerUserDO.getEmail() + ").");
-        throw new DuplicateAccountException("You do not use " + capitalizeFully(provider) + " to log on to Isaac."
-            + " You may have registered using a different provider, or a username and password.");
+      if (
+        providerUserDO.getEmail() != null &&
+        !providerUserDO.getEmail().isEmpty() &&
+        this.findUserByEmail(providerUserDO.getEmail()) != null
+      ) {
+        log.warn(
+          "A user tried to use unknown provider '" +
+          sanitiseExternalLogValue(capitalizeFully(provider)) +
+          "' to log in to an account with matching email (" +
+          providerUserDO.getEmail() +
+          ")."
+        );
+        throw new DuplicateAccountException(
+          "You do not use " +
+          capitalizeFully(provider) +
+          " to log on to Isaac." +
+          " You may have registered using a different provider, or a username and password."
+        );
       }
       // this must be a registration request
-      RegisteredUser segueUserDO = this.registerUserWithFederatedProvider(
-          authenticator.getAuthenticationProvider(), providerUserDO);
+      RegisteredUser segueUserDO =
+        this.registerUserWithFederatedProvider(authenticator.getAuthenticationProvider(), providerUserDO);
       RegisteredUserDTO segueUserDTO = this.logUserIn(request, response, segueUserDO);
       segueUserDTO.setFirstLogin(true);
 
       try {
-        ImmutableMap<String, Object> emailTokens = ImmutableMap.of("provider",
-            capitalizeFully(provider));
+        ImmutableMap<String, Object> emailTokens = ImmutableMap.of("provider", capitalizeFully(provider));
 
-        emailManager.sendTemplatedEmailToUser(segueUserDTO,
-            emailManager.getEmailTemplateDTO("email-template-registration-confirmation-federated"),
-            emailTokens, EmailType.SYSTEM);
-
+        emailManager.sendTemplatedEmailToUser(
+          segueUserDTO,
+          emailManager.getEmailTemplateDTO("email-template-registration-confirmation-federated"),
+          emailTokens,
+          EmailType.SYSTEM
+        );
       } catch (ContentManagerException e) {
         log.error("Registration email could not be sent due to content issue: " + e.getMessage());
       }
@@ -358,20 +385,23 @@ public class UserAccountManager implements IUserAccountManager {
    *                                                         enabled for the account
    * @throws SegueDatabaseException                    - if there is a problem with the database.
    */
-  public final RegisteredUserDTO authenticateWithCredentials(final HttpServletRequest request,
-                                                             final HttpServletResponse response, final String provider,
-                                                             final String email, final String password)
-      throws AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-      NoCredentialsAvailableException, SegueDatabaseException, AdditionalAuthenticationRequiredException,
-      MFARequiredButNotConfiguredException, InvalidKeySpecException, NoSuchAlgorithmException {
+  public final RegisteredUserDTO authenticateWithCredentials(
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final String provider,
+    final String email,
+    final String password
+  )
+    throws AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException, AdditionalAuthenticationRequiredException, MFARequiredButNotConfiguredException, InvalidKeySpecException, NoSuchAlgorithmException {
     Validate.notBlank(email);
     Validate.notBlank(password);
 
     // get the current user based on their session id information.
     RegisteredUserDTO currentUser = this.convertUserDOToUserDTO(this.getCurrentRegisteredUserDO(request));
     if (null != currentUser) {
-      log.debug(String.format("UserId (%s) already has a valid session - not bothering to reauthenticate",
-          currentUser.getId()));
+      log.debug(
+        String.format("UserId (%s) already has a valid session - not bothering to reauthenticate", currentUser.getId())
+      );
       return currentUser;
     }
 
@@ -402,14 +432,18 @@ public class UserAccountManager implements IUserAccountManager {
    * @param registeredUserContexts - a List of User Contexts (stage, exam board)
    * @return the updated user object.
    */
-  public Response createUserObjectAndLogIn(final HttpServletRequest request, final HttpServletResponse response,
-                                           final RegisteredUser userObjectFromClient, final String newPassword,
-                                           final Map<String, Map<String, Boolean>> userPreferenceObject,
-                                           final List<UserContext> registeredUserContexts)
-      throws InvalidKeySpecException, NoSuchAlgorithmException {
+  public Response createUserObjectAndLogIn(
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final RegisteredUser userObjectFromClient,
+    final String newPassword,
+    final Map<String, Map<String, Boolean>> userPreferenceObject,
+    final List<UserContext> registeredUserContexts
+  )
+    throws InvalidKeySpecException, NoSuchAlgorithmException {
     try {
-      RegisteredUserDTO savedUser = this.createUserObjectAndSession(request, response,
-          userObjectFromClient, newPassword, registeredUserContexts);
+      RegisteredUserDTO savedUser =
+        this.createUserObjectAndSession(request, response, userObjectFromClient, newPassword, registeredUserContexts);
 
       if (userPreferenceObject != null) {
         List<UserPreference> userPreferences = userPreferenceObjectToList(userPreferenceObject, savedUser.getId());
@@ -422,31 +456,39 @@ public class UserAccountManager implements IUserAccountManager {
       return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
     } catch (FailedToHashPasswordException e) {
       log.error("Failed to hash password during user registration!");
-      return new SegueErrorResponse(Response.Status.INTERNAL_SERVER_ERROR,
-          "Unable to set a password.").toResponse();
+      return new SegueErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unable to set a password.").toResponse();
     } catch (MissingRequiredFieldException e) {
       log.warn(String.format("Missing field during update operation: %s ", e.getMessage()));
-      return new SegueErrorResponse(Response.Status.BAD_REQUEST, "You are missing a required field. "
-          + "Please make sure you have specified all mandatory fields in your response.").toResponse();
+      return new SegueErrorResponse(
+        Response.Status.BAD_REQUEST,
+        "You are missing a required field. " +
+        "Please make sure you have specified all mandatory fields in your response."
+      )
+      .toResponse();
     } catch (DuplicateAccountException e) {
-      log.warn(String.format("Duplicate account registration attempt for (%s)",
-          sanitiseExternalLogValue(userObjectFromClient.getEmail())));
+      log.warn(
+        String.format(
+          "Duplicate account registration attempt for (%s)",
+          sanitiseExternalLogValue(userObjectFromClient.getEmail())
+        )
+      );
       return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
     } catch (SegueDatabaseException e) {
       String errorMsg = "Unable to set a password, due to an internal database error.";
       log.error(errorMsg, e);
       return new SegueErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (EmailMustBeVerifiedException e) {
-      log.warn("Someone attempted to register with an Isaac email address: "
-          + sanitiseExternalLogValue(userObjectFromClient.getEmail()));
-      return new SegueErrorResponse(Response.Status.BAD_REQUEST,
-          "You cannot register with an Isaac email address.").toResponse();
+      log.warn(
+        "Someone attempted to register with an Isaac email address: " +
+        sanitiseExternalLogValue(userObjectFromClient.getEmail())
+      );
+      return new SegueErrorResponse(Response.Status.BAD_REQUEST, "You cannot register with an Isaac email address.")
+      .toResponse();
     } catch (InvalidNameException e) {
       log.warn("Invalid name provided during registration.");
       return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
     }
   }
-
 
   /**
    * Convert user-provided preference maps to UserPreference lists.
@@ -455,49 +497,70 @@ public class UserAccountManager implements IUserAccountManager {
    * @param userId               - the userId of the user
    * @return whether the preference is valid
    */
-  private List<UserPreference> userPreferenceObjectToList(final Map<String, Map<String, Boolean>> userPreferenceObject,
-                                                          final long userId) {
+  private List<UserPreference> userPreferenceObjectToList(
+    final Map<String, Map<String, Boolean>> userPreferenceObject,
+    final long userId
+  ) {
     List<UserPreference> userPreferences = com.google.common.collect.Lists.newArrayList();
     if (null == userPreferenceObject) {
       return userPreferences;
     }
     // FIXME: This entire method is horrible, but required to sanitise what is stored in the database . . .
     for (String preferenceType : userPreferenceObject.keySet()) {
-
       // Check if the given preference type is one we support:
-      if (!EnumUtils.isValidEnum(uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacUserPreferences.class, preferenceType)
-          && !EnumUtils.isValidEnum(SegueUserPreferences.class, preferenceType)) {
+      if (
+        !EnumUtils.isValidEnum(uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacUserPreferences.class, preferenceType) &&
+        !EnumUtils.isValidEnum(SegueUserPreferences.class, preferenceType)
+      ) {
         log.warn("Unknown user preference type '" + sanitiseExternalLogValue(preferenceType) + "' provided. Skipping.");
         continue;
       }
 
-      if (EnumUtils.isValidEnum(SegueUserPreferences.class, preferenceType)
-          && SegueUserPreferences.EMAIL_PREFERENCE.equals(SegueUserPreferences.valueOf(preferenceType))) {
+      if (
+        EnumUtils.isValidEnum(SegueUserPreferences.class, preferenceType) &&
+        SegueUserPreferences.EMAIL_PREFERENCE.equals(SegueUserPreferences.valueOf(preferenceType))
+      ) {
         // This is an email preference, which is treated specially:
         for (String preferenceName : userPreferenceObject.get(preferenceType).keySet()) {
-          if (!EnumUtils.isValidEnum(EmailType.class, preferenceName)
-              || !EmailType.valueOf(preferenceName).isValidEmailPreference()) {
-            log.warn("Invalid email preference name '" + sanitiseExternalLogValue(preferenceName) + "' provided for '"
-                + sanitiseExternalLogValue(preferenceType) + "'! Skipping.");
+          if (
+            !EnumUtils.isValidEnum(EmailType.class, preferenceName) ||
+            !EmailType.valueOf(preferenceName).isValidEmailPreference()
+          ) {
+            log.warn(
+              "Invalid email preference name '" +
+              sanitiseExternalLogValue(preferenceName) +
+              "' provided for '" +
+              sanitiseExternalLogValue(preferenceType) +
+              "'! Skipping."
+            );
             continue;
           }
           boolean preferenceValue = userPreferenceObject.get(preferenceType).get(preferenceName);
           userPreferences.add(new UserPreference(userId, preferenceType, preferenceName, preferenceValue));
         }
-      } else if (EnumUtils.isValidEnum(uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacUserPreferences.class,
-          preferenceType)) {
+      } else if (
+        EnumUtils.isValidEnum(uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacUserPreferences.class, preferenceType)
+      ) {
         // Isaac user preference names are configured in the config files:
         String acceptedPreferenceNamesProperty = properties.getProperty(preferenceType);
         if (null == acceptedPreferenceNamesProperty) {
-          log.error("Failed to find allowed user preferences names for '" + sanitiseExternalLogValue(preferenceType)
-              + "'! Has it been configured?");
+          log.error(
+            "Failed to find allowed user preferences names for '" +
+            sanitiseExternalLogValue(preferenceType) +
+            "'! Has it been configured?"
+          );
           acceptedPreferenceNamesProperty = "";
         }
         List<String> acceptedPreferenceNames = Arrays.asList(acceptedPreferenceNamesProperty.split(","));
         for (String preferenceName : userPreferenceObject.get(preferenceType).keySet()) {
           if (!acceptedPreferenceNames.contains(preferenceName)) {
-            log.warn("Invalid user preference name '" + sanitiseExternalLogValue(preferenceName)
-                + "' provided for type '" + sanitiseExternalLogValue(preferenceType) + "'! Skipping.");
+            log.warn(
+              "Invalid user preference name '" +
+              sanitiseExternalLogValue(preferenceName) +
+              "' provided for type '" +
+              sanitiseExternalLogValue(preferenceType) +
+              "'! Skipping."
+            );
             continue;
           }
           boolean preferenceValue = userPreferenceObject.get(preferenceType).get(preferenceName);
@@ -505,7 +568,8 @@ public class UserAccountManager implements IUserAccountManager {
         }
       } else {
         log.warn(
-            "Unexpected user preference type '" + sanitiseExternalLogValue(preferenceType) + "' provided. Skipping.");
+          "Unexpected user preference type '" + sanitiseExternalLogValue(preferenceType) + "' provided. Skipping."
+        );
       }
     }
     return userPreferences;
@@ -529,13 +593,16 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws InvalidKeySpecException               - if the preconfigured key spec is invalid
    * @throws NoSuchAlgorithmException              - if the configured algorithm is not valid
    */
-  public Response updateUserObject(final HttpServletRequest request, final HttpServletResponse response,
-                                   final RegisteredUser userObjectFromClient, final String passwordCurrent,
-                                   final String newPassword,
-                                   final Map<String, Map<String, Boolean>> userPreferenceObject,
-                                   final List<UserContext> registeredUserContexts)
-      throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, InvalidKeySpecException,
-      NoSuchAlgorithmException {
+  public Response updateUserObject(
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final RegisteredUser userObjectFromClient,
+    final String passwordCurrent,
+    final String newPassword,
+    final Map<String, Map<String, Boolean>> userPreferenceObject,
+    final List<UserContext> registeredUserContexts
+  )
+    throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, InvalidKeySpecException, NoSuchAlgorithmException {
     Validate.notNull(userObjectFromClient.getId());
 
     // this is an update as the user has an id
@@ -543,33 +610,47 @@ public class UserAccountManager implements IUserAccountManager {
     try {
       // check that the current user has permissions to change this user's details.
       RegisteredUserDTO currentlyLoggedInUser = this.getCurrentRegisteredUser(request);
-      if (!currentlyLoggedInUser.getId().equals(userObjectFromClient.getId())
-          && !checkUserRole(currentlyLoggedInUser, Arrays.asList(Role.ADMIN, Role.EVENT_MANAGER))) {
-        return new SegueErrorResponse(Response.Status.FORBIDDEN,
-            "You cannot change someone else's user settings.").toResponse();
+      if (
+        !currentlyLoggedInUser.getId().equals(userObjectFromClient.getId()) &&
+        !checkUserRole(currentlyLoggedInUser, Arrays.asList(Role.ADMIN, Role.EVENT_MANAGER))
+      ) {
+        return new SegueErrorResponse(Response.Status.FORBIDDEN, "You cannot change someone else's user settings.")
+        .toResponse();
       }
 
       // check if they are trying to change a password
       if (newPassword != null && !newPassword.isEmpty()) {
         // only admins and the account owner can change passwords
-        if (!currentlyLoggedInUser.getId().equals(userObjectFromClient.getId())
-            && !checkUserRole(currentlyLoggedInUser, Collections.singletonList(Role.ADMIN))) {
-          return new SegueErrorResponse(Response.Status.FORBIDDEN,
-              "You cannot change someone else's password.").toResponse();
+        if (
+          !currentlyLoggedInUser.getId().equals(userObjectFromClient.getId()) &&
+          !checkUserRole(currentlyLoggedInUser, Collections.singletonList(Role.ADMIN))
+        ) {
+          return new SegueErrorResponse(Response.Status.FORBIDDEN, "You cannot change someone else's password.")
+          .toResponse();
         }
 
         // Password change requires auth check unless admin is modifying non-admin user account
-        if (!(checkUserRole(currentlyLoggedInUser, Collections.singletonList(Role.ADMIN))
-            && userObjectFromClient.getRole() != Role.ADMIN)) {
+        if (
+          !(
+            checkUserRole(currentlyLoggedInUser, Collections.singletonList(Role.ADMIN)) &&
+            userObjectFromClient.getRole() != Role.ADMIN
+          )
+        ) {
           // authenticate the user to check they are allowed to change the password
 
           if (null == passwordCurrent) {
-            return new SegueErrorResponse(Response.Status.BAD_REQUEST,
-                "You must provide your current password to change your password!").toResponse();
+            return new SegueErrorResponse(
+              Response.Status.BAD_REQUEST,
+              "You must provide your current password to change your password!"
+            )
+            .toResponse();
           }
 
-          this.ensureCorrectPassword(AuthenticationProvider.SEGUE.name(),
-              userObjectFromClient.getEmail(), passwordCurrent);
+          this.ensureCorrectPassword(
+              AuthenticationProvider.SEGUE.name(),
+              userObjectFromClient.getEmail(),
+              passwordCurrent
+            );
         }
       }
 
@@ -578,10 +659,10 @@ public class UserAccountManager implements IUserAccountManager {
 
       // You cannot modify role using this endpoint (an admin needs to go through the endpoint specifically for
       // role modification)
-      if (null == userObjectFromClient.getRole() || !existingUserFromDb.getRole()
-          .equals(userObjectFromClient.getRole())) {
-        return new SegueErrorResponse(Response.Status.FORBIDDEN,
-            "You cannot change a users role.").toResponse();
+      if (
+        null == userObjectFromClient.getRole() || !existingUserFromDb.getRole().equals(userObjectFromClient.getRole())
+      ) {
+        return new SegueErrorResponse(Response.Status.FORBIDDEN, "You cannot change a users role.").toResponse();
       }
 
       if (registeredUserContexts != null) {
@@ -596,7 +677,8 @@ public class UserAccountManager implements IUserAccountManager {
          */
         userObjectFromClient.setRegisteredContexts(existingUserFromDb.getRegisteredContexts());
         userObjectFromClient.setRegisteredContextsLastConfirmed(
-            existingUserFromDb.getRegisteredContextsLastConfirmed());
+          existingUserFromDb.getRegisteredContextsLastConfirmed()
+        );
       }
 
       if (userObjectFromClient.getTeacherPending() == null) {
@@ -606,8 +688,10 @@ public class UserAccountManager implements IUserAccountManager {
       RegisteredUserDTO updatedUser = updateUserObject(userObjectFromClient, newPassword);
 
       // If the user's school has changed, record it. Check this using Objects.equals() to be null safe!
-      if (!Objects.equals(updatedUser.getSchoolId(), existingUserFromDb.getSchoolId())
-          || !Objects.equals(updatedUser.getSchoolOther(), existingUserFromDb.getSchoolOther())) {
+      if (
+        !Objects.equals(updatedUser.getSchoolId(), existingUserFromDb.getSchoolId()) ||
+        !Objects.equals(updatedUser.getSchoolOther(), existingUserFromDb.getSchoolOther())
+      ) {
         LinkedHashMap<String, Object> eventDetails = new LinkedHashMap<>();
         eventDetails.put("oldSchoolId", existingUserFromDb.getSchoolId());
         eventDetails.put("newSchoolId", updatedUser.getSchoolId());
@@ -617,17 +701,19 @@ public class UserAccountManager implements IUserAccountManager {
         if (!Objects.equals(currentlyLoggedInUser.getId(), updatedUser.getId())) {
           // This is an ADMIN user changing another user's school:
           eventDetails.put(USER_ID_FKEY_FIELDNAME, updatedUser.getId());
-          this.logManager.logEvent(currentlyLoggedInUser, request, SegueServerLogType.ADMIN_CHANGE_USER_SCHOOL,
-              eventDetails);
+          this.logManager.logEvent(
+              currentlyLoggedInUser,
+              request,
+              SegueServerLogType.ADMIN_CHANGE_USER_SCHOOL,
+              eventDetails
+            );
         } else {
-          this.logManager.logEvent(currentlyLoggedInUser, request, SegueServerLogType.USER_SCHOOL_CHANGE,
-              eventDetails);
+          this.logManager.logEvent(currentlyLoggedInUser, request, SegueServerLogType.USER_SCHOOL_CHANGE, eventDetails);
         }
       }
 
       if (userPreferenceObject != null) {
-        List<UserPreference> userPreferences = userPreferenceObjectToList(userPreferenceObject,
-            updatedUser.getId());
+        List<UserPreference> userPreferences = userPreferenceObjectToList(userPreferenceObject, updatedUser.getId());
         userPreferenceManager.saveUserPreferences(userPreferences);
       }
 
@@ -635,20 +721,22 @@ public class UserAccountManager implements IUserAccountManager {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (NoUserException e) {
-      return new SegueErrorResponse(Response.Status.NOT_FOUND,
-          "The user specified does not exist.").toResponse();
+      return new SegueErrorResponse(Response.Status.NOT_FOUND, "The user specified does not exist.").toResponse();
     } catch (SegueDatabaseException e) {
       log.error("Unable to modify user", e);
-      return new SegueErrorResponse(Response.Status.INTERNAL_SERVER_ERROR,
-          "Error while modifying the user").toResponse();
+      return new SegueErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Error while modifying the user")
+      .toResponse();
     } catch (InvalidPasswordException e) {
       return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
     } catch (MissingRequiredFieldException e) {
       log.warn(String.format("Missing field during update operation: %s ", e.getMessage()));
       return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
     } catch (AuthenticationProviderMappingException e) {
-      return new SegueErrorResponse(Response.Status.INTERNAL_SERVER_ERROR,
-          "Unable to map to a known authenticator. The provider: is unknown").toResponse();
+      return new SegueErrorResponse(
+        Response.Status.INTERNAL_SERVER_ERROR,
+        "Unable to map to a known authenticator. The provider: is unknown"
+      )
+      .toResponse();
     } catch (InvalidNameException e) {
       log.warn("Invalid name provided during user update.");
       return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
@@ -666,8 +754,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException        - If there is an internal database error.
    */
   public RegisteredUserDTO updateUserObject(final RegisteredUser updatedUser, final String newPassword)
-      throws InvalidPasswordException, MissingRequiredFieldException, SegueDatabaseException,
-      InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException {
+    throws InvalidPasswordException, MissingRequiredFieldException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException {
     Validate.notNull(updatedUser.getId());
 
     // We want to map to DTO first to make sure that the user cannot
@@ -675,7 +762,8 @@ public class UserAccountManager implements IUserAccountManager {
     RegisteredUserDTO userDTOContainingUpdates = this.dtoMapper.map(updatedUser, RegisteredUserDTO.class);
     if (updatedUser.getId() == null) {
       throw new IllegalArgumentException(
-          "The user object specified does not have an id. Users cannot be updated without a specific id set.");
+        "The user object specified does not have an id. Users cannot be updated without a specific id set."
+      );
     }
 
     // This is an update operation.
@@ -683,8 +771,9 @@ public class UserAccountManager implements IUserAccountManager {
     // userToSave = existingUser;
 
     // Check that the user isn't trying to take an existing users e-mail.
-    if (this.findUserByEmail(updatedUser.getEmail()) != null && !existingUser.getEmail()
-        .equals(updatedUser.getEmail())) {
+    if (
+      this.findUserByEmail(updatedUser.getEmail()) != null && !existingUser.getEmail().equals(updatedUser.getEmail())
+    ) {
       throw new DuplicateAccountException("An account with that e-mail address already exists.");
     }
 
@@ -697,8 +786,9 @@ public class UserAccountManager implements IUserAccountManager {
       throw new InvalidNameException("The family name provided is an invalid length or contains forbidden characters.");
     }
 
-    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders
-        .get(AuthenticationProvider.SEGUE);
+    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders.get(
+        AuthenticationProvider.SEGUE
+      );
 
     // Check if there is a new password and it is invalid as early as possible:
     if (null != newPassword && !newPassword.isEmpty()) {
@@ -747,7 +837,6 @@ public class UserAccountManager implements IUserAccountManager {
         RegisteredUserDTO userDTO = this.getUserDTOById(userToSave.getId());
         String emailVerificationToken = userToSave.getEmailVerificationToken();
         this.sendVerificationEmailsForEmailChange(userDTO, newEmail, emailVerificationToken);
-
       } catch (ContentManagerException | NoUserException e) {
         log.error("ContentManagerException during sendEmailVerificationChange " + e.getMessage());
       }
@@ -779,10 +868,12 @@ public class UserAccountManager implements IUserAccountManager {
    *                                                     process.
    * @throws SegueDatabaseException                - if there is a problem with the database.
    */
-  public RegisteredUserDTO authenticateMFA(final HttpServletRequest request, final HttpServletResponse response,
-                                           final Integer totpCode)
-      throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException,
-      NoUserLoggedInException {
+  public RegisteredUserDTO authenticateMFA(
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final Integer totpCode
+  )
+    throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException, NoUserLoggedInException {
     RegisteredUser registeredUser = this.retrievePartialLogInForMFA(request);
 
     if (registeredUser == null) {
@@ -810,13 +901,10 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException                 - if there is a problem with the database.
    */
   public void ensureCorrectPassword(final String provider, final String email, final String password)
-      throws AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, NoUserException,
-      NoCredentialsAvailableException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
-
+    throws AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, NoUserException, NoCredentialsAvailableException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
     // this method will throw an error if the credentials are incorrect.
     this.userAuthenticationManager.getSegueUserFromCredentials(provider, email, password);
   }
-
 
   /**
    * Unlink User From AuthenticationProvider
@@ -831,7 +919,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws AuthenticationProviderMappingException - if we are unable to locate the authentication provider specified.
    */
   public void unlinkUserFromProvider(final RegisteredUserDTO user, final String providerString)
-      throws SegueDatabaseException, MissingRequiredFieldException, AuthenticationProviderMappingException {
+    throws SegueDatabaseException, MissingRequiredFieldException, AuthenticationProviderMappingException {
     RegisteredUser userDO = this.findUserById(user.getId());
     this.userAuthenticationManager.unlinkUserAndProvider(userDO, providerString);
   }
@@ -845,7 +933,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws NoUserLoggedInException - if there is no registered user logged in.
    */
   public final boolean checkUserRole(final HttpServletRequest request, final Collection<Role> validRoles)
-      throws NoUserLoggedInException {
+    throws NoUserLoggedInException {
     RegisteredUserDTO user = this.getCurrentRegisteredUser(request);
 
     return this.checkUserRole(user, validRoles);
@@ -860,7 +948,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws NoUserLoggedInException - if there is no registered user logged in.
    */
   public final boolean checkUserRole(final RegisteredUserDTO user, final Collection<Role> validRoles)
-      throws NoUserLoggedInException {
+    throws NoUserLoggedInException {
     if (null == user) {
       throw new NoUserLoggedInException();
     }
@@ -899,7 +987,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws NoUserLoggedInException - When the session has expired or there is no user currently logged in.
    */
   public final RegisteredUserDTO getCurrentRegisteredUser(final HttpServletRequest request)
-      throws NoUserLoggedInException {
+    throws NoUserLoggedInException {
     Validate.notNull(request);
 
     RegisteredUser user = this.getCurrentRegisteredUserDO(request);
@@ -937,7 +1025,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException - If there is an internal database error
    */
   public final UserAuthenticationSettingsDTO getUsersAuthenticationSettings(final RegisteredUserDTO user)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     Validate.notNull(user);
 
     UserAuthenticationSettings userAuthenticationSettings = this.database.getUserAuthenticationSettings(user.getId());
@@ -956,8 +1044,8 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException - if there is a database error.
    */
   public List<RegisteredUserDTO> findUsers(final RegisteredUserDTO prototype) throws SegueDatabaseException {
-    List<RegisteredUser> registeredUsersDOs = this.database.findUsers(this.dtoMapper.map(prototype,
-        RegisteredUser.class));
+    List<RegisteredUser> registeredUsersDOs =
+      this.database.findUsers(this.dtoMapper.map(prototype, RegisteredUser.class));
 
     return this.convertUserDOListToUserDTOList(registeredUsersDOs);
   }
@@ -1005,8 +1093,8 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException - If there is another database error
    */
   @Override
-  public final RegisteredUserDTO getUserDTOById(final Long id, final boolean includeDeleted) throws NoUserException,
-      SegueDatabaseException {
+  public final RegisteredUserDTO getUserDTOById(final Long id, final boolean includeDeleted)
+    throws NoUserException, SegueDatabaseException {
     RegisteredUser user;
     if (includeDeleted) {
       user = this.database.getById(id, true);
@@ -1028,8 +1116,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws NoUserException        - If we cannot find a valid user with the email address provided.
    * @throws SegueDatabaseException - If there is another database error
    */
-  public final RegisteredUserDTO getUserDTOByEmail(final String email) throws NoUserException,
-      SegueDatabaseException {
+  public final RegisteredUserDTO getUserDTOByEmail(final String email) throws NoUserException, SegueDatabaseException {
     RegisteredUser findUserByEmail = this.findUserByEmail(email);
 
     if (null == findUserByEmail) {
@@ -1063,7 +1150,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @param response to destroy the segue cookie.
    */
   public void logUserOut(final HttpServletRequest request, final HttpServletResponse response)
-      throws NoUserLoggedInException, SegueDatabaseException {
+    throws NoUserLoggedInException, SegueDatabaseException {
     Validate.notNull(request);
     this.userAuthenticationManager.destroyUserSession(request, response);
   }
@@ -1086,18 +1173,21 @@ public class UserAccountManager implements IUserAccountManager {
    *                                             can be used (i.e. an @isaaccomputerscience.org address).
    */
   public RegisteredUserDTO createUserObjectAndSession(
-      final HttpServletRequest request, final HttpServletResponse response, final RegisteredUser user,
-      final String newPassword, final List<UserContext> registeredUserContexts) throws InvalidPasswordException,
-      MissingRequiredFieldException, SegueDatabaseException,
-      EmailMustBeVerifiedException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException {
-    Validate.isTrue(user.getId() == null,
-        "When creating a new user the user id must not be set.");
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final RegisteredUser user,
+    final String newPassword,
+    final List<UserContext> registeredUserContexts
+  )
+    throws InvalidPasswordException, MissingRequiredFieldException, SegueDatabaseException, EmailMustBeVerifiedException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException {
+    Validate.isTrue(user.getId() == null, "When creating a new user the user id must not be set.");
 
     // Ensure nobody registers with Isaac email addresses. Users can change emails to restricted ones by verifying them,
     // however.
     if (null != restrictedSignupEmailRegex && restrictedSignupEmailRegex.matcher(user.getEmail()).find()) {
       log.warn(
-          "User attempted to register with Isaac email address '" + sanitiseExternalLogValue(user.getEmail()) + "'!");
+        "User attempted to register with Isaac email address '" + sanitiseExternalLogValue(user.getEmail()) + "'!"
+      );
       throw new EmailMustBeVerifiedException("You cannot register with an Isaac email address.");
     }
 
@@ -1137,8 +1227,9 @@ public class UserAccountManager implements IUserAccountManager {
       throw new InvalidNameException("The family name provided is an invalid length or contains forbidden characters.");
     }
 
-    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders
-        .get(AuthenticationProvider.SEGUE);
+    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders.get(
+        AuthenticationProvider.SEGUE
+      );
 
     // FIXME: Before creating the user object, ensure password is valid. This should really be in a transaction.
     authenticator.ensureValidPassword(newPassword);
@@ -1164,13 +1255,17 @@ public class UserAccountManager implements IUserAccountManager {
     try {
       RegisteredUserDTO userToReturnDTO = this.getUserDTOById(userToReturn.getId());
 
-      ImmutableMap<String, Object> emailTokens = ImmutableMap.of("verificationURL",
-          generateEmailVerificationURL(userToReturnDTO, userToReturn.getEmailVerificationToken()));
+      ImmutableMap<String, Object> emailTokens = ImmutableMap.of(
+        "verificationURL",
+        generateEmailVerificationURL(userToReturnDTO, userToReturn.getEmailVerificationToken())
+      );
 
-      emailManager.sendTemplatedEmailToUser(userToReturnDTO,
-          emailManager.getEmailTemplateDTO("email-template-registration-confirmation"),
-          emailTokens, EmailType.SYSTEM);
-
+      emailManager.sendTemplatedEmailToUser(
+        userToReturnDTO,
+        emailManager.getEmailTemplateDTO("email-template-registration-confirmation"),
+        emailTokens,
+        EmailType.SYSTEM
+      );
     } catch (ContentManagerException e) {
       log.error("Registration email could not be sent due to content issue: " + e.getMessage());
     } catch (NoUserException e) {
@@ -1181,8 +1276,12 @@ public class UserAccountManager implements IUserAccountManager {
     //TODO: do we need this?
     userToReturn = this.database.createOrUpdateUser(userToReturn);
 
-    logManager.logEvent(this.convertUserDOToUserDTO(userToReturn), request, SegueServerLogType.USER_REGISTRATION,
-        ImmutableMap.builder().put("provider", AuthenticationProvider.SEGUE.name()).build());
+    logManager.logEvent(
+      this.convertUserDOToUserDTO(userToReturn),
+      request,
+      SegueServerLogType.USER_REGISTRATION,
+      ImmutableMap.builder().put("provider", AuthenticationProvider.SEGUE.name()).build()
+    );
 
     // return it to the caller.
     return this.logUserIn(request, response, userToReturn);
@@ -1212,11 +1311,12 @@ public class UserAccountManager implements IUserAccountManager {
           default:
             emailTemplate = "email-template-default-role-change";
         }
-        emailManager.sendTemplatedEmailToUser(existingUserDTO,
-            emailManager.getEmailTemplateDTO(emailTemplate),
-            ImmutableMap.of("oldrole", existingUserDTO.getRole().toString(),
-                "newrole", requestedRole.toString()),
-            EmailType.SYSTEM);
+        emailManager.sendTemplatedEmailToUser(
+          existingUserDTO,
+          emailManager.getEmailTemplateDTO(emailTemplate),
+          ImmutableMap.of("oldrole", existingUserDTO.getRole().toString(), "newrole", requestedRole.toString()),
+          EmailType.SYSTEM
+        );
       }
     } catch (ContentManagerException | NoUserException e) {
       log.debug("ContentManagerException during sendTeacherWelcome " + e.getMessage());
@@ -1232,15 +1332,20 @@ public class UserAccountManager implements IUserAccountManager {
    * @param requestedEmailVerificationStatus - the new email verification status
    * @throws SegueDatabaseException - an exception when accessing the database
    */
-  public void updateUserEmailVerificationStatus(final String email,
-                                                final EmailVerificationStatus requestedEmailVerificationStatus)
-      throws SegueDatabaseException {
+  public void updateUserEmailVerificationStatus(
+    final String email,
+    final EmailVerificationStatus requestedEmailVerificationStatus
+  )
+    throws SegueDatabaseException {
     Validate.notNull(requestedEmailVerificationStatus);
     RegisteredUser userToSave = this.findUserByEmail(email);
     if (null == userToSave) {
-      log.warn(String.format(
+      log.warn(
+        String.format(
           "Could not update email verification status of email address (%s) - does not exist",
-          sanitiseExternalLogValue(email)));
+          sanitiseExternalLogValue(email)
+        )
+      );
       return;
     }
     userToSave.setEmailVerificationStatus(requestedEmailVerificationStatus);
@@ -1275,7 +1380,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException if an error occurs
    */
   public void mergeUserAccounts(final RegisteredUserDTO target, final RegisteredUserDTO source)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     // check the users exist
     if (null == target) {
       throw new SegueDatabaseException("Merge users target is null");
@@ -1298,25 +1403,26 @@ public class UserAccountManager implements IUserAccountManager {
    * @return true if the request was successfully submitted or false if the user was not found
    * @throws SegueDatabaseException - If there is an internal database error.
    */
-  public final boolean resetPasswordRequest(final RegisteredUserDTO userObject)
-      throws SegueDatabaseException {
+  public final boolean resetPasswordRequest(final RegisteredUserDTO userObject) throws SegueDatabaseException {
     RegisteredUser user = this.findUserByEmail(userObject.getEmail());
 
     if (null == user) {
       return false;
     }
 
-    EXECUTOR.submit(() -> {
-      RegisteredUserDTO userDTO = this.convertUserDOToUserDTO(user);
-      try {
-        this.userAuthenticationManager.resetPasswordRequest(user, userDTO);
-        log.info("Password reset sent");
-      } catch (CommunicationException e) {
-        log.error("Error sending reset message.", e);
-      } catch (SegueDatabaseException | InvalidKeySpecException | NoSuchAlgorithmException e) {
-        log.error("Error generating password reset token.", e);
+    EXECUTOR.submit(
+      () -> {
+        RegisteredUserDTO userDTO = this.convertUserDOToUserDTO(user);
+        try {
+          this.userAuthenticationManager.resetPasswordRequest(user, userDTO);
+          log.info("Password reset sent");
+        } catch (CommunicationException e) {
+          log.error("Error sending reset message.", e);
+        } catch (SegueDatabaseException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+          log.error("Error generating password reset token.", e);
+        }
       }
-    });
+    );
     return true;
   }
 
@@ -1329,16 +1435,16 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException - If there is an internal database error.
    */
   public final void emailVerificationRequest(final HttpServletRequest request, final String email)
-      throws SegueDatabaseException {
-
+    throws SegueDatabaseException {
     try {
       RegisteredUserDTO userDTO = getCurrentRegisteredUser(request);
       RegisteredUser user = this.findUserById(userDTO.getId());
 
       // TODO: Email verification stuff does not belong in the password authenticator... It should be moved.
       // Generate token
-      IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders
-          .get(AuthenticationProvider.SEGUE);
+      IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders.get(
+          AuthenticationProvider.SEGUE
+        );
       user = authenticator.createEmailVerificationTokenForUser(user, email);
 
       // Save user object
@@ -1351,10 +1457,13 @@ public class UserAccountManager implements IUserAccountManager {
       } else {
         this.sendVerificationEmailsForEmailChange(userDTO, email, emailVerificationToken);
       }
-
     } catch (NoUserLoggedInException e) {
-      log.error(String.format("Verification requested for email:%s where email does not exist "
-          + "and user not logged in!", sanitiseExternalLogValue(email)));
+      log.error(
+        String.format(
+          "Verification requested for email:%s where email does not exist " + "and user not logged in!",
+          sanitiseExternalLogValue(email)
+        )
+      );
     } catch (ContentManagerException e) {
       log.debug("ContentManagerException " + e.getMessage());
     }
@@ -1370,8 +1479,9 @@ public class UserAccountManager implements IUserAccountManager {
    */
   public final boolean validatePasswordResetToken(final String token) throws SegueDatabaseException {
     // Set user's password
-    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders
-        .get(AuthenticationProvider.SEGUE);
+    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders.get(
+        AuthenticationProvider.SEGUE
+      );
 
     return authenticator.isValidResetToken(token);
   }
@@ -1387,9 +1497,10 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws NoUserException        - if the user does not exist.
    */
   public RegisteredUserDTO processEmailVerification(final Long userId, final String token)
-      throws SegueDatabaseException, InvalidTokenException, NoUserException {
-    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders
-        .get(AuthenticationProvider.SEGUE);
+    throws SegueDatabaseException, InvalidTokenException, NoUserException {
+    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders.get(
+        AuthenticationProvider.SEGUE
+      );
 
     RegisteredUser user = this.findUserById(userId);
 
@@ -1399,16 +1510,15 @@ public class UserAccountManager implements IUserAccountManager {
     }
 
     if (!userId.equals(user.getId())) {
-      log.warn(String.format("Received an invalid email token request by (%s) - provided bad userid",
-          user.getId()));
+      log.warn(String.format("Received an invalid email token request by (%s) - provided bad userid", user.getId()));
       throw new InvalidTokenException();
     }
 
     EmailVerificationStatus evStatus = user.getEmailVerificationStatus();
-    if (evStatus == EmailVerificationStatus.VERIFIED
-        && user.getEmail().equals(user.getEmailToVerify())) {
-      log.warn(String.format("Received a duplicate email verification request for (%s) - already verified",
-          user.getEmail()));
+    if (evStatus == EmailVerificationStatus.VERIFIED && user.getEmail().equals(user.getEmailToVerify())) {
+      log.warn(
+        String.format("Received a duplicate email verification request for (%s) - already verified", user.getEmail())
+      );
       return this.convertUserDOToUserDTO(user);
     }
 
@@ -1421,8 +1531,9 @@ public class UserAccountManager implements IUserAccountManager {
 
       // Save user
       RegisteredUser createOrUpdateUser = this.database.createOrUpdateUser(user);
-      log.info(String.format("Email verification for user (%s) has completed successfully.",
-          createOrUpdateUser.getId()));
+      log.info(
+        String.format("Email verification for user (%s) has completed successfully.", createOrUpdateUser.getId())
+      );
       return this.convertUserDOToUserDTO(createOrUpdateUser);
     } else {
       log.warn(String.format("Received an invalid email verification token for (%s) - invalid token", userId));
@@ -1441,8 +1552,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException   - If there is an internal database error.
    */
   public RegisteredUserDTO resetPassword(final String token, final String newPassword)
-      throws InvalidTokenException, InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException,
-      NoSuchAlgorithmException {
+    throws InvalidTokenException, InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
     return this.convertUserDOToUserDTO(this.userAuthenticationManager.resetPassword(token, newPassword));
   }
 
@@ -1476,8 +1586,12 @@ public class UserAccountManager implements IUserAccountManager {
    * @return true if it is now active on the account, false if secret / TOTP code do not match.
    * @throws SegueDatabaseException - unable to save secret to account.
    */
-  public boolean activateMFAForUser(final RegisteredUserDTO user, final String sharedSecret,
-                                    final Integer codeSubmitted) throws SegueDatabaseException {
+  public boolean activateMFAForUser(
+    final RegisteredUserDTO user,
+    final String sharedSecret,
+    final Integer codeSubmitted
+  )
+    throws SegueDatabaseException {
     return this.secondFactorManager.activate2FAForUser(user, sharedSecret, codeSubmitted);
   }
 
@@ -1510,8 +1624,9 @@ public class UserAccountManager implements IUserAccountManager {
    * @return a summarised DTO object with details as per the specified detailedDTOClass
    */
   public <T extends UserSummaryDTO> T convertToUserSummary(
-          final RegisteredUserDTO userToConvert,
-          final Class<T> detailedDtoClass) {
+    final RegisteredUserDTO userToConvert,
+    final Class<T> detailedDtoClass
+  ) {
     return this.dtoMapper.map(userToConvert, detailedDtoClass);
   }
 
@@ -1538,8 +1653,9 @@ public class UserAccountManager implements IUserAccountManager {
    * @return a list of summarised objects with reduced personal information
    */
   public List<UserSummaryWithEmailAddressDTO> convertToDetailedUserSummaryObjectList(
-      final List<RegisteredUserDTO> userListToConvert,
-      final Class<? extends UserSummaryWithEmailAddressDTO> detailedDTO) {
+    final List<RegisteredUserDTO> userListToConvert,
+    final Class<? extends UserSummaryWithEmailAddressDTO> detailedDTO
+  ) {
     Validate.notNull(userListToConvert);
     List<UserSummaryWithEmailAddressDTO> resultList = Lists.newArrayList();
     for (RegisteredUserDTO user : userListToConvert) {
@@ -1559,13 +1675,12 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws NoUserLoggedInException if they haven't started the flow.
    */
   public UserSummaryWithEmailAddressDTO getPartiallyIdentifiedUser(final HttpServletRequest request)
-      throws NoUserLoggedInException {
+    throws NoUserLoggedInException {
     RegisteredUser registeredUser = this.retrievePartialLogInForMFA(request);
     if (null == registeredUser) {
       throw new NoUserLoggedInException();
     }
-    return this.convertToUserSummary(this.convertUserDOToUserDTO(registeredUser),
-        UserSummaryWithEmailAddressDTO.class);
+    return this.convertToUserSummary(this.convertUserDOToUserDTO(registeredUser), UserSummaryWithEmailAddressDTO.class);
   }
 
   /**
@@ -1576,14 +1691,16 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws ContentManagerException - if the email template does not exist.
    * @throws SegueDatabaseException  - if there is a database exception during the processing of the email.
    */
-  private void sendVerificationEmailForCurrentEmail(final RegisteredUserDTO userDTO,
-                                                    final String emailVerificationToken)
-      throws ContentManagerException, SegueDatabaseException {
-
-    EmailTemplateDTO emailVerificationTemplate =
-        emailManager.getEmailTemplateDTO("email-template-email-verification");
-    Map<String, Object> emailTokens =
-        ImmutableMap.of("verificationURL", this.generateEmailVerificationURL(userDTO, emailVerificationToken));
+  private void sendVerificationEmailForCurrentEmail(
+    final RegisteredUserDTO userDTO,
+    final String emailVerificationToken
+  )
+    throws ContentManagerException, SegueDatabaseException {
+    EmailTemplateDTO emailVerificationTemplate = emailManager.getEmailTemplateDTO("email-template-email-verification");
+    Map<String, Object> emailTokens = ImmutableMap.of(
+      "verificationURL",
+      this.generateEmailVerificationURL(userDTO, emailVerificationToken)
+    );
 
     log.info(String.format("Sending email verification message to %s", sanitiseExternalLogValue(userDTO.getEmail())));
 
@@ -1600,16 +1717,23 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws ContentManagerException - if the email template does not exist.
    * @throws SegueDatabaseException  - if there is a database exception during the processing of the email.
    */
-  private void sendVerificationEmailsForEmailChange(final RegisteredUserDTO userDTO,
-                                                    final String newEmail,
-                                                    final String newEmailToken)
-      throws ContentManagerException, SegueDatabaseException {
-
+  private void sendVerificationEmailsForEmailChange(
+    final RegisteredUserDTO userDTO,
+    final String newEmail,
+    final String newEmailToken
+  )
+    throws ContentManagerException, SegueDatabaseException {
     EmailTemplateDTO emailChangeTemplate = emailManager.getEmailTemplateDTO("email-verification-change");
     Map<String, Object> emailTokens = ImmutableMap.of("requestedemail", newEmail);
 
-    log.info(String.format("Sending email for email address change for user (%s)"
-        + " from email (%s) to email (%s)", userDTO.getId(), userDTO.getEmail(), sanitiseExternalLogValue(newEmail)));
+    log.info(
+      String.format(
+        "Sending email for email address change for user (%s)" + " from email (%s) to email (%s)",
+        userDTO.getId(),
+        userDTO.getEmail(),
+        sanitiseExternalLogValue(newEmail)
+      )
+    );
     emailManager.sendTemplatedEmailToUser(userDTO, emailChangeTemplate, emailTokens, EmailType.SYSTEM);
 
     // Defensive copy to ensure old email address is preserved (shouldn't change until new email is verified)
@@ -1628,12 +1752,20 @@ public class UserAccountManager implements IUserAccountManager {
    * @return the DTO version of the user.
    * @throws SegueDatabaseException - if there is a problem with the database.
    */
-  private RegisteredUserDTO logUserIn(final HttpServletRequest request, final HttpServletResponse response,
-                                      final RegisteredUser user) throws SegueDatabaseException {
+  private RegisteredUserDTO logUserIn(
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final RegisteredUser user
+  )
+    throws SegueDatabaseException {
     AnonymousUser anonymousUser = this.getAnonymousUserDO(request);
     if (anonymousUser != null) {
-      log.debug(String.format("Anonymous User (%s) located during login - need to merge question information",
-          anonymousUser.getSessionId()));
+      log.debug(
+        String.format(
+          "Anonymous User (%s) located during login - need to merge question information",
+          anonymousUser.getSessionId()
+        )
+      );
     }
 
     // now we want to clean up any data generated by the user while they weren't logged in.
@@ -1651,8 +1783,12 @@ public class UserAccountManager implements IUserAccountManager {
    * @param response - response to update cookie information
    * @param user     - user of interest
    */
-  private void partialLogInForMFA(final HttpServletRequest request, final HttpServletResponse response,
-                                  final RegisteredUser user) throws SegueDatabaseException {
+  private void partialLogInForMFA(
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final RegisteredUser user
+  )
+    throws SegueDatabaseException {
     this.userAuthenticationManager.createIncompleteLoginUserSession(request, response, user);
   }
 
@@ -1681,19 +1817,24 @@ public class UserAccountManager implements IUserAccountManager {
         final RegisteredUserDTO userDTO = this.convertUserDOToUserDTO(user);
 
         this.questionAttemptDb.mergeAnonymousQuestionAttemptsIntoRegisteredUser(
-            this.dtoMapper.map(anonymousUser, AnonymousUserDTO.class), userDTO);
+            this.dtoMapper.map(anonymousUser, AnonymousUserDTO.class),
+            userDTO
+          );
 
         // may as well spawn a new thread to do the log migration stuff asynchronously
         // work now.
         Thread logMigrationJob = new Thread() {
+
           @Override
           public void run() {
             // run this asynchronously as there is no need to block and it is quite slow.
-            logManager.transferLogEventsToRegisteredUser(anonymousUser.getSessionId(), user.getId()
-                .toString());
+            logManager.transferLogEventsToRegisteredUser(anonymousUser.getSessionId(), user.getId().toString());
 
-            logManager.logInternalEvent(userDTO, SegueServerLogType.MERGE_USER,
-                ImmutableMap.of("oldAnonymousUserId", anonymousUser.getSessionId()));
+            logManager.logInternalEvent(
+              userDTO,
+              SegueServerLogType.MERGE_USER,
+              ImmutableMap.of("oldAnonymousUserId", anonymousUser.getSessionId())
+            );
 
             // delete the session attribute as merge has completed.
             try {
@@ -1705,7 +1846,6 @@ public class UserAccountManager implements IUserAccountManager {
         };
 
         logMigrationJob.start();
-
       } catch (SegueDatabaseException e) {
         log.error("Unable to merge anonymously collected data with stored user object.", e);
       }
@@ -1751,15 +1891,15 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws NoUserException        - If we are unable to locate the user id based on the lookup reference provided.
    * @throws SegueDatabaseException - If there is an internal database error.
    */
-  private RegisteredUser registerUserWithFederatedProvider(final AuthenticationProvider federatedAuthenticator,
-                                                           final UserFromAuthProvider userFromProvider)
-      throws NoUserException, SegueDatabaseException {
-
+  private RegisteredUser registerUserWithFederatedProvider(
+    final AuthenticationProvider federatedAuthenticator,
+    final UserFromAuthProvider userFromProvider
+  )
+    throws NoUserException, SegueDatabaseException {
     log.debug(String.format("New registration (%s) as user does not already exist.", federatedAuthenticator));
 
     if (null == userFromProvider) {
-      log.warn("Unable to create user for the provider "
-          + federatedAuthenticator);
+      log.warn("Unable to create user for the provider " + federatedAuthenticator);
       throw new NoUserException("No user returned by the provider!");
     }
 
@@ -1767,8 +1907,11 @@ public class UserAccountManager implements IUserAccountManager {
     newLocalUser.setRegistrationDate(new Date());
 
     // register user
-    RegisteredUser newlyRegisteredUser = database.registerNewUserWithProvider(newLocalUser,
-        federatedAuthenticator, userFromProvider.getProviderUserId());
+    RegisteredUser newlyRegisteredUser = database.registerNewUserWithProvider(
+      newLocalUser,
+      federatedAuthenticator,
+      userFromProvider.getProviderUserId()
+    );
 
     RegisteredUser localUserInformation = this.database.getById(newlyRegisteredUser.getId());
 
@@ -1779,15 +1922,18 @@ public class UserAccountManager implements IUserAccountManager {
     }
 
     // since the federated providers didn't always provide email addresses - we have to check and update accordingly.
-    if (!localUserInformation.getEmail().contains("@")
-        && !EmailVerificationStatus.DELIVERY_FAILED.equals(localUserInformation.getEmailVerificationStatus())) {
-      this.updateUserEmailVerificationStatus(localUserInformation.getEmail(),
-          EmailVerificationStatus.DELIVERY_FAILED);
+    if (
+      !localUserInformation.getEmail().contains("@") &&
+      !EmailVerificationStatus.DELIVERY_FAILED.equals(localUserInformation.getEmailVerificationStatus())
+    ) {
+      this.updateUserEmailVerificationStatus(localUserInformation.getEmail(), EmailVerificationStatus.DELIVERY_FAILED);
     }
 
-    logManager.logInternalEvent(this.convertUserDOToUserDTO(localUserInformation), SegueServerLogType.USER_REGISTRATION,
-        ImmutableMap.builder().put("provider", federatedAuthenticator.name())
-            .build());
+    logManager.logInternalEvent(
+      this.convertUserDOToUserDTO(localUserInformation),
+      SegueServerLogType.USER_REGISTRATION,
+      ImmutableMap.builder().put("provider", federatedAuthenticator.name()).build()
+    );
 
     return localUserInformation;
   }
@@ -1803,11 +1949,13 @@ public class UserAccountManager implements IUserAccountManager {
   }
 
   public static boolean isEmailValid(final String email) {
-    return email != null
-        && !email.isEmpty()
-        && email.matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")
-        && EMAIL_PERMITTED_CHARS_REGEX.matcher(email).matches()
-        && !EMAIL_CONSECUTIVE_FULL_STOP_REGEX.matcher(email).find();
+    return (
+      email != null &&
+      !email.isEmpty() &&
+      email.matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)") &&
+      EMAIL_PERMITTED_CHARS_REGEX.matcher(email).matches() &&
+      !EMAIL_CONSECUTIVE_FULL_STOP_REGEX.matcher(email).find()
+    );
   }
 
   /**
@@ -1817,11 +1965,13 @@ public class UserAccountManager implements IUserAccountManager {
    * @return true if the name is valid, false otherwise.
    */
   public static boolean isUserNameValid(final String name) {
-    return null != name
-        && !name.isEmpty()
-        && !name.isBlank()
-        && name.length() <= USER_NAME_MAX_LENGTH
-        && USER_NAME_PERMITTED_CHARS_REGEX.matcher(name).matches();
+    return (
+      null != name &&
+      !name.isEmpty() &&
+      !name.isBlank() &&
+      name.length() <= USER_NAME_MAX_LENGTH &&
+      USER_NAME_PERMITTED_CHARS_REGEX.matcher(name).matches()
+    );
   }
 
   /**
@@ -1849,8 +1999,10 @@ public class UserAccountManager implements IUserAccountManager {
       return new ArrayList<>();
     }
 
-    return users.parallelStream().map(user -> this.dtoMapper.map(user, RegisteredUserDTO.class))
-        .collect(Collectors.toList());
+    return users
+      .parallelStream()
+      .map(user -> this.dtoMapper.map(user, RegisteredUserDTO.class))
+      .collect(Collectors.toList());
   }
 
   /**
@@ -1893,7 +2045,6 @@ public class UserAccountManager implements IUserAccountManager {
       // add the user reference to the session
       request.getSession().setAttribute(ANONYMOUS_USER, anonymousUserId);
       this.temporaryUserCache.storeAnonymousUser(user);
-
     } else {
       // reuse existing one
       if (request.getSession().getAttribute(ANONYMOUS_USER) instanceof String) {
@@ -1904,8 +2055,10 @@ public class UserAccountManager implements IUserAccountManager {
           // the session must have expired. Create a new user and run this method again.
           // this probably won't happen often as the session expiry and the cache should be timed correctly.
           request.getSession().removeAttribute(ANONYMOUS_USER);
-          log.warn("Anonymous user session expired so creating a"
-              + " new one - this should not happen often if cache settings are correct.");
+          log.warn(
+            "Anonymous user session expired so creating a" +
+            " new one - this should not happen often if cache settings are correct."
+          );
           return this.getAnonymousUserDO(request);
         }
       } else {
@@ -1954,7 +2107,8 @@ public class UserAccountManager implements IUserAccountManager {
     List<NameValuePair> urlParamPairs = Lists.newArrayList();
     urlParamPairs.add(new BasicNameValuePair("userid", userDTO.getId().toString()));
     urlParamPairs.add(
-        new BasicNameValuePair("token", emailVerificationToken.substring(0, Constants.TRUNCATED_TOKEN_LENGTH)));
+      new BasicNameValuePair("token", emailVerificationToken.substring(0, Constants.TRUNCATED_TOKEN_LENGTH))
+    );
     String urlParams = URLEncodedUtils.format(urlParamPairs, "UTF-8");
 
     return String.format("https://%s/verifyemail?%s", properties.getProperty(HOST_NAME), urlParams);
@@ -1978,7 +2132,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException - if there is a problem with the database.
    */
   public Map<TimeInterval, Map<Role, Long>> getActiveRolesOverPrevious(final TimeInterval[] timeIntervals)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     return this.database.getRolesLastSeenOver(timeIntervals);
   }
 
@@ -2013,7 +2167,7 @@ public class UserAccountManager implements IUserAccountManager {
   }
 
   public RegisteredUserDTO updateTeacherPendingFlag(final Long userId, boolean newFlagValue)
-      throws SegueDatabaseException, NoUserException {
+    throws SegueDatabaseException, NoUserException {
     RegisteredUser user = findUserById(userId);
     if (user == null) {
       throw new NoUserException(String.format("No user found with ID: %s", userId));
@@ -2023,13 +2177,18 @@ public class UserAccountManager implements IUserAccountManager {
     return dtoMapper.map(updatedUser, RegisteredUserDTO.class);
   }
 
-  public void sendRoleChangeRequestEmail(final HttpServletRequest request, final RegisteredUserDTO user,
-                                         final Role requestedRole, final Map<String, String> requestDetails)
-      throws SegueDatabaseException, ContentManagerException, MissingRequiredFieldException {
+  public void sendRoleChangeRequestEmail(
+    final HttpServletRequest request,
+    final RegisteredUserDTO user,
+    final Role requestedRole,
+    final Map<String, String> requestDetails
+  )
+    throws SegueDatabaseException, ContentManagerException, MissingRequiredFieldException {
     String userSchool = getSchoolNameWithPostcode(user);
     if (userSchool == null) {
       throw new MissingRequiredFieldException(
-          String.format("School information could not be found for user with ID: %s", user.getId()));
+        String.format("School information could not be found for user with ID: %s", user.getId())
+      );
     }
 
     String verificationDetails = requestDetails.get("verificationDetails");
@@ -2048,29 +2207,40 @@ public class UserAccountManager implements IUserAccountManager {
     String roleName = requestedRole.toString();
     String emailSubject = String.format("%s Account Request", StringUtils.capitalize(roleName.toLowerCase()));
     String emailMessage = String.format(
-        "Hello,\n<br>\n<br>"
-            + "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>"
-            + "My school is: %s\n<br>"
-            + "A link to my school website with a staff list showing my name and email"
-            + " (or a phone number to contact the school) is: %s\n<br>\n<br>\n<br>"
-            + "%s"
-            + "Thanks, \n<br>\n<br>%s %s",
-        userSchool, verificationDetails, otherDetailsLine, user.getGivenName(), user.getFamilyName());
+      "Hello,\n<br>\n<br>" +
+      "Please could you convert my Isaac account into a teacher account.\n<br>\n<br>" +
+      "My school is: %s\n<br>" +
+      "A link to my school website with a staff list showing my name and email" +
+      " (or a phone number to contact the school) is: %s\n<br>\n<br>\n<br>" +
+      "%s" +
+      "Thanks, \n<br>\n<br>%s %s",
+      userSchool,
+      verificationDetails,
+      otherDetailsLine,
+      user.getGivenName(),
+      user.getFamilyName()
+    );
     Map<String, Object> emailValues = new ImmutableMap.Builder<String, Object>()
-        .put("contactGivenName", user.getGivenName())
-        .put("contactFamilyName", user.getFamilyName())
-        .put("contactUserId", user.getId())
-        .put("contactUserRole", user.getRole())
-        .put("contactEmail", user.getEmail())
-        .put("contactSubject", emailSubject)
-        .put("contactMessage", emailMessage)
-        .put("replyToName", String.format("%s %s", user.getGivenName(), user.getFamilyName()))
-        .build();
+      .put("contactGivenName", user.getGivenName())
+      .put("contactFamilyName", user.getFamilyName())
+      .put("contactUserId", user.getId())
+      .put("contactUserRole", user.getRole())
+      .put("contactEmail", user.getEmail())
+      .put("contactSubject", emailSubject)
+      .put("contactMessage", emailMessage)
+      .put("replyToName", String.format("%s %s", user.getGivenName(), user.getFamilyName()))
+      .build();
     emailManager.sendContactUsFormEmail(properties.getProperty(Constants.MAIL_RECEIVERS), emailValues);
 
-    logManager.logEvent(user, request, SegueServerLogType.CONTACT_US_FORM_USED,
-        ImmutableMap.of("message", String.format("%s %s (%s) - %s", user.getGivenName(),
-            user.getFamilyName(), user.getEmail(), emailMessage)));
+    logManager.logEvent(
+      user,
+      request,
+      SegueServerLogType.CONTACT_US_FORM_USED,
+      ImmutableMap.of(
+        "message",
+        String.format("%s %s (%s) - %s", user.getGivenName(), user.getFamilyName(), user.getEmail(), emailMessage)
+      )
+    );
   }
 
   public String getSchoolNameWithPostcode(final RegisteredUserDTO user) {

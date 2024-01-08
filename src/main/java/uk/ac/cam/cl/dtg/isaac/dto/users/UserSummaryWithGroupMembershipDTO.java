@@ -22,9 +22,7 @@ package uk.ac.cam.cl.dtg.isaac.dto.users;
 public class UserSummaryWithGroupMembershipDTO extends UserSummaryDTO {
   private GroupMembershipDTO groupMembershipInformation;
 
-  public UserSummaryWithGroupMembershipDTO() {
-
-  }
+  public UserSummaryWithGroupMembershipDTO() {}
 
   public GroupMembershipDTO getGroupMembershipInformation() {
     return groupMembershipInformation;

@@ -69,8 +69,7 @@ public class ContentIndexerTest {
     this.database = createMock(GitDb.class);
     this.searchProvider = createMock(ElasticSearchIndexer.class);
     this.contentMapper = createMock(ContentMapper.class);
-    this.defaultContentIndexer = new ContentIndexer(database, searchProvider,
-        contentMapper);
+    this.defaultContentIndexer = new ContentIndexer(database, searchProvider, contentMapper);
   }
 
   /**
@@ -82,7 +81,7 @@ public class ContentIndexerTest {
    */
   @Test
   public void buildSearchIndexes_sendContentToSearchProvider_checkSearchProviderIsSentAllImportantObject()
-      throws JsonProcessingException, SegueSearchException {
+    throws JsonProcessingException, SegueSearchException {
     reset(database, searchProvider);
     String uniqueObjectId = UUID.randomUUID().toString();
     String uniqueObjectHash = UUID.randomUUID().toString();
@@ -114,24 +113,16 @@ public class ContentIndexerTest {
 
     // prepare pre-canned responses for the object mapper
     ObjectMapper objectMapper = createMock(ObjectMapper.class);
-    expect(contentMapper.generateNewPreconfiguredContentMapper()).andReturn(objectMapper)
-        .once();
-    expect(objectMapper.writeValueAsString(content)).andReturn(
-        uniqueObjectHash).once();
-    expect(objectMapper.writeValueAsString(
-        anyObject())).andReturn(versionMeta.toString()).once(); // expects versionMeta - possibly differing date
-    expect(objectMapper.writeValueAsString(
-        tagsMeta)).andReturn(tagsMeta.toString()).once();
+    expect(contentMapper.generateNewPreconfiguredContentMapper()).andReturn(objectMapper).once();
+    expect(objectMapper.writeValueAsString(content)).andReturn(uniqueObjectHash).once();
+    expect(objectMapper.writeValueAsString(anyObject())).andReturn(versionMeta.toString()).once(); // expects versionMeta - possibly differing date
+    expect(objectMapper.writeValueAsString(tagsMeta)).andReturn(tagsMeta.toString()).once();
 
     // populate all units and published units - order matters for the below
-    expect(objectMapper.writeValueAsString(
-        someUnitsMapRaw)).andReturn(someUnitsMap.toString()).once();
-    expect(objectMapper.writeValueAsString(
-        someUnitsMapRaw2)).andReturn(someUnitsMap.toString()).once();
-    expect(objectMapper.writeValueAsString(
-        someUnitsMapRaw)).andReturn(someUnitsMap.toString()).once();
-    expect(objectMapper.writeValueAsString(
-        someUnitsMapRaw2)).andReturn(someUnitsMap.toString()).once();
+    expect(objectMapper.writeValueAsString(someUnitsMapRaw)).andReturn(someUnitsMap.toString()).once();
+    expect(objectMapper.writeValueAsString(someUnitsMapRaw2)).andReturn(someUnitsMap.toString()).once();
+    expect(objectMapper.writeValueAsString(someUnitsMapRaw)).andReturn(someUnitsMap.toString()).once();
+    expect(objectMapper.writeValueAsString(someUnitsMapRaw2)).andReturn(someUnitsMap.toString()).once();
 
     // Important Items for test - start here
 
@@ -146,8 +137,11 @@ public class ContentIndexerTest {
     // Ensure units are indexed
     searchProvider.bulkIndex(eq(INITIAL_VERSION), eq(Constants.ContentIndextype.UNIT.toString()), anyObject());
     expectLastCall().once();
-    searchProvider.bulkIndex(eq(INITIAL_VERSION), eq(Constants.ContentIndextype.PUBLISHED_UNIT.toString()),
-        anyObject());
+    searchProvider.bulkIndex(
+      eq(INITIAL_VERSION),
+      eq(Constants.ContentIndextype.PUBLISHED_UNIT.toString()),
+      anyObject()
+    );
     expectLastCall().once();
 
     // Ensure content errors are indexed
@@ -155,18 +149,26 @@ public class ContentIndexerTest {
     expectLastCall().once();
 
     // Ensure at least one bulk index for general content is requested
-    searchProvider.bulkIndexWithIds(eq(INITIAL_VERSION), eq(Constants.ContentIndextype.CONTENT.toString()),
-        anyObject());
+    searchProvider.bulkIndexWithIds(
+      eq(INITIAL_VERSION),
+      eq(Constants.ContentIndextype.CONTENT.toString()),
+      anyObject()
+    );
     expectLastCall().once();
 
     replay(searchProvider, contentMapper, objectMapper);
 
-    ContentIndexer contentIndexer = new ContentIndexer(database,
-        searchProvider, contentMapper);
+    ContentIndexer contentIndexer = new ContentIndexer(database, searchProvider, contentMapper);
 
     // Method under test
-    contentIndexer.buildElasticSearchIndex(INITIAL_VERSION, contents, someTagsList, someUnitsMap, publishedUnitsMap,
-        someContentProblemsMap);
+    contentIndexer.buildElasticSearchIndex(
+      INITIAL_VERSION,
+      contents,
+      someTagsList,
+      someUnitsMap,
+      publishedUnitsMap,
+      someContentProblemsMap
+    );
 
     verify(searchProvider, contentMapper, objectMapper);
   }
@@ -198,8 +200,7 @@ public class ContentIndexerTest {
     assertEquals(0, elements.size());
   }
 
-  private Content createContentHierarchy(final int numLevels,
-                                         final Set<Content> flatSet) {
+  private Content createContentHierarchy(final int numLevels, final Set<Content> flatSet) {
     List<ContentBase> children = new LinkedList<>();
 
     if (numLevels > 0) {
@@ -207,8 +208,7 @@ public class ContentIndexerTest {
       children.add(child);
     }
 
-    Content content = createEmptyContentElement(children,
-        String.format("%d", numLevels));
+    Content content = createEmptyContentElement(children, String.format("%d", numLevels));
     flatSet.add(content);
     return content;
   }
@@ -222,10 +222,24 @@ public class ContentIndexerTest {
    * @param id       - The id of the content element
    * @return The new Content object
    */
-  private Content createEmptyContentElement(final List<ContentBase> children,
-                                            final String id) {
-    return new Content(id, "", "", "", "", "", "", "", children, "",
-        "", new LinkedList<>(), false, false, new HashSet<>(), 1);
+  private Content createEmptyContentElement(final List<ContentBase> children, final String id) {
+    return new Content(
+      id,
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      children,
+      "",
+      "",
+      new LinkedList<>(),
+      false,
+      false,
+      new HashSet<>(),
+      1
+    );
   }
-
 }

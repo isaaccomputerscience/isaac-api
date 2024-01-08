@@ -18,13 +18,11 @@ package uk.ac.cam.cl.dtg.isaac.quiz;
 
 import org.isaacphysics.graphchecker.settings.SettingsWrapper;
 
-
 /**
  * This class defines some Isaac-specific settings for the Graph Checker. If you are thinking of changing any
  * settings, you should run the tuner (Bluefin) to evaluate them on the sample set first.
  */
 public class IsaacGraphSketcherSettings implements SettingsWrapper {
-
   private static final double ISAAC_AXIS_SLOP = 0.0025;
   private static final double ISAAC_ORIGIN_SLOP = 0.01;
 

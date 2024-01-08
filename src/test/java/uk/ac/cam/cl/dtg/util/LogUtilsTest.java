@@ -29,15 +29,15 @@ public class LogUtilsTest {
   @SuppressWarnings("checkstyle:AvoidEscapedUnicodeCharacters")
   private static Stream<Arguments> stringValuesToTest() {
     return Stream.of(
-        Arguments.of(null, null),
-        Arguments.of("", ""),
-        Arguments.of(" ", " "),
-        Arguments.of("test", "test"),
-        Arguments.of("1234", "1234"),
-        Arguments.of("\n", "\\n"),
-        Arguments.of("!\"#$%&'()*+-./:;<=>?@[\\]^_`{|}~", "!\\\"#$%&'()*+-./:;<=>?@[\\\\]^_`{|}~"),
-        Arguments.of("\u000E\u0015\u001C\u008D", "\\u000E\\u0015\\u001C\\u008D"),
-        Arguments.of("\u00A0\u00A7\u00C7\u00EB", "\\u00A0\\u00A7\\u00C7\\u00EB")
+      Arguments.of(null, null),
+      Arguments.of("", ""),
+      Arguments.of(" ", " "),
+      Arguments.of("test", "test"),
+      Arguments.of("1234", "1234"),
+      Arguments.of("\n", "\\n"),
+      Arguments.of("!\"#$%&'()*+-./:;<=>?@[\\]^_`{|}~", "!\\\"#$%&'()*+-./:;<=>?@[\\\\]^_`{|}~"),
+      Arguments.of("\u000E\u0015\u001C\u008D", "\\u000E\\u0015\\u001C\\u008D"),
+      Arguments.of("\u00A0\u00A7\u00C7\u00EB", "\\u00A0\\u00A7\\u00C7\\u00EB")
     );
   }
 
@@ -53,16 +53,16 @@ public class LogUtilsTest {
     orderedMap.put("key1", "value1");
     orderedMap.put("key2", "value2");
     return Stream.of(
-        Arguments.of(null, null),
-        Arguments.of(Map.of(), "{}"),
-        Arguments.of(Map.of("", ""), "{=}"),
-        Arguments.of(Map.of("key1", ""), "{key1=}"),
-        Arguments.of(Map.of("", "value1"), "{=value1}"),
-        Arguments.of(Map.of("key1", "value1"), "{key1=value1}"),
-        Arguments.of(orderedMap, "{key1=value1, key2=value2}"),
-        Arguments.of(Map.of("key1", Map.of("key2", "value2")), "{key1={key2=value2}}"),
-        Arguments.of(Map.of("key1", List.of("value1", "value2")), "{key1=[value1, value2]}"),
-        Arguments.of(Map.of("key1", "value1\nvalue2"), "{key1=value1\\nvalue2}")
+      Arguments.of(null, null),
+      Arguments.of(Map.of(), "{}"),
+      Arguments.of(Map.of("", ""), "{=}"),
+      Arguments.of(Map.of("key1", ""), "{key1=}"),
+      Arguments.of(Map.of("", "value1"), "{=value1}"),
+      Arguments.of(Map.of("key1", "value1"), "{key1=value1}"),
+      Arguments.of(orderedMap, "{key1=value1, key2=value2}"),
+      Arguments.of(Map.of("key1", Map.of("key2", "value2")), "{key1={key2=value2}}"),
+      Arguments.of(Map.of("key1", List.of("value1", "value2")), "{key1=[value1, value2]}"),
+      Arguments.of(Map.of("key1", "value1\nvalue2"), "{key1=value1\\nvalue2}")
     );
   }
 }

@@ -59,21 +59,23 @@ public class ChoiceDeserializer extends JsonDeserializer<Choice> {
    * @param itemDeserializer
    *            - Required to cope with deserialising Items inside Choices when deserialising Choices directly.
    */
-  public ChoiceDeserializer(final ContentBaseDeserializer contentDeserializer,
-                            final ItemDeserializer itemDeserializer) {
+  public ChoiceDeserializer(
+    final ContentBaseDeserializer contentDeserializer,
+    final ItemDeserializer itemDeserializer
+  ) {
     this.contentDeserializer = contentDeserializer;
     this.itemDeserializer = itemDeserializer;
   }
 
   @Override
   public Choice deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
-      throws IOException {
-
+    throws IOException {
     ObjectNode root = getSingletonChoiceMapper().readTree(jsonParser);
 
     if (null == root.get("type")) {
       throw new JsonMappingException(
-          "Error: unable to parse content as there is no type property within the json input.");
+        "Error: unable to parse content as there is no type property within the json input."
+      );
     }
 
     String contentType = root.get("type").textValue();

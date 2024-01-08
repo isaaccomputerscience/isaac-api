@@ -49,9 +49,9 @@ public class IsaacSymbolicLogicValidator implements IValidator {
   }
 
   private static class ValidationResult {
-    private Content feedback;               // The feedback we send the user
-    private MatchType responseMatchType;    // The match type we found
-    private boolean responseCorrect;        // Whether we're right or wrong
+    private Content feedback; // The feedback we send the user
+    private MatchType responseMatchType; // The match type we found
+    private boolean responseCorrect; // Whether we're right or wrong
 
     ValidationResult(final Content feedback, final MatchType responseMatchType, final boolean responseCorrect) {
       this.feedback = feedback;
@@ -96,7 +96,7 @@ public class IsaacSymbolicLogicValidator implements IValidator {
 
   @Override
   public QuestionValidationResponse validateQuestionResponse(final Question question, final Choice answer)
-      throws ValidatorUnavailableException {
+    throws ValidatorUnavailableException {
     Validate.notNull(question);
     Validate.notNull(answer);
 
@@ -107,9 +107,9 @@ public class IsaacSymbolicLogicValidator implements IValidator {
 
     // These variables store the important features of the response we'll send.
     ValidationResult validationResult = new ValidationResult(
-        INITIAL_CONTENT,            // The feedback we send the user
-        INITIAL_MATCH_TYPE,         // The match type we found
-        INITIAL_RESPONSE_CORRECT    // Whether we're right or wrong
+      INITIAL_CONTENT, // The feedback we send the user
+      INITIAL_MATCH_TYPE, // The match type we found
+      INITIAL_RESPONSE_CORRECT // Whether we're right or wrong
     );
 
     // There are several specific responses the user can receive. Each of them will set feedback content, so
@@ -147,13 +147,21 @@ public class IsaacSymbolicLogicValidator implements IValidator {
     // If we got this far and feedback is still null, they were wrong. There's no useful feedback we can give at this
     // point.
 
-    return new FormulaValidationResponse(symbolicLogicQuestion.getId(), answer, validationResult.getFeedback(),
-        validationResult.isResponseCorrect(), validationResult.getResponseMatchType().toString(), new Date());
+    return new FormulaValidationResponse(
+      symbolicLogicQuestion.getId(),
+      answer,
+      validationResult.getFeedback(),
+      validationResult.isResponseCorrect(),
+      validationResult.getResponseMatchType().toString(),
+      new Date()
+    );
   }
 
-  private ValidationResult checkForSymbolicAnswerMatch(final IsaacSymbolicLogicQuestion question,
-                                                       final LogicFormula submittedLogicFormula)
-      throws ValidatorUnavailableException {
+  private ValidationResult checkForSymbolicAnswerMatch(
+    final IsaacSymbolicLogicQuestion question,
+    final LogicFormula submittedLogicFormula
+  )
+    throws ValidatorUnavailableException {
     // Go through all choices, keeping track of the best match we've seen so far. A symbolic match terminates
     // this loop immediately. A numeric match may later be replaced with a symbolic match, but otherwise will suffice.
 
@@ -165,7 +173,6 @@ public class IsaacSymbolicLogicValidator implements IValidator {
 
     // For all the choices on this question...
     for (Choice c : orderedChoices) {
-
       // ... that are of the LogicFormula type, ...
       if (!(c instanceof LogicFormula)) {
         // Don't need to log this - it will have been logged above.
@@ -199,30 +206,42 @@ public class IsaacSymbolicLogicValidator implements IValidator {
 
         if (response.containsKey("error")) {
           if (response.containsKey("code")) {
-            log.error("Failed to check logic formula \""
-                + sanitiseExternalLogValue(submittedLogicFormula.getPythonExpression()) + "\" against \""
-                + sanitiseExternalLogValue(logicFormulaChoice.getPythonExpression()) + "\": "
-                + sanitiseExternalLogValue(response.get("error").toString()));
+            log.error(
+              "Failed to check logic formula \"" +
+              sanitiseExternalLogValue(submittedLogicFormula.getPythonExpression()) +
+              "\" against \"" +
+              sanitiseExternalLogValue(logicFormulaChoice.getPythonExpression()) +
+              "\": " +
+              sanitiseExternalLogValue(response.get("error").toString())
+            );
           } else if (response.containsKey("syntax_error")) {
             // There's a syntax error in the "test" expression, no use checking it further:
-            Content feedback = new Content("Your answer does not seem to be valid boolean logic.<br>"
-                + "Check for things like mismatched brackets or misplaced symbols.");
+            Content feedback = new Content(
+              "Your answer does not seem to be valid boolean logic.<br>" +
+              "Check for things like mismatched brackets or misplaced symbols."
+            );
             feedback.setTags(new HashSet<>(Collections.singletonList("syntax_error")));
             return new ValidationResult(feedback, INITIAL_MATCH_TYPE, false);
           } else {
-            log.warn("Problem checking logic formula \"" + submittedLogicFormula.getPythonExpression()
-                + "\" for (" + question.getId() + ") with symbolic checker: " + response.get("error"));
+            log.warn(
+              "Problem checking logic formula \"" +
+              submittedLogicFormula.getPythonExpression() +
+              "\" for (" +
+              question.getId() +
+              ") with symbolic checker: " +
+              response.get("error")
+            );
           }
         } else {
           if (response.get("equal").equals("true")) {
             matchType = MatchType.valueOf(((String) response.get("equality_type")).toUpperCase());
           }
         }
-
       } catch (IOException e) {
         log.error("Failed to check formula with symbolic checker. Is the server running? Not trying again.");
-        throw new ValidatorUnavailableException("We are having problems marking Logic Questions."
-            + " Please try again later!");
+        throw new ValidatorUnavailableException(
+          "We are having problems marking Logic Questions." + " Please try again later!"
+        );
       }
 
       if (matchType == MatchType.EXACT) {
@@ -247,35 +266,47 @@ public class IsaacSymbolicLogicValidator implements IValidator {
 
       if (closestMatchType != MatchType.EXACT && closestMatch.getRequiresExactMatch()) {
         if (closestMatch.isCorrect()) {
-          Content feedback =
-              new Content("Your answer is not in the form we expected. Can you rearrange or simplify it?");
+          Content feedback = new Content(
+            "Your answer is not in the form we expected. Can you rearrange or simplify it?"
+          );
           feedback.setTags(new HashSet<>(Collections.singletonList("required_exact")));
 
-          log.info("User submitted an answer that was close to an exact match, but not exact "
-              + "for question " + sanitiseExternalLogValue(question.getId())
-              + ". Choice: " + sanitiseExternalLogValue(closestMatch.getPythonExpression())
-              + ", submitted: " + sanitiseExternalLogValue(submittedLogicFormula.getPythonExpression()));
+          log.info(
+            "User submitted an answer that was close to an exact match, but not exact " +
+            "for question " +
+            sanitiseExternalLogValue(question.getId()) +
+            ". Choice: " +
+            sanitiseExternalLogValue(closestMatch.getPythonExpression()) +
+            ", submitted: " +
+            sanitiseExternalLogValue(submittedLogicFormula.getPythonExpression())
+          );
 
           return new ValidationResult(feedback, closestMatchType, false);
         } // ELSE: This is weak match to a wrong answer; we can't use the feedback for the choice.
       } else {
-        return new ValidationResult((Content) closestMatch.getExplanation(), closestMatchType,
-            closestMatch.isCorrect());
+        return new ValidationResult(
+          (Content) closestMatch.getExplanation(),
+          closestMatchType,
+          closestMatch.isCorrect()
+        );
       }
-
     }
     return new ValidationResult(INITIAL_CONTENT, INITIAL_MATCH_TYPE, INITIAL_RESPONSE_CORRECT);
   }
 
-  private static ValidationResult checkForExactAnswerMatch(final IsaacSymbolicLogicQuestion question,
-                                                           final LogicFormula submittedLogicFormula) {
+  private static ValidationResult checkForExactAnswerMatch(
+    final IsaacSymbolicLogicQuestion question,
+    final LogicFormula submittedLogicFormula
+  ) {
     // For all the choices on this question...
     for (Choice c : question.getChoices()) {
-
       // ... that are of the LogicFormula type, ...
       if (!(c instanceof LogicFormula)) {
-        log.error("Validator for questionId: " + question.getId()
-            + " expected there to be a LogicFormula. Instead it found a Choice.");
+        log.error(
+          "Validator for questionId: " +
+          question.getId() +
+          " expected there to be a LogicFormula. Instead it found a Choice."
+        );
         continue;
       }
 
@@ -283,17 +314,16 @@ public class IsaacSymbolicLogicValidator implements IValidator {
 
       // ... and that have a python expression ...
       if (null == logicFormulaChoice.getPythonExpression() || logicFormulaChoice.getPythonExpression().isEmpty()) {
-        log.error("Expected python expression, but none found in choice for question id: "
-            + question.getId());
+        log.error("Expected python expression, but none found in choice for question id: " + question.getId());
         continue;
       }
 
       // ... look for an exact string match to the submitted answer.
       if (logicFormulaChoice.getPythonExpression().equals(submittedLogicFormula.getPythonExpression())) {
         return new ValidationResult(
-            (Content) logicFormulaChoice.getExplanation(),
-            MatchType.EXACT,
-            logicFormulaChoice.isCorrect()
+          (Content) logicFormulaChoice.getExplanation(),
+          MatchType.EXACT,
+          logicFormulaChoice.isCorrect()
         );
       }
     }
@@ -310,8 +340,9 @@ public class IsaacSymbolicLogicValidator implements IValidator {
 
   private static Content checkQuestionHasAnswer(final IsaacSymbolicLogicQuestion question) {
     if (null == question.getChoices() || question.getChoices().isEmpty()) {
-      log.error("Question does not have any answers. " + question.getId() + " src: "
-          + question.getCanonicalSourceFile());
+      log.error(
+        "Question does not have any answers. " + question.getId() + " src: " + question.getCanonicalSourceFile()
+      );
 
       return new Content("This question does not have any correct answers");
     }
@@ -319,18 +350,24 @@ public class IsaacSymbolicLogicValidator implements IValidator {
   }
 
   private static void validateQuestionType(final Question question, final Choice answer)
-      throws IllegalArgumentException {
+    throws IllegalArgumentException {
     if (!(question instanceof IsaacSymbolicLogicQuestion)) {
-      throw new IllegalArgumentException(String.format(
+      throw new IllegalArgumentException(
+        String.format(
           "This validator only works with Isaac Symbolic Questions... (%s is not symbolic)",
-          question.getId()));
+          question.getId()
+        )
+      );
     }
 
     if (!(answer instanceof LogicFormula)) {
-      throw new IllegalArgumentException(String.format(
-          "Expected LogicFormula for IsaacSymbolicLogicQuestion: %s. Received (%s) ", question.getId(),
-          answer.getClass()));
+      throw new IllegalArgumentException(
+        String.format(
+          "Expected LogicFormula for IsaacSymbolicLogicQuestion: %s. Received (%s) ",
+          question.getId(),
+          answer.getClass()
+        )
+      );
     }
   }
-
 }

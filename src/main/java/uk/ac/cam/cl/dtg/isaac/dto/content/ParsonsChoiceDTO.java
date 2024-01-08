@@ -24,7 +24,5 @@ public class ParsonsChoiceDTO extends ItemChoiceDTO {
   /**
    * Default constructor required for mapping.
    */
-  public ParsonsChoiceDTO() {
-  }
-
+  public ParsonsChoiceDTO() {}
 }

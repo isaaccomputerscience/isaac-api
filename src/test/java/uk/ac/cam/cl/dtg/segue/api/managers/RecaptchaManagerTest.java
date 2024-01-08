@@ -18,8 +18,9 @@ public class RecaptchaManagerTest {
   @Before
   public final void setUp() throws Exception {
     properties = createMock(PropertiesLoader.class);
-    expect(properties.getProperty(GOOGLE_RECAPTCHA_SECRET)).andReturn("6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")
-        .atLeastOnce();
+    expect(properties.getProperty(GOOGLE_RECAPTCHA_SECRET))
+      .andReturn("6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")
+      .atLeastOnce();
     replay(properties);
   }
 

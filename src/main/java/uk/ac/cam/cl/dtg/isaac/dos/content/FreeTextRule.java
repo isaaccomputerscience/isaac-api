@@ -27,8 +27,7 @@ public class FreeTextRule extends Choice {
   private boolean allowsMisspelling;
   private Integer proximityDistance;
 
-  public FreeTextRule() {
-  }
+  public FreeTextRule() {}
 
   public void setCaseInsensitive(final boolean caseInsensitive) {
     this.caseInsensitive = caseInsensitive;

@@ -23,7 +23,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.JsonContentType;
  */
 @JsonContentType("isaacParsonsQuestion")
 public class IsaacParsonsQuestionDTO extends IsaacItemQuestionDTO {
-
   private Boolean disableIndentation;
 
   public Boolean getDisableIndentation() {

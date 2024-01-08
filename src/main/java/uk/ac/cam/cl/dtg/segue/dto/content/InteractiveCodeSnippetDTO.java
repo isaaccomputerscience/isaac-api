@@ -25,21 +25,22 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.CodeSnippetDTO;
  *
  */
 public class InteractiveCodeSnippetDTO extends CodeSnippetDTO {
-
   private String setupCode;
   private String testCode;
   private String expectedResult;
   private Boolean wrapCodeInMain;
 
   @JsonCreator
-  public InteractiveCodeSnippetDTO(@JsonProperty("language") final String language,
-                                   @JsonProperty("code") final String code,
-                                   @JsonProperty("disableHighlighting") final Boolean disableHighlighting,
-                                   @JsonProperty("url") final String url,
-                                   @JsonProperty("setupCode") final String setupCode,
-                                   @JsonProperty("testCode") final String testCode,
-                                   @JsonProperty("expectedResult") final String expectedResult,
-                                   @JsonProperty("wrapCodeInMain") final Boolean wrapCodeInMain) {
+  public InteractiveCodeSnippetDTO(
+    @JsonProperty("language") final String language,
+    @JsonProperty("code") final String code,
+    @JsonProperty("disableHighlighting") final Boolean disableHighlighting,
+    @JsonProperty("url") final String url,
+    @JsonProperty("setupCode") final String setupCode,
+    @JsonProperty("testCode") final String testCode,
+    @JsonProperty("expectedResult") final String expectedResult,
+    @JsonProperty("wrapCodeInMain") final Boolean wrapCodeInMain
+  ) {
     super(language, code, disableHighlighting, url);
     this.setupCode = setupCode;
     this.testCode = testCode;
@@ -79,4 +80,3 @@ public class InteractiveCodeSnippetDTO extends CodeSnippetDTO {
     this.wrapCodeInMain = wrapCodeInMain;
   }
 }
-

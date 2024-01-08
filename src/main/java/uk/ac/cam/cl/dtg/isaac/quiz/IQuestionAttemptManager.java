@@ -24,8 +24,13 @@ public interface IQuestionAttemptManager {
    * @param questionAttempt - the question attempt object recording the users result.
    * @throws SegueDatabaseException - if there is an error during the database operation.
    */
-  void registerQuestionAttempt(Long userId, String questionPageId, String fullQuestionId,
-                               QuestionValidationResponse questionAttempt) throws SegueDatabaseException;
+  void registerQuestionAttempt(
+    Long userId,
+    String questionPageId,
+    String fullQuestionId,
+    QuestionValidationResponse questionAttempt
+  )
+    throws SegueDatabaseException;
 
   /**
    * Get a users question attempts.
@@ -35,7 +40,7 @@ public interface IQuestionAttemptManager {
    * @throws SegueDatabaseException - If there is a database error.
    */
   Map<String, Map<String, List<QuestionValidationResponse>>> getQuestionAttempts(Long userId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * A method that makes a single database request for a group of users and questions to get all of their attempt
@@ -49,9 +54,11 @@ public interface IQuestionAttemptManager {
    *     (without the actual question attempt values).
    * @throws SegueDatabaseException - if a database error occurs
    */
-  Map<Long, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>>
-      getQuestionAttemptsByUsersAndQuestionPrefix(List<Long> userIds, List<String> questionPage)
-      throws SegueDatabaseException;
+  Map<Long, Map<String, Map<String, List<LightweightQuestionValidationResponse>>>> getQuestionAttemptsByUsersAndQuestionPrefix(
+    List<Long> userIds,
+    List<String> questionPage
+  )
+    throws SegueDatabaseException;
 
   /**
    * Registers an anonymous user's attempt to answer a question and stores it in the database.
@@ -62,8 +69,13 @@ public interface IQuestionAttemptManager {
    * @param questionAttempt - attempt details
    * @throws SegueDatabaseException - if there are db problems
    */
-  void registerAnonymousQuestionAttempt(String userId, String questionPageId, String fullQuestionId,
-                                        QuestionValidationResponse questionAttempt) throws SegueDatabaseException;
+  void registerAnonymousQuestionAttempt(
+    String userId,
+    String questionPageId,
+    String fullQuestionId,
+    QuestionValidationResponse questionAttempt
+  )
+    throws SegueDatabaseException;
 
   /**
    * Retrieves the question attempts of an anonymous user from the database.
@@ -72,7 +84,7 @@ public interface IQuestionAttemptManager {
    * @return List of questionpage --> question id --> list of QuestionResponses.
    */
   Map<String, Map<String, List<QuestionValidationResponse>>> getAnonymousQuestionAttempts(String anonymousId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Convenience method to merge anonymous user question attempts with registered user records.
@@ -82,7 +94,7 @@ public interface IQuestionAttemptManager {
    * @throws SegueDatabaseException - if something goes wrong.
    */
   void mergeAnonymousQuestionInformationWithRegisteredUserRecord(String anonymousUserId, Long registeredUserId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Retrieves a count of users by their roles who have answered questions within the specified time ranges.
@@ -94,7 +106,7 @@ public interface IQuestionAttemptManager {
    * @throws SegueDatabaseException If there is a database-related issue, such as a SQL exception.
    */
   Map<TimeInterval, Map<Role, Long>> getAnsweredQuestionRolesOverPrevious(TimeInterval[] timeIntervals)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * getQuestionAttemptCountForUserByDateRange.
@@ -110,6 +122,6 @@ public interface IQuestionAttemptManager {
    * @return a collection of log events that match the above criteria or an empty collection.
    * @throws SegueDatabaseException - if we cannot retrieve the data from the database.
    */
-  Map<Date, Long> getQuestionAttemptCountForUserByDateRange(Date fromDate, Date toDate,
-                                                            Long userId, Boolean perDay) throws SegueDatabaseException;
+  Map<Date, Long> getQuestionAttemptCountForUserByDateRange(Date fromDate, Date toDate, Long userId, Boolean perDay)
+    throws SegueDatabaseException;
 }

@@ -31,10 +31,14 @@ public class SegueScheduledDatabaseScriptJob extends SegueScheduledJob {
 
   private static final Logger log = LoggerFactory.getLogger(SegueScheduledDatabaseScriptJob.class);
 
-  public SegueScheduledDatabaseScriptJob(final String jobKey, final String jobGroupName, final String description,
-                                         final String cronString, final String sqlFilePath) {
+  public SegueScheduledDatabaseScriptJob(
+    final String jobKey,
+    final String jobGroupName,
+    final String description,
+    final String cronString,
+    final String sqlFilePath
+  ) {
     super(jobKey, jobGroupName, description, cronString);
-
     this.sqlFile = sqlFilePath;
 
     executionContext = Maps.newHashMap();

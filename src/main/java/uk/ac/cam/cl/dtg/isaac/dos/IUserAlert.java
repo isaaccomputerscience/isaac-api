@@ -3,9 +3,10 @@ package uk.ac.cam.cl.dtg.isaac.dos;
 import java.util.Date;
 
 public interface IUserAlert {
-
   enum AlertEvents {
-    SEEN, CLICKED, DISMISSED
+    SEEN,
+    CLICKED,
+    DISMISSED
   }
 
   Long getId();
@@ -39,5 +40,4 @@ public interface IUserAlert {
   Date getDismissed();
 
   void setDismissed(Date dismissed);
-
 }

@@ -25,7 +25,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
  * @author Alistair Stead
  */
 public interface IGroupObserver {
-
   /**
    * @param group - the group that the membership was revoked from
    * @param user  - the user that revoked the membership
@@ -54,5 +53,4 @@ public interface IGroupObserver {
    * @param group - the group for which the additional manager permissions were changed
    */
   void onAdditionalManagerPrivilegesChanged(UserGroupDTO group);
-
 }

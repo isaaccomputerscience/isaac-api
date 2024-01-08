@@ -53,6 +53,7 @@ public class GameboardItem {
   // optional field if we want to use the gameboard item outside of the context of a board.
   @Nullable
   private String boardId;
+
   // Optional record of the question ID which supersedes this one.
   @Nullable
   private String supersededBy;
@@ -60,8 +61,7 @@ public class GameboardItem {
   /**
    * Generic constructor.
    */
-  public GameboardItem() {
-  }
+  public GameboardItem() {}
 
   /**
    * Static factory method for constructing a minimal Gameboard Item from a GameboardContentDescriptor.
@@ -72,8 +72,10 @@ public class GameboardItem {
    * @return A Minimal gameboard item containing all of the information from the content descriptor.
    */
   public static GameboardItem buildLightweightItemFromContentDescriptor(
-      final GameboardContentDescriptor contentDescriptor) {
+    final GameboardContentDescriptor contentDescriptor
+  ) {
     return new GameboardItem() {
+
       {
         this.setId(contentDescriptor.getId());
         this.setContentType(contentDescriptor.getContentType());

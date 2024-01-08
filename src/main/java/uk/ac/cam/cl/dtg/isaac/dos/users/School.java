@@ -29,7 +29,12 @@ public class School {
    * Enum to represent where this school object was created.
    */
   public enum SchoolDataSource {
-    GOVERNMENT_UK, GOVERNMENT_IE, GOVERNMENT_SCO, GOVERNMENT_WAL, GOVERNMENT_NI, USER_ENTERED;
+    GOVERNMENT_UK,
+    GOVERNMENT_IE,
+    GOVERNMENT_SCO,
+    GOVERNMENT_WAL,
+    GOVERNMENT_NI,
+    USER_ENTERED;
 
     @Override
     public String toString() {
@@ -42,9 +47,7 @@ public class School {
   /**
    * Default Constructor for mappers.
    */
-  public School() {
-
-  }
+  public School() {}
 
   /**
    * Full constructor.
@@ -55,8 +58,13 @@ public class School {
    * @param dataSource -dataSource of this information
    * @param closed     - whether the school is closed
    */
-  public School(final String urn, final String name, final String postcode, final Boolean closed,
-                final SchoolDataSource dataSource) {
+  public School(
+    final String urn,
+    final String name,
+    final String postcode,
+    final Boolean closed,
+    final SchoolDataSource dataSource
+  ) {
     this.urn = urn;
     this.name = name;
     this.postcode = postcode;
@@ -117,7 +125,6 @@ public class School {
   public void setPostcode(final String postcode) {
     this.postcode = postcode;
   }
-
 
   /**
    * Gets the closed status.

@@ -82,10 +82,18 @@ public class GameboardDTO implements EmailService.HasTitleOrId {
    * @param tags
    *            - Set of tags associated with the game board.
    */
-  public GameboardDTO(final String id, final String title, final List<GameboardItem> contents,
-                      final IsaacWildcard wildCard, final Integer wildcardPosition, final Date creationDate,
-                      final GameFilter gameFilter, final Long ownerUserId,
-                      final GameboardCreationMethod creationMethod, final Set<String> tags) {
+  public GameboardDTO(
+    final String id,
+    final String title,
+    final List<GameboardItem> contents,
+    final IsaacWildcard wildCard,
+    final Integer wildcardPosition,
+    final Date creationDate,
+    final GameFilter gameFilter,
+    final Long ownerUserId,
+    final GameboardCreationMethod creationMethod,
+    final Set<String> tags
+  ) {
     this.id = id;
     this.title = title;
     this.contents = contents;
@@ -269,7 +277,6 @@ public class GameboardDTO implements EmailService.HasTitleOrId {
     return isSavedToCurrentUser;
   }
 
-
   /**
    * Sets the isSavedToCurrentUser.
    *
@@ -278,7 +285,6 @@ public class GameboardDTO implements EmailService.HasTitleOrId {
   public void setSavedToCurrentUser(final Boolean isSavedToCurrentUser) {
     this.isSavedToCurrentUser = isSavedToCurrentUser;
   }
-
 
   /**
    * Gets the creationMethod.
@@ -377,23 +383,42 @@ public class GameboardDTO implements EmailService.HasTitleOrId {
 
   @Override
   public String toString() {
-    return "GameboardDTO ["
-        + "id='" + id + '\''
-        + ", title='" + title + '\''
-        + ", contents=" + contents
-        + ", wildCard=" + wildCard
-        + ", wildCardPosition=" + wildCardPosition
-        + ", creationDate=" + creationDate
-        + ", gameFilter=" + gameFilter
-        + ", ownerUserId=" + ownerUserId
-        + ", ownerUserInformation=" + ownerUserInformation
-        + ", tags=" + tags
-        + ", isSavedToCurrentUser=" + isSavedToCurrentUser
-        + ", creationMethod=" + creationMethod
-        + ", percentageCompleted=" + percentageCompleted
-        + ", lastVisited=" + lastVisited
-        + ", startedQuestion=" + startedQuestion
-        + ']';
+    return (
+      "GameboardDTO [" +
+      "id='" +
+      id +
+      '\'' +
+      ", title='" +
+      title +
+      '\'' +
+      ", contents=" +
+      contents +
+      ", wildCard=" +
+      wildCard +
+      ", wildCardPosition=" +
+      wildCardPosition +
+      ", creationDate=" +
+      creationDate +
+      ", gameFilter=" +
+      gameFilter +
+      ", ownerUserId=" +
+      ownerUserId +
+      ", ownerUserInformation=" +
+      ownerUserInformation +
+      ", tags=" +
+      tags +
+      ", isSavedToCurrentUser=" +
+      isSavedToCurrentUser +
+      ", creationMethod=" +
+      creationMethod +
+      ", percentageCompleted=" +
+      percentageCompleted +
+      ", lastVisited=" +
+      lastVisited +
+      ", startedQuestion=" +
+      startedQuestion +
+      ']'
+    );
   }
 
   @Override

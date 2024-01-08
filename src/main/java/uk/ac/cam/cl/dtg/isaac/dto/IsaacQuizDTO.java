@@ -37,6 +37,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 public class IsaacQuizDTO extends SeguePageDTO implements EmailService.HasTitleOrId {
   @Deprecated
   private boolean visibleToStudents;
+
   private List<String> hiddenFromRoles;
   private QuizFeedbackMode defaultFeedbackMode;
   private ContentDTO rubric;
@@ -49,29 +50,45 @@ public class IsaacQuizDTO extends SeguePageDTO implements EmailService.HasTitleO
 
   @JsonCreator
   public IsaacQuizDTO(
-      @JsonProperty("id") final String id,
-      @JsonProperty("title") final String title,
-      @JsonProperty("subtitle") final String subtitle,
-      @JsonProperty("type") final String type,
-      @JsonProperty("author") final String author,
-      @JsonProperty("encoding") final String encoding,
-      @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
-      @JsonProperty("layout") final String layout,
-      @JsonProperty("children") final List<ContentBaseDTO> children,
-      @JsonProperty("value") final String value,
-      @JsonProperty("attribution") final String attribution,
-      @JsonProperty("relatedContent") final List<ContentSummaryDTO> relatedContent,
-      @JsonProperty("version") final boolean published,
-      @JsonProperty("deprecated") final Boolean deprecated,
-      @JsonProperty("tags") final Set<String> tags,
-      @JsonProperty("level") final Integer level,
-      @JsonProperty("visibleToStudents") final boolean visibleToStudents,
-      @JsonProperty("hiddenFromRoles") final List<String> hiddenFromRoles,
-      @JsonProperty("defaultFeedbackMode") final QuizFeedbackMode defaultFeedbackMode,
-      @JsonProperty("rubric") final ContentDTO rubric) {
-    super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, value, attribution,
-        relatedContent, published, deprecated, tags, level);
-
+    @JsonProperty("id") final String id,
+    @JsonProperty("title") final String title,
+    @JsonProperty("subtitle") final String subtitle,
+    @JsonProperty("type") final String type,
+    @JsonProperty("author") final String author,
+    @JsonProperty("encoding") final String encoding,
+    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+    @JsonProperty("layout") final String layout,
+    @JsonProperty("children") final List<ContentBaseDTO> children,
+    @JsonProperty("value") final String value,
+    @JsonProperty("attribution") final String attribution,
+    @JsonProperty("relatedContent") final List<ContentSummaryDTO> relatedContent,
+    @JsonProperty("version") final boolean published,
+    @JsonProperty("deprecated") final Boolean deprecated,
+    @JsonProperty("tags") final Set<String> tags,
+    @JsonProperty("level") final Integer level,
+    @JsonProperty("visibleToStudents") final boolean visibleToStudents,
+    @JsonProperty("hiddenFromRoles") final List<String> hiddenFromRoles,
+    @JsonProperty("defaultFeedbackMode") final QuizFeedbackMode defaultFeedbackMode,
+    @JsonProperty("rubric") final ContentDTO rubric
+  ) {
+    super(
+      id,
+      title,
+      subtitle,
+      type,
+      author,
+      encoding,
+      canonicalSourceFile,
+      layout,
+      children,
+      value,
+      attribution,
+      relatedContent,
+      published,
+      deprecated,
+      tags,
+      level
+    );
     this.visibleToStudents = visibleToStudents;
     this.hiddenFromRoles = hiddenFromRoles;
     this.defaultFeedbackMode = defaultFeedbackMode;
@@ -81,9 +98,7 @@ public class IsaacQuizDTO extends SeguePageDTO implements EmailService.HasTitleO
   /**
    * Default constructor required for Jackson.
    */
-  public IsaacQuizDTO() {
-
-  }
+  public IsaacQuizDTO() {}
 
   @Deprecated
   public boolean getVisibleToStudents() {

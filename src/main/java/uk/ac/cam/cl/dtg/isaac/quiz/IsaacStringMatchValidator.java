@@ -43,15 +43,22 @@ public class IsaacStringMatchValidator implements IValidator {
     Validate.notNull(answer);
 
     if (!(question instanceof IsaacStringMatchQuestion)) {
-      throw new IllegalArgumentException(String.format(
+      throw new IllegalArgumentException(
+        String.format(
           "This validator only works with Isaac String Match Questions... (%s is not string match)",
-          question.getId()));
+          question.getId()
+        )
+      );
     }
 
     if (!(answer instanceof StringChoice)) {
-      throw new IllegalArgumentException(String.format(
-          "Expected StringChoice for IsaacStringMatchQuestion: %s. Received (%s) ", question.getId(),
-          answer.getClass()));
+      throw new IllegalArgumentException(
+        String.format(
+          "Expected StringChoice for IsaacStringMatchQuestion: %s. Received (%s) ",
+          question.getId(),
+          answer.getClass()
+        )
+      );
     }
 
     StringChoice userAnswer = (StringChoice) answer;
@@ -59,12 +66,13 @@ public class IsaacStringMatchValidator implements IValidator {
     IsaacStringMatchQuestion stringMatchQuestion = (IsaacStringMatchQuestion) question;
 
     // These variables store the important features of the response we'll send.
-    Content feedback = null;                        // The feedback we send the user
-    boolean responseCorrect = false;                // Whether we're right or wrong
+    Content feedback = null; // The feedback we send the user
+    boolean responseCorrect = false; // Whether we're right or wrong
 
     if (null == stringMatchQuestion.getChoices() || stringMatchQuestion.getChoices().isEmpty()) {
-      log.error("Question does not have any answers. " + question.getId() + " src: "
-          + question.getCanonicalSourceFile());
+      log.error(
+        "Question does not have any answers. " + question.getId() + " src: " + question.getCanonicalSourceFile()
+      );
 
       feedback = new Content("This question does not have any correct answers");
     }
@@ -78,30 +86,39 @@ public class IsaacStringMatchValidator implements IValidator {
     // STEP 2: If they did, does their answer match a known answer?
 
     if (null == feedback) {
-
       // Sort the choices so that we match incorrect choices last, taking precedence over correct ones.
       List<Choice> orderedChoices = getOrderedChoices(stringMatchQuestion.getChoices());
 
       // For all the choices on this question...
       for (Choice c : orderedChoices) {
-
         // ... that are of the StringChoice type, ...
         if (!(c instanceof StringChoice)) {
-          log.error("Isaac StringMatch Validator for questionId: " + stringMatchQuestion.getId()
-              + " expected there to be a StringChoice. Instead it found a Choice.");
+          log.error(
+            "Isaac StringMatch Validator for questionId: " +
+            stringMatchQuestion.getId() +
+            " expected there to be a StringChoice. Instead it found a Choice."
+          );
           continue;
         }
         StringChoice stringChoice = (StringChoice) c;
 
         if (null == stringChoice.getValue() || stringChoice.getValue().isEmpty()) {
-          log.error("Expected a string to match, but none found in choice for question id: "
-              + stringMatchQuestion.getId());
+          log.error(
+            "Expected a string to match, but none found in choice for question id: " + stringMatchQuestion.getId()
+          );
           continue;
         }
 
         // ... check if they match the choice, ...
-        if (valuesMatch(stringChoice.getValue(), userAnswer.getValue(), stringChoice.isCaseInsensitive(),
-            stringMatchQuestion.getPreserveLeadingWhitespace(), stringMatchQuestion.getPreserveTrailingWhitespace())) {
+        if (
+          valuesMatch(
+            stringChoice.getValue(),
+            userAnswer.getValue(),
+            stringChoice.isCaseInsensitive(),
+            stringMatchQuestion.getPreserveLeadingWhitespace(),
+            stringMatchQuestion.getPreserveTrailingWhitespace()
+          )
+        ) {
           if (stringChoice.isCaseInsensitive()) {
             if (!responseCorrect) {
               // ... allowing case-insensitive matching only if haven't already matched a correct answer ...
@@ -126,9 +143,13 @@ public class IsaacStringMatchValidator implements IValidator {
     return new QuestionValidationResponse(question.getId(), userAnswer, responseCorrect, feedback, new Date());
   }
 
-  private boolean valuesMatch(final String trustedValue, final String userValue, final Boolean caseInsensitive,
-                              final Boolean preserveLeadingWhitespace, final Boolean preserveTrailingWhitespace) {
-
+  private boolean valuesMatch(
+    final String trustedValue,
+    final String userValue,
+    final Boolean caseInsensitive,
+    final Boolean preserveLeadingWhitespace,
+    final Boolean preserveTrailingWhitespace
+  ) {
     if (null == trustedValue || null == userValue) {
       return false;
     }

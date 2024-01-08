@@ -34,36 +34,50 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacFeaturedProfileDTO;
 @DTOMapping(IsaacFeaturedProfileDTO.class)
 @JsonContentType("isaacFeaturedProfile")
 public class IsaacFeaturedProfile extends Content {
-
   private String emailAddress;
   private Image image;
   private String homepage;
 
   @JsonCreator
   public IsaacFeaturedProfile(
-      @JsonProperty("id") final String id,
-      @JsonProperty("title") final String title,
-      @JsonProperty("subtitle") final String subtitle,
-      @JsonProperty("type") final String type,
-      @JsonProperty("author") final String author,
-      @JsonProperty("encoding") final String encoding,
-      @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
-      @JsonProperty("layout") final String layout,
-      @JsonProperty("children") final List<ContentBase> children,
-      @JsonProperty("value") final String value,
-      @JsonProperty("attribution") final String attribution,
-      @JsonProperty("relatedContent") final List<String> relatedContent,
-      @JsonProperty("version") final boolean published,
-      @JsonProperty("deprecated") final Boolean deprecated,
-      @JsonProperty("tags") final Set<String> tags,
-      @JsonProperty("level") final Integer level,
-      @JsonProperty("emailAddress") final String emailAddress,
-      @JsonProperty("image") final Image image,
-      @JsonProperty("homepage") final String homepage) {
-    super(id, title, subtitle, type, author, encoding,
-        canonicalSourceFile, layout, children, value, attribution,
-        relatedContent, published, deprecated, tags, level);
-
+    @JsonProperty("id") final String id,
+    @JsonProperty("title") final String title,
+    @JsonProperty("subtitle") final String subtitle,
+    @JsonProperty("type") final String type,
+    @JsonProperty("author") final String author,
+    @JsonProperty("encoding") final String encoding,
+    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+    @JsonProperty("layout") final String layout,
+    @JsonProperty("children") final List<ContentBase> children,
+    @JsonProperty("value") final String value,
+    @JsonProperty("attribution") final String attribution,
+    @JsonProperty("relatedContent") final List<String> relatedContent,
+    @JsonProperty("version") final boolean published,
+    @JsonProperty("deprecated") final Boolean deprecated,
+    @JsonProperty("tags") final Set<String> tags,
+    @JsonProperty("level") final Integer level,
+    @JsonProperty("emailAddress") final String emailAddress,
+    @JsonProperty("image") final Image image,
+    @JsonProperty("homepage") final String homepage
+  ) {
+    super(
+      id,
+      title,
+      subtitle,
+      type,
+      author,
+      encoding,
+      canonicalSourceFile,
+      layout,
+      children,
+      value,
+      attribution,
+      relatedContent,
+      published,
+      deprecated,
+      tags,
+      level
+    );
     this.emailAddress = emailAddress;
     this.image = image;
     this.homepage = homepage;
@@ -72,9 +86,7 @@ public class IsaacFeaturedProfile extends Content {
   /**
    * Default constructor required for Jackson.
    */
-  public IsaacFeaturedProfile() {
-
-  }
+  public IsaacFeaturedProfile() {}
 
   /**
    * Gets the e-mail address.

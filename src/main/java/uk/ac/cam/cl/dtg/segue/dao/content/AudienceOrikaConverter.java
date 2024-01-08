@@ -16,19 +16,28 @@ import ma.glasnost.orika.metadata.Type;
  * It seems ORIKA is not good at converting between highly nested data structures.
  */
 public class AudienceOrikaConverter
-    extends CustomConverter<List<Map<String, List<String>>>, List<Map<String, List<String>>>> {
+  extends CustomConverter<List<Map<String, List<String>>>, List<Map<String, List<String>>>> {
 
   @Override
   public List<Map<String, List<String>>> convert(
-      final List<Map<String, List<String>>> maps, final Type<? extends List<Map<String, List<String>>>> type,
-      final MappingContext context) {
+    final List<Map<String, List<String>>> maps,
+    final Type<? extends List<Map<String, List<String>>>> type,
+    final MappingContext context
+  ) {
     if (maps == null) {
       return null;
     }
 
     // This is horrible to read but it is a deep copy of the data structure - better safe than sorry.
-    return maps.stream().map(m -> m.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().collect(Collectors.toList()))))
-        .collect(Collectors.toList());
+    return maps
+      .stream()
+      .map(
+        m ->
+          m
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().collect(Collectors.toList())))
+      )
+      .collect(Collectors.toList());
   }
 }

@@ -21,7 +21,6 @@ package uk.ac.cam.cl.dtg.isaac.dos;
  * (for example the specific colour 'red') associated with the boolean value. The preference object is immutable.
  */
 public class UserPreference {
-
   private long userId;
   private String preferenceType;
   private String preferenceName;
@@ -35,8 +34,12 @@ public class UserPreference {
    * @param preferenceName  - the name of the preference
    * @param preferenceValue - the boolean value of the preference
    */
-  public UserPreference(final long userId, final String preferenceType, final String preferenceName,
-                        final boolean preferenceValue) {
+  public UserPreference(
+    final long userId,
+    final String preferenceType,
+    final String preferenceName,
+    final boolean preferenceValue
+  ) {
     this.userId = userId;
     this.preferenceType = preferenceType;
     this.preferenceName = preferenceName;

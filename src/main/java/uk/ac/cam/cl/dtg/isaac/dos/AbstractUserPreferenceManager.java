@@ -38,7 +38,7 @@ public abstract class AbstractUserPreferenceManager {
    * @throws SegueDatabaseException - if a database error occurs
    */
   public abstract UserPreference getUserPreference(String preferenceType, String preferenceName, long userId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Get a specific preference for many users.
@@ -50,7 +50,11 @@ public abstract class AbstractUserPreferenceManager {
    * @throws SegueDatabaseException - if a database error occurs
    */
   public abstract Map<Long, UserPreference> getUsersPreference(
-      String preferenceType, String preferenceName, List<RegisteredUserDTO> users) throws SegueDatabaseException;
+    String preferenceType,
+    String preferenceName,
+    List<RegisteredUserDTO> users
+  )
+    throws SegueDatabaseException;
 
   /**
    * Get all preferences of one type for a specific user.
@@ -61,7 +65,7 @@ public abstract class AbstractUserPreferenceManager {
    * @throws SegueDatabaseException - if a database error occurs
    */
   public abstract List<UserPreference> getUserPreferences(String preferenceType, long userId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Get all preferences of one type for many users.
@@ -72,7 +76,10 @@ public abstract class AbstractUserPreferenceManager {
    * @throws SegueDatabaseException - if a database error occurs
    */
   public abstract Map<Long, List<UserPreference>> getUserPreferences(
-      String preferenceType, List<RegisteredUserDTO> users) throws SegueDatabaseException;
+    String preferenceType,
+    List<RegisteredUserDTO> users
+  )
+    throws SegueDatabaseException;
 
   /**
    * Get all preferences for a specific user.
@@ -89,6 +96,5 @@ public abstract class AbstractUserPreferenceManager {
    * @param userPreferences - a list of the UserPreference objects to save
    * @throws SegueDatabaseException - if a database error occurs
    */
-  public abstract void saveUserPreferences(List<UserPreference> userPreferences)
-      throws SegueDatabaseException;
+  public abstract void saveUserPreferences(List<UserPreference> userPreferences) throws SegueDatabaseException;
 }

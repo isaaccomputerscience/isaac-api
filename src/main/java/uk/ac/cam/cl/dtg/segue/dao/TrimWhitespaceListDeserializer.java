@@ -41,8 +41,7 @@ public class TrimWhitespaceListDeserializer extends JsonDeserializer<List<String
 
   @Override
   public List<String> deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
-      throws IOException, JsonProcessingException, JsonMappingException {
-
+    throws IOException, JsonProcessingException, JsonMappingException {
     @SuppressWarnings("unchecked")
     List<String> listOfStringToTrim = jsonParser.readValueAs(ArrayList.class);
 

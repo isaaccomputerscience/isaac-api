@@ -32,7 +32,6 @@ import uk.ac.cam.cl.dtg.util.LogUtils;
  * @author Connor Holloway
  */
 public class SendEmailMisuseHandler implements IMisuseHandler {
-
   private static final Logger log = LoggerFactory.getLogger(SendEmailMisuseHandler.class);
 
   private static final Integer SOFT_THRESHOLD = 201;
@@ -40,8 +39,7 @@ public class SendEmailMisuseHandler implements IMisuseHandler {
   private static final Integer ACCOUNTING_INTERVAL = NUMBER_SECONDS_IN_ONE_DAY;
 
   @Inject
-  public SendEmailMisuseHandler() {
-  }
+  public SendEmailMisuseHandler() {}
 
   @Override
   public Integer getSoftThreshold() {

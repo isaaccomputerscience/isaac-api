@@ -28,8 +28,7 @@ public class IsaacCardDeckDTO extends ContentDTO {
   /**
    * Default constructor required for mapping.
    */
-  public IsaacCardDeckDTO() {
-  }
+  public IsaacCardDeckDTO() {}
 
   /**
    * Get the cards.

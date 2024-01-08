@@ -129,10 +129,12 @@ public class UserAuthenticationManager {
    * @param emailQueue          - A communications queue for managing emails
    */
   @Inject
-  public UserAuthenticationManager(final IUserDataManager database,
-                                   final PropertiesLoader properties,
-                                   final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
-                                   final EmailManager emailQueue) {
+  public UserAuthenticationManager(
+    final IUserDataManager database,
+    final PropertiesLoader properties,
+    final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
+    final EmailManager emailQueue
+  ) {
     Validate.notNull(properties.getProperty(HMAC_SALT));
     Validate.notNull(properties.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT));
     Validate.notNull(properties.getProperty(HOST_NAME));
@@ -163,12 +165,16 @@ public class UserAuthenticationManager {
     String jsessionId = null;
     try {
       jsessionId = this.getJsessionIdFromRequest(request);
-    } catch (InvalidSessionException e) { /* Do nothing - leave jsessionId as null */ }
+    } catch (InvalidSessionException e) {
+      /* Do nothing - leave jsessionId as null */
+    }
 
     Map<String, String> sessionInformation = Maps.newHashMap();
     try {
       sessionInformation = getSegueSessionFromRequest(request);
-    } catch (InvalidSessionException | IOException e) { /* Do nothing - leave session map empty */ }
+    } catch (InvalidSessionException | IOException e) {
+      /* Do nothing - leave session map empty */
+    }
 
     String segueUserId = sessionInformation.get(SESSION_USER_ID);
     String sessionToken = sessionInformation.get(SESSION_TOKEN);
@@ -191,7 +197,7 @@ public class UserAuthenticationManager {
    * @throws AuthenticationProviderMappingException - as per exception description.
    */
   public URI getThirdPartyAuthURI(final HttpServletRequest request, final String provider)
-      throws IOException, AuthenticationProviderMappingException {
+    throws IOException, AuthenticationProviderMappingException {
     IAuthenticator federatedAuthenticator = mapToProvider(provider);
 
     // if we are an OAuthProvider redirect to the provider
@@ -214,8 +220,9 @@ public class UserAuthenticationManager {
 
       redirectLink = URI.create(oauth1Provider.getAuthorizationUrl(token));
     } else {
-      throw new AuthenticationProviderMappingException("Unable to map to a known authenticator. "
-          + "The provider: " + provider + " is unknown");
+      throw new AuthenticationProviderMappingException(
+        "Unable to map to a known authenticator. " + "The provider: " + provider + " is unknown"
+      );
     }
 
     return redirectLink;
@@ -237,9 +244,7 @@ public class UserAuthenticationManager {
    * @throws AuthenticationCodeException            - as per exception description.
    */
   public UserFromAuthProvider getThirdPartyUserInformation(final HttpServletRequest request, final String provider)
-      throws AuthenticationProviderMappingException, AuthenticatorSecurityException, NoUserException,
-      IOException, AuthenticationCodeException, CodeExchangeException,
-      CrossSiteRequestForgeryException {
+    throws AuthenticationProviderMappingException, AuthenticatorSecurityException, NoUserException, IOException, AuthenticationCodeException, CodeExchangeException, CrossSiteRequestForgeryException {
     IAuthenticator authenticator = mapToProvider(provider);
 
     IOAuthAuthenticator oauthProvider;
@@ -253,8 +258,9 @@ public class UserAuthenticationManager {
 
       providerSpecificUserLookupReference = this.getOauthInternalRefCode(oauthProvider, request);
     } else {
-      throw new AuthenticationProviderMappingException("Unable to map to a known authenticator. The provider: "
-          + provider + " is unknown");
+      throw new AuthenticationProviderMappingException(
+        "Unable to map to a known authenticator. The provider: " + provider + " is unknown"
+      );
     }
 
     UserFromAuthProvider userFromProvider = oauthProvider.getUserInfo(providerSpecificUserLookupReference);
@@ -271,7 +277,7 @@ public class UserAuthenticationManager {
    * @throws SegueDatabaseException - If there is an internal database error.
    */
   public RegisteredUser getSegueUserFromLinkedAccount(final AuthenticationProvider provider, final String providerId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     Validate.notNull(provider);
     Validate.notBlank(providerId);
 
@@ -294,11 +300,12 @@ public class UserAuthenticationManager {
    * @throws NoSuchAlgorithmException               - if the configured algorithm is not valid.
    * @throws InvalidKeySpecException                - if the preconfigured key spec is invalid.
    */
-  public final RegisteredUser getSegueUserFromCredentials(final String provider, final String email,
-                                                          final String plainTextPassword)
-      throws AuthenticationProviderMappingException,
-      SegueDatabaseException, IncorrectCredentialsProvidedException,
-      NoCredentialsAvailableException, InvalidKeySpecException, NoSuchAlgorithmException {
+  public final RegisteredUser getSegueUserFromCredentials(
+    final String provider,
+    final String email,
+    final String plainTextPassword
+  )
+    throws AuthenticationProviderMappingException, SegueDatabaseException, IncorrectCredentialsProvidedException, NoCredentialsAvailableException, InvalidKeySpecException, NoSuchAlgorithmException {
     Validate.notBlank(email);
     Validate.notNull(plainTextPassword);
     IAuthenticator authenticator = mapToProvider(provider);
@@ -308,8 +315,9 @@ public class UserAuthenticationManager {
 
       return passwordAuthenticator.authenticate(email, plainTextPassword);
     } else {
-      throw new AuthenticationProviderMappingException("Unable to map to a known authenticator that accepts "
-          + "raw credentials for the given provider: " + provider);
+      throw new AuthenticationProviderMappingException(
+        "Unable to map to a known authenticator that accepts " + "raw credentials for the given provider: " + provider
+      );
     }
   }
 
@@ -320,8 +328,9 @@ public class UserAuthenticationManager {
    * @return true means the user should have a means of authenticating with their account as far as we are concerned
    */
   public boolean hasLocalCredentials(final RegisteredUser user) throws SegueDatabaseException {
-    IPasswordAuthenticator passwordAuthenticator = (IPasswordAuthenticator) this.registeredAuthProviders
-        .get(AuthenticationProvider.SEGUE);
+    IPasswordAuthenticator passwordAuthenticator = (IPasswordAuthenticator) this.registeredAuthProviders.get(
+        AuthenticationProvider.SEGUE
+      );
 
     return passwordAuthenticator.hasPasswordRegistered(user);
   }
@@ -335,8 +344,10 @@ public class UserAuthenticationManager {
    *                                              completed MFA.
    * @return either a user or null if we couldn't find the user for whatever reason.
    */
-  public RegisteredUser getUserFromSession(final HttpServletRequest request,
-                                           final boolean allowIncompleteLoginsToReturnUser) {
+  public RegisteredUser getUserFromSession(
+    final HttpServletRequest request,
+    final boolean allowIncompleteLoginsToReturnUser
+  ) {
     // WARNING: There are two public getUserFromSession methods: ensure you check both!
     Validate.notNull(request);
 
@@ -355,20 +366,26 @@ public class UserAuthenticationManager {
     if (checkOriginHeader) {
       // Check if the request originated from Isaac, which should be unnecessary except for WebSockets given
       // correct CORS headers. This code will merely print warnings if something doesn't look right:
-      String referrer = request.getHeader("Referer");  // Note HTTP Header misspelling!
+      String referrer = request.getHeader("Referer"); // Note HTTP Header misspelling!
       if (null == referrer) {
-        log.warn("Authenticated request has no 'Referer' information set! Accessing: "
-            + request.getPathInfo());
+        log.warn("Authenticated request has no 'Referer' information set! Accessing: " + request.getPathInfo());
       } else if (!referrer.startsWith("https://" + properties.getProperty(HOST_NAME) + "/")) {
-        log.warn("Authenticated request has unexpected Referer: '" + referrer + "'. Accessing: "
-            + request.getPathInfo());
+        log.warn(
+          "Authenticated request has unexpected Referer: '" + referrer + "'. Accessing: " + request.getPathInfo()
+        );
       }
       // If the client sends an Origin header, we can check its value. If they do not send the header,
       // we can draw no conclusions.
       String origin = request.getHeader("Origin");
       if (null != origin && !origin.equals("https://" + properties.getProperty(HOST_NAME))) {
-        log.warn("Authenticated request has unexpected Origin: '" + origin + "'. Accessing: "
-            + request.getMethod() + " " + request.getPathInfo());
+        log.warn(
+          "Authenticated request has unexpected Origin: '" +
+          origin +
+          "'. Accessing: " +
+          request.getMethod() +
+          " " +
+          request.getPathInfo()
+        );
       }
     }
 
@@ -424,7 +441,6 @@ public class UserAuthenticationManager {
     }
   }
 
-
   /**
    * This method tries to address some of the duplication when extracting a user from a request.
    * <br>
@@ -441,12 +457,16 @@ public class UserAuthenticationManager {
    *     methods
    * @see #getUserFromSession(UpgradeRequest) -     but unrelated by interfaces/inheritance, so require duplication!
    */
-  private RegisteredUser getUserFromSessionInformationMap(final Map<String, String> currentSessionInformation,
-                                                          final boolean allowIncompleteLoginsToReturnUser) {
+  private RegisteredUser getUserFromSessionInformationMap(
+    final Map<String, String> currentSessionInformation,
+    final boolean allowIncompleteLoginsToReturnUser
+  ) {
     if (!allowIncompleteLoginsToReturnUser) {
       // check if the session has a caveat about incomplete MFA Login
-      if (!Strings.isNullOrEmpty(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))
-          && Boolean.parseBoolean(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))) {
+      if (
+        !Strings.isNullOrEmpty(currentSessionInformation.get(PARTIAL_LOGIN_FLAG)) &&
+        Boolean.parseBoolean(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))
+      ) {
         // login is incomplete we cannot proceed.
         log.debug("Incomplete MFA flow - no user object to be provided");
         return null;
@@ -480,8 +500,12 @@ public class UserAuthenticationManager {
    * @param user     - the user who should be logged in.
    * @return the request and response will be modified and the original userDO will be returned for convenience.
    */
-  public RegisteredUser createUserSession(final HttpServletRequest request, final HttpServletResponse response,
-                                          final RegisteredUser user) throws SegueDatabaseException {
+  public RegisteredUser createUserSession(
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final RegisteredUser user
+  )
+    throws SegueDatabaseException {
     this.createSession(request, response, user, false);
     return user;
   }
@@ -494,9 +518,12 @@ public class UserAuthenticationManager {
    * @param user     - the user who should be logged in.
    * @return the request and response will be modified and the original userDO will be returned for convenience.
    */
-  public RegisteredUser createIncompleteLoginUserSession(final HttpServletRequest request,
-                                                         final HttpServletResponse response,
-                                                         final RegisteredUser user) throws SegueDatabaseException {
+  public RegisteredUser createIncompleteLoginUserSession(
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final RegisteredUser user
+  )
+    throws SegueDatabaseException {
     this.createSession(request, response, user, true);
     return user;
   }
@@ -510,7 +537,7 @@ public class UserAuthenticationManager {
    * @throws SegueDatabaseException  - if accessing the database fails
    */
   public void destroyUserSession(final HttpServletRequest request, final HttpServletResponse response)
-      throws NoUserLoggedInException, SegueDatabaseException {
+    throws NoUserLoggedInException, SegueDatabaseException {
     Validate.notNull(request);
     try {
       request.getSession().invalidate();
@@ -532,7 +559,7 @@ public class UserAuthenticationManager {
    * @throws SegueDatabaseException  - if accessing the database fails
    */
   public void invalidateSessionToken(final HttpServletRequest request)
-      throws NoUserLoggedInException, SegueDatabaseException {
+    throws NoUserLoggedInException, SegueDatabaseException {
     Validate.notNull(request);
     RegisteredUser currentUser = this.getUserFromSession(request, false);
     if (null == currentUser) {
@@ -552,20 +579,24 @@ public class UserAuthenticationManager {
    * @throws AuthenticationProviderMappingException if we are unable to locate the provider requested.
    */
   public IAuthenticator mapToProvider(final String provider) throws AuthenticationProviderMappingException {
-    Validate.notEmpty(provider, "Provider name must not be empty or null if we are going "
-        + "to map it to an implementation.");
+    Validate.notEmpty(
+      provider,
+      "Provider name must not be empty or null if we are going " + "to map it to an implementation."
+    );
 
     AuthenticationProvider enumProvider;
     try {
       enumProvider = AuthenticationProvider.valueOf(provider.toUpperCase());
     } catch (IllegalArgumentException e) {
-      throw new AuthenticationProviderMappingException("The provider requested is "
-          + "invalid and not a known AuthenticationProvider: " + provider);
+      throw new AuthenticationProviderMappingException(
+        "The provider requested is " + "invalid and not a known AuthenticationProvider: " + provider
+      );
     }
 
     if (!registeredAuthProviders.containsKey(enumProvider)) {
-      throw new AuthenticationProviderMappingException("This authentication provider"
-          + " has not been registered / implemented yet: " + provider);
+      throw new AuthenticationProviderMappingException(
+        "This authentication provider" + " has not been registered / implemented yet: " + provider
+      );
     }
 
     log.debug("Mapping provider: " + sanitiseExternalLogValue(provider) + " to " + enumProvider);
@@ -581,16 +612,21 @@ public class UserAuthenticationManager {
    * @param providerUserObject     - the user object provided by the 3rd party authenticator.
    * @throws SegueDatabaseException - If there is an internal database error.
    */
-  public void linkProviderToExistingAccount(final RegisteredUser currentUser,
-                                            final AuthenticationProvider federatedAuthenticator,
-                                            final UserFromAuthProvider providerUserObject)
-      throws SegueDatabaseException {
+  public void linkProviderToExistingAccount(
+    final RegisteredUser currentUser,
+    final AuthenticationProvider federatedAuthenticator,
+    final UserFromAuthProvider providerUserObject
+  )
+    throws SegueDatabaseException {
     Validate.notNull(currentUser);
     Validate.notNull(federatedAuthenticator);
     Validate.notNull(providerUserObject);
 
-    this.database.linkAuthProviderToAccount(currentUser, federatedAuthenticator,
-        providerUserObject.getProviderUserId());
+    this.database.linkAuthProviderToAccount(
+        currentUser,
+        federatedAuthenticator,
+        providerUserObject.getProviderUserId()
+      );
   }
 
   /**
@@ -606,28 +642,30 @@ public class UserAuthenticationManager {
    * @throws AuthenticationProviderMappingException - if we are unable to locate the authentication provider specified.
    */
   public void unlinkUserAndProvider(final RegisteredUser userDO, final String providerString)
-      throws SegueDatabaseException, MissingRequiredFieldException, AuthenticationProviderMappingException {
-
+    throws SegueDatabaseException, MissingRequiredFieldException, AuthenticationProviderMappingException {
     // check if the provider is there to delete in the first place. If not just return.
-    if (!this.database.getAuthenticationProvidersByUser(userDO).contains(
-        this.mapToProvider(providerString).getAuthenticationProvider())) {
+    if (
+      !this.database.getAuthenticationProvidersByUser(userDO)
+        .contains(this.mapToProvider(providerString).getAuthenticationProvider())
+    ) {
       return;
     }
 
-    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this
-        .mapToProvider(AuthenticationProvider.SEGUE.name());
+    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.mapToProvider(
+        AuthenticationProvider.SEGUE.name()
+      );
 
     // make sure that the change doesn't prevent the user from logging in again.
-    if (this.database.getAuthenticationProvidersByUser(userDO).size() > 1 || authenticator.hasPasswordRegistered(
-        userDO)) {
-      this.database.unlinkAuthProviderFromUser(userDO, this.mapToProvider(providerString)
-          .getAuthenticationProvider());
+    if (
+      this.database.getAuthenticationProvidersByUser(userDO).size() > 1 || authenticator.hasPasswordRegistered(userDO)
+    ) {
+      this.database.unlinkAuthProviderFromUser(userDO, this.mapToProvider(providerString).getAuthenticationProvider());
     } else {
-      throw new MissingRequiredFieldException("This modification would mean that you"
-          + " no longer have a way to log in and has been ignored.");
+      throw new MissingRequiredFieldException(
+        "This modification would mean that you" + " no longer have a way to log in and has been ignored."
+      );
     }
   }
-
 
   /**
    * This method will use an email address to check a local user exists and if so, will send an email with a unique
@@ -641,11 +679,11 @@ public class UserAuthenticationManager {
    * @throws SegueDatabaseException   - If there is an internal database error.
    */
   public final void resetPasswordRequest(final RegisteredUser userDO, final RegisteredUserDTO userAsDTO)
-      throws InvalidKeySpecException,
-      NoSuchAlgorithmException, CommunicationException, SegueDatabaseException {
+    throws InvalidKeySpecException, NoSuchAlgorithmException, CommunicationException, SegueDatabaseException {
     try {
-      IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders
-          .get(AuthenticationProvider.SEGUE);
+      IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders.get(
+          AuthenticationProvider.SEGUE
+        );
 
       // Before we create a reset token, record if they already have a password:
       boolean userHadPasswordRegistered = authenticator.hasPasswordRegistered(userDO);
@@ -654,20 +692,23 @@ public class UserAuthenticationManager {
       String token = authenticator.createPasswordResetTokenForUser(userDO);
       log.info(String.format("Sending password reset message to %s", userDO.getEmail()));
 
-      Map<String, Object> emailValues = ImmutableMap.of("resetURL",
-          String.format("https://%s/resetpassword/%s",
-              properties.getProperty(HOST_NAME), token));
+      Map<String, Object> emailValues = ImmutableMap.of(
+        "resetURL",
+        String.format("https://%s/resetpassword/%s", properties.getProperty(HOST_NAME), token)
+      );
 
       if (this.database.hasALinkedAccount(userDO) && !userHadPasswordRegistered) {
         // If user wasn't previously authenticated locally, and has a linked account
         // allow them to reset their password but tell them about their provider(s):
         this.sendFederatedAuthenticatorResetMessage(userDO, userAsDTO, emailValues);
       } else {
-        this.emailManager.sendTemplatedEmailToUser(userAsDTO,
+        this.emailManager.sendTemplatedEmailToUser(
+            userAsDTO,
             emailManager.getEmailTemplateDTO("email-template-password-reset"),
-            emailValues, EmailType.SYSTEM);
+            emailValues,
+            EmailType.SYSTEM
+          );
       }
-
     } catch (ContentManagerException e) {
       log.error("ContentManagerException " + e.getMessage());
     }
@@ -684,11 +725,10 @@ public class UserAuthenticationManager {
    * @throws SegueDatabaseException   - If there is an internal database error.
    */
   public RegisteredUser resetPassword(final String token, final String newPassword)
-      throws InvalidTokenException, InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException,
-      NoSuchAlgorithmException {
-
-    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders
-        .get(AuthenticationProvider.SEGUE);
+    throws InvalidTokenException, InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException {
+    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders.get(
+        AuthenticationProvider.SEGUE
+      );
 
     // Ensure new password is valid
     authenticator.ensureValidPassword(newPassword);
@@ -712,10 +752,12 @@ public class UserAuthenticationManager {
    * @param additionalEmailValues - Additional email values to find and replace including any password reset urls.
    * @throws SegueDatabaseException - If there is an internal database error.
    */
-  private void sendFederatedAuthenticatorResetMessage(final RegisteredUser user, final RegisteredUserDTO userAsDTO,
-                                                      final Map<String, Object> additionalEmailValues)
-      throws
-      SegueDatabaseException {
+  private void sendFederatedAuthenticatorResetMessage(
+    final RegisteredUser user,
+    final RegisteredUserDTO userAsDTO,
+    final Map<String, Object> additionalEmailValues
+  )
+    throws SegueDatabaseException {
     Validate.notNull(user);
 
     // Get the user's federated authenticators
@@ -755,17 +797,19 @@ public class UserAuthenticationManager {
 
     try {
       Map<String, Object> emailTokens = Maps.newHashMap();
-      emailTokens.putAll(ImmutableMap.of("providerString", providersString,
-          "providerWord", providerWord));
+      emailTokens.putAll(ImmutableMap.of("providerString", providersString, "providerWord", providerWord));
       emailTokens.putAll(additionalEmailValues);
 
-      emailManager.sendTemplatedEmailToUser(userAsDTO,
-          emailManager.getEmailTemplateDTO("email-template-federated-password-reset"),
-          emailTokens, EmailType.SYSTEM);
-
+      emailManager.sendTemplatedEmailToUser(
+        userAsDTO,
+        emailManager.getEmailTemplateDTO("email-template-federated-password-reset"),
+        emailTokens,
+        EmailType.SYSTEM
+      );
     } catch (ContentManagerException contentException) {
-      log.error(String.format("Error sending federated email verification message - %s",
-          contentException.getMessage()));
+      log.error(
+        String.format("Error sending federated email verification message - %s", contentException.getMessage())
+      );
     }
   }
 
@@ -781,8 +825,7 @@ public class UserAuthenticationManager {
    * @throws CrossSiteRequestForgeryException - Unable to guarantee no CSRF
    */
   private String getOauthInternalRefCode(final IOAuthAuthenticator oauthProvider, final HttpServletRequest request)
-      throws AuthenticationCodeException, CodeExchangeException,
-      CrossSiteRequestForgeryException {
+    throws AuthenticationCodeException, CodeExchangeException, CrossSiteRequestForgeryException {
     // verify there is no cross site request forgery going on.
     if (request.getQueryString() == null || !ensureNoCSRF(request, oauthProvider)) {
       throw new CrossSiteRequestForgeryException("CSRF check failed");
@@ -803,7 +846,6 @@ public class UserAuthenticationManager {
     }
   }
 
-
   /**
    * Verify with the request that there is no CSRF violation.
    *
@@ -813,7 +855,7 @@ public class UserAuthenticationManager {
    * @throws CrossSiteRequestForgeryException - if we suspect cross site request forgery.
    */
   private boolean ensureNoCSRF(final HttpServletRequest request, final IOAuthAuthenticator oauthProvider)
-      throws CrossSiteRequestForgeryException {
+    throws CrossSiteRequestForgeryException {
     Validate.notNull(request);
 
     String key;
@@ -830,12 +872,20 @@ public class UserAuthenticationManager {
     String csrfTokenFromProvider = request.getParameter(key);
 
     if (null == csrfTokenFromUser || !csrfTokenFromUser.equals(csrfTokenFromProvider)) {
-      log.error("Invalid state parameter - Provider said: " + request.getParameter(STATE_PARAM_NAME)
-          + " Session said: " + request.getSession().getAttribute(STATE_PARAM_NAME));
+      log.error(
+        "Invalid state parameter - Provider said: " +
+        request.getParameter(STATE_PARAM_NAME) +
+        " Session said: " +
+        request.getSession().getAttribute(STATE_PARAM_NAME)
+      );
       return false;
     } else {
-      log.debug("State parameter matches - Provider said: " + request.getParameter(STATE_PARAM_NAME)
-          + " Session said: " + request.getSession().getAttribute(STATE_PARAM_NAME));
+      log.debug(
+        "State parameter matches - Provider said: " +
+        request.getParameter(STATE_PARAM_NAME) +
+        " Session said: " +
+        request.getSession().getAttribute(STATE_PARAM_NAME)
+      );
       return true;
     }
   }
@@ -849,13 +899,20 @@ public class UserAuthenticationManager {
    * @param partialLoginFlag Boolean to indicate whether or not this cookie represents a partial login (true) or full
    *                             (false)
    */
-  private void createSession(final HttpServletRequest request, final HttpServletResponse response,
-                             final RegisteredUser user, final boolean partialLoginFlag) throws SegueDatabaseException {
+  private void createSession(
+    final HttpServletRequest request,
+    final HttpServletResponse response,
+    final RegisteredUser user,
+    final boolean partialLoginFlag
+  )
+    throws SegueDatabaseException {
     Validate.notNull(response);
     Validate.notNull(user);
     Validate.notNull(user.getId());
-    int sessionExpiryTimeInSeconds =
-        properties.getIntegerPropertyOrFallback(SESSION_EXPIRY_SECONDS_DEFAULT, SESSION_EXPIRY_SECONDS_FALLBACK);
+    int sessionExpiryTimeInSeconds = properties.getIntegerPropertyOrFallback(
+      SESSION_EXPIRY_SECONDS_DEFAULT,
+      SESSION_EXPIRY_SECONDS_FALLBACK
+    );
 
     if (partialLoginFlag) {
       // use shortened expiry time if partial login
@@ -874,9 +931,13 @@ public class UserAuthenticationManager {
    * @param partialLoginFlagString     either null if this is a full login cookie or a string value of true if this is
    *                                       a partial login cookie
    */
-  private void createSession(final HttpServletResponse response, final RegisteredUser user,
-                             final int sessionExpiryTimeInSeconds,
-                             @Nullable final String partialLoginFlagString) throws SegueDatabaseException {
+  private void createSession(
+    final HttpServletResponse response,
+    final RegisteredUser user,
+    final int sessionExpiryTimeInSeconds,
+    @Nullable final String partialLoginFlagString
+  )
+    throws SegueDatabaseException {
     SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
     String newUserSessionToken = this.database.regenerateSessionToken(user).toString();
     String userId = user.getId().toString();
@@ -887,15 +948,19 @@ public class UserAuthenticationManager {
       calendar.add(Calendar.SECOND, sessionExpiryTimeInSeconds);
       String sessionExpiryDate = sessionDateFormat.format(calendar.getTime());
 
-      Map<String, String> sessionInformation =
-          prepareSessionInformation(userId, newUserSessionToken, sessionExpiryDate, hmacKey, partialLoginFlagString);
+      Map<String, String> sessionInformation = prepareSessionInformation(
+        userId,
+        newUserSessionToken,
+        sessionExpiryDate,
+        hmacKey,
+        partialLoginFlagString
+      );
 
       Cookie authCookie = createAuthCookie(sessionInformation, sessionExpiryTimeInSeconds);
 
       log.debug(String.format("Creating AuthCookie for user (%s) with value %s", userId, authCookie.getValue()));
 
-      response.addCookie(authCookie);  // lgtm [java/insecure-cookie]  false positive due to conditional above!
-
+      response.addCookie(authCookie); // lgtm [java/insecure-cookie]  false positive due to conditional above!
     } catch (JsonProcessingException e1) {
       log.error("Unable to save cookie.", e1);
     }
@@ -911,8 +976,10 @@ public class UserAuthenticationManager {
    * @param sessionTokenFromDatabase the real session token to validate this cookie against
    * @return true if it is still valid, false if not.
    */
-  public boolean isValidUsersSession(final Map<String, String> sessionInformation,
-                                      final Integer sessionTokenFromDatabase) {
+  public boolean isValidUsersSession(
+    final Map<String, String> sessionInformation,
+    final Integer sessionTokenFromDatabase
+  ) {
     Validate.notNull(sessionInformation);
     Validate.notNull(sessionTokenFromDatabase);
 
@@ -951,8 +1018,10 @@ public class UserAuthenticationManager {
     }
 
     // Check that the session token is still valid:
-    if (sessionTokenFromDatabase == NO_SESSION_TOKEN_RESERVED_VALUE
-        || !sessionTokenFromDatabase.toString().equals(userSessionToken)) {
+    if (
+      sessionTokenFromDatabase == NO_SESSION_TOKEN_RESERVED_VALUE ||
+      !sessionTokenFromDatabase.toString().equals(userSessionToken)
+    ) {
       log.debug("Invalid session token detected for user id " + userId);
       return false;
     }
@@ -970,9 +1039,13 @@ public class UserAuthenticationManager {
    * @param partialLoginFlag - Boolean data to encode in the cookie - true if a partial login
    * @return HMAC signature.
    */
-  public String calculateSessionHMAC(final String key, final String userId, final String currentDate,
-                                      final String sessionToken,
-                                      @Nullable final String partialLoginFlag) {
+  public String calculateSessionHMAC(
+    final String key,
+    final String userId,
+    final String currentDate,
+    final String sessionToken,
+    @Nullable final String partialLoginFlag
+  ) {
     StringBuilder sb = new StringBuilder();
     sb.append(userId);
     sb.append("|").append(currentDate);
@@ -1033,8 +1106,8 @@ public class UserAuthenticationManager {
    * @throws IOException             - problem parsing session information.
    * @throws InvalidSessionException - if there is no session set or if it is not valid.
    */
-  private Map<String, String> getSegueSessionFromRequest(final HttpServletRequest request) throws IOException,
-      InvalidSessionException {
+  private Map<String, String> getSegueSessionFromRequest(final HttpServletRequest request)
+    throws IOException, InvalidSessionException {
     // WARNING: There are two getSegueSessionFromRequest methods: ensure you update both!
     Cookie segueAuthCookie = null;
     if (request.getCookies() == null) {
@@ -1053,8 +1126,7 @@ public class UserAuthenticationManager {
 
     @SuppressWarnings("unchecked")
     Map<String, String> sessionInformation =
-        this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()),
-            HashMap.class);
+      this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()), HashMap.class);
 
     return sessionInformation;
   }
@@ -1066,8 +1138,8 @@ public class UserAuthenticationManager {
    *     an HttpServletRequest. Worse, the cookies from an HttpServletRequest are Cookie objects, but those from the
    *     WebSocket UpgradeRequest are HttpCookies!
    */
-  private Map<String, String> getSegueSessionFromRequest(final UpgradeRequest request) throws IOException,
-      InvalidSessionException {
+  private Map<String, String> getSegueSessionFromRequest(final UpgradeRequest request)
+    throws IOException, InvalidSessionException {
     // WARNING: There are two getSegueSessionFromRequest methods: ensure you update both!
     HttpCookie segueAuthCookie = null;
     if (request.getCookies() == null) {
@@ -1086,8 +1158,7 @@ public class UserAuthenticationManager {
 
     @SuppressWarnings("unchecked")
     Map<String, String> sessionInformation =
-        this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()),
-            HashMap.class);
+      this.serializationMapper.readValue(Base64.decodeBase64(segueAuthCookie.getValue()), HashMap.class);
 
     return sessionInformation;
   }
@@ -1118,9 +1189,13 @@ public class UserAuthenticationManager {
     }
   }
 
-  public Map<String, String> prepareSessionInformation(String userId, String newUserSessionToken,
-                                                       String sessionExpiryDate, String hmacKey,
-                                                       String partialLoginFlagString) {
+  public Map<String, String> prepareSessionInformation(
+    String userId,
+    String newUserSessionToken,
+    String sessionExpiryDate,
+    String hmacKey,
+    String partialLoginFlagString
+  ) {
     ImmutableMap.Builder<String, String> sessionInformationBuilder = new ImmutableMap.Builder<>();
     sessionInformationBuilder.put(SESSION_USER_ID, userId);
     sessionInformationBuilder.put(SESSION_TOKEN, newUserSessionToken);
@@ -1130,8 +1205,13 @@ public class UserAuthenticationManager {
       sessionInformationBuilder.put(PARTIAL_LOGIN_FLAG, partialLoginFlagString);
     }
 
-    String sessionHmac =
-        calculateSessionHMAC(hmacKey, userId, sessionExpiryDate, newUserSessionToken, partialLoginFlagString);
+    String sessionHmac = calculateSessionHMAC(
+      hmacKey,
+      userId,
+      sessionExpiryDate,
+      newUserSessionToken,
+      partialLoginFlagString
+    );
     sessionInformationBuilder.put(HMAC, sessionHmac);
 
     return sessionInformationBuilder.build();
@@ -1185,9 +1265,11 @@ public class UserAuthenticationManager {
   }
 
   public Cookie createAuthCookie(final Map<String, String> sessionInformation, final int sessionExpiryTimeInSeconds)
-      throws JsonProcessingException {
-    Cookie authCookie = new Cookie(SEGUE_AUTH_COOKIE,
-        Base64.encodeBase64String(serializationMapper.writeValueAsString(sessionInformation).getBytes()));
+    throws JsonProcessingException {
+    Cookie authCookie = new Cookie(
+      SEGUE_AUTH_COOKIE,
+      Base64.encodeBase64String(serializationMapper.writeValueAsString(sessionInformation).getBytes())
+    );
     authCookie.setMaxAge(sessionExpiryTimeInSeconds);
     authCookie.setPath("/");
     authCookie.setHttpOnly(true);
@@ -1200,7 +1282,7 @@ public class UserAuthenticationManager {
   public Cookie createAuthLogoutCookie() {
     Cookie logoutCookie = new Cookie(SEGUE_AUTH_COOKIE, "");
     logoutCookie.setPath("/");
-    logoutCookie.setMaxAge(0);  // This will lead to it being removed by the browser immediately.
+    logoutCookie.setMaxAge(0); // This will lead to it being removed by the browser immediately.
     logoutCookie.setHttpOnly(true);
     logoutCookie.setSecure(setSecureCookies);
     logoutCookie.setComment(SAME_SITE_LAX_COMMENT);
@@ -1209,13 +1291,13 @@ public class UserAuthenticationManager {
 
   public NewCookie createAuthLogoutNewCookie() {
     NewCookie logoutCookie = new NewCookie.Builder(SEGUE_AUTH_COOKIE)
-        .value("")
-        .path("/")
-        .maxAge(0)
-        .httpOnly(true)
-        .secure(setSecureCookies)
-        .comment(SAME_SITE_LAX_COMMENT)
-        .build();
+      .value("")
+      .path("/")
+      .maxAge(0)
+      .httpOnly(true)
+      .secure(setSecureCookies)
+      .comment(SAME_SITE_LAX_COMMENT)
+      .build();
     return logoutCookie;
   }
 }

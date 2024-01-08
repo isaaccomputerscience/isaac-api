@@ -23,7 +23,6 @@ package uk.ac.cam.cl.dtg.util.locations;
  *
  */
 public class PostCode {
-
   private final String postCode;
   private final Double lat;
   private final Double lon;
@@ -70,5 +69,4 @@ public class PostCode {
   public Double getLon() {
     return lon;
   }
-
 }

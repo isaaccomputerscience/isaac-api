@@ -65,5 +65,4 @@ public abstract class Media extends Content {
   public void setAltText(final String altText) {
     this.altText = altText;
   }
-
 }

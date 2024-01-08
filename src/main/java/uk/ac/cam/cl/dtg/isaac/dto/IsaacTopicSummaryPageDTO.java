@@ -29,7 +29,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
  */
 @JsonContentType("isaacTopicSummaryPage")
 public class IsaacTopicSummaryPageDTO extends SeguePageDTO {
-
   private List<GameboardDTO> linkedGameboards;
 
   /**
@@ -49,5 +48,4 @@ public class IsaacTopicSummaryPageDTO extends SeguePageDTO {
   public void setLinkedGameboards(final List<GameboardDTO> linkedGameboards) {
     this.linkedGameboards = linkedGameboards;
   }
-
 }

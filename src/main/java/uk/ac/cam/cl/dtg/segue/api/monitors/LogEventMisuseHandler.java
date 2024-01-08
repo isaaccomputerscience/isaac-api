@@ -80,8 +80,13 @@ public class LogEventMisuseHandler implements IMisuseHandler {
   public void executeHardThresholdAction(final String message) {
     final String subject = "HARD Threshold limit reached for: LogEventMisuseHandler -- Log Data Requests too large";
 
-    EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
-        subject, message, message, EmailType.ADMIN);
+    EmailCommunicationMessage e = new EmailCommunicationMessage(
+      properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
+      subject,
+      message,
+      message,
+      EmailType.ADMIN
+    );
 
     emailManager.addSystemEmailToQueue(e);
     log.warn("Hard threshold limit: " + sanitiseExternalLogValue(message));

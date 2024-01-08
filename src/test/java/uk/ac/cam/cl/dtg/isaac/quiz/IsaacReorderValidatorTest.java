@@ -373,9 +373,12 @@ public class IsaacReorderValidatorTest {
     invalidQuestionType.setId("invalidQuestionType");
 
     // This should throw an exception:
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      validator.validateQuestionResponse(invalidQuestionType, new ItemChoice());
-    });
+    Exception exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> {
+        validator.validateQuestionResponse(invalidQuestionType, new ItemChoice());
+      }
+    );
     assertTrue(exception.getMessage().contains("only works with IsaacReorderQuestions"));
   }
 
@@ -387,9 +390,12 @@ public class IsaacReorderValidatorTest {
     IsaacReorderQuestion reorderQuestion = new IsaacReorderQuestion();
 
     // This should throw an exception:
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      validator.validateQuestionResponse(reorderQuestion, new Choice());
-    });
+    Exception exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> {
+        validator.validateQuestionResponse(reorderQuestion, new Choice());
+      }
+    );
     assertTrue(exception.getMessage().contains("Expected ItemChoice for IsaacReorderQuestion"));
   }
 }

@@ -25,15 +25,11 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 @DTOMapping(QuestionDTO.class)
 @JsonContentType("question")
 public class Question extends Content {
-
   private ContentBase answer;
   private List<ContentBase> hints;
   private Content defaultFeedback;
 
-
-  public Question() {
-
-  }
+  public Question() {}
 
   /**
    * Gets the answer.
@@ -88,5 +84,4 @@ public class Question extends Content {
   public final void setDefaultFeedback(final Content defaultFeedback) {
     this.defaultFeedback = defaultFeedback;
   }
-
 }

@@ -22,5 +22,4 @@ package uk.ac.cam.cl.dtg.segue.auth.exceptions;
  */
 public class NoUserLoggedInException extends Exception {
   private static final long serialVersionUID = -6539399759909668464L;
-
 }

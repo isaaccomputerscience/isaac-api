@@ -9,7 +9,6 @@ import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
  * @see ITransaction
  */
 public class PgTransaction implements ITransaction {
-
   private final Connection conn;
 
   public PgTransaction(final PostgresSqlDb postgresSqlDb) throws SegueDatabaseException {

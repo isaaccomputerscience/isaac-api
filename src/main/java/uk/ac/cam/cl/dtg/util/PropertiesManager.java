@@ -42,9 +42,9 @@ public class PropertiesManager extends PropertiesLoader {
    *             - if we cannot read the file for whatever reason.
    */
   @Inject
-  public PropertiesManager(final String propertiesFile) throws IOException {
+  public PropertiesManager(final String propertiesFile)
+    throws IOException {
     super(propertiesFile);
-
   }
 
   /**

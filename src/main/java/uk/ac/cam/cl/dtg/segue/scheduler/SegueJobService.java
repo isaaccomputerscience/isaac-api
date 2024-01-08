@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
 public class SegueJobService implements ServletContextListener {
-
   private final Scheduler scheduler;
 
   private final List<SegueScheduledJob> allKnownJobs;
@@ -56,8 +55,11 @@ public class SegueJobService implements ServletContextListener {
    * @param jobsToRemove collection of possibly-existing jobs to remove/deregister
    */
   @Inject
-  public SegueJobService(final PostgresSqlDb database, final List<SegueScheduledJob> allKnownJobs,
-                         @Nullable final List<SegueScheduledJob> jobsToRemove) {
+  public SegueJobService(
+    final PostgresSqlDb database,
+    final List<SegueScheduledJob> allKnownJobs,
+    @Nullable final List<SegueScheduledJob> jobsToRemove
+  ) {
     this.allKnownJobs = allKnownJobs;
     this.jobsToRemove = jobsToRemove;
     this.localRegisteredJobs = new ArrayList<>();
@@ -96,13 +98,16 @@ public class SegueJobService implements ServletContextListener {
    * @throws SchedulerException if the job cannot be de-registered
    */
   public void removeScheduleJob(final SegueScheduledJob jobToRemove) throws SchedulerException {
-    JobDetail job = JobBuilder.newJob(jobToRemove.getExecutableTask().getClass())
-        .withIdentity(jobToRemove.getJobKey(), jobToRemove.getJobGroupName())
-        .setJobData(new JobDataMap(jobToRemove.getExecutionContext()))
-        .withDescription(jobToRemove.getJobDescription()).build();
+    JobDetail job = JobBuilder
+      .newJob(jobToRemove.getExecutableTask().getClass())
+      .withIdentity(jobToRemove.getJobKey(), jobToRemove.getJobGroupName())
+      .setJobData(new JobDataMap(jobToRemove.getExecutionContext()))
+      .withDescription(jobToRemove.getJobDescription())
+      .build();
 
-    scheduler.getContext()
-        .remove(jobToRemove.getExecutableTask().getClass().getName(), jobToRemove.getExecutionContext());
+    scheduler
+      .getContext()
+      .remove(jobToRemove.getExecutableTask().getClass().getName(), jobToRemove.getExecutionContext());
 
     boolean deletionNeeded = scheduler.deleteJob(job.getKey());
 
@@ -133,26 +138,41 @@ public class SegueJobService implements ServletContextListener {
    * @throws SchedulerException if the job could not be registered
    */
   public void registerScheduleJob(final SegueScheduledJob jobToRegister) throws SchedulerException {
-    CronTrigger cronTrigger = TriggerBuilder.newTrigger()
-        .withIdentity(jobToRegister.getJobKey() + "_trigger", jobToRegister.getJobGroupName())
-        .withSchedule(cronSchedule(jobToRegister.getCronString())).build();
+    CronTrigger cronTrigger = TriggerBuilder
+      .newTrigger()
+      .withIdentity(jobToRegister.getJobKey() + "_trigger", jobToRegister.getJobGroupName())
+      .withSchedule(cronSchedule(jobToRegister.getCronString()))
+      .build();
 
-    JobDetail job = JobBuilder.newJob(jobToRegister.getExecutableTask().getClass())
-        .withIdentity(jobToRegister.getJobKey(), jobToRegister.getJobGroupName())
-        .setJobData(new JobDataMap(jobToRegister.getExecutionContext()))
-        .withDescription(jobToRegister.getJobDescription()).build();
+    JobDetail job = JobBuilder
+      .newJob(jobToRegister.getExecutableTask().getClass())
+      .withIdentity(jobToRegister.getJobKey(), jobToRegister.getJobGroupName())
+      .setJobData(new JobDataMap(jobToRegister.getExecutionContext()))
+      .withDescription(jobToRegister.getJobDescription())
+      .build();
 
-    scheduler.getContext()
-        .put(jobToRegister.getExecutableTask().getClass().getName(), jobToRegister.getExecutionContext());
+    scheduler
+      .getContext()
+      .put(jobToRegister.getExecutableTask().getClass().getName(), jobToRegister.getExecutionContext());
 
     if (!scheduler.checkExists(job.getKey())) {
       scheduler.scheduleJob(job, cronTrigger);
-      log.info(String.format("Registered job (%s) to segue job execution service. Current jobs registered (%s): ",
-          jobToRegister.getJobKey(), localRegisteredJobs.size()));
+      log.info(
+        String.format(
+          "Registered job (%s) to segue job execution service. Current jobs registered (%s): ",
+          jobToRegister.getJobKey(),
+          localRegisteredJobs.size()
+        )
+      );
     } else {
       scheduler.rescheduleJob(cronTrigger.getKey(), cronTrigger);
-      log.info(String.format("Re-registered job (%s) to segue job execution service. Current jobs registered (%s): ",
-          jobToRegister.getJobKey(), localRegisteredJobs.size()));
+      log.info(
+        String.format(
+          "Re-registered job (%s) to segue job execution service. Current jobs registered (%s): ",
+          jobToRegister.getJobKey(),
+          localRegisteredJobs.size()
+        )
+      );
     }
 
     localRegisteredJobs.add(jobToRegister);
@@ -185,8 +205,7 @@ public class SegueJobService implements ServletContextListener {
   }
 
   @Override
-  public void contextInitialized(final ServletContextEvent servletContextEvent) {
-  }
+  public void contextInitialized(final ServletContextEvent servletContextEvent) {}
 
   @Override
   public void contextDestroyed(final ServletContextEvent servletContextEvent) {

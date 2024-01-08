@@ -26,7 +26,6 @@ import java.util.Map;
  *
  */
 public interface EventBooking {
-
   /**
    * Getter for booking Id.
    *

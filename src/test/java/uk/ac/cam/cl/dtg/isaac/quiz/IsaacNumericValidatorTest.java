@@ -135,8 +135,10 @@ public class IsaacNumericValidatorTest {
     Quantity q = new Quantity(correctIntegerAnswer, correctUnits);
 
     // Test response:
-    QuantityValidationResponse response =
-        (QuantityValidationResponse) validator.validateQuestionResponse(numericQuestionWithUnits, q);
+    QuantityValidationResponse response = (QuantityValidationResponse) validator.validateQuestionResponse(
+      numericQuestionWithUnits,
+      q
+    );
     assertTrue(response.isCorrect());
     assertTrue(response.getCorrectUnits());
   }
@@ -150,8 +152,10 @@ public class IsaacNumericValidatorTest {
     Quantity q = new Quantity("43", correctUnits);
 
     // Test response:
-    QuantityValidationResponse response =
-        (QuantityValidationResponse) validator.validateQuestionResponse(numericQuestionWithUnits, q);
+    QuantityValidationResponse response = (QuantityValidationResponse) validator.validateQuestionResponse(
+      numericQuestionWithUnits,
+      q
+    );
 
     // Check answer is wrong,
     assertFalse(response.isCorrect());
@@ -169,8 +173,10 @@ public class IsaacNumericValidatorTest {
     Quantity quantityTooFew = new Quantity("4", correctUnits);
 
     // Test response:
-    QuantityValidationResponse responseTooFew =
-        (QuantityValidationResponse) validator.validateQuestionResponse(numericQuestionWithUnits, quantityTooFew);
+    QuantityValidationResponse responseTooFew = (QuantityValidationResponse) validator.validateQuestionResponse(
+      numericQuestionWithUnits,
+      quantityTooFew
+    );
 
     // Check answer is wrong,
     assertFalse(responseTooFew.isCorrect());
@@ -182,8 +188,10 @@ public class IsaacNumericValidatorTest {
     Quantity quantityTooMany = new Quantity("42.000", correctUnits);
 
     // Test response:
-    QuantityValidationResponse responseTooMany =
-        (QuantityValidationResponse) validator.validateQuestionResponse(numericQuestionWithUnits, quantityTooMany);
+    QuantityValidationResponse responseTooMany = (QuantityValidationResponse) validator.validateQuestionResponse(
+      numericQuestionWithUnits,
+      quantityTooMany
+    );
 
     // Check answer is wrong,
     assertFalse(responseTooMany.isCorrect());
@@ -201,8 +209,10 @@ public class IsaacNumericValidatorTest {
     Quantity q = new Quantity(correctIntegerAnswer, "m\\,h^{-1}");
 
     // Test response:
-    QuantityValidationResponse response =
-        (QuantityValidationResponse) validator.validateQuestionResponse(numericQuestionWithUnits, q);
+    QuantityValidationResponse response = (QuantityValidationResponse) validator.validateQuestionResponse(
+      numericQuestionWithUnits,
+      q
+    );
 
     // Check answer is wrong:
     assertFalse(response.isCorrect());
@@ -220,8 +230,10 @@ public class IsaacNumericValidatorTest {
     Quantity q = new Quantity(correctIntegerAnswer);
 
     // Test response:
-    QuantityValidationResponse response =
-        (QuantityValidationResponse) validator.validateQuestionResponse(numericQuestionWithUnits, q);
+    QuantityValidationResponse response = (QuantityValidationResponse) validator.validateQuestionResponse(
+      numericQuestionWithUnits,
+      q
+    );
 
     // Check answer is wrong:
     assertFalse(response.isCorrect());
@@ -239,8 +251,10 @@ public class IsaacNumericValidatorTest {
     Quantity q = new Quantity("", correctUnits);
 
     // Test response:
-    QuantityValidationResponse response =
-        (QuantityValidationResponse) validator.validateQuestionResponse(numericQuestionWithUnits, q);
+    QuantityValidationResponse response = (QuantityValidationResponse) validator.validateQuestionResponse(
+      numericQuestionWithUnits,
+      q
+    );
 
     // Check answer is wrong:
     assertFalse(response.isCorrect());
@@ -433,8 +447,10 @@ public class IsaacNumericValidatorTest {
     // Set up a correct user answer with too many sig figs:
     Quantity quantity5sfCorrect = new Quantity("1.6875");
     // Test response is sig fig message:
-    QuestionValidationResponse response5sfCorrect =
-        validator.validateQuestionResponse(someNumericQuestion, quantity5sfCorrect);
+    QuestionValidationResponse response5sfCorrect = validator.validateQuestionResponse(
+      someNumericQuestion,
+      quantity5sfCorrect
+    );
     assertFalse(response5sfCorrect.isCorrect(), "expected 1.6875 not to match 1.6875 to 2 or 3 sf");
     assertTrue(response5sfCorrect.getExplanation().getTags().contains("sig_figs"));
     assertTrue(response5sfCorrect.getExplanation().getTags().contains("sig_figs_too_many"));
@@ -442,11 +458,15 @@ public class IsaacNumericValidatorTest {
     // Set up a wrong user answer with too many sig figs:
     Quantity quantity5sfWrong = new Quantity("2.7986");
     // Test response does not mention sig figs:
-    QuestionValidationResponse response5sfWrong =
-        validator.validateQuestionResponse(someNumericQuestion, quantity5sfWrong);
+    QuestionValidationResponse response5sfWrong = validator.validateQuestionResponse(
+      someNumericQuestion,
+      quantity5sfWrong
+    );
     assertFalse(response5sfWrong.isCorrect(), "expected 2.7986 not to match 1.6875");
-    assertFalse(response5sfWrong.getExplanation().getTags().contains("sig_figs"),
-        "expected 2.7986 without sig fig message");
+    assertFalse(
+      response5sfWrong.getExplanation().getTags().contains("sig_figs"),
+      "expected 2.7986 without sig fig message"
+    );
 
     // Set up a user answer:
     Quantity quantity1sf = new Quantity("5");
@@ -590,7 +610,6 @@ public class IsaacNumericValidatorTest {
     // Test response:
     QuestionValidationResponse responseWithUnits = validator.validateQuestionResponse(numericQuestion, q);
     assertFalse(responseWithUnits.isCorrect());
-
     // FIXME - this needs to test that the log message occurs!
   }
 
@@ -626,10 +645,14 @@ public class IsaacNumericValidatorTest {
     IsaacQuickQuestion invalidQuestionType = new IsaacQuickQuestion();
     invalidQuestionType.setId("invalidQuestionType");
 
-    Exception exception = assertThrows(IllegalArgumentException.class,
-        () -> validator.validateQuestionResponse(invalidQuestionType, new Quantity()));
-    assertEquals("This validator only works with Isaac Numeric Questions... (invalidQuestionType is not numeric)",
-        exception.getMessage());
+    Exception exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> validator.validateQuestionResponse(invalidQuestionType, new Quantity())
+    );
+    assertEquals(
+      "This validator only works with Isaac Numeric Questions... (invalidQuestionType is not numeric)",
+      exception.getMessage()
+    );
   }
 
   /*
@@ -640,11 +663,14 @@ public class IsaacNumericValidatorTest {
     IsaacNumericQuestion numericQuestion = new IsaacNumericQuestion();
     numericQuestion.setId("invalidQuestionType");
 
-    Exception exception = assertThrows(IllegalArgumentException.class,
-        () -> validator.validateQuestionResponse(numericQuestion, new Choice()));
+    Exception exception = assertThrows(
+      IllegalArgumentException.class,
+      () -> validator.validateQuestionResponse(numericQuestion, new Choice())
+    );
     assertEquals(
-        "Expected Quantity for IsaacNumericQuestion: invalidQuestionType. Received (class uk.ac.cam.cl.dtg.isaac.dos.content.Choice)",
-        exception.getMessage());
+      "Expected Quantity for IsaacNumericQuestion: invalidQuestionType. Received (class uk.ac.cam.cl.dtg.isaac.dos.content.Choice)",
+      exception.getMessage()
+    );
   }
 
   /*
@@ -681,13 +707,13 @@ public class IsaacNumericValidatorTest {
       Test parsing common unambiguous representations as numbers.
    */
   @ParameterizedTest
-  @ValueSource(strings = {"42", "4.2e1", "4.2E1", "4.2x10^1", "4.2*10**1", "4.2×10^(1)", "4.2 \\times 10^{1}"})
+  @ValueSource(strings = { "42", "4.2e1", "4.2E1", "4.2x10^1", "4.2*10**1", "4.2×10^(1)", "4.2 \\times 10^{1}" })
   public void isaacNumericValidator_CheckParsingAsNumberWorks_baseValue(String input) {
     assertTrue(validator.numericValuesMatch("42", input, 2));
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"10000", "1x10^4", "1e4", "1E4", "1 x 10**4", "10^4", "10**(4)", "10^{4}", "100x10^2"})
+  @ValueSource(strings = { "10000", "1x10^4", "1e4", "1E4", "1 x 10**4", "10^4", "10**(4)", "10^{4}", "100x10^2" })
   public void isaacNumericValidator_CheckParsingAsNumberWorks_exponentValue(String input) {
     assertTrue(validator.numericValuesMatch("10000", input, 1));
   }
@@ -698,21 +724,33 @@ public class IsaacNumericValidatorTest {
   @ParameterizedTest
   @MethodSource
   public void isaacNumericValidator_CheckSignificantFiguresNoRangeCalculationWorks_multipleTests(
-      List<String> numbersToTest, List<Integer> sigFigsToPass, List<Integer> sigFigsToFail) {
+    List<String> numbersToTest,
+    List<Integer> sigFigsToPass,
+    List<Integer> sigFigsToFail
+  ) {
     for (String number : numbersToTest) {
       for (Integer sigFig : sigFigsToPass) {
-        String onFailedFirstAssertionMessage =
-            String.format("Unexpected too few sig fig for %s @ %dsf", number, sigFig);
+        String onFailedFirstAssertionMessage = String.format(
+          "Unexpected too few sig fig for %s @ %dsf",
+          number,
+          sigFig
+        );
         assertFalse(validator.tooFewSignificantFigures(number, sigFig), onFailedFirstAssertionMessage);
-        String onFailedSecondAssertionMessage =
-            String.format("Unexpected too many sig fig for %s @ %dsf", number, sigFig);
+        String onFailedSecondAssertionMessage = String.format(
+          "Unexpected too many sig fig for %s @ %dsf",
+          number,
+          sigFig
+        );
         assertFalse(validator.tooManySignificantFigures(number, sigFig), onFailedSecondAssertionMessage);
       }
       for (Integer sigFig : sigFigsToFail) {
-        String onFailedThirdAssertionMessage =
-            String.format("Expected incorrect sig fig for %s @ %dsf", number, sigFig);
+        String onFailedThirdAssertionMessage = String.format(
+          "Expected incorrect sig fig for %s @ %dsf",
+          number,
+          sigFig
+        );
         boolean incorrectSigFigs =
-            validator.tooFewSignificantFigures(number, sigFig) || validator.tooManySignificantFigures(number, sigFig);
+          validator.tooFewSignificantFigures(number, sigFig) || validator.tooManySignificantFigures(number, sigFig);
         assertTrue(incorrectSigFigs, onFailedThirdAssertionMessage);
       }
     }
@@ -726,13 +764,16 @@ public class IsaacNumericValidatorTest {
    */
   private static Stream<Arguments> isaacNumericValidator_CheckSignificantFiguresNoRangeCalculationWorks_multipleTests() {
     return Stream.of(
-        Arguments.of(Arrays.asList("5000", "5000e3", "-5000", "-5000e3"), Arrays.asList(1, 2, 3, 4),
-            Collections.singletonList(5)),
-        Arguments.of(Arrays.asList("5300", "5300e3", "-5300", "-5300e3"), Arrays.asList(2, 3, 4), Arrays.asList(1, 5)),
-        Arguments.of(Arrays.asList("50300", "-50300"), Arrays.asList(3, 4, 5), Arrays.asList(1, 2, 6)),
-        Arguments.of(Arrays.asList("0", "-0"), Collections.singletonList(1), Collections.singletonList(2)),
-        Arguments.of(Arrays.asList("0000100", "-0000100"), Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6, 7)),
-        Arguments.of(Arrays.asList("0000100.00", "-0000100.00"), Collections.singletonList(5), Arrays.asList(4, 6, 7))
+      Arguments.of(
+        Arrays.asList("5000", "5000e3", "-5000", "-5000e3"),
+        Arrays.asList(1, 2, 3, 4),
+        Collections.singletonList(5)
+      ),
+      Arguments.of(Arrays.asList("5300", "5300e3", "-5300", "-5300e3"), Arrays.asList(2, 3, 4), Arrays.asList(1, 5)),
+      Arguments.of(Arrays.asList("50300", "-50300"), Arrays.asList(3, 4, 5), Arrays.asList(1, 2, 6)),
+      Arguments.of(Arrays.asList("0", "-0"), Collections.singletonList(1), Collections.singletonList(2)),
+      Arguments.of(Arrays.asList("0000100", "-0000100"), Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6, 7)),
+      Arguments.of(Arrays.asList("0000100.00", "-0000100.00"), Collections.singletonList(5), Arrays.asList(4, 6, 7))
     );
   }
 
@@ -741,37 +782,40 @@ public class IsaacNumericValidatorTest {
    */
   @ParameterizedTest
   @MethodSource
-  public void isaacNumericValidator_CheckSignificantFiguresRoundingWorks(String inputValue, int sigFigsToRoundTo,
-                                                                         double expectedResult) {
+  public void isaacNumericValidator_CheckSignificantFiguresRoundingWorks(
+    String inputValue,
+    int sigFigsToRoundTo,
+    double expectedResult
+  ) {
     double actualResult = validator.roundStringValueToSigFigs(inputValue, sigFigsToRoundTo);
-    String onFailedAssertionMessage =
-        String.format("sigfig rounding failed for value '%s' to %dsf: expected '%f', got '%f'", inputValue,
-            sigFigsToRoundTo, expectedResult, actualResult);
+    String onFailedAssertionMessage = String.format(
+      "sigfig rounding failed for value '%s' to %dsf: expected '%f', got '%f'",
+      inputValue,
+      sigFigsToRoundTo,
+      expectedResult,
+      actualResult
+    );
     assertEquals(actualResult, expectedResult, 0.0, onFailedAssertionMessage);
   }
 
   private static Stream<Arguments> isaacNumericValidator_CheckSignificantFiguresRoundingWorks() {
     return Stream.of(
-        Arguments.of("1.25648", 1, 1.0),
-
-        Arguments.of("1.25648", 2, 1.3),
-        Arguments.of("-1.25648", 2, -1.3),
-        // Check that we're using the rounding scheme known as "round half away from zero"
-        Arguments.of("17.5", 2, 18),
-        Arguments.of("-17.5", 2, -18),
-
-        Arguments.of("0.2425", 3, 0.243),
-        Arguments.of("-0.2425", 3, -0.243),
-        Arguments.of("0.2425", 2, 0.24),
-        Arguments.of("-0.2425", 2, -0.24),
-
-        Arguments.of("1.25E11", 2, 1.3E11),
-        Arguments.of("1.25E1", 2, 1.3E1),
-        Arguments.of("-4.0E11", 2, -4.0E11),
-        Arguments.of("-4.0E-11", 2, -4.0E-11),
-
-        Arguments.of("0.0", 2, 0.0),
-        Arguments.of("0", 2, 0.0)
+      Arguments.of("1.25648", 1, 1.0),
+      Arguments.of("1.25648", 2, 1.3),
+      Arguments.of("-1.25648", 2, -1.3),
+      // Check that we're using the rounding scheme known as "round half away from zero"
+      Arguments.of("17.5", 2, 18),
+      Arguments.of("-17.5", 2, -18),
+      Arguments.of("0.2425", 3, 0.243),
+      Arguments.of("-0.2425", 3, -0.243),
+      Arguments.of("0.2425", 2, 0.24),
+      Arguments.of("-0.2425", 2, -0.24),
+      Arguments.of("1.25E11", 2, 1.3E11),
+      Arguments.of("1.25E1", 2, 1.3E1),
+      Arguments.of("-4.0E11", 2, -4.0E11),
+      Arguments.of("-4.0E-11", 2, -4.0E-11),
+      Arguments.of("0.0", 2, 0.0),
+      Arguments.of("0", 2, 0.0)
     );
   }
 
@@ -780,31 +824,45 @@ public class IsaacNumericValidatorTest {
 */
   @ParameterizedTest
   @MethodSource
-  public void isaacNumericValidator_CheckSignificantFiguresExtractionWorks(String inputValue, int minAllowedSigFigs,
-                                                                           int maxAllowedSigFigs, int expectedResult) {
-    int actualResult =
-        validator.numberOfSignificantFiguresToValidateWith(inputValue, minAllowedSigFigs, maxAllowedSigFigs);
-    String onFailedFirstAssertionMessage =
-        String.format("sigfig extraction out of range for value %s (min allowed: %d, max allowed: %d) got %d",
-            inputValue, minAllowedSigFigs, maxAllowedSigFigs, actualResult);
+  public void isaacNumericValidator_CheckSignificantFiguresExtractionWorks(
+    String inputValue,
+    int minAllowedSigFigs,
+    int maxAllowedSigFigs,
+    int expectedResult
+  ) {
+    int actualResult = validator.numberOfSignificantFiguresToValidateWith(
+      inputValue,
+      minAllowedSigFigs,
+      maxAllowedSigFigs
+    );
+    String onFailedFirstAssertionMessage = String.format(
+      "sigfig extraction out of range for value %s (min allowed: %d, max allowed: %d) got %d",
+      inputValue,
+      minAllowedSigFigs,
+      maxAllowedSigFigs,
+      actualResult
+    );
     assertTrue(actualResult <= maxAllowedSigFigs && actualResult >= minAllowedSigFigs, onFailedFirstAssertionMessage);
-    String onFailedSecondAssertionMessage =
-        String.format("sigfig extraction failed for value %s, expected: %d got %d", inputValue, expectedResult,
-            actualResult);
+    String onFailedSecondAssertionMessage = String.format(
+      "sigfig extraction failed for value %s, expected: %d got %d",
+      inputValue,
+      expectedResult,
+      actualResult
+    );
     assertEquals(expectedResult, actualResult, onFailedSecondAssertionMessage);
   }
 
   private static Stream<Arguments> isaacNumericValidator_CheckSignificantFiguresExtractionWorks() {
     return Stream.of(
-        // Unambiguous cases:
-        Arguments.of("1", 1, 10, 1),
-        Arguments.of("1.23", 2, 3, 3),
-        Arguments.of("0.400", 2, 3, 3),
-        Arguments.of("6.0e3", 2, 2, 2),
-        // Ambiguous cases:
-        Arguments.of("30000", 3, 3, 3),
-        Arguments.of("10", 3, 3, 3),
-        Arguments.of("3333000", 2, 4, 4)
+      // Unambiguous cases:
+      Arguments.of("1", 1, 10, 1),
+      Arguments.of("1.23", 2, 3, 3),
+      Arguments.of("0.400", 2, 3, 3),
+      Arguments.of("6.0e3", 2, 2, 2),
+      // Ambiguous cases:
+      Arguments.of("30000", 3, 3, 3),
+      Arguments.of("10", 3, 3, 3),
+      Arguments.of("3333000", 2, 4, 4)
     );
   }
 
@@ -828,8 +886,10 @@ public class IsaacNumericValidatorTest {
 
     // Act
     Quantity userSubmittedAnswerWithExcessivePrecision = new Quantity("13.000");
-    QuestionValidationResponse response = validator.validateQuestionResponse(someNumericQuestion,
-        userSubmittedAnswerWithExcessivePrecision);
+    QuestionValidationResponse response = validator.validateQuestionResponse(
+      someNumericQuestion,
+      userSubmittedAnswerWithExcessivePrecision
+    );
 
     // Assert
     assertTrue(response.isCorrect());
@@ -855,8 +915,10 @@ public class IsaacNumericValidatorTest {
 
     // Act
     Quantity userSubmittedAnswerWithExcessivePrecision = new Quantity("13.000");
-    QuestionValidationResponse response = validator.validateQuestionResponse(someNumericQuestion,
-        userSubmittedAnswerWithExcessivePrecision);
+    QuestionValidationResponse response = validator.validateQuestionResponse(
+      someNumericQuestion,
+      userSubmittedAnswerWithExcessivePrecision
+    );
 
     // Assert
     assertFalse(response.isCorrect());
@@ -881,8 +943,7 @@ public class IsaacNumericValidatorTest {
 
     // Act
     Quantity userSubmittedAnswer = new Quantity("2.11", "None");
-    QuestionValidationResponse response = validator.validateQuestionResponse(someNumericQuestion,
-        userSubmittedAnswer);
+    QuestionValidationResponse response = validator.validateQuestionResponse(someNumericQuestion, userSubmittedAnswer);
 
     // Assert
     assertFalse(response.isCorrect());

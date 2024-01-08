@@ -42,12 +42,15 @@ public class AssignmentService {
   }
 
   public <T extends IAssignmentLike> void augmentAssignerSummaries(final Collection<T> assignments)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     Map<Long, UserSummaryDTO> userSummaryCache = new HashMap<>();
 
     // Iterating over the owner IDs allows us to cache "no user found" errors without querying database each time:
-    List<Long> ownerUserIds =
-        assignments.stream().map(IAssignmentLike::getOwnerUserId).distinct().collect(Collectors.toList());
+    List<Long> ownerUserIds = assignments
+      .stream()
+      .map(IAssignmentLike::getOwnerUserId)
+      .distinct()
+      .collect(Collectors.toList());
     for (Long ownerUserId : ownerUserIds) {
       try {
         RegisteredUserDTO user = userManager.getUserDTOById(ownerUserId);

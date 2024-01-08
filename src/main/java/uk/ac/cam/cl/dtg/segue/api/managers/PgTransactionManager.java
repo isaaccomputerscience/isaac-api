@@ -9,7 +9,6 @@ import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
  * Created by du220 on 21/05/2018.
  */
 public class PgTransactionManager implements ITransactionManager {
-
   private final PostgresSqlDb postgresSqlDb;
 
   @Inject

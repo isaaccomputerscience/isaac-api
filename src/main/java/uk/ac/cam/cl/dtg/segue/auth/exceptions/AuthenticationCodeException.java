@@ -34,5 +34,4 @@ public class AuthenticationCodeException extends Exception {
   public AuthenticationCodeException(final String msg) {
     super(msg);
   }
-
 }

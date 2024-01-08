@@ -45,5 +45,4 @@ public class SegueDatabaseException extends Exception {
   public SegueDatabaseException(final String message, final Exception e) {
     super(message, e);
   }
-
 }

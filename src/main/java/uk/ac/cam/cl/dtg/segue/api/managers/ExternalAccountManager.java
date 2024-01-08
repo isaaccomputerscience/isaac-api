@@ -62,14 +62,13 @@ public class ExternalAccountManager implements IExternalAccountManager {
       List<UserExternalAccountChanges> userRecordsToUpdate = database.getRecentlyChangedRecords();
 
       for (UserExternalAccountChanges userRecord : userRecordsToUpdate) {
-
         Long userId = userRecord.getUserId();
         log.debug(String.format("Processing user: %s", userId));
         try {
-
           String accountEmail = userRecord.getAccountEmail();
-          boolean accountEmailDeliveryFailed =
-              EmailVerificationStatus.DELIVERY_FAILED.equals(userRecord.getEmailVerificationStatus());
+          boolean accountEmailDeliveryFailed = EmailVerificationStatus.DELIVERY_FAILED.equals(
+            userRecord.getEmailVerificationStatus()
+          );
           String mailjetId = userRecord.getProviderUserId();
           JSONObject mailjetDetails;
 
@@ -87,8 +86,11 @@ public class ExternalAccountManager implements IExternalAccountManager {
               //    Expect: DELIVERY_FAILED, but non-null "mailjet_id"
               //    Action: same as deletion? Or just remove from lists for now?
               log.debug("Case: delivery failed.");
-              mailjetApi.updateUserSubscriptions(mailjetId, MailJetSubscriptionAction.REMOVE,
-                  MailJetSubscriptionAction.REMOVE);
+              mailjetApi.updateUserSubscriptions(
+                mailjetId,
+                MailJetSubscriptionAction.REMOVE,
+                MailJetSubscriptionAction.REMOVE
+              );
             } else if (!accountEmail.toLowerCase().equals(mailjetDetails.getString("Email"))) {
               // Case: account email change:
               //    Expect: non-null "mailjet_id", email in MailJet != email in database
@@ -123,7 +125,6 @@ public class ExternalAccountManager implements IExternalAccountManager {
           // Iff action done successfully, update the provider_last_updated time:
           log.debug("Update provider_last_updated.");
           database.updateProviderLastUpdated(userId);
-
         } catch (SegueDatabaseException e) {
           log.error(String.format("Error storing record of MailJet update to user (%s)!", userId));
         } catch (MailjetClientCommunicationException e) {
@@ -143,24 +144,30 @@ public class ExternalAccountManager implements IExternalAccountManager {
   }
 
   private void updateUserOnMailJet(final String mailjetId, final UserExternalAccountChanges userRecord)
-      throws SegueDatabaseException, MailjetException {
+    throws SegueDatabaseException, MailjetException {
     Long userId = userRecord.getUserId();
-    mailjetApi.updateUserProperties(mailjetId, userRecord.getGivenName(), userRecord.getRole().toString(),
-        userRecord.getEmailVerificationStatus().toString());
+    mailjetApi.updateUserProperties(
+      mailjetId,
+      userRecord.getGivenName(),
+      userRecord.getRole().toString(),
+      userRecord.getEmailVerificationStatus().toString()
+    );
 
-    MailJetSubscriptionAction newsStatus = (userRecord.allowsNewsEmails() != null
-        && userRecord.allowsNewsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
-        MailJetSubscriptionAction.UNSUBSCRIBE;
-    MailJetSubscriptionAction eventsStatus = (userRecord.allowsEventsEmails() != null
-        && userRecord.allowsEventsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
-        MailJetSubscriptionAction.UNSUBSCRIBE;
+    MailJetSubscriptionAction newsStatus = (userRecord.allowsNewsEmails() != null && userRecord.allowsNewsEmails())
+      ? MailJetSubscriptionAction.FORCE_SUBSCRIBE
+      : MailJetSubscriptionAction.UNSUBSCRIBE;
+    MailJetSubscriptionAction eventsStatus = (
+        userRecord.allowsEventsEmails() != null && userRecord.allowsEventsEmails()
+      )
+      ? MailJetSubscriptionAction.FORCE_SUBSCRIBE
+      : MailJetSubscriptionAction.UNSUBSCRIBE;
     mailjetApi.updateUserSubscriptions(mailjetId, newsStatus, eventsStatus);
 
     database.updateExternalAccount(userId, mailjetId);
   }
 
   private void deleteUserFromMailJet(final String mailjetId, final UserExternalAccountChanges userRecord)
-      throws SegueDatabaseException, MailjetException {
+    throws SegueDatabaseException, MailjetException {
     Long userId = userRecord.getUserId();
     mailjetApi.permanentlyDeleteAccountById(mailjetId);
     database.updateExternalAccount(userId, null);

@@ -12,7 +12,6 @@ import uk.ac.cam.cl.dtg.util.NameFormatter;
 
 public class NameFormatterTest {
 
-
   /**
    * Test teacher user name extraction.
    */

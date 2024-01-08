@@ -54,8 +54,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
    *            - An instance of an automapper that can be used for mapping to and from AssignmentDOs and DTOs.
    */
   @Inject
-  public PgAssignmentPersistenceManager(final PostgresSqlDb database,
-                                        final MapperFacade mapper) {
+  public PgAssignmentPersistenceManager(final PostgresSqlDb database, final MapperFacade mapper) {
     this.database = database;
     this.mapper = mapper;
   }
@@ -64,18 +63,22 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
   public Long saveAssignment(final AssignmentDTO assignment) throws SegueDatabaseException {
     AssignmentDO assignmentToSave = mapper.map(assignment, AssignmentDO.class);
 
-    String query = "INSERT INTO assignments(gameboard_id, group_id, owner_user_id, creation_date, due_date, notes,"
-        + " scheduled_start_date) VALUES (?, ?, ?, ?, ?, ?, ?);";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+    String query =
+      "INSERT INTO assignments(gameboard_id, group_id, owner_user_id, creation_date, due_date, notes," +
+      " scheduled_start_date) VALUES (?, ?, ?, ?, ?, ?, ?);";
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
     ) {
       pst.setString(FIELD_SAVE_GAMEBOARD_ID, assignmentToSave.getGameboardId());
       pst.setLong(FIELD_SAVE_GROUP_ID, assignmentToSave.getGroupId());
       pst.setLong(FIELD_SAVE_OWNER_USER_ID, assignmentToSave.getOwnerUserId());
 
       if (assignment.getCreationDate() != null) {
-        pst.setTimestamp(FIELD_SAVE_CREATION_DATE,
-            new java.sql.Timestamp(assignmentToSave.getCreationDate().getTime()));
+        pst.setTimestamp(
+          FIELD_SAVE_CREATION_DATE,
+          new java.sql.Timestamp(assignmentToSave.getCreationDate().getTime())
+        );
       } else {
         pst.setTimestamp(FIELD_SAVE_CREATION_DATE, new java.sql.Timestamp(new Date().getTime()));
       }
@@ -93,8 +96,10 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
       }
 
       if (assignment.getScheduledStartDate() != null) {
-        pst.setTimestamp(FIELD_SAVE_SCHEDULED_START_DATE,
-            new java.sql.Timestamp(assignmentToSave.getScheduledStartDate().getTime()));
+        pst.setTimestamp(
+          FIELD_SAVE_SCHEDULED_START_DATE,
+          new java.sql.Timestamp(assignmentToSave.getScheduledStartDate().getTime())
+        );
       } else {
         pst.setNull(FIELD_SAVE_SCHEDULED_START_DATE, Types.TIMESTAMP);
       }
@@ -114,7 +119,6 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
         log.debug("Saving Assignment... Assignment ID: " + assignment.getId() + " Db id : " + assignmentId);
         return assignmentId;
       }
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
@@ -127,21 +131,19 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
     }
 
     String query = "SELECT * FROM assignments WHERE id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_BY_ID_ASSIGNMENT_ID, assignmentId);
 
       try (ResultSet results = pst.executeQuery()) {
-
         List<AssignmentDO> listOfResults = Lists.newArrayList();
         while (results.next()) {
           listOfResults.add(this.convertFromSQLToAssignmentDO(results));
         }
 
         if (listOfResults.size() > 1) {
-          throw new SegueDatabaseException("Ambiguous result, expected single result and found more than one"
-              + listOfResults);
+          throw new SegueDatabaseException(
+            "Ambiguous result, expected single result and found more than one" + listOfResults
+          );
         }
 
         if (listOfResults.size() == 0) {
@@ -150,7 +152,6 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
 
         return this.convertToAssignmentDTO(listOfResults.get(0));
       }
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Unable to find assignment by id", e);
     }
@@ -163,17 +164,13 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
 
   @Override
   public List<AssignmentDTO> getAssignmentsByOwnerIdAndGroupId(final Long assignmentOwnerId, final Long groupId)
-      throws SegueDatabaseException {
-
+    throws SegueDatabaseException {
     String query = "SELECT * FROM assignments WHERE owner_user_id = ? AND group_id = ? ORDER BY creation_date";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_BY_OWNER_AND_GROUP_OWNER_USER_ID, assignmentOwnerId);
       pst.setLong(FIELD_GET_BY_OWNER_AND_GROUP_GROUP_ID, groupId);
 
       try (ResultSet results = pst.executeQuery()) {
-
         List<AssignmentDTO> listOfResults = Lists.newArrayList();
 
         while (results.next()) {
@@ -187,19 +184,15 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
     }
   }
 
-
   @Override
   public List<AssignmentDTO> getAssignmentsByGameboardAndGroup(final String gameboardId, final Long groupId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     String query = "SELECT * FROM assignments WHERE gameboard_id = ? AND group_id = ? ORDER BY creation_date";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_GET_BY_GAMEBOARD_AND_GROUP_GAMEBOARD_ID, gameboardId);
       pst.setLong(FILED_GET_BY_GAMEBOARD_AND_GROUP_GROUP_ID, groupId);
 
       try (ResultSet results = pst.executeQuery()) {
-
         List<AssignmentDTO> listOfResults = Lists.newArrayList();
 
         while (results.next()) {
@@ -216,13 +209,10 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
   @Override
   public List<AssignmentDTO> getAssignmentsByOwner(final Long ownerId) throws SegueDatabaseException {
     String query = "SELECT * FROM assignments WHERE owner_user_id = ? ORDER BY creation_date";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_BY_OWNER_OWNER_USER_ID, ownerId);
 
       try (ResultSet results = pst.executeQuery()) {
-
         List<AssignmentDTO> listOfResults = Lists.newArrayList();
 
         while (results.next()) {
@@ -246,8 +236,9 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
     }
     sb.append(") ORDER BY creation_date");
 
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(sb.toString())
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(sb.toString())
     ) {
       int i = 1;
       for (Long id : groupIds) {
@@ -274,12 +265,11 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
     if (null == timestamp) {
       throw new SegueDatabaseException("Parameter timestamp is null, cannot search for scheduled assignments!");
     }
-    String query = "SELECT * FROM assignments WHERE scheduled_start_date IS NOT NULL AND scheduled_start_date "
-        + "BETWEEN ((?)::timestamp - INTERVAL '10 minute') AND ((?)::timestamp + INTERVAL '59 minute');";
+    String query =
+      "SELECT * FROM assignments WHERE scheduled_start_date IS NOT NULL AND scheduled_start_date " +
+      "BETWEEN ((?)::timestamp - INTERVAL '10 minute') AND ((?)::timestamp + INTERVAL '59 minute');";
 
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setTimestamp(FIELD_GET_SCHEDULED_FOR_HOUR_FIRST_TIMESTAMP, new java.sql.Timestamp(timestamp.getTime()));
       pst.setTimestamp(FIELD_GET_SCHEDULED_FOR_HOUR_SECOND_TIMESTAMP, new java.sql.Timestamp(timestamp.getTime()));
 
@@ -300,9 +290,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
   @Override
   public void deleteAssignment(final Long id) throws SegueDatabaseException {
     String query = "DELETE FROM assignments WHERE id = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_DELETE_ASSIGNMENT_ID, id);
 
       pst.execute();
@@ -343,9 +331,16 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
       preciseScheduledStartDate = new java.util.Date(sqlResults.getTimestamp("scheduled_start_date").getTime());
     }
 
-    return new AssignmentDO(sqlResults.getLong("id"), sqlResults.getString("gameboard_id"),
-        sqlResults.getLong("owner_user_id"), sqlResults.getLong("group_id"), sqlResults.getString("notes"), preciseDate,
-        preciseDueDate, preciseScheduledStartDate);
+    return new AssignmentDO(
+      sqlResults.getLong("id"),
+      sqlResults.getString("gameboard_id"),
+      sqlResults.getLong("owner_user_id"),
+      sqlResults.getLong("group_id"),
+      sqlResults.getString("notes"),
+      preciseDate,
+      preciseDueDate,
+      preciseScheduledStartDate
+    );
   }
 
   // Field Constants

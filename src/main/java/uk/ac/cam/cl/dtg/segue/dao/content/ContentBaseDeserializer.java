@@ -39,6 +39,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
  */
 public class ContentBaseDeserializer extends JsonDeserializer<Content> {
   private Map<String, Class<? extends Content>> typeMap = null;
+
   //private static final Logger log = LoggerFactory.getLogger(ContentBaseDeserializer.class);
 
   /**
@@ -53,8 +54,7 @@ public class ContentBaseDeserializer extends JsonDeserializer<Content> {
 
   @Override
   public final Content deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
-      throws IOException {
-
+    throws IOException {
     if (null == typeMap) {
       throw new IllegalStateException("No Map provided for Content Type deserialization.");
     }
@@ -64,8 +64,11 @@ public class ContentBaseDeserializer extends JsonDeserializer<Content> {
     Class<? extends Content> contentClass;
 
     if (null == root.get("type")) {
-      throw new JsonMappingException("Error: unable to parse content as there "
-          + "is no type property within the json input. Json Fragment: " + root.toString());
+      throw new JsonMappingException(
+        "Error: unable to parse content as there " +
+        "is no type property within the json input. Json Fragment: " +
+        root.toString()
+      );
     }
 
     String contentType = root.get("type").textValue();

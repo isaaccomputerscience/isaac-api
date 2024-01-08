@@ -62,14 +62,13 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
     nestedFieldsByType.put("content", Lists.newArrayList("audience"));
   }
 
-
   public void indexObject(final String indexBase, final String indexType, final String content)
-      throws SegueSearchException {
+    throws SegueSearchException {
     indexObject(indexBase, indexType, content, null);
   }
 
   void indexObject(final String indexBase, final String indexType, final String content, final String uniqueId)
-      throws SegueSearchException {
+    throws SegueSearchException {
     String typedIndex = ElasticSearchProvider.produceTypedIndexName(indexBase, indexType);
     // check index already exists if not execute any initialisation steps.
     if (!this.hasIndex(indexBase, indexType)) {
@@ -82,7 +81,6 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       IndexRequest request = new IndexRequest(typedIndex).id(uniqueId).source(content, XContentType.JSON);
       IndexResponse indexResponse = getClient().index(request, RequestOptions.DEFAULT);
       log.debug("Document: " + indexResponse.getId() + " indexed.");
-
     } catch (ElasticsearchException | IOException e) {
       throw new SegueSearchException("Error during index operation.", e);
     }
@@ -95,9 +93,12 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
    *                             BulkRequestBuilder
    * @throws SegueSearchException if an error occurs during the index operation
    */
-  private void executeBulkIndexRequest(final String indexBase, final String indexType,
-                                       final Function<String, BulkRequest> buildBulkRequest)
-      throws SegueSearchException {
+  private void executeBulkIndexRequest(
+    final String indexBase,
+    final String indexType,
+    final Function<String, BulkRequest> buildBulkRequest
+  )
+    throws SegueSearchException {
     String typedIndex = ElasticSearchProvider.produceTypedIndexName(indexBase, indexType);
 
     // check index already exists if not execute any initialisation steps.
@@ -112,17 +113,16 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
 
     try {
       // increase default timeouts
-      RequestConfig requestConfig = RequestConfig.custom()
-          .setConnectTimeout(ELASTICSEARCH_INDEXER_REQUEST_TIMEOUT)
-          .setSocketTimeout(ELASTICSEARCH_INDEXER_REQUEST_TIMEOUT)
-          .build();
-      RequestOptions options = RequestOptions.DEFAULT.toBuilder()
-          .setRequestConfig(requestConfig)
-          .build();
+      RequestConfig requestConfig = RequestConfig
+        .custom()
+        .setConnectTimeout(ELASTICSEARCH_INDEXER_REQUEST_TIMEOUT)
+        .setSocketTimeout(ELASTICSEARCH_INDEXER_REQUEST_TIMEOUT)
+        .build();
+      RequestOptions options = RequestOptions.DEFAULT.toBuilder().setRequestConfig(requestConfig).build();
 
       // execute bulk request
-      BulkResponse bulkResponse =
-          getClient().bulk(bulkRequest.timeout("180s").setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE), options);
+      BulkResponse bulkResponse = getClient()
+        .bulk(bulkRequest.timeout("180s").setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE), options);
       if (bulkResponse.hasFailures()) {
         // process failures by iterating through each bulk response item
         for (BulkItemResponse itemResponse : bulkResponse.getItems()) {
@@ -137,28 +137,42 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
   }
 
   void bulkIndex(final String indexBase, final String indexType, final List<String> dataToIndex)
-      throws SegueSearchException {
-    executeBulkIndexRequest(indexBase, indexType, typedIndex -> {
-      // build bulk request, items don't have ids
-      BulkRequest request = new BulkRequest();
-      dataToIndex.forEach(itemToIndex -> request.add(
-          new IndexRequest(typedIndex).source(itemToIndex, XContentType.JSON)
-      ));
-      return request;
-    });
+    throws SegueSearchException {
+    executeBulkIndexRequest(
+      indexBase,
+      indexType,
+      typedIndex -> {
+        // build bulk request, items don't have ids
+        BulkRequest request = new BulkRequest();
+        dataToIndex.forEach(
+          itemToIndex -> request.add(new IndexRequest(typedIndex).source(itemToIndex, XContentType.JSON))
+        );
+        return request;
+      }
+    );
   }
 
-  void bulkIndexWithIds(final String indexBase, final String indexType,
-                        final List<Map.Entry<String, String>> dataToIndex)
-      throws SegueSearchException {
-    executeBulkIndexRequest(indexBase, indexType, typedIndex -> {
-      // build bulk request, ids of data items are specified by their keys
-      BulkRequest bulkRequest = new BulkRequest();
-      dataToIndex.forEach(itemToIndex -> bulkRequest.add(
-          new IndexRequest(typedIndex).id(itemToIndex.getKey()).source(itemToIndex.getValue(), XContentType.JSON)
-      ));
-      return bulkRequest;
-    });
+  void bulkIndexWithIds(
+    final String indexBase,
+    final String indexType,
+    final List<Map.Entry<String, String>> dataToIndex
+  )
+    throws SegueSearchException {
+    executeBulkIndexRequest(
+      indexBase,
+      indexType,
+      typedIndex -> {
+        // build bulk request, ids of data items are specified by their keys
+        BulkRequest bulkRequest = new BulkRequest();
+        dataToIndex.forEach(
+          itemToIndex ->
+            bulkRequest.add(
+              new IndexRequest(typedIndex).id(itemToIndex.getKey()).source(itemToIndex.getValue(), XContentType.JSON)
+            )
+        );
+        return bulkRequest;
+      }
+    );
   }
 
   public boolean expungeEntireSearchCache() {
@@ -170,8 +184,12 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       log.info("Sending delete request to ElasticSearch for search index: " + sanitiseInternalLogValue(typedIndex));
       getClient().indices().delete(new DeleteIndexRequest(typedIndex), RequestOptions.DEFAULT);
     } catch (ElasticsearchException | IOException e) {
-      log.error("ElasticSearch exception while trying to delete index " + sanitiseInternalLogValue(typedIndex)
-              + ", it might not have existed.", e);
+      log.error(
+        "ElasticSearch exception while trying to delete index " +
+        sanitiseInternalLogValue(typedIndex) +
+        ", it might not have existed.",
+        e
+      );
       return false;
     }
 
@@ -185,8 +203,11 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
     return this.expungeTypedIndexFromSearchCache(typedIndex);
   }
 
-  boolean addOrMoveIndexAlias(final String aliasBase, final String indexBaseTarget,
-                              final List<String> indexTypeTargets) {
+  boolean addOrMoveIndexAlias(
+    final String aliasBase,
+    final String indexBaseTarget,
+    final List<String> indexTypeTargets
+  ) {
     String indexWithPrevious = null; // This is the index that has the <alias>_previous alias
     String indexWithCurrent = null; // This is the index that has the <alias> alias.
 
@@ -197,13 +218,20 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       // First, find where <alias>_previous points.
       ImmutableMap<String, Set<AliasMetadata>> returnedPreviousAliases = null;
       try {
-        returnedPreviousAliases = ImmutableMap.copyOf(
-            getClient().indices()
-                .getAlias(new GetAliasesRequest().aliases(typedAlias + "_previous"), RequestOptions.DEFAULT)
-                .getAliases());
+        returnedPreviousAliases =
+          ImmutableMap.copyOf(
+            getClient()
+              .indices()
+              .getAlias(new GetAliasesRequest().aliases(typedAlias + "_previous"), RequestOptions.DEFAULT)
+              .getAliases()
+          );
       } catch (IOException e) {
-        log.error(String.format("Failed to retrieve existing previous alias %s, not moving alias!",
-            sanitiseInternalLogValue(typedAlias) + "_previous"));
+        log.error(
+          String.format(
+            "Failed to retrieve existing previous alias %s, not moving alias!",
+            sanitiseInternalLogValue(typedAlias) + "_previous"
+          )
+        );
         continue;
       }
 
@@ -220,12 +248,17 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       // Now find where <alias> points
       ImmutableMap<String, Set<AliasMetadata>> returnedAliases = null;
       try {
-        returnedAliases = ImmutableMap.copyOf(
-            getClient().indices().getAlias(new GetAliasesRequest().aliases(typedAlias), RequestOptions.DEFAULT)
-                .getAliases());
+        returnedAliases =
+          ImmutableMap.copyOf(
+            getClient()
+              .indices()
+              .getAlias(new GetAliasesRequest().aliases(typedAlias), RequestOptions.DEFAULT)
+              .getAliases()
+          );
       } catch (IOException e) {
-        log.error(String.format("Failed to retrieve existing alias %s, not moving alias!",
-            sanitiseInternalLogValue(typedAlias)));
+        log.error(
+          String.format("Failed to retrieve existing alias %s, not moving alias!", sanitiseInternalLogValue(typedAlias))
+        );
         continue;
       }
 
@@ -240,39 +273,40 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       }
 
       if (indexWithCurrent != null && indexWithCurrent.equals(typedIndexTarget)) {
-        log.info("Not moving alias '" + sanitiseInternalLogValue(typedAlias)
-            + "' - it already points to the right index.");
+        log.info(
+          "Not moving alias '" + sanitiseInternalLogValue(typedAlias) + "' - it already points to the right index."
+        );
       } else {
         IndicesAliasesRequest request = new IndicesAliasesRequest();
 
         if (indexWithCurrent != null) {
           // Remove the alias from the place it's currently pointing
           request.addAliasAction(
-              new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.REMOVE)
-                  .index(indexWithCurrent)
-                  .alias(typedAlias)
+            new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.REMOVE)
+              .index(indexWithCurrent)
+              .alias(typedAlias)
           );
           if (indexWithPrevious != null) {
             // Remove <alias>_previous from wherever it's currently pointing.
             request.addAliasAction(
-                new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.REMOVE)
-                    .index(indexWithPrevious)
-                    .alias(typedAlias + "_previous")
+              new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.REMOVE)
+                .index(indexWithPrevious)
+                .alias(typedAlias + "_previous")
             );
           }
           // Move <alias>_previous to wherever <alias> was pointing.
           request.addAliasAction(
-              new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
-                  .index(indexWithCurrent)
-                  .alias(typedAlias + "_previous")
+            new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
+              .index(indexWithCurrent)
+              .alias(typedAlias + "_previous")
           );
         }
 
         // Point <alias> to the right place.
         request.addAliasAction(
-            new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
-                .index(typedIndexTarget)
-                .alias(typedAlias)
+          new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
+            .index(typedIndexTarget)
+            .alias(typedAlias)
         );
         try {
           getClient().indices().updateAliases(request, RequestOptions.DEFAULT);
@@ -280,7 +314,6 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
           log.error(String.format("Failed to update alias %s", sanitiseInternalLogValue(typedAlias)), e);
         }
       }
-
     }
     this.expungeOldIndices();
     return true;
@@ -317,12 +350,10 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
   private void sendMappingCorrections(final String typedIndex, final String indexType) {
     try {
       // Specify index settings
-      CreateIndexRequest indexRequest = new CreateIndexRequest(typedIndex).settings(
-          XContentFactory.jsonBuilder()
-              .startObject()
-              .field("index.mapping.total_fields.limit", "9999")
-              .endObject()
-      );
+      CreateIndexRequest indexRequest = new CreateIndexRequest(typedIndex)
+      .settings(
+          XContentFactory.jsonBuilder().startObject().field("index.mapping.total_fields.limit", "9999").endObject()
+        );
 
       // Add mapping to specify properties of the index
       final XContentBuilder mappingBuilder = XContentFactory.jsonBuilder().startObject().startObject("properties");
@@ -331,16 +362,16 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       for (String fieldName : this.rawFieldsListByType.getOrDefault(indexType, Collections.emptyList())) {
         log.debug("Sending raw mapping correction for " + fieldName + "." + Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX);
         mappingBuilder
-            .startObject(fieldName)
-            .field("type", "text")
-            .field("index", "true")
-            .startObject("fields")
-            .startObject(Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX)
-            .field("type", "keyword")
-            .field("index", "true")
-            .endObject()
-            .endObject()
-            .endObject();
+          .startObject(fieldName)
+          .field("type", "text")
+          .field("index", "true")
+          .startObject("fields")
+          .startObject(Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX)
+          .field("type", "keyword")
+          .field("index", "true")
+          .endObject()
+          .endObject()
+          .endObject();
       }
 
       // Add mapping to specify nested object fields
@@ -353,7 +384,6 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       indexRequest.mapping(mappingBuilder);
 
       getClient().indices().create(indexRequest, RequestOptions.DEFAULT);
-
     } catch (IOException e) {
       log.error("Error while sending mapping correction " + "instructions to the ElasticSearch Server", e);
     }

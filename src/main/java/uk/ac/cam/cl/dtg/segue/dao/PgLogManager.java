@@ -76,27 +76,42 @@ public class PgLogManager implements ILogManager {
    *            - whether the log event should be persisted or not?
    */
   @Inject
-  public PgLogManager(final PostgresSqlDb database, final ObjectMapper objectMapper,
-                      @Named(Constants.LOGGING_ENABLED) final boolean loggingEnabled) {
-
+  public PgLogManager(
+    final PostgresSqlDb database,
+    final ObjectMapper objectMapper,
+    @Named(Constants.LOGGING_ENABLED) final boolean loggingEnabled
+  ) {
     this.database = database;
     this.objectMapper = objectMapper;
     this.loggingEnabled = loggingEnabled;
   }
 
   @Override
-  public void logEvent(final AbstractSegueUserDTO user, final HttpServletRequest httpRequest, final LogType eventType,
-                       final Object eventDetails) {
+  public void logEvent(
+    final AbstractSegueUserDTO user,
+    final HttpServletRequest httpRequest,
+    final LogType eventType,
+    final Object eventDetails
+  ) {
     Validate.notNull(user);
     try {
       if (user instanceof RegisteredUserDTO) {
-        this.persistLogEvent(((RegisteredUserDTO) user).getId().toString(), null, eventType.name(), eventDetails,
-            RequestIpExtractor.getClientIpAddr(httpRequest));
+        this.persistLogEvent(
+            ((RegisteredUserDTO) user).getId().toString(),
+            null,
+            eventType.name(),
+            eventDetails,
+            RequestIpExtractor.getClientIpAddr(httpRequest)
+          );
       } else {
-        this.persistLogEvent(null, ((AnonymousUserDTO) user).getSessionId(), eventType.name(), eventDetails,
-            RequestIpExtractor.getClientIpAddr(httpRequest));
+        this.persistLogEvent(
+            null,
+            ((AnonymousUserDTO) user).getSessionId(),
+            eventType.name(),
+            eventDetails,
+            RequestIpExtractor.getClientIpAddr(httpRequest)
+          );
       }
-
     } catch (JsonProcessingException e) {
       log.error("Unable to serialize eventDetails as json string", e);
     } catch (SegueDatabaseException e) {
@@ -105,18 +120,31 @@ public class PgLogManager implements ILogManager {
   }
 
   @Override
-  public void logExternalEvent(final AbstractSegueUserDTO user, final HttpServletRequest httpRequest,
-                               final String eventType, final Object eventDetails) {
+  public void logExternalEvent(
+    final AbstractSegueUserDTO user,
+    final HttpServletRequest httpRequest,
+    final String eventType,
+    final Object eventDetails
+  ) {
     Validate.notNull(user);
     try {
       if (user instanceof RegisteredUserDTO) {
-        this.persistLogEvent(((RegisteredUserDTO) user).getId().toString(), null, eventType, eventDetails,
-            RequestIpExtractor.getClientIpAddr(httpRequest));
+        this.persistLogEvent(
+            ((RegisteredUserDTO) user).getId().toString(),
+            null,
+            eventType,
+            eventDetails,
+            RequestIpExtractor.getClientIpAddr(httpRequest)
+          );
       } else {
-        this.persistLogEvent(null, ((AnonymousUserDTO) user).getSessionId(), eventType, eventDetails,
-            RequestIpExtractor.getClientIpAddr(httpRequest));
+        this.persistLogEvent(
+            null,
+            ((AnonymousUserDTO) user).getSessionId(),
+            eventType,
+            eventDetails,
+            RequestIpExtractor.getClientIpAddr(httpRequest)
+          );
       }
-
     } catch (JsonProcessingException e) {
       log.error("Unable to serialize eventDetails as json string", e);
     } catch (SegueDatabaseException e) {
@@ -129,12 +157,10 @@ public class PgLogManager implements ILogManager {
     Validate.notNull(user);
     try {
       if (user instanceof RegisteredUserDTO) {
-        this.persistLogEvent(((RegisteredUserDTO) user).getId().toString(), null, eventType.name(), eventDetails,
-            null);
+        this.persistLogEvent(((RegisteredUserDTO) user).getId().toString(), null, eventType.name(), eventDetails, null);
       } else {
         this.persistLogEvent(null, ((AnonymousUserDTO) user).getSessionId(), eventType.name(), eventDetails, null);
       }
-
     } catch (JsonProcessingException e) {
       log.error("Unable to serialize eventDetails as json string", e);
     } catch (SegueDatabaseException e) {
@@ -145,14 +171,11 @@ public class PgLogManager implements ILogManager {
   @Override
   public void transferLogEventsToRegisteredUser(final String oldUserId, final String newUserId) {
     String query = "UPDATE logged_events SET user_id = ?, anonymous_user = TRUE WHERE user_id = ?;";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_TRANSFER_LOG_EVENTS_NEW_USER_ID, newUserId);
       pst.setString(FIELD_TRANSFER_LOG_EVENTS_OLD_USER_ID, oldUserId);
 
       pst.executeUpdate();
-
     } catch (SQLException e) {
       log.error("Unable to transfer log events", e);
     }
@@ -160,15 +183,18 @@ public class PgLogManager implements ILogManager {
 
   @Override
   public Collection<LogEvent> getLogsByType(final String type, final Date fromDate, final Date toDate)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     return this.getLogsByUserAndType(type, fromDate, toDate, null);
   }
 
   @Override
-  public Collection<LogEvent> getLogsByType(final String type, final Date fromDate, final Date toDate,
-                                            final List<RegisteredUserDTO> usersOfInterest)
-      throws SegueDatabaseException {
-
+  public Collection<LogEvent> getLogsByType(
+    final String type,
+    final Date fromDate,
+    final Date toDate,
+    final List<RegisteredUserDTO> usersOfInterest
+  )
+    throws SegueDatabaseException {
     List<String> usersIdsList = Lists.newArrayList();
     for (RegisteredUserDTO u : usersOfInterest) {
       usersIdsList.add(u.getId().toString());
@@ -180,9 +206,7 @@ public class PgLogManager implements ILogManager {
   @Override
   public Long getLogCountByType(final String type) throws SegueDatabaseException {
     String query = "SELECT COUNT(*) AS TOTAL FROM logged_events WHERE event_type = ?";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_GET_LOG_COUNT_EVENT_TYPE, type);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -195,11 +219,14 @@ public class PgLogManager implements ILogManager {
   }
 
   @Override
-  public Map<String, Map<LocalDate, Long>> getLogCountByDate(final Collection<String> eventTypes,
-                                                             final Date fromDate, final Date toDate,
-                                                             final List<RegisteredUserDTO> usersOfInterest,
-                                                             final boolean binDataByMonth)
-      throws SegueDatabaseException {
+  public Map<String, Map<LocalDate, Long>> getLogCountByDate(
+    final Collection<String> eventTypes,
+    final Date fromDate,
+    final Date toDate,
+    final List<RegisteredUserDTO> usersOfInterest,
+    final boolean binDataByMonth
+  )
+    throws SegueDatabaseException {
     Validate.notNull(eventTypes);
 
     List<String> usersIdsList = Lists.newArrayList();
@@ -212,8 +239,8 @@ public class PgLogManager implements ILogManager {
     Map<String, Map<LocalDate, Long>> result = Maps.newHashMap();
 
     for (String typeOfInterest : eventTypes) {
-      Map<Date, Long> rs = this.getLogsCountByMonthFilteredByUserAndType(typeOfInterest, fromDate, toDate,
-          usersIdsList);
+      Map<Date, Long> rs =
+        this.getLogsCountByMonthFilteredByUserAndType(typeOfInterest, fromDate, toDate, usersIdsList);
 
       if (!result.containsKey(typeOfInterest)) {
         result.put(typeOfInterest, new HashMap<LocalDate, Long>());
@@ -223,8 +250,7 @@ public class PgLogManager implements ILogManager {
         LocalDate localisedDate = new LocalDate(le.getKey());
 
         if (result.get(typeOfInterest).containsKey(localisedDate)) {
-          result.get(typeOfInterest).put(localisedDate,
-              result.get(typeOfInterest).get(localisedDate) + le.getValue());
+          result.get(typeOfInterest).put(localisedDate, result.get(typeOfInterest).get(localisedDate) + le.getValue());
         } else {
           result.get(typeOfInterest).put(localisedDate, le.getValue());
         }
@@ -238,17 +264,16 @@ public class PgLogManager implements ILogManager {
   public Set<String> getAllIpAddresses() {
     Set<String> ipAddresses = Sets.newHashSet();
     String query = "SELECT DISTINCT ip_address FROM logged_events";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query);
-         ResultSet results = pst.executeQuery()
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query);
+      ResultSet results = pst.executeQuery()
     ) {
       while (results.next()) {
         ipAddresses.add(results.getString("ip_address"));
       }
-
     } catch (SQLException e) {
       log.error("Unable to get all ip addresses due to a database error.", e);
-
     }
 
     return ipAddresses;
@@ -256,13 +281,11 @@ public class PgLogManager implements ILogManager {
 
   @Override
   public Map<String, Date> getLastLogDateForAllUsers(final String qualifyingLogEventType)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     String query =
-        "SELECT DISTINCT ON (user_id) user_id, \"timestamp\" FROM logged_events WHERE event_type = ?"
-            + " ORDER BY user_id, id DESC;";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+      "SELECT DISTINCT ON (user_id) user_id, \"timestamp\" FROM logged_events WHERE event_type = ?" +
+      " ORDER BY user_id, id DESC;";
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_GET_LOG_DATE_EVENT_TYPE, qualifyingLogEventType);
 
       try (ResultSet results = pst.executeQuery()) {
@@ -282,9 +305,10 @@ public class PgLogManager implements ILogManager {
   @Override
   public Set<String> getAllEventTypes() throws SegueDatabaseException {
     String query = "SELECT event_type FROM logged_events GROUP BY event_type";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query);
-         ResultSet results = pst.executeQuery()
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query);
+      ResultSet results = pst.executeQuery()
     ) {
       Set<String> eventTypesRecorded = Sets.newHashSet();
 
@@ -308,9 +332,15 @@ public class PgLogManager implements ILogManager {
    *             if we cannot read the requested column.
    */
   private LogEvent buildPgLogEventFromPgResult(final ResultSet results) throws SQLException {
-    return new LogEvent(results.getString("event_type"), results.getString("event_details_type"),
-        results.getObject("event_details"), results.getString("user_id"),
-        results.getBoolean("anonymous_user"), results.getString("user_id"), results.getDate("timestamp"));
+    return new LogEvent(
+      results.getString("event_type"),
+      results.getString("event_details_type"),
+      results.getObject("event_details"),
+      results.getString("user_id"),
+      results.getBoolean("anonymous_user"),
+      results.getString("user_id"),
+      results.getDate("timestamp")
+    );
   }
 
   /**
@@ -331,9 +361,13 @@ public class PgLogManager implements ILogManager {
    * @throws SegueDatabaseException
    *             - if we cannot retrieve the data from the database.
    */
-  private Map<Date, Long> getLogsCountByMonthFilteredByUserAndType(final String type, final Date fromDate,
-                                                                   final Date toDate, final Collection<String> userIds)
-      throws SegueDatabaseException {
+  private Map<Date, Long> getLogsCountByMonthFilteredByUserAndType(
+    final String type,
+    final Date fromDate,
+    final Date toDate,
+    final Collection<String> userIds
+  )
+    throws SegueDatabaseException {
     Validate.notNull(fromDate);
     Validate.notNull(toDate);
 
@@ -347,7 +381,6 @@ public class PgLogManager implements ILogManager {
       }
 
       queryToBuild.append(String.format(" AND user_id IN (%s)", inParams.toString()));
-
     }
     queryToBuild.append(") ");
     // The following LEFT JOIN gives us months with no events in as required, but need count(id) not count(1) to
@@ -356,11 +389,13 @@ public class PgLogManager implements ILogManager {
     queryToBuild.append("SELECT to_char(gen_month, 'YYYY-MM-01'), count(id)");
     queryToBuild.append(" FROM generate_series(date_trunc('month', ?::timestamp), ?, INTERVAL '1' MONTH) m(gen_month)");
     queryToBuild.append(
-        " LEFT OUTER JOIN filtered_logs ON ( date_trunc('month', \"timestamp\") = date_trunc('month', gen_month) )");
+      " LEFT OUTER JOIN filtered_logs ON ( date_trunc('month', \"timestamp\") = date_trunc('month', gen_month) )"
+    );
     queryToBuild.append(" GROUP BY gen_month ORDER BY gen_month ASC;");
 
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(queryToBuild.toString())
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(queryToBuild.toString())
     ) {
       pst.setString(FIELD_GET_LOG_COUNT_BY_MONTH_FILTERED_EVENT_TYPE, type);
 
@@ -408,9 +443,13 @@ public class PgLogManager implements ILogManager {
    * @throws SegueDatabaseException
    *             - if we cannot retrieve the data from the database.
    */
-  private Collection<LogEvent> getLogsByUserAndType(final String type, final Date fromDate, final Date toDate,
-                                                    final Collection<String> userIds) throws SegueDatabaseException {
-
+  private Collection<LogEvent> getLogsByUserAndType(
+    final String type,
+    final Date fromDate,
+    final Date toDate,
+    final Collection<String> userIds
+  )
+    throws SegueDatabaseException {
     String query = "SELECT * FROM logged_events WHERE event_type = ?";
 
     if (fromDate != null) {
@@ -429,12 +468,9 @@ public class PgLogManager implements ILogManager {
       }
 
       query += String.format(" AND user_id IN (%s)", inParams.toString());
-
     }
 
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_GET_LOGS_BY_USER_AND_TYPE_EVENT_TYPE, type);
 
       int index = GET_LOGS_BY_USER_AND_TYPE_FIRST_USER_ID_OR_TIMESTAMP_INDEX;
@@ -453,7 +489,6 @@ public class PgLogManager implements ILogManager {
       }
 
       try (ResultSet results = pst.executeQuery()) {
-
         List<LogEvent> returnResult = Lists.newArrayList();
         while (results.next()) {
           returnResult.add(buildPgLogEventFromPgResult(results));
@@ -483,9 +518,14 @@ public class PgLogManager implements ILogManager {
    *             - if we are unable to serialize the eventDetails as a string.
    * @throws SegueDatabaseException - if we cannot persist the event in the database.
    */
-  private void persistLogEvent(final String userId, final String anonymousUserId, final String eventType,
-                               final Object eventDetails, final String ipAddress)
-      throws JsonProcessingException, SegueDatabaseException {
+  private void persistLogEvent(
+    final String userId,
+    final String anonymousUserId,
+    final String eventType,
+    final Object eventDetails,
+    final String ipAddress
+  )
+    throws JsonProcessingException, SegueDatabaseException {
     // don't do anything if logging is not enabled.
     if (!this.loggingEnabled) {
       return;
@@ -498,10 +538,12 @@ public class PgLogManager implements ILogManager {
       LOG_EVENT.labels(eventType).inc();
     }
 
-    String query = "INSERT INTO logged_events(user_id, anonymous_user, event_type, event_details_type,"
-        + " event_details, ip_address, timestamp) VALUES (?, ?, ?, ?, ?::text::jsonb, ?::inet, ?);";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
+    String query =
+      "INSERT INTO logged_events(user_id, anonymous_user, event_type, event_details_type," +
+      " event_details, ip_address, timestamp) VALUES (?, ?, ?, ?, ?::text::jsonb, ?::inet, ?);";
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
     ) {
       pst.setString(FIELD_PERSIST_LOG_EVENT_USER_ID, logEvent.getUserId());
       pst.setBoolean(FIELD_PERSIST_LOG_EVENT_IS_ANONYMOUS, logEvent.isAnonymousUser());
@@ -522,7 +564,6 @@ public class PgLogManager implements ILogManager {
           throw new SQLException("Creating user failed, no ID obtained.");
         }
       }
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
@@ -543,8 +584,13 @@ public class PgLogManager implements ILogManager {
    *            - the ip address of the client making the request
    * @return a log event.
    */
-  private LogEvent buildLogEvent(final String userId, final String anonymousUserId, final String eventType,
-                                 final Object eventDetails, final String ipAddress) {
+  private LogEvent buildLogEvent(
+    final String userId,
+    final String anonymousUserId,
+    final String eventType,
+    final Object eventDetails,
+    final String ipAddress
+  ) {
     if (null == userId && null == anonymousUserId) {
       throw new IllegalArgumentException("UserId or anonymousUserId must be set.");
     }

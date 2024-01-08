@@ -32,9 +32,7 @@ public class QuantityValidationResponseDTO extends QuestionValidationResponseDTO
   /**
    * Default constructor.
    */
-  public QuantityValidationResponseDTO() {
-
-  }
+  public QuantityValidationResponseDTO() {}
 
   /**
    * Full constructor.
@@ -54,9 +52,15 @@ public class QuantityValidationResponseDTO extends QuestionValidationResponseDTO
    * @param dateAttempted
    *            -
    */
-  public QuantityValidationResponseDTO(final String questionId, final ChoiceDTO answer, final Boolean correct,
-                                       final ContentDTO explanation, final Boolean correctValue,
-                                       final Boolean correctUnits, final Date dateAttempted) {
+  public QuantityValidationResponseDTO(
+    final String questionId,
+    final ChoiceDTO answer,
+    final Boolean correct,
+    final ContentDTO explanation,
+    final Boolean correctValue,
+    final Boolean correctUnits,
+    final Date dateAttempted
+  ) {
     super(questionId, answer, correct, explanation, dateAttempted);
     this.correctValue = correctValue;
     this.correctUnits = correctUnits;

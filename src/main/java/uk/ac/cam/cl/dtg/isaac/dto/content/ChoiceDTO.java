@@ -26,7 +26,5 @@ public class ChoiceDTO extends ContentDTO {
   /**
    * Default Constructor required for mappers.
    */
-  public ChoiceDTO() {
-
-  }
+  public ChoiceDTO() {}
 }

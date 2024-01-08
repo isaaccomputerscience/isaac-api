@@ -41,13 +41,19 @@ public class SegueLoginByEmailMisuseHandler implements IMisuseHandler {
 
   @Inject
   public SegueLoginByEmailMisuseHandler(final PropertiesLoader properties) {
-    this(SEGUE_LOGIN_BY_EMAIL_DEFAULT_SOFT_THRESHOLD, SEGUE_LOGIN_BY_EMAIL_DEFAULT_HARD_THRESHOLD,
-        properties.getIntegerPropertyOrFallback(SEGUE_LOGIN_EMAIL_MISUSE_INTERVAL, NUMBER_SECONDS_IN_THIRTY_MINUTES));
+    this(
+      SEGUE_LOGIN_BY_EMAIL_DEFAULT_SOFT_THRESHOLD,
+      SEGUE_LOGIN_BY_EMAIL_DEFAULT_HARD_THRESHOLD,
+      properties.getIntegerPropertyOrFallback(SEGUE_LOGIN_EMAIL_MISUSE_INTERVAL, NUMBER_SECONDS_IN_THIRTY_MINUTES)
+    );
   }
 
   @Inject
-  public SegueLoginByEmailMisuseHandler(final Integer softThreshold, final Integer hardThreshold,
-                                        final Integer interval) {
+  public SegueLoginByEmailMisuseHandler(
+    final Integer softThreshold,
+    final Integer hardThreshold,
+    final Integer interval
+  ) {
     this.softThreshold = softThreshold;
     this.hardThreshold = hardThreshold;
     this.accountingInterval = interval;

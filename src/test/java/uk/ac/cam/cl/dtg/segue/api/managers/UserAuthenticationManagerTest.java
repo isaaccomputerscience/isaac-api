@@ -69,13 +69,12 @@ public class UserAuthenticationManagerTest {
 
     expect(this.dummyPropertiesLoader.getProperty(HMAC_SALT)).andReturn(dummyHMACSalt).anyTimes();
     expect(this.dummyPropertiesLoader.getProperty(HOST_NAME)).andReturn(dummyHostName).anyTimes();
-    expect(this.dummyPropertiesLoader.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT)).andReturn("60")
-        .anyTimes();
+    expect(this.dummyPropertiesLoader.getProperty(SESSION_EXPIRY_SECONDS_DEFAULT)).andReturn("60").anyTimes();
     expect(this.dummyPropertiesLoader.getProperty(Constants.SEGUE_APP_ENVIRONMENT)).andReturn("DEV").anyTimes();
     replay(this.dummyPropertiesLoader);
 
     userAuthenticationManager =
-        new UserAuthenticationManager(dummyDatabase, dummyPropertiesLoader, dummyProvidersMap, dummyQueue);
+      new UserAuthenticationManager(dummyDatabase, dummyPropertiesLoader, dummyProvidersMap, dummyQueue);
   }
 
   @Test
@@ -90,7 +89,7 @@ public class UserAuthenticationManagerTest {
     Cookie segueAuthCookie = userAuthenticationManager.createAuthCookie(sessionInformation, 300);
 
     HttpServletRequest mockRequest = createNiceMock(HttpServletRequest.class);
-    expect(mockRequest.getCookies()).andReturn(new Cookie[] {segueAuthCookie}).anyTimes();
+    expect(mockRequest.getCookies()).andReturn(new Cookie[] { segueAuthCookie }).anyTimes();
     replay(mockRequest);
 
     expect(dummyDatabase.getSessionToken(1L)).andReturn(1).times(2);
@@ -115,7 +114,7 @@ public class UserAuthenticationManagerTest {
   public void isSessionValid_noAuthCookie() throws SegueDatabaseException {
     Cookie notAuthCookie = new Cookie("NOT_AUTH_COOKIE", "");
     HttpServletRequest mockRequest = createNiceMock(HttpServletRequest.class);
-    expect(mockRequest.getCookies()).andReturn(new Cookie[] {notAuthCookie}).anyTimes();
+    expect(mockRequest.getCookies()).andReturn(new Cookie[] { notAuthCookie }).anyTimes();
     replay(mockRequest);
 
     expect(dummyDatabase.getSessionToken(1L)).andReturn(1);
@@ -130,9 +129,12 @@ public class UserAuthenticationManagerTest {
     Date cookieExpiryDate = Date.from(LocalDateTime.of(2020, 1, 1, 0, 0, 0).toInstant(UTC));
     String cookieExpiryDateString = new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(cookieExpiryDate);
     Map<String, String> sessionInformation = Map.of(
-        SESSION_USER_ID, "1",
-        SESSION_TOKEN, "1",
-        DATE_EXPIRES, cookieExpiryDateString
+      SESSION_USER_ID,
+      "1",
+      SESSION_TOKEN,
+      "1",
+      DATE_EXPIRES,
+      cookieExpiryDateString
     );
 
     assertEquals(expectedHMAC, userAuthenticationManager.calculateUpdatedHMAC(sessionInformation));
@@ -144,10 +146,14 @@ public class UserAuthenticationManagerTest {
     Date cookieExpiryDate = Date.from(LocalDateTime.of(2020, 1, 1, 0, 0, 0).toInstant(UTC));
     String cookieExpiryDateString = new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(cookieExpiryDate);
     Map<String, String> sessionInformation = Map.of(
-        SESSION_USER_ID, "1",
-        SESSION_TOKEN, "1",
-        DATE_EXPIRES, cookieExpiryDateString,
-        PARTIAL_LOGIN_FLAG, "true"
+      SESSION_USER_ID,
+      "1",
+      SESSION_TOKEN,
+      "1",
+      DATE_EXPIRES,
+      cookieExpiryDateString,
+      PARTIAL_LOGIN_FLAG,
+      "true"
     );
 
     assertEquals(expectedHMAC, userAuthenticationManager.calculateUpdatedHMAC(sessionInformation));
@@ -164,18 +170,23 @@ public class UserAuthenticationManagerTest {
     expectLastCall();
     replay(dummyDatabase);
 
-    Map<String, String> sessionInformation = new HashMap(Map.of(
-        SESSION_USER_ID, "1",
-        SESSION_TOKEN, "1",
-        DATE_EXPIRES, new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(Date.from(Instant.now().plus(3600, SECONDS)))
-    ));
+    Map<String, String> sessionInformation = new HashMap(
+      Map.of(
+        SESSION_USER_ID,
+        "1",
+        SESSION_TOKEN,
+        "1",
+        DATE_EXPIRES,
+        new SimpleDateFormat(DEFAULT_DATE_FORMAT).format(Date.from(Instant.now().plus(3600, SECONDS)))
+      )
+    );
     sessionInformation.put(HMAC, userAuthenticationManager.calculateUpdatedHMAC(sessionInformation));
 
     Cookie authCookie = userAuthenticationManager.createAuthCookie(sessionInformation, 3600);
     HttpSession logoutSession = createMockSession();
     replay(logoutSession);
     HttpServletRequest logoutRequest = createMockServletRequest(logoutSession);
-    expect(logoutRequest.getCookies()).andReturn(new Cookie[] {authCookie}).anyTimes();
+    expect(logoutRequest.getCookies()).andReturn(new Cookie[] { authCookie }).anyTimes();
     replay(logoutRequest);
 
     Capture<Cookie> logoutResponseCookie = newCapture();

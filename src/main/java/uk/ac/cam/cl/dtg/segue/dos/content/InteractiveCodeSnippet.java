@@ -28,7 +28,6 @@ import uk.ac.cam.cl.dtg.segue.dto.content.InteractiveCodeSnippetDTO;
 @DTOMapping(InteractiveCodeSnippetDTO.class)
 @JsonContentType("interactiveCodeSnippet")
 public class InteractiveCodeSnippet extends CodeSnippet {
-
   private String setupCode;
   private String testCode;
   private String expectedResult;
@@ -37,9 +36,7 @@ public class InteractiveCodeSnippet extends CodeSnippet {
   /**
    * Default constructor, required for mappers.
    */
-  public InteractiveCodeSnippet() {
-
-  }
+  public InteractiveCodeSnippet() {}
 
   public String getSetupCode() {
     return setupCode;

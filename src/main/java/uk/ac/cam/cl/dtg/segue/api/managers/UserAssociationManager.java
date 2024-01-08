@@ -64,9 +64,10 @@ public class UserAssociationManager {
    */
   @Inject
   public UserAssociationManager(
-      final IAssociationDataManager associationDatabase,
-      final UserAccountManager userManager,
-      final GroupManager userGroupManager) {
+    final IAssociationDataManager associationDatabase,
+    final UserAccountManager userManager,
+    final GroupManager userGroupManager
+  ) {
     this.associationDatabase = associationDatabase;
     this.userManager = userManager;
     this.userGroupManager = userGroupManager;
@@ -86,9 +87,11 @@ public class UserAssociationManager {
    * @throws UserGroupNotFoundException
    *             - if the group specified does not exist.
    */
-  public AssociationToken generateAssociationToken(final RegisteredUserDTO registeredUser,
-                                                   final Long associatedGroupId)
-      throws SegueDatabaseException, UserGroupNotFoundException {
+  public AssociationToken generateAssociationToken(
+    final RegisteredUserDTO registeredUser,
+    final Long associatedGroupId
+  )
+    throws SegueDatabaseException, UserGroupNotFoundException {
     Validate.notNull(registeredUser);
 
     if (associatedGroupId != null) {
@@ -105,8 +108,7 @@ public class UserAssociationManager {
     // create some kind of random token and remove ambiguous characters.
     String token = newToken();
 
-    AssociationToken associationToken = new AssociationToken(token, registeredUser.getId(),
-        associatedGroupId);
+    AssociationToken associationToken = new AssociationToken(token, registeredUser.getId(), associatedGroupId);
 
     return associationDatabase.saveAssociationToken(associationToken);
   }
@@ -127,8 +129,8 @@ public class UserAssociationManager {
 
     char[] authToken = new char[TOKEN_LENGTH];
 
-    int index = 0;  // Where we are in the token.
-    int shift = 0;  // Where we are in the random 32-bit integer.
+    int index = 0; // Where we are in the token.
+    int shift = 0; // Where we are in the random 32-bit integer.
     int randomBits = SECURE_RANDOM.nextInt();
 
     // Use 5 bit ints extracted from randomBits, to generate tokenLength random characters from sample space.
@@ -138,9 +140,8 @@ public class UserAssociationManager {
         randomBits = SECURE_RANDOM.nextInt();
         shift = 0;
       }
-      int chr =
-          (randomBits >> (RANDOM_BITS_TO_EXTRACT * shift)) & BIT_SHIFT_MASK;  // Extract next 5 bit int from randomBits.
-      shift++;  // Ensure we don't reuse any of randomBits.
+      int chr = (randomBits >> (RANDOM_BITS_TO_EXTRACT * shift)) & BIT_SHIFT_MASK; // Extract next 5 bit int from randomBits.
+      shift++; // Ensure we don't reuse any of randomBits.
       if (chr < tokenCharMap.length()) {
         // If we're in the valid range, use that character and advance in authToken, else try again.
         authToken[index] = tokenCharMap.charAt(chr);
@@ -160,8 +161,8 @@ public class UserAssociationManager {
    * @throws SegueDatabaseException
    *             - if a database error occurs.
    */
-  public void deleteAssociationTokenByGroupId(final Long groupId) throws InvalidUserAssociationTokenException,
-      SegueDatabaseException {
+  public void deleteAssociationTokenByGroupId(final Long groupId)
+    throws InvalidUserAssociationTokenException, SegueDatabaseException {
     AssociationToken associationTokenByGroupId = associationDatabase.getAssociationTokenByGroupId(groupId);
     if (null == associationTokenByGroupId) {
       throw new InvalidUserAssociationTokenException("The group token provided does not exist or is invalid.");
@@ -182,7 +183,7 @@ public class UserAssociationManager {
    * @throws SegueDatabaseException - if there is a database error
    */
   public AssociationToken lookupTokenDetails(final RegisteredUserDTO userMakingRequest, final String token)
-      throws InvalidUserAssociationTokenException, SegueDatabaseException {
+    throws InvalidUserAssociationTokenException, SegueDatabaseException {
     Validate.notNull(userMakingRequest);
     Validate.notBlank(token);
     AssociationToken lookedupToken = associationDatabase.lookupAssociationToken(token);
@@ -233,8 +234,11 @@ public class UserAssociationManager {
    * @throws InvalidUserAssociationTokenException
    *             - If the token provided is invalid.
    */
-  public AssociationToken createAssociationWithToken(final String token, final RegisteredUserDTO userGrantingPermission)
-      throws SegueDatabaseException, InvalidUserAssociationTokenException {
+  public AssociationToken createAssociationWithToken(
+    final String token,
+    final RegisteredUserDTO userGrantingPermission
+  )
+    throws SegueDatabaseException, InvalidUserAssociationTokenException {
     Validate.notBlank(token);
     Validate.notNull(userGrantingPermission);
 
@@ -245,8 +249,7 @@ public class UserAssociationManager {
     }
 
     // add owner association
-    if (!associationDatabase
-        .hasValidAssociation(lookedupToken.getOwnerUserId(), userGrantingPermission.getId())) {
+    if (!associationDatabase.hasValidAssociation(lookedupToken.getOwnerUserId(), userGrantingPermission.getId())) {
       associationDatabase.createAssociation(lookedupToken, userGrantingPermission.getId());
     }
 
@@ -254,13 +257,13 @@ public class UserAssociationManager {
 
     if (lookedupToken.getGroupId() != null) {
       userGroupManager.addUserToGroup(group, userGrantingPermission);
-      log.debug(String.format("Adding User: %s to Group: %s", userGrantingPermission.getId(),
-          lookedupToken.getGroupId()));
+      log.debug(
+        String.format("Adding User: %s to Group: %s", userGrantingPermission.getId(), lookedupToken.getGroupId())
+      );
 
       // add additional manager associations
       for (Long additionalManagerId : group.getAdditionalManagersUserIds()) {
-        if (!associationDatabase
-            .hasValidAssociation(additionalManagerId, userGrantingPermission.getId())) {
+        if (!associationDatabase.hasValidAssociation(additionalManagerId, userGrantingPermission.getId())) {
           associationDatabase.createAssociation(additionalManagerId, userGrantingPermission.getId());
         }
       }
@@ -279,7 +282,7 @@ public class UserAssociationManager {
    *             - If there is a database issue whilst fulfilling the request.
    */
   public void revokeAssociation(final RegisteredUserDTO ownerUser, final RegisteredUserDTO userToRevoke)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     Validate.notNull(ownerUser);
     Validate.notNull(userToRevoke);
 
@@ -294,8 +297,7 @@ public class UserAssociationManager {
    * @throws SegueDatabaseException
    *             - If there is a database issue whilst fulfilling the request.
    */
-  public void revokeAllAssociationsByOwnerUser(final RegisteredUserDTO ownerUser)
-      throws SegueDatabaseException {
+  public void revokeAllAssociationsByOwnerUser(final RegisteredUserDTO ownerUser) throws SegueDatabaseException {
     Validate.notNull(ownerUser);
 
     associationDatabase.deleteAssociationsByOwner(ownerUser.getId());
@@ -310,7 +312,7 @@ public class UserAssociationManager {
    *             - If there is a database issue whilst fulfilling the request.
    */
   public void revokeAllAssociationsByRecipientUser(final RegisteredUserDTO recipientUser)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     Validate.notNull(recipientUser);
 
     associationDatabase.deleteAssociationsByRecipient(recipientUser.getId());
@@ -326,8 +328,10 @@ public class UserAssociationManager {
    *            - the users to be accessed.
    * @return updated user with data removed and access flags set.
    */
-  public UserSummaryDTO enforceAuthorisationPrivacy(final RegisteredUserDTO currentUser,
-                                                    final UserSummaryDTO userRequested) {
+  public UserSummaryDTO enforceAuthorisationPrivacy(
+    final RegisteredUserDTO currentUser,
+    final UserSummaryDTO userRequested
+  ) {
     if (this.hasPermission(currentUser, userRequested)) {
       userRequested.setAuthorisedFullAccess(true);
     } else {
@@ -346,8 +350,10 @@ public class UserAssociationManager {
    *            - the list of users being accessed.
    * @return updated collection of users with data removed and access flags set.
    */
-  public List<UserSummaryDTO> enforceAuthorisationPrivacy(final RegisteredUserDTO currentUser,
-                                                          final List<UserSummaryDTO> dataRequested) {
+  public List<UserSummaryDTO> enforceAuthorisationPrivacy(
+    final RegisteredUserDTO currentUser,
+    final List<UserSummaryDTO> dataRequested
+  ) {
     // verify permission of currentUser to access dataRequested.
 
     // for those without permission obfuscate the date
@@ -370,13 +376,14 @@ public class UserAssociationManager {
    */
   public boolean hasPermission(final RegisteredUserDTO currentUser, final UserSummaryDTO userRequested) {
     try {
-      return currentUser.getId().equals(userRequested.getId())
-          || Role.ADMIN.equals(currentUser.getRole())
-          || !Role.STUDENT.equals(currentUser.getRole()) && this.associationDatabase.hasValidAssociation(
-          currentUser.getId(), userRequested.getId());
+      return (
+        currentUser.getId().equals(userRequested.getId()) ||
+        Role.ADMIN.equals(currentUser.getRole()) ||
+        !Role.STUDENT.equals(currentUser.getRole()) &&
+        this.associationDatabase.hasValidAssociation(currentUser.getId(), userRequested.getId())
+      );
     } catch (SegueDatabaseException e) {
-      log.error("Database Error: Unable to determine whether a user has permission to view another users data.",
-          e);
+      log.error("Database Error: Unable to determine whether a user has permission to view another users data.", e);
       return false;
     }
   }
@@ -406,13 +413,15 @@ public class UserAssociationManager {
    */
   public boolean hasTeacherPermission(final RegisteredUserDTO currentUser, final UserSummaryDTO userRequested) {
     try {
-      return currentUser.getId().equals(userRequested.getId())
-          || Role.ADMIN.equals(currentUser.getRole())
-          || !Role.STUDENT.equals(currentUser.getRole()) && !Role.TUTOR.equals(currentUser.getRole())
-          && this.associationDatabase.hasValidAssociation(currentUser.getId(), userRequested.getId());
+      return (
+        currentUser.getId().equals(userRequested.getId()) ||
+        Role.ADMIN.equals(currentUser.getRole()) ||
+        !Role.STUDENT.equals(currentUser.getRole()) &&
+        !Role.TUTOR.equals(currentUser.getRole()) &&
+        this.associationDatabase.hasValidAssociation(currentUser.getId(), userRequested.getId())
+      );
     } catch (SegueDatabaseException e) {
-      log.error("Database Error: Unable to determine whether a user has permission to view another users data.",
-          e);
+      log.error("Database Error: Unable to determine whether a user has permission to view another users data.", e);
       return false;
     }
   }
@@ -439,20 +448,21 @@ public class UserAssociationManager {
    * @throws SegueDatabaseException if it was not able to get the user's associations form the database.
    */
   public <T> List<T> filterUnassociatedRecords(
-      final RegisteredUserDTO currentUser,
-      final List<T> records,
-      final Function<T, Long> userIdKey
-  ) throws SegueDatabaseException {
+    final RegisteredUserDTO currentUser,
+    final List<T> records,
+    final Function<T, Long> userIdKey
+  )
+    throws SegueDatabaseException {
     // Get current user's associated IDs
-    Set<Long> associations = this.getAssociationsForOthers(currentUser).stream()
+    Set<Long> associations =
+      this.getAssociationsForOthers(currentUser)
+        .stream()
         .map(UserAssociation::getUserIdGrantingPermission)
         .collect(Collectors.toSet());
     // Add own ID to associations
     associations.add(currentUser.getId());
 
-    return records.stream()
-        .filter(item -> associations.contains(userIdKey.apply(item)))
-        .collect(Collectors.toList());
+    return records.stream().filter(item -> associations.contains(userIdKey.apply(item))).collect(Collectors.toList());
   }
 
   /**
@@ -463,9 +473,8 @@ public class UserAssociationManager {
    * @return a list of user ID which has granted the current user to view their data.
    * @throws SegueDatabaseException if it was not able to get the user's associations form the database.
    */
-  public List<Long> filterUnassociatedRecords(
-      final RegisteredUserDTO currentUser, final List<Long> userIds
-  ) throws SegueDatabaseException {
+  public List<Long> filterUnassociatedRecords(final RegisteredUserDTO currentUser, final List<Long> userIds)
+    throws SegueDatabaseException {
     return this.filterUnassociatedRecords(currentUser, userIds, Function.identity());
   }
 }

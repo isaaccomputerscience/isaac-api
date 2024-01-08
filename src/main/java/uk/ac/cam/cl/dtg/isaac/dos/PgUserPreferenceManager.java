@@ -39,7 +39,6 @@ import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
  * A postgres specific User Preference Manager.
  */
 public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
-
   private final PostgresSqlDb database;
   private static final Logger log = LoggerFactory.getLogger(PgUserPreferenceManager.class);
 
@@ -54,20 +53,22 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
   }
 
   private UserPreference userPreferenceFromResultSet(final ResultSet results) throws SQLException {
-    return new UserPreference(results.getLong("user_id"), results.getString("preference_type"),
-        results.getString("preference_name"), results.getBoolean("preference_value"));
+    return new UserPreference(
+      results.getLong("user_id"),
+      results.getString("preference_type"),
+      results.getString("preference_name"),
+      results.getBoolean("preference_value")
+    );
   }
 
   @Override
   public UserPreference getUserPreference(final String preferenceType, final String preferenceName, final long userId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     Validate.notBlank(preferenceType);
     Validate.notBlank(preferenceName);
 
     String query = "SELECT * FROM user_preferences WHERE user_id=? AND preference_type=? AND preference_name=?;";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_PREFERENCE_USER_ID, userId);
       pst.setString(FIELD_GET_PREFERENCE_PREFERENCE_TYPE, preferenceType);
       pst.setString(FIELD_GET_PREFERENCE_PREFERENCE_NAME, preferenceName);
@@ -86,9 +87,12 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
   }
 
   @Override
-  public Map<Long, UserPreference> getUsersPreference(final String preferenceType, final String preferenceName,
-                                                      final List<RegisteredUserDTO> users)
-      throws SegueDatabaseException {
+  public Map<Long, UserPreference> getUsersPreference(
+    final String preferenceType,
+    final String preferenceName,
+    final List<RegisteredUserDTO> users
+  )
+    throws SegueDatabaseException {
     Validate.notBlank(preferenceType);
     Validate.notBlank(preferenceName);
 
@@ -99,7 +103,6 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
     int toIndex = min(pageSize, users.size());
 
     while (fromIndex < toIndex) {
-
       List<RegisteredUserDTO> pagedUsers = users.subList(fromIndex, toIndex);
       StringBuilder sb = new StringBuilder();
       sb.append("SELECT * FROM user_preferences WHERE user_id IN (");
@@ -108,8 +111,9 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
       }
       sb.append(") AND preference_type=? AND preference_name=? ORDER BY user_id ASC;");
 
-      try (Connection conn = database.getDatabaseConnection();
-           PreparedStatement pst = conn.prepareStatement(sb.toString())
+      try (
+        Connection conn = database.getDatabaseConnection();
+        PreparedStatement pst = conn.prepareStatement(sb.toString())
       ) {
         for (int i = 1; i <= pagedUsers.size(); i++) {
           pst.setLong(i, pagedUsers.get(i - 1).getId());
@@ -118,7 +122,6 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
         pst.setString(pagedUsers.size() + 2, preferenceName);
 
         try (ResultSet results = pst.executeQuery()) {
-
           while (results.next()) {
             Long userId = results.getLong("user_id");
             UserPreference pref = userPreferenceFromResultSet(results);
@@ -128,7 +131,6 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
 
         fromIndex = toIndex;
         toIndex = min(toIndex + pageSize, users.size());
-
       } catch (SQLException e) {
         throw new SegueDatabaseException("Postgres exception", e);
       }
@@ -138,13 +140,11 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
 
   @Override
   public List<UserPreference> getUserPreferences(final String preferenceType, final long userId)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     Validate.notBlank(preferenceType);
 
     String query = "SELECT * FROM user_preferences WHERE user_id=? AND preference_type=?;";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_PREFERENCES_USER_ID, userId);
       pst.setString(FIELD_GET_PREFERENCES_PREFERENCE_TYPE, preferenceType);
 
@@ -164,9 +164,11 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
   }
 
   @Override
-  public Map<Long, List<UserPreference>> getUserPreferences(final String preferenceType,
-                                                            final List<RegisteredUserDTO> users)
-      throws SegueDatabaseException {
+  public Map<Long, List<UserPreference>> getUserPreferences(
+    final String preferenceType,
+    final List<RegisteredUserDTO> users
+  )
+    throws SegueDatabaseException {
     Validate.notBlank(preferenceType);
 
     Map<Long, List<UserPreference>> usersPreferencesMap = Maps.newHashMap();
@@ -176,7 +178,6 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
     int toIndex = min(pageSize, users.size());
 
     while (fromIndex < toIndex) {
-
       List<RegisteredUserDTO> pagedUsers = users.subList(fromIndex, toIndex);
       StringBuilder sb = new StringBuilder();
       sb.append("SELECT * FROM user_preferences WHERE user_id IN (");
@@ -186,8 +187,9 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
       }
       sb.append(") AND preference_type=? ORDER BY user_id ASC, preference_name ASC;");
 
-      try (Connection conn = database.getDatabaseConnection();
-           PreparedStatement pst = conn.prepareStatement(sb.toString())
+      try (
+        Connection conn = database.getDatabaseConnection();
+        PreparedStatement pst = conn.prepareStatement(sb.toString())
       ) {
         for (int i = 1; i <= pagedUsers.size(); i++) {
           pst.setLong(i, pagedUsers.get(i - 1).getId());
@@ -195,7 +197,6 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
         pst.setString(pagedUsers.size() + 1, preferenceType);
 
         try (ResultSet results = pst.executeQuery()) {
-
           while (results.next()) {
             Long userId = results.getLong("user_id");
             UserPreference pref = userPreferenceFromResultSet(results);
@@ -212,7 +213,6 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
 
         fromIndex = toIndex;
         toIndex = min(toIndex + pageSize, users.size());
-
       } catch (SQLException e) {
         throw new SegueDatabaseException("Postgres exception", e);
       }
@@ -222,15 +222,11 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
 
   @Override
   public List<UserPreference> getAllUserPreferences(final long userId) throws SegueDatabaseException {
-
     String query = "SELECT * FROM user_preferences WHERE user_id=?;";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(FIELD_GET_ALL_PREFERENCES_USER_ID, userId);
 
       try (ResultSet results = pst.executeQuery()) {
-
         List<UserPreference> userPreferences = Lists.newArrayList();
 
         while (results.next()) {
@@ -250,11 +246,11 @@ public class PgUserPreferenceManager extends AbstractUserPreferenceManager {
     // Upsert the value in, using Postgres 9.5 syntax 'ON CONFLICT DO UPDATE ...'
     // Only update a conflicting row if value has changed, to ensure the last_updated date remains accurate:
     String query =
-        "INSERT INTO user_preferences(user_id, preference_type, preference_name, preference_value, last_updated) "
-            + " VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)"
-            + " ON CONFLICT (user_id, preference_type, preference_name) DO UPDATE"
-            + " SET preference_value=excluded.preference_value, last_updated=excluded.last_updated"
-            + " WHERE user_preferences.preference_value!=excluded.preference_value;";
+      "INSERT INTO user_preferences(user_id, preference_type, preference_name, preference_value, last_updated) " +
+      " VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)" +
+      " ON CONFLICT (user_id, preference_type, preference_name) DO UPDATE" +
+      " SET preference_value=excluded.preference_value, last_updated=excluded.last_updated" +
+      " WHERE user_preferences.preference_value!=excluded.preference_value;";
     try (Connection conn = database.getDatabaseConnection()) {
       conn.setAutoCommit(false);
       for (UserPreference preference : userPreferences) {

@@ -33,9 +33,7 @@ public class CodeSnippet extends Content {
   /**
    * Default constructor, required for mappers.
    */
-  public CodeSnippet() {
-
-  }
+  public CodeSnippet() {}
 
   /**
    * Gets the language.

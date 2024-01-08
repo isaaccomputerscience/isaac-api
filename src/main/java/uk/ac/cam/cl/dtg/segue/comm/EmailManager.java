@@ -93,9 +93,14 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    *                                  some static string.
    */
   @Inject
-  public EmailManager(final EmailCommunicator communicator, final AbstractUserPreferenceManager userPreferenceManager,
-                      final PropertiesLoader globalProperties, final GitContentManager contentManager,
-                      final ILogManager logManager, final Map<String, String> globalStringTokens) {
+  public EmailManager(
+    final EmailCommunicator communicator,
+    final AbstractUserPreferenceManager userPreferenceManager,
+    final PropertiesLoader globalProperties,
+    final GitContentManager contentManager,
+    final ILogManager logManager,
+    final Map<String, String> globalStringTokens
+  ) {
     super(communicator);
     this.userPreferenceManager = userPreferenceManager;
     this.globalProperties = globalProperties;
@@ -142,9 +147,13 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @throws ContentManagerException if we can't parse the content
    * @throws SegueDatabaseException  if we cannot contact the database for logging.
    */
-  public void sendTemplatedEmailToUser(final RegisteredUserDTO userDTO, final EmailTemplateDTO emailContentTemplate,
-                                       final Map<String, Object> tokenToValueMapping, final EmailType emailType)
-      throws ContentManagerException, SegueDatabaseException {
+  public void sendTemplatedEmailToUser(
+    final RegisteredUserDTO userDTO,
+    final EmailTemplateDTO emailContentTemplate,
+    final Map<String, Object> tokenToValueMapping,
+    final EmailType emailType
+  )
+    throws ContentManagerException, SegueDatabaseException {
     this.sendTemplatedEmailToUser(userDTO, emailContentTemplate, tokenToValueMapping, emailType, null);
   }
 
@@ -160,11 +169,14 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @throws ContentManagerException if we can't parse the content
    * @throws SegueDatabaseException  if we cannot contact the database for logging.
    */
-  public void sendTemplatedEmailToUser(final RegisteredUserDTO userDTO, final EmailTemplateDTO emailContentTemplate,
-                                       final Map<String, Object> tokenToValueMapping, final EmailType emailType,
-                                       final @Nullable List<EmailAttachment> attachments)
-      throws ContentManagerException, SegueDatabaseException {
-
+  public void sendTemplatedEmailToUser(
+    final RegisteredUserDTO userDTO,
+    final EmailTemplateDTO emailContentTemplate,
+    final Map<String, Object> tokenToValueMapping,
+    final EmailType emailType,
+    final @Nullable List<EmailAttachment> attachments
+  )
+    throws ContentManagerException, SegueDatabaseException {
     // generate properties from hashMap for token replacement process
     Properties propertiesToReplace = new Properties();
     propertiesToReplace.putAll(this.globalStringTokens);
@@ -179,9 +191,14 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     // Sanitizes inputs from users
     sanitizeEmailParameters(propertiesToReplace);
 
-    EmailCommunicationMessage emailCommunicationMessage
-        = constructMultiPartEmail(userDTO.getId(), userDTO.getEmail(), emailContentTemplate, propertiesToReplace,
-        emailType, attachments);
+    EmailCommunicationMessage emailCommunicationMessage = constructMultiPartEmail(
+      userDTO.getId(),
+      userDTO.getEmail(),
+      emailContentTemplate,
+      propertiesToReplace,
+      emailType,
+      attachments
+    );
 
     this.filterByPreferencesAndAddToQueue(userDTO, emailCommunicationMessage);
   }
@@ -196,7 +213,7 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @throws SegueDatabaseException  - if the database cannot be accessed
    */
   public void sendContactUsFormEmail(final String recipientEmailAddress, final Map<String, Object> emailValues)
-      throws ContentManagerException, SegueDatabaseException {
+    throws ContentManagerException, SegueDatabaseException {
     EmailTemplateDTO emailContent = getEmailTemplateDTO("email-contact-us-form");
     emailContent.setReplyToEmailAddress(emailValues.get("contactEmail").toString());
     emailContent.setReplyToName(emailValues.get("replyToName").toString());
@@ -210,8 +227,14 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
 
     sanitizeEmailParameters(propertiesToReplace);
 
-    EmailCommunicationMessage e = constructMultiPartEmail(null, recipientEmailAddress, emailContent,
-        propertiesToReplace, EmailType.SYSTEM, null);
+    EmailCommunicationMessage e = constructMultiPartEmail(
+      null,
+      recipientEmailAddress,
+      emailContent,
+      propertiesToReplace,
+      EmailType.SYSTEM,
+      null
+    );
 
     this.addSystemEmailToQueue(e);
   }
@@ -224,10 +247,13 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @throws SegueDatabaseException  - a segue database exception
    * @throws ContentManagerException - a content management exception
    */
-  public void sendCustomEmail(final RegisteredUserDTO sendingUser, final String contentObjectId,
-                              final List<RegisteredUserDTO> allSelectedUsers, final EmailType emailType)
-      throws SegueDatabaseException,
-      ContentManagerException {
+  public void sendCustomEmail(
+    final RegisteredUserDTO sendingUser,
+    final String contentObjectId,
+    final List<RegisteredUserDTO> allSelectedUsers,
+    final EmailType emailType
+  )
+    throws SegueDatabaseException, ContentManagerException {
     Validate.notNull(allSelectedUsers);
     Validate.notNull(contentObjectId);
 
@@ -244,8 +270,14 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
 
       sanitizeEmailParameters(p);
 
-      EmailCommunicationMessage e = constructMultiPartEmail(user.getId(), user.getEmail(), emailContent, p,
-          emailType, null);
+      EmailCommunicationMessage e = constructMultiPartEmail(
+        user.getId(),
+        user.getEmail(),
+        emailContent,
+        p,
+        emailType,
+        null
+      );
 
       // add to the queue
       boolean emailAddedToSendQueue = this.filterByPreferencesAndAddToQueue(user, e);
@@ -257,18 +289,24 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     List<Long> ids = Lists.newArrayList();
     allSelectedUsers.stream().map(RegisteredUserDTO::getId).forEach(ids::add);
 
-    ImmutableMap<String, Object> eventDetails =
-        new ImmutableMap.Builder<String, Object>().put(USER_ID_LIST_FKEY_FIELDNAME, ids)
-            .put("contentObjectId", contentObjectId)
-            .put(CONTENT_VERSION_FIELDNAME, this.contentManager.getCurrentContentSHA())
-            .put("numberFiltered", numberOfFilteredUsers)
-            .put("type", emailType).build();
+    ImmutableMap<String, Object> eventDetails = new ImmutableMap.Builder<String, Object>()
+      .put(USER_ID_LIST_FKEY_FIELDNAME, ids)
+      .put("contentObjectId", contentObjectId)
+      .put(CONTENT_VERSION_FIELDNAME, this.contentManager.getCurrentContentSHA())
+      .put("numberFiltered", numberOfFilteredUsers)
+      .put("type", emailType)
+      .build();
 
     this.logManager.logInternalEvent(sendingUser, SegueServerLogType.SEND_MASS_EMAIL, eventDetails);
-    log.info(String.format("Admin user (%s) added %d emails to the queue. %d were filtered.", sendingUser.getEmail(),
-        allSelectedUsers.size() - numberOfFilteredUsers, numberOfFilteredUsers));
+    log.info(
+      String.format(
+        "Admin user (%s) added %d emails to the queue. %d were filtered.",
+        sendingUser.getEmail(),
+        allSelectedUsers.size() - numberOfFilteredUsers,
+        numberOfFilteredUsers
+      )
+    );
   }
-
 
   /**
    * @param sendingUser      - the user object for the user sending the email
@@ -278,11 +316,14 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @throws SegueDatabaseException  - a segue database exception
    * @throws ContentManagerException - a content management exception
    */
-  public void sendCustomContentEmail(final RegisteredUserDTO sendingUser, final EmailTemplateDTO emailTemplate,
-                                     final List<RegisteredUserDTO> allSelectedUsers,
-                                     final EmailType emailType) throws SegueDatabaseException, ContentManagerException {
+  public void sendCustomContentEmail(
+    final RegisteredUserDTO sendingUser,
+    final EmailTemplateDTO emailTemplate,
+    final List<RegisteredUserDTO> allSelectedUsers,
+    final EmailType emailType
+  )
+    throws SegueDatabaseException, ContentManagerException {
     Validate.notNull(allSelectedUsers);
-
 
     int numberOfFilteredUsers = 0;
     for (RegisteredUserDTO user : allSelectedUsers) {
@@ -295,8 +336,14 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
 
       sanitizeEmailParameters(p);
 
-      EmailCommunicationMessage e = constructMultiPartEmail(user.getId(), user.getEmail(), emailTemplate, p,
-          emailType, null);
+      EmailCommunicationMessage e = constructMultiPartEmail(
+        user.getId(),
+        user.getEmail(),
+        emailTemplate,
+        p,
+        emailType,
+        null
+      );
 
       // add to the queue
       boolean emailAddedToSendQueue = this.filterByPreferencesAndAddToQueue(user, e);
@@ -308,18 +355,24 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     List<Long> ids = Lists.newArrayList();
     allSelectedUsers.stream().map(RegisteredUserDTO::getId).forEach(ids::add);
 
-    ImmutableMap<String, Object> eventDetails =
-        new ImmutableMap.Builder<String, Object>().put(USER_ID_LIST_FKEY_FIELDNAME, ids)
-            .put("htmlTemplate", emailTemplate.getHtmlContent())
-            .put(CONTENT_VERSION_FIELDNAME, this.contentManager.getCurrentContentSHA())
-            .put("numberFiltered", numberOfFilteredUsers)
-            .put("type", emailType).build();
+    ImmutableMap<String, Object> eventDetails = new ImmutableMap.Builder<String, Object>()
+      .put(USER_ID_LIST_FKEY_FIELDNAME, ids)
+      .put("htmlTemplate", emailTemplate.getHtmlContent())
+      .put(CONTENT_VERSION_FIELDNAME, this.contentManager.getCurrentContentSHA())
+      .put("numberFiltered", numberOfFilteredUsers)
+      .put("type", emailType)
+      .build();
 
     this.logManager.logInternalEvent(sendingUser, SegueServerLogType.SEND_CUSTOM_MASS_EMAIL, eventDetails);
-    log.info(String.format("User (%s) added %d emails to the queue. %d were filtered.", sendingUser.getEmail(),
-        allSelectedUsers.size() - numberOfFilteredUsers, numberOfFilteredUsers));
+    log.info(
+      String.format(
+        "User (%s) added %d emails to the queue. %d were filtered.",
+        sendingUser.getEmail(),
+        allSelectedUsers.size() - numberOfFilteredUsers,
+        numberOfFilteredUsers
+      )
+    );
   }
-
 
   /**
    * This method checks the database for the user's email preferences and either adds them to
@@ -333,17 +386,19 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @return boolean - true if the email was added to the queue false if it was filtered for some reason
    * @throws SegueDatabaseException - the content was of incorrect type
    */
-  private boolean filterByPreferencesAndAddToQueue(final RegisteredUserDTO userDTO,
-                                                   final EmailCommunicationMessage email)
-      throws SegueDatabaseException {
+  private boolean filterByPreferencesAndAddToQueue(
+    final RegisteredUserDTO userDTO,
+    final EmailCommunicationMessage email
+  )
+    throws SegueDatabaseException {
     Validate.notNull(email);
     Validate.notNull(userDTO);
 
     ImmutableMap<String, Object> eventDetails = new ImmutableMap.Builder<String, Object>()
-        .put("userId", userDTO.getId())
-        .put("email", email.getRecipientAddress())
-        .put("type", email.getEmailType())
-        .build();
+      .put("userId", userDTO.getId())
+      .put("email", email.getRecipientAddress())
+      .put("type", email.getEmailType())
+      .build();
 
     // don't send an email if we know it has failed before
     // FIXME - should system emails ignore this setting to avoid abuse?
@@ -354,16 +409,24 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
 
     // if this is an email type that cannot have a preference, send it and log as appropriate
     if (!email.getEmailType().isValidEmailPreference()) {
-      log.info(String.format("Added %s email to the queue with subject: %s",
-          email.getEmailType().toString().toLowerCase(), sanitiseInternalLogValue(email.getSubject())));
+      log.info(
+        String.format(
+          "Added %s email to the queue with subject: %s",
+          email.getEmailType().toString().toLowerCase(),
+          sanitiseInternalLogValue(email.getSubject())
+        )
+      );
       logManager.logInternalEvent(userDTO, SegueServerLogType.SENT_EMAIL, eventDetails);
       addToQueue(email);
       return true;
     }
 
     try {
-      UserPreference preference = userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(),
-          email.getEmailType().name(), userDTO.getId());
+      UserPreference preference = userPreferenceManager.getUserPreference(
+        SegueUserPreferences.EMAIL_PREFERENCE.name(),
+        email.getEmailType().name(),
+        userDTO.getId()
+      );
       // If no preference is present, do not send the email.
       if (preference != null && preference.getPreferenceValue()) {
         logManager.logInternalEvent(userDTO, SegueServerLogType.SENT_EMAIL, eventDetails);
@@ -373,8 +436,12 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
 
       return false;
     } catch (SegueDatabaseException e1) {
-      throw new SegueDatabaseException(String.format("Email of type %s cannot be sent - "
-          + "error accessing preferences in database", email.getEmailType().toString()));
+      throw new SegueDatabaseException(
+        String.format(
+          "Email of type %s cannot be sent - " + "error accessing preferences in database",
+          email.getEmailType().toString()
+        )
+      );
     }
   }
 
@@ -400,36 +467,42 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @param keyPrefix - the key prefix - used for recursively creating the map key.
    * @return a flattened map for containing strings that can be used in email template replacement.
    */
-  public Map<String, String> flattenTokenMap(final Map<String, Object> inputMap, final Map<String, String> outputMap,
-                                             final String keyPrefix) {
+  public Map<String, String> flattenTokenMap(
+    final Map<String, Object> inputMap,
+    final Map<String, String> outputMap,
+    final String keyPrefix
+  ) {
     return getFlatTokenMap(inputMap, outputMap, Objects.requireNonNullElse(keyPrefix, ""));
   }
 
-  private Map<String, String> getFlatTokenMap(final Map<String, Object> inputMap, final Map<String, String> outputMap,
-                                              final String keyPrefix) {
+  private Map<String, String> getFlatTokenMap(
+    final Map<String, Object> inputMap,
+    final Map<String, String> outputMap,
+    final String keyPrefix
+  ) {
     for (Map.Entry<String, Object> mapEntry : inputMap.entrySet()) {
       String valueToStore = "";
 
       if (mapEntry.getValue() == null) {
         valueToStore = "";
-
       } else if (mapEntry.getValue() instanceof Map) {
         // if we have a general map we should recurse until we get objects we can do something with.
         this.flattenTokenMap((Map) mapEntry.getValue(), outputMap, keyPrefix + mapEntry.getKey() + ".");
-
       } else if (mapEntry.getValue() instanceof ContentDTO) {
         Map objectWithJavaTypes = new org.apache.commons.beanutils.BeanMap(mapEntry.getValue());
 
         // go through and convert any known java types into our preferred string representation
-        Map<String, String> temp = this.flattenTokenMap(objectWithJavaTypes,
-            Maps.newHashMap(), keyPrefix + mapEntry.getKey() + ".");
+        Map<String, String> temp =
+          this.flattenTokenMap(objectWithJavaTypes, Maps.newHashMap(), keyPrefix + mapEntry.getKey() + ".");
         outputMap.putAll(temp);
 
         // now convert any java types we haven't defined specific conversions for into the basic Jackson serialisations.
         ObjectMapper om = new ObjectMapper();
-        this.flattenTokenMap(om.convertValue(mapEntry.getValue(), HashMap.class),
-            outputMap, keyPrefix + mapEntry.getKey() + ".");
-
+        this.flattenTokenMap(
+            om.convertValue(mapEntry.getValue(), HashMap.class),
+            outputMap,
+            keyPrefix + mapEntry.getKey() + "."
+          );
       } else {
         valueToStore = this.emailTokenValueMapper(mapEntry.getValue());
       }
@@ -489,7 +562,7 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
   }
 
   private String completeTemplateWithProperties(final String content, final Properties templateProperties)
-      throws IllegalArgumentException {
+    throws IllegalArgumentException {
     return completeTemplateWithProperties(content, templateProperties, false);
   }
 
@@ -501,8 +574,11 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @param html               boolean for if html tags are required
    * @return template with completed fields
    */
-  private String completeTemplateWithProperties(final String content, final Properties templateProperties,
-                                                final boolean html) {
+  private String completeTemplateWithProperties(
+    final String content,
+    final Properties templateProperties,
+    final boolean html
+  ) {
     String template = content;
 
     Pattern p = Pattern.compile("\\{\\{[A-Za-z0-9.]+\\}\\}");
@@ -571,10 +647,13 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @throws ResourceNotFoundException - if the resource has not been found
    */
   public EmailCommunicationMessage constructMultiPartEmail(
-      @Nullable final Long userId, final String userEmail,
-      final EmailTemplateDTO emailContent, final Properties contentProperties,
-      final EmailType emailType)
-      throws ContentManagerException, ResourceNotFoundException {
+    @Nullable final Long userId,
+    final String userEmail,
+    final EmailTemplateDTO emailContent,
+    final Properties contentProperties,
+    final EmailType emailType
+  )
+    throws ContentManagerException, ResourceNotFoundException {
     return this.constructMultiPartEmail(userId, userEmail, emailContent, contentProperties, emailType, null);
   }
 
@@ -592,10 +671,14 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @throws ResourceNotFoundException - if the resource has not been found
    */
   public EmailCommunicationMessage constructMultiPartEmail(
-      @Nullable final Long userId, final String userEmail,
-      final EmailTemplateDTO emailContent, final Properties contentProperties,
-      final EmailType emailType, @Nullable final List<EmailAttachment> attachments)
-      throws ContentManagerException, ResourceNotFoundException {
+    @Nullable final Long userId,
+    final String userEmail,
+    final EmailTemplateDTO emailContent,
+    final Properties contentProperties,
+    final EmailType emailType,
+    @Nullable final List<EmailAttachment> attachments
+  )
+    throws ContentManagerException, ResourceNotFoundException {
     Validate.notNull(userEmail);
     Validate.notEmpty(userEmail);
 
@@ -604,8 +687,10 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     contentPropertiesToUse.putAll(this.globalStringTokens);
     contentPropertiesToUse.putAll(contentProperties);
 
-    String plainTextContent =
-        completeTemplateWithProperties(emailContent.getPlainTextContent(), contentPropertiesToUse);
+    String plainTextContent = completeTemplateWithProperties(
+      emailContent.getPlainTextContent(),
+      contentPropertiesToUse
+    );
     String htmlContent = completeTemplateWithProperties(emailContent.getHtmlContent(), contentPropertiesToUse, true);
 
     // Extract from address and reply to addresses:
@@ -635,13 +720,22 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     plainTextTemplateProperties.put("email", userEmail);
     plainTextTemplateProperties.putAll(this.globalStringTokens);
 
-    String plainTextMessage = completeTemplateWithProperties(plainTextTemplate.getValue(),
-        plainTextTemplateProperties);
+    String plainTextMessage = completeTemplateWithProperties(plainTextTemplate.getValue(), plainTextTemplateProperties);
 
-    return new EmailCommunicationMessage(userId, userEmail, emailContent.getSubject(),
-        plainTextMessage, htmlMessage, emailType,
-        overrideFromAddress, overrideFromName, overrideEnvelopeFrom, replyToAddress, replyToName, attachments);
-
+    return new EmailCommunicationMessage(
+      userId,
+      userEmail,
+      emailContent.getSubject(),
+      plainTextMessage,
+      htmlMessage,
+      emailType,
+      overrideFromAddress,
+      overrideFromName,
+      overrideEnvelopeFrom,
+      replyToAddress,
+      replyToName,
+      attachments
+    );
   }
 
   /**
@@ -652,8 +746,7 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @throws ContentManagerException   - error if there is a problem accessing content
    * @throws ResourceNotFoundException - error if the content is not of the right type
    */
-  private ContentDTO getContentDTO(final String id)
-      throws ContentManagerException, ResourceNotFoundException {
+  private ContentDTO getContentDTO(final String id) throws ContentManagerException, ResourceNotFoundException {
     ContentDTO c = this.contentManager.getContentById(id);
 
     if (null == c) {
@@ -671,8 +764,8 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    * @throws ContentManagerException   - error if there is a problem accessing content
    * @throws ResourceNotFoundException - error if the content is not of the right type
    */
-  public EmailTemplateDTO getEmailTemplateDTO(final String id) throws ContentManagerException,
-      ResourceNotFoundException {
+  public EmailTemplateDTO getEmailTemplateDTO(final String id)
+    throws ContentManagerException, ResourceNotFoundException {
     ContentDTO c = this.contentManager.getContentById(id);
 
     if (null == c) {

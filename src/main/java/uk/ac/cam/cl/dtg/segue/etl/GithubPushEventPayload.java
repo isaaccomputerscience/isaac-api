@@ -10,9 +10,7 @@ public class GithubPushEventPayload {
   private String ref;
   private String after;
 
-  public GithubPushEventPayload() {
-
-  }
+  public GithubPushEventPayload() {}
 
   public void setRef(final String ref) {
     this.ref = ref;

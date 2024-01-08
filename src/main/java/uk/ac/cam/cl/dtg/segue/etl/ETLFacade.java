@@ -43,10 +43,11 @@ public class ETLFacade extends AbstractSegueFacade {
   @POST
   @Path("/set_version_alias/{alias}/{version}")
   @Produces(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Update a content version alias.",
-      description = "This is primarily used to set the 'live' content version.")
+  @Operation(
+    summary = "Update a content version alias.",
+    description = "This is primarily used to set the 'live' content version."
+  )
   public Response setLiveVersion(@PathParam("alias") final String alias, @PathParam("version") final String version) {
-
     if (!SHA_PATTERN.matcher(version).matches()) {
       log.error("Version did not match expected SHA format");
       return Response.serverError().entity("Version did not match expected SHA format").build();
@@ -61,7 +62,6 @@ public class ETLFacade extends AbstractSegueFacade {
       log.info("Finished processing ETL request");
       return Response.serverError().entity(e.getMessage()).build();
     }
-
   }
 
   @GET
@@ -71,5 +71,4 @@ public class ETLFacade extends AbstractSegueFacade {
   public Response statusCheck() {
     return Response.ok().entity("{\"code\" : 200}").build();
   }
-
 }

@@ -39,9 +39,7 @@ public class Notification extends Content {
   /**
    * Default constructor.
    */
-  public Notification() {
-
-  }
+  public Notification() {}
 
   /**
    * Gets the externalReference.

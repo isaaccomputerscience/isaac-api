@@ -31,9 +31,7 @@ public class ItemOrikaConverter extends AbstractPolymorphicBidirectionalConverte
   /**
    * Constructs an Orika Converter specialises in selecting the correct subclass for choice objects.
    */
-  public ItemOrikaConverter() {
-
-  }
+  public ItemOrikaConverter() {}
 
   @Override
   public ItemDTO convertTo(final Item source, final Type<ItemDTO> destinationType, final MappingContext context) {

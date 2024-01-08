@@ -65,15 +65,15 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
    */
   @JsonCreator
   public RegisteredUserDTO(
-      @JsonProperty("givenName") final String givenName,
-      @JsonProperty("familyName") final String familyName,
-      @JsonProperty("email") final String email,
-      @JsonProperty("verificationStatus") final EmailVerificationStatus emailVerificationStatus,
-      @JsonProperty("dateOfBirth") final Date dateOfBirth,
-      @JsonProperty("gender") final Gender gender,
-      @JsonProperty("registrationDate") final Date registrationDate,
-      @JsonProperty("schoolId") final String schoolId,
-      @JsonProperty("teacherPending") final Boolean teacherPending
+    @JsonProperty("givenName") final String givenName,
+    @JsonProperty("familyName") final String familyName,
+    @JsonProperty("email") final String email,
+    @JsonProperty("verificationStatus") final EmailVerificationStatus emailVerificationStatus,
+    @JsonProperty("dateOfBirth") final Date dateOfBirth,
+    @JsonProperty("gender") final Gender gender,
+    @JsonProperty("registrationDate") final Date registrationDate,
+    @JsonProperty("schoolId") final String schoolId,
+    @JsonProperty("teacherPending") final Boolean teacherPending
   ) {
     this.familyName = familyName;
     this.givenName = givenName;
@@ -86,13 +86,10 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
     this.teacherPending = teacherPending;
   }
 
-
   /**
    * Default constructor required for Jackson.
    */
-  public RegisteredUserDTO() {
-
-  }
+  public RegisteredUserDTO() {}
 
   /**
    * Gets the id.
@@ -103,7 +100,6 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
   public Long getId() {
     return id;
   }
-
 
   /**
    * Sets the id.
@@ -126,7 +122,6 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
   public Long getLegacyId() {
     return this.getId();
   }
-
 
   /**
    * Sets the id.
@@ -229,7 +224,6 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
   public void setDateOfBirth(final Date dateOfBirth) {
     this.dateOfBirth = dateOfBirth;
   }
-
 
   /**
    * @return email verification status
@@ -544,21 +538,37 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
 
   @Override
   public String toString() {
-    return "RegisteredUserDTO ["
-        + "id=" + id
-        + ", givenName=" + givenName
-        + ", familyName=" + familyName
-        + ", email=" + email
-        + ", role=" + role
-        + ", dateOfBirth=" + dateOfBirth
-        + ", gender=" + gender
-        + ", registrationDate=" + registrationDate
-        + ", schoolId=" + schoolId
-        + ", schoolOther=" + schoolOther
-        + ", emailVerificationStatus=" + emailVerificationStatus
-        + ", teacherPending=" + teacherPending
-        + ", firstLogin=" + firstLogin
-        + ", lastUpdated=" + lastUpdated
-        + "]";
+    return (
+      "RegisteredUserDTO [" +
+      "id=" +
+      id +
+      ", givenName=" +
+      givenName +
+      ", familyName=" +
+      familyName +
+      ", email=" +
+      email +
+      ", role=" +
+      role +
+      ", dateOfBirth=" +
+      dateOfBirth +
+      ", gender=" +
+      gender +
+      ", registrationDate=" +
+      registrationDate +
+      ", schoolId=" +
+      schoolId +
+      ", schoolOther=" +
+      schoolOther +
+      ", emailVerificationStatus=" +
+      emailVerificationStatus +
+      ", teacherPending=" +
+      teacherPending +
+      ", firstLogin=" +
+      firstLogin +
+      ", lastUpdated=" +
+      lastUpdated +
+      "]"
+    );
   }
 }

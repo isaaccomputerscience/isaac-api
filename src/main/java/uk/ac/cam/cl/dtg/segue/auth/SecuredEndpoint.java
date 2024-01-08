@@ -26,7 +26,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
  *
  */
 public @interface SecuredEndpoint {
-
   /**
    * Gets the role that the user must be in order to access this endpoint.
    *

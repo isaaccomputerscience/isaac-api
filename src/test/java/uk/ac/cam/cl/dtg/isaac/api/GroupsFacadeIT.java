@@ -53,23 +53,34 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
-
 public class GroupsFacadeIT extends IsaacIntegrationTest {
-
   private GroupsFacade groupsFacade;
 
   @BeforeEach
   public void setUp() throws Exception {
     // get an instance of the facade to test
-    this.groupsFacade = new GroupsFacade(properties, userAccountManager, logManager, assignmentManager, gameManager,
-        groupManager, userAssociationManager, userBadgeManager, misuseMonitor);
+    this.groupsFacade =
+      new GroupsFacade(
+        properties,
+        userAccountManager,
+        logManager,
+        assignmentManager,
+        gameManager,
+        groupManager,
+        userAssociationManager,
+        userBadgeManager,
+        misuseMonitor
+      );
   }
 
   @AfterEach
   public void tearDown() throws SQLException {
     // reset group managers in DB, so the same groups can be re-used across test cases
-    try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
-        "DELETE FROM group_additional_managers WHERE group_id in (?, ?);");) {
+    try (
+      PreparedStatement pst = postgresSqlDb
+        .getDatabaseConnection()
+        .prepareStatement("DELETE FROM group_additional_managers WHERE group_id in (?, ?);");
+    ) {
       pst.setInt(1, (int) TEST_TEACHERS_AB_GROUP_ID);
       pst.setInt(2, (int) TEST_TUTORS_AB_GROUP_ID);
       pst.executeUpdate();
@@ -77,19 +88,24 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  public void createGroupEndpoint_createGroupAsTeacher_succeeds() throws NoCredentialsAvailableException,
-      NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-      IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+  public void createGroupEndpoint_createGroupAsTeacher_succeeds()
+    throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
     // Arrange
     // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest createGroupRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest createGroupRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(createGroupRequest);
 
-    UserGroup userGroup = new UserGroup(null, "Test Teacher's New Group", TEST_TEACHER_ID,
-        GroupStatus.ACTIVE, new Date(), false, false, new Date());
+    UserGroup userGroup = new UserGroup(
+      null,
+      "Test Teacher's New Group",
+      TEST_TEACHER_ID,
+      GroupStatus.ACTIVE,
+      new Date(),
+      false,
+      false,
+      new Date()
+    );
 
     // Act
     // make request
@@ -105,19 +121,24 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  public void createGroupEndpoint_createGroupAsTutor_succeeds() throws NoCredentialsAvailableException,
-      NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
-      IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
+  public void createGroupEndpoint_createGroupAsTutor_succeeds()
+    throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
     // Arrange
     // log in as Tutor, create request
-    LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL,
-        TEST_TUTOR_PASSWORD);
-    HttpServletRequest createGroupRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+    LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
+    HttpServletRequest createGroupRequest = createRequestWithCookies(new Cookie[] { tutorLogin.cookie });
     replay(createGroupRequest);
 
-    UserGroup userGroup = new UserGroup(null, "Test Tutor's New Group", TEST_TUTOR_ID,
-        GroupStatus.ACTIVE, new Date(), false, false, new Date());
+    UserGroup userGroup = new UserGroup(
+      null,
+      "Test Tutor's New Group",
+      TEST_TUTOR_ID,
+      GroupStatus.ACTIVE,
+      new Date(),
+      false,
+      false,
+      new Date()
+    );
 
     // Act
     // make request
@@ -133,16 +154,12 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  public void addAdditionalManagerToGroupEndpoint_addAdditionalTeacherManagerAsTeacher_succeeds() throws
-      NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
-      MFARequiredButNotConfiguredException {
+  public void addAdditionalManagerToGroupEndpoint_addAdditionalTeacherManagerAsTeacher_succeeds()
+    throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
     // Arrange
     // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest addManagerRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest addManagerRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(addManagerRequest);
 
     Map<String, String> responseMap = new HashMap<>();
@@ -150,8 +167,11 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
 
     // Act
     // make request
-    Response addManagerResponse = groupsFacade.addAdditionalManagerToGroup(addManagerRequest, TEST_TEACHERS_AB_GROUP_ID,
-        responseMap);
+    Response addManagerResponse = groupsFacade.addAdditionalManagerToGroup(
+      addManagerRequest,
+      TEST_TEACHERS_AB_GROUP_ID,
+      responseMap
+    );
 
     // Assert
     // check status code is OK
@@ -163,16 +183,12 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  public void addAdditionalManagerToGroupEndpoint_addAdditionalTutorManagerAsTeacher_fails() throws
-      NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
-      MFARequiredButNotConfiguredException {
+  public void addAdditionalManagerToGroupEndpoint_addAdditionalTutorManagerAsTeacher_fails()
+    throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
     // Arrange
     // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest addManagerRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest addManagerRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(addManagerRequest);
 
     Map<String, String> responseMap = new HashMap<>();
@@ -180,8 +196,11 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
 
     // Act
     // make request
-    Response addManagerResponse = groupsFacade.addAdditionalManagerToGroup(addManagerRequest, TEST_TEACHERS_AB_GROUP_ID,
-        responseMap);
+    Response addManagerResponse = groupsFacade.addAdditionalManagerToGroup(
+      addManagerRequest,
+      TEST_TEACHERS_AB_GROUP_ID,
+      responseMap
+    );
 
     // Assert
     // check status code
@@ -189,21 +208,20 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
 
     // check an error message was returned
     SegueErrorResponse responseBody = (SegueErrorResponse) addManagerResponse.getEntity();
-    assertEquals("There was a problem adding the user specified. Please make sure their email address is "
-        + "correct and they have a teacher account.", responseBody.getErrorMessage());
+    assertEquals(
+      "There was a problem adding the user specified. Please make sure their email address is " +
+      "correct and they have a teacher account.",
+      responseBody.getErrorMessage()
+    );
   }
 
   @Test
-  public void addAdditionalManagerToGroupEndpoint_addAdditionalTeacherManagerAsTutor_fails() throws
-      NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
-      MFARequiredButNotConfiguredException {
+  public void addAdditionalManagerToGroupEndpoint_addAdditionalTeacherManagerAsTutor_fails()
+    throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
     // Arrange
     // log in as Tutor, create request
-    LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL,
-        TEST_TUTOR_PASSWORD);
-    HttpServletRequest addManagerRequest = createRequestWithCookies(new Cookie[] {tutorLogin.cookie});
+    LoginResult tutorLogin = loginAs(httpSession, TEST_TUTOR_EMAIL, TEST_TUTOR_PASSWORD);
+    HttpServletRequest addManagerRequest = createRequestWithCookies(new Cookie[] { tutorLogin.cookie });
     replay(addManagerRequest);
 
     Map<String, String> responseMap = new HashMap<>();
@@ -211,8 +229,11 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
 
     // Act
     // make request
-    Response addManagerResponse = groupsFacade.addAdditionalManagerToGroup(addManagerRequest, TEST_TUTORS_AB_GROUP_ID,
-        responseMap);
+    Response addManagerResponse = groupsFacade.addAdditionalManagerToGroup(
+      addManagerRequest,
+      TEST_TUTORS_AB_GROUP_ID,
+      responseMap
+    );
 
     // Assert
     // check status code
@@ -220,7 +241,9 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
 
     // check an error message was returned
     SegueErrorResponse responseBody = (SegueErrorResponse) addManagerResponse.getEntity();
-    assertEquals("You must have a teacher account to add additional group managers to your groups.",
-        responseBody.getErrorMessage());
+    assertEquals(
+      "You must have a teacher account to add additional group managers to your groups.",
+      responseBody.getErrorMessage()
+    );
   }
 }

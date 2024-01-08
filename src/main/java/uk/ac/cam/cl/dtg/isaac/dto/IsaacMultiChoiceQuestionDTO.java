@@ -40,5 +40,4 @@ public class IsaacMultiChoiceQuestionDTO extends IsaacQuestionBaseDTO {
   public List<ChoiceDTO> getChoices() {
     return super.getChoices();
   }
-
 }

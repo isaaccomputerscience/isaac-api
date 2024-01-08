@@ -67,8 +67,9 @@ public class GroupManagerTest {
 
   private GroupManager groupManager;
 
-  private static final Date somePastDate =
-      new Date(System.currentTimeMillis() - NUMBER_SECONDS_IN_ONE_WEEK * NUMBER_MILLISECONDS_IN_SECOND);
+  private static final Date somePastDate = new Date(
+    System.currentTimeMillis() - NUMBER_SECONDS_IN_ONE_WEEK * NUMBER_MILLISECONDS_IN_SECOND
+  );
 
   /**
    * Initial configuration of tests.
@@ -111,12 +112,15 @@ public class GroupManagerTest {
 
     try {
       expect(this.groupDataManager.createGroup(and(capture(capturedGroup), isA(UserGroup.class))))
-          .andReturn(resultFromDB);
+        .andReturn(resultFromDB);
       expect(this.groupDataManager.getAdditionalManagerSetByGroupId(anyObject()))
-          .andReturn(someSetOfManagers).atLeastOnce();
+        .andReturn(someSetOfManagers)
+        .atLeastOnce();
       expect(this.userManager.findUsers(someSetOfManagers)).andReturn(someListOfUsers);
-      expect(this.userManager.convertToDetailedUserSummaryObjectList(someListOfUsers,
-          UserSummaryWithEmailAddressDTO.class)).andReturn(someListOfUsersDTOs);
+      expect(
+          this.userManager.convertToDetailedUserSummaryObjectList(someListOfUsers, UserSummaryWithEmailAddressDTO.class)
+        )
+        .andReturn(someListOfUsersDTOs);
       expect(this.dummyMapper.map(resultFromDB, UserGroupDTO.class)).andReturn(mappedGroup).atLeastOnce();
 
       replay(this.userManager, this.groupDataManager, this.dummyMapper);
@@ -129,7 +133,6 @@ public class GroupManagerTest {
       assertEquals(someGroupOwner.getId(), capturedGroup.getValue().getOwnerId());
       assertEquals(someGroupName, capturedGroup.getValue().getGroupName());
       assertInstanceOf(Date.class, capturedGroup.getValue().getCreated());
-
     } catch (SegueDatabaseException e) {
       fail("No exception expected");
       e.printStackTrace();
@@ -139,25 +142,99 @@ public class GroupManagerTest {
 
   @Test
   public void orderUsersByName_ordersBySurnamePrimarily() {
-    List<RegisteredUserDTO> users = Stream.of(
-            new RegisteredUserDTO("A", "Ab", "aab@test.com", EmailVerificationStatus.VERIFIED, somePastDate, Gender.MALE,
-                somePastDate, "", false),
-            new RegisteredUserDTO("B", "Ar", "bar@test.com", EmailVerificationStatus.VERIFIED, somePastDate, Gender.FEMALE,
-                somePastDate, "", false),
-            new RegisteredUserDTO("C", "Ax", "caz@test.com", EmailVerificationStatus.VERIFIED, somePastDate, Gender.MALE,
-                somePastDate, "", false),
-            new RegisteredUserDTO(null, "Ax", "NONEax@test.com", EmailVerificationStatus.VERIFIED, somePastDate,
-                Gender.FEMALE, somePastDate, "", false),
-            new RegisteredUserDTO("A", "Ba", "dba@test.com", EmailVerificationStatus.VERIFIED, somePastDate, Gender.FEMALE,
-                somePastDate, "", false),
-            new RegisteredUserDTO("B", "Bb", "ebb@test.com", EmailVerificationStatus.VERIFIED, somePastDate, Gender.MALE,
-                somePastDate, "", false),
-            new RegisteredUserDTO("C", "Bf", "fbf@test.com", EmailVerificationStatus.VERIFIED, somePastDate, Gender.FEMALE,
-                somePastDate, "", false),
-            new RegisteredUserDTO("A", null, "aNONE@test.com", EmailVerificationStatus.VERIFIED, somePastDate,
-                Gender.FEMALE, somePastDate, "", false))
-        .peek(user -> user.setId((long) (user.getGivenName() + user.getFamilyName()).hashCode()))
-        .collect(Collectors.toList());
+    List<RegisteredUserDTO> users = Stream
+      .of(
+        new RegisteredUserDTO(
+          "A",
+          "Ab",
+          "aab@test.com",
+          EmailVerificationStatus.VERIFIED,
+          somePastDate,
+          Gender.MALE,
+          somePastDate,
+          "",
+          false
+        ),
+        new RegisteredUserDTO(
+          "B",
+          "Ar",
+          "bar@test.com",
+          EmailVerificationStatus.VERIFIED,
+          somePastDate,
+          Gender.FEMALE,
+          somePastDate,
+          "",
+          false
+        ),
+        new RegisteredUserDTO(
+          "C",
+          "Ax",
+          "caz@test.com",
+          EmailVerificationStatus.VERIFIED,
+          somePastDate,
+          Gender.MALE,
+          somePastDate,
+          "",
+          false
+        ),
+        new RegisteredUserDTO(
+          null,
+          "Ax",
+          "NONEax@test.com",
+          EmailVerificationStatus.VERIFIED,
+          somePastDate,
+          Gender.FEMALE,
+          somePastDate,
+          "",
+          false
+        ),
+        new RegisteredUserDTO(
+          "A",
+          "Ba",
+          "dba@test.com",
+          EmailVerificationStatus.VERIFIED,
+          somePastDate,
+          Gender.FEMALE,
+          somePastDate,
+          "",
+          false
+        ),
+        new RegisteredUserDTO(
+          "B",
+          "Bb",
+          "ebb@test.com",
+          EmailVerificationStatus.VERIFIED,
+          somePastDate,
+          Gender.MALE,
+          somePastDate,
+          "",
+          false
+        ),
+        new RegisteredUserDTO(
+          "C",
+          "Bf",
+          "fbf@test.com",
+          EmailVerificationStatus.VERIFIED,
+          somePastDate,
+          Gender.FEMALE,
+          somePastDate,
+          "",
+          false
+        ),
+        new RegisteredUserDTO(
+          "A",
+          null,
+          "aNONE@test.com",
+          EmailVerificationStatus.VERIFIED,
+          somePastDate,
+          Gender.FEMALE,
+          somePastDate,
+          "",
+          false
+        )
+      )
+      .peek(user -> user.setId((long) (user.getGivenName() + user.getFamilyName()).hashCode()))
+      .collect(Collectors.toList());
 
     List<RegisteredUserDTO> shuffledUsers = new ArrayList<>(users);
     Collections.shuffle(shuffledUsers);

@@ -32,7 +32,6 @@ import java.util.List;
  * @see <a href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig>OpenID documentation.</a>
  */
 public class OidcDiscoveryResponse extends GenericJson {
-
   @Key("issuer")
   private String issuer;
 
@@ -68,7 +67,6 @@ public class OidcDiscoveryResponse extends GenericJson {
     return issuer;
   }
 
-
   /**
    * Alternatively, load saved OIDC IdP metadata from disk.
    *
@@ -77,8 +75,7 @@ public class OidcDiscoveryResponse extends GenericJson {
    * @return A configured {@link OidcDiscoveryResponse}.
    * @throws IOException
    */
-  public static OidcDiscoveryResponse load(final JsonFactory jsonFactory, final Reader reader)
-      throws IOException {
+  public static OidcDiscoveryResponse load(final JsonFactory jsonFactory, final Reader reader) throws IOException {
     return jsonFactory.fromReader(reader, OidcDiscoveryResponse.class);
   }
 }

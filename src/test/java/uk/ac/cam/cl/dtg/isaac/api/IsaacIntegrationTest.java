@@ -114,7 +114,6 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  * Subclasses should be named "*IT.java" so Maven Failsafe detects them. They are runnable via the "verify" Maven target.
  */
 public abstract class IsaacIntegrationTest {
-
   protected static HttpSession httpSession;
   protected static PostgreSQLContainer postgres;
   protected static ElasticsearchContainer elasticsearch;
@@ -161,61 +160,66 @@ public abstract class IsaacIntegrationTest {
 
   @BeforeAll
   public static void setUpClass() {
-    postgres = new PostgreSQLContainer<>("postgres:12")
+    postgres =
+      new PostgreSQLContainer<>("postgres:12")
         .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust")
         .withUsername("rutherford")
         .withFileSystemBind(
-            IsaacIntegrationTest.class.getClassLoader().getResource("db_scripts/postgres-rutherford-create-script.sql")
-                .getPath(), "/docker-entrypoint-initdb.d/00-isaac-create.sql")
+          IsaacIntegrationTest.class.getClassLoader()
+            .getResource("db_scripts/postgres-rutherford-create-script.sql")
+            .getPath(),
+          "/docker-entrypoint-initdb.d/00-isaac-create.sql"
+        )
         .withFileSystemBind(
-            IsaacIntegrationTest.class.getClassLoader().getResource("db_scripts/postgres-rutherford-functions.sql")
-                .getPath(), "/docker-entrypoint-initdb.d/01-isaac-functions.sql")
+          IsaacIntegrationTest.class.getClassLoader()
+            .getResource("db_scripts/postgres-rutherford-functions.sql")
+            .getPath(),
+          "/docker-entrypoint-initdb.d/01-isaac-functions.sql"
+        )
         .withFileSystemBind(
-            IsaacIntegrationTest.class.getClassLoader().getResource("db_scripts/quartz_scheduler_create_script.sql")
-                .getPath(), "/docker-entrypoint-initdb.d/02-isaac-quartz.sql")
+          IsaacIntegrationTest.class.getClassLoader()
+            .getResource("db_scripts/quartz_scheduler_create_script.sql")
+            .getPath(),
+          "/docker-entrypoint-initdb.d/02-isaac-quartz.sql"
+        )
         .withFileSystemBind(
-            IsaacIntegrationTest.class.getClassLoader().getResource("test-postgres-rutherford-data-dump.sql").getPath(),
-            "/docker-entrypoint-initdb.d/03-data-dump.sql")
-    ;
+          IsaacIntegrationTest.class.getClassLoader().getResource("test-postgres-rutherford-data-dump.sql").getPath(),
+          "/docker-entrypoint-initdb.d/03-data-dump.sql"
+        );
 
     // TODO It would be nice if we could pull the version from pom.xml
     elasticsearch =
-        new ElasticsearchContainer(DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.17.6"))
-            .withCopyFileToContainer(MountableFile.forClasspathResource("isaac-test-es-data.tar.gz"),
-                "/usr/share/elasticsearch/isaac-test-es-data.tar.gz")
-            .withCopyFileToContainer(MountableFile.forClasspathResource("isaac-test-es-docker-entrypoint.sh", 0100775),
-                "/usr/local/bin/docker-entrypoint.sh")
-            .withExposedPorts(9200, 9300)
-            .withEnv("cluster.name", "isaac")
-            .withEnv("node.name", "localhost")
-            .withEnv("http.max_content_length", "512mb")
-            .withEnv("xpack.security.enabled", "true")
-            .withEnv("ELASTIC_PASSWORD", "elastic")
-            .withEnv("ingest.geoip.downloader.enabled", "false")
-            .withStartupTimeout(Duration.ofSeconds(120));
+      new ElasticsearchContainer(DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.17.6"))
+        .withCopyFileToContainer(
+          MountableFile.forClasspathResource("isaac-test-es-data.tar.gz"),
+          "/usr/share/elasticsearch/isaac-test-es-data.tar.gz"
+        )
+        .withCopyFileToContainer(
+          MountableFile.forClasspathResource("isaac-test-es-docker-entrypoint.sh", 0100775),
+          "/usr/local/bin/docker-entrypoint.sh"
+        )
+        .withExposedPorts(9200, 9300)
+        .withEnv("cluster.name", "isaac")
+        .withEnv("node.name", "localhost")
+        .withEnv("http.max_content_length", "512mb")
+        .withEnv("xpack.security.enabled", "true")
+        .withEnv("ELASTIC_PASSWORD", "elastic")
+        .withEnv("ingest.geoip.downloader.enabled", "false")
+        .withStartupTimeout(Duration.ofSeconds(120));
 
     postgres.start();
     elasticsearch.start();
 
-    postgresSqlDb = new PostgresSqlDb(
-        postgres.getJdbcUrl(),
-        "rutherford",
-        "somerandompassword"
-    ); // user/pass are irrelevant because POSTGRES_HOST_AUTH_METHOD is set to "trust"
+    postgresSqlDb = new PostgresSqlDb(postgres.getJdbcUrl(), "rutherford", "somerandompassword"); // user/pass are irrelevant because POSTGRES_HOST_AUTH_METHOD is set to "trust"
 
     try {
       elasticSearchProvider =
-          new ElasticSearchProvider(ElasticSearchProvider.getClient(
-              "localhost",
-              elasticsearch.getMappedPort(9200),
-              "elastic",
-              "elastic"
-          )
-          );
+        new ElasticSearchProvider(
+          ElasticSearchProvider.getClient("localhost", elasticsearch.getMappedPort(9200), "elastic", "elastic")
+        );
     } catch (UnknownHostException e) {
       throw new RuntimeException(e);
     }
-
 
     String configLocation = SystemUtils.IS_OS_LINUX ? DEFAULT_LINUX_CONFIG_LOCATION : null;
     if (System.getProperty("test.config.location") != null) {
@@ -233,12 +237,16 @@ public abstract class IsaacIntegrationTest {
 
     globalTokens = Maps.newHashMap();
     globalTokens.put("sig", properties.getProperty(EMAIL_SIGNATURE));
-    globalTokens.put("emailPreferencesURL",
-        String.format("https://%s/account#emailpreferences", properties.getProperty(HOST_NAME)));
+    globalTokens.put(
+      "emailPreferencesURL",
+      String.format("https://%s/account#emailpreferences", properties.getProperty(HOST_NAME))
+    );
     globalTokens.put("myAssignmentsURL", String.format("https://%s/assignments", properties.getProperty(HOST_NAME)));
     globalTokens.put("myQuizzesURL", String.format("https://%s/quizzes", properties.getProperty(HOST_NAME)));
-    globalTokens.put("myBookedEventsURL",
-        String.format("https://%s/events?show_booked_only=true", properties.getProperty(HOST_NAME)));
+    globalTokens.put(
+      "myBookedEventsURL",
+      String.format("https://%s/events?show_booked_only=true", properties.getProperty(HOST_NAME))
+    );
     globalTokens.put("contactUsURL", String.format("https://%s/contact", properties.getProperty(HOST_NAME)));
     globalTokens.put("accountURL", String.format("https://%s/account", properties.getProperty(HOST_NAME)));
     globalTokens.put("siteBaseURL", String.format("https://%s", properties.getProperty(HOST_NAME)));
@@ -258,14 +266,22 @@ public abstract class IsaacIntegrationTest {
 
     // The following may need some actual authentication providers...
     providersToRegister = new HashMap<>();
-    Map<String, ISegueHashingAlgorithm> algorithms =
-        new HashMap<>(Map.of("SeguePBKDF2v3", new SeguePBKDF2v3(), "SegueSCryptv1", new SegueSCryptv1()));
-    providersToRegister.put(AuthenticationProvider.SEGUE,
-        new SegueLocalAuthenticator(pgUsers, passwordDataManager, properties, algorithms,
-            algorithms.get("SegueSCryptv1")));
+    Map<String, ISegueHashingAlgorithm> algorithms = new HashMap<>(
+      Map.of("SeguePBKDF2v3", new SeguePBKDF2v3(), "SegueSCryptv1", new SegueSCryptv1())
+    );
+    providersToRegister.put(
+      AuthenticationProvider.SEGUE,
+      new SegueLocalAuthenticator(pgUsers, passwordDataManager, properties, algorithms, algorithms.get("SegueSCryptv1"))
+    );
 
-    EmailCommunicator communicator =
-        new EmailCommunicator("localhost", "587", null, null, "default@localhost", "Howdy!");
+    EmailCommunicator communicator = new EmailCommunicator(
+      "localhost",
+      "587",
+      null,
+      null,
+      "default@localhost",
+      "Howdy!"
+    );
     userPreferenceManager = new PgUserPreferenceManager(postgresSqlDb);
 
     Git git = createNiceMock(Git.class);
@@ -274,7 +290,7 @@ public abstract class IsaacIntegrationTest {
     logManager = createNiceMock(ILogManager.class);
 
     emailManager =
-        new EmailManager(communicator, userPreferenceManager, properties, contentManager, logManager, globalTokens);
+      new EmailManager(communicator, userPreferenceManager, properties, contentManager, logManager, globalTokens);
 
     userAuthenticationManager = new UserAuthenticationManager(pgUsers, properties, providersToRegister, emailManager);
     secondFactorManager = createMock(SegueTOTPAuthenticator.class);
@@ -289,56 +305,109 @@ public abstract class IsaacIntegrationTest {
     schoolListReader = new SchoolListReader(elasticSearchProvider);
 
     userAccountManager =
-        new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, mapperFacade, emailManager,
-            pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager, userPreferenceManager,
-            schoolListReader);
+      new UserAccountManager(
+        pgUsers,
+        questionManager,
+        properties,
+        providersToRegister,
+        mapperFacade,
+        emailManager,
+        pgAnonymousUsers,
+        logManager,
+        userAuthenticationManager,
+        secondFactorManager,
+        userPreferenceManager,
+        schoolListReader
+      );
 
     ObjectMapper objectMapper = new ObjectMapper();
-    EventBookingPersistenceManager bookingPersistanceManager =
-        new EventBookingPersistenceManager(postgresSqlDb, userAccountManager, contentManager, objectMapper);
+    EventBookingPersistenceManager bookingPersistanceManager = new EventBookingPersistenceManager(
+      postgresSqlDb,
+      userAccountManager,
+      contentManager,
+      objectMapper
+    );
     PgAssociationDataManager pgAssociationDataManager = new PgAssociationDataManager(postgresSqlDb);
     PgUserGroupPersistenceManager pgUserGroupPersistenceManager = new PgUserGroupPersistenceManager(postgresSqlDb);
-    IAssignmentPersistenceManager assignmentPersistenceManager =
-        new PgAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
+    IAssignmentPersistenceManager assignmentPersistenceManager = new PgAssignmentPersistenceManager(
+      postgresSqlDb,
+      mapperFacade
+    );
 
-    GameboardPersistenceManager gameboardPersistenceManager =
-        new GameboardPersistenceManager(postgresSqlDb, contentManager, mapperFacade, objectMapper,
-            new URIManager(properties), "latest");
+    GameboardPersistenceManager gameboardPersistenceManager = new GameboardPersistenceManager(
+      postgresSqlDb,
+      contentManager,
+      mapperFacade,
+      objectMapper,
+      new URIManager(properties),
+      "latest"
+    );
     gameManager = new GameManager(contentManager, gameboardPersistenceManager, mapperFacade, questionManager, "latest");
     groupManager = new GroupManager(pgUserGroupPersistenceManager, userAccountManager, gameManager, mapperFacade);
     userAssociationManager = new UserAssociationManager(pgAssociationDataManager, userAccountManager, groupManager);
     PgTransactionManager pgTransactionManager = new PgTransactionManager(postgresSqlDb);
     eventBookingManager =
-        new EventBookingManager(bookingPersistanceManager, emailManager, userAssociationManager, properties,
-            groupManager, userAccountManager, pgTransactionManager);
+      new EventBookingManager(
+        bookingPersistanceManager,
+        emailManager,
+        userAssociationManager,
+        properties,
+        groupManager,
+        userAccountManager,
+        pgTransactionManager
+      );
     userBadgeManager = createNiceMock(UserBadgeManager.class);
     replay(userBadgeManager);
-    assignmentManager = new AssignmentManager(assignmentPersistenceManager, groupManager,
-        new EmailService(emailManager, groupManager, userAccountManager), gameManager, properties);
+    assignmentManager =
+      new AssignmentManager(
+        assignmentPersistenceManager,
+        groupManager,
+        new EmailService(emailManager, groupManager, userAccountManager),
+        gameManager,
+        properties
+      );
 
-    quizManager = new QuizManager(properties, new ContentService(contentManager, "latest"), contentManager,
-        new ContentSummarizerService(mapperFacade, new URIManager(properties)), contentMapper);
+    quizManager =
+      new QuizManager(
+        properties,
+        new ContentService(contentManager, "latest"),
+        contentManager,
+        new ContentSummarizerService(mapperFacade, new URIManager(properties)),
+        contentMapper
+      );
     quizAssignmentPersistenceManager = new PgQuizAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
-    quizAssignmentManager = new QuizAssignmentManager(quizAssignmentPersistenceManager,
-        new EmailService(emailManager, groupManager, userAccountManager), quizManager, groupManager, properties);
+    quizAssignmentManager =
+      new QuizAssignmentManager(
+        quizAssignmentPersistenceManager,
+        new EmailService(emailManager, groupManager, userAccountManager),
+        quizManager,
+        groupManager,
+        properties
+      );
     assignmentService = new AssignmentService(userAccountManager);
     quizAttemptPersistenceManager = new PgQuizAttemptPersistenceManager(postgresSqlDb, mapperFacade);
     quizAttemptManager = new QuizAttemptManager(quizAttemptPersistenceManager);
     quizQuestionAttemptPersistenceManager = new PgQuizQuestionAttemptPersistenceManager(postgresSqlDb, contentMapper);
     quizQuestionManager =
-        new QuizQuestionManager(questionManager, contentMapper, quizQuestionAttemptPersistenceManager, quizManager,
-            quizAttemptManager);
+      new QuizQuestionManager(
+        questionManager,
+        contentMapper,
+        quizQuestionAttemptPersistenceManager,
+        quizManager,
+        quizAttemptManager
+      );
 
     misuseMonitor = new InMemoryMisuseMonitor();
-    misuseMonitor.registerHandler(GroupManagerLookupMisuseHandler.class.getSimpleName(),
-        new GroupManagerLookupMisuseHandler(emailManager, properties));
+    misuseMonitor.registerHandler(
+      GroupManagerLookupMisuseHandler.class.getSimpleName(),
+      new GroupManagerLookupMisuseHandler(emailManager, properties)
+    );
 
     String someSegueAnonymousUserId = "9284723987anonymous83924923";
     httpSession = createNiceMock(HttpSession.class);
     expect(httpSession.getAttribute(Constants.ANONYMOUS_USER)).andReturn(null).anyTimes();
     expect(httpSession.getId()).andReturn(someSegueAnonymousUserId).anyTimes();
     replay(httpSession);
-
     // NOTE: The next part is commented out until we figure out a way of actually using Guice to do the heavy lifting for us...
     /*
     // Create Mocked Injector
@@ -358,10 +427,7 @@ public abstract class IsaacIntegrationTest {
   }
 
   protected LoginResult loginAs(final HttpSession httpSession, final String username, final String password)
-      throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
-      MFARequiredButNotConfiguredException {
+    throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
     Capture<Cookie> capturedUserCookie = Capture.newInstance(); // new Capture<Cookie>(); seems deprecated
 
     HttpServletRequest userLoginRequest = createNiceMock(HttpServletRequest.class);
@@ -373,8 +439,13 @@ public abstract class IsaacIntegrationTest {
     expectLastCall().atLeastOnce(); // This is how you expect void methods, apparently...
     replay(userLoginResponse);
 
-    RegisteredUserDTO user = userAccountManager.authenticateWithCredentials(userLoginRequest, userLoginResponse,
-        AuthenticationProvider.SEGUE.toString(), username, password);
+    RegisteredUserDTO user = userAccountManager.authenticateWithCredentials(
+      userLoginRequest,
+      userLoginResponse,
+      AuthenticationProvider.SEGUE.toString(),
+      username,
+      password
+    );
 
     return new LoginResult(user, capturedUserCookie.getValue());
   }

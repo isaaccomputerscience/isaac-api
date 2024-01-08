@@ -46,8 +46,8 @@ public class DateRangeFilterInstruction extends AbstractFilterInstruction {
 
     if (null == fromDate && null == toDate) {
       throw new IllegalArgumentException(
-          "You must provide either a from date or a to date for this filter to work. "
-              + "Both are currently null");
+        "You must provide either a from date or a to date for this filter to work. " + "Both are currently null"
+      );
     }
   }
 

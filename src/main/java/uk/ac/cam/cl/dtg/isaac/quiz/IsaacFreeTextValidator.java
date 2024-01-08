@@ -36,10 +36,7 @@ public class IsaacFreeTextValidator implements IValidator {
 
   // Map of wildcards from our RegEx based syntax to the PMatch's custom syntax
   private static final String NON_ALPHANUMERIC_CHARS = "!\"#£$%&'/\\-+<=>@^`{}~.,()[]:;";
-  private static final Map<String, String> WILDCARD_CONVERSION_MAP = ImmutableMap.of(
-      "*", "&",
-      ".", "#"
-  );
+  private static final Map<String, String> WILDCARD_CONVERSION_MAP = ImmutableMap.of("*", "&", ".", "#");
   private static final String ESCAPE_CHARACTER = "\\";
   private static final String TEMPORARY_OBSCURE_CHARACTER = "\uBAD1"; // Same character as is used in PMatch library
 
@@ -92,7 +89,8 @@ public class IsaacFreeTextValidator implements IValidator {
 
     if (!(answer instanceof StringChoice)) {
       throw new IllegalArgumentException(
-          answer.getClass() + " is not of expected type StringChoice for (" + question.getId() + ")");
+        answer.getClass() + " is not of expected type StringChoice for (" + question.getId() + ")"
+      );
     }
   }
 

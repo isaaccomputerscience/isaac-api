@@ -21,5 +21,4 @@ package uk.ac.cam.cl.dtg.isaac.api.managers;
  */
 public class NoWildcardException extends InvalidGameboardException {
   private static final long serialVersionUID = 8222475145102964489L;
-
 }

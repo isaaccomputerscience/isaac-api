@@ -20,7 +20,6 @@ package uk.ac.cam.cl.dtg.isaac.dos.users;
  * An internal class to represent the state of a user that needs synchronising with an external provider.
  */
 public class UserExternalAccountChanges {
-
   private Long userId;
   private String providerUserId;
   private String accountEmail;
@@ -31,11 +30,17 @@ public class UserExternalAccountChanges {
   private Boolean allowsNewsEmails;
   private Boolean allowsEventsEmails;
 
-  public UserExternalAccountChanges(final Long userId, final String providerUserId, final String accountEmail,
-                                    final Role role,
-                                    final String givenName, final Boolean deleted,
-                                    final EmailVerificationStatus emailVerificationStatus,
-                                    final Boolean allowsNewsEmails, final Boolean allowsEventsEmails) {
+  public UserExternalAccountChanges(
+    final Long userId,
+    final String providerUserId,
+    final String accountEmail,
+    final Role role,
+    final String givenName,
+    final Boolean deleted,
+    final EmailVerificationStatus emailVerificationStatus,
+    final Boolean allowsNewsEmails,
+    final Boolean allowsEventsEmails
+  ) {
     this.userId = userId;
     this.providerUserId = providerUserId;
     this.accountEmail = accountEmail;
@@ -118,5 +123,4 @@ public class UserExternalAccountChanges {
   public void setAllowsEventsEmails(final Boolean allowsEventsEmails) {
     this.allowsEventsEmails = allowsEventsEmails;
   }
-
 }

@@ -51,10 +51,16 @@ public class UserFromAuthProvider {
    * @param gender
    *            - gender of the user
    */
-  public UserFromAuthProvider(final String providerUserId, final String givenName, final String familyName,
-                              final String email, final EmailVerificationStatus emailVerificationStatus,
-                              final Role role,
-                              final Date dateOfBirth, final Gender gender) {
+  public UserFromAuthProvider(
+    final String providerUserId,
+    final String givenName,
+    final String familyName,
+    final String email,
+    final EmailVerificationStatus emailVerificationStatus,
+    final Role role,
+    final Date dateOfBirth,
+    final Gender gender
+  ) {
     this.providerUserId = providerUserId;
     this.familyName = familyName;
     this.givenName = givenName;

@@ -77,11 +77,14 @@ public class SegueContentFacade extends AbstractSegueFacade {
    * @param contentService - An instance of the content service used to search for matching content
    */
   @Inject
-  public SegueContentFacade(final PropertiesLoader properties, final GitContentManager contentManager,
-                            @Named(CONTENT_INDEX) final String contentIndex,
-                            final ILogManager logManager, final ContentService contentService) {
+  public SegueContentFacade(
+    final PropertiesLoader properties,
+    final GitContentManager contentManager,
+    @Named(CONTENT_INDEX) final String contentIndex,
+    final ILogManager logManager,
+    final ContentService contentService
+  ) {
     super(properties, logManager);
-
     this.contentManager = contentManager;
     this.contentIndex = contentIndex;
     this.contentService = contentService;
@@ -97,9 +100,12 @@ public class SegueContentFacade extends AbstractSegueFacade {
    * @return Response containing a ResultsWrapper{@literal <ContentDTO>} or a Response containing null if none found.
    */
   public final ResultsWrapper<ContentDTO> findMatchingContent(
-      final String version, final List<GitContentManager.BooleanSearchClause> fieldsToMatch,
-      @Nullable final Integer startIndex, @Nullable final Integer limit) throws ContentManagerException {
-
+    final String version,
+    final List<GitContentManager.BooleanSearchClause> fieldsToMatch,
+    @Nullable final Integer startIndex,
+    @Nullable final Integer limit
+  )
+    throws ContentManagerException {
     return contentService.findMatchingContent(version, fieldsToMatch, startIndex, limit);
   }
 
@@ -117,8 +123,11 @@ public class SegueContentFacade extends AbstractSegueFacade {
    * @return Response containing a ResultsWrapper{@literal <ContentDTO>} or a Response containing null if none found.
    */
   public final ResultsWrapper<ContentDTO> findMatchingContentRandomOrder(
-      @Nullable final String version, final List<GitContentManager.BooleanSearchClause> fieldsToMatch,
-      final Integer startIndex, final Integer limit) {
+    @Nullable final String version,
+    final List<GitContentManager.BooleanSearchClause> fieldsToMatch,
+    final Integer startIndex,
+    final Integer limit
+  ) {
     return this.findMatchingContentRandomOrder(version, fieldsToMatch, startIndex, limit, null);
   }
 
@@ -134,9 +143,12 @@ public class SegueContentFacade extends AbstractSegueFacade {
    * @return Response containing a ResultsWrapper{@literal <ContentDTO>} or a Response containing null if none found.
    */
   public final ResultsWrapper<ContentDTO> findMatchingContentRandomOrder(
-      @Nullable final String version, final List<GitContentManager.BooleanSearchClause> fieldsToMatch,
-      final Integer startIndex, final Integer limit, final Long randomSeed) {
-
+    @Nullable final String version,
+    final List<GitContentManager.BooleanSearchClause> fieldsToMatch,
+    final Integer startIndex,
+    final Integer limit,
+    final Long randomSeed
+  ) {
     String newVersion = this.contentIndex;
     Integer newLimit = DEFAULT_RESULTS_LIMIT;
     Integer newStartIndex = 0;
@@ -154,14 +166,12 @@ public class SegueContentFacade extends AbstractSegueFacade {
 
     // Deserialize object into POJO of specified type, providing one exists.
     try {
-      c = this.contentManager.findByFieldNamesRandomOrder(fieldsToMatch, newStartIndex,
-          newLimit, randomSeed);
+      c = this.contentManager.findByFieldNamesRandomOrder(fieldsToMatch, newStartIndex, newLimit, randomSeed);
     } catch (IllegalArgumentException e) {
       log.error("Unable to map content object.", e);
       throw e;
     } catch (ContentManagerException e1) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested",
-          e1);
+      SegueErrorResponse error = new SegueErrorResponse(Status.NOT_FOUND, "Error locating the version requested", e1);
       log.error(error.getErrorMessage(), e1);
     }
 
@@ -180,11 +190,14 @@ public class SegueContentFacade extends AbstractSegueFacade {
    * @return a response containing the search results (results wrapper) or an empty list.
    * @throws ContentManagerException - an exception when the content is not found
    */
-  public final ResultsWrapper<ContentDTO> segueSearch(final String searchString, @Nullable final String version,
-                                                      @Nullable final Map<String, List<String>> fieldsThatMustMatch,
-                                                      @Nullable final Integer startIndex,
-                                                      @Nullable final Integer limit) throws ContentManagerException {
-
+  public final ResultsWrapper<ContentDTO> segueSearch(
+    final String searchString,
+    @Nullable final String version,
+    @Nullable final Map<String, List<String>> fieldsThatMustMatch,
+    @Nullable final Integer startIndex,
+    @Nullable final Integer limit
+  )
+    throws ContentManagerException {
     return contentService.segueSearch(searchString, version, fieldsThatMustMatch, startIndex, limit);
   }
 
@@ -201,8 +214,7 @@ public class SegueContentFacade extends AbstractSegueFacade {
   @Operation(summary = "List all tags currently in use.")
   public final Response getTagListByLiveVersion(@Context final Request request) {
     // Calculate the ETag on last modified date of tags list
-    EntityTag etag = new EntityTag(this.contentManager.getCurrentContentSHA().hashCode()
-        + "tagList".hashCode() + "");
+    EntityTag etag = new EntityTag(this.contentManager.getCurrentContentSHA().hashCode() + "tagList".hashCode() + "");
 
     Response cachedResponse = generateCachedResponse(request, etag);
 
@@ -228,8 +240,7 @@ public class SegueContentFacade extends AbstractSegueFacade {
   @Operation(summary = "List all units currently in use by numeric questions.")
   public final Response getAllUnitsByLiveVersion(@Context final Request request) {
     // Calculate the ETag on last modified date of tags list
-    EntityTag etag = new EntityTag(this.contentManager.getCurrentContentSHA().hashCode()
-        + "unitsList".hashCode() + "");
+    EntityTag etag = new EntityTag(this.contentManager.getCurrentContentSHA().hashCode() + "unitsList".hashCode() + "");
 
     Response cachedResponse = generateCachedResponse(request, etag);
 

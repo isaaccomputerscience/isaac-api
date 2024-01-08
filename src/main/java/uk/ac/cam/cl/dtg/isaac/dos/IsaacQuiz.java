@@ -35,33 +35,50 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizDTO;
 public class IsaacQuiz extends SeguePage {
   @Deprecated
   private boolean visibleToStudents;
+
   private List<String> hiddenFromRoles;
   private Content rubric;
 
   @JsonCreator
   public IsaacQuiz(
-      @JsonProperty("id") final String id,
-      @JsonProperty("title") final String title,
-      @JsonProperty("subtitle") final String subtitle,
-      @JsonProperty("type") final String type,
-      @JsonProperty("author") final String author,
-      @JsonProperty("encoding") final String encoding,
-      @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
-      @JsonProperty("layout") final String layout,
-      @JsonProperty("children") final List<ContentBase> children,
-      @JsonProperty("value") final String value,
-      @JsonProperty("attribution") final String attribution,
-      @JsonProperty("relatedContent") final List<String> relatedContent,
-      @JsonProperty("version") final boolean published,
-      @JsonProperty("deprecated") final Boolean deprecated,
-      @JsonProperty("tags") final Set<String> tags,
-      @JsonProperty("level") final Integer level,
-      @JsonProperty("visibleToStudents") final boolean visibleToStudents,
-      @JsonProperty("hiddenFromRoles") final List<String> hiddenFromRoles,
-      @JsonProperty("rubric") final Content rubric) {
-    super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, value, attribution,
-        relatedContent, published, deprecated, tags, level);
-
+    @JsonProperty("id") final String id,
+    @JsonProperty("title") final String title,
+    @JsonProperty("subtitle") final String subtitle,
+    @JsonProperty("type") final String type,
+    @JsonProperty("author") final String author,
+    @JsonProperty("encoding") final String encoding,
+    @JsonProperty("canonicalSourceFile") final String canonicalSourceFile,
+    @JsonProperty("layout") final String layout,
+    @JsonProperty("children") final List<ContentBase> children,
+    @JsonProperty("value") final String value,
+    @JsonProperty("attribution") final String attribution,
+    @JsonProperty("relatedContent") final List<String> relatedContent,
+    @JsonProperty("version") final boolean published,
+    @JsonProperty("deprecated") final Boolean deprecated,
+    @JsonProperty("tags") final Set<String> tags,
+    @JsonProperty("level") final Integer level,
+    @JsonProperty("visibleToStudents") final boolean visibleToStudents,
+    @JsonProperty("hiddenFromRoles") final List<String> hiddenFromRoles,
+    @JsonProperty("rubric") final Content rubric
+  ) {
+    super(
+      id,
+      title,
+      subtitle,
+      type,
+      author,
+      encoding,
+      canonicalSourceFile,
+      layout,
+      children,
+      value,
+      attribution,
+      relatedContent,
+      published,
+      deprecated,
+      tags,
+      level
+    );
     this.visibleToStudents = visibleToStudents;
     this.hiddenFromRoles = hiddenFromRoles;
     this.rubric = rubric;
@@ -70,9 +87,7 @@ public class IsaacQuiz extends SeguePage {
   /**
    * Default constructor required for Jackson.
    */
-  public IsaacQuiz() {
-
-  }
+  public IsaacQuiz() {}
 
   @Deprecated
   public boolean getVisibleToStudents() {

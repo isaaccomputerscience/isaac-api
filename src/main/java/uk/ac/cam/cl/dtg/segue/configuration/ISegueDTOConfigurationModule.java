@@ -24,7 +24,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
  *
  */
 public interface ISegueDTOConfigurationModule {
-
   /**
    * This method should provide a map of 'type' identifiers to Classes which extend the Segue Content DTO.
    * <br>
@@ -36,5 +35,4 @@ public interface ISegueDTOConfigurationModule {
    * @return a map of string type identifiers to classes that extend Content.
    */
   List<Class<? extends Content>> getContentDataTransferObjectMap();
-
 }

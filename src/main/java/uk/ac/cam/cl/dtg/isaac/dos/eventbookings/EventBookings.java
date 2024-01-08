@@ -30,7 +30,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  * @author sac92
  */
 public interface EventBookings {
-
   /**
    * Add booking to the database.
    *
@@ -43,8 +42,15 @@ public interface EventBookings {
    * @return the newly created booking
    * @throws SegueDatabaseException - if an error occurs.
    */
-  EventBooking add(ITransaction transaction, String eventId, Long userId, Long reservedById, BookingStatus status,
-                   Map<String, String> additionalInformation) throws SegueDatabaseException;
+  EventBooking add(
+    ITransaction transaction,
+    String eventId,
+    Long userId,
+    Long reservedById,
+    BookingStatus status,
+    Map<String, String> additionalInformation
+  )
+    throws SegueDatabaseException;
 
   /**
    * Add booking to the database.
@@ -57,8 +63,14 @@ public interface EventBookings {
    * @return the newly created booking
    * @throws SegueDatabaseException - if an error occurs.
    */
-  EventBooking add(ITransaction transaction, String eventId, Long userId, BookingStatus status,
-                   Map<String, String> additionalInformation) throws SegueDatabaseException;
+  EventBooking add(
+    ITransaction transaction,
+    String eventId,
+    Long userId,
+    BookingStatus status,
+    Map<String, String> additionalInformation
+  )
+    throws SegueDatabaseException;
 
   /**
    * updateStatus.
@@ -71,8 +83,15 @@ public interface EventBookings {
    * @param additionalEventInformation - additional information required for the event if null it will be unmodified.
    * @throws SegueDatabaseException - if the database goes wrong.
    */
-  void updateStatus(ITransaction transaction, String eventId, Long userId, Long reservingUserId, BookingStatus status,
-                    Map<String, String> additionalEventInformation) throws SegueDatabaseException;
+  void updateStatus(
+    ITransaction transaction,
+    String eventId,
+    Long userId,
+    Long reservingUserId,
+    BookingStatus status,
+    Map<String, String> additionalEventInformation
+  )
+    throws SegueDatabaseException;
 
   /**
    * Remove booking from the database.
@@ -120,7 +139,7 @@ public interface EventBookings {
    * @throws SegueDatabaseException - if there is a problem accessing the db
    */
   Map<BookingStatus, Map<Role, Long>> getEventBookingStatusCounts(String eventId, boolean includeDeletedUsersInCounts)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Find all bookings for a given event with a given status.
@@ -133,7 +152,7 @@ public interface EventBookings {
    * @throws SegueDatabaseException - if an error occurs.
    */
   Iterable<EventBooking> findAllByEventIdAndStatus(String eventId, @Nullable BookingStatus status)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Find all bookings for a given event.
@@ -143,7 +162,6 @@ public interface EventBookings {
    * @throws SegueDatabaseException - if an error occurs.
    */
   Iterable<EventBooking> findAllByUserId(Long userId) throws SegueDatabaseException;
-
 
   /**
    * Find all event reservations by a given user.

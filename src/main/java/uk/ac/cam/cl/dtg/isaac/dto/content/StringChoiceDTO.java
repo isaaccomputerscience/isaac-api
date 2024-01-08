@@ -26,9 +26,7 @@ public class StringChoiceDTO extends ChoiceDTO {
   /**
    * Default constructor required for mapping.
    */
-  public StringChoiceDTO() {
-
-  }
+  public StringChoiceDTO() {}
 
   /**
    * @return Whether this string choice should allow any case to match.

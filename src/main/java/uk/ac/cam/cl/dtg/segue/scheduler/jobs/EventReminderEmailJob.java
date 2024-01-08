@@ -28,4 +28,3 @@ public class EventReminderEmailJob implements Job {
     log.info("Ran EventReminderEmailJob");
   }
 }
-

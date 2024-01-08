@@ -27,7 +27,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 
 /**
- * A wrapper object used to indicate an error has occurred to the client using the API. 
+ * A wrapper object used to indicate an error has occurred to the client using the API.
  * TODO: should this be converted into some kind of throwable?
  */
 public class SegueErrorResponse implements Serializable {
@@ -83,8 +83,12 @@ public class SegueErrorResponse implements Serializable {
    * @param e
    *            - if an exception has been triggered and should be shown in the response.
    */
-  public SegueErrorResponse(final Integer responseCode, final String responseCodeType, final String errorMessage,
-                            @Nullable final Exception e) {
+  public SegueErrorResponse(
+    final Integer responseCode,
+    final String responseCodeType,
+    final String errorMessage,
+    @Nullable final Exception e
+  ) {
     this.responseCode = responseCode;
     this.responseCodeType = responseCodeType;
     this.exception = e;
@@ -200,8 +204,7 @@ public class SegueErrorResponse implements Serializable {
    * @return a default response for when the user must be logged in to access a resource.
    */
   public static Response getNotLoggedInResponse() {
-    return new SegueErrorResponse(Status.UNAUTHORIZED, "You must be logged in to access this resource.")
-        .toResponse();
+    return new SegueErrorResponse(Status.UNAUTHORIZED, "You must be logged in to access this resource.").toResponse();
   }
 
   /**
@@ -209,15 +212,14 @@ public class SegueErrorResponse implements Serializable {
    */
   public static Response getIncorrectRoleResponse() {
     return new SegueErrorResponse(Status.FORBIDDEN, "You do not have the permissions to complete this action")
-        .toResponse();
+    .toResponse();
   }
 
   /**
    * @return a default response for when an endpoint will exist in the future but has not yet been implemented.
    */
   public static Response getNotImplementedResponse() {
-    return new SegueErrorResponse(Status.NOT_IMPLEMENTED, "This endpoint has not yet been implemented")
-        .toResponse();
+    return new SegueErrorResponse(Status.NOT_IMPLEMENTED, "This endpoint has not yet been implemented").toResponse();
   }
 
   /**
@@ -254,8 +256,7 @@ public class SegueErrorResponse implements Serializable {
    * @return error response.
    */
   public static Response getMethodNotAllowedReponse(final String message) {
-    return new SegueErrorResponse(Status.METHOD_NOT_ALLOWED, message)
-        .toResponse();
+    return new SegueErrorResponse(Status.METHOD_NOT_ALLOWED, message).toResponse();
   }
 
   /**

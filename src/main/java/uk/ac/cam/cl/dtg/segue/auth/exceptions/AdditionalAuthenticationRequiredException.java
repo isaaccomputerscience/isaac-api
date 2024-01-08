@@ -19,6 +19,4 @@ package uk.ac.cam.cl.dtg.segue.auth.exceptions;
 /**
  * Indicates that the login flow cannot complete without a further authentication step.
  */
-public class AdditionalAuthenticationRequiredException extends Exception {
-
-}
+public class AdditionalAuthenticationRequiredException extends Exception {}

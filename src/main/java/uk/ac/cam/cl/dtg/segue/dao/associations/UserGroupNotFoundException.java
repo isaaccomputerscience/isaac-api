@@ -32,5 +32,4 @@ public class UserGroupNotFoundException extends Exception {
   public UserGroupNotFoundException(final String message) {
     super(message);
   }
-
 }

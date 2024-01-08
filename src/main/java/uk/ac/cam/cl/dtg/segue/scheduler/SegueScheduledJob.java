@@ -29,8 +29,12 @@ public abstract class SegueScheduledJob {
 
   private String cronString;
 
-  public SegueScheduledJob(final String jobKey, final String jobGroupName, final String description,
-                           final String cronString) {
+  public SegueScheduledJob(
+    final String jobKey,
+    final String jobGroupName,
+    final String description,
+    final String cronString
+  ) {
     this.jobKey = jobKey;
     this.jobGroupName = jobGroupName;
     this.description = description;
@@ -73,7 +77,6 @@ public abstract class SegueScheduledJob {
     return cronString;
   }
 
-
   /**
    * Human-readable description of the job.
    *
@@ -111,10 +114,15 @@ public abstract class SegueScheduledJob {
    * @return SegueScheduledJob
    */
   public static SegueScheduledJob createCustomJob(
-      final String jobKey, final String jobGroupName, final String description, final String cronString,
-      final Map<String, Object> executionContext, final Job executableTask) {
-
+    final String jobKey,
+    final String jobGroupName,
+    final String description,
+    final String cronString,
+    final Map<String, Object> executionContext,
+    final Job executableTask
+  ) {
     return new SegueScheduledJob(jobKey, jobGroupName, description, cronString) {
+
       @Override
       public Map<String, Object> getExecutionContext() {
         return executionContext;
@@ -126,5 +134,4 @@ public abstract class SegueScheduledJob {
       }
     };
   }
-
 }

@@ -41,9 +41,10 @@ public class SimpleHttpClientService {
 
   private String getResponse(final HttpURLConnection http) throws IOException {
     StringBuilder sb = new StringBuilder();
-    try (InputStream res = http.getInputStream();
-         BufferedReader rd = new BufferedReader(new InputStreamReader(res, StandardCharsets.UTF_8))) {
-
+    try (
+      InputStream res = http.getInputStream();
+      BufferedReader rd = new BufferedReader(new InputStreamReader(res, StandardCharsets.UTF_8))
+    ) {
       int cp;
       while ((cp = rd.read()) != -1) {
         sb.append((char) cp);

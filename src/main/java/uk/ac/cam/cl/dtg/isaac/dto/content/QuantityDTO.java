@@ -26,9 +26,7 @@ public class QuantityDTO extends ChoiceDTO {
   /**
    * Default constructor required for mapping.
    */
-  public QuantityDTO() {
-
-  }
+  public QuantityDTO() {}
 
   /**
    * Gets the units.

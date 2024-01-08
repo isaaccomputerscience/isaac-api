@@ -54,7 +54,6 @@ public class GitDbTest {
     replay(git);
     replay(repo);
 
-    assertNull(db.getTreeWalk("sha",
-        "")); // Blank path is explicitly allowed. This should not throw an exception. But in this case we've passed an invalid sha, so we should get null back.
+    assertNull(db.getTreeWalk("sha", "")); // Blank path is explicitly allowed. This should not throw an exception. But in this case we've passed an invalid sha, so we should get null back.
   }
 }

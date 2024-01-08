@@ -20,14 +20,15 @@ import uk.ac.cam.cl.dtg.segue.dao.userbadges.IUserBadgePolicy;
  * Created by du220 on 02/05/2018.
  */
 public class TeacherCpdBadgePolicy implements IUserBadgePolicy {
-
   private final EventBookingManager bookingManager;
   private final GitContentManager contentManager;
   private final String contentIndex;
 
-  public TeacherCpdBadgePolicy(final EventBookingManager bookingManager,
-                               final GitContentManager contentManager,
-                               final String contentIndex) {
+  public TeacherCpdBadgePolicy(
+    final EventBookingManager bookingManager,
+    final GitContentManager contentManager,
+    final String contentIndex
+  ) {
     this.bookingManager = bookingManager;
     this.contentManager = contentManager;
     this.contentIndex = contentIndex;
@@ -40,27 +41,23 @@ public class TeacherCpdBadgePolicy implements IUserBadgePolicy {
 
   @Override
   public JsonNode initialiseState(final RegisteredUserDTO user, final ITransaction transaction) {
-
     ArrayNode events = JsonNodeFactory.instance.arrayNode();
 
     try {
       Map<String, BookingStatus> userBookings = bookingManager.getAllEventStatesForUser(user.getId());
 
       for (String eventId : userBookings.keySet()) {
-
         if (!BookingStatus.ATTENDED.equals(userBookings.get(eventId))) {
           continue;
         }
 
         ContentDTO content = getContentDetails(eventId);
         if (content instanceof IsaacEventPageDTO) {
-
           if (content.getTags().contains("teacher")) {
             events.add(content.getId());
           }
         }
       }
-
     } catch (SegueDatabaseException | ContentManagerException e) {
       e.printStackTrace();
     }
@@ -70,7 +67,6 @@ public class TeacherCpdBadgePolicy implements IUserBadgePolicy {
 
   @Override
   public JsonNode updateState(final RegisteredUserDTO user, final JsonNode state, final String event) {
-
     Iterator<JsonNode> iter = ((ArrayNode) state.get("cpdEvents")).elements();
 
     while (iter.hasNext()) {
@@ -82,7 +78,6 @@ public class TeacherCpdBadgePolicy implements IUserBadgePolicy {
     ((ArrayNode) state.get("cpdEvents")).add(event);
     return state;
   }
-
 
   /**
    * @param eventId - the event id to search for

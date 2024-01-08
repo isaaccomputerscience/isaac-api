@@ -3,7 +3,6 @@ package uk.ac.cam.cl.dtg.isaac.dos;
 import java.util.Date;
 
 public class PgUserAlert implements IUserAlert {
-
   private Long id;
   private Long userId;
   private String message;
@@ -13,8 +12,16 @@ public class PgUserAlert implements IUserAlert {
   private Date clicked;
   private Date dismissed;
 
-  public PgUserAlert(final Long id, final Long userId, final String message, final String link, final Date created,
-                     final Date seen, final Date clicked, final Date dismissed) {
+  public PgUserAlert(
+    final Long id,
+    final Long userId,
+    final String message,
+    final String link,
+    final Date created,
+    final Date seen,
+    final Date clicked,
+    final Date dismissed
+  ) {
     this.id = id;
     this.userId = userId;
     this.message = message;

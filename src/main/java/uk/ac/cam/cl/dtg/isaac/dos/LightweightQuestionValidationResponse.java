@@ -13,9 +13,7 @@ public class LightweightQuestionValidationResponse {
   /**
    * Default Constructor for mappers.
    */
-  public LightweightQuestionValidationResponse() {
-
-  }
+  public LightweightQuestionValidationResponse() {}
 
   /**
    * Full constructor.
@@ -24,8 +22,11 @@ public class LightweightQuestionValidationResponse {
    * @param correct       -
    * @param dateAttempted -
    */
-  public LightweightQuestionValidationResponse(final String questionId, final Boolean correct,
-                                               final Date dateAttempted) {
+  public LightweightQuestionValidationResponse(
+    final String questionId,
+    final Boolean correct,
+    final Date dateAttempted
+  ) {
     this.questionId = questionId;
     this.correct = correct;
     this.dateAttempted = dateAttempted;
@@ -87,7 +88,14 @@ public class LightweightQuestionValidationResponse {
 
   @Override
   public String toString() {
-    return "QuestionValidationResponse [questionId=" + questionId + ", correct=" + correct
-        + ", dateAttempted=" + dateAttempted + "]";
+    return (
+      "QuestionValidationResponse [questionId=" +
+      questionId +
+      ", correct=" +
+      correct +
+      ", dateAttempted=" +
+      dateAttempted +
+      "]"
+    );
   }
 }

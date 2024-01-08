@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class QuizFeedbackDTO {
+
   public static class Mark {
     private Integer correct;
     private Integer incorrect;
@@ -47,9 +48,11 @@ public class QuizFeedbackDTO {
         return false;
       }
       Mark mark = (Mark) o;
-      return Objects.equals(getCorrect(), mark.getCorrect())
-          && Objects.equals(incorrect, mark.incorrect)
-          && Objects.equals(notAttempted, mark.notAttempted);
+      return (
+        Objects.equals(getCorrect(), mark.getCorrect()) &&
+        Objects.equals(incorrect, mark.incorrect) &&
+        Objects.equals(notAttempted, mark.notAttempted)
+      );
     }
 
     @Override
@@ -94,8 +97,11 @@ public class QuizFeedbackDTO {
   @Nullable
   private Map<String, Mark> questionMarks;
 
-  public QuizFeedbackDTO(final Mark overallMark, final Map<String, Mark> sectionMarks,
-                         final Map<String, Mark> questionMarks) {
+  public QuizFeedbackDTO(
+    final Mark overallMark,
+    final Map<String, Mark> sectionMarks,
+    final Map<String, Mark> questionMarks
+  ) {
     this.overallMark = overallMark;
     this.sectionMarks = sectionMarks;
     this.questionMarks = questionMarks;
@@ -139,9 +145,11 @@ public class QuizFeedbackDTO {
       return false;
     }
     QuizFeedbackDTO that = (QuizFeedbackDTO) o;
-    return Objects.equals(complete, that.complete)
-        && Objects.equals(overallMark, that.overallMark)
-        && Objects.equals(sectionMarks, that.sectionMarks);
+    return (
+      Objects.equals(complete, that.complete) &&
+      Objects.equals(overallMark, that.overallMark) &&
+      Objects.equals(sectionMarks, that.sectionMarks)
+    );
   }
 
   @Override

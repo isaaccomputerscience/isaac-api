@@ -23,7 +23,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.DTOMapping;
 import uk.ac.cam.cl.dtg.isaac.dto.ItemValidationResponseDTO;
 
-
 /**
  * Class for providing correctness feedback about individual items in a submitted Choice.
  * <br>
@@ -37,8 +36,7 @@ public class ItemValidationResponse extends QuestionValidationResponse {
   /**
    * Default constructor for Jackson.
    */
-  public ItemValidationResponse() {
-  }
+  public ItemValidationResponse() {}
 
   /**
    * Full constructor.
@@ -50,9 +48,14 @@ public class ItemValidationResponse extends QuestionValidationResponse {
    * @param explanation   - explanation.
    * @param dateAttempted - dateAttempted.
    */
-  public ItemValidationResponse(final String questionId, final Choice answer,
-                                final Boolean correct, final List<Boolean> itemsCorrect,
-                                final Content explanation, final Date dateAttempted) {
+  public ItemValidationResponse(
+    final String questionId,
+    final Choice answer,
+    final Boolean correct,
+    final List<Boolean> itemsCorrect,
+    final Content explanation,
+    final Date dateAttempted
+  ) {
     super(questionId, answer, correct, explanation, dateAttempted);
     this.itemsCorrect = itemsCorrect;
   }

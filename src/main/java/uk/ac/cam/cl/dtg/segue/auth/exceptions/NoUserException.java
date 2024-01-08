@@ -34,5 +34,4 @@ public class NoUserException extends Exception {
   public NoUserException(final String message) {
     super(message);
   }
-
 }

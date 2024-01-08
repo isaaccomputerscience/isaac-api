@@ -32,7 +32,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  * @author Stephen Cummins
  */
 public interface IPasswordAuthenticator extends IAuthenticator {
-
   /**
    * Creates or updates a local set of credentials for a Segue user with the system.
    *
@@ -46,7 +45,7 @@ public interface IPasswordAuthenticator extends IAuthenticator {
    *             - If there is an internal database error.
    */
   void setOrChangeUsersPassword(RegisteredUser user, String plainTextPassword)
-      throws InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException;
+    throws InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException;
 
   /**
    * authenticate This method authenticates a given user based on the given e-mail address and password.
@@ -68,8 +67,7 @@ public interface IPasswordAuthenticator extends IAuthenticator {
    *             - if the preconfigured key spec is invalid.
    */
   RegisteredUser authenticate(String usersEmailAddress, String plainTextPassword)
-      throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException,
-      SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException;
+    throws IncorrectCredentialsProvidedException, NoCredentialsAvailableException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException;
 
   /**
    * Method to check if a user has a password configured.
@@ -86,8 +84,8 @@ public interface IPasswordAuthenticator extends IAuthenticator {
    *            - the user which should have token information added. -
    * @return The reset token
    */
-  String createPasswordResetTokenForUser(RegisteredUser userToAttachToken) throws
-      SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException;
+  String createPasswordResetTokenForUser(RegisteredUser userToAttachToken)
+    throws SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException;
 
   /**
    * This method will test if the user's reset token is valid reset token for a given user.

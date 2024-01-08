@@ -26,7 +26,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  *
  */
 public interface IAssociationDataManager {
-
   /**
    * Generates a token with no group.
    *
@@ -93,8 +92,7 @@ public interface IAssociationDataManager {
    * @throws SegueDatabaseException
    *             - if there is a database error.
    */
-  void createAssociation(Long userIdReceivingAccess, Long userIdGrantingAccess)
-      throws SegueDatabaseException;
+  void createAssociation(Long userIdReceivingAccess, Long userIdGrantingAccess) throws SegueDatabaseException;
 
   /**
    * Revoke an individual user association i.e. one user's permission to access personal data of another.

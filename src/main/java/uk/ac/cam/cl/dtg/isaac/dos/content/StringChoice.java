@@ -27,9 +27,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.StringChoiceDTO;
 public class StringChoice extends Choice {
   private boolean caseInsensitive;
 
-  public StringChoice() {
-
-  }
+  public StringChoice() {}
 
   /**
    * @return Whether this string choice should allow any case to match.
@@ -46,5 +44,4 @@ public class StringChoice extends Choice {
   public void setCaseInsensitive(final boolean caseInsensitive) {
     this.caseInsensitive = caseInsensitive;
   }
-
 }

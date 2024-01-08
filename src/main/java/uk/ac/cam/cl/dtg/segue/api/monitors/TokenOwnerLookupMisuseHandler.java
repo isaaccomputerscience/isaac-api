@@ -78,17 +78,20 @@ public class TokenOwnerLookupMisuseHandler implements IMisuseHandler {
   @Override
   public void executeSoftThresholdAction(final String message) {
     log.warn("Soft threshold limit: " + sanitiseExternalLogValue(message));
-
   }
 
   @Override
   public void executeHardThresholdAction(final String message) {
     final String subject = "HARD Threshold limit reached for TokenOwnershipRequest endpoint";
 
-    EmailCommunicationMessage e = new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
-        subject, message, message, EmailType.ADMIN);
+    EmailCommunicationMessage e = new EmailCommunicationMessage(
+      properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
+      subject,
+      message,
+      message,
+      EmailType.ADMIN
+    );
     emailManager.addSystemEmailToQueue(e);
     log.warn("Hard threshold limit: " + sanitiseExternalLogValue(message));
-
   }
 }

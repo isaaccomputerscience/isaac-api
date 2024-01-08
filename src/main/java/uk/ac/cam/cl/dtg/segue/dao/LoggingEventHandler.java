@@ -26,8 +26,12 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
  */
 public abstract class LoggingEventHandler {
 
-  public abstract void handleEvent(AbstractSegueUserDTO user, HttpServletRequest httpRequest, String eventType,
-                                   Object eventDetails);
+  public abstract void handleEvent(
+    AbstractSegueUserDTO user,
+    HttpServletRequest httpRequest,
+    String eventType,
+    Object eventDetails
+  );
 
   public abstract void transferLogEventsToRegisteredUser(String oldUserId, String newUserId);
 }

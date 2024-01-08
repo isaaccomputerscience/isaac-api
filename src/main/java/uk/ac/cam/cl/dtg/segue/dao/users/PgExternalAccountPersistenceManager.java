@@ -37,21 +37,23 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
   @Override
   public List<UserExternalAccountChanges> getRecentlyChangedRecords() throws SegueDatabaseException {
-    String query = "SELECT id, provider_user_identifier, email, role, given_name, deleted, email_verification_status, "
-        + "       news_prefs.preference_value AS news_emails, events_prefs.preference_value AS events_emails "
-        + "FROM users "
-        + "    LEFT OUTER JOIN user_preferences AS news_prefs ON users.id = news_prefs.user_id "
-        + "AND news_prefs.preference_type='EMAIL_PREFERENCE' "
-        + "AND news_prefs.preference_name='NEWS_AND_UPDATES' "
-        + "    LEFT OUTER JOIN user_preferences AS events_prefs ON users.id = events_prefs.user_id "
-        + "AND events_prefs.preference_type='EMAIL_PREFERENCE' "
-        + "AND events_prefs.preference_name='EVENTS' "
-        + "    LEFT OUTER JOIN external_accounts ON users.id=external_accounts.user_id AND provider_name='MailJet' "
-        + "WHERE (users.last_updated >= provider_last_updated OR news_prefs.last_updated >= provider_last_updated "
-        + "           OR events_prefs.last_updated >= provider_last_updated OR provider_last_updated IS NULL)";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query);
-         ResultSet results = pst.executeQuery()
+    String query =
+      "SELECT id, provider_user_identifier, email, role, given_name, deleted, email_verification_status, " +
+      "       news_prefs.preference_value AS news_emails, events_prefs.preference_value AS events_emails " +
+      "FROM users " +
+      "    LEFT OUTER JOIN user_preferences AS news_prefs ON users.id = news_prefs.user_id " +
+      "AND news_prefs.preference_type='EMAIL_PREFERENCE' " +
+      "AND news_prefs.preference_name='NEWS_AND_UPDATES' " +
+      "    LEFT OUTER JOIN user_preferences AS events_prefs ON users.id = events_prefs.user_id " +
+      "AND events_prefs.preference_type='EMAIL_PREFERENCE' " +
+      "AND events_prefs.preference_name='EVENTS' " +
+      "    LEFT OUTER JOIN external_accounts ON users.id=external_accounts.user_id AND provider_name='MailJet' " +
+      "WHERE (users.last_updated >= provider_last_updated OR news_prefs.last_updated >= provider_last_updated " +
+      "           OR events_prefs.last_updated >= provider_last_updated OR provider_last_updated IS NULL)";
+    try (
+      Connection conn = database.getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement(query);
+      ResultSet results = pst.executeQuery()
     ) {
       List<UserExternalAccountChanges> listOfResults = Lists.newArrayList();
 
@@ -60,7 +62,6 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       }
 
       return listOfResults;
-
     } catch (SQLException e) {
       throw new SegueDatabaseException("Postgres exception", e);
     }
@@ -69,9 +70,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
   @Override
   public void updateProviderLastUpdated(final Long userId) throws SegueDatabaseException {
     String query = "UPDATE external_accounts SET provider_last_updated=? WHERE user_id=? AND provider_name='MailJet';";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setTimestamp(1, new Timestamp(new Date().getTime()));
       pst.setLong(2, userId);
 
@@ -83,15 +82,13 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
   @Override
   public void updateExternalAccount(final Long userId, final String providerUserIdentifier)
-      throws SegueDatabaseException {
+    throws SegueDatabaseException {
     // Upsert the value in, using Postgres 9.5 syntax 'ON CONFLICT DO UPDATE ...'
     String query =
-        "INSERT INTO external_accounts(user_id, provider_name, provider_user_identifier) VALUES (?, 'MailJet', ?)"
-            + " ON CONFLICT (user_id, provider_name) DO UPDATE SET"
-            + " provider_user_identifier=excluded.provider_user_identifier";
-    try (Connection conn = database.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(query)
-    ) {
+      "INSERT INTO external_accounts(user_id, provider_name, provider_user_identifier) VALUES (?, 'MailJet', ?)" +
+      " ON CONFLICT (user_id, provider_name) DO UPDATE SET" +
+      " provider_user_identifier=excluded.provider_user_identifier";
+    try (Connection conn = database.getDatabaseConnection(); PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setLong(1, userId);
       pst.setString(2, providerUserIdentifier);
 
@@ -103,16 +100,15 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
   private UserExternalAccountChanges buildUserExternalAccountChanges(final ResultSet results) throws SQLException {
     return new UserExternalAccountChanges(
-        results.getLong("id"),
-        results.getString("provider_user_identifier"),
-        results.getString("email"),
-        Role.valueOf(results.getString("role")),
-        results.getString("given_name"),
-        results.getBoolean("deleted"),
-        EmailVerificationStatus.valueOf(results.getString("email_verification_status")),
-        results.getBoolean("news_emails"),
-        results.getBoolean("events_emails")
+      results.getLong("id"),
+      results.getString("provider_user_identifier"),
+      results.getString("email"),
+      Role.valueOf(results.getString("role")),
+      results.getString("given_name"),
+      results.getBoolean("deleted"),
+      EmailVerificationStatus.valueOf(results.getString("email_verification_status")),
+      results.getBoolean("news_emails"),
+      results.getBoolean("events_emails")
     );
-
   }
 }

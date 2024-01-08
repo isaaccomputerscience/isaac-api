@@ -66,16 +66,19 @@ public class RegisteredUser extends AbstractSegueUser {
    */
   @JsonCreator
   public RegisteredUser(
-      @JsonProperty("id") final Long id,
-      @JsonProperty("givenName") final String givenName, @JsonProperty("familyName") final String familyName,
-      @JsonProperty("email") final String email, @JsonProperty("role") final Role role,
-      @JsonProperty("dateOfBirth") final Date dateOfBirth, @JsonProperty("gender") final Gender gender,
-      @JsonProperty("registrationDate") final Date registrationDate,
-      @JsonProperty("lastUpdated") final Date lastUpdated,
-      @JsonProperty("emailToVerify") final String emailToVerify,
-      @JsonProperty("emailVerificationToken") final String emailVerificationToken,
-      @JsonProperty("emailVerificationStatus") final EmailVerificationStatus emailVerificationStatus,
-      @JsonProperty("teacherPending") final Boolean teacherPending
+    @JsonProperty("id") final Long id,
+    @JsonProperty("givenName") final String givenName,
+    @JsonProperty("familyName") final String familyName,
+    @JsonProperty("email") final String email,
+    @JsonProperty("role") final Role role,
+    @JsonProperty("dateOfBirth") final Date dateOfBirth,
+    @JsonProperty("gender") final Gender gender,
+    @JsonProperty("registrationDate") final Date registrationDate,
+    @JsonProperty("lastUpdated") final Date lastUpdated,
+    @JsonProperty("emailToVerify") final String emailToVerify,
+    @JsonProperty("emailVerificationToken") final String emailVerificationToken,
+    @JsonProperty("emailVerificationStatus") final EmailVerificationStatus emailVerificationStatus,
+    @JsonProperty("teacherPending") final Boolean teacherPending
   ) {
     this.id = id;
     this.familyName = familyName;
@@ -95,9 +98,7 @@ public class RegisteredUser extends AbstractSegueUser {
   /**
    * Default constructor required for Jackson.
    */
-  public RegisteredUser() {
-
-  }
+  public RegisteredUser() {}
 
   /**
    * Gets the id (integer form).
@@ -111,7 +112,6 @@ public class RegisteredUser extends AbstractSegueUser {
   public Long getLegacyId() {
     return this.getId();
   }
-
 
   /**
    * Gets the id (integer form).
@@ -455,23 +455,48 @@ public class RegisteredUser extends AbstractSegueUser {
 
   @Override
   public String toString() {
-    return "RegisteredUser{"
-        + "id=" + id
-        + ", givenName='" + givenName + '\''
-        + ", familyName='" + familyName + '\''
-        + ", email='" + email + '\''
-        + ", role=" + role
-        + ", dateOfBirth=" + dateOfBirth
-        + ", gender=" + gender
-        + ", registrationDate=" + registrationDate
-        + ", schoolId='" + schoolId + '\''
-        + ", schoolOther='" + schoolOther + '\''
-        + ", emailVerificationToken='" + emailVerificationToken + '\''
-        + ", emailToVerify='" + emailToVerify + '\''
-        + ", emailVerificationStatus=" + emailVerificationStatus
-        + ", teacherPending=" + teacherPending
-        + ", lastUpdated=" + lastUpdated
-        + ", lastSeen=" + lastSeen
-        + '}';
+    return (
+      "RegisteredUser{" +
+      "id=" +
+      id +
+      ", givenName='" +
+      givenName +
+      '\'' +
+      ", familyName='" +
+      familyName +
+      '\'' +
+      ", email='" +
+      email +
+      '\'' +
+      ", role=" +
+      role +
+      ", dateOfBirth=" +
+      dateOfBirth +
+      ", gender=" +
+      gender +
+      ", registrationDate=" +
+      registrationDate +
+      ", schoolId='" +
+      schoolId +
+      '\'' +
+      ", schoolOther='" +
+      schoolOther +
+      '\'' +
+      ", emailVerificationToken='" +
+      emailVerificationToken +
+      '\'' +
+      ", emailToVerify='" +
+      emailToVerify +
+      '\'' +
+      ", emailVerificationStatus=" +
+      emailVerificationStatus +
+      ", teacherPending=" +
+      teacherPending +
+      ", lastUpdated=" +
+      lastUpdated +
+      ", lastSeen=" +
+      lastSeen +
+      '}'
+    );
   }
 }

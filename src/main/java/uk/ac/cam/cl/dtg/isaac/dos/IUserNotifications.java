@@ -25,7 +25,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  * database.
  */
 public interface IUserNotifications {
-
   /**
    * @param userId - the user id to look up
    * @return the list of notification records for this user.
@@ -40,5 +39,5 @@ public interface IUserNotifications {
    * @throws SegueDatabaseException - if a database error has occurred.
    */
   void saveUserNotification(Long userId, String notificationId, NotificationStatus status)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 }

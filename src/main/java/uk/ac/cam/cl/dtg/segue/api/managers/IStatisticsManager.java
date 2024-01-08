@@ -17,7 +17,6 @@ import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
  * Created by du220 on 19/07/2017.
  */
 public interface IStatisticsManager {
-
   /**
    * Output general stats. This returns a Map of String to Object and is intended to be sent directly to a
    * serializable facade endpoint.
@@ -25,8 +24,7 @@ public interface IStatisticsManager {
    * @return an ImmutableMap{@literal <String, String>} (stat name, stat value)
    * @throws SegueDatabaseException - if there is a database error.
    */
-  Map<String, Object> getGeneralStatistics()
-      throws SegueDatabaseException;
+  Map<String, Object> getGeneralStatistics() throws SegueDatabaseException;
 
   /**
    * LogCount.
@@ -44,8 +42,7 @@ public interface IStatisticsManager {
    *     numberActiveLastThirtyDays.
    * @throws UnableToIndexSchoolsException - if there is a problem getting school details.
    */
-  List<Map<String, Object>> getSchoolStatistics()
-      throws UnableToIndexSchoolsException, SegueSearchException;
+  List<Map<String, Object>> getSchoolStatistics() throws UnableToIndexSchoolsException, SegueSearchException;
 
   /**
    * Get the number of users per school.
@@ -64,8 +61,8 @@ public interface IStatisticsManager {
    * @throws ResourceNotFoundException     - if we cannot locate the school requested.
    * @throws UnableToIndexSchoolsException - if the school list has not been indexed.
    */
-  List<RegisteredUserDTO> getUsersBySchoolId(String schoolId) throws ResourceNotFoundException,
-      SegueDatabaseException, UnableToIndexSchoolsException, SegueSearchException;
+  List<RegisteredUserDTO> getUsersBySchoolId(String schoolId)
+    throws ResourceNotFoundException, SegueDatabaseException, UnableToIndexSchoolsException, SegueSearchException;
 
   /**
    * @return a Map of userId's to last event timestamp
@@ -90,7 +87,7 @@ public interface IStatisticsManager {
    * @throws ContentManagerException - if we are unable to look up the content.
    */
   Map<String, Object> getUserQuestionInformation(RegisteredUserDTO userOfInterest)
-      throws SegueDatabaseException, ContentManagerException;
+    throws SegueDatabaseException, ContentManagerException;
 
   /**
    * getEventLogsByDate.
@@ -103,8 +100,12 @@ public interface IStatisticsManager {
    * @throws SegueDatabaseException - if there is a problem contacting the underlying database
    */
   Map<String, Map<LocalDate, Long>> getEventLogsByDate(
-      Collection<String> eventTypes, Date fromDate, Date toDate, boolean binDataByMonth)
-      throws SegueDatabaseException;
+    Collection<String> eventTypes,
+    Date fromDate,
+    Date toDate,
+    boolean binDataByMonth
+  )
+    throws SegueDatabaseException;
 
   /**
    * getEventLogsByDate.
@@ -118,9 +119,13 @@ public interface IStatisticsManager {
    * @throws SegueDatabaseException - if there is a problem contacting the underlying database
    */
   Map<String, Map<LocalDate, Long>> getEventLogsByDateAndUserList(
-      Collection<String> eventTypes, Date fromDate, Date toDate, List<RegisteredUserDTO> userList,
-      boolean binDataByMonth)
-      throws SegueDatabaseException;
+    Collection<String> eventTypes,
+    Date fromDate,
+    Date toDate,
+    List<RegisteredUserDTO> userList,
+    boolean binDataByMonth
+  )
+    throws SegueDatabaseException;
 
   /**
    * Calculate the number of users from the list provided that meet the criteria.
@@ -132,7 +137,10 @@ public interface IStatisticsManager {
    * @return a collection containing the users who meet the criteria
    */
   Collection<RegisteredUserDTO> getNumberOfUsersActiveForLastNDays(
-      Collection<RegisteredUserDTO> users, Map<String, Date> lastSeenUserMap, int daysFromToday);
+    Collection<RegisteredUserDTO> users,
+    Map<String, Date> lastSeenUserMap,
+    int daysFromToday
+  );
 
   /**
    * Gets additional information for a user outlining their progress for teacher-based activity.

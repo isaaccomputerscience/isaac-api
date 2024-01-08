@@ -32,7 +32,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacTopicSummaryPageDTO;
 @DTOMapping(IsaacTopicSummaryPageDTO.class)
 @JsonContentType("isaacTopicSummaryPage")
 public class IsaacTopicSummaryPage extends SeguePage {
-
   private List<String> linkedGameboards;
 
   /**
@@ -52,5 +51,4 @@ public class IsaacTopicSummaryPage extends SeguePage {
   public void setLinkedGameboards(final List<String> linkedGameboards) {
     this.linkedGameboards = linkedGameboards;
   }
-
 }

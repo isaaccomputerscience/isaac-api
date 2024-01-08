@@ -38,9 +38,7 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
   /**
    * UserSummaryDTO.
    */
-  public UserSummaryDTO() {
-
-  }
+  public UserSummaryDTO() {}
 
   /**
    * Gets the id.
@@ -51,7 +49,6 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
   public Long getId() {
     return id;
   }
-
 
   /**
    * Sets the id.
@@ -181,15 +178,27 @@ public class UserSummaryDTO extends AbstractSegueUserDTO {
 
   @Override
   public String toString() {
-    return "UserSummaryDTO ["
-        + "id=" + id
-        + ", givenName='" + givenName + '\''
-        + ", familyName='" + familyName + '\''
-        + ", role=" + role
-        + ", authorisedFullAccess=" + authorisedFullAccess
-        + ", emailVerificationStatus=" + emailVerificationStatus
-        + ", teacherPending=" + teacherPending
-        + ", registeredContexts=" + registeredContexts
-        + ']';
+    return (
+      "UserSummaryDTO [" +
+      "id=" +
+      id +
+      ", givenName='" +
+      givenName +
+      '\'' +
+      ", familyName='" +
+      familyName +
+      '\'' +
+      ", role=" +
+      role +
+      ", authorisedFullAccess=" +
+      authorisedFullAccess +
+      ", emailVerificationStatus=" +
+      emailVerificationStatus +
+      ", teacherPending=" +
+      teacherPending +
+      ", registeredContexts=" +
+      registeredContexts +
+      ']'
+    );
   }
 }

@@ -35,7 +35,6 @@ import uk.ac.cam.cl.dtg.util.LogUtils;
  * @author Alistair Stead
  */
 public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
-
   private static final Logger log = LoggerFactory.getLogger(PasswordResetByEmailMisuseHandler.class);
 
   private final Integer softThreshold;
@@ -44,13 +43,19 @@ public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
 
   @Inject
   public PasswordResetByEmailMisuseHandler() {
-    this(PASSWORD_RESET_BY_EMAIL_DEFAULT_SOFT_THRESHOLD, PASSWORD_RESET_BY_EMAIL_DEFAULT_HARD_THRESHOLD,
-        NUMBER_SECONDS_IN_MINUTE);
+    this(
+      PASSWORD_RESET_BY_EMAIL_DEFAULT_SOFT_THRESHOLD,
+      PASSWORD_RESET_BY_EMAIL_DEFAULT_HARD_THRESHOLD,
+      NUMBER_SECONDS_IN_MINUTE
+    );
   }
 
   @Inject
-  public PasswordResetByEmailMisuseHandler(final Integer softThreshold, final Integer hardThreshold,
-                                           final Integer interval) {
+  public PasswordResetByEmailMisuseHandler(
+    final Integer softThreshold,
+    final Integer hardThreshold,
+    final Integer interval
+  ) {
     this.softThreshold = softThreshold;
     this.hardThreshold = hardThreshold;
     this.accountingInterval = interval;
@@ -85,5 +90,4 @@ public class PasswordResetByEmailMisuseHandler implements IMisuseHandler {
   public void executeHardThresholdAction(final String message) {
     log.error("Hard threshold limit: " + sanitiseExternalLogValue(message));
   }
-
 }

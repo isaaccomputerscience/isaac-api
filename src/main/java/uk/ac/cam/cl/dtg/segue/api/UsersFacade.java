@@ -128,11 +128,16 @@ public class UsersFacade extends AbstractSegueFacade {
    * @param schoolListReader       - so we can augment school info
    */
   @Inject
-  public UsersFacade(final PropertiesLoader properties, final UserAccountManager userManager,
-                     final RecaptchaManager recaptchaManager, final ILogManager logManager,
-                     final UserAssociationManager userAssociationManager, final IMisuseMonitor misuseMonitor,
-                     final AbstractUserPreferenceManager userPreferenceManager,
-                     final SchoolListReader schoolListReader) {
+  public UsersFacade(
+    final PropertiesLoader properties,
+    final UserAccountManager userManager,
+    final RecaptchaManager recaptchaManager,
+    final ILogManager logManager,
+    final UserAssociationManager userAssociationManager,
+    final IMisuseMonitor misuseMonitor,
+    final AbstractUserPreferenceManager userPreferenceManager,
+    final SchoolListReader schoolListReader
+  ) {
     super(properties, logManager);
     this.userManager = userManager;
     this.recaptchaManager = recaptchaManager;
@@ -155,9 +160,11 @@ public class UsersFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Get information about the current user.")
-  public Response getCurrentUserEndpoint(@Context final Request request,
-                                         @Context final HttpServletRequest httpServletRequest,
-                                         @Context final HttpServletResponse response) {
+  public Response getCurrentUserEndpoint(
+    @Context final Request request,
+    @Context final HttpServletRequest httpServletRequest,
+    @Context final HttpServletResponse response
+  ) {
     try {
       RegisteredUserDTO currentUser = userManager.getCurrentRegisteredUser(httpServletRequest);
 
@@ -175,8 +182,11 @@ public class UsersFacade extends AbstractSegueFacade {
         return cachedResponse;
       }
 
-      return Response.ok(currentUser).tag(etag)
-          .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+      return Response
+        .ok(currentUser)
+        .tag(etag)
+        .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     }
@@ -198,11 +208,12 @@ public class UsersFacade extends AbstractSegueFacade {
   @Consumes(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Create a new user or update an existing user.")
-  public Response createOrUpdateUserSettings(@Context final HttpServletRequest request,
-                                             @Context final HttpServletResponse response,
-                                             final String userObjectString)
-      throws InvalidKeySpecException, NoSuchAlgorithmException {
-
+  public Response createOrUpdateUserSettings(
+    @Context final HttpServletRequest request,
+    @Context final HttpServletResponse response,
+    final String userObjectString
+  )
+    throws InvalidKeySpecException, NoSuchAlgorithmException {
     UserSettings userSettingsObjectFromClient;
     String newPassword;
     String recaptchaToken;
@@ -222,7 +233,7 @@ public class UsersFacade extends AbstractSegueFacade {
       }
     } catch (IOException e) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "Unable to parse the user object you provided.", e)
-          .toResponse();
+      .toResponse();
     }
 
     RegisteredUser registeredUser = userSettingsObjectFromClient.getRegisteredUser();
@@ -234,15 +245,19 @@ public class UsersFacade extends AbstractSegueFacade {
 
     if (null != registeredUser.getId()) {
       try {
-        return userManager.updateUserObject(request, response, registeredUser,
-            userSettingsObjectFromClient.getPasswordCurrent(), newPassword,
-            userPreferences, registeredUserContexts);
+        return userManager.updateUserObject(
+          request,
+          response,
+          registeredUser,
+          userSettingsObjectFromClient.getPasswordCurrent(),
+          newPassword,
+          userPreferences,
+          registeredUserContexts
+        );
       } catch (IncorrectCredentialsProvidedException e) {
-        return new SegueErrorResponse(Status.BAD_REQUEST, "Incorrect credentials provided.", e)
-            .toResponse();
+        return new SegueErrorResponse(Status.BAD_REQUEST, "Incorrect credentials provided.", e).toResponse();
       } catch (NoCredentialsAvailableException e) {
-        return new SegueErrorResponse(Status.BAD_REQUEST, "No credentials available.", e)
-            .toResponse();
+        return new SegueErrorResponse(Status.BAD_REQUEST, "No credentials available.", e).toResponse();
       }
     } else {
       try {
@@ -259,20 +274,35 @@ public class UsersFacade extends AbstractSegueFacade {
         // which has not made any other authenticated/logged request to Isaac beforehand.
         // This _might_ be suspicious, and this logging will help establish that.
         if (request.getSession() == null || request.getSession().getAttribute(ANONYMOUS_USER) == null) {
-          log.error(String.format("Registration attempt from (%s) for (%s) without corresponding anonymous user!",
-              ipAddress, sanitiseExternalLogValue(registeredUser.getEmail())));
+          log.error(
+            String.format(
+              "Registration attempt from (%s) for (%s) without corresponding anonymous user!",
+              ipAddress,
+              sanitiseExternalLogValue(registeredUser.getEmail())
+            )
+          );
         }
 
-        return userManager.createUserObjectAndLogIn(request, response, registeredUser, newPassword, userPreferences,
-            registeredUserContexts);
+        return userManager.createUserObjectAndLogIn(
+          request,
+          response,
+          registeredUser,
+          newPassword,
+          userPreferences,
+          registeredUserContexts
+        );
       } catch (SegueResourceMisuseException e) {
-        log.error(String.format("Blocked a registration attempt by (%s) after misuse limit hit!",
-            RequestIpExtractor.getClientIpAddr(request)));
+        log.error(
+          String.format(
+            "Blocked a registration attempt by (%s) after misuse limit hit!",
+            RequestIpExtractor.getClientIpAddr(request)
+          )
+        );
         return SegueErrorResponse.getRateThrottledResponse(
-            "Too many registration requests. Please try again later or contact us!");
+          "Too many registration requests. Please try again later or contact us!"
+        );
       }
     }
-
   }
 
   /**
@@ -299,13 +329,18 @@ public class UsersFacade extends AbstractSegueFacade {
         userPreferences.get(pref.getPreferenceType()).put(pref.getPreferenceName(), pref.getPreferenceValue());
       }
 
-      return Response.ok(userPreferences)
-          .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+      return Response
+        .ok(userPreferences)
+        .cacheControl(getCacheControl(Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Can't load user preferences!", e);
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Can't load user preferences!",
+        e
+      );
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     }
@@ -326,9 +361,11 @@ public class UsersFacade extends AbstractSegueFacade {
   @Consumes(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Request password reset for another user.")
-  public Response generatePasswordResetTokenForOtherUser(@Context final Request request,
-                                                         @Context final HttpServletRequest httpServletRequest,
-                                                         @PathParam("user_id") final Long userIdOfInterest) {
+  public Response generatePasswordResetTokenForOtherUser(
+    @Context final Request request,
+    @Context final HttpServletRequest httpServletRequest,
+    @PathParam("user_id") final Long userIdOfInterest
+  ) {
     try {
       RegisteredUserDTO currentUser = userManager.getCurrentRegisteredUser(httpServletRequest);
 
@@ -341,8 +378,10 @@ public class UsersFacade extends AbstractSegueFacade {
 
       // Decide if the user is allowed to view this data. User must have at least a teacher account to request
       // a password reset for another user.
-      if (!currentUser.getId().equals(userIdOfInterest)
-          && !userAssociationManager.hasTeacherPermission(currentUser, userOfInterestSummaryObject)) {
+      if (
+        !currentUser.getId().equals(userIdOfInterest) &&
+        !userAssociationManager.hasTeacherPermission(currentUser, userOfInterestSummaryObject)
+      ) {
         return SegueErrorResponse.getIncorrectRoleResponse();
       }
 
@@ -351,11 +390,19 @@ public class UsersFacade extends AbstractSegueFacade {
       userManager.resetPasswordRequest(userOfInterest);
 
       this.getLogManager()
-          .logEvent(currentUser, httpServletRequest, SegueServerLogType.PASSWORD_RESET_REQUEST_RECEIVED,
-              ImmutableMap.of(
-                  LOCAL_AUTH_EMAIL_FIELDNAME, userOfInterest.getEmail(),
-                  LOCAL_AUTH_GROUP_MANAGER_EMAIL_FIELDNAME, currentUser.getEmail(),
-                  LOCAL_AUTH_GROUP_MANAGER_INITIATED_FIELDNAME, true));
+        .logEvent(
+          currentUser,
+          httpServletRequest,
+          SegueServerLogType.PASSWORD_RESET_REQUEST_RECEIVED,
+          ImmutableMap.of(
+            LOCAL_AUTH_EMAIL_FIELDNAME,
+            userOfInterest.getEmail(),
+            LOCAL_AUTH_GROUP_MANAGER_EMAIL_FIELDNAME,
+            currentUser.getEmail(),
+            LOCAL_AUTH_GROUP_MANAGER_INITIATED_FIELDNAME,
+            true
+          )
+        );
 
       log.info("Password reset requested for account: " + userIdOfInterest);
       return Response.ok().build();
@@ -366,15 +413,13 @@ public class UsersFacade extends AbstractSegueFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Error accessing database.", e);
+      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error accessing database.", e);
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     } catch (SegueResourceMisuseException e) {
       return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
     }
   }
-
 
   /**
    * End point that allows a local user to generate a password reset request.
@@ -390,11 +435,15 @@ public class UsersFacade extends AbstractSegueFacade {
   @Path("users/resetpassword")
   @Consumes(MediaType.APPLICATION_JSON)
   @GZIP
-  @Operation(summary = "Request password reset for an email address.",
-      description = "The email address must be provided as a RegisteredUserDTO object, although only the 'email'"
-          + " field is required.")
-  public Response generatePasswordResetToken(final RegisteredUserDTO userObject,
-                                             @Context final HttpServletRequest request) {
+  @Operation(
+    summary = "Request password reset for an email address.",
+    description = "The email address must be provided as a RegisteredUserDTO object, although only the 'email'" +
+    " field is required."
+  )
+  public Response generatePasswordResetToken(
+    final RegisteredUserDTO userObject,
+    @Context final HttpServletRequest request
+  ) {
     if (null == userObject || null == userObject.getEmail() || userObject.getEmail().isEmpty()) {
       log.debug("User is null");
       return new SegueErrorResponse(Status.BAD_REQUEST, "No account email address provided.").toResponse();
@@ -407,24 +456,32 @@ public class UsersFacade extends AbstractSegueFacade {
       boolean userExists = userManager.resetPasswordRequest(userObject);
 
       this.getLogManager()
-          .logEvent(userManager.getCurrentUser(request), request, SegueServerLogType.PASSWORD_RESET_REQUEST_RECEIVED,
-              ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userObject.getEmail()));
+        .logEvent(
+          userManager.getCurrentUser(request),
+          request,
+          SegueServerLogType.PASSWORD_RESET_REQUEST_RECEIVED,
+          ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userObject.getEmail())
+        );
 
       if (userExists) {
         log.info("Password reset requested for email: (" + sanitiseExternalLogValue(userObject.getEmail()) + ")");
       } else {
-        log.warn("Password reset requested for account that does not exist: ("
-            + sanitiseExternalLogValue(userObject.getEmail()) + ")");
+        log.warn(
+          "Password reset requested for account that does not exist: (" +
+          sanitiseExternalLogValue(userObject.getEmail()) +
+          ")"
+        );
       }
       return Response.ok().build();
     } catch (SegueDatabaseException e) {
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Error accessing database.", e);
+      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error accessing database.", e);
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     } catch (SegueResourceMisuseException e) {
-      log.error("Password reset request blocked for email: (" + sanitiseExternalLogValue(userObject.getEmail()) + ")",
-          e.toString());
+      log.error(
+        "Password reset request blocked for email: (" + sanitiseExternalLogValue(userObject.getEmail()) + ")",
+        e.toString()
+      );
       return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
     }
   }
@@ -449,8 +506,10 @@ public class UsersFacade extends AbstractSegueFacade {
       }
     } catch (SegueDatabaseException e) {
       log.error("Internal database error, while validating Password Reset Request.", e);
-      SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Database error has occurred. Unable to access token list.");
+      SegueErrorResponse error = new SegueErrorResponse(
+        Status.INTERNAL_SERVER_ERROR,
+        "Database error has occurred. Unable to access token list."
+      );
       return error.toResponse();
     }
 
@@ -471,22 +530,33 @@ public class UsersFacade extends AbstractSegueFacade {
   @Path("users/resetpassword/{token}")
   @Consumes(MediaType.APPLICATION_JSON)
   @GZIP
-  @Operation(summary = "Reset an account password using a reset token.",
-      description = "The 'token' should be generated using one of the endpoints for requesting a password reset.")
-  public Response resetPassword(@PathParam("token") final String token, final Map<String, String> clientResponse,
-                                @Context final HttpServletRequest request)
-      throws InvalidKeySpecException, NoSuchAlgorithmException {
+  @Operation(
+    summary = "Reset an account password using a reset token.",
+    description = "The 'token' should be generated using one of the endpoints for requesting a password reset."
+  )
+  public Response resetPassword(
+    @PathParam("token") final String token,
+    final Map<String, String> clientResponse,
+    @Context final HttpServletRequest request
+  )
+    throws InvalidKeySpecException, NoSuchAlgorithmException {
     try {
       String newPassword = clientResponse.get("password");
       RegisteredUserDTO userDTO = userManager.resetPassword(token, newPassword);
 
-      this.getLogManager().logEvent(userDTO, request, SegueServerLogType.PASSWORD_RESET_REQUEST_SUCCESSFUL,
-          ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userDTO.getEmail()));
+      this.getLogManager()
+        .logEvent(
+          userDTO,
+          request,
+          SegueServerLogType.PASSWORD_RESET_REQUEST_SUCCESSFUL,
+          ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userDTO.getEmail())
+        );
 
       // we can reset the misuse monitor for incorrect logins now.
-      misuseMonitor.resetMisuseCount(userDTO.getEmail().toLowerCase(),
-          SegueLoginByEmailMisuseHandler.class.getSimpleName());
-
+      misuseMonitor.resetMisuseCount(
+        userDTO.getEmail().toLowerCase(),
+        SegueLoginByEmailMisuseHandler.class.getSimpleName()
+      );
     } catch (InvalidTokenException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST, "Invalid password reset token.");
       log.error("Invalid password reset token supplied.");
@@ -520,9 +590,10 @@ public class UsersFacade extends AbstractSegueFacade {
     try {
       RegisteredUserDTO user = this.userManager.getCurrentRegisteredUser(request);
 
-      return Response.ok(this.userManager.getNewSharedSecret(user))
-          .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
-
+      return Response
+        .ok(this.userManager.getNewSharedSecret(user))
+        .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     }
@@ -542,8 +613,10 @@ public class UsersFacade extends AbstractSegueFacade {
     try {
       RegisteredUserDTO user = this.userManager.getCurrentRegisteredUser(request);
 
-      return Response.ok(ImmutableMap.of("mfaStatus", this.userManager.has2FAConfigured(user)))
-          .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+      return Response
+        .ok(ImmutableMap.of("mfaStatus", this.userManager.has2FAConfigured(user)))
+        .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+        .build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
@@ -566,10 +639,13 @@ public class UsersFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   public final Response setupMFA(@Context final HttpServletRequest request, final Map<String, String> mfaResponse) {
     try {
-      if (Strings.isNullOrEmpty(mfaResponse.get("sharedSecret")) || Strings.isNullOrEmpty(
-          mfaResponse.get("mfaVerificationCode"))) {
+      if (
+        Strings.isNullOrEmpty(mfaResponse.get("sharedSecret")) ||
+        Strings.isNullOrEmpty(mfaResponse.get("mfaVerificationCode"))
+      ) {
         return SegueErrorResponse.getBadRequestResponse(
-            "Response must include full sharedSecret object and mfaVerificationCode");
+          "Response must include full sharedSecret object and mfaVerificationCode"
+        );
       }
 
       final String sharedSecret = mfaResponse.get("sharedSecret");
@@ -581,7 +657,6 @@ public class UsersFacade extends AbstractSegueFacade {
       } else {
         return SegueErrorResponse.getBadRequestResponse("Verification code is incorrect");
       }
-
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
@@ -604,8 +679,10 @@ public class UsersFacade extends AbstractSegueFacade {
   @Path("users/{user_id}/mfa")
   @Operation(summary = "Admin endpoint for disabling MFA for a user")
   @Produces(MediaType.APPLICATION_JSON)
-  public final Response deleteMFASettingsForAccount(@Context final HttpServletRequest request,
-                                                    @PathParam("user_id") final Long userIdOfInterest) {
+  public final Response deleteMFASettingsForAccount(
+    @Context final HttpServletRequest request,
+    @PathParam("user_id") final Long userIdOfInterest
+  ) {
     try {
       final RegisteredUserDTO currentlyLoggedInUser = this.userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdmin(userManager, currentlyLoggedInUser)) {
@@ -616,16 +693,24 @@ public class UsersFacade extends AbstractSegueFacade {
       final RegisteredUserDTO userOfInterest = this.userManager.getUserDTOById(userIdOfInterest);
 
       if (currentlyLoggedInUser.getId().equals(userOfInterest.getId())) {
-        return Response.status(Status.FORBIDDEN).entity("Unable to change the MFA status of the account you are "
-            + "currently using. Ask another Admin for help.").build();
+        return Response
+          .status(Status.FORBIDDEN)
+          .entity(
+            "Unable to change the MFA status of the account you are " + "currently using. Ask another Admin for help."
+          )
+          .build();
       }
 
       this.userManager.deactivateMFAForUser(userOfInterest);
-      log.info(String.format("Admin (%s) deactivated MFA on account (%s)!",
-          currentlyLoggedInUser.getEmail(), userOfInterest.getId()));
+      log.info(
+        String.format(
+          "Admin (%s) deactivated MFA on account (%s)!",
+          currentlyLoggedInUser.getEmail(),
+          userOfInterest.getId()
+        )
+      );
 
       return Response.ok().build();
-
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
@@ -636,7 +721,8 @@ public class UsersFacade extends AbstractSegueFacade {
       return SegueErrorResponse.getBadRequestResponse("UserId must be a number");
     } catch (NoUserException e) {
       return SegueErrorResponse.getResourceNotFoundResponse(
-          "Unable to complete MFA removal as user account could not be found.");
+        "Unable to complete MFA removal as user account could not be found."
+      );
     }
   }
 
@@ -653,8 +739,10 @@ public class UsersFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "Get the school information of specified users.")
-  public Response getUserIdToSchoolMap(@Context final HttpServletRequest httpServletRequest,
-                                       @QueryParam("user_ids") final String userIdsQueryParam) {
+  public Response getUserIdToSchoolMap(
+    @Context final HttpServletRequest httpServletRequest,
+    @QueryParam("user_ids") final String userIdsQueryParam
+  ) {
     try {
       RegisteredUserDTO currentUser = userManager.getCurrentRegisteredUser(httpServletRequest);
       if (!isUserStaff(userManager, currentUser) && !Role.EVENT_LEADER.equals(currentUser.getRole())) {
@@ -662,14 +750,17 @@ public class UsersFacade extends AbstractSegueFacade {
       }
 
       if (null == userIdsQueryParam || userIdsQueryParam.isEmpty()) {
-        return new SegueErrorResponse(Status.BAD_REQUEST,
-            "You must provide a comma separated list of user_ids in the query param")
-            .toResponse();
+        return new SegueErrorResponse(
+          Status.BAD_REQUEST,
+          "You must provide a comma separated list of user_ids in the query param"
+        )
+        .toResponse();
       }
 
-      List<Long> userIds = Arrays.stream(userIdsQueryParam.split(","))
-          .map(schoolId -> Long.parseLong(schoolId))
-          .collect(Collectors.toList());
+      List<Long> userIds = Arrays
+        .stream(userIdsQueryParam.split(","))
+        .map(schoolId -> Long.parseLong(schoolId))
+        .collect(Collectors.toList());
 
       // Restrict event leader queries to users who have granted access to their data
       if (Role.EVENT_LEADER.equals(currentUser.getRole())) {
@@ -696,17 +787,15 @@ public class UsersFacade extends AbstractSegueFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (NumberFormatException e) {
-      return new SegueErrorResponse(Status.BAD_REQUEST, "Unable to parse all parameters as integers.")
-          .toResponse();
+      return new SegueErrorResponse(Status.BAD_REQUEST, "Unable to parse all parameters as integers.").toResponse();
     } catch (SegueDatabaseException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error while looking up users", e)
-          .toResponse();
+      .toResponse();
     } catch (IOException | UnableToIndexSchoolsException | SegueSearchException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error while looking up schools", e)
-          .toResponse();
+      .toResponse();
     }
   }
-
 
   @POST
   @Path("/users/request_role_change")
@@ -714,7 +803,9 @@ public class UsersFacade extends AbstractSegueFacade {
   @Consumes(MediaType.APPLICATION_JSON)
   @Operation(summary = "Submit a contact form request.")
   public Response requestRoleChange(
-      @Context final HttpServletRequest request, final Map<String, String> requestDetails) {
+    @Context final HttpServletRequest request,
+    final Map<String, String> requestDetails
+  ) {
     if (requestDetails == null || StringUtils.isEmpty(requestDetails.get("verificationDetails"))) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "Missing form details.").toResponse();
     }
@@ -723,20 +814,19 @@ public class UsersFacade extends AbstractSegueFacade {
       RegisteredUserDTO currentUserDto = this.userManager.getCurrentRegisteredUser(request);
 
       if (currentUserDto.getTeacherPending()) {
-        return new SegueErrorResponse(
-            Status.BAD_REQUEST, "You have already submitted a teacher upgrade request.").toResponse();
+        return new SegueErrorResponse(Status.BAD_REQUEST, "You have already submitted a teacher upgrade request.")
+        .toResponse();
       }
       if (currentUserDto.getRole() == Role.TEACHER) {
-        return new SegueErrorResponse(
-            Status.BAD_REQUEST, "You already have a teacher role.").toResponse();
+        return new SegueErrorResponse(Status.BAD_REQUEST, "You already have a teacher role.").toResponse();
       }
 
       userManager.sendRoleChangeRequestEmail(request, currentUserDto, Role.TEACHER, requestDetails);
       RegisteredUserDTO updatedUser = userManager.updateTeacherPendingFlag(currentUserDto.getId(), true);
       return Response.ok(updatedUser).build();
     } catch (NoUserLoggedInException | NoUserException e) {
-      return new SegueErrorResponse(Status.UNAUTHORIZED,
-          "You must be logged in to request a role change.").toResponse();
+      return new SegueErrorResponse(Status.UNAUTHORIZED, "You must be logged in to request a role change.")
+      .toResponse();
     } catch (SegueDatabaseException e) {
       String errorMsg = "A database error has occurred while handling a role change request";
       log.error(errorMsg, e);

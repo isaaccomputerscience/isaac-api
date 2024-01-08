@@ -26,9 +26,14 @@ public class MisuseStatisticDTO {
   private Date lastEventTimestamp;
   private Integer currentCounter;
 
-  public MisuseStatisticDTO(final String agentIdentifier, final String eventType, final Boolean isMisused,
-                            final Boolean isOverSoftThreshold, final Date lastEventTimestamp,
-                            final Integer currentCounter) {
+  public MisuseStatisticDTO(
+    final String agentIdentifier,
+    final String eventType,
+    final Boolean isMisused,
+    final Boolean isOverSoftThreshold,
+    final Date lastEventTimestamp,
+    final Integer currentCounter
+  ) {
     this.agentIdentifier = agentIdentifier;
     this.eventType = eventType;
     this.isMisused = isMisused;

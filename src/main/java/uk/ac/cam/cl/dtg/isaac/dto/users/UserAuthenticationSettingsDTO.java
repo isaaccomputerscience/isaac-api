@@ -39,8 +39,12 @@ public class UserAuthenticationSettingsDTO extends AbstractSegueUserDTO {
    * @param hasSegueAccount - boolean whether or not they have a segue account
    * @param mfaStatus       - boolean whether or not they have MFA enabled on a segue account
    */
-  public UserAuthenticationSettingsDTO(final Long id, final List<AuthenticationProvider> linkedAccounts,
-                                       final boolean hasSegueAccount, final boolean mfaStatus) {
+  public UserAuthenticationSettingsDTO(
+    final Long id,
+    final List<AuthenticationProvider> linkedAccounts,
+    final boolean hasSegueAccount,
+    final boolean mfaStatus
+  ) {
     this.id = id;
     this.linkedAccounts = linkedAccounts;
     this.hasSegueAccount = hasSegueAccount;
@@ -50,9 +54,7 @@ public class UserAuthenticationSettingsDTO extends AbstractSegueUserDTO {
   /**
    * Default constructor required for Jackson.
    */
-  public UserAuthenticationSettingsDTO() {
-
-  }
+  public UserAuthenticationSettingsDTO() {}
 
   /**
    * Gets the id.
@@ -64,7 +66,6 @@ public class UserAuthenticationSettingsDTO extends AbstractSegueUserDTO {
     return id;
   }
 
-
   /**
    * Sets the id.
    *
@@ -74,7 +75,6 @@ public class UserAuthenticationSettingsDTO extends AbstractSegueUserDTO {
   public void setId(final Long id) {
     this.id = id;
   }
-
 
   /**
    * Gets the linkedAccounts.
@@ -129,5 +129,4 @@ public class UserAuthenticationSettingsDTO extends AbstractSegueUserDTO {
   public void setMfaStatus(final boolean mfaStatus) {
     this.mfaStatus = mfaStatus;
   }
-
 }

@@ -20,9 +20,9 @@ public class SegueSCryptv1 extends SegueSCrypt implements ISegueHashingAlgorithm
   private static final Integer ITERATIONS = 65536;
   private static final Integer BLOCK_SIZE = 8;
   private static final Integer PARALLELISM_FACTOR = 1;
-  private static final Integer KEY_LENGTH = 64;  // bytes
+  private static final Integer KEY_LENGTH = 64; // bytes
   private static final String SALTING_ALGORITHM = "SHA1PRNG";
-  private static final int SALT_SIZE = 16;  // bytes
+  private static final int SALT_SIZE = 16; // bytes
 
   public SegueSCryptv1() {
     super(ITERATIONS, BLOCK_SIZE, PARALLELISM_FACTOR, KEY_LENGTH, SALTING_ALGORITHM, SALT_SIZE);
@@ -32,5 +32,4 @@ public class SegueSCryptv1 extends SegueSCrypt implements ISegueHashingAlgorithm
   public String hashingAlgorithmName() {
     return "SegueSCryptv1";
   }
-
 }

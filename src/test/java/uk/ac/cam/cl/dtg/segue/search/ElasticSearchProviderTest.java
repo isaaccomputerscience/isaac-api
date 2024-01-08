@@ -35,10 +35,11 @@ public class ElasticSearchProviderTest {
     Map<String, AbstractFilterInstruction> filters = new HashMap<>();
     filters.put("published", new SimpleFilterInstruction("true"));
 
-    BoolQueryBuilder expectedQuery = QueryBuilders.boolQuery()
-        .must(QueryBuilders.boolQuery()
-            .must(QueryBuilders.boolQuery()
-                .must(QueryBuilders.matchQuery("published", "true"))));
+    BoolQueryBuilder expectedQuery = QueryBuilders
+      .boolQuery()
+      .must(
+        QueryBuilders.boolQuery().must(QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("published", "true")))
+      );
 
     // Act
     QueryBuilder actualQuery = provider.generateFilterQuery(filters);
@@ -55,10 +56,11 @@ public class ElasticSearchProviderTest {
     Map<String, AbstractFilterInstruction> filters = new HashMap<>();
     filters.put("published", new SimpleExclusionInstruction("true"));
 
-    BoolQueryBuilder expectedQuery = QueryBuilders.boolQuery()
-        .mustNot(QueryBuilders.boolQuery()
-            .must(QueryBuilders.boolQuery()
-                .must(QueryBuilders.matchQuery("published", "true"))));
+    BoolQueryBuilder expectedQuery = QueryBuilders
+      .boolQuery()
+      .mustNot(
+        QueryBuilders.boolQuery().must(QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("published", "true")))
+      );
 
     // Act
     QueryBuilder actualQuery = provider.generateFilterQuery(filters);
@@ -76,13 +78,13 @@ public class ElasticSearchProviderTest {
     filters.put("published", new SimpleFilterInstruction("true"));
     filters.put("tags", new SimpleExclusionInstruction("regression_test"));
 
-    BoolQueryBuilder expectedMustQuery = QueryBuilders.boolQuery()
-        .must(QueryBuilders.boolQuery()
-            .must(QueryBuilders.matchQuery("published", "true")));
+    BoolQueryBuilder expectedMustQuery = QueryBuilders
+      .boolQuery()
+      .must(QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("published", "true")));
 
-    BoolQueryBuilder expectedMustNotQuery = QueryBuilders.boolQuery()
-        .must(QueryBuilders.boolQuery()
-            .must(QueryBuilders.matchQuery("tags", "regression_test")));
+    BoolQueryBuilder expectedMustNotQuery = QueryBuilders
+      .boolQuery()
+      .must(QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("tags", "regression_test")));
 
     BoolQueryBuilder expectedQuery = QueryBuilders.boolQuery().must(expectedMustQuery);
     expectedQuery.mustNot(expectedMustNotQuery);

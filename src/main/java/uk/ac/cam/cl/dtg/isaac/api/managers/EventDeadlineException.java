@@ -13,5 +13,4 @@ public class EventDeadlineException extends Exception {
   public EventDeadlineException(final String message) {
     super(message);
   }
-
 }

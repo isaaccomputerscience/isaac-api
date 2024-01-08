@@ -28,9 +28,7 @@ public class IsaacAnvilQuestionDTO extends IsaacQuestionBaseDTO {
   /**
    * IsaacAnvilQuestionDTO.
    */
-  public IsaacAnvilQuestionDTO() {
-
-  }
+  public IsaacAnvilQuestionDTO() {}
 
   /**
    * Gets the anvilApp.

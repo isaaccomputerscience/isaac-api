@@ -55,7 +55,6 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 public class AssignmentFacadeIT extends IsaacIntegrationTest {
-
   private AssignmentFacade assignmentFacade;
   private final String instantExpected = "2049-07-01T12:05:30Z";
   private final Clock clock = Clock.fixed(Instant.parse(instantExpected), ZoneId.of("UTC"));
@@ -63,9 +62,20 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
   @BeforeEach
   public void setUp() throws Exception {
     // get an instance of the facade to test
-    this.assignmentFacade = new AssignmentFacade(assignmentManager, questionManager, userAccountManager,
-        groupManager, properties, gameManager, logManager, userAssociationManager, userBadgeManager,
-        new AssignmentService(userAccountManager), clock);
+    this.assignmentFacade =
+      new AssignmentFacade(
+        assignmentManager,
+        questionManager,
+        userAccountManager,
+        groupManager,
+        properties,
+        gameManager,
+        logManager,
+        userAssociationManager,
+        userBadgeManager,
+        new AssignmentService(userAccountManager),
+        clock
+      );
   }
 
   @AfterEach
@@ -74,8 +84,11 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
     reset(userBadgeManager);
 
     // reset assignments in DB, so the same assignment can be re-used across tests
-    try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
-        "DELETE FROM assignments WHERE gameboard_id in (?,?);")) {
+    try (
+      PreparedStatement pst = postgresSqlDb
+        .getDatabaseConnection()
+        .prepareStatement("DELETE FROM assignments WHERE gameboard_id in (?,?);")
+    ) {
       pst.setString(1, ITConstants.ASSIGNMENTS_TEST_GAMEBOARD_ID);
       pst.setString(2, ITConstants.ASSIGNMENTS_DATE_TEST_GAMEBOARD_ID);
       pst.executeUpdate();
@@ -91,17 +104,12 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  public void assignBulkEndpoint_setValidAssignmentAsTeacher_assignsSuccessfully() throws
-      NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-      AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-
+  public void assignBulkEndpoint_setValidAssignmentAsTeacher_assignsSuccessfully()
+    throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
     // Arrange
     // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest assignGameboardsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest assignGameboardsRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(assignGameboardsRequest);
 
     // build assignment
@@ -111,16 +119,18 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
 
     // Act
     // make request
-    Response assignBulkResponse = assignmentFacade.assignGameBoards(assignGameboardsRequest,
-        Collections.singletonList(assignment));
+    Response assignBulkResponse = assignmentFacade.assignGameBoards(
+      assignGameboardsRequest,
+      Collections.singletonList(assignment)
+    );
 
     // Assert
     // check status code is OK
     assertEquals(Response.Status.OK.getStatusCode(), assignBulkResponse.getStatus());
 
     // check the assignment assigned successfully
-    @SuppressWarnings("unchecked") ArrayList<AssignmentStatusDTO> responseBody =
-        (ArrayList<AssignmentStatusDTO>) assignBulkResponse.getEntity();
+    @SuppressWarnings("unchecked")
+    ArrayList<AssignmentStatusDTO> responseBody = (ArrayList<AssignmentStatusDTO>) assignBulkResponse.getEntity();
     assertNull(responseBody.get(0).getErrorMessage());
   }
 
@@ -160,12 +170,8 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
   // }
 
   @Test
-  public void assignBulkEndpoint_scheduleAssignmentWithValidDueDateAsTeacher_assignsSuccessfully() throws
-      NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-      AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-
+  public void assignBulkEndpoint_scheduleAssignmentWithValidDueDateAsTeacher_assignsSuccessfully()
+    throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
     // Arrange
     // build due date
     Calendar dueDateCalendar = Calendar.getInstance();
@@ -174,9 +180,8 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
     dueDateCalendar.set(Calendar.YEAR, 2050);
 
     // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest assignGameboardsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest assignGameboardsRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(assignGameboardsRequest);
 
     // build assignment
@@ -187,16 +192,18 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
 
     // Act
     // make request
-    Response assignBulkResponse = assignmentFacade.assignGameBoards(assignGameboardsRequest,
-        Collections.singletonList(assignment));
+    Response assignBulkResponse = assignmentFacade.assignGameBoards(
+      assignGameboardsRequest,
+      Collections.singletonList(assignment)
+    );
 
     // Assert
     // check status code is OK
     assertEquals(Response.Status.OK.getStatusCode(), assignBulkResponse.getStatus());
 
     // check the assignment assigned successfully
-    @SuppressWarnings("unchecked") ArrayList<AssignmentStatusDTO> responseBody =
-        (ArrayList<AssignmentStatusDTO>) assignBulkResponse.getEntity();
+    @SuppressWarnings("unchecked")
+    ArrayList<AssignmentStatusDTO> responseBody = (ArrayList<AssignmentStatusDTO>) assignBulkResponse.getEntity();
     assertNull(responseBody.get(0).getErrorMessage());
   }
 
@@ -243,12 +250,8 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
   // }
 
   @Test
-  public void assignBulkEndpoint_scheduleAssignmentWithDueDateInPastAsTeacher_failsToAssign() throws
-      NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
-      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
-      AdditionalAuthenticationRequiredException, InvalidKeySpecException,
-      NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
-
+  public void assignBulkEndpoint_scheduleAssignmentWithDueDateInPastAsTeacher_failsToAssign()
+    throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException, AuthenticationProviderMappingException, IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
     // Arrange
     // build due date
     Calendar dueDateCalendar = Calendar.getInstance();
@@ -257,9 +260,8 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
     dueDateCalendar.set(Calendar.YEAR, 2049);
 
     // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest assignGameboardsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest assignGameboardsRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(assignGameboardsRequest);
 
     // build assignment
@@ -270,23 +272,24 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
 
     // Act
     // make request
-    Response assignBulkResponse = assignmentFacade.assignGameBoards(assignGameboardsRequest,
-        Collections.singletonList(assignment));
+    Response assignBulkResponse = assignmentFacade.assignGameBoards(
+      assignGameboardsRequest,
+      Collections.singletonList(assignment)
+    );
 
     // Assert
     // check status code is OK (this is expected even if no assignment assigns successfully)
     assertEquals(Response.Status.OK.getStatusCode(), assignBulkResponse.getStatus());
 
     // check the assignment failed to assign
-    @SuppressWarnings("unchecked") ArrayList<AssignmentStatusDTO> responseBody =
-        (ArrayList<AssignmentStatusDTO>) assignBulkResponse.getEntity();
+    @SuppressWarnings("unchecked")
+    ArrayList<AssignmentStatusDTO> responseBody = (ArrayList<AssignmentStatusDTO>) assignBulkResponse.getEntity();
     assertEquals("The assignment cannot be due in the past.", responseBody.get(0).getErrorMessage());
   }
 
   @Test
-  public void assignBulkEndpoint_scheduleSingleAssignmentWithDistantScheduledDateAsTeacher_failsToAssign() throws
-      Exception {
-
+  public void assignBulkEndpoint_scheduleSingleAssignmentWithDistantScheduledDateAsTeacher_failsToAssign()
+    throws Exception {
     // Arrange
     // build scheduled date
     Calendar scheduledDateCalendar = Calendar.getInstance();
@@ -295,9 +298,8 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
     scheduledDateCalendar.set(Calendar.YEAR, 2050);
 
     // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest assignGameboardsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest assignGameboardsRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(assignGameboardsRequest);
 
     // build assignment
@@ -308,24 +310,27 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
 
     // Act
     // make request
-    Response assignBulkResponse = assignmentFacade.assignGameBoards(assignGameboardsRequest,
-        Collections.singletonList(assignment));
+    Response assignBulkResponse = assignmentFacade.assignGameBoards(
+      assignGameboardsRequest,
+      Collections.singletonList(assignment)
+    );
 
     // Assert
     // check status code is OK (this is expected even if no assignment assigns successfully)
     assertEquals(Response.Status.OK.getStatusCode(), assignBulkResponse.getStatus());
 
     // check the assignment failed to assign
-    @SuppressWarnings("unchecked") ArrayList<AssignmentStatusDTO> responseBody =
-        (ArrayList<AssignmentStatusDTO>) assignBulkResponse.getEntity();
-    assertEquals("The assignment cannot be scheduled to begin more than one year in the future.",
-        responseBody.get(0).getErrorMessage());
+    @SuppressWarnings("unchecked")
+    ArrayList<AssignmentStatusDTO> responseBody = (ArrayList<AssignmentStatusDTO>) assignBulkResponse.getEntity();
+    assertEquals(
+      "The assignment cannot be scheduled to begin more than one year in the future.",
+      responseBody.get(0).getErrorMessage()
+    );
   }
 
   @Test
-  public void assignBulkEndpoint_scheduleSingleAssignmentWithScheduledDateAfterDueDateAsTeacher_failsToAssign() throws
-      Exception {
-
+  public void assignBulkEndpoint_scheduleSingleAssignmentWithScheduledDateAfterDueDateAsTeacher_failsToAssign()
+    throws Exception {
     // Arrange
     // build scheduled date
     Calendar scheduledDateCalendar = Calendar.getInstance();
@@ -340,9 +345,8 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
     dueDateCalendar.set(Calendar.YEAR, 2050);
 
     // log in as Teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest assignGameboardsRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest assignGameboardsRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(assignGameboardsRequest);
 
     // build assignment
@@ -354,18 +358,19 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
 
     // Act
     // make request
-    Response assignBulkResponse = assignmentFacade.assignGameBoards(assignGameboardsRequest,
-        Collections.singletonList(assignment));
+    Response assignBulkResponse = assignmentFacade.assignGameBoards(
+      assignGameboardsRequest,
+      Collections.singletonList(assignment)
+    );
 
     // Assert
     // check status code is OK (this is expected even if no assignment assigns successfully)
     assertEquals(Response.Status.OK.getStatusCode(), assignBulkResponse.getStatus());
 
     // check the assignment failed to assign
-    @SuppressWarnings("unchecked") ArrayList<AssignmentStatusDTO> responseBody =
-        (ArrayList<AssignmentStatusDTO>) assignBulkResponse.getEntity();
-    assertEquals("The assignment cannot be scheduled to begin after it is due.",
-        responseBody.get(0).getErrorMessage());
+    @SuppressWarnings("unchecked")
+    ArrayList<AssignmentStatusDTO> responseBody = (ArrayList<AssignmentStatusDTO>) assignBulkResponse.getEntity();
+    assertEquals("The assignment cannot be scheduled to begin after it is due.", responseBody.get(0).getErrorMessage());
   }
 
   // FLAKY
@@ -401,7 +406,7 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
 
   @Test
   public void deleteAssignmentEndpoint_attemptToDeleteOwnersAssignmentAsAdditionalManagerWithAdditionManagerPrivilegesOn_succeeds()
-      throws Exception {
+    throws Exception {
     // Test Teacher (5) is additional manager of group 5, which is owned by dave teacher (10)
 
     // Arrange
@@ -411,15 +416,17 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
     groupManager.editUserGroup(davesGroup);
 
     // log in as Test teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest deleteAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest deleteAssignmentRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(deleteAssignmentRequest);
 
     // Act
     // make request
-    Response deleteAssignmentResponse = assignmentFacade.deleteAssignment(deleteAssignmentRequest,
-        ITConstants.ADDITIONAL_MANAGER_TEST_GAMEBOARD_ID, ITConstants.DAVE_TEACHERS_BC_GROUP_ID);
+    Response deleteAssignmentResponse = assignmentFacade.deleteAssignment(
+      deleteAssignmentRequest,
+      ITConstants.ADDITIONAL_MANAGER_TEST_GAMEBOARD_ID,
+      ITConstants.DAVE_TEACHERS_BC_GROUP_ID
+    );
 
     // Assert
     // check status code is NO_CONTENT (successful)
@@ -429,18 +436,21 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
   @Test
   public void getAssignmentProgressDownloadCSV_succeeds() throws Exception {
     // log in as Test teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest downloadAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest downloadAssignmentRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(downloadAssignmentRequest);
 
-    Response downloadAssignmentResponse =
-        assignmentFacade.getAssignmentProgressDownloadCSV(downloadAssignmentRequest, 4L, "excel");
+    Response downloadAssignmentResponse = assignmentFacade.getAssignmentProgressDownloadCSV(
+      downloadAssignmentRequest,
+      4L,
+      "excel"
+    );
     String downloadAssignmentContents = downloadAssignmentResponse.getEntity().toString();
 
     String expectedContents;
-    try (FileInputStream expectedFile = new FileInputStream(
-        "src/test/resources/expected_assignment_progress_export.csv")) {
+    try (
+      FileInputStream expectedFile = new FileInputStream("src/test/resources/expected_assignment_progress_export.csv")
+    ) {
       expectedContents = IOUtils.toString(expectedFile, StandardCharsets.UTF_8);
     }
     assertEquals(expectedContents, downloadAssignmentContents);
@@ -449,13 +459,15 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
   @Test
   public void getAssignmentProgressDownloadCSV_permissionDenied() throws Exception {
     // log in as Test teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TUTOR_EMAIL,
-        ITConstants.TEST_TUTOR_PASSWORD);
-    HttpServletRequest downloadAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TUTOR_EMAIL, ITConstants.TEST_TUTOR_PASSWORD);
+    HttpServletRequest downloadAssignmentRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(downloadAssignmentRequest);
 
-    Response downloadAssignmentResponse =
-        assignmentFacade.getAssignmentProgressDownloadCSV(downloadAssignmentRequest, 4L, "excel");
+    Response downloadAssignmentResponse = assignmentFacade.getAssignmentProgressDownloadCSV(
+      downloadAssignmentRequest,
+      4L,
+      "excel"
+    );
 
     assertEquals(403, downloadAssignmentResponse.getStatus());
   }
@@ -463,14 +475,15 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
   @Test
   public void getGroupAssignmentsProgressDownloadCSV_succeeds() throws Exception {
     // log in as Test teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL,
-        ITConstants.TEST_TEACHER_PASSWORD);
-    HttpServletRequest downloadAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TEACHER_EMAIL, ITConstants.TEST_TEACHER_PASSWORD);
+    HttpServletRequest downloadAssignmentRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(downloadAssignmentRequest);
 
-    Response downloadAssignmentResponse =
-        assignmentFacade.getGroupAssignmentsProgressDownloadCSV(downloadAssignmentRequest,
-            ASSIGNMENT_FACADE_TEST_GROUP_ID, "excel");
+    Response downloadAssignmentResponse = assignmentFacade.getGroupAssignmentsProgressDownloadCSV(
+      downloadAssignmentRequest,
+      ASSIGNMENT_FACADE_TEST_GROUP_ID,
+      "excel"
+    );
     String downloadAssignmentContents = downloadAssignmentResponse.getEntity().toString();
 
     String expectedContents;
@@ -483,14 +496,15 @@ public class AssignmentFacadeIT extends IsaacIntegrationTest {
   @Test
   public void getGroupAssignmentsProgressDownloadCSV_permissionDenied() throws Exception {
     // log in as Test teacher, create request
-    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TUTOR_EMAIL,
-        ITConstants.TEST_TUTOR_PASSWORD);
-    HttpServletRequest downloadAssignmentRequest = createRequestWithCookies(new Cookie[] {teacherLogin.cookie});
+    LoginResult teacherLogin = loginAs(httpSession, ITConstants.TEST_TUTOR_EMAIL, ITConstants.TEST_TUTOR_PASSWORD);
+    HttpServletRequest downloadAssignmentRequest = createRequestWithCookies(new Cookie[] { teacherLogin.cookie });
     replay(downloadAssignmentRequest);
 
-    Response downloadAssignmentResponse =
-        assignmentFacade.getGroupAssignmentsProgressDownloadCSV(downloadAssignmentRequest,
-            ASSIGNMENT_FACADE_TEST_GROUP_ID, "excel");
+    Response downloadAssignmentResponse = assignmentFacade.getGroupAssignmentsProgressDownloadCSV(
+      downloadAssignmentRequest,
+      ASSIGNMENT_FACADE_TEST_GROUP_ID,
+      "excel"
+    );
 
     assertEquals(403, downloadAssignmentResponse.getStatus());
   }

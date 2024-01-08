@@ -4,7 +4,6 @@ import java.util.List;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 public interface IUserAlerts {
-
   List<IUserAlert> getUserAlerts(Long userId) throws SegueDatabaseException;
 
   IUserAlert createAlert(Long userId, String message, String link) throws SegueDatabaseException;

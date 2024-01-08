@@ -23,7 +23,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  * Interface representing an abstract persistence mechanism for 2FA secrets.
  */
 public interface ITOTPDataManager {
-
   /**
    * get2FASharedSecret.
    *
@@ -50,5 +49,4 @@ public interface ITOTPDataManager {
    * @throws SegueDatabaseException - if something goes wrong in the database.
    */
   void delete2FACredentials(Long userId) throws SegueDatabaseException;
-
 }

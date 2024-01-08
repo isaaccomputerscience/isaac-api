@@ -7,7 +7,6 @@ import uk.ac.cam.cl.dtg.segue.api.managers.UserBadgeManager;
  * Created by du220 on 27/04/2018.
  */
 public class UserBadge {
-
   private Long userId;
   private UserBadgeManager.Badge badgeName;
   private JsonNode state;

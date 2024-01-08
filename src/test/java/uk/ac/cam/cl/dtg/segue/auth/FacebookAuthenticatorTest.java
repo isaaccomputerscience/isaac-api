@@ -19,6 +19,7 @@ package uk.ac.cam.cl.dtg.segue.auth;
 import org.junit.Before;
 
 public class FacebookAuthenticatorTest extends IOAuth2AuthenticatorTest {
+
   /**
    * Initial configuration of tests.
    *
@@ -28,8 +29,7 @@ public class FacebookAuthenticatorTest extends IOAuth2AuthenticatorTest {
   @Before
   public final void setUp() throws Exception {
     this.oauth2Authenticator =
-        new FacebookAuthenticator(clientId, clientSecret, callbackUri, requestedScopes, "someRequestedFields");
+      new FacebookAuthenticator(clientId, clientSecret, callbackUri, requestedScopes, "someRequestedFields");
     this.authenticator = this.oauth2Authenticator;
   }
-
 }

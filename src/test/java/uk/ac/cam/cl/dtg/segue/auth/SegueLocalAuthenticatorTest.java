@@ -53,7 +53,6 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  * Test class for the SegueLocalAuthenticator class.
  */
 public class SegueLocalAuthenticatorTest {
-
   private IUserDataManager userDataManager;
   private IPasswordDataManager passwordDataManager;
   private PropertiesLoader propertiesLoader;
@@ -64,10 +63,14 @@ public class SegueLocalAuthenticatorTest {
   private final ISegueHashingAlgorithm oldAlgorithm3 = new SeguePBKDF2v3();
 
   private final Map<String, ISegueHashingAlgorithm> possibleAlgorithms = ImmutableMap.of(
-      preferredAlgorithm.hashingAlgorithmName(), preferredAlgorithm,
-      oldAlgorithm1.hashingAlgorithmName(), oldAlgorithm1,
-      oldAlgorithm2.hashingAlgorithmName(), oldAlgorithm2,
-      oldAlgorithm3.hashingAlgorithmName(), oldAlgorithm3
+    preferredAlgorithm.hashingAlgorithmName(),
+    preferredAlgorithm,
+    oldAlgorithm1.hashingAlgorithmName(),
+    oldAlgorithm1,
+    oldAlgorithm2.hashingAlgorithmName(),
+    oldAlgorithm2,
+    oldAlgorithm3.hashingAlgorithmName(),
+    oldAlgorithm3
   );
 
   /**
@@ -84,6 +87,7 @@ public class SegueLocalAuthenticatorTest {
 
   @Nested
   class SegueLocalAuthenticatorSetOrChangeUsersPassword {
+
     /**
      * Verify that setOrChangeUsersPassword fails with bad input.
      * * @throws InvalidKeySpecException
@@ -98,8 +102,13 @@ public class SegueLocalAuthenticatorTest {
 
       replay(userDataManager);
 
-      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(userDataManager, passwordDataManager,
-          propertiesLoader, possibleAlgorithms, preferredAlgorithm);
+      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(
+        userDataManager,
+        passwordDataManager,
+        propertiesLoader,
+        possibleAlgorithms,
+        preferredAlgorithm
+      );
 
       try {
         segueAuthenticator.setOrChangeUsersPassword(someUser, null);
@@ -131,18 +140,22 @@ public class SegueLocalAuthenticatorTest {
      */
     @Test
     public final void validPasswordPasswordAndHashShouldBePopulatedAsBase64()
-        throws InvalidKeySpecException, NoSuchAlgorithmException {
+      throws InvalidKeySpecException, NoSuchAlgorithmException {
       RegisteredUser someUser = new RegisteredUser();
       someUser.setEmail(TEST_USER_EMAIL);
       someUser.setId(TEST_USER_ID);
       replay(userDataManager);
 
-      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(userDataManager, passwordDataManager,
-          propertiesLoader, possibleAlgorithms, preferredAlgorithm);
+      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(
+        userDataManager,
+        passwordDataManager,
+        propertiesLoader,
+        possibleAlgorithms,
+        preferredAlgorithm
+      );
 
       try {
         segueAuthenticator.setOrChangeUsersPassword(someUser, TEST_USER_CORRECT_PASSWORD);
-
         // TODO write test
 
       } catch (InvalidPasswordException e) {
@@ -155,13 +168,13 @@ public class SegueLocalAuthenticatorTest {
 
   @Nested
   class SegueLocalAuthenticatorAuthenticate {
+
     /**
      * Verify that setOrChangeUsersPassword fails on a bad password.
      * * @throws SegueDatabaseException
      */
     @Test
-    public final void correctEmailAndIncorrectPasswordProvided()
-        throws SegueDatabaseException {
+    public final void correctEmailAndIncorrectPasswordProvided() throws SegueDatabaseException {
       String usersEmailAddress = TEST_USER_EMAIL;
 
       RegisteredUser userFromDatabase = new RegisteredUser();
@@ -183,11 +196,18 @@ public class SegueLocalAuthenticatorTest {
 
       replay(userDataManager, passwordDataManager);
 
-      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(userDataManager, passwordDataManager,
-          propertiesLoader, possibleAlgorithms, preferredAlgorithm);
+      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(
+        userDataManager,
+        passwordDataManager,
+        propertiesLoader,
+        possibleAlgorithms,
+        preferredAlgorithm
+      );
 
-      assertThrows(IncorrectCredentialsProvidedException.class,
-          () -> segueAuthenticator.authenticate(usersEmailAddress, TEST_USER_INCORRECT_PASSWORD));
+      assertThrows(
+        IncorrectCredentialsProvidedException.class,
+        () -> segueAuthenticator.authenticate(usersEmailAddress, TEST_USER_INCORRECT_PASSWORD)
+      );
     }
 
     /**
@@ -195,9 +215,7 @@ public class SegueLocalAuthenticatorTest {
      * * @throws SegueDatabaseException
      */
     @Test
-    public final void badEmailAndIncorrectPasswordProvided()
-        throws SegueDatabaseException {
-
+    public final void badEmailAndIncorrectPasswordProvided() throws SegueDatabaseException {
       RegisteredUser userFromDatabase = new RegisteredUser();
       userFromDatabase.setId(TEST_USER_ID);
       userFromDatabase.setEmail(TEST_USER_EMAIL);
@@ -208,13 +226,19 @@ public class SegueLocalAuthenticatorTest {
 
       replay(userDataManager);
 
-      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(userDataManager, passwordDataManager,
-          propertiesLoader, possibleAlgorithms, preferredAlgorithm);
+      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(
+        userDataManager,
+        passwordDataManager,
+        propertiesLoader,
+        possibleAlgorithms,
+        preferredAlgorithm
+      );
 
-      assertThrows(IncorrectCredentialsProvidedException.class,
-          () -> segueAuthenticator.authenticate(someBadEmail, TEST_USER_INCORRECT_PASSWORD));
+      assertThrows(
+        IncorrectCredentialsProvidedException.class,
+        () -> segueAuthenticator.authenticate(someBadEmail, TEST_USER_INCORRECT_PASSWORD)
+      );
     }
-
   }
 
   /**
@@ -228,8 +252,7 @@ public class SegueLocalAuthenticatorTest {
    */
   @Test
   public final void segueLocalAuthenticatorSetPasswordAndImmediateAuthenticateCorrectEmailAndPasswordProvided()
-      throws SegueDatabaseException,
-      NoCredentialsAvailableException, InvalidPasswordException, InvalidKeySpecException, NoSuchAlgorithmException {
+    throws SegueDatabaseException, NoCredentialsAvailableException, InvalidPasswordException, InvalidKeySpecException, NoSuchAlgorithmException {
     String someCorrectPasswordPlainText = TEST_USER_CORRECT_PASSWORD;
     String usersEmailAddress = TEST_USER_EMAIL;
 
@@ -248,19 +271,24 @@ public class SegueLocalAuthenticatorTest {
 
     replay(userDataManager, passwordDataManager);
 
-    SegueLocalAuthenticator segueAuthenticator =
-        new SegueLocalAuthenticator(userDataManager, passwordDataManager,
-            propertiesLoader, possibleAlgorithms, preferredAlgorithm);
+    SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(
+      userDataManager,
+      passwordDataManager,
+      propertiesLoader,
+      possibleAlgorithms,
+      preferredAlgorithm
+    );
     try {
       // first try and mutate the user object using the set method.
       // this should set the password and secure hash on the user object.
       segueAuthenticator.setOrChangeUsersPassword(userFromDatabase, someCorrectPasswordPlainText);
 
       // now try and authenticate using the password we just created.
-      RegisteredUser authenticatedUser =
-          segueAuthenticator.authenticate(usersEmailAddress, someCorrectPasswordPlainText);
+      RegisteredUser authenticatedUser = segueAuthenticator.authenticate(
+        usersEmailAddress,
+        someCorrectPasswordPlainText
+      );
       assertNotNull(authenticatedUser);
-
     } catch (IncorrectCredentialsProvidedException e) {
       fail("We expect a user to be returned");
     }
@@ -268,10 +296,16 @@ public class SegueLocalAuthenticatorTest {
 
   @Nested
   class EnsureValidPasswordValidStrings {
+
     @Test
     public void validString() {
-      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(userDataManager, passwordDataManager,
-          propertiesLoader, possibleAlgorithms, preferredAlgorithm);
+      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(
+        userDataManager,
+        passwordDataManager,
+        propertiesLoader,
+        possibleAlgorithms,
+        preferredAlgorithm
+      );
       try {
         segueAuthenticator.ensureValidPassword("Password123!");
       } catch (InvalidPasswordException e) {
@@ -281,8 +315,13 @@ public class SegueLocalAuthenticatorTest {
 
     @Test
     public void validSpecialCharacters() {
-      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(userDataManager, passwordDataManager,
-          propertiesLoader, possibleAlgorithms, preferredAlgorithm);
+      SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(
+        userDataManager,
+        passwordDataManager,
+        propertiesLoader,
+        possibleAlgorithms,
+        preferredAlgorithm
+      );
       try {
         segueAuthenticator.ensureValidPassword("Password123 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
       } catch (InvalidPasswordException e) {
@@ -295,20 +334,27 @@ public class SegueLocalAuthenticatorTest {
   @NullAndEmptySource
   @MethodSource("ensureValidPasswordInvalidStrings")
   public void ensureValidPasswordInvalidStrings(final String password) {
-    SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(userDataManager, passwordDataManager,
-        propertiesLoader, possibleAlgorithms, preferredAlgorithm);
-    Exception exception =
-        assertThrows(InvalidPasswordException.class, () -> segueAuthenticator.ensureValidPassword(password));
+    SegueLocalAuthenticator segueAuthenticator = new SegueLocalAuthenticator(
+      userDataManager,
+      passwordDataManager,
+      propertiesLoader,
+      possibleAlgorithms,
+      preferredAlgorithm
+    );
+    Exception exception = assertThrows(
+      InvalidPasswordException.class,
+      () -> segueAuthenticator.ensureValidPassword(password)
+    );
     assertEquals(PASSWORD_REQUIREMENTS_ERROR_MESSAGE, exception.getMessage());
   }
 
   private static Stream<Arguments> ensureValidPasswordInvalidStrings() {
     return Stream.of(
-        Arguments.of("password123"), // Password must equal or exceed the minimum length
-        Arguments.of("password123!"), // Password must contain an upper case letter
-        Arguments.of("PASSWORD123!"), // Password must contain a lower case letter
-        Arguments.of("Passwordabc!"), // Password must contain a number
-        Arguments.of("Password1234") // Password must contain a special character
+      Arguments.of("password123"), // Password must equal or exceed the minimum length
+      Arguments.of("password123!"), // Password must contain an upper case letter
+      Arguments.of("PASSWORD123!"), // Password must contain a lower case letter
+      Arguments.of("Passwordabc!"), // Password must contain a number
+      Arguments.of("Password1234") // Password must contain a special character
     );
   }
 
@@ -317,8 +363,8 @@ public class SegueLocalAuthenticatorTest {
   private static final String TEST_USER_BAD_EMAIL = "badtest@test.com";
   private static final String TEST_USER_CORRECT_PASSWORD = "test5eguePassw0rd!";
   private static final String TEST_USER_INCORRECT_PASSWORD = "password";
-  private static final String TEST_USER_CORRECT_PASSWORD_HASH_FROM_DB
-      = "q41e8iZsi0TO5xB1MWwC06jkaWx8MTnSHMp3eP/FNOTBCwpTnPX5a/KsUTUJ2cwnCiXZeATVqWEF2FCbSQp9Fg==";
+  private static final String TEST_USER_CORRECT_PASSWORD_HASH_FROM_DB =
+    "q41e8iZsi0TO5xB1MWwC06jkaWx8MTnSHMp3eP/FNOTBCwpTnPX5a/KsUTUJ2cwnCiXZeATVqWEF2FCbSQp9Fg==";
   private static final String TEST_USER_CORRECT_SECURE_SALT_FROM_DB = "P77Fhqu2/SAVGDCtu9IkHg==";
   private static final Long TEST_USER_ID = 533L;
 }

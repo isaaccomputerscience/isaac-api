@@ -7,7 +7,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.AssignmentDTO;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 public interface IAssignmentPersistenceManager {
-
   /**
    * Save an Assignment.
    *
@@ -44,7 +43,7 @@ public interface IAssignmentPersistenceManager {
    * @throws SegueDatabaseException - if there is an error when accessing the database.
    */
   List<AssignmentDTO> getAssignmentsByOwnerIdAndGroupId(Long assignmentOwnerId, Long groupId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * getAssignmentsByGameboardAndGroup.
@@ -55,8 +54,7 @@ public interface IAssignmentPersistenceManager {
    * @throws SegueDatabaseException - if there is an error when accessing the database or if duplicate assignments exist
    *                                      in the database...
    */
-  List<AssignmentDTO> getAssignmentsByGameboardAndGroup(String gameboardId, Long groupId)
-      throws SegueDatabaseException;
+  List<AssignmentDTO> getAssignmentsByGameboardAndGroup(String gameboardId, Long groupId) throws SegueDatabaseException;
 
   /**
    * getAssignmentsByOwner.
@@ -85,7 +83,6 @@ public interface IAssignmentPersistenceManager {
    */
   List<AssignmentDTO> getAssignmentsScheduledForHour(Date timestamp) throws SegueDatabaseException;
 
-
   /**
    * deleteAssignment.
    *
@@ -93,5 +90,4 @@ public interface IAssignmentPersistenceManager {
    * @throws SegueDatabaseException - if we are unable to perform the delete operation.
    */
   void deleteAssignment(Long id) throws SegueDatabaseException;
-
 }

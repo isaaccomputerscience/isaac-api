@@ -25,15 +25,13 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ItemChoiceDTO;
 @DTOMapping(ItemChoiceDTO.class)
 @JsonContentType("itemChoice")
 public class ItemChoice extends Choice {
-
   private Boolean allowSubsetMatch;
   private List<Item> items;
 
   /**
    * Default constructor required for mapping.
    */
-  public ItemChoice() {
-  }
+  public ItemChoice() {}
 
   public List<Item> getItems() {
     return items;

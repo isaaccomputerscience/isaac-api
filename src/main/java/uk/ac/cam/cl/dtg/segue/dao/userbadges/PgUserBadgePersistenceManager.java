@@ -18,27 +18,28 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  * Created by du220 on 13/04/2018.
  */
 public class PgUserBadgePersistenceManager implements IUserBadgePersistenceManager {
-
   private final ObjectMapper mapper = new ObjectMapper();
-
 
   /**
    * Postgres specific database management for user badges.
    */
-  public PgUserBadgePersistenceManager() {
-  }
+  public PgUserBadgePersistenceManager() {}
 
   @Override
-  public UserBadge getBadge(final RegisteredUserDTO user, final UserBadgeManager.Badge badgeName,
-                            final ITransaction transaction) throws SegueDatabaseException {
-
+  public UserBadge getBadge(
+    final RegisteredUserDTO user,
+    final UserBadgeManager.Badge badgeName,
+    final ITransaction transaction
+  )
+    throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
       throw new SegueDatabaseException("Unable to get badge definition from database.");
     }
 
-    String query = "INSERT INTO user_badges (user_id, badge) VALUES (?, ?)"
-        + " ON CONFLICT (user_id, badge) DO UPDATE SET user_id = excluded.user_id"
-        + " WHERE user_badges.user_id = ? AND user_badges.badge = ? RETURNING *";
+    String query =
+      "INSERT INTO user_badges (user_id, badge) VALUES (?, ?)" +
+      " ON CONFLICT (user_id, badge) DO UPDATE SET user_id = excluded.user_id" +
+      " WHERE user_badges.user_id = ? AND user_badges.badge = ? RETURNING *";
 
     Connection conn = ((PgTransaction) transaction).getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query)) {
@@ -49,8 +50,11 @@ public class PgUserBadgePersistenceManager implements IUserBadgePersistenceManag
 
       try (ResultSet results = pst.executeQuery()) {
         results.next();
-        return new UserBadge(user.getId(), badgeName, (results.getString("state") != null)
-            ? mapper.readTree(results.getString("state")) : null);
+        return new UserBadge(
+          user.getId(),
+          badgeName,
+          (results.getString("state") != null) ? mapper.readTree(results.getString("state")) : null
+        );
       }
     } catch (SQLException | IOException e) {
       throw new SegueDatabaseException("Unable to get badge definition from database: " + e);
@@ -59,7 +63,6 @@ public class PgUserBadgePersistenceManager implements IUserBadgePersistenceManag
 
   @Override
   public void updateBadge(final UserBadge badge, final ITransaction transaction) throws SegueDatabaseException {
-
     if (!(transaction instanceof PgTransaction)) {
       throw new SegueDatabaseException("Unable to update database badge.");
     }
@@ -73,7 +76,6 @@ public class PgUserBadgePersistenceManager implements IUserBadgePersistenceManag
       pst.setString(FIELD_UPDATE_BADGE_BADGE_NAME, badge.getBadgeName().name());
 
       pst.executeUpdate();
-
     } catch (SQLException | JsonProcessingException e) {
       throw new SegueDatabaseException("Unable to update database badge.");
     }

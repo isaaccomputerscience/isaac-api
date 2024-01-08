@@ -29,7 +29,6 @@ import java.util.List;
  *            - The type of result that can be held in the Wrapper.
  */
 public class ResultsWrapper<T> {
-
   private final List<T> results;
   private Long totalResultsAvailable;
 

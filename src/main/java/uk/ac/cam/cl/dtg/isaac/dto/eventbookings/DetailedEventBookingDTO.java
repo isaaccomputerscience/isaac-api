@@ -5,9 +5,7 @@ import java.util.Map;
 public class DetailedEventBookingDTO extends EventBookingDTO {
   private Map<String, String> additionalInformation;
 
-  public DetailedEventBookingDTO() {
-
-  }
+  public DetailedEventBookingDTO() {}
 
   /**
    * Get additional event booking information.

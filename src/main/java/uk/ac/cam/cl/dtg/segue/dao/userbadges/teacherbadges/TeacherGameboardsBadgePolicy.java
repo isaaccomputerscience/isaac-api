@@ -17,7 +17,6 @@ import uk.ac.cam.cl.dtg.segue.dao.userbadges.IUserBadgePolicy;
  * Created by du220 on 01/05/2018.
  */
 public class TeacherGameboardsBadgePolicy implements IUserBadgePolicy {
-
   private final GameManager gameManager;
 
   public TeacherGameboardsBadgePolicy(final GameManager gameManager) {
@@ -31,15 +30,14 @@ public class TeacherGameboardsBadgePolicy implements IUserBadgePolicy {
 
   @Override
   public JsonNode initialiseState(final RegisteredUserDTO user, final ITransaction transaction) {
-
     ArrayNode gameboards = JsonNodeFactory.instance.arrayNode();
 
     try {
-      for (GameboardDTO gameboard : gameManager.getUsersGameboards(user, 0,
-          null, null, null).getResults()) {
-
-        if (user.getId().equals(gameboard.getOwnerUserId())
-            && GameboardCreationMethod.BUILDER.equals(gameboard.getCreationMethod())) {
+      for (GameboardDTO gameboard : gameManager.getUsersGameboards(user, 0, null, null, null).getResults()) {
+        if (
+          user.getId().equals(gameboard.getOwnerUserId()) &&
+          GameboardCreationMethod.BUILDER.equals(gameboard.getCreationMethod())
+        ) {
           gameboards.add(gameboard.getId());
         }
       }
@@ -48,12 +46,10 @@ public class TeacherGameboardsBadgePolicy implements IUserBadgePolicy {
     }
 
     return JsonNodeFactory.instance.objectNode().set("gameboards", gameboards);
-
   }
 
   @Override
   public JsonNode updateState(final RegisteredUserDTO user, final JsonNode state, final String event) {
-
     Iterator<JsonNode> iter = ((ArrayNode) state.get("gameboards")).elements();
 
     while (iter.hasNext()) {

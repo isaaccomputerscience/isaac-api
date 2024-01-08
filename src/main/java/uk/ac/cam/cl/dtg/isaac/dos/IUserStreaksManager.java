@@ -7,7 +7,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
  * Created by du220 on 16/04/2018.
  */
 public interface IUserStreaksManager {
-
   /**
    * This method will get the current streak and current streak progress for a registered user.
    *

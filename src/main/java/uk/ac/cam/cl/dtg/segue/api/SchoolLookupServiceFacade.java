@@ -76,12 +76,13 @@ public class SchoolLookupServiceFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "List all schools matching provided criteria.")
-  public Response schoolSearch(@Context final Request request, @QueryParam("query") final String searchQuery,
-                               @QueryParam("urn") final String schoolURN) {
-
+  public Response schoolSearch(
+    @Context final Request request,
+    @QueryParam("query") final String searchQuery,
+    @QueryParam("urn") final String schoolURN
+  ) {
     if ((null == searchQuery || searchQuery.isEmpty()) && (null == schoolURN || schoolURN.isEmpty())) {
-      return new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a search query or school URN")
-          .toResponse();
+      return new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a search query or school URN").toResponse();
     }
 
     EntityTag etag = new EntityTag(schoolListReader.getDataLastModifiedDate());
@@ -101,13 +102,11 @@ public class SchoolLookupServiceFacade {
 
     List<School> list;
     try {
-
       if (schoolURN != null && !schoolURN.isEmpty()) {
         list = Arrays.asList(schoolListReader.findSchoolById(schoolURN));
       } else {
         list = schoolListReader.findSchoolByNameOrPostCode(searchQuery);
       }
-
     } catch (UnableToIndexSchoolsException | SegueSearchException | IOException e) {
       String message = "Unable to create / access the index of schools for the schools service.";
       log.error(message, e);

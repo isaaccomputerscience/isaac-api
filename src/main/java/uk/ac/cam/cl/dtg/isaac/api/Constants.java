@@ -51,7 +51,12 @@ public final class Constants {
   public static final String RELATED_CONTENT_FIELDNAME = "relatedContent";
 
   public static final Set<String> SITE_WIDE_SEARCH_VALID_DOC_TYPES = ImmutableSet.of(
-      QUESTION_TYPE, CONCEPT_TYPE, TOPIC_SUMMARY_PAGE_TYPE, PAGE_TYPE, EVENT_TYPE);
+    QUESTION_TYPE,
+    CONCEPT_TYPE,
+    TOPIC_SUMMARY_PAGE_TYPE,
+    PAGE_TYPE,
+    EVENT_TYPE
+  );
 
   public static final int NUMERIC_QUESTION_DEFAULT_SIGNIFICANT_FIGURES = 2;
 
@@ -64,11 +69,17 @@ public final class Constants {
    * GameboardItemState Represents the potential states of a gameboard item.
    */
   public enum GameboardItemState {
-    PERFECT, PASSED, IN_PROGRESS, NOT_ATTEMPTED, FAILED
+    PERFECT,
+    PASSED,
+    IN_PROGRESS,
+    NOT_ATTEMPTED,
+    FAILED
   }
 
   public enum QuestionPartState {
-    CORRECT, INCORRECT, NOT_ATTEMPTED
+    CORRECT,
+    INCORRECT,
+    NOT_ATTEMPTED
   }
 
   public enum FastTrackLevel {
@@ -95,7 +106,9 @@ public final class Constants {
    * GameboardState Represents the potential states of a gameboard.
    */
   public enum GameboardState {
-    COMPLETED, IN_PROGRESS, NOT_ATTEMPTED
+    COMPLETED,
+    IN_PROGRESS,
+    NOT_ATTEMPTED
   }
 
   // field names
@@ -156,11 +169,13 @@ public final class Constants {
     VIEW_QUESTION,
     VIEW_QUIZ_SECTION,
     VIEW_TOPIC_SUMMARY_PAGE,
-    VIEW_USER_PROGRESS,
+    VIEW_USER_PROGRESS
   }
 
-  public static final Set<String> ISAAC_SERVER_LOG_TYPES =
-      Arrays.stream(IsaacServerLogType.values()).map(IsaacServerLogType::name).collect(Collectors.toSet());
+  public static final Set<String> ISAAC_SERVER_LOG_TYPES = Arrays
+    .stream(IsaacServerLogType.values())
+    .map(IsaacServerLogType::name)
+    .collect(Collectors.toSet());
 
   public enum IsaacClientLogType implements LogType {
     QUESTION_PART_OPEN,
@@ -193,10 +208,13 @@ public final class Constants {
     REPORT_CONTENT_PAGE
   }
 
-  public static final Set<String> ISAAC_CLIENT_LOG_TYPES =
-      Arrays.stream(IsaacClientLogType.values()).map(IsaacClientLogType::name).collect(Collectors.toSet());
+  public static final Set<String> ISAAC_CLIENT_LOG_TYPES = Arrays
+    .stream(IsaacClientLogType.values())
+    .map(IsaacClientLogType::name)
+    .collect(Collectors.toSet());
 
   public static final Set<String> ALL_ACCEPTED_LOG_TYPES = new HashSet<String>() {
+
     {
       addAll(SEGUE_SERVER_LOG_TYPES);
       addAll(ISAAC_SERVER_LOG_TYPES);
@@ -205,7 +223,11 @@ public final class Constants {
   };
 
   public enum IsaacUserPreferences {
-    BETA_FEATURE, EXAM_BOARD, PROGRAMMING_LANGUAGE, BOOLEAN_NOTATION, DISPLAY_SETTING
+    BETA_FEATURE,
+    EXAM_BOARD,
+    PROGRAMMING_LANGUAGE,
+    BOOLEAN_NOTATION,
+    DISPLAY_SETTING
   }
 
   public static final Integer EMAIL_EVENT_REMINDER_DAYS_AHEAD = 3;
@@ -213,7 +235,7 @@ public final class Constants {
 
   // Response messages
   public static final String EMPTY_ASSIGNMENT_GAMEBOARD =
-      "Assignment gameboard has no questions, or its questions no longer exist. Cannot fetch assignment progress.";
+    "Assignment gameboard has no questions, or its questions no longer exist. Cannot fetch assignment progress.";
 
   public static final Integer DO_HASHCODE_PRIME = 31;
 

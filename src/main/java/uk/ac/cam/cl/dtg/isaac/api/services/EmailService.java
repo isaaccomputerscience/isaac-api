@@ -58,8 +58,11 @@ public class EmailService {
   private final UserAccountManager userManager;
 
   @Inject
-  public EmailService(final EmailManager emailManager, final GroupManager groupManager,
-                      final UserAccountManager userManager) {
+  public EmailService(
+    final EmailManager emailManager,
+    final GroupManager groupManager,
+    final UserAccountManager userManager
+  ) {
     this.emailManager = emailManager;
     this.groupManager = groupManager;
     this.userManager = userManager;
@@ -67,8 +70,13 @@ public class EmailService {
 
   private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yy");
 
-  public void sendAssignmentEmailToGroup(final IAssignmentLike assignment, final HasTitleOrId on, final Map<String,
-      Object> tokenToValueMapping, final String templateName) throws SegueDatabaseException {
+  public void sendAssignmentEmailToGroup(
+    final IAssignmentLike assignment,
+    final HasTitleOrId on,
+    final Map<String, Object> tokenToValueMapping,
+    final String templateName
+  )
+    throws SegueDatabaseException {
     UserGroupDTO userGroupDTO = groupManager.getGroupById(assignment.getGroupId());
 
     String dueDate = "";
@@ -87,14 +95,15 @@ public class EmailService {
       String groupName = getFilteredGroupNameFromGroup(userGroupDTO);
       String assignmentOwner = getTeacherNameFromUser(assignmentOwnerDTO);
 
-      final Map<String, Object> map = ImmutableMap.<String, Object>builder()
-          .put("gameboardName", name) // Legacy name
-          .put("assignmentName", name)
-          .put("assignmentDueDate", dueDate)
-          .put("groupName", groupName)
-          .put("assignmentOwner", assignmentOwner)
-          .putAll(tokenToValueMapping)
-          .build();
+      final Map<String, Object> map = ImmutableMap
+        .<String, Object>builder()
+        .put("gameboardName", name) // Legacy name
+        .put("assignmentName", name)
+        .put("assignmentDueDate", dueDate)
+        .put("groupName", groupName)
+        .put("assignmentOwner", assignmentOwner)
+        .putAll(tokenToValueMapping)
+        .build();
 
       sendTemplatedEmailToActiveGroupMembers(userGroupDTO, templateName, map, EmailType.ASSIGNMENTS);
     } catch (NoUserException e) {
@@ -102,13 +111,16 @@ public class EmailService {
     }
   }
 
-  public void sendTemplatedEmailToActiveGroupMembers(final UserGroupDTO userGroupDTO, final String templateName,
-                                                     final Map<String, Object> tokenToValueMapping,
-                                                     final EmailType emailType)
-      throws SegueDatabaseException {
+  public void sendTemplatedEmailToActiveGroupMembers(
+    final UserGroupDTO userGroupDTO,
+    final String templateName,
+    final Map<String, Object> tokenToValueMapping,
+    final EmailType emailType
+  )
+    throws SegueDatabaseException {
     List<RegisteredUserDTO> usersToEmail = Lists.newArrayList();
     Map<Long, GroupMembershipDTO> userMembershipMapforGroup =
-        this.groupManager.getUserMembershipMapForGroup(userGroupDTO.getId());
+      this.groupManager.getUserMembershipMapForGroup(userGroupDTO.getId());
 
     // filter users so those who are inactive in the group aren't emailed
     for (RegisteredUserDTO user : groupManager.getUsersInGroup(userGroupDTO)) {
@@ -119,8 +131,12 @@ public class EmailService {
 
     try {
       for (RegisteredUserDTO userDTO : usersToEmail) {
-        emailManager.sendTemplatedEmailToUser(userDTO, emailManager.getEmailTemplateDTO(templateName),
-            tokenToValueMapping, emailType);
+        emailManager.sendTemplatedEmailToUser(
+          userDTO,
+          emailManager.getEmailTemplateDTO(templateName),
+          tokenToValueMapping,
+          emailType
+        );
       }
     } catch (ContentManagerException e) {
       log.error("Could not send " + templateName + " emails due to content issue", e);

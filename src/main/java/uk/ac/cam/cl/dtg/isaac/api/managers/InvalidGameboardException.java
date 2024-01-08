@@ -11,9 +11,7 @@ public class InvalidGameboardException extends Exception {
   /**
    * Default constructor.
    */
-  public InvalidGameboardException() {
-
-  }
+  public InvalidGameboardException() {}
 
   /**
    * constructor with message.

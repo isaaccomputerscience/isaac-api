@@ -39,8 +39,12 @@ public class UserAuthenticationSettings extends AbstractSegueUser {
    * @param hasSegueAccount - boolean whether or not they have a segue account
    * @param mfaStatus       - indicates if MFA is enabled for the account.
    */
-  public UserAuthenticationSettings(final Long id, final List<AuthenticationProvider> linkedAccounts,
-                                    final boolean hasSegueAccount, final boolean mfaStatus) {
+  public UserAuthenticationSettings(
+    final Long id,
+    final List<AuthenticationProvider> linkedAccounts,
+    final boolean hasSegueAccount,
+    final boolean mfaStatus
+  ) {
     this.id = id;
     this.linkedAccounts = linkedAccounts;
     this.hasSegueAccount = hasSegueAccount;
@@ -50,9 +54,7 @@ public class UserAuthenticationSettings extends AbstractSegueUser {
   /**
    * Default constructor required for Jackson.
    */
-  public UserAuthenticationSettings() {
-
-  }
+  public UserAuthenticationSettings() {}
 
   /**
    * Gets the id.

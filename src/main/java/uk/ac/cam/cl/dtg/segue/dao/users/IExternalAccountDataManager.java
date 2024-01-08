@@ -21,7 +21,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.UserExternalAccountChanges;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 public interface IExternalAccountDataManager {
-
   List<UserExternalAccountChanges> getRecentlyChangedRecords() throws SegueDatabaseException;
 
   void updateProviderLastUpdated(Long userId) throws SegueDatabaseException;

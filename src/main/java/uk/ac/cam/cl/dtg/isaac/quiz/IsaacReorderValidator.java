@@ -46,18 +46,27 @@ public class IsaacReorderValidator implements IValidator {
     Validate.notNull(answer);
 
     if (!(question instanceof IsaacReorderQuestion)) {
-      throw new IllegalArgumentException(String.format(
-          "This validator only works with IsaacReorderQuestions (%s is not ReorderQuestion)", question.getId()));
+      throw new IllegalArgumentException(
+        String.format(
+          "This validator only works with IsaacReorderQuestions (%s is not ReorderQuestion)",
+          question.getId()
+        )
+      );
     }
 
     if (!(answer instanceof ItemChoice)) {
-      throw new IllegalArgumentException(String.format(
-          "Expected ItemChoice for IsaacReorderQuestion: %s. Received (%s) ", question.getId(), answer.getClass()));
+      throw new IllegalArgumentException(
+        String.format(
+          "Expected ItemChoice for IsaacReorderQuestion: %s. Received (%s) ",
+          question.getId(),
+          answer.getClass()
+        )
+      );
     }
 
     // These variables store the important features of the response we'll send.
-    Content feedback = null;                        // The feedback we send the user
-    boolean responseCorrect = false;                // Whether we're right or wrong
+    Content feedback = null; // The feedback we send the user
+    boolean responseCorrect = false; // Whether we're right or wrong
 
     IsaacReorderQuestion reorderQuestion = (IsaacReorderQuestion) question;
     ItemChoice submittedChoice = (ItemChoice) answer;
@@ -67,12 +76,14 @@ public class IsaacReorderValidator implements IValidator {
     // STEP 0: Is it even possible to answer this question?
 
     if (null == reorderQuestion.getChoices() || reorderQuestion.getChoices().isEmpty()) {
-      log.error("Question does not have any answers. " + question.getId() + " src: "
-          + question.getCanonicalSourceFile());
+      log.error(
+        "Question does not have any answers. " + question.getId() + " src: " + question.getCanonicalSourceFile()
+      );
       feedback = new Content("This question does not have any correct answers!");
     } else if (null == reorderQuestion.getItems() || reorderQuestion.getItems().isEmpty()) {
-      log.error("ReorderQuestion does not have any items. " + question.getId() + " src: "
-          + question.getCanonicalSourceFile());
+      log.error(
+        "ReorderQuestion does not have any items. " + question.getId() + " src: " + question.getCanonicalSourceFile()
+      );
       feedback = new Content("This question does not have any items to choose from!");
     }
 
@@ -100,11 +111,15 @@ public class IsaacReorderValidator implements IValidator {
 
       // For all the choices on this question...
       for (Choice c : orderedChoices) {
-
         // ... that are ItemChoices (and not subclasses) ...
         if (!ItemChoice.class.equals(c.getClass())) {
-          log.error(String.format("Expected ItemChoice in question (%s), instead found %s!", reorderQuestion.getId(),
-              c.getClass().toString()));
+          log.error(
+            String.format(
+              "Expected ItemChoice in question (%s), instead found %s!",
+              reorderQuestion.getId(),
+              c.getClass().toString()
+            )
+          );
           continue;
         }
 
@@ -113,17 +128,28 @@ public class IsaacReorderValidator implements IValidator {
 
         // ... and that have valid items ...
         if (null == itemChoice.getItems() || itemChoice.getItems().isEmpty()) {
-          log.error(String.format("Expected list of Items, but none found in choice for question id (%s)!",
-              reorderQuestion.getId()));
+          log.error(
+            String.format(
+              "Expected list of Items, but none found in choice for question id (%s)!",
+              reorderQuestion.getId()
+            )
+          );
           continue;
         }
         if (itemChoice.getItems().stream().anyMatch(i -> i.getClass() != Item.class)) {
-          log.error(String.format("Expected list of Items, but something else found in choice for question id (%s)!",
-              reorderQuestion.getId()));
+          log.error(
+            String.format(
+              "Expected list of Items, but something else found in choice for question id (%s)!",
+              reorderQuestion.getId()
+            )
+          );
           continue;
         }
-        List<String> trustedChoiceItemIds =
-            itemChoice.getItems().stream().map(Item::getId).collect(Collectors.toList());
+        List<String> trustedChoiceItemIds = itemChoice
+          .getItems()
+          .stream()
+          .map(Item::getId)
+          .collect(Collectors.toList());
 
         // ... look for a match to the submitted answer.
 
@@ -167,5 +193,4 @@ public class IsaacReorderValidator implements IValidator {
   public List<Choice> getOrderedChoices(final List<Choice> choices) {
     return IsaacItemQuestionValidator.getOrderedChoicesWithSubsets(choices);
   }
-
 }

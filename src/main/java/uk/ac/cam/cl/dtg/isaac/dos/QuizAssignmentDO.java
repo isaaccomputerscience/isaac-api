@@ -44,9 +44,15 @@ public class QuizAssignmentDO {
    * @param dueDate          - optional date the assignment should be completed by.
    * @param quizFeedbackMode - what level of feedback to give to students.
    */
-  public QuizAssignmentDO(final Long id, final String quizId, final Long ownerUserId, final Long groupId,
-                          final Date creationDate, @Nullable final Date dueDate,
-                          final QuizFeedbackMode quizFeedbackMode) {
+  public QuizAssignmentDO(
+    final Long id,
+    final String quizId,
+    final Long ownerUserId,
+    final Long groupId,
+    final Date creationDate,
+    @Nullable final Date dueDate,
+    final QuizFeedbackMode quizFeedbackMode
+  ) {
     this.id = id;
     this.quizId = quizId;
     this.ownerUserId = ownerUserId;
@@ -59,9 +65,7 @@ public class QuizAssignmentDO {
   /**
    * Default constructor required for AutoMapping.
    */
-  public QuizAssignmentDO() {
-
-  }
+  public QuizAssignmentDO() {}
 
   /**
    * Gets the id.

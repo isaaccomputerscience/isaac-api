@@ -36,5 +36,4 @@ public class IsaacRegexMatchQuestionDTO extends IsaacQuestionBaseDTO {
   public void setMultiLineEntry(final Boolean multiLineEntry) {
     this.multiLineEntry = multiLineEntry;
   }
-
 }

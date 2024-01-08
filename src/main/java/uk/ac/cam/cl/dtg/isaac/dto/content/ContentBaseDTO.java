@@ -32,7 +32,6 @@ import uk.ac.cam.cl.dtg.segue.dao.TrimWhitespaceDeserializer;
  * deserialized using a custom serializer (ContentBaseDeserializer).
  */
 public abstract class ContentBaseDTO {
-
   private String id;
   private String type;
   private Set<String> tags;
@@ -47,7 +46,6 @@ public abstract class ContentBaseDTO {
   public ContentBaseDTO() {
     this.tags = Sets.newHashSet();
   }
-
 
   /**
    * Gets the id.

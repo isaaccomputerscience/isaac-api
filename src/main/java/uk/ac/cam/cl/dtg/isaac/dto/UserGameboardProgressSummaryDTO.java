@@ -26,5 +26,4 @@ public class UserGameboardProgressSummaryDTO {
   public void setProgress(final List<GameboardProgressSummaryDTO> progress) {
     this.progress = progress;
   }
-
 }

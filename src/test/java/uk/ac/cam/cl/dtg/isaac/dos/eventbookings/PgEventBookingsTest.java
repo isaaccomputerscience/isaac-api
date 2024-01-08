@@ -20,6 +20,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
 public class PgEventBookingsTest {
+
   private PgEventBookings buildPgEventBookings() {
     return new PgEventBookings(dummyPostgresSqlDb, dummyObjectMapper);
   }
@@ -41,7 +42,7 @@ public class PgEventBookingsTest {
 
   @Test
   public void getEventBookingStatusCounts_checkEventBookingStatusCounts_canCopeWithComplicatedResult()
-      throws Exception {
+    throws Exception {
     // Mock setup
     expect(dummyPostgresSqlDb.getDatabaseConnection()).andReturn(dummyConnection).once();
     expect(dummyConnection.prepareStatement(anyString())).andReturn(dummyPreparedStatement).once();
@@ -75,28 +76,48 @@ public class PgEventBookingsTest {
     dummyConnection.close();
 
     // Create expected status count
-    Map<BookingStatus, Map<Role, Long>> expectedStatusCounts = new HashMap<BookingStatus, Map<Role, Long>>() {{
-        put(BookingStatus.CONFIRMED, new HashMap<Role, Long>() {{
-            put(Role.STUDENT, 20L);
-            put(Role.TEACHER, 4L);
+    Map<BookingStatus, Map<Role, Long>> expectedStatusCounts = new HashMap<BookingStatus, Map<Role, Long>>() {
+
+      {
+        put(
+          BookingStatus.CONFIRMED,
+          new HashMap<Role, Long>() {
+
+            {
+              put(Role.STUDENT, 20L);
+              put(Role.TEACHER, 4L);
+            }
           }
-        });
-        put(BookingStatus.WAITING_LIST, new HashMap<Role, Long>() {{
-            put(Role.STUDENT, 10L);
+        );
+        put(
+          BookingStatus.WAITING_LIST,
+          new HashMap<Role, Long>() {
+
+            {
+              put(Role.STUDENT, 10L);
+            }
           }
-        });
-        put(BookingStatus.CANCELLED, new HashMap<Role, Long>() {{
-            put(Role.TEACHER, 2L);
+        );
+        put(
+          BookingStatus.CANCELLED,
+          new HashMap<Role, Long>() {
+
+            {
+              put(Role.TEACHER, 2L);
+            }
           }
-        });
-      }};
+        );
+      }
+    };
 
     // Run test
-    Object[] mockedObjects = {dummyPostgresSqlDb, dummyConnection, dummyPreparedStatement, dummyResultSet};
+    Object[] mockedObjects = { dummyPostgresSqlDb, dummyConnection, dummyPreparedStatement, dummyResultSet };
     replay(mockedObjects);
     PgEventBookings pgEventBookings = this.buildPgEventBookings();
-    Map<BookingStatus, Map<Role, Long>> actualStatusCounts =
-        pgEventBookings.getEventBookingStatusCounts("someEventId", true);
+    Map<BookingStatus, Map<Role, Long>> actualStatusCounts = pgEventBookings.getEventBookingStatusCounts(
+      "someEventId",
+      true
+    );
     assertEquals("Every row should be represented in the result", expectedStatusCounts, actualStatusCounts);
     verify(mockedObjects);
   }

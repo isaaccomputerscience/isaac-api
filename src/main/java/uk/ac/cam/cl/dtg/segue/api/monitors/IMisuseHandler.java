@@ -21,7 +21,6 @@ package uk.ac.cam.cl.dtg.segue.api.monitors;
  *
  */
 public interface IMisuseHandler {
-
   /**
    * Get the number of times we can see this event before the warning condition is fired.
    *

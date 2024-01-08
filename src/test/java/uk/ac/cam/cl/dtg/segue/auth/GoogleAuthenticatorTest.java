@@ -21,6 +21,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets.Details;
 import org.junit.Before;
 
 public class GoogleAuthenticatorTest extends IOAuth2AuthenticatorTest {
+
   /**
    * Initial configuration of tests.
    *
@@ -36,8 +37,7 @@ public class GoogleAuthenticatorTest extends IOAuth2AuthenticatorTest {
     details.setClientId(clientId);
     details.setClientSecret(clientSecret);
 
-    this.oauth2Authenticator =
-        new GoogleAuthenticator(clientSecrets, callbackUri, requestedScopes);
+    this.oauth2Authenticator = new GoogleAuthenticator(clientSecrets, callbackUri, requestedScopes);
     this.authenticator = this.oauth2Authenticator;
   }
 }

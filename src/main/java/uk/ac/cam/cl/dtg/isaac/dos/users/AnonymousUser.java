@@ -32,9 +32,7 @@ public class AnonymousUser extends AbstractSegueUser {
   /**
    * Default constructor required for Jackson.
    */
-  public AnonymousUser() {
-
-  }
+  public AnonymousUser() {}
 
   /**
    * Full constructor for the AnonymousUser object.
@@ -97,7 +95,6 @@ public class AnonymousUser extends AbstractSegueUser {
   public void setDateCreated(final Date dateCreated) {
     this.dateCreated = dateCreated;
   }
-
 
   /**
    * get date this object was last updated.

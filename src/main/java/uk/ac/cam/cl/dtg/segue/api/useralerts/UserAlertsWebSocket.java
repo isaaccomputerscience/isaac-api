@@ -48,6 +48,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  */
 @WebSocket(idleTimeout = USER_ALERTS_WEBSOCKET_IDLE_TIMEOUT_SECONDS)
 public class UserAlertsWebSocket implements IAlertListener {
+
   private static class Protocol {
     static final String HEARTBEAT = "heartbeat";
     static final String USER_SNAPSHOT_NUDGE = "user-snapshot-nudge";
@@ -107,13 +108,14 @@ public class UserAlertsWebSocket implements IAlertListener {
    * @param properties                - instance of properties loader
    */
   @Inject
-  public UserAlertsWebSocket(final UserAccountManager userManager,
-                             final UserAuthenticationManager userAuthenticationManager,
-                             final IUserAlerts userAlerts,
-                             final ILogManager logManager,
-                             final IStatisticsManager statisticsManager,
-                             final PropertiesLoader properties) {
-
+  public UserAlertsWebSocket(
+    final UserAccountManager userManager,
+    final UserAuthenticationManager userAuthenticationManager,
+    final IUserAlerts userAlerts,
+    final ILogManager logManager,
+    final IStatisticsManager statisticsManager,
+    final PropertiesLoader properties
+  ) {
     this.userManager = userManager;
     this.userAuthenticationManager = userAuthenticationManager;
     this.userAlerts = userAlerts;
@@ -121,7 +123,6 @@ public class UserAlertsWebSocket implements IAlertListener {
     this.statisticsManager = statisticsManager;
     this.properties = properties;
   }
-
 
   /**
    * Handles incoming messages from a connected client.
@@ -138,9 +139,9 @@ public class UserAlertsWebSocket implements IAlertListener {
 
     try {
       if (message.equals(Protocol.HEARTBEAT)) {
-        session.getRemote().sendString(objectMapper.writeValueAsString(ImmutableMap.of(
-            Protocol.HEARTBEAT, System.currentTimeMillis()
-        )));
+        session
+          .getRemote()
+          .sendString(objectMapper.writeValueAsString(ImmutableMap.of(Protocol.HEARTBEAT, System.currentTimeMillis())));
       } else if (message.equals(Protocol.USER_SNAPSHOT_NUDGE)) {
         sendUserSnapshotData();
       } else {
@@ -156,7 +157,6 @@ public class UserAlertsWebSocket implements IAlertListener {
     }
   }
 
-
   /**
    * Handles a new client websocket connection.
    *
@@ -170,7 +170,6 @@ public class UserAlertsWebSocket implements IAlertListener {
       RegisteredUser validUserFromSession = userAuthenticationManager.getUserFromSession(session.getUpgradeRequest());
 
       if (null != validUserFromSession) {
-
         connectedUser = userManager.getUserDTOById(validUserFromSession.getId());
 
         long connectedUserId = connectedUser.getId();
@@ -186,8 +185,9 @@ public class UserAlertsWebSocket implements IAlertListener {
           addedUser = null == nullIfNewUser;
           Set<UserAlertsWebSocket> unsafeUsersSockets = unsafeConnectedSockets.get(connectedUserId);
 
-          addedSocket = unsafeUsersSockets.size() <= Integer.parseInt(
-              this.properties.getProperty(Constants.MAX_CONCURRENT_WEB_SOCKETS_PER_USER));
+          addedSocket =
+            unsafeUsersSockets.size() <=
+            Integer.parseInt(this.properties.getProperty(Constants.MAX_CONCURRENT_WEB_SOCKETS_PER_USER));
           if (addedSocket) {
             unsafeUsersSockets.add(this);
           }
@@ -208,8 +208,9 @@ public class UserAlertsWebSocket implements IAlertListener {
           log.debug("User " + connectedUserId + " opened new websocket. Total open: " + numberOfUserSockets);
           SegueMetrics.WEBSOCKETS_OPENED_SUCCESSFULLY.inc();
         } else {
-          log.debug("User " + connectedUserId
-              + " attempted to open too many simultaneous WebSockets; sending TRY_AGAIN_LATER.");
+          log.debug(
+            "User " + connectedUserId + " attempted to open too many simultaneous WebSockets; sending TRY_AGAIN_LATER."
+          );
           session.close(StatusCode.NORMAL, "TRY_AGAIN_LATER");
           return;
         }
@@ -227,7 +228,6 @@ public class UserAlertsWebSocket implements IAlertListener {
         log.debug("WebSocket connection failed! Expired or invalid session.");
         session.close(StatusCode.POLICY_VIOLATION, "Expired or invalid session!");
       }
-
     } catch (IOException e) {
       log.warn("WebSocket connection failed! " + e.getClass().getSimpleName() + ": " + e.getMessage());
       session.close(StatusCode.SERVER_ERROR, "onConnect IOException");
@@ -239,7 +239,6 @@ public class UserAlertsWebSocket implements IAlertListener {
       session.close(StatusCode.SERVER_ERROR, "onConnect Database Error");
     }
   }
-
 
   /**
    * Handles the closing of the websocket connection.
@@ -305,15 +304,21 @@ public class UserAlertsWebSocket implements IAlertListener {
    */
   private void sendAlert(final IUserAlert alert) {
     try {
-      this.session.getRemote().sendString(objectMapper.writeValueAsString(ImmutableMap.of(
-          Protocol.NOTIFICATIONS, ImmutableList.of(alert),
-          Protocol.HEARTBEAT, System.currentTimeMillis()
-      )));
+      this.session.getRemote()
+        .sendString(
+          objectMapper.writeValueAsString(
+            ImmutableMap.of(
+              Protocol.NOTIFICATIONS,
+              ImmutableList.of(alert),
+              Protocol.HEARTBEAT,
+              System.currentTimeMillis()
+            )
+          )
+        );
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
-
 
   /**
    * Method to send a payload to the connected user with details of their current stats snapshot.
@@ -321,10 +326,18 @@ public class UserAlertsWebSocket implements IAlertListener {
    * @throws IOException - if the WebSocket is unexpectedly closed or in an invalid state
    */
   private void sendUserSnapshotData() throws IOException {
-    session.getRemote().sendString(objectMapper.writeValueAsString(ImmutableMap.of(
-        Protocol.USER_SNAPSHOT, statisticsManager.getDetailedUserStatistics(connectedUser),
-        Protocol.HEARTBEAT, System.currentTimeMillis()
-    )));
+    session
+      .getRemote()
+      .sendString(
+        objectMapper.writeValueAsString(
+          ImmutableMap.of(
+            Protocol.USER_SNAPSHOT,
+            statisticsManager.getDetailedUserStatistics(connectedUser),
+            Protocol.HEARTBEAT,
+            System.currentTimeMillis()
+          )
+        )
+      );
   }
 
   /**
@@ -337,9 +350,9 @@ public class UserAlertsWebSocket implements IAlertListener {
   private void sendInitialNotifications(final long userId) throws SegueDatabaseException, IOException {
     List<IUserAlert> persistedAlerts = userAlerts.getUserAlerts(userId);
     if (!persistedAlerts.isEmpty()) {
-      session.getRemote().sendString(objectMapper.writeValueAsString(ImmutableMap.of(
-          Protocol.NOTIFICATIONS, persistedAlerts
-      )));
+      session
+        .getRemote()
+        .sendString(objectMapper.writeValueAsString(ImmutableMap.of(Protocol.NOTIFICATIONS, persistedAlerts)));
     }
   }
 }

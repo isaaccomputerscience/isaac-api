@@ -24,7 +24,6 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.CodeExchangeException;
  *
  */
 public interface IOAuthAuthenticator extends IFederatedAuthenticator {
-
   /**
    * Step 2 of OAUTH - Get authorisation code from oauth provider using the
    * response URL they have provided.

@@ -117,7 +117,6 @@ public final class Constants {
    */
   public static final String HIDE_REGRESSION_TEST_CONTENT = "HIDE_REGRESSION_TEST_CONTENT";
 
-
   /**
    * Constant representing the key for the location for the version config file..
    */
@@ -143,14 +142,15 @@ public final class Constants {
   public static final String SEGUE_CONFIG_LOCATION_ENVIRONMENT_PROPERTY = "SEGUE_CONFIG_LOCATION";
   public static final String MAILER_SMTP_PORT = "MAILER_SMTP_PORT";
   public static final String SEGUE_CONFIG_LOCATION_NOT_SPECIFIED_MESSAGE =
-      "Segue configuration location not specified, please provide it as either a java system property"
-          + " (config.location) or environment variable SEGUE_CONFIG_LOCATION";
+    "Segue configuration location not specified, please provide it as either a java system property" +
+    " (config.location) or environment variable SEGUE_CONFIG_LOCATION";
 
   /**
    * Enum to describe types of server environment / profile.
    */
   public enum EnvironmentType {
-    PROD, DEV
+    PROD,
+    DEV
   }
 
   // HMAC stuff
@@ -249,7 +249,8 @@ public final class Constants {
    *
    */
   public enum SortOrder {
-    ASC, DESC
+    ASC,
+    DESC
   }
 
   /**
@@ -257,7 +258,9 @@ public final class Constants {
    *
    */
   public enum BooleanOperator {
-    AND, OR, NOT
+    AND,
+    OR,
+    NOT
   }
 
   public static final String SCHOOLS_INDEX_BASE = "schools";
@@ -342,35 +345,37 @@ public final class Constants {
   public static final String LOCAL_AUTH_GROUP_MANAGER_EMAIL_FIELDNAME = "groupManagerEmail";
 
   // Local authentication response messages
-  public static final String PASSWORD_REQUIREMENTS_ERROR_MESSAGE = "Passwords must be at least 12 characters in length "
-      + "and contain at least one of each of: uppercase character, lowercase character, number and ascii punctuation"
-      + " character.";
+  public static final String PASSWORD_REQUIREMENTS_ERROR_MESSAGE =
+    "Passwords must be at least 12 characters in length " +
+    "and contain at least one of each of: uppercase character, lowercase character, number and ascii punctuation" +
+    " character.";
   public static final String LOGIN_MISSING_CREDENTIALS_MESSAGE =
-      "You must specify an email and password when logging in.";
+    "You must specify an email and password when logging in.";
   public static final String LOGIN_RATE_THROTTLE_MESSAGE =
-      "There have been too many attempts to login to this account. Please try again later.";
+    "There have been too many attempts to login to this account. Please try again later.";
   public static final String LOGIN_DATABASE_ERROR_MESSAGE =
-      "Internal database error has occurred during authentication.";
+    "Internal database error has occurred during authentication.";
   public static final String LOGIN_UNKNOWN_PROVIDER_MESSAGE = "Unable to locate the provider specified.";
   public static final String LOGIN_INCORRECT_CREDENTIALS_MESSAGE = "Incorrect credentials provided.";
   public static final String LOGIN_2FA_REQUIRED_MESSAGE =
-      "Your account type requires 2FA, but none has been configured! "
-          + "Please ask an admin to demote your account to regain access.";
+    "Your account type requires 2FA, but none has been configured! " +
+    "Please ask an admin to demote your account to regain access.";
   public static final String LOGOUT_DATABASE_ERROR_MESSAGE = "Internal database error has occurred during logout.";
   public static final String LOGOUT_SESSION_ALREADY_INVALIDATED_MESSAGE =
-      "The session has already been invalidated. Unable to logout again...";
+    "The session has already been invalidated. Unable to logout again...";
   public static final String LOGOUT_NO_ACTIVE_SESSION_MESSAGE =
-      "No active user session found. You must be logged in to log out...";
+    "No active user session found. You must be logged in to log out...";
 
   // Group response messages
-  public static final String PROBLEM_ADDING_GROUP_MANAGER_MESSAGE = "There was a problem adding the user specified. "
-      + "Please make sure their email address is correct and they have a teacher account.";
+  public static final String PROBLEM_ADDING_GROUP_MANAGER_MESSAGE =
+    "There was a problem adding the user specified. " +
+    "Please make sure their email address is correct and they have a teacher account.";
   public static final String MUST_BE_TEACHER_TO_ADD_MANAGERS_MESSAGE =
-      "You must have a teacher account to add additional group managers to your groups.";
+    "You must have a teacher account to add additional group managers to your groups.";
 
   // General response messages
   public static final String TOO_MANY_REQUESTS =
-      "You have exceeded the number of requests allowed for this endpoint. Please try again later.";
+    "You have exceeded the number of requests allowed for this endpoint. Please try again later.";
 
   // Database properties
   public static final String SEGUE_DB_NAME = "SEGUE_DB_NAME";
@@ -396,8 +401,14 @@ public final class Constants {
 
     private final PGInterval interval;
 
-    TimeInterval(final int years, final int months, final int days, final int hours, final int minutes,
-                 final double seconds) {
+    TimeInterval(
+      final int years,
+      final int months,
+      final int days,
+      final int hours,
+      final int minutes,
+      final double seconds
+    ) {
       this.interval = new PGInterval(years, months, days, hours, minutes, seconds);
     }
 
@@ -464,8 +475,10 @@ public final class Constants {
     USER_SCHOOL_CHANGE
   }
 
-  public static final Set<String> SEGUE_SERVER_LOG_TYPES =
-      Arrays.stream(SegueServerLogType.values()).map(SegueServerLogType::name).collect(Collectors.toSet());
+  public static final Set<String> SEGUE_SERVER_LOG_TYPES = Arrays
+    .stream(SegueServerLogType.values())
+    .map(SegueServerLogType::name)
+    .collect(Collectors.toSet());
 
   // Websocket Component
   public static final String MAX_CONCURRENT_WEB_SOCKETS_PER_USER = "MAX_CONCURRENT_WEB_SOCKETS_PER_USER";
@@ -515,8 +528,8 @@ public final class Constants {
   public static final String SUMMARY_FIELDNAME = "summary";
   public static final String CHILDREN_FIELDNAME = "children";
   public static final String DATE_FIELDNAME = "date";
-  public static final String[] ADDRESS_PATH_FIELDNAME = {"location", "address"};
-  public static final String[] ADDRESS_FIELDNAMES = {"addressLine1", "addressLine2", "town", "county", "postalCode"};
+  public static final String[] ADDRESS_PATH_FIELDNAME = { "location", "address" };
+  public static final String[] ADDRESS_FIELDNAMES = { "addressLine1", "addressLine2", "town", "county", "postalCode" };
   public static final String SEARCHABLE_CONTENT_FIELDNAME = "searchableContent";
   public static final String VISIBLE_TO_STUDENTS_FIELDNAME = "visibleToStudents";
   public static final String HIDDEN_FROM_ROLES_FIELDNAME = "hiddenFromRoles";
@@ -525,8 +538,11 @@ public final class Constants {
   public static final String STAGE_FIELDNAME = "audience.stage";
   public static final String DIFFICULTY_FIELDNAME = "audience.difficulty";
   public static final String EXAM_BOARD_FIELDNAME = "audience.examBoard";
-  public static final Set<String> NESTED_FIELDS =
-      ImmutableSet.of(STAGE_FIELDNAME, DIFFICULTY_FIELDNAME, EXAM_BOARD_FIELDNAME);
+  public static final Set<String> NESTED_FIELDS = ImmutableSet.of(
+    STAGE_FIELDNAME,
+    DIFFICULTY_FIELDNAME,
+    EXAM_BOARD_FIELDNAME
+  );
 
   public static final String USER_ID_FKEY_FIELDNAME = "userId";
   public static final String OLD_USER_ID_FKEY_FIELDNAME = "oldUserId";
@@ -547,7 +563,9 @@ public final class Constants {
    *  Enum to represent filter values for event management.
    */
   public enum EventFilterOption {
-    FUTURE, RECENT, PAST
+    FUTURE,
+    RECENT,
+    PAST
   }
 
   public static final String ID_SEPARATOR = "|";
@@ -572,7 +590,10 @@ public final class Constants {
    *  Represent the information a user has provided about their school status.
    */
   public enum SchoolInfoStatus {
-    PROVIDED, OTHER_PROVIDED, BOTH_PROVIDED, NOT_PROVIDED;
+    PROVIDED,
+    OTHER_PROVIDED,
+    BOTH_PROVIDED,
+    NOT_PROVIDED;
 
     /**
      *  Return the status given the state of the two school fields.

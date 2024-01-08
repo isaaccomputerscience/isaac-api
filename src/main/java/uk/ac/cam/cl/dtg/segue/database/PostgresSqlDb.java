@@ -36,7 +36,6 @@ import org.apache.commons.dbcp2.BasicDataSource;
  * PostgresSqlDb adapter.
  */
 public class PostgresSqlDb implements Closeable {
-
   private final BasicDataSource dataSource;
 
   /**
@@ -48,7 +47,6 @@ public class PostgresSqlDb implements Closeable {
    */
   @Inject
   public PostgresSqlDb(final String databaseUrl, final String username, final String password) {
-
     dataSource = new BasicDataSource();
     dataSource.setDriverClassName("org.postgresql.Driver");
     dataSource.setUrl(databaseUrl);
@@ -82,13 +80,11 @@ public class PostgresSqlDb implements Closeable {
 
   @Override
   public void close() {
-
     try {
       this.dataSource.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }
-
   }
 
   /**
@@ -97,9 +93,10 @@ public class PostgresSqlDb implements Closeable {
    * @return whether the database is read only.
    */
   public boolean isReadOnlyReplica() throws SQLException {
-    try (Connection conn = getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement("SELECT pg_is_in_recovery()");
-         ResultSet results = pst.executeQuery()
+    try (
+      Connection conn = getDatabaseConnection();
+      PreparedStatement pst = conn.prepareStatement("SELECT pg_is_in_recovery()");
+      ResultSet results = pst.executeQuery()
     ) {
       results.next();
       return results.getBoolean(1);

@@ -34,7 +34,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
  * @author Stephen Cummins
  */
 public interface IUserDataManager {
-
   /**
    * Register a user in the local data repository.
    *
@@ -44,9 +43,12 @@ public interface IUserDataManager {
    * @return the local users id.
    * @throws SegueDatabaseException - If there is an internal database error.
    */
-  RegisteredUser registerNewUserWithProvider(RegisteredUser user, AuthenticationProvider provider,
-                                             String providerUserId)
-      throws SegueDatabaseException;
+  RegisteredUser registerNewUserWithProvider(
+    RegisteredUser user,
+    AuthenticationProvider provider,
+    String providerUserId
+  )
+    throws SegueDatabaseException;
 
   /**
    * Determine whether the user has at least one linked account.
@@ -74,7 +76,7 @@ public interface IUserDataManager {
    * @throws SegueDatabaseException - If there is an internal database error.
    */
   Map<RegisteredUser, List<AuthenticationProvider>> getAuthenticationProvidersByUsers(List<RegisteredUser> users)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Get UserAuthenticationSettings Object.
@@ -94,7 +96,7 @@ public interface IUserDataManager {
    * @throws SegueDatabaseException - If there is an internal database error.
    */
   Map<RegisteredUser, Boolean> getSegueAccountExistenceByUsers(List<RegisteredUser> users)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Find a user by their linked account information.
@@ -105,7 +107,7 @@ public interface IUserDataManager {
    * @throws SegueDatabaseException - If there is an internal database error.
    */
   RegisteredUser getByLinkedAccount(AuthenticationProvider provider, String providerUserId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Creates a link record, connecting a local user to an external provider for authentication purposes.
@@ -117,7 +119,7 @@ public interface IUserDataManager {
    * @throws SegueDatabaseException - If there is an internal database error.
    */
   boolean linkAuthProviderToAccount(RegisteredUser user, AuthenticationProvider provider, String providerUserId)
-      throws SegueDatabaseException;
+    throws SegueDatabaseException;
 
   /**
    * Unlink providerFromUser.
@@ -281,7 +283,7 @@ public interface IUserDataManager {
    * @return the Integer sessionToken if found or null if not
    * @throws SegueDatabaseException if there is an internal database error
    */
-  Integer getSessionToken(Long userId) throws  SegueDatabaseException;
+  Integer getSessionToken(Long userId) throws SegueDatabaseException;
 
   /**
    * Count all the users by role and return a map.
