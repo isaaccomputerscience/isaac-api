@@ -1,10 +1,12 @@
 package uk.ac.cam.cl.dtg.segue.dao;
 
 import static org.junit.Assert.assertTrue;
+import static uk.ac.cam.cl.dtg.util.ReflectionsUtil.getClasses;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import org.junit.Before;
 import org.junit.Test;
-import org.reflections.Reflections;
 import uk.ac.cam.cl.dtg.isaac.dos.content.CodeSnippet;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
@@ -15,8 +17,8 @@ public class ContentMapperTest {
   private ContentMapper contentMapper;
 
   @Before
-  public void setUp() {
-    this.contentMapper = new ContentMapper(new Reflections("uk.ac.cam.cl.dtg.isaac"));
+  public void setUp() throws IOException, URISyntaxException, ClassNotFoundException {
+    this.contentMapper = new ContentMapper(getClasses("uk.ac.cam.cl.dtg.isaac"));
   }
 
   @Test

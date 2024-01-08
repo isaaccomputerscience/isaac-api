@@ -12,6 +12,7 @@ import static org.easymock.EasyMock.replay;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_LINUX_CONFIG_LOCATION;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EMAIL_SIGNATURE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
+import static uk.ac.cam.cl.dtg.util.ReflectionsUtil.getClasses;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -21,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -32,7 +34,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.easymock.Capture;
 import org.eclipse.jgit.api.Git;
 import org.junit.jupiter.api.BeforeAll;
-import org.reflections.Reflections;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -170,7 +171,7 @@ public abstract class IsaacIntegrationTest {
   }
 
   @BeforeAll
-  public static void setUpClass() {
+  public static void setUpClass() throws IOException, URISyntaxException, ClassNotFoundException {
     postgres = new PostgreSQLContainer<>("postgres:12")
         .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust")
         .withUsername("rutherford")
@@ -260,7 +261,7 @@ public abstract class IsaacIntegrationTest {
     pgAnonymousUsers = new PgAnonymousUsers(postgresSqlDb);
     PgPasswordDataManager passwordDataManager = new PgPasswordDataManager(postgresSqlDb);
 
-    contentMapper = new ContentMapper(new Reflections("uk.ac.cam.cl.dtg"));
+    contentMapper = new ContentMapper(getClasses("uk.ac.cam.cl.dtg"));
     PgQuestionAttempts pgQuestionAttempts = new PgQuestionAttempts(postgresSqlDb, contentMapper);
     questionManager = new QuestionManager(contentMapper, pgQuestionAttempts);
 

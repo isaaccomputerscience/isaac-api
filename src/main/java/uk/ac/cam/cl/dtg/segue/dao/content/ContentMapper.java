@@ -33,7 +33,6 @@ import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.converter.ConverterFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.apache.commons.lang3.Validate;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
@@ -82,28 +81,12 @@ public class ContentMapper {
   /**
    * Alternative constructor that will attempt to search for valid types to pre-register.
    *
-   * @param configuredReflectionClass - string representing the parent package to search for content classes.
-   *                                        e.g. uk.ac.cam.cl.dtg.segue
+   * @param classes - list of classes contained within the parent package to search for content classes.
    */
-  @SuppressWarnings("unchecked")
-  public ContentMapper(final Reflections configuredReflectionClass) {
-    this();
-    Validate.notNull(configuredReflectionClass);
-
-    // We need to pre-register different content objects here for the
-    // auto-mapping to work
-    Set<Class<?>> annotated = configuredReflectionClass.getTypesAnnotatedWith(JsonContentType.class);
-
-    for (Class<?> classToAdd : annotated) {
-      if (Content.class.isAssignableFrom(classToAdd)) {
-        this.registerJsonTypeAndDTOMapping((Class<Content>) classToAdd);
-      }
-    }
-  }
-
   public ContentMapper(final List<Class<?>> classes) {
     this();
     Validate.notNull(classes);
+    Validate.notEmpty(classes);
 
     // We need to pre-register different content objects here for the
     // auto-mapping to work
