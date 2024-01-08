@@ -4,7 +4,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.CONFIG_LOCATION_SYSTEM_PROPER
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_LINUX_CONFIG_LOCATION;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_CONFIG_LOCATION_ENVIRONMENT_PROPERTY;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_CONFIG_LOCATION_NOT_SPECIFIED_MESSAGE;
-import static uk.ac.cam.cl.dtg.util.ReflectionsUtil.getClasses;
+import static uk.ac.cam.cl.dtg.util.ReflectionUtils.getClasses;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;

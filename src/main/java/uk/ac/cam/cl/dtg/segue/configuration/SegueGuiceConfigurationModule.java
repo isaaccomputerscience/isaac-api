@@ -36,8 +36,8 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.RASPBERRYPI_OAUTH_SCOPES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_APP_ENVIRONMENT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_CONFIG_LOCATION_ENVIRONMENT_PROPERTY;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_CONFIG_LOCATION_NOT_SPECIFIED_MESSAGE;
-import static uk.ac.cam.cl.dtg.util.ReflectionsUtil.getClasses;
-import static uk.ac.cam.cl.dtg.util.ReflectionsUtil.getSubTypes;
+import static uk.ac.cam.cl.dtg.util.ReflectionUtils.getClasses;
+import static uk.ac.cam.cl.dtg.util.ReflectionUtils.getSubTypes;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -227,7 +227,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   private static IGroupObserver groupObserver = null;
 
   private static Collection<Class<? extends ServletContextListener>> contextListeners;
-  private static final Map<String, List<Class<?>>> REFLECTIONS = new HashMap<>();
+  private static final Map<String, List<Class<?>>> classesByPackage = new HashMap<>();
 
   /**
    * A setter method that is mostly useful for testing. It populates the global properties static value if it has not
@@ -1232,13 +1232,13 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * @param pkg - class name to use as key
    * @return reflections.
    */
-  public static List<Class<?>> getReflectionsClass(final String pkg)
+  public static List<Class<?>> getPackageClasses(final String pkg)
       throws IOException, URISyntaxException, ClassNotFoundException {
-    if (!REFLECTIONS.containsKey(pkg)) {
+    if (!classesByPackage.containsKey(pkg)) {
       log.info(String.format("Caching reflections scan on '%s'", pkg));
-      REFLECTIONS.put(pkg, getClasses(pkg));
+      classesByPackage.put(pkg, getClasses(pkg));
     }
-    return REFLECTIONS.get(pkg);
+    return classesByPackage.get(pkg);
   }
 
   /**
@@ -1253,10 +1253,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
       contextListeners = Lists.newArrayList();
 
       Set<Class<? extends ServletContextListener>> subTypes =
-          getSubTypes(getReflectionsClass("uk.ac.cam.cl.dtg.segue"), ServletContextListener.class);
+          getSubTypes(getPackageClasses("uk.ac.cam.cl.dtg.segue"), ServletContextListener.class);
 
       Set<Class<? extends ServletContextListener>> etlSubTypes =
-          getSubTypes(getReflectionsClass("uk.ac.cam.cl.dtg.segue.etl"), ServletContextListener.class);
+          getSubTypes(getPackageClasses("uk.ac.cam.cl.dtg.segue.etl"), ServletContextListener.class);
 
       subTypes.removeAll(etlSubTypes);
 

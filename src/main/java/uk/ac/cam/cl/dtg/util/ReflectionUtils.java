@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ReflectionsUtil {
+public class ReflectionUtils {
   public static List<Class<?>> getClasses(String packageName) throws ClassNotFoundException, IOException,
       URISyntaxException {
     ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -51,4 +51,6 @@ public class ReflectionsUtil {
   public static <T> Set<Class<? extends T>> getSubTypes(List<Class<?>> classes, Class<T> parentClass) {
     return classes.stream().filter(parentClass::isAssignableFrom).map(c -> (Class<T>) c).collect(Collectors.toSet());
   }
+
+  private ReflectionUtils() {}
 }

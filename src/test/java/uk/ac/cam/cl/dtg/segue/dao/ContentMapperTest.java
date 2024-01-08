@@ -1,7 +1,7 @@
 package uk.ac.cam.cl.dtg.segue.dao;
 
 import static org.junit.Assert.assertTrue;
-import static uk.ac.cam.cl.dtg.util.ReflectionsUtil.getClasses;
+import static uk.ac.cam.cl.dtg.util.ReflectionUtils.getClasses;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
