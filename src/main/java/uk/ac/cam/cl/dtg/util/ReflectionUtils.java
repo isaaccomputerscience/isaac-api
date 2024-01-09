@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,10 +17,10 @@ import org.slf4j.LoggerFactory;
 public class ReflectionUtils {
   private static final Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
 
-  public static List<Class<?>> getClasses(String packageName) {
+  public static Set<Class<?>> getClasses(String packageName) {
     try {
       List<File> dirs = findDirectories(packageName);
-      List<Class<?>> classes = new ArrayList<>();
+      Set<Class<?>> classes = new HashSet<>();
       for (File directory : dirs) {
         classes.addAll(findClasses(directory, packageName));
       }
@@ -69,7 +70,7 @@ public class ReflectionUtils {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Set<Class<? extends T>> getSubTypes(List<Class<?>> classes, Class<T> parentClass) {
+  public static <T> Set<Class<? extends T>> getSubTypes(Set<Class<?>> classes, Class<T> parentClass) {
     return classes.stream().filter(parentClass::isAssignableFrom).map(c -> (Class<T>) c).collect(Collectors.toSet());
   }
 

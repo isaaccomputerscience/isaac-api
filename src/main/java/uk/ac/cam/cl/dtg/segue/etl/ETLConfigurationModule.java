@@ -17,7 +17,7 @@ import com.google.inject.name.Names;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.SystemUtils;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
@@ -117,7 +117,7 @@ class ETLConfigurationModule extends AbstractModule {
   @Singleton
   private static ContentMapper getContentMapper() {
     if (null == mapper) {
-      List<Class<?>> c = getClasses("uk.ac.cam.cl.dtg");
+      Set<Class<?>> c = getClasses("uk.ac.cam.cl.dtg");
       mapper = new ContentMapper(c);
     }
     return mapper;

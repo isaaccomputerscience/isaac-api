@@ -83,7 +83,7 @@ public class ContentMapper {
    *
    * @param classes - list of classes contained within the parent package to search for content classes.
    */
-  public ContentMapper(final List<Class<?>> classes) {
+  public ContentMapper(final Set<Class<?>> classes) {
     this();
     Validate.notNull(classes);
     Validate.notEmpty(classes);

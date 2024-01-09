@@ -226,7 +226,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   private static IGroupObserver groupObserver = null;
 
   private static Collection<Class<? extends ServletContextListener>> contextListeners;
-  private static final Map<String, List<Class<?>>> classesByPackage = new HashMap<>();
+  private static final Map<String, Set<Class<?>>> classesByPackage = new HashMap<>();
 
   /**
    * A setter method that is mostly useful for testing. It populates the global properties static value if it has not
@@ -584,7 +584,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Singleton
   private static ContentMapper getContentMapper() {
     if (null == mapper) {
-      List<Class<?>> c = getClasses("uk.ac.cam.cl.dtg");
+      Set<Class<?>> c = getClasses("uk.ac.cam.cl.dtg");
       mapper = new ContentMapper(c);
       log.info("Creating Singleton of the Content Mapper");
     }
@@ -1231,7 +1231,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * @param pkg - class name to use as key
    * @return reflections.
    */
-  public static List<Class<?>> getPackageClasses(final String pkg) {
+  public static Set<Class<?>> getPackageClasses(final String pkg) {
     if (!classesByPackage.containsKey(pkg)) {
       log.info(String.format("Caching reflections scan on '%s'", pkg));
       classesByPackage.put(pkg, getClasses(pkg));
