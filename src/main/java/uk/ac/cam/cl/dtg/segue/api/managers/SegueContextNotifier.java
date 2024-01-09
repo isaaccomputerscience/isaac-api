@@ -4,8 +4,6 @@ import com.google.api.client.util.Lists;
 import com.google.inject.Injector;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import org.slf4j.Logger;
@@ -32,7 +30,7 @@ public class SegueContextNotifier implements ServletContextListener {
    * The constructor which will invoke use the Guice injector to get instances of everything that should be notified
    * of any context messages.
    */
-  public SegueContextNotifier() throws IOException, URISyntaxException, ClassNotFoundException {
+  public SegueContextNotifier() {
     injector = SegueGuiceConfigurationModule.getGuiceInjector();
 
     // Instantiate metrics exporter on process startup

@@ -58,7 +58,6 @@ import jakarta.servlet.ServletContextListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -583,7 +582,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Inject
   @Provides
   @Singleton
-  private static ContentMapper getContentMapper() throws IOException, URISyntaxException, ClassNotFoundException {
+  private static ContentMapper getContentMapper() {
     if (null == mapper) {
       List<Class<?>> c = getClasses("uk.ac.cam.cl.dtg");
       mapper = new ContentMapper(c);
@@ -877,7 +876,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   @Inject
-  public static MapperFacade getDOtoDTOMapper() throws IOException, URISyntaxException, ClassNotFoundException {
+  public static MapperFacade getDOtoDTOMapper() {
     return SegueGuiceConfigurationModule.getContentMapper().getAutoMapper();
   }
 
@@ -1232,8 +1231,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * @param pkg - class name to use as key
    * @return reflections.
    */
-  public static List<Class<?>> getPackageClasses(final String pkg)
-      throws IOException, URISyntaxException, ClassNotFoundException {
+  public static List<Class<?>> getPackageClasses(final String pkg) {
     if (!classesByPackage.containsKey(pkg)) {
       log.info(String.format("Caching reflections scan on '%s'", pkg));
       classesByPackage.put(pkg, getClasses(pkg));
@@ -1246,8 +1244,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    *
    * @return the list of context listener classes (these should all be singletons).
    */
-  public static Collection<Class<? extends ServletContextListener>> getRegisteredContextListenerClasses()
-      throws IOException, URISyntaxException, ClassNotFoundException {
+  public static Collection<Class<? extends ServletContextListener>> getRegisteredContextListenerClasses() {
 
     if (null == contextListeners) {
       contextListeners = Lists.newArrayList();

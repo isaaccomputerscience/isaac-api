@@ -16,7 +16,6 @@ import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.List;
 import org.apache.commons.lang3.SystemUtils;
@@ -116,7 +115,7 @@ class ETLConfigurationModule extends AbstractModule {
   @Inject
   @Provides
   @Singleton
-  private static ContentMapper getContentMapper() throws IOException, URISyntaxException, ClassNotFoundException {
+  private static ContentMapper getContentMapper() {
     if (null == mapper) {
       List<Class<?>> c = getClasses("uk.ac.cam.cl.dtg");
       mapper = new ContentMapper(c);

@@ -22,7 +22,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -171,7 +170,7 @@ public abstract class IsaacIntegrationTest {
   }
 
   @BeforeAll
-  public static void setUpClass() throws IOException, URISyntaxException, ClassNotFoundException {
+  public static void setUpClass() {
     postgres = new PostgreSQLContainer<>("postgres:12")
         .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust")
         .withUsername("rutherford")
