@@ -6,7 +6,7 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
@@ -14,8 +14,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
@@ -30,7 +30,7 @@ public class PgEventBookingsTest {
   private PreparedStatement dummyPreparedStatement;
   private ResultSet dummyResultSet;
 
-  @Before
+  @BeforeEach
   public final void setUp() throws Exception {
     this.dummyPostgresSqlDb = createMock(PostgresSqlDb.class);
     this.dummyObjectMapper = createMock(ObjectMapper.class);
@@ -97,7 +97,7 @@ public class PgEventBookingsTest {
     PgEventBookings pgEventBookings = this.buildPgEventBookings();
     Map<BookingStatus, Map<Role, Long>> actualStatusCounts =
         pgEventBookings.getEventBookingStatusCounts("someEventId", true);
-    assertEquals("Every row should be represented in the result", expectedStatusCounts, actualStatusCounts);
+    assertEquals(expectedStatusCounts, actualStatusCounts, "Every row should be represented in the result");
     verify(mockedObjects);
   }
 }

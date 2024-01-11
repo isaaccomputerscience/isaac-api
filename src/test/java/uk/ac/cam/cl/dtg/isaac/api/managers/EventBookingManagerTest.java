@@ -7,8 +7,8 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_ADMIN_EMAIL;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_ICAL_UID_DOMAIN;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
@@ -22,8 +22,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dao.EventBookingPersistenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.AssociationToken;
 import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
@@ -66,7 +67,7 @@ public class EventBookingManagerTest {
   /**
    * Initial configuration of tests.
    */
-  @Before
+  @BeforeEach
   public final void setUp() {
     this.dummyEmailManager = createMock(EmailManager.class);
     this.dummyEventBookingPersistenceManager = createMock(EventBookingPersistenceManager.class);
@@ -556,8 +557,8 @@ public class EventBookingManagerTest {
     Long actualPlacesAvailable = ebm.getPlacesAvailable(testEvent);
     Long expectedPlacesAvailable = (long) initialNumberOfPlaces - 1 - 10;
     assertEquals(
-        "STUDENT events should only count confirmed and waiting list student places in availability calculations",
-        expectedPlacesAvailable, actualPlacesAvailable);
+        expectedPlacesAvailable, actualPlacesAvailable,
+        "STUDENT events should only count confirmed and waiting list student places in availability calculations");
     verify(mockedObjects);
   }
 
@@ -581,8 +582,8 @@ public class EventBookingManagerTest {
     replay(mockedObjects);
     Long placesAvailable = ebm.getPlacesAvailable(testEvent);
     Long expectedPlacesAvailable = 1L;
-    assertEquals("WAITING_LIST_ONLY events should only count confirmed places in availability calculations",
-        placesAvailable, expectedPlacesAvailable);
+    assertEquals(placesAvailable, expectedPlacesAvailable,
+        "WAITING_LIST_ONLY events should only count confirmed places in availability calculations");
     verify(mockedObjects);
   }
 
@@ -610,8 +611,8 @@ public class EventBookingManagerTest {
     replay(mockedObjects);
     Long placesAvailable = ebm.getPlacesAvailable(testEvent);
     Long expectedPlacesAvailable = 0L;
-    assertEquals("RESERVED bookings should count towards the places available in availability calculations",
-        expectedPlacesAvailable, placesAvailable);
+    assertEquals(expectedPlacesAvailable, placesAvailable,
+        "RESERVED bookings should count towards the places available in availability calculations");
     verify(mockedObjects);
   }
 
@@ -677,9 +678,9 @@ public class EventBookingManagerTest {
     );
 
     for (RegisteredUserDTO user : expectedResults.keySet()) {
-      assertEquals(String.format("Test case: %s", user.getRole()),
-          expectedResults.get(user),
-          eventBookingManager.isUserAbleToManageEvent(user, testEvent));
+      assertEquals(expectedResults.get(user),
+          eventBookingManager.isUserAbleToManageEvent(user, testEvent),
+          String.format("Test case: %s", user.getRole()));
     }
     verify(mockedObjects);
   }
@@ -716,7 +717,7 @@ public class EventBookingManagerTest {
 
     for (TestCase testCase : testCases) {
       boolean actual = EventBookingManager.eventAllowsGroupBookings(testCase.eventPageDTO);
-      assertEquals(testCase.assertion, testCase.expected, actual);
+      assertEquals(testCase.expected, actual, testCase.assertion);
     }
   }
 
@@ -788,7 +789,7 @@ public class EventBookingManagerTest {
     List<EventBookingDTO> actualResults =
         eventBookingManager.requestReservations(testCase.event, students, testCase.teacher);
     List<EventBookingDTO> expectedResults = ImmutableList.of(testCase.student1Booking, testCase.student2Booking);
-    assertEquals("N results should be returned unaltered", expectedResults, actualResults);
+    assertEquals(expectedResults, actualResults, "N results should be returned unaltered");
     verify(mockedObjects);
   }
 
@@ -929,8 +930,8 @@ public class EventBookingManagerTest {
     List<EventBookingDTO> actualResults =
         eventBookingManager.requestReservations(testCase.event, students, testCase.teacher);
     List<EventBookingDTO> expectedResults = ImmutableList.of(testCase.student1Booking);
-    assertEquals("Student 1 should get reserved despite the existing cancelled reservation", expectedResults,
-        actualResults);
+    Assertions.assertEquals(expectedResults, actualResults,
+        "Student 1 should get reserved despite the existing cancelled reservation");
     verify(mockedObjects);
   }
 
