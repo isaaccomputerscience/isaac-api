@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.eclipse.jetty.webapp.WebAppClassLoader;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +52,8 @@ public class ReflectionUtils {
     return dirs;
   }
 
-  private static List<Class<?>> findClasses(File directory, String packageName) throws ClassNotFoundException {
+  private static List<Class<?>> findClasses(File directory, String packageName)
+      throws ClassNotFoundException, IOException {
     List<Class<?>> classes = new ArrayList<>();
     if (!directory.exists()) {
       return classes;
@@ -59,7 +62,8 @@ public class ReflectionUtils {
     if (files == null) {
       return classes;
     }
-    ClassLoader loader = ClassLoader.getSystemClassLoader();
+    WebAppClassLoader.Context context = new WebAppContext();
+    ClassLoader loader = new WebAppClassLoader(context);
     for (File file : files) {
       if (file.isDirectory()) {
         classes.addAll(findClasses(file, packageName + "." + file.getName()));
