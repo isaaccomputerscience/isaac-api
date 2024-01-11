@@ -23,10 +23,10 @@ public class ReflectionUtils {
     try {
       List<File> dirs = findDirectories(packageName);
       Set<Class<?>> classes = new HashSet<>();
-      WebAppClassLoader.Context context = new WebAppContext();
-      ClassLoader loader = new WebAppClassLoader(context);
-      for (File directory : dirs) {
-        classes.addAll(findClasses(directory, packageName, loader));
+      try (WebAppClassLoader loader = new WebAppClassLoader(new WebAppContext())) {
+        for (File directory : dirs) {
+          classes.addAll(findClasses(directory, packageName, loader));
+        }
       }
       return classes;
     } catch (ClassNotFoundException e) {
