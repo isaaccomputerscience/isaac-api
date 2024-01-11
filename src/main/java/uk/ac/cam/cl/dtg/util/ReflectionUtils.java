@@ -23,19 +23,21 @@ public class ReflectionUtils {
     try {
       List<File> dirs = findDirectories(packageName);
       Set<Class<?>> classes = new HashSet<>();
+      WebAppClassLoader.Context context = new WebAppContext();
+      ClassLoader loader = new WebAppClassLoader(context);
       for (File directory : dirs) {
-        classes.addAll(findClasses(directory, packageName));
+        classes.addAll(findClasses(directory, packageName, loader));
       }
       return classes;
     } catch (ClassNotFoundException e) {
       log.error("Error while retrieving class resources");
-      throw new RuntimeException(e);
+      throw new ClassReflectionException(e);
     } catch (IOException e) {
       log.error("IO error while retrieving resources");
-      throw new RuntimeException(e);
+      throw new ClassReflectionException(e);
     } catch (URISyntaxException e) {
       log.error("Error while parsing resource URI");
-      throw new RuntimeException(e);
+      throw new ClassReflectionException(e);
     }
   }
 
@@ -52,7 +54,7 @@ public class ReflectionUtils {
     return dirs;
   }
 
-  private static List<Class<?>> findClasses(File directory, String packageName)
+  private static List<Class<?>> findClasses(File directory, String packageName, ClassLoader loader)
       throws ClassNotFoundException, IOException {
     List<Class<?>> classes = new ArrayList<>();
     if (!directory.exists()) {
@@ -62,11 +64,9 @@ public class ReflectionUtils {
     if (files == null) {
       return classes;
     }
-    WebAppClassLoader.Context context = new WebAppContext();
-    ClassLoader loader = new WebAppClassLoader(context);
     for (File file : files) {
       if (file.isDirectory()) {
-        classes.addAll(findClasses(file, packageName + "." + file.getName()));
+        classes.addAll(findClasses(file, packageName + "." + file.getName(), loader));
       } else if (file.getName().endsWith(".class")) {
         classes.add(
             Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6), false, loader));
