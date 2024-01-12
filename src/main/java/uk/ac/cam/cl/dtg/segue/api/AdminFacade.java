@@ -121,6 +121,7 @@ import uk.ac.cam.cl.dtg.util.RequestIpExtractor;
 @Tag(name = "/admin")
 public class AdminFacade extends AbstractSegueFacade {
   private static final Logger log = LoggerFactory.getLogger(AdminFacade.class);
+  private static final String ACCESS_DENIED_MESSAGE = "You must be staff to access this endpoint.";
 
   private final UserAccountManager userManager;
   private final GitContentManager contentManager;
@@ -212,7 +213,7 @@ public class AdminFacade extends AbstractSegueFacade {
     try {
       RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdminOrEventManager(userManager, requestingUser)) {
-        return new SegueErrorResponse(Status.FORBIDDEN, "You must be staff to access this endpoint.")
+        return new SegueErrorResponse(Status.FORBIDDEN, ACCESS_DENIED_MESSAGE)
             .toResponse();
       }
 
@@ -300,7 +301,7 @@ public class AdminFacade extends AbstractSegueFacade {
     try {
       RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdminOrEventManager(userManager, requestingUser)) {
-        return new SegueErrorResponse(Status.FORBIDDEN, "You must be staff to access this endpoint.")
+        return new SegueErrorResponse(Status.FORBIDDEN, ACCESS_DENIED_MESSAGE)
             .toResponse();
       }
 
@@ -368,7 +369,7 @@ public class AdminFacade extends AbstractSegueFacade {
     try {
       RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdminOrEventManager(userManager, requestingUser)) {
-        return new SegueErrorResponse(Status.FORBIDDEN, "You must be staff to access this endpoint.")
+        return new SegueErrorResponse(Status.FORBIDDEN, ACCESS_DENIED_MESSAGE)
             .toResponse();
       }
 
