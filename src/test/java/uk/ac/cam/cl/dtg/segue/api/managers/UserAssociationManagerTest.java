@@ -24,14 +24,14 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.api.client.util.Sets;
 import org.easymock.Capture;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.AssociationToken;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
@@ -57,7 +57,7 @@ public class UserAssociationManagerTest {
    * @throws Exception
    *             - test exception
    */
-  @Before
+  @BeforeEach
   public final void setUp() throws Exception {
     dummyAssociationDataManager = createMock(IAssociationDataManager.class);
     dummyGroupDataManager = createMock(GroupManager.class);
@@ -69,6 +69,7 @@ public class UserAssociationManagerTest {
    * @throws SegueDatabaseException
    * @throws UserGroupNotFoundException
    */
+  @SuppressWarnings("checkstyle:NonEmptyAtclauseDescription")
   @Test
   public final void userAssociationManager_generateToken_tokenShouldBeCreatedAndPersisted()
       throws SegueDatabaseException, UserGroupNotFoundException {
@@ -383,6 +384,7 @@ public class UserAssociationManagerTest {
     verify(someUserRequestingAccess, someRegisteredUserGrantingAccessSummary, dummyAssociationDataManager);
   }
 
+  @SuppressWarnings("checkstyle:Indentation")
   @Test
   public final void userAssociationManager_TokenMustBeSixCharactersAndRandom()
       throws SegueDatabaseException, UserGroupNotFoundException {
@@ -433,9 +435,9 @@ public class UserAssociationManagerTest {
           continue;
         }
         assertFalse(
-            "Token letter distribution not random; expected " + expectedAvg + " occurrences, found " + occurrences[x][y]
-                + "!",
-            (occurrences[x][y] > expectedAvg + allowedDelta) || (occurrences[x][y] < expectedAvg - allowedDelta));
+            (occurrences[x][y] > expectedAvg + allowedDelta) || (occurrences[x][y] < expectedAvg - allowedDelta),
+            "Token letter distribution not random; expected " + expectedAvg + " occurrences, found " + occurrences[x][y] + "!"
+                );
       }
     }
   }
