@@ -16,6 +16,8 @@
 
 package uk.ac.cam.cl.dtg.segue.dao.content;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -85,7 +87,7 @@ public class ContentMapper {
    */
   public ContentMapper(final Set<Class<?>> classes) {
     this();
-    Validate.notNull(classes);
+    requireNonNull(classes);
     Validate.notEmpty(classes);
 
     // We need to pre-register different content objects here for the
@@ -125,7 +127,7 @@ public class ContentMapper {
    * @param cls - the class to extract the jsontype value from.
    */
   public synchronized void registerJsonType(final Class<? extends Content> cls) {
-    Validate.notNull(cls, "Class cannot be null.");
+    requireNonNull(cls, "Class cannot be null.");
 
     JsonContentType jt = cls.getAnnotation(JsonContentType.class);
     if (jt != null) {
@@ -142,7 +144,7 @@ public class ContentMapper {
    */
   @SuppressWarnings("unchecked")
   public synchronized void registerDTOMapping(final Class<? extends Content> cls) {
-    Validate.notNull(cls, "Class cannot be null.");
+    requireNonNull(cls, "Class cannot be null.");
 
     DTOMapping dtoMapping = cls.getAnnotation(DTOMapping.class);
     if (dtoMapping != null && ContentDTO.class.isAssignableFrom(dtoMapping.value())) {
@@ -239,7 +241,7 @@ public class ContentMapper {
    * @see #getDTOByDO(Content)
    */
   public List<ContentDTO> getDTOByDOList(final List<Content> contentDOList) {
-    Validate.notNull(contentDOList);
+    requireNonNull(contentDOList);
 
     List<ContentDTO> resultList = Lists.newArrayList();
     for (Content c : contentDOList) {
