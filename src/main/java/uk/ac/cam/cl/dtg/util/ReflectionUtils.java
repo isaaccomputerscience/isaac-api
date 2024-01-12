@@ -11,22 +11,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.eclipse.jetty.webapp.WebAppClassLoader;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ReflectionUtils {
   private static final Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
 
+  private ReflectionUtils() {}
+
   public static Set<Class<?>> getClasses(String packageName) {
     try {
       List<File> dirs = findDirectories(packageName);
       Set<Class<?>> classes = new HashSet<>();
-      try (WebAppClassLoader loader = new WebAppClassLoader(new WebAppContext())) {
-        for (File directory : dirs) {
-          classes.addAll(findClasses(directory, packageName, loader));
-        }
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      for (File directory : dirs) {
+        classes.addAll(findClasses(directory, packageName, loader));
       }
       return classes;
     } catch (ClassNotFoundException e) {
@@ -79,6 +78,4 @@ public class ReflectionUtils {
   public static <T> Set<Class<? extends T>> getSubTypes(Set<Class<?>> classes, Class<T> parentClass) {
     return classes.stream().filter(parentClass::isAssignableFrom).map(c -> (Class<T>) c).collect(Collectors.toSet());
   }
-
-  private ReflectionUtils() {}
 }

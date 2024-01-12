@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,9 +84,9 @@ public class ContentMapper {
   /**
    * Alternative constructor that will attempt to search for valid types to pre-register.
    *
-   * @param classes - list of classes contained within the parent package to search for content classes.
+   * @param classes - series of classes contained within the parent package to search for content classes.
    */
-  public ContentMapper(final Set<Class<?>> classes) {
+  public ContentMapper(final Collection<Class<?>> classes) {
     this();
     requireNonNull(classes);
     Validate.notEmpty(classes);
