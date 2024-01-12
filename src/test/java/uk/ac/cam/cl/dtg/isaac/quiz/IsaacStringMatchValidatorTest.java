@@ -16,16 +16,16 @@
 
 package uk.ac.cam.cl.dtg.isaac.quiz;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.api.client.util.Lists;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuickQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacStringMatchQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
@@ -42,13 +42,10 @@ public class IsaacStringMatchValidatorTest {
   private final String caseSensitiveAnswer = "CaseSensitiveAnswer";
   private final String caseInsensitiveAnswer = "CaseInsensitiveAnswer";
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
   /**
    * Initial configuration of tests.
    */
-  @Before
+  @BeforeEach
   public final void setUp() {
     validator = new IsaacStringMatchValidator();
 
@@ -469,11 +466,11 @@ public class IsaacStringMatchValidatorTest {
     IsaacQuickQuestion invalidQuestionType = new IsaacQuickQuestion();
     invalidQuestionType.setId("invalidQuestionType");
 
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("only works with Isaac String Match Questions");
-
-    // This should throw an exception:
-    validator.validateQuestionResponse(invalidQuestionType, new StringChoice());
+    Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        validator.validateQuestionResponse(invalidQuestionType, new StringChoice()));
+    assertEquals("This validator only works with Isaac String Match Questions..."
+            + " (invalidQuestionType is not string match)",
+        exception.getMessage());
   }
 
   /*
@@ -484,10 +481,10 @@ public class IsaacStringMatchValidatorTest {
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
     someStringMatchQuestion.setId("invalidQuestionType");
 
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Expected StringChoice for IsaacStringMatchQuestion");
-
-    // This should throw an exception:
-    validator.validateQuestionResponse(someStringMatchQuestion, new Choice());
+    Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        validator.validateQuestionResponse(someStringMatchQuestion, new Choice()));
+    assertEquals("Expected StringChoice for IsaacStringMatchQuestion: invalidQuestionType."
+            + " Received (class uk.ac.cam.cl.dtg.isaac.dos.content.Choice) ",
+        exception.getMessage());
   }
 }

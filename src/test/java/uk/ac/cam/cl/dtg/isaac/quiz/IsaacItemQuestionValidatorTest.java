@@ -16,18 +16,17 @@
 
 package uk.ac.cam.cl.dtg.isaac.quiz;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacItemQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuickQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
@@ -44,13 +43,10 @@ public class IsaacItemQuestionValidatorTest {
   private IsaacItemQuestion someItemQuestion;
   private String incorrectExplanation = "EXPLANATION";
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
   /**
    * Initial configuration of tests.
    */
-  @Before
+  @BeforeEach
   public final void setUp() {
     validator = new IsaacItemQuestionValidator();
 
@@ -493,11 +489,10 @@ public class IsaacItemQuestionValidatorTest {
     IsaacQuickQuestion invalidQuestionType = new IsaacQuickQuestion();
     invalidQuestionType.setId("invalidQuestionType");
 
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("only works with IsaacItemQuestions");
-
-    // This should throw an exception:
-    validator.validateQuestionResponse(invalidQuestionType, new ItemChoice());
+    Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        validator.validateQuestionResponse(invalidQuestionType, new ItemChoice()));
+    assertEquals("This validator only works with IsaacItemQuestions (invalidQuestionType is not ItemQuestion)",
+        exception.getMessage());
   }
 
   /*
@@ -508,10 +503,9 @@ public class IsaacItemQuestionValidatorTest {
     IsaacItemQuestion itemQuestion = new IsaacItemQuestion();
     itemQuestion.setId("invalidQuestionType");
 
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Expected ItemChoice for IsaacItemQuestion");
-
-    // This should throw an exception:
-    validator.validateQuestionResponse(itemQuestion, new Choice());
+    Exception exception = assertThrows(IllegalArgumentException.class, () ->
+        validator.validateQuestionResponse(itemQuestion, new Choice()));
+    assertEquals("Expected ItemChoice for IsaacItemQuestion: invalidQuestionType. "
+        + "Received (class uk.ac.cam.cl.dtg.isaac.dos.content.Choice) ", exception.getMessage());
   }
 }
