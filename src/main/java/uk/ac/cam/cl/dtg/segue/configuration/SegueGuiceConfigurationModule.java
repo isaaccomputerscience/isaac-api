@@ -1232,11 +1232,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * @return reflections.
    */
   public static Set<Class<?>> getPackageClasses(final String pkg) {
-    if (!classesByPackage.containsKey(pkg)) {
-      log.info(String.format("Caching reflections scan on '%s'", pkg));
-      classesByPackage.put(pkg, getClasses(pkg));
-    }
-    return classesByPackage.get(pkg);
+    return classesByPackage.computeIfAbsent(pkg, key -> {
+      log.info(String.format("Caching reflections scan on '%s'", key));
+      return getClasses(key);
+    });
   }
 
   /**
