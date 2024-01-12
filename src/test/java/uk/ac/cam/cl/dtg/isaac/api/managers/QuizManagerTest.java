@@ -3,13 +3,13 @@ package uk.ac.cam.cl.dtg.isaac.api.managers;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.api.services.ContentSummarizerService;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizSectionDTO;
@@ -27,7 +27,7 @@ public class QuizManagerTest extends AbstractManagerTest {
   private PropertiesLoader properties;
   private IsaacQuizDTO brokenQuiz;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     properties = createMock(PropertiesLoader.class);
 
