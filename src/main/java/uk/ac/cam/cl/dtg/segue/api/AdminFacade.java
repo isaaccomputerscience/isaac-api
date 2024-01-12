@@ -295,34 +295,19 @@ public class AdminFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   public synchronized Response modifyUsersTeacherPendingStatus(@Context final HttpServletRequest request,
-                                               @PathParam("status") final Boolean status, final List<Long> userIds) {
+                                                               @PathParam("status") final Boolean status,
+                                                               final List<Long> userIds) {
     try {
       RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdminOrEventManager(userManager, requestingUser)) {
         return new SegueErrorResponse(Status.FORBIDDEN, "You must be staff to access this endpoint.")
-                .toResponse();
+            .toResponse();
       }
 
       List<Long> failedUserIds = new ArrayList<>();
 
       for (Long userId : userIds) {
-        try {
-          RegisteredUserDTO user = this.userManager.getUserDTOById(userId);
-
-          if (null == user) {
-            throw new NoUserException("No user found with this ID.");
-          }
-
-          Boolean oldStatus = user.getTeacherPending();
-          this.userManager.updateTeacherPendingFlag(userId, status);
-          log.info(String.format(
-                  "ADMIN user %s has modified the teacher_pending status of %s [%s] from %s to %s",
-                  requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status
-          ));
-        } catch (NoUserException e) {
-          log.error("NoUserException for userId " + userId, e);
-          failedUserIds.add(userId);
-        }
+        modifyTeacherPendingStatusForUser(userId, requestingUser, status, failedUserIds);
       }
 
       if (!failedUserIds.isEmpty()) {
@@ -335,10 +320,31 @@ public class AdminFacade extends AbstractSegueFacade {
     } catch (SegueDatabaseException e) {
       log.error("Database error while trying to change teacher_pending status", e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-              "Could not save new teacher_pending status to the database").toResponse();
+          "Could not save new teacher_pending status to the database").toResponse();
     }
 
     return Response.ok().build();
+  }
+
+  private void modifyTeacherPendingStatusForUser(Long userId, RegisteredUserDTO requestingUser, Boolean status,
+                                                 List<Long> failedUserIds) throws SegueDatabaseException {
+    try {
+      RegisteredUserDTO user = this.userManager.getUserDTOById(userId);
+
+      if (null == user) {
+        throw new NoUserException("No user found with this ID.");
+      }
+
+      Boolean oldStatus = user.getTeacherPending();
+      this.userManager.updateTeacherPendingFlag(userId, status);
+      if (log.isInfoEnabled()) {
+        log.info("ADMIN user {} has modified the teacher_pending status of {} [{}] from {} to {}",
+            requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status);
+      }
+    } catch (NoUserException e) {
+      log.error("NoUserException for userId " + userId, e);
+      failedUserIds.add(userId);
+    }
   }
 
   /**
