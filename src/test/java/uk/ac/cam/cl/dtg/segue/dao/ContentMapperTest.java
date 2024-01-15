@@ -1,10 +1,10 @@
 package uk.ac.cam.cl.dtg.segue.dao;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.ac.cam.cl.dtg.util.ReflectionUtils.getClasses;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.content.CodeSnippet;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
@@ -14,7 +14,7 @@ public class ContentMapperTest {
 
   private ContentMapper contentMapper;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     this.contentMapper = new ContentMapper(getClasses("uk.ac.cam.cl.dtg.isaac"));
   }

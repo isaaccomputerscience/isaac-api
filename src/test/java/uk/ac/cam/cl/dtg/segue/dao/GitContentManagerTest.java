@@ -17,11 +17,11 @@
 package uk.ac.cam.cl.dtg.segue.dao;
 
 import static org.easymock.EasyMock.createMock;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
@@ -34,7 +34,7 @@ import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
 public class GitContentManagerTest {
   private GitContentManager defaultGCM;
 
-  @Before
+  @BeforeEach
   public final void setUp() {
     GitDb database = createMock(GitDb.class);
     ISearchProvider searchProvider = createMock(ISearchProvider.class);
