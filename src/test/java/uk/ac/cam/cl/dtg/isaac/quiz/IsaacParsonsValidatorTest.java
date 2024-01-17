@@ -41,7 +41,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.ParsonsItem;
 /**
  * Test class for the Parsons Question Validator class.
  */
-public class IsaacParsonsValidatorTest {
+class IsaacParsonsValidatorTest {
   private IsaacParsonsValidator validator;
   private IsaacParsonsQuestion someParsonsQuestion;
   private final String incorrectExplanation = "EXPLANATION";
@@ -84,7 +84,7 @@ public class IsaacParsonsValidatorTest {
      Test that correct answers are recognised.
   */
   @Test
-  public final void isaacParsonsValidator_CorrectItems_CorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_CorrectItems_CorrectResponseShouldBeReturned() {
     // Set up user answer:
     ParsonsChoice c = new ParsonsChoice();
     ParsonsItem submittedItem1 = new ParsonsItem("id001", null, 0);
@@ -100,7 +100,7 @@ public class IsaacParsonsValidatorTest {
      Test that order matters for correct answers.
   */
   @Test
-  public final void isaacParsonsValidator_CorrectItemsWrongOrder_IncorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_CorrectItemsWrongOrder_IncorrectResponseShouldBeReturned() {
     // Set up user answer:
     ParsonsChoice c = new ParsonsChoice();
     ParsonsItem submittedItem1 = new ParsonsItem("id001", null, 0);
@@ -116,7 +116,7 @@ public class IsaacParsonsValidatorTest {
  Test that indentation matters for correct answers.
 */
   @Test
-  public final void isaacParsonsValidator_CorrectItemsWrongIndentation_IncorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_CorrectItemsWrongIndentation_IncorrectResponseShouldBeReturned() {
     // Set up user answer:
     ParsonsChoice c = new ParsonsChoice();
     ParsonsItem submittedItem1 = new ParsonsItem("id001", null, 0);
@@ -132,7 +132,7 @@ public class IsaacParsonsValidatorTest {
      Test that correct choices take precedence over incorrect choices.
   */
   @Test
-  public final void isaacParsonsValidator_CorrectChoicePrecedence_CorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_CorrectChoicePrecedence_CorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacParsonsQuestion parsonsQuestion = new IsaacParsonsQuestion();
 
@@ -171,7 +171,7 @@ public class IsaacParsonsValidatorTest {
    Test that invalid answers are recognised.
   */
   @Test
-  public final void isaacParsonsValidator_InvalidItems_ErrorResponseShouldBeReturned() {
+  final void isaacParsonsValidator_InvalidItems_ErrorResponseShouldBeReturned() {
     // Set up invalid user answer:
     ParsonsChoice c = new ParsonsChoice();
     ParsonsItem submittedItem1 = new ParsonsItem("id005", null, 0);
@@ -187,7 +187,7 @@ public class IsaacParsonsValidatorTest {
    Test that invalid answers are recognised.
   */
   @Test
-  public final void isaacParsonsValidator_IncorrectItemType_ExceptionShouldBeThrown() {
+  final void isaacParsonsValidator_IncorrectItemType_ExceptionShouldBeThrown() {
     // Set up invalid user answer:
     ParsonsChoice c = new ParsonsChoice();
     Item submittedItem1 = new Item("id001", null);
@@ -204,7 +204,7 @@ public class IsaacParsonsValidatorTest {
    Test that no items being submitted gets custom feedback.
   */
   @Test
-  public final void isaacParsonsValidator_NoItemsSubmitted_IncorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_NoItemsSubmitted_IncorrectResponseShouldBeReturned() {
     // Set up invalid user answer:
     ParsonsChoice c = new ParsonsChoice();
     c.setItems(null);
@@ -219,7 +219,7 @@ public class IsaacParsonsValidatorTest {
    Test that incorrect answers are incorrect.
   */
   @Test
-  public final void isaacParsonsValidator_IncorrectAnswer_IncorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_IncorrectAnswer_IncorrectResponseShouldBeReturned() {
     // Set up user answer:
     ParsonsChoice c = new ParsonsChoice();
     ParsonsItem submittedItem1 = new ParsonsItem("id001", null, 0);
@@ -235,7 +235,7 @@ public class IsaacParsonsValidatorTest {
      Test that incorrect choices can be matched.
   */
   @Test
-  public final void isaacParsonsValidator_IncorrectChoiceMatch_MatchedResponseShouldBeReturned() {
+  final void isaacParsonsValidator_IncorrectChoiceMatch_MatchedResponseShouldBeReturned() {
     // Set up user answer:
     ParsonsChoice c = new ParsonsChoice();
     ParsonsItem submittedItem1 = new ParsonsItem("id001", null, 0);
@@ -254,7 +254,7 @@ public class IsaacParsonsValidatorTest {
    Test that missing choices are detected.
   */
   @Test
-  public final void isaacParsonsValidator_NoChoices_IncorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_NoChoices_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacParsonsQuestion parsonsQuestion = new IsaacParsonsQuestion();
 
@@ -280,7 +280,7 @@ public class IsaacParsonsValidatorTest {
    Test that missing items are detected.
   */
   @Test
-  public final void isaacParsonsValidator_NoItems_IncorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_NoItems_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacParsonsQuestion parsonsQuestion = new IsaacParsonsQuestion();
 
@@ -310,7 +310,7 @@ public class IsaacParsonsValidatorTest {
    Test that choices missing items are detected.
   */
   @Test
-  public final void isaacParsonsValidator_NoItemsInChoice_IncorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_NoItemsInChoice_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacParsonsQuestion parsonsQuestion = new IsaacParsonsQuestion();
 
@@ -340,7 +340,7 @@ public class IsaacParsonsValidatorTest {
    Test that incorrect choice types in question are detected.
   */
   @Test
-  public final void isaacParsonsValidator_WrongChoiceType_IncorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_WrongChoiceType_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacParsonsQuestion parsonsQuestion = new IsaacParsonsQuestion();
 
@@ -369,7 +369,7 @@ public class IsaacParsonsValidatorTest {
 Test that incorrect Item types in choices are detected.
 */
   @Test
-  public final void isaacParsonsValidator_WrongItemTypeInChoice_IncorrectResponseShouldBeReturned() {
+  final void isaacParsonsValidator_WrongItemTypeInChoice_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacParsonsQuestion parsonsQuestion = new IsaacParsonsQuestion();
 
@@ -399,7 +399,7 @@ Test that incorrect Item types in choices are detected.
    Test that incorrect question types are detected.
   */
   @Test
-  public final void isaacParsonsValidator_WrongQuestionType_ExceptionShouldBeThrown() {
+  final void isaacParsonsValidator_WrongQuestionType_ExceptionShouldBeThrown() {
     IsaacQuickQuestion invalidQuestionType = new IsaacQuickQuestion();
     invalidQuestionType.setId("invalidQuestionType");
 
@@ -414,7 +414,7 @@ Test that incorrect Item types in choices are detected.
    Test that incorrect submitted choice types are detected.
   */
   @Test
-  public final void isaacParsonsValidator_WrongChoiceType_ExceptionShouldBeThrown() {
+  final void isaacParsonsValidator_WrongChoiceType_ExceptionShouldBeThrown() {
     IsaacParsonsQuestion parsonsQuestion = new IsaacParsonsQuestion();
     parsonsQuestion.setId("invalidQuestionType");
 

@@ -51,7 +51,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  * EventBookingManagerTest.
  */
 class EventBookingManagerTest {
-  private static Date someFutureDate = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
+  private static final Date someFutureDate = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
   private EventBookingPersistenceManager dummyEventBookingPersistenceManager;
   private EmailManager dummyEmailManager;
   private UserAssociationManager dummyUserAssociationManager;

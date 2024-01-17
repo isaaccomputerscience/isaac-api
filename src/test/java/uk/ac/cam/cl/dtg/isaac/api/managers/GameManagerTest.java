@@ -46,7 +46,7 @@ import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager.BooleanSearchClause;
 
-public class GameManagerTest {
+class GameManagerTest {
   private GitContentManager dummyContentManager;
   private GameboardPersistenceManager dummyGameboardPersistenceManager;
   private MapperFacade dummyMapper;
@@ -68,7 +68,7 @@ public class GameManagerTest {
   }
 
   @Test
-  public void getNextQuestionsForFilter_appliesExclusionFilterForDeprecatedQuestions() throws
+  void getNextQuestionsForFilter_appliesExclusionFilterForDeprecatedQuestions() throws
       ContentManagerException {
 
     // configure the mock GitContentManager to record the filters that are sent to it by getNextQuestionsForFilter()
@@ -96,7 +96,7 @@ public class GameManagerTest {
   }
 
   @Test
-  public void generateRandomQuestions_returnsCorrectNumberOfQuestions() throws ContentManagerException {
+  void generateRandomQuestions_returnsCorrectNumberOfQuestions() throws ContentManagerException {
 
     // Arrange
     int limit = 5;
@@ -129,7 +129,7 @@ public class GameManagerTest {
   }
 
   @Test
-  public void generateRandomQuestions_appliesExclusionFilterForDeprecatedQuestions() throws
+  void generateRandomQuestions_appliesExclusionFilterForDeprecatedQuestions() throws
       ContentManagerException {
 
     // configure the mock GitContentManager to record the filters that are sent to it by generateRandomQuestions()

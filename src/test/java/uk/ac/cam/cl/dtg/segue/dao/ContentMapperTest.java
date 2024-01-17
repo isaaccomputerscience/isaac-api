@@ -10,7 +10,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 
-public class ContentMapperTest {
+class ContentMapperTest {
 
   private ContentMapper contentMapper;
 
@@ -20,7 +20,7 @@ public class ContentMapperTest {
   }
 
   @Test
-  public void getDTOByDO_CodeSnippetDOtoDTO_ExpandableSetInDTO() {
+  void getDTOByDO_CodeSnippetDOtoDTO_ExpandableSetInDTO() {
     // Arrange
     CodeSnippet codeSnippet = new CodeSnippet();
     codeSnippet.setType("codeSnippet");
@@ -34,7 +34,7 @@ public class ContentMapperTest {
   }
 
   @Test
-  public void getDTOByDO_ContentDOtoDTO_ExpandableSetInDTO() {
+  void getDTOByDO_ContentDOtoDTO_ExpandableSetInDTO() {
     // Arrange
     Content content = new Content();
     content.setType("content");

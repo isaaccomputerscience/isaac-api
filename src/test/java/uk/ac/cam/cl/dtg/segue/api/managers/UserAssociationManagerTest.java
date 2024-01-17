@@ -46,7 +46,7 @@ import uk.ac.cam.cl.dtg.segue.dao.associations.UserGroupNotFoundException;
  * Test class for the user Association class.
  *
  */
-public class UserAssociationManagerTest {
+class UserAssociationManagerTest {
   private IAssociationDataManager dummyAssociationDataManager;
   private GroupManager dummyGroupDataManager;
   private UserAccountManager dummyUserManager;
@@ -71,7 +71,7 @@ public class UserAssociationManagerTest {
    */
   @SuppressWarnings("checkstyle:NonEmptyAtclauseDescription")
   @Test
-  public final void userAssociationManager_generateToken_tokenShouldBeCreatedAndPersisted()
+  final void userAssociationManager_generateToken_tokenShouldBeCreatedAndPersisted()
       throws SegueDatabaseException, UserGroupNotFoundException {
     UserAssociationManager managerUnderTest = new UserAssociationManager(
         dummyAssociationDataManager, dummyUserManager, dummyGroupDataManager);
@@ -104,7 +104,7 @@ public class UserAssociationManagerTest {
   }
 
   @Test
-  public final void userAssociationManager_createAssociationWithTokenAndAddToGroup_associationShouldBeCreatedAndUserAddedToGroup()
+  final void userAssociationManager_createAssociationWithTokenAndAddToGroup_associationShouldBeCreatedAndUserAddedToGroup()
       throws SegueDatabaseException, UserGroupNotFoundException {
     UserAssociationManager managerUnderTest = new UserAssociationManager(
         dummyAssociationDataManager, dummyUserManager, dummyGroupDataManager);
@@ -153,7 +153,7 @@ public class UserAssociationManagerTest {
   }
 
   @Test
-  public final void userAssociationManager_DuplicateAssociationButAddToGroupAnyway_associationShouldNotBeCreatedButUserShouldBeAddedToGroup()
+  final void userAssociationManager_DuplicateAssociationButAddToGroupAnyway_associationShouldNotBeCreatedButUserShouldBeAddedToGroup()
       throws SegueDatabaseException, UserGroupNotFoundException {
     UserAssociationManager managerUnderTest = new UserAssociationManager(
         dummyAssociationDataManager, dummyUserManager, dummyGroupDataManager);
@@ -198,7 +198,7 @@ public class UserAssociationManagerTest {
   }
 
   @Test
-  public final void userAssociationManager_createAssociationWithTokenNoGroup_associationShouldBeCreated()
+  final void userAssociationManager_createAssociationWithTokenNoGroup_associationShouldBeCreated()
       throws SegueDatabaseException, UserGroupNotFoundException {
     UserAssociationManager managerUnderTest = new UserAssociationManager(
         dummyAssociationDataManager, dummyUserManager, dummyGroupDataManager);
@@ -239,7 +239,7 @@ public class UserAssociationManagerTest {
   }
 
   @Test
-  public final void userAssociationManager_createAssociationWithBadToken_exceptionShouldBeThrown()
+  final void userAssociationManager_createAssociationWithBadToken_exceptionShouldBeThrown()
       throws SegueDatabaseException, UserGroupNotFoundException {
     UserAssociationManager managerUnderTest = new UserAssociationManager(
         dummyAssociationDataManager, dummyUserManager, dummyGroupDataManager);
@@ -272,7 +272,7 @@ public class UserAssociationManagerTest {
   }
 
   @Test
-  public final void userAssociationManager_hasPermissionUserIsTheOwner_trueShouldBeRetured()
+  final void userAssociationManager_hasPermissionUserIsTheOwner_trueShouldBeRetured()
       throws SegueDatabaseException, UserGroupNotFoundException {
     UserAssociationManager managerUnderTest = new UserAssociationManager(
         dummyAssociationDataManager, dummyUserManager, dummyGroupDataManager);
@@ -295,7 +295,7 @@ public class UserAssociationManagerTest {
   }
 
   @Test
-  public final void userAssociationManager_hasPermissionUserIsAdmin_trueShouldBeRetured()
+  final void userAssociationManager_hasPermissionUserIsAdmin_trueShouldBeRetured()
       throws SegueDatabaseException, UserGroupNotFoundException {
     UserAssociationManager managerUnderTest = new UserAssociationManager(
         dummyAssociationDataManager, dummyUserManager, dummyGroupDataManager);
@@ -322,7 +322,7 @@ public class UserAssociationManagerTest {
   }
 
   @Test
-  public final void userAssociationManager_hasPermissionUserHasValidAssociation_trueShouldBeRetured()
+  final void userAssociationManager_hasPermissionUserHasValidAssociation_trueShouldBeRetured()
       throws SegueDatabaseException, UserGroupNotFoundException {
     UserAssociationManager managerUnderTest = new UserAssociationManager(
         dummyAssociationDataManager, dummyUserManager, dummyGroupDataManager);
@@ -353,7 +353,7 @@ public class UserAssociationManagerTest {
   }
 
   @Test
-  public final void userAssociationManager_NoPermissionUserHasNoValidAssociation_falseShouldBeRetured()
+  final void userAssociationManager_NoPermissionUserHasNoValidAssociation_falseShouldBeRetured()
       throws SegueDatabaseException, UserGroupNotFoundException {
     UserAssociationManager managerUnderTest = new UserAssociationManager(
         dummyAssociationDataManager, dummyUserManager, dummyGroupDataManager);
@@ -386,7 +386,7 @@ public class UserAssociationManagerTest {
 
   @SuppressWarnings("checkstyle:Indentation")
   @Test
-  public final void userAssociationManager_TokenMustBeSixCharactersAndRandom()
+  final void userAssociationManager_TokenMustBeSixCharactersAndRandom()
       throws SegueDatabaseException, UserGroupNotFoundException {
     UserAssociationManager managerUnderTest = new UserAssociationManager(
         dummyAssociationDataManager, dummyUserManager, dummyGroupDataManager);

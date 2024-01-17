@@ -59,7 +59,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 /**
  * Test class for the EmailManager class.
  */
-public class EmailManagerTest {
+class EmailManagerTest {
   private static final String CONTENT_VERSION = "liveVersion";
 
   private EmailCommunicator emailCommunicator;
@@ -205,7 +205,7 @@ public class EmailManagerTest {
    * @throws CommunicationException
    */
   @Test
-  public final void sendTemplatedEmailToUser_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
+  final void sendTemplatedEmailToUser_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
     replay(userManager);
 
     EmailTemplateDTO template = createDummyEmailTemplate("Hi, {{givenName}}."
@@ -280,7 +280,7 @@ public class EmailManagerTest {
    * @throws CommunicationException
    */
   @Test
-  public final void sendFederatedPasswordReset_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
+  final void sendFederatedPasswordReset_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
 
     EmailTemplateDTO template = createDummyEmailTemplate("Hello, {{givenName}}.\n\nYou requested a "
         + "password reset. However you use {{providerString}} to log in to our site. You need"
@@ -348,7 +348,7 @@ public class EmailManagerTest {
    * @throws CommunicationException
    */
   @Test
-  public final void sendPasswordReset_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
+  final void sendPasswordReset_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
 
     EmailTemplateDTO template = createDummyEmailTemplate("Hello, {{givenName}}.\n\nA request has been "
         + "made to reset the password for the account: </a href='mailto:{{email}}'>{{email}}<a>"
@@ -419,7 +419,7 @@ public class EmailManagerTest {
    * @throws CommunicationException
    */
   @Test
-  public void sendRegistrationConfirmation_checkForInvalidTemplateTags_throwIllegalArgumentException() {
+  void sendRegistrationConfirmation_checkForInvalidTemplateTags_throwIllegalArgumentException() {
     EmailTemplateDTO template = createDummyEmailTemplate("Hi, {{givenName}} {{surname}}.\n"
         + "Thanks for registering!\nYour Isaac email address is: "
         + "</a href='mailto:{{email}}'>{{email}}<a>.\naddress</a>\n{{sig}}");
@@ -457,7 +457,7 @@ public class EmailManagerTest {
    * Verify that the system responds correctly when there are fewer tags than expected in the email template.
    */
   @Test
-  public final void sendRegistrationConfirmation_checkTemplatesWithNoTagsWorks_emailIsGeneratedWithoutTemplateContent() {
+  final void sendRegistrationConfirmation_checkTemplatesWithNoTagsWorks_emailIsGeneratedWithoutTemplateContent() {
     EmailTemplateDTO template = createDummyEmailTemplate("this is a template with no tags");
 
     // Create content manager
@@ -516,7 +516,7 @@ public class EmailManagerTest {
    * Make sure that when the templates are published:false, that the method reacts appropriately.
    */
   @Test
-  public void sendRegistrationConfirmation_checkNullContentDTO_exceptionThrownAndDealtWith() {
+  void sendRegistrationConfirmation_checkNullContentDTO_exceptionThrownAndDealtWith() {
     ContentDTO htmlTemplate = createDummyContentTemplate("{{content}}");
     try {
       expect(mockContentManager.getContentById("email-template-registration-confirmation")).andReturn(null);
@@ -567,7 +567,7 @@ public class EmailManagerTest {
    * Make sure that when the templates are published:false, that the method reacts appropriately.
    */
   @Test
-  public void sendCustomEmail_checkNullProperties_replacedWithEmptyString() {
+  void sendCustomEmail_checkNullProperties_replacedWithEmptyString() {
 
     EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
         mockContentManager, logManager, generateGlobalTokenMap());
@@ -628,7 +628,7 @@ public class EmailManagerTest {
    * Check we don't send custom content emails to users with null / preference
    */
   @Test
-  public void sendCustomContentEmail_checkNullProperties_replacedWithEmptyString() {
+  void sendCustomContentEmail_checkNullProperties_replacedWithEmptyString() {
 
     EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
         mockContentManager, logManager, generateGlobalTokenMap());
@@ -693,7 +693,7 @@ public class EmailManagerTest {
    * Make sure that when the templates are published:false, that the method reacts appropriately.
    */
   @Test
-  public void flattenTokenMap_checkTemplateReplacement_successfulReplacement() {
+  void flattenTokenMap_checkTemplateReplacement_successfulReplacement() {
     EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
         mockContentManager, logManager, generateGlobalTokenMap());
     Date someDate = new Date();

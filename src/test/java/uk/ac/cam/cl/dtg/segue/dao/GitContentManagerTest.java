@@ -31,7 +31,7 @@ import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
 /**
  * Test class for the GitContentManager class.
  */
-public class GitContentManagerTest {
+class GitContentManagerTest {
   private GitContentManager defaultGCM;
 
   @BeforeEach
@@ -47,7 +47,7 @@ public class GitContentManagerTest {
    * Test that the getById method returns null if it is passed a null id.
    */
   @Test
-  public void getById_invalidId_checkNullReturned() {
+  void getById_invalidId_checkNullReturned() {
     String id = null;
     try {
       assertNull(defaultGCM.getContentDOById(id));

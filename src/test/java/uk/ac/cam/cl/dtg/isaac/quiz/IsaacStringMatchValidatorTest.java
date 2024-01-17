@@ -36,7 +36,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.StringChoice;
 /**
  * Test class for the String Match Validator class.
  */
-public class IsaacStringMatchValidatorTest {
+class IsaacStringMatchValidatorTest {
   private IsaacStringMatchValidator validator;
   private IsaacStringMatchQuestion someStringMatchQuestion;
   private final String caseSensitiveAnswer = "CaseSensitiveAnswer";
@@ -72,7 +72,7 @@ public class IsaacStringMatchValidatorTest {
       Test that the "did not provide an answer" response is returned for empty input.
    */
   @Test
-  public final void isaacStringMatchValidator_EmptyValue_InvalidResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_EmptyValue_InvalidResponseShouldBeReturned() {
     // Set up user answer:
     StringChoice c = new StringChoice();
     c.setValue("");
@@ -87,7 +87,7 @@ public class IsaacStringMatchValidatorTest {
      Test that the default behavior for StringChoice is case-sensitive matching.
   */
   @Test
-  public final void isaacStringMatchValidator_LowerCaseValueDefaultChoice_IncorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_LowerCaseValueDefaultChoice_IncorrectResponseShouldBeReturned() {
     // Set up user answer:
     StringChoice c = new StringChoice();
     c.setValue(caseSensitiveAnswer.toLowerCase());
@@ -101,7 +101,7 @@ public class IsaacStringMatchValidatorTest {
      Test that correct answers are recognised (case-sensitive default).
   */
   @Test
-  public final void isaacStringMatchValidator_CorrectValueDefaultChoice_CorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_CorrectValueDefaultChoice_CorrectResponseShouldBeReturned() {
     // Set up user answer:
     StringChoice c = new StringChoice();
     c.setValue(caseSensitiveAnswer);
@@ -115,7 +115,7 @@ public class IsaacStringMatchValidatorTest {
       Test that correct answers are recognised (when case-insensitive allowed).
   */
   @Test
-  public final void isaacStringMatchValidator_CorrectValueCaseInsensitive_CorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_CorrectValueCaseInsensitive_CorrectResponseShouldBeReturned() {
     // Set up user answer:
     StringChoice c = new StringChoice();
     c.setValue(caseInsensitiveAnswer);
@@ -129,7 +129,7 @@ public class IsaacStringMatchValidatorTest {
      Test that case-insensitive correct answers are recognised (when case-insensitive allowed).
   */
   @Test
-  public final void isaacStringMatchValidator_LowercaseCorrectValueCaseInsensitive_CorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_LowercaseCorrectValueCaseInsensitive_CorrectResponseShouldBeReturned() {
     // Set up user answer:
     StringChoice c = new StringChoice();
     c.setValue(caseInsensitiveAnswer.toLowerCase());
@@ -143,7 +143,7 @@ public class IsaacStringMatchValidatorTest {
      Test that the default behavior for String Match Questions trims trailing spaces.
   */
   @Test
-  public final void isaacStringMatchValidator_CorrectWithTrailingSpaces_CorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_CorrectWithTrailingSpaces_CorrectResponseShouldBeReturned() {
     // Set up user answer:
     StringChoice c = new StringChoice();
     c.setValue(String.format("%s     ", caseSensitiveAnswer));
@@ -157,7 +157,7 @@ public class IsaacStringMatchValidatorTest {
      Test that trailing whitespace on multiple lines is removed before matching by default.
   */
   @Test
-  public final void isaacStringMatchValidator_TrailingSpacesMultiline_CorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_TrailingSpacesMultiline_CorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
 
@@ -183,7 +183,7 @@ public class IsaacStringMatchValidatorTest {
      Test that trailing whitespace on multiple lines is preserved when flag set.
   */
   @Test
-  public final void isaacStringMatchValidator_TrailingSpacesMultilinePreserved_IncorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_TrailingSpacesMultilinePreserved_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
     someStringMatchQuestion.setPreserveTrailingWhitespace(true);
@@ -210,7 +210,7 @@ public class IsaacStringMatchValidatorTest {
  Test that leading whitespace on multiple lines is removed before matching by default.
 */
   @Test
-  public final void isaacStringMatchValidator_LeadingSpacesMultiline_CorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_LeadingSpacesMultiline_CorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
 
@@ -236,7 +236,7 @@ public class IsaacStringMatchValidatorTest {
      Test that leading whitespace on multiple lines is preserved when flag set.
   */
   @Test
-  public final void isaacStringMatchValidator_LeadingSpacesMultilinePreserved_IncorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_LeadingSpacesMultilinePreserved_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
     someStringMatchQuestion.setPreserveLeadingWhitespace(true);
@@ -263,7 +263,7 @@ public class IsaacStringMatchValidatorTest {
      Test that whitespace stripping does not remove newlines as well.
   */
   @Test
-  public final void isaacStringMatchValidator_TrailingSpacesNoNewlines_IncorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_TrailingSpacesNoNewlines_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
 
@@ -289,7 +289,7 @@ public class IsaacStringMatchValidatorTest {
      Test that correct case-sensitive match takes priority over case-insensitive correct match.
   */
   @Test
-  public final void isaacStringMatchValidator_CaseSensitivePriority_CorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_CaseSensitivePriority_CorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
 
@@ -325,7 +325,7 @@ public class IsaacStringMatchValidatorTest {
      Test that case-insensitive correct matches take priority over case-insensitive incorrect matches.
   */
   @Test
-  public final void isaacStringMatchValidator_CaseInsensitivePriorityCorrect_CorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_CaseInsensitivePriorityCorrect_CorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
 
@@ -358,7 +358,7 @@ public class IsaacStringMatchValidatorTest {
  Test that incorrect case-sensitive match takes priority over case-insensitive correct match.
 */
   @Test
-  public final void isaacStringMatchValidator_CaseSensitivePriority_IncorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_CaseSensitivePriority_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
 
@@ -393,7 +393,7 @@ public class IsaacStringMatchValidatorTest {
    Test that missing choices are detected.
   */
   @Test
-  public final void isaacStringMatchValidator_NoChoices_IncorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_NoChoices_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
     someStringMatchQuestion.setChoices(Lists.newArrayList());
@@ -412,7 +412,7 @@ public class IsaacStringMatchValidatorTest {
    Test that incorrect choice types in question are detected.
   */
   @Test
-  public final void isaacStringMatchValidator_WrongChoiceType_IncorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_WrongChoiceType_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
 
@@ -437,7 +437,7 @@ public class IsaacStringMatchValidatorTest {
    Test that choices in questions missing values are not matched.
   */
   @Test
-  public final void isaacStringMatchValidator_EmptyValueInQuestion_IncorrectResponseShouldBeReturned() {
+  final void isaacStringMatchValidator_EmptyValueInQuestion_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
 
@@ -462,7 +462,7 @@ public class IsaacStringMatchValidatorTest {
    Test that incorrect question types are detected.
   */
   @Test
-  public final void isaacStringMatchValidator_WrongQuestionType_ExceptionShouldBeThrown() {
+  final void isaacStringMatchValidator_WrongQuestionType_ExceptionShouldBeThrown() {
     IsaacQuickQuestion invalidQuestionType = new IsaacQuickQuestion();
     invalidQuestionType.setId("invalidQuestionType");
 
@@ -477,7 +477,7 @@ public class IsaacStringMatchValidatorTest {
    Test that incorrect submitted choice types are detected.
   */
   @Test
-  public final void isaacStringMatchValidator_WrongChoiceType_ExceptionShouldBeThrown() {
+  final void isaacStringMatchValidator_WrongChoiceType_ExceptionShouldBeThrown() {
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
     someStringMatchQuestion.setId("invalidQuestionType");
 

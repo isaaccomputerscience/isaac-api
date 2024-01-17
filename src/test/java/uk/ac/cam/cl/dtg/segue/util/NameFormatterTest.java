@@ -10,14 +10,14 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 import uk.ac.cam.cl.dtg.util.NameFormatter;
 
-public class NameFormatterTest {
+class NameFormatterTest {
 
 
   /**
    * Test teacher user name extraction.
    */
   @Test
-  public final void testGetTeacherNameFromUser() throws Exception {
+  final void testGetTeacherNameFromUser() throws Exception {
     // Check case with both first and last name:
     RegisteredUserDTO dummyUserFirstLast = new RegisteredUserDTO();
     dummyUserFirstLast.setGivenName("FirstName");
@@ -43,7 +43,7 @@ public class NameFormatterTest {
    * Test teacher user name extraction.
    */
   @Test
-  public final void testGetFilteredGroupNameFromGroup() throws Exception {
+  final void testGetFilteredGroupNameFromGroup() throws Exception {
     String groupName = "Group Name";
 
     // Check case with shared group name:
