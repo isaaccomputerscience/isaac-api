@@ -10,7 +10,7 @@ import org.eclipse.jgit.transport.SshConfigStore;
  * A SshConfigStore used by JGit to configure the SSH sessions it creates.
  * ETL will use the same settings regardless of host and ignore existing on-disk configs.
  */
-public class ETLInMemorySshConfigStore implements SshConfigStore {
+public class EtlInMemorySshConfigStore implements SshConfigStore {
 
   private final InMemoryHostConfig inMemoryHostConfig;
 
@@ -18,7 +18,7 @@ public class ETLInMemorySshConfigStore implements SshConfigStore {
    * @param config - A Map of config keys to config values (of the sort ordinarily found in ~/.ssh/config),
    *               which will apply to all sessions using this store regardless of the target host, port or user.
    */
-  public ETLInMemorySshConfigStore(final Map<String, List<String>> config) {
+  public EtlInMemorySshConfigStore(final Map<String, List<String>> config) {
     inMemoryHostConfig = new InMemoryHostConfig(config);
   }
 

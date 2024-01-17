@@ -59,7 +59,7 @@ import org.eclipse.jgit.treewalk.filter.PathSuffixFilter;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.cam.cl.dtg.segue.etl.ETLInMemorySshConfigStore;
+import uk.ac.cam.cl.dtg.segue.etl.EtlInMemorySshConfigStore;
 
 
 /**
@@ -137,7 +137,7 @@ public class GitDb {
    *             - This method is intended to only locate one file at a time. If your search matches multiple files
    *             then this exception will be thrown.
    */
-  public ByteArrayOutputStream getFileByCommitSHA(final String sha, final String fullFilePath) throws IOException,
+  public ByteArrayOutputStream getFileByCommitSha(final String sha, final String fullFilePath) throws IOException,
       UnsupportedOperationException {
     if (null == sha || null == fullFilePath) {
       return null;
@@ -404,7 +404,7 @@ public class GitDb {
 
     // configure the factory to use the above options, and create
     ConfigStoreFactory inMemorySshConfigStoreFactory = (homeDir, configFile, localUserName) ->
-        new ETLInMemorySshConfigStore(sshConfig);
+        new EtlInMemorySshConfigStore(sshConfig);
     SshdSessionFactory factory = new SshdSessionFactoryBuilder()
         .setHomeDirectory(FS.DETECTED.userHome())
         .setSshDirectory(new File(FS.DETECTED.userHome(), "/.ssh"))
