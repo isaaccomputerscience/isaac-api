@@ -59,7 +59,7 @@ import org.eclipse.jgit.treewalk.filter.PathSuffixFilter;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.cam.cl.dtg.segue.etl.EtlInMemorySshConfigStore;
+import uk.ac.cam.cl.dtg.segue.etl.ETLInMemorySshConfigStore;
 
 
 /**
@@ -404,7 +404,7 @@ public class GitDb {
 
     // configure the factory to use the above options, and create
     ConfigStoreFactory inMemorySshConfigStoreFactory = (homeDir, configFile, localUserName) ->
-        new EtlInMemorySshConfigStore(sshConfig);
+        new ETLInMemorySshConfigStore(sshConfig);
     SshdSessionFactory factory = new SshdSessionFactoryBuilder()
         .setHomeDirectory(FS.DETECTED.userHome())
         .setSshDirectory(new File(FS.DETECTED.userHome(), "/.ssh"))

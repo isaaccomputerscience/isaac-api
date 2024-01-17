@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import uk.ac.cam.cl.dtg.segue.etl.EtlInMemorySshConfigStore.InMemoryHostConfig;
+import uk.ac.cam.cl.dtg.segue.etl.ETLInMemorySshConfigStore.InMemoryHostConfig;
 
-class EtlInMemorySshConfigStoreTest {
+class ETLInMemorySshConfigStoreTest {
 
   @Test
   void inMemoryHostConfigGetValue_ExistingKey_ReturnsValue() {
