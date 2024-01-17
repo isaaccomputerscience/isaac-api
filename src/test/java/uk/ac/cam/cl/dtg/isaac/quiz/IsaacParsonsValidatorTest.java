@@ -25,10 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacParsonsQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuickQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
@@ -45,9 +43,6 @@ class IsaacParsonsValidatorTest {
   private IsaacParsonsValidator validator;
   private IsaacParsonsQuestion someParsonsQuestion;
   private final String incorrectExplanation = "EXPLANATION";
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   /**
    * Initial configuration of tests.
@@ -402,9 +397,10 @@ Test that incorrect Item types in choices are detected.
   final void isaacParsonsValidator_WrongQuestionType_ExceptionShouldBeThrown() {
     IsaacQuickQuestion invalidQuestionType = new IsaacQuickQuestion();
     invalidQuestionType.setId("invalidQuestionType");
+    ParsonsChoice choice = new ParsonsChoice();
 
     Exception exception = assertThrows(IllegalArgumentException.class, () ->
-        validator.validateQuestionResponse(invalidQuestionType, new ParsonsChoice()));
+        validator.validateQuestionResponse(invalidQuestionType, choice));
     assertEquals("This validator only works with IsaacParsonsQuestions "
             + "(invalidQuestionType is not ParsonsQuestion)",
         exception.getMessage());
@@ -417,9 +413,10 @@ Test that incorrect Item types in choices are detected.
   final void isaacParsonsValidator_WrongChoiceType_ExceptionShouldBeThrown() {
     IsaacParsonsQuestion parsonsQuestion = new IsaacParsonsQuestion();
     parsonsQuestion.setId("invalidQuestionType");
+    Choice choice = new Choice();
 
     Exception exception = assertThrows(IllegalArgumentException.class, () ->
-        validator.validateQuestionResponse(parsonsQuestion, new Choice()));
+        validator.validateQuestionResponse(parsonsQuestion, choice));
     assertEquals("Expected ParsonsChoice for IsaacParsonsQuestion: invalidQuestionType."
             + " Received (class uk.ac.cam.cl.dtg.isaac.dos.content.Choice) ",
         exception.getMessage());

@@ -17,7 +17,7 @@ class NameFormatterTest {
    * Test teacher user name extraction.
    */
   @Test
-  final void testGetTeacherNameFromUser() throws Exception {
+  final void testGetTeacherNameFromUser() {
     // Check case with both first and last name:
     RegisteredUserDTO dummyUserFirstLast = new RegisteredUserDTO();
     dummyUserFirstLast.setGivenName("FirstName");
@@ -43,7 +43,7 @@ class NameFormatterTest {
    * Test teacher user name extraction.
    */
   @Test
-  final void testGetFilteredGroupNameFromGroup() throws Exception {
+  final void testGetFilteredGroupNameFromGroup() {
     String groupName = "Group Name";
 
     // Check case with shared group name:

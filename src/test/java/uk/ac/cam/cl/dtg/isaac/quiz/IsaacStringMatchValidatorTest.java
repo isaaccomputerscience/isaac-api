@@ -465,9 +465,10 @@ class IsaacStringMatchValidatorTest {
   final void isaacStringMatchValidator_WrongQuestionType_ExceptionShouldBeThrown() {
     IsaacQuickQuestion invalidQuestionType = new IsaacQuickQuestion();
     invalidQuestionType.setId("invalidQuestionType");
+    StringChoice choice = new StringChoice();
 
     Exception exception = assertThrows(IllegalArgumentException.class, () ->
-        validator.validateQuestionResponse(invalidQuestionType, new StringChoice()));
+        validator.validateQuestionResponse(invalidQuestionType, choice));
     assertEquals("This validator only works with Isaac String Match Questions..."
             + " (invalidQuestionType is not string match)",
         exception.getMessage());
@@ -480,9 +481,10 @@ class IsaacStringMatchValidatorTest {
   final void isaacStringMatchValidator_WrongChoiceType_ExceptionShouldBeThrown() {
     IsaacStringMatchQuestion someStringMatchQuestion = new IsaacStringMatchQuestion();
     someStringMatchQuestion.setId("invalidQuestionType");
+    Choice choice = new Choice();
 
     Exception exception = assertThrows(IllegalArgumentException.class, () ->
-        validator.validateQuestionResponse(someStringMatchQuestion, new Choice()));
+        validator.validateQuestionResponse(someStringMatchQuestion, choice));
     assertEquals("Expected StringChoice for IsaacStringMatchQuestion: invalidQuestionType."
             + " Received (class uk.ac.cam.cl.dtg.isaac.dos.content.Choice) ",
         exception.getMessage());

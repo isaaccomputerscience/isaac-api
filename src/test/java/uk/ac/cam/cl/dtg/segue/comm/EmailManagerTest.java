@@ -168,6 +168,8 @@ class EmailManagerTest {
   }
 
   /**
+   * Helper method to create test email template objects.
+   *
    * @param template - id of the template
    * @return - SegueDTO object
    */
@@ -185,6 +187,8 @@ class EmailManagerTest {
   }
 
   /**
+   * Helper method to create test content objects.
+   *
    * @param template - id of the template
    * @return - SegueDTO object
    */
@@ -201,8 +205,6 @@ class EmailManagerTest {
 
   /**
    * Verifies that email templates are parsed and replaced correctly.
-   *
-   * @throws CommunicationException
    */
   @Test
   final void sendTemplatedEmailToUser_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
@@ -238,10 +240,7 @@ class EmailManagerTest {
       manager.sendTemplatedEmailToUser(userDTO,
           manager.getEmailTemplateDTO("email-template-registration-confirmation"),
           emailTokens, EmailType.SYSTEM);
-    } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
-    } catch (SegueDatabaseException e) {
+    } catch (ContentManagerException | SegueDatabaseException e) {
       e.printStackTrace();
       Assertions.fail();
     }
@@ -276,8 +275,6 @@ class EmailManagerTest {
 
   /**
    * Verifies that email templates are parsed and replaced correctly.
-   *
-   * @throws CommunicationException
    */
   @Test
   final void sendFederatedPasswordReset_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
@@ -344,8 +341,6 @@ class EmailManagerTest {
 
   /**
    * Verifies that email templates are parsed and replaced correctly.
-   *
-   * @throws CommunicationException
    */
   @Test
   final void sendPasswordReset_checkForTemplateCompletion_emailShouldBeSentWithTemplateTagsFilledIn() {
@@ -382,10 +377,7 @@ class EmailManagerTest {
           manager.getEmailTemplateDTO("email-template-password-reset"),
           emailValues, EmailType.SYSTEM);
 
-    } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
-    } catch (SegueDatabaseException e) {
+    } catch (ContentManagerException | SegueDatabaseException e) {
       e.printStackTrace();
       Assertions.fail();
     }
@@ -415,8 +407,6 @@ class EmailManagerTest {
   /**
    * Verify that if there are extra tags the system doesn't recognise, there will be an exception, and the email won't
    * be sent.
-   *
-   * @throws CommunicationException
    */
   @Test
   void sendRegistrationConfirmation_checkForInvalidTemplateTags_throwIllegalArgumentException() {
@@ -487,10 +477,7 @@ class EmailManagerTest {
       manager.sendTemplatedEmailToUser(userDTO,
           template,
           emailTokens, EmailType.SYSTEM);
-    } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
-    } catch (SegueDatabaseException e) {
+    } catch (ContentManagerException | SegueDatabaseException e) {
       e.printStackTrace();
       Assertions.fail();
     }
@@ -616,16 +603,14 @@ class EmailManagerTest {
 
     try {
       manager.sendCustomEmail(userDTOWithNulls, contentObjectId, allSelectedUsers, EmailType.ASSIGNMENTS);
-    } catch (SegueDatabaseException e) {
-      Assertions.fail();
-    } catch (ContentManagerException e) {
+    } catch (SegueDatabaseException | ContentManagerException e) {
       Assertions.fail();
     }
 
   }
 
   /**
-   * Check we don't send custom content emails to users with null / preference
+   * Check we don't send custom content emails to users with null / preference.
    */
   @Test
   void sendCustomContentEmail_checkNullProperties_replacedWithEmptyString() {
@@ -681,9 +666,7 @@ class EmailManagerTest {
 
     try {
       manager.sendCustomContentEmail(userDTOWithNulls, emailTemplate, allSelectedUsers, EmailType.ASSIGNMENTS);
-    } catch (SegueDatabaseException e) {
-      Assertions.fail();
-    } catch (ContentManagerException e) {
+    } catch (SegueDatabaseException | ContentManagerException e) {
       Assertions.fail();
     }
 
@@ -704,10 +687,10 @@ class EmailManagerTest {
     inputMap.put("date", someDate);
     Map<String, String> mapUnderTest = manager.flattenTokenMap(inputMap, Maps.newHashMap(), "");
 
-    assert (mapUnderTest.get("address.line1").equals("Computer Laboratory"));
+    assertEquals("Computer Laboratory", mapUnderTest.get("address.line1"));
   }
 
-  private Map generateGlobalTokenMap() {
+  private Map<String, String> generateGlobalTokenMap() {
     Map<String, String> globalTokens = Maps.newHashMap();
     globalTokens.put("sig", "Isaac Computer Science Project");
     globalTokens.put("emailPreferencesURL", "https://test/assignments");

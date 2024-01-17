@@ -371,11 +371,11 @@ class IsaacReorderValidatorTest {
   final void isaacReorderValidator_WrongQuestionType_ExceptionShouldBeThrown() {
     IsaacQuickQuestion invalidQuestionType = new IsaacQuickQuestion();
     invalidQuestionType.setId("invalidQuestionType");
+    ItemChoice choice = new ItemChoice();
 
     // This should throw an exception:
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      validator.validateQuestionResponse(invalidQuestionType, new ItemChoice());
-    });
+    Exception exception = assertThrows(IllegalArgumentException.class,
+        () -> validator.validateQuestionResponse(invalidQuestionType, choice));
     assertTrue(exception.getMessage().contains("only works with IsaacReorderQuestions"));
   }
 
@@ -385,11 +385,11 @@ class IsaacReorderValidatorTest {
   @Test
   final void isaacReorderValidator_WrongChoiceType_ExceptionShouldBeThrown() {
     IsaacReorderQuestion reorderQuestion = new IsaacReorderQuestion();
+    Choice choice = new Choice();
 
     // This should throw an exception:
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      validator.validateQuestionResponse(reorderQuestion, new Choice());
-    });
+    Exception exception =
+        assertThrows(IllegalArgumentException.class, () -> validator.validateQuestionResponse(reorderQuestion, choice));
     assertTrue(exception.getMessage().contains("Expected ItemChoice for IsaacReorderQuestion"));
   }
 }

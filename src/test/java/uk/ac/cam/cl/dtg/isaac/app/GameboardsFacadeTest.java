@@ -80,8 +80,6 @@ class GameboardsFacadeTest {
 
   /**
    * Verify that when an empty gameboard is noticed a 204 is returned.
-   *
-   * @throws ContentManagerException
    */
   @Test
   void isaacEndPoint_checkEmptyGameboardCausesErrorNoUser_SegueErrorResponseShouldBeReturned()

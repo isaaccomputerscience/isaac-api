@@ -488,9 +488,10 @@ class IsaacItemQuestionValidatorTest {
   final void isaacItemQuestionValidator_WrongQuestionType_ExceptionShouldBeThrown() {
     IsaacQuickQuestion invalidQuestionType = new IsaacQuickQuestion();
     invalidQuestionType.setId("invalidQuestionType");
+    Choice choice = new Choice();
 
     Exception exception = assertThrows(IllegalArgumentException.class, () ->
-        validator.validateQuestionResponse(invalidQuestionType, new ItemChoice()));
+        validator.validateQuestionResponse(invalidQuestionType, choice));
     assertEquals("This validator only works with IsaacItemQuestions (invalidQuestionType is not ItemQuestion)",
         exception.getMessage());
   }
@@ -502,9 +503,10 @@ class IsaacItemQuestionValidatorTest {
   final void isaacItemQuestionValidator_WrongChoiceType_ExceptionShouldBeThrown() {
     IsaacItemQuestion itemQuestion = new IsaacItemQuestion();
     itemQuestion.setId("invalidQuestionType");
+    Choice choice = new Choice();
 
     Exception exception = assertThrows(IllegalArgumentException.class, () ->
-        validator.validateQuestionResponse(itemQuestion, new Choice()));
+        validator.validateQuestionResponse(itemQuestion, choice));
     assertEquals("Expected ItemChoice for IsaacItemQuestion: invalidQuestionType. "
         + "Received (class uk.ac.cam.cl.dtg.isaac.dos.content.Choice) ", exception.getMessage());
   }
