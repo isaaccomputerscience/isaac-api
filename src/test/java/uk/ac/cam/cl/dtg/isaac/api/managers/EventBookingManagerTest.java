@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dao.EventBookingPersistenceManager;
@@ -930,7 +929,7 @@ public class EventBookingManagerTest {
     List<EventBookingDTO> actualResults =
         eventBookingManager.requestReservations(testCase.event, students, testCase.teacher);
     List<EventBookingDTO> expectedResults = ImmutableList.of(testCase.student1Booking);
-    Assertions.assertEquals(expectedResults, actualResults,
+    assertEquals(expectedResults, actualResults,
         "Student 1 should get reserved despite the existing cancelled reservation");
     verify(mockedObjects);
   }
