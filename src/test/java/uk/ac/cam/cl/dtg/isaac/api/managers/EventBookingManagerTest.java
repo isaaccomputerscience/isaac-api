@@ -581,7 +581,7 @@ class EventBookingManagerTest {
     replay(mockedObjects);
     Long placesAvailable = ebm.getPlacesAvailable(testEvent);
     Long expectedPlacesAvailable = 1L;
-    assertEquals(placesAvailable, expectedPlacesAvailable,
+    assertEquals(expectedPlacesAvailable, placesAvailable,
         "WAITING_LIST_ONLY events should only count confirmed places in availability calculations");
     verify(mockedObjects);
   }
