@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
-public class PgEventBookingsTest {
+class PgEventBookingsTest {
   private PgEventBookings buildPgEventBookings() {
     return new PgEventBookings(dummyPostgresSqlDb, dummyObjectMapper);
   }
@@ -40,7 +40,7 @@ public class PgEventBookingsTest {
   }
 
   @Test
-  public void getEventBookingStatusCounts_checkEventBookingStatusCounts_canCopeWithComplicatedResult()
+  void getEventBookingStatusCounts_checkEventBookingStatusCounts_canCopeWithComplicatedResult()
       throws Exception {
     // Mock setup
     expect(dummyPostgresSqlDb.getDatabaseConnection()).andReturn(dummyConnection).once();

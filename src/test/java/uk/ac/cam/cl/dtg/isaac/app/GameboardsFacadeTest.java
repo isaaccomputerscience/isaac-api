@@ -48,7 +48,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  * Test class for the user manager class.
  *
  */
-public class GameboardsFacadeTest {
+class GameboardsFacadeTest {
 
   private PropertiesLoader dummyPropertiesLoader = null;
   private GameManager dummyGameManager = null;
@@ -84,7 +84,7 @@ public class GameboardsFacadeTest {
    * @throws ContentManagerException
    */
   @Test
-  public final void isaacEndPoint_checkEmptyGameboardCausesErrorNoUser_SegueErrorResponseShouldBeReturned()
+  void isaacEndPoint_checkEmptyGameboardCausesErrorNoUser_SegueErrorResponseShouldBeReturned()
       throws NoWildcardException, SegueDatabaseException, ContentManagerException {
     GameboardsFacade gameboardFacade = new GameboardsFacade(
         dummyPropertiesLoader, dummyLogManager, dummyGameManager, questionManager,
@@ -111,10 +111,11 @@ public class GameboardsFacadeTest {
 
     replay(dummyGameManager);
 
-    Response r = gameboardFacade.generateTemporaryGameboard(dummyRequest, title, subjects, fields, topics,
-        stages, difficulties, examBoards, levels, concepts, questionCategory);
+    try (Response r = gameboardFacade.generateTemporaryGameboard(dummyRequest, title, subjects, fields, topics,
+        stages, difficulties, examBoards, levels, concepts, questionCategory)) {
 
-    assertEquals(r.getStatus(), Status.NO_CONTENT.getStatusCode());
+      assertEquals(r.getStatus(), Status.NO_CONTENT.getStatusCode());
+    }
     verify(dummyGameManager);
   }
 }

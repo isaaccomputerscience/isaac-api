@@ -39,7 +39,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.ItemChoice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ParsonsChoice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ParsonsItem;
 
-public class IsaacClozeValidatorTest {
+class IsaacClozeValidatorTest {
   private IsaacClozeValidator validator;
   private IsaacClozeQuestion someClozeQuestion;
   // Some items:
@@ -90,7 +90,7 @@ public class IsaacClozeValidatorTest {
       Test that correct answers are recognised.
   */
   @Test
-  public final void isaacClozeValidator_CorrectItems_CorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_CorrectItems_CorrectResponseShouldBeReturned() {
     // Set up user answer:
     ItemChoice c = new ItemChoice();
     c.setItems(ImmutableList.of(item1, item3));
@@ -104,7 +104,7 @@ public class IsaacClozeValidatorTest {
       Test that incorrect answers are not recognised.
   */
   @Test
-  public final void isaacClozeValidator_IncorrectItems_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_IncorrectItems_IncorrectResponseShouldBeReturned() {
     // Set up user answer:
     ItemChoice c = new ItemChoice();
     c.setItems(ImmutableList.of(item2, item3));
@@ -118,7 +118,7 @@ public class IsaacClozeValidatorTest {
       Test that subset match answers can be matched.
   */
   @Test
-  public final void isaacClozeValidator_UserSubsetMatch_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_UserSubsetMatch_IncorrectResponseShouldBeReturned() {
     // Set up user answer:
     ItemChoice c = new ItemChoice();
     c.setItems(ImmutableList.of(item2, item3));
@@ -133,7 +133,7 @@ public class IsaacClozeValidatorTest {
       Test that known incorrect answers can be matched.
   */
   @Test
-  public final void isaacClozeValidator_KnownIncorrect_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_KnownIncorrect_IncorrectResponseShouldBeReturned() {
     // Set up user answer:
     ItemChoice c = new ItemChoice();
     c.setItems(ImmutableList.of(item1, item2));
@@ -148,7 +148,7 @@ public class IsaacClozeValidatorTest {
   Test that known incorrect answers can be matched.
 */
   @Test
-  public final void isaacClozeValidator_KnownIncorrectDetailedFeedback_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_KnownIncorrectDetailedFeedback_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacClozeQuestion clozeQuestion = new IsaacClozeQuestion();
     clozeQuestion.setItems(ImmutableList.of(item1, item2, item3));
@@ -175,7 +175,7 @@ public class IsaacClozeValidatorTest {
        Test that all null-placeholder answers are rejected.
   */
   @Test
-  public final void isaacClozeValidator_AllNull_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_AllNull_IncorrectResponseShouldBeReturned() {
     ItemChoice c = new ItemChoice();
     c.setItems(ImmutableList.of(nullPlaceholder, nullPlaceholder));
 
@@ -189,7 +189,7 @@ public class IsaacClozeValidatorTest {
       Test that answers missing items are rejected.
   */
   @Test
-  public final void isaacClozeValidator_NotEnoughItems_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_NotEnoughItems_IncorrectResponseShouldBeReturned() {
     ItemChoice c = new ItemChoice();
     c.setItems(ImmutableList.of(item1));
 
@@ -203,7 +203,7 @@ public class IsaacClozeValidatorTest {
       Test that answers with too many items are rejected.
   */
   @Test
-  public final void isaacClozeValidator_TooManyItems_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_TooManyItems_IncorrectResponseShouldBeReturned() {
     ItemChoice c = new ItemChoice();
     c.setItems(ImmutableList.of(item1, item2, item3));
 
@@ -217,7 +217,7 @@ public class IsaacClozeValidatorTest {
       Test that answers with unknown items are rejected.
   */
   @Test
-  public final void isaacClozeValidator_UnknownItems_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_UnknownItems_IncorrectResponseShouldBeReturned() {
     ItemChoice c = new ItemChoice();
     c.setItems(ImmutableList.of(item1, new Item("unknown", null)));
 
@@ -231,7 +231,7 @@ public class IsaacClozeValidatorTest {
       Test that answers with no items are rejected.
   */
   @Test
-  public final void isaacClozeValidator_NoUserItems_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_NoUserItems_IncorrectResponseShouldBeReturned() {
     ItemChoice c = new ItemChoice();
 
     // Test response:
@@ -244,7 +244,7 @@ public class IsaacClozeValidatorTest {
       Test that answers with no items are rejected.
   */
   @Test
-  public final void isaacClozeValidator_IncorrectTypeUserItems_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_IncorrectTypeUserItems_IncorrectResponseShouldBeReturned() {
     ItemChoice c = new ItemChoice();
     c.setItems(ImmutableList.of(new ParsonsItem("id001", null, null)));
 
@@ -258,7 +258,7 @@ public class IsaacClozeValidatorTest {
       Test that default feedback is returned.
   */
   @Test
-  public final void isaacClozeValidator_DefaultFeedbackReturned() {
+  final void isaacClozeValidator_DefaultFeedbackReturned() {
     // Set up the question object:
     IsaacClozeQuestion clozeQuestion = new IsaacClozeQuestion();
     clozeQuestion.setDefaultFeedback(new Content(defaultExplanation));
@@ -285,7 +285,7 @@ public class IsaacClozeValidatorTest {
    Test that missing choices are detected.
   */
   @Test
-  public final void isaacClozeValidator_NoChoices_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_NoChoices_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacClozeQuestion clozeQuestion = new IsaacClozeQuestion();
     clozeQuestion.setItems(ImmutableList.of(item1, item2, item3));
@@ -306,7 +306,7 @@ public class IsaacClozeValidatorTest {
       Test that wrong choice types are detected.
   */
   @Test
-  public final void isaacClozeValidator_WrongTypeChoices_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_WrongTypeChoices_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacClozeQuestion clozeQuestion = new IsaacClozeQuestion();
     ParsonsItem parsonsItem = new ParsonsItem("id001", null, null);
@@ -331,7 +331,7 @@ public class IsaacClozeValidatorTest {
    Test that missing items are detected.
   */
   @Test
-  public final void isaacClozeValidator_NoItems_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_NoItems_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacClozeQuestion clozeQuestion = new IsaacClozeQuestion();
     clozeQuestion.setItems(ImmutableList.of(item1, item2, item3));
@@ -355,7 +355,7 @@ public class IsaacClozeValidatorTest {
    Test that missing items are detected.
   */
   @Test
-  public final void isaacClozeValidator_NoItemsInQuestion_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_NoItemsInQuestion_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacClozeQuestion clozeQuestion = new IsaacClozeQuestion();
 
@@ -378,7 +378,7 @@ public class IsaacClozeValidatorTest {
    Test that incorrect item types are detected.
   */
   @Test
-  public final void isaacClozeValidator_ParsonsItems_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_ParsonsItems_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacClozeQuestion clozeQuestion = new IsaacClozeQuestion();
     clozeQuestion.setItems(ImmutableList.of(item1, item2, item3));
@@ -402,7 +402,7 @@ public class IsaacClozeValidatorTest {
       Test that null placeholders do not match if "allowSubset" is not marked.
   */
   @Test
-  public final void isaacClozeValidator_NullButNoSubset_IncorrectResponseShouldBeReturned() {
+  final void isaacClozeValidator_NullButNoSubset_IncorrectResponseShouldBeReturned() {
     // Set up the question object:
     IsaacClozeQuestion clozeQuestion = new IsaacClozeQuestion();
     clozeQuestion.setItems(ImmutableList.of(item1, item2, item3));
@@ -426,7 +426,7 @@ public class IsaacClozeValidatorTest {
    Test that incorrect question types are detected.
   */
   @Test
-  public final void isaacClozeValidator_WrongQuestionType_ExceptionShouldBeThrown() {
+  final void isaacClozeValidator_WrongQuestionType_ExceptionShouldBeThrown() {
     IsaacQuickQuestion invalidQuestionType = new IsaacQuickQuestion();
     invalidQuestionType.setId("invalidQuestionType");
 
@@ -441,7 +441,7 @@ public class IsaacClozeValidatorTest {
    Test that incorrect submitted choice types are detected.
   */
   @Test
-  public final void isaacClozeValidator_WrongChoiceType_ExceptionShouldBeThrown() {
+  final void isaacClozeValidator_WrongChoiceType_ExceptionShouldBeThrown() {
     IsaacClozeQuestion clozeQuestion = new IsaacClozeQuestion();
 
     // This should throw an exception:

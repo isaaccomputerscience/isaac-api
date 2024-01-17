@@ -50,8 +50,8 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 /**
  * EventBookingManagerTest.
  */
-public class EventBookingManagerTest {
-  private static Date someFutureDate = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
+class EventBookingManagerTest {
+  private static final Date someFutureDate = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
   private EventBookingPersistenceManager dummyEventBookingPersistenceManager;
   private EmailManager dummyEmailManager;
   private UserAssociationManager dummyUserAssociationManager;
@@ -90,7 +90,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_noExceptionThrown() throws
+  void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_noExceptionThrown() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
@@ -140,7 +140,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_checkStudentNotAllowedOnStudentEventAsCapacityFull_eventFullExceptionThrown() throws
+  void requestBooking_checkStudentNotAllowedOnStudentEventAsCapacityFull_eventFullExceptionThrown() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
@@ -178,7 +178,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_checkTeacherNotAllowedOnTeacherEventAsCapacityFull_eventFullExceptionThrown() throws
+  void requestBooking_checkTeacherNotAllowedOnTeacherEventAsCapacityFull_eventFullExceptionThrown() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags);
@@ -216,7 +216,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_addressNotVerified_addressNotVerifiedExceptionThrown() throws Exception {
+  void requestBooking_addressNotVerified_addressNotVerifiedExceptionThrown() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
 
@@ -234,7 +234,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_expiredBooking_EventExpiredExceptionThrown() throws Exception {
+  void requestBooking_expiredBooking_EventExpiredExceptionThrown() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
 
@@ -259,7 +259,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_cancelledSpaceAndWaitingList_SpaceRemainsFull() throws Exception {
+  void requestBooking_cancelledSpaceAndWaitingList_SpaceRemainsFull() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags);
 
@@ -297,7 +297,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_cancelledSpaceAndNoWaitingList_Success() throws Exception {
+  void requestBooking_cancelledSpaceAndNoWaitingList_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
 
@@ -344,7 +344,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_cancelledSpaceAndSomeWaitingList_Success() throws Exception {
+  void requestBooking_cancelledSpaceAndSomeWaitingList_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(teacherCSTags, 2);
 
@@ -394,7 +394,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestBooking_userIsAbleToPromoteBookingReservation_Success() throws Exception {
+  void requestBooking_userIsAbleToPromoteBookingReservation_Success() throws Exception {
     EventBookingManager eventBookingManager = this.buildEventBookingManager();
     ReservationTestDefaults testCase = new ReservationTestDefaults();
     testCase.event.setNumberOfPlaces(1);
@@ -435,7 +435,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void promoteBooking_spaceDueToCancellation_Success() throws Exception {
+  void promoteBooking_spaceDueToCancellation_Success() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(teacherCSTags);
 
@@ -490,7 +490,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void promoteBooking_NoSpace_Failure() throws Exception {
+  void promoteBooking_NoSpace_Failure() throws Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags);
 
@@ -530,7 +530,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void getPlacesAvailable_checkEventCapacity_capacityCalculatedCorrectly() throws Exception {
+  void getPlacesAvailable_checkEventCapacity_capacityCalculatedCorrectly() throws Exception {
     // Create a future event and event booking manager
     EventBookingManager ebm = this.buildEventBookingManager();
     int initialNumberOfPlaces = 1000;
@@ -562,7 +562,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void getEventPage_checkWaitingListOnlyEventCapacity_capacityCalculatedCorrectly() throws
+  void getEventPage_checkWaitingListOnlyEventCapacity_capacityCalculatedCorrectly() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 2, EventStatus.WAITING_LIST_ONLY);
@@ -587,7 +587,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void getEventPage_checkStudentEventReservedBookings_capacityCalculatedCorrectly() throws
+  void getEventPage_checkStudentEventReservedBookings_capacityCalculatedCorrectly() throws
       Exception {
     EventBookingManager ebm = this.buildEventBookingManager();
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 2, EventStatus.OPEN);
@@ -616,7 +616,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void isUserAbleToManageEvent_checkUsersWithDifferentRoles_success() throws Exception {
+  void isUserAbleToManageEvent_checkUsersWithDifferentRoles_success() throws Exception {
     EventBookingManager eventBookingManager = this.buildEventBookingManager();
 
     // Users to test
@@ -685,7 +685,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void eventAllowsGroupBookings_checkAllCases_defaultIsFalseAndOtherwiseReportedCorrectly() {
+  void eventAllowsGroupBookings_checkAllCases_defaultIsFalseAndOtherwiseReportedCorrectly() {
     class TestCase {
       IsaacEventPageDTO eventPageDTO;
       Boolean expected;
@@ -721,7 +721,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestReservations_reserveSpacesWhenThereAreAvailableSpaces_success() throws Exception {
+  void requestReservations_reserveSpacesWhenThereAreAvailableSpaces_success() throws Exception {
     EventBookingManager eventBookingManager = buildEventBookingManager();
     ReservationTestDefaults testCase = new ReservationTestDefaults();
     List<RegisteredUserDTO> students = ImmutableList.of(testCase.student1, testCase.student2);
@@ -793,7 +793,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestReservations_reserveSpacesForTwoWhenThereIsOnlyOneAvailableSpace_throwsEventIsFullException()
+  void requestReservations_reserveSpacesForTwoWhenThereIsOnlyOneAvailableSpace_throwsEventIsFullException()
       throws Exception {
     EventBookingManager eventBookingManager = buildEventBookingManager();
     ReservationTestDefaults testCase = new ReservationTestDefaults();
@@ -822,7 +822,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestReservations_reserveSpacesForMoreThanAllowed_throwsEventGroupReservationLimitException()
+  void requestReservations_reserveSpacesForMoreThanAllowed_throwsEventGroupReservationLimitException()
       throws Exception {
     EventBookingManager eventBookingManager = buildEventBookingManager();
     ReservationTestDefaults testCase = new ReservationTestDefaults();
@@ -865,7 +865,7 @@ public class EventBookingManagerTest {
   }
 
   @Test
-  public void requestReservations_cancelledReservationsDoNotCountTowardsReservationLimit_success() throws Exception {
+  void requestReservations_cancelledReservationsDoNotCountTowardsReservationLimit_success() throws Exception {
     EventBookingManager eventBookingManager = buildEventBookingManager();
     ReservationTestDefaults testCase = new ReservationTestDefaults();
 

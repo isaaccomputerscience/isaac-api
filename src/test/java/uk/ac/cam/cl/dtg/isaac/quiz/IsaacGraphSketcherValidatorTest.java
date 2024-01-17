@@ -31,7 +31,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.GraphChoice;
 /**
  * Test class for the Graph Sketcher Validator class.
  */
-public class IsaacGraphSketcherValidatorTest {
+class IsaacGraphSketcherValidatorTest {
   private IsaacGraphSketcherValidator validator;
 
   /**
@@ -46,7 +46,7 @@ public class IsaacGraphSketcherValidatorTest {
       Test that the "did not provide an answer" response is returned for empty input.
    */
   @Test
-  public final void emptyValue_InvalidResponseShouldBeReturned() {
+  final void emptyValue_InvalidResponseShouldBeReturned() {
     // Set up the question object:
     IsaacGraphSketcherQuestion someGraphSketcherQuestion = new IsaacGraphSketcherQuestion();
 
@@ -71,7 +71,7 @@ public class IsaacGraphSketcherValidatorTest {
   }
 
   @Test
-  public final void correctAnswerPasses() {
+  final void correctAnswerPasses() {
     // Set up the question object:
     IsaacGraphSketcherQuestion someGraphSketcherQuestion = new IsaacGraphSketcherQuestion();
 
@@ -95,7 +95,7 @@ public class IsaacGraphSketcherValidatorTest {
   }
 
   @Test
-  public final void incorrectAnswerFails() {
+  final void incorrectAnswerFails() {
     // Set up the question object:
     IsaacGraphSketcherQuestion someGraphSketcherQuestion = new IsaacGraphSketcherQuestion();
 
