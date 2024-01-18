@@ -57,7 +57,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.GroupManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
-public class IsaacTest {
+public abstract class IsaacTest {
   protected static Date somePastDate = new Date(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000);
   protected static Date someFurtherPastDate = new Date(System.currentTimeMillis() - 14 * 24 * 60 * 60 * 1000);
   protected static Date someFutureDate = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
