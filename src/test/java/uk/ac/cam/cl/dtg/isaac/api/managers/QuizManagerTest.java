@@ -21,7 +21,7 @@ import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-public class QuizManagerTest extends AbstractManagerTest {
+class QuizManagerTest extends AbstractManagerTest {
 
   private QuizManager quizManager;
   private PropertiesLoader properties;
@@ -44,7 +44,7 @@ public class QuizManagerTest extends AbstractManagerTest {
   }
 
   @Test
-  public void extractSectionObjectsInDev() throws ContentManagerException {
+  void extractSectionObjectsInDev() throws ContentManagerException {
     withMock(properties, m ->
         expect(m.getProperty(Constants.SEGUE_APP_ENVIRONMENT)).andStubReturn(Constants.EnvironmentType.DEV.name())
     );
@@ -56,7 +56,7 @@ public class QuizManagerTest extends AbstractManagerTest {
   }
 
   @Test
-  public void extractSectionObjectsInProd() throws ContentManagerException {
+  void extractSectionObjectsInProd() throws ContentManagerException {
     withMock(properties, m ->
         expect(m.getProperty(Constants.SEGUE_APP_ENVIRONMENT)).andStubReturn(Constants.EnvironmentType.PROD.name())
     );
