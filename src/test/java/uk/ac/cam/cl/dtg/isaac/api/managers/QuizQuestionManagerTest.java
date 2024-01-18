@@ -102,7 +102,7 @@ class QuizQuestionManagerTest extends AbstractManagerTest {
     replay(quizQuestionAttemptPersistenceManager, questionManager, contentMapper, mapperFacade, quizAttemptManager);
   }
 
-  public void initializeAdditionalObjects() {
+  private void initializeAdditionalObjects() {
     correctAnswer = new Choice();
     correctAnswerDTO = new ChoiceDTO();
     wrongAnswer = new Choice();
@@ -154,12 +154,10 @@ class QuizQuestionManagerTest extends AbstractManagerTest {
     );
 
     for (final Map.Entry<List<QuestionValidationResponse>, Optional<QuestionValidationResponse>> option : optionsToTest.entrySet()) {
-      withMock(quizQuestionAttemptPersistenceManager, m -> {
-        expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
-            .andReturn(Collections.singletonMap(
-                question.getId(),
-                option.getKey()));
-      });
+      withMock(quizQuestionAttemptPersistenceManager, m -> expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
+          .andReturn(Collections.singletonMap(
+              question.getId(),
+              option.getKey())));
       Map<QuestionDTO, QuestionValidationResponse> answerMap =
           quizQuestionManager.getAnswerMap(studentAttempt, singletonList(question));
 
@@ -180,29 +178,23 @@ class QuizQuestionManagerTest extends AbstractManagerTest {
 
   @Test
   void augmentQuestionsForUserShufflesQuestionChoices() throws SegueDatabaseException {
-    withMock(quizQuestionAttemptPersistenceManager, m -> {
-      expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
-          .andReturn(Collections.singletonMap(
-              question.getId(),
-              singletonList(correctResponse)));
-    });
+    withMock(quizQuestionAttemptPersistenceManager, m -> expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
+        .andReturn(Collections.singletonMap(
+            question.getId(),
+            singletonList(correctResponse))));
 
-    withMock(questionManager, m -> {
-      m.shuffleChoiceQuestionsChoices(student.getId().toString(), questions);
-    });
+    withMock(questionManager, m -> m.shuffleChoiceQuestionsChoices(student.getId().toString(), questions));
 
     quizQuestionManager.augmentQuestionsForUser(studentQuiz, studentAttempt, true);
   }
 
   @Test
   void augmentFeedbackFor() throws SegueDatabaseException, ContentManagerException {
-    withMock(quizQuestionAttemptPersistenceManager, m -> {
-      expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
-          .andReturn(answerMap.entrySet().stream().collect(Collectors.toMap(
-              a -> a.getKey().getId(),
-              a -> singletonList(a.getValue())
-          )));
-    });
+    withMock(quizQuestionAttemptPersistenceManager, m -> expect(m.getAllAnswersForQuizAttempt(studentAttempt.getId()))
+        .andReturn(answerMap.entrySet().stream().collect(Collectors.toMap(
+            a -> a.getKey().getId(),
+            a -> singletonList(a.getValue())
+        ))));
 
     QuizAttemptDTO resultAttempt =
         quizQuestionManager.augmentFeedbackFor(studentAttempt, studentQuiz, QuizFeedbackMode.DETAILED_FEEDBACK);

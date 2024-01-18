@@ -54,7 +54,7 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 
-public class GroupsFacadeIT extends IsaacIntegrationTest {
+class GroupsFacadeIT extends IsaacIntegrationTest {
 
   private GroupsFacade groupsFacade;
 
@@ -77,7 +77,7 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  public void createGroupEndpoint_createGroupAsTeacher_succeeds() throws NoCredentialsAvailableException,
+  void createGroupEndpoint_createGroupAsTeacher_succeeds() throws NoCredentialsAvailableException,
       NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
       IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
       NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
@@ -105,7 +105,7 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  public void createGroupEndpoint_createGroupAsTutor_succeeds() throws NoCredentialsAvailableException,
+  void createGroupEndpoint_createGroupAsTutor_succeeds() throws NoCredentialsAvailableException,
       NoUserException, SegueDatabaseException, AuthenticationProviderMappingException,
       IncorrectCredentialsProvidedException, AdditionalAuthenticationRequiredException, InvalidKeySpecException,
       NoSuchAlgorithmException, MFARequiredButNotConfiguredException {
@@ -133,7 +133,7 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  public void addAdditionalManagerToGroupEndpoint_addAdditionalTeacherManagerAsTeacher_succeeds() throws
+  void addAdditionalManagerToGroupEndpoint_addAdditionalTeacherManagerAsTeacher_succeeds() throws
       NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
       AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
       AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -163,7 +163,7 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  public void addAdditionalManagerToGroupEndpoint_addAdditionalTutorManagerAsTeacher_fails() throws
+  void addAdditionalManagerToGroupEndpoint_addAdditionalTutorManagerAsTeacher_fails() throws
       NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
       AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
       AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
@@ -194,7 +194,7 @@ public class GroupsFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  public void addAdditionalManagerToGroupEndpoint_addAdditionalTeacherManagerAsTutor_fails() throws
+  void addAdditionalManagerToGroupEndpoint_addAdditionalTeacherManagerAsTutor_fails() throws
       NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
       AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
       AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
