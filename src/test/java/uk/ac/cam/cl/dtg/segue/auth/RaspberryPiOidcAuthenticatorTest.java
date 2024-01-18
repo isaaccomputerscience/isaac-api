@@ -37,8 +37,13 @@ class RaspberryPiOidcAuthenticatorTest {
     String idpMetadataPath = Paths.get(res.toURI()).toFile().getAbsolutePath();
 
     authenticator =
-        new RaspberryPiOidcAuthenticator("test_client_id", "test_client_secret", "http://localhost:9001", "openid",
-            idpMetadataPath);
+        new RaspberryPiOidcAuthenticator(
+            "test_client_id",
+            "test_client_secret",
+            "http://localhost:9001",
+            "openid",
+            idpMetadataPath
+        );
   }
 
   @Test
@@ -80,7 +85,7 @@ class RaspberryPiOidcAuthenticatorTest {
     String idpNickname = "*";
     String idpFullName = "John Smith";
 
-    // Act
+    // Act & Assert
     assertThrows(NoUserException.class, () -> authenticator.getGivenNameFamilyName(idpNickname, idpFullName));
   }
 
