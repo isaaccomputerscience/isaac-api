@@ -304,7 +304,6 @@ class EmailManagerTest {
 
     } catch (ContentManagerException e) {
       fail(e);
-      log.debug(e.getMessage());
     } catch (SegueDatabaseException e) {
       log.debug(e.getMessage());
       fail(e);
