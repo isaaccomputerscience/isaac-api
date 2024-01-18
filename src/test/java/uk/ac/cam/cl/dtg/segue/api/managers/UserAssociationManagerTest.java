@@ -69,7 +69,7 @@ class UserAssociationManagerTest {
    * @throws SegueDatabaseException test exception
    * @throws UserGroupNotFoundException test exception
    */
-  @SuppressWarnings("checkstyle:NonEmptyAtclauseDescription")
+
   @Test
   final void userAssociationManager_generateToken_tokenShouldBeCreatedAndPersisted()
       throws SegueDatabaseException, UserGroupNotFoundException {
