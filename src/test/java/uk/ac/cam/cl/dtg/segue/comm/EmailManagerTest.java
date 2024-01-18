@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
@@ -35,7 +36,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.easymock.Capture;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -148,8 +148,7 @@ class EmailManagerTest {
     try {
       emailCommunicator.sendMessage(and(capture(capturedArgument), isA(EmailCommunicationMessage.class)));
     } catch (CommunicationException e1) {
-      e1.printStackTrace();
-      Assertions.fail();
+      fail(e1);
     }
 
     replay(emailCommunicator);
@@ -229,8 +228,7 @@ class EmailManagerTest {
       replay(mockContentManager);
 
     } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
@@ -241,8 +239,7 @@ class EmailManagerTest {
           manager.getEmailTemplateDTO("email-template-registration-confirmation"),
           emailTokens, EmailType.SYSTEM);
     } catch (ContentManagerException | SegueDatabaseException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     final String expectedMessagePlainText = "Hi, tester."
@@ -262,8 +259,7 @@ class EmailManagerTest {
         Thread.sleep(100);
         i++;
       } catch (InterruptedException e) {
-        e.printStackTrace();
-        Assertions.fail();
+        fail(e);
       }
     }
     email = capturedArgument.getValue();
@@ -295,8 +291,7 @@ class EmailManagerTest {
 
       replay(mockContentManager);
     } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
@@ -308,13 +303,11 @@ class EmailManagerTest {
           emailTokens, EmailType.SYSTEM);
 
     } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
       log.debug(e.getMessage());
     } catch (SegueDatabaseException e) {
-      e.printStackTrace();
       log.debug(e.getMessage());
-      Assertions.fail();
+      fail(e);
     }
 
     final String expectedMessage = "Hello, tester.\n\nYou requested a password reset. "
@@ -328,8 +321,7 @@ class EmailManagerTest {
         Thread.sleep(100);
         i++;
       } catch (InterruptedException e) {
-        e.printStackTrace();
-        Assertions.fail();
+        fail(e);
       }
     }
     email = capturedArgument.getValue();
@@ -363,8 +355,7 @@ class EmailManagerTest {
       replay(mockContentManager);
 
     } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
@@ -378,8 +369,7 @@ class EmailManagerTest {
           emailValues, EmailType.SYSTEM);
 
     } catch (ContentManagerException | SegueDatabaseException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     final String expectedMessage = "Hello, tester.\n\nA request has been "
@@ -394,8 +384,7 @@ class EmailManagerTest {
         Thread.sleep(100);
         i++;
       } catch (InterruptedException e) {
-        e.printStackTrace();
-        Assertions.fail();
+        fail(e);
       }
     }
     email = capturedArgument.getValue();
@@ -426,16 +415,14 @@ class EmailManagerTest {
       replay(mockContentManager);
 
     } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
         mockContentManager, logManager, generateGlobalTokenMap());
 
-    ImmutableMap<String, Object> emailTokens = ImmutableMap.of("verificationURL", "https://testUrl.com");
+    Map<String, Object> emailTokens = Map.of("verificationURL", "https://testUrl.com");
 
-    // Use assertThrows to check for the expected exception
     assertThrows(IllegalArgumentException.class, () -> {
       manager.sendTemplatedEmailToUser(userDTO,
           template,
@@ -465,8 +452,7 @@ class EmailManagerTest {
 
       replay(mockContentManager);
     } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
@@ -478,8 +464,7 @@ class EmailManagerTest {
           template,
           emailTokens, EmailType.SYSTEM);
     } catch (ContentManagerException | SegueDatabaseException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     // Wait for the emailQueue to spin up and send our message
@@ -489,8 +474,7 @@ class EmailManagerTest {
         Thread.sleep(100);
         i++;
       } catch (InterruptedException e) {
-        e.printStackTrace();
-        Assertions.fail();
+        fail(e);
       }
     }
     email = capturedArgument.getValue();
@@ -514,8 +498,7 @@ class EmailManagerTest {
 
       replay(mockContentManager);
     } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     EmailManager manager = new EmailManager(emailCommunicator, userPreferenceManager, mockPropertiesLoader,
@@ -528,10 +511,8 @@ class EmailManagerTest {
           emailTokens, EmailType.SYSTEM);
 
     } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     } catch (SegueDatabaseException e) {
-      e.printStackTrace();
       log.info(e.getMessage());
     }
 
@@ -542,8 +523,7 @@ class EmailManagerTest {
         Thread.sleep(100);
         i++;
       } catch (InterruptedException e) {
-        e.printStackTrace();
-        Assertions.fail();
+        fail(e);
       }
     }
     // We expect there to be nothing captured because the content was not returned
@@ -574,8 +554,7 @@ class EmailManagerTest {
           userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
               userDTOWithNulls.getId())).andReturn(userPreference);
     } catch (SegueDatabaseException e1) {
-      e1.printStackTrace();
-      Assertions.fail();
+      fail(e1);
     }
     replay(userPreferenceManager);
 
@@ -597,14 +576,13 @@ class EmailManagerTest {
 
       replay(mockContentManager);
     } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     try {
       manager.sendCustomEmail(userDTOWithNulls, contentObjectId, allSelectedUsers, EmailType.ASSIGNMENTS);
     } catch (SegueDatabaseException | ContentManagerException e) {
-      Assertions.fail();
+      fail(e);
     }
 
   }
@@ -633,8 +611,7 @@ class EmailManagerTest {
           userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(), "ASSIGNMENTS",
               userDTOWithNulls.getId())).andReturn(userPreference);
     } catch (SegueDatabaseException e1) {
-      e1.printStackTrace();
-      Assertions.fail();
+      fail(e1);
     }
     replay(userPreferenceManager);
 
@@ -660,14 +637,13 @@ class EmailManagerTest {
 
       replay(mockContentManager);
     } catch (ContentManagerException e) {
-      e.printStackTrace();
-      Assertions.fail();
+      fail(e);
     }
 
     try {
       manager.sendCustomContentEmail(userDTOWithNulls, emailTemplate, allSelectedUsers, EmailType.ASSIGNMENTS);
     } catch (SegueDatabaseException | ContentManagerException e) {
-      Assertions.fail();
+      fail(e);
     }
 
   }
