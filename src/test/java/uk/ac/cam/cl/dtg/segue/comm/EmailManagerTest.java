@@ -303,9 +303,9 @@ class EmailManagerTest {
           emailTokens, EmailType.SYSTEM);
 
     } catch (ContentManagerException e) {
+      log.debug(e.getMessage());
       fail(e);
     } catch (SegueDatabaseException e) {
-      log.debug(e.getMessage());
       fail(e);
     }
 
