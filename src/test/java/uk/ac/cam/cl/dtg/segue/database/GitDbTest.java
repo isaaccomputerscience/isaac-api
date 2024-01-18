@@ -19,7 +19,7 @@ package uk.ac.cam.cl.dtg.segue.database;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -54,8 +54,7 @@ class GitDbTest {
     replay(git);
     replay(repo);
 
-    assertEquals(
-        null,
+    assertNull(
         db.getTreeWalk("sha", ""),
         "When passing an invalid sha and a blank path, null should be returned as blank path is explicitly allowed."
     );

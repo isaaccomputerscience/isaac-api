@@ -302,10 +302,7 @@ class EmailManagerTest {
           manager.getEmailTemplateDTO("email-template-federated-password-reset"),
           emailTokens, EmailType.SYSTEM);
 
-    } catch (ContentManagerException e) {
-      log.debug(e.getMessage());
-      fail(e);
-    } catch (SegueDatabaseException e) {
+    } catch (ContentManagerException | SegueDatabaseException e) {
       fail(e);
     }
 
