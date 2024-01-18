@@ -35,7 +35,6 @@ class RaspberryPiOidcAuthenticatorTest {
     // Set up an authenticator with local OIDC IdP metadata
     URL res = getClass().getClassLoader().getResource("test-rpf-idp-metadata.json");
     String idpMetadataPath = Paths.get(res.toURI()).toFile().getAbsolutePath();
-
     authenticator =
         new RaspberryPiOidcAuthenticator(
             "test_client_id",
