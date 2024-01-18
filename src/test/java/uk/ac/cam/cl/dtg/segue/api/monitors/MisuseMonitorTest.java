@@ -29,8 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
-import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.managers.SegueResourceMisuseException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailCommunicationMessage;
@@ -39,7 +37,6 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
  * Test class for the user manager class.
- *
  */
 class MisuseMonitorTest {
   private PropertiesLoader dummyPropertiesLoader;
@@ -48,8 +45,7 @@ class MisuseMonitorTest {
   /**
    * Initial configuration of tests.
    *
-   * @throws Exception
-   *             - test exception
+   * @throws Exception - test exception
    */
   @BeforeEach
   public final void setUp() throws Exception {
@@ -70,34 +66,43 @@ class MisuseMonitorTest {
     String event = TokenOwnerLookupMisuseHandler.class.getSimpleName();
 
     IMisuseMonitor misuseMonitor = new InMemoryMisuseMonitor();
-    TokenOwnerLookupMisuseHandler tokenOwnerLookupMisuseHandler =
+    TokenOwnerLookupMisuseHandler realTokenOwnerLookupMisuseHandler =
         new TokenOwnerLookupMisuseHandler(dummyCommunicator, dummyPropertiesLoader);
 
-    misuseMonitor.registerHandler(event, tokenOwnerLookupMisuseHandler);
+    TokenOwnerLookupMisuseHandler mockHandler = createMock(TokenOwnerLookupMisuseHandler.class);
+    expect(mockHandler.getAccountingIntervalInSeconds()).andDelegateTo(realTokenOwnerLookupMisuseHandler).atLeastOnce();
+    expect(mockHandler.getSoftThreshold()).andDelegateTo(realTokenOwnerLookupMisuseHandler).atLeastOnce();
+    expect(mockHandler.getHardThreshold()).andDelegateTo(realTokenOwnerLookupMisuseHandler).atLeastOnce();
+    mockHandler.executeSoftThresholdAction(String.format("(%s) has exceeded the soft limit!", userId));
+    expectLastCall().andDelegateTo(realTokenOwnerLookupMisuseHandler);
+    mockHandler.executeHardThresholdAction(String.format("(%s) has exceeded the hard limit!", userId));
+    expectLastCall().andDelegateTo(realTokenOwnerLookupMisuseHandler);
+    replay(mockHandler);
+
+    misuseMonitor.registerHandler(event, mockHandler);
 
     dummyCommunicator.addSystemEmailToQueue(EasyMock.isA(EmailCommunicationMessage.class));
     expectLastCall();
     replay(this.dummyCommunicator);
 
-    for (int i = 0; i < tokenOwnerLookupMisuseHandler.getSoftThreshold(); i++) {
+    for (int i = 0; i < realTokenOwnerLookupMisuseHandler.getSoftThreshold(); i++) {
       assertDoesNotThrow(() -> misuseMonitor.notifyEvent(userId, event),
-          String.format("Exception should not be thrown after %d attempts",
-              tokenOwnerLookupMisuseHandler.getSoftThreshold()));
+          String.format("Exception should not be thrown at %d attempts, under soft threshold of %d", i,
+              realTokenOwnerLookupMisuseHandler.getSoftThreshold()));
     }
 
-    for (int i = tokenOwnerLookupMisuseHandler.getSoftThreshold(); i < tokenOwnerLookupMisuseHandler.getHardThreshold();
-         i++) {
+    for (int i = realTokenOwnerLookupMisuseHandler.getSoftThreshold();
+         i < realTokenOwnerLookupMisuseHandler.getHardThreshold(); i++) {
       assertDoesNotThrow(() -> misuseMonitor.notifyEvent(userId, event),
-          String.format("Exception thrown before %d attempts, under limit of %d!", i,
-              tokenOwnerLookupMisuseHandler.getHardThreshold()));
+          String.format("Exception should not be thrown at %d attempts, under hard threshold of %d", i,
+              realTokenOwnerLookupMisuseHandler.getHardThreshold()));
     }
 
     assertThrows(SegueResourceMisuseException.class, () -> misuseMonitor.notifyEvent(userId, event),
-        String.format("SegueResourceMisuseException not thrown after %d attempts, over limit of %d!",
-            tokenOwnerLookupMisuseHandler.getHardThreshold(),
-            tokenOwnerLookupMisuseHandler.getHardThreshold()));
+        String.format("SegueResourceMisuseException should be thrown as the hard threshold of %d has been reached",
+            realTokenOwnerLookupMisuseHandler.getHardThreshold()));
 
-    verify(this.dummyCommunicator, this.dummyPropertiesLoader);
+    verify(this.dummyCommunicator, this.dummyPropertiesLoader, mockHandler);
   }
 
   /**
@@ -105,39 +110,46 @@ class MisuseMonitorTest {
    */
   @Test
   final void emailVerificationRequest_checkForMisuse_emailShouldBeSentAndExceptionShouldOccur() {
-
+    String userEmail = "test@test.com";
     String event = EmailVerificationRequestMisuseHandler.class.getSimpleName();
 
     IMisuseMonitor misuseMonitor = new InMemoryMisuseMonitor();
+    EmailVerificationRequestMisuseHandler realEmailVerificationMisuseHandler =
+        new EmailVerificationRequestMisuseHandler();
 
-    EmailVerificationRequestMisuseHandler emailVerificationMisuseHandler = new EmailVerificationRequestMisuseHandler();
+    EmailVerificationRequestMisuseHandler mockHandler = createMock(EmailVerificationRequestMisuseHandler.class);
+    expect(mockHandler.getAccountingIntervalInSeconds()).andDelegateTo(realEmailVerificationMisuseHandler)
+        .atLeastOnce();
+    expect(mockHandler.getSoftThreshold()).andDelegateTo(realEmailVerificationMisuseHandler).atLeastOnce();
+    expect(mockHandler.getHardThreshold()).andDelegateTo(realEmailVerificationMisuseHandler).atLeastOnce();
+    mockHandler.executeSoftThresholdAction(String.format("(%s) has exceeded the soft limit!", userEmail));
+    expectLastCall().andDelegateTo(realEmailVerificationMisuseHandler);
+    mockHandler.executeHardThresholdAction(String.format("(%s) has exceeded the hard limit!", userEmail));
+    expectLastCall().andDelegateTo(realEmailVerificationMisuseHandler);
+    replay(mockHandler);
 
-    misuseMonitor.registerHandler(event, emailVerificationMisuseHandler);
-
-    // Create a test user
-    RegisteredUser user = new RegisteredUser();
-    user.setEmail("test@test.com");
-    user.setEmailVerificationStatus(EmailVerificationStatus.NOT_VERIFIED);
+    misuseMonitor.registerHandler(event, mockHandler);
 
     // Soft threshold
-    for (int i = 0; i < emailVerificationMisuseHandler.getSoftThreshold(); i++) {
-      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(user.getEmail(), event),
-          String.format("Exception should not be thrown after %d attempts",
-              emailVerificationMisuseHandler.getSoftThreshold()));
+    for (int i = 0; i < realEmailVerificationMisuseHandler.getSoftThreshold(); i++) {
+      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(userEmail, event),
+          String.format("Exception should not be thrown at %d attempts, under soft threshold of %d", i,
+              realEmailVerificationMisuseHandler.getSoftThreshold()));
     }
 
     // Hard threshold
-    for (int i = emailVerificationMisuseHandler.getSoftThreshold(); i < emailVerificationMisuseHandler.getHardThreshold();
-         i++) {
-      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(user.getEmail(), event),
-          String.format("Exception thrown before %d attempts, under limit of %d!", i,
-              emailVerificationMisuseHandler.getHardThreshold()));
+    for (int i = realEmailVerificationMisuseHandler.getSoftThreshold();
+         i < realEmailVerificationMisuseHandler.getHardThreshold(); i++) {
+      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(userEmail, event),
+          String.format("Exception should not be thrown at %d attempts, under hard threshold of %d", i,
+              realEmailVerificationMisuseHandler.getHardThreshold()));
     }
 
-    assertThrows(SegueResourceMisuseException.class, () -> misuseMonitor.notifyEvent(user.getEmail(), event),
-        String.format("SegueResourceMisuseException not thrown after %d attempts, over limit of %d!",
-            emailVerificationMisuseHandler.getHardThreshold(),
-            emailVerificationMisuseHandler.getHardThreshold()));
+    assertThrows(SegueResourceMisuseException.class, () -> misuseMonitor.notifyEvent(userEmail, event),
+        String.format("SegueResourceMisuseException should be thrown as the hard threshold of %d has been reached",
+            realEmailVerificationMisuseHandler.getHardThreshold()));
+
+    verify(mockHandler);
   }
 
   /**
@@ -145,39 +157,43 @@ class MisuseMonitorTest {
    */
   @Test
   final void userSearchRequest_checkForMisuse_emailShouldBeSentAndExceptionShouldOccur() {
-
+    String userId = String.valueOf(1234L);
     String event = UserSearchMisuseHandler.class.getSimpleName();
 
     IMisuseMonitor misuseMonitor = new InMemoryMisuseMonitor();
+    UserSearchMisuseHandler realUserSearchMisuseHandler = new UserSearchMisuseHandler();
 
-    UserSearchMisuseHandler userSearchMisuseHandler = new UserSearchMisuseHandler();
+    UserSearchMisuseHandler mockHandler = createMock(UserSearchMisuseHandler.class);
+    expect(mockHandler.getAccountingIntervalInSeconds()).andDelegateTo(realUserSearchMisuseHandler)
+        .atLeastOnce();
+    expect(mockHandler.getSoftThreshold()).andDelegateTo(realUserSearchMisuseHandler).atLeastOnce();
+    expect(mockHandler.getHardThreshold()).andDelegateTo(realUserSearchMisuseHandler).atLeastOnce();
+    mockHandler.executeSoftThresholdAction(String.format("(%s) has exceeded the soft limit!", userId));
+    expectLastCall().andDelegateTo(realUserSearchMisuseHandler);
+    mockHandler.executeHardThresholdAction(String.format("(%s) has exceeded the hard limit!", userId));
+    expectLastCall().andDelegateTo(realUserSearchMisuseHandler);
+    replay(mockHandler);
 
-    misuseMonitor.registerHandler(event, userSearchMisuseHandler);
-
-    // Create a test user
-    RegisteredUser user = new RegisteredUser();
-    user.setId(1234L);
-    user.setEmailVerificationStatus(EmailVerificationStatus.NOT_VERIFIED);
+    misuseMonitor.registerHandler(event, mockHandler);
 
     // Soft threshold
-    for (int i = 0; i < userSearchMisuseHandler.getSoftThreshold(); i++) {
-      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(user.getId().toString(), event),
-          String.format("Exception should not be thrown after %d attempts",
-              userSearchMisuseHandler.getSoftThreshold()));
+    for (int i = 0; i < realUserSearchMisuseHandler.getSoftThreshold(); i++) {
+      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(userId, event),
+          String.format("Exception should not be thrown at %d attempts, under soft threshold of %d", i,
+              realUserSearchMisuseHandler.getSoftThreshold()));
     }
 
     // Hard threshold
-    for (int i = userSearchMisuseHandler.getSoftThreshold(); i < userSearchMisuseHandler.getHardThreshold();
+    for (int i = realUserSearchMisuseHandler.getSoftThreshold(); i < realUserSearchMisuseHandler.getHardThreshold();
          i++) {
-      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(user.getId().toString(), event),
-          String.format("Exception thrown before %d attempts, under limit of %d!", i,
-              userSearchMisuseHandler.getHardThreshold()));
+      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(userId, event),
+          String.format("Exception should not be thrown at %d attempts, under hard threshold of %d", i,
+              realUserSearchMisuseHandler.getHardThreshold()));
     }
 
-    assertThrows(SegueResourceMisuseException.class, () -> misuseMonitor.notifyEvent(user.getId().toString(), event),
-        String.format("SegueResourceMisuseException not thrown after %d attempts, over limit of %d!",
-            userSearchMisuseHandler.getHardThreshold(),
-            userSearchMisuseHandler.getHardThreshold()));
+    assertThrows(SegueResourceMisuseException.class, () -> misuseMonitor.notifyEvent(userId, event),
+        String.format("SegueResourceMisuseException should be thrown as the hard threshold of %d has been reached",
+            realUserSearchMisuseHandler.getHardThreshold()));
   }
 
   /**
@@ -185,41 +201,34 @@ class MisuseMonitorTest {
    */
   @Test
   final void willHaveMisused() {
+    String userId = String.valueOf(1234L);
     String event = UserSearchMisuseHandler.class.getSimpleName();
 
     IMisuseMonitor misuseMonitor = new InMemoryMisuseMonitor();
-
     UserSearchMisuseHandler userSearchMisuseHandler = new UserSearchMisuseHandler();
 
     misuseMonitor.registerHandler(event, userSearchMisuseHandler);
 
-    // Create a test user
-    RegisteredUser user = new RegisteredUser();
-    user.setId(1234L);
-    user.setEmailVerificationStatus(EmailVerificationStatus.NOT_VERIFIED);
-
     // Soft threshold
     for (int i = 0; i < userSearchMisuseHandler.getSoftThreshold(); i++) {
-      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(user.getId().toString(), event),
-          String.format("Exception should not be thrown after %d attempts",
+      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(userId, event),
+          String.format("Exception should not be thrown at %d attempts, under soft threshold of %d", i,
               userSearchMisuseHandler.getSoftThreshold()));
     }
 
     // Hard threshold
-    for (int i = userSearchMisuseHandler.getSoftThreshold(); i < userSearchMisuseHandler.getHardThreshold();
-         i++) {
-      assertFalse(misuseMonitor.willHaveMisused(user.getId().toString(), event,
+    for (int i = userSearchMisuseHandler.getSoftThreshold(); i < userSearchMisuseHandler.getHardThreshold(); i++) {
+      assertFalse(misuseMonitor.willHaveMisused(userId, event,
           UserSearchMisuseHandler.HARD_THRESHOLD - i - 1));
-      assertTrue(misuseMonitor.willHaveMisused(user.getId().toString(), event,
-          UserSearchMisuseHandler.HARD_THRESHOLD - i));
-      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(user.getId().toString(), event),
-          String.format("Exception thrown before %d attempts, under limit of %d!", i,
+      assertTrue(
+          misuseMonitor.willHaveMisused(userId, event, UserSearchMisuseHandler.HARD_THRESHOLD - i));
+      assertDoesNotThrow(() -> misuseMonitor.notifyEvent(userId, event),
+          String.format("Exception should not be thrown at %d attempts, under hard threshold of %d", i,
               userSearchMisuseHandler.getHardThreshold()));
     }
 
-    assertThrows(SegueResourceMisuseException.class, () -> misuseMonitor.notifyEvent(user.getId().toString(), event),
-        String.format("SegueResourceMisuseException not thrown after %d attempts, over limit of %d!",
-            userSearchMisuseHandler.getHardThreshold(),
+    assertThrows(SegueResourceMisuseException.class, () -> misuseMonitor.notifyEvent(userId, event),
+        String.format("SegueResourceMisuseException should be thrown as the hard threshold of %d has been reached",
             userSearchMisuseHandler.getHardThreshold()));
   }
 }
