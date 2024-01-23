@@ -30,6 +30,7 @@
         <ossindex.version>3.2.0</ossindex.version>
         <jgit.version>6.8.0.202311291450-r</jgit.version>
         <maven.surefire-failsafe.version>3.2.5</maven.surefire-failsafe.version>
+        <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
     </properties>
 
     <dependencies>
@@ -383,6 +384,11 @@
             <version>${ossindex.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${org.mapstruct.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -412,6 +418,13 @@
                 <version>3.11.0</version>
                 <configuration>
                     <release>11</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${org.mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
