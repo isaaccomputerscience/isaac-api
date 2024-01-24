@@ -104,6 +104,7 @@ import uk.ac.cam.cl.dtg.segue.dao.users.PgUsers;
 import uk.ac.cam.cl.dtg.segue.database.GitDb;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 import uk.ac.cam.cl.dtg.segue.search.ElasticSearchProvider;
+import uk.ac.cam.cl.dtg.util.MapStructContentMapper;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -124,6 +125,7 @@ public abstract class IsaacIntegrationTest {
   protected static ElasticSearchProvider elasticSearchProvider;
   protected static SchoolListReader schoolListReader;
   protected static MapperFacade mapperFacade;
+  protected static MapStructContentMapper newMapperFacade;
   protected static Map<AuthenticationProvider, IAuthenticator> providersToRegister;
   protected static IMisuseMonitor misuseMonitor;
 
@@ -255,6 +257,7 @@ public abstract class IsaacIntegrationTest {
     questionManager = new QuestionManager(contentMapper, pgQuestionAttempts, userPreferenceManager);
 
     mapperFacade = contentMapper.getAutoMapper();
+    newMapperFacade = MapStructContentMapper.INSTANCE;
 
     // The following may need some actual authentication providers...
     providersToRegister = new HashMap<>();
@@ -289,7 +292,7 @@ public abstract class IsaacIntegrationTest {
     schoolListReader = new SchoolListReader(elasticSearchProvider);
 
     userAccountManager =
-        new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, mapperFacade, emailManager,
+        new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, newMapperFacade, emailManager,
             pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager, userPreferenceManager,
             schoolListReader);
 

@@ -84,6 +84,7 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.users.IAnonymousUserDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
+import uk.ac.cam.cl.dtg.util.MapStructContentMapper;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 class UserManagerTest {
@@ -95,6 +96,7 @@ class UserManagerTest {
   private static final String CSRF_TEST_VALUE = "CSRFTESTVALUE";
 
   private MapperFacade dummyMapper;
+  private MapStructContentMapper newDummyMapper;
   private EmailManager dummyQueue;
   private SimpleDateFormat sdf;
 
@@ -119,6 +121,7 @@ class UserManagerTest {
 
     String dummyHostName = "bob";
     this.dummyMapper = createMock(MapperFacade.class);
+    this.newDummyMapper = MapStructContentMapper.INSTANCE;
     this.dummyQueue = createMock(EmailManager.class);
     this.dummyPropertiesLoader = createMock(PropertiesLoader.class);
     this.sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
@@ -697,7 +700,7 @@ class UserManagerTest {
     HashMap<AuthenticationProvider, IAuthenticator> providerMap = new HashMap<>();
     providerMap.put(provider, authenticator);
     return new UserAccountManager(dummyDatabase, this.dummyQuestionDatabase, this.dummyPropertiesLoader,
-        providerMap, this.dummyMapper, this.dummyQueue, this.dummyUserCache, this.dummyLogManager,
+        providerMap, this.newDummyMapper, this.dummyQueue, this.dummyUserCache, this.dummyLogManager,
         buildTestAuthenticationManager(provider, authenticator), dummySecondFactorAuthenticator,
         dummyUserPreferenceManager, dummySchoolListReader);
   }

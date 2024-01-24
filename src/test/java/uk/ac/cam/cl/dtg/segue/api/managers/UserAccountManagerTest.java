@@ -45,6 +45,7 @@ import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.segue.dao.users.PgAnonymousUsers;
 import uk.ac.cam.cl.dtg.segue.dao.users.PgUsers;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
+import uk.ac.cam.cl.dtg.util.MapStructContentMapper;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 class UserAccountManagerTest {
@@ -61,6 +62,7 @@ class UserAccountManagerTest {
     PropertiesLoader propertiesLoader = createNiceMock(PropertiesLoader.class);
     Map<AuthenticationProvider, IAuthenticator> providersToRegister = Map.of();
     MapperFacade dtoMapper = createNiceMock(MapperFacade.class);
+    MapStructContentMapper newMapper = MapStructContentMapper.INSTANCE;
     emailManager = createMock(EmailManager.class);
     PgAnonymousUsers pgAnonymousUsers = createNiceMock(PgAnonymousUsers.class);
     ILogManager logManager = createNiceMock(ILogManager.class);
@@ -76,7 +78,7 @@ class UserAccountManagerTest {
     replay(propertiesLoader);
 
     userAccountManager =
-        new UserAccountManager(database, questionmanager, propertiesLoader, providersToRegister, dtoMapper,
+        new UserAccountManager(database, questionmanager, propertiesLoader, providersToRegister, newMapper,
             emailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorAuthenticator,
             userPreferenceManager, schoolListReader);
   }
