@@ -2,6 +2,7 @@ package uk.ac.cam.cl.dtg.util;
 
 import java.util.List;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.SubclassExhaustiveStrategy;
 import org.mapstruct.SubclassMapping;
 import org.mapstruct.factory.Mappers;
@@ -37,8 +38,7 @@ public interface MapStructContentMapper {
 
   ContentDTO map(Content source);
 
-  String map(ContentSummaryDTO source);
-
+  @Mapping(target = "id", source = "source")
   ContentSummaryDTO map(String source);
 
   RegisteredUser map(RegisteredUserDTO source);
@@ -67,21 +67,11 @@ public interface MapStructContentMapper {
 
   UserSummaryWithGroupMembershipDTO mapUserToSummaryWithGroupMembershipDTO(RegisteredUserDTO source);
 
-//  <T extends UserSummaryDTO> T map(RegisteredUserDTO source, Class<T> targetClass);
-
-//  <C, T extends C, S extends C> T map(S source, Class<T> targetClass);
-//
-////  <T extends Content, S extends Content> T map(S source, Class<T> targetClass);
-////
-////  <T extends AbstractSegueUser, S extends AbstractSegueUser> T map(S source, Class<T> targetClass);
-////
-////  <T extends AbstractSegueUserDTO, S extends AbstractSegueUserDTO> T map(S source, Class<T> targetClass);
-//
-//  <T extends AbstractSegueUser, S extends AbstractSegueUserDTO> T map(S source, Class<T> targetClass);
-//
-//  <T extends AbstractSegueUserDTO, S extends AbstractSegueUser> T map(S source, Class<T> targetClass);
-
   List<String> mapContentSummaryDtoToString(List<ContentSummaryDTO> source);
 
   List<ContentSummaryDTO> mapStringToContentSummaryDTO(List<String> source);
+
+  default String mapToString(ContentSummaryDTO source) {
+    return source.getId();
+  }
 }
