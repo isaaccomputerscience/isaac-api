@@ -104,8 +104,8 @@ import uk.ac.cam.cl.dtg.segue.dao.users.PgUsers;
 import uk.ac.cam.cl.dtg.segue.database.GitDb;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 import uk.ac.cam.cl.dtg.segue.search.ElasticSearchProvider;
-import uk.ac.cam.cl.dtg.util.MapStructContentMapper;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
 
 /**
  * Abstract superclass for integration tests, providing them with dependencies including ElasticSearch and PostgreSQL
@@ -125,7 +125,7 @@ public abstract class IsaacIntegrationTest {
   protected static ElasticSearchProvider elasticSearchProvider;
   protected static SchoolListReader schoolListReader;
   protected static MapperFacade mapperFacade;
-  protected static MapStructContentMapper newMapperFacade;
+  protected static MapStructMainMapper newMapperFacade;
   protected static Map<AuthenticationProvider, IAuthenticator> providersToRegister;
   protected static IMisuseMonitor misuseMonitor;
 
@@ -257,7 +257,7 @@ public abstract class IsaacIntegrationTest {
     questionManager = new QuestionManager(contentMapper, pgQuestionAttempts, userPreferenceManager);
 
     mapperFacade = contentMapper.getAutoMapper();
-    newMapperFacade = MapStructContentMapper.INSTANCE;
+    newMapperFacade = MapStructMainMapper.INSTANCE;
 
     // The following may need some actual authentication providers...
     providersToRegister = new HashMap<>();

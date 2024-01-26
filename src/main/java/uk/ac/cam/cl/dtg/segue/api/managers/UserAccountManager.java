@@ -121,8 +121,8 @@ import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IAnonymousUserDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
-import uk.ac.cam.cl.dtg.util.MapStructContentMapper;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
 
 /**
  * This class is responsible for managing all user data and orchestration of calls to a user Authentication Manager for
@@ -134,7 +134,7 @@ public class UserAccountManager implements IUserAccountManager {
   private final IUserDataManager database;
   private final QuestionManager questionAttemptDb;
   private final ILogManager logManager;
-  private final MapStructContentMapper dtoMapper;
+  private final MapStructMainMapper dtoMapper;
   private final EmailManager emailManager;
 
   private final IAnonymousUserDataManager temporaryUserCache;
@@ -178,7 +178,7 @@ public class UserAccountManager implements IUserAccountManager {
   public UserAccountManager(final IUserDataManager database, final QuestionManager questionDb,
                             final PropertiesLoader properties,
                             final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
-                            final MapStructContentMapper dtoMapper,
+                            final MapStructMainMapper dtoMapper,
                             final EmailManager emailQueue, final IAnonymousUserDataManager temporaryUserCache,
                             final ILogManager logManager, final UserAuthenticationManager userAuthenticationManager,
                             final ISecondFactorAuthenticator secondFactorManager,
@@ -1101,7 +1101,7 @@ public class UserAccountManager implements IUserAccountManager {
     }
 
     RegisteredUser userToSave;
-    MapStructContentMapper mapper = this.dtoMapper;
+    MapStructMainMapper mapper = this.dtoMapper;
 
     // We want to map to DTO first to make sure that the user cannot
     // change fields that aren't exposed to them

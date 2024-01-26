@@ -1,20 +1,11 @@
-package uk.ac.cam.cl.dtg.util;
+package uk.ac.cam.cl.dtg.util.mappers;
 
-import java.util.List;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.SubclassExhaustiveStrategy;
-import org.mapstruct.SubclassMapping;
 import org.mapstruct.factory.Mappers;
-import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
-import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
 import uk.ac.cam.cl.dtg.isaac.dos.users.AnonymousUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserAuthenticationSettings;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserFromAuthProvider;
-import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserAuthenticationSettingsDTO;
@@ -24,22 +15,10 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDto;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithGroupMembershipDTO;
 
-@Mapper(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION)
-public interface MapStructContentMapper {
-  MapStructContentMapper INSTANCE = Mappers.getMapper(MapStructContentMapper.class);
+@Mapper
+public interface MapStructUserMapper {
 
-  @SubclassMapping(source = ContentDTO.class, target = Content.class)
-  ContentBase map(ContentBaseDTO source);
-
-  @SubclassMapping(source = Content.class, target = ContentDTO.class)
-  ContentBaseDTO map(ContentBase source);
-
-  Content map(ContentDTO source);
-
-  ContentDTO map(Content source);
-
-  @Mapping(target = "id", source = "source")
-  ContentSummaryDTO map(String source);
+  MapStructUserMapper INSTANCE = Mappers.getMapper(MapStructUserMapper.class);
 
   RegisteredUser map(RegisteredUserDTO source);
 
@@ -80,12 +59,4 @@ public interface MapStructContentMapper {
   RegisteredUserDTO mapToDTO(RegisteredUserDTO source);
 
   RegisteredUser mapUserToRegisteredUser(UserFromAuthProvider source);
-
-  List<String> mapContentSummaryDtoToString(List<ContentSummaryDTO> source);
-
-  List<ContentSummaryDTO> mapStringToContentSummaryDTO(List<String> source);
-
-  default String mapToString(ContentSummaryDTO source) {
-    return source.getId();
-  }
 }

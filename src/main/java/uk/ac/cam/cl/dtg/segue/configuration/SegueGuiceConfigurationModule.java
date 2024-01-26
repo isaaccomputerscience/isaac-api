@@ -188,9 +188,9 @@ import uk.ac.cam.cl.dtg.segue.scheduler.jobs.ScheduledAssignmentsEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.SegueScheduledSyncMailjetUsersJob;
 import uk.ac.cam.cl.dtg.segue.search.ElasticSearchProvider;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
-import uk.ac.cam.cl.dtg.util.MapStructContentMapper;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
 
 /**
  * This class is responsible for injecting configuration values for persistence related classes.
@@ -720,7 +720,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
                                              final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
                                              final EmailManager emailQueue,
                                              final IAnonymousUserDataManager temporaryUserCache,
-                                             final ILogManager logManager, final MapStructContentMapper mapperFacade,
+                                             final ILogManager logManager, final MapStructMainMapper mapperFacade,
                                              final UserAuthenticationManager userAuthenticationManager,
                                              final ISecondFactorAuthenticator secondFactorManager,
                                              final AbstractUserPreferenceManager userPreferenceManager,
@@ -883,8 +883,8 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   @Inject
-  public static MapStructContentMapper getMapperInstance() {
-    return MapStructContentMapper.INSTANCE;
+  public static MapStructMainMapper getMapperInstance() {
+    return MapStructMainMapper.INSTANCE;
   }
 
   /**
