@@ -53,9 +53,19 @@ public interface MapStructContentMapper {
 
   AnonymousUserDTO map(AnonymousUser source);
 
-  RegisteredUserDTO mapToDTO(RegisteredUserDTO source);
-
-  RegisteredUser mapUserToRegisteredUser(UserFromAuthProvider source);
+  default <T extends UserSummaryDTO> T map(RegisteredUserDTO source, Class<T> targetClass) {
+    if (targetClass == UserSummaryForAdminUsersDTO.class) {
+      return (T) mapUserToAdminSummaryDTO(source);
+    } else if (targetClass == UserSummaryWithEmailAddressAndGenderDto.class) {
+      return (T) mapUserToSummaryWithEmailAndGenderDTO(source);
+    } else if (targetClass == UserSummaryWithEmailAddressDTO.class) {
+      return (T) mapUserToSummaryWithEmailDTO(source);
+    } else if (targetClass == UserSummaryWithGroupMembershipDTO.class) {
+      return (T) mapUserToSummaryWithGroupMembershipDTO(source);
+    } else {
+      return (T) mapUserToSummary(source);
+    }
+  }
 
   UserSummaryDTO mapUserToSummary(RegisteredUserDTO source);
 
@@ -66,6 +76,10 @@ public interface MapStructContentMapper {
   UserSummaryWithEmailAddressDTO mapUserToSummaryWithEmailDTO(RegisteredUserDTO source);
 
   UserSummaryWithGroupMembershipDTO mapUserToSummaryWithGroupMembershipDTO(RegisteredUserDTO source);
+
+  RegisteredUserDTO mapToDTO(RegisteredUserDTO source);
+
+  RegisteredUser mapUserToRegisteredUser(UserFromAuthProvider source);
 
   List<String> mapContentSummaryDtoToString(List<ContentSummaryDTO> source);
 

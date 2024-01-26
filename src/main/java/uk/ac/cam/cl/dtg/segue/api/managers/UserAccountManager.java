@@ -86,10 +86,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserAuthenticationSettingsDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryForAdminUsersDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDto;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithGroupMembershipDTO;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 import uk.ac.cam.cl.dtg.segue.auth.IAuthenticator;
@@ -1501,7 +1498,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @return a summarised object with minimal personal information
    */
   public UserSummaryDTO convertToUserSummaryObject(final RegisteredUserDTO userToConvert) {
-    return this.dtoMapper.mapUserToSummary(userToConvert);
+    return this.dtoMapper.map(userToConvert, UserSummaryDTO.class);
   }
 
   /**
@@ -1512,24 +1509,9 @@ public class UserAccountManager implements IUserAccountManager {
    * @param detailedDtoClass - The DTO class type into which the user object is to be converted
    * @return a summarised DTO object with details as per the specified detailedDTOClass
    */
-//  public <T extends UserSummaryDTO> T convertToUserSummary(
-//          final RegisteredUserDTO userToConvert,
-//          final Class<T> detailedDtoClass) {
-//    return this.dtoMapper.map(userToConvert, detailedDtoClass);
-//  }
-
-  public <T extends UserSummaryDTO> T convertToUserSummary(final RegisteredUserDTO userToConvert, final Class<T> detailedDtoClass) {
-    if (detailedDtoClass == UserSummaryForAdminUsersDTO.class) {
-      return (T) this.dtoMapper.mapUserToAdminSummaryDTO(userToConvert);
-    } else if (detailedDtoClass == UserSummaryWithEmailAddressAndGenderDto.class) {
-      return (T) this.dtoMapper.mapUserToSummaryWithEmailAndGenderDTO(userToConvert);
-    } else if (detailedDtoClass == UserSummaryWithEmailAddressDTO.class) {
-      return (T) this.dtoMapper.mapUserToSummaryWithEmailDTO(userToConvert);
-    } else if (detailedDtoClass == UserSummaryWithGroupMembershipDTO.class) {
-      return (T) this.dtoMapper.mapUserToSummaryWithGroupMembershipDTO(userToConvert);
-    } else {
-      return (T) this.dtoMapper.mapUserToSummary(userToConvert);
-    }
+  public <T extends UserSummaryDTO> T convertToUserSummary(final RegisteredUserDTO userToConvert,
+                                                           final Class<T> detailedDtoClass) {
+    return this.dtoMapper.map(userToConvert, detailedDtoClass);
   }
 
   /**
