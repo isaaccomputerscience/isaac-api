@@ -103,6 +103,7 @@ import uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics;
 import uk.ac.cam.cl.dtg.segue.api.monitors.UserSearchMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
+import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
@@ -124,6 +125,9 @@ public class AdminFacade extends AbstractSegueFacade {
   private static final String ACCESS_DENIED_MESSAGE = "You must be staff to access this endpoint.";
 
   private final UserAccountManager userManager;
+
+  private final EmailManager emailManager;
+
   private final GitContentManager contentManager;
   private final String contentIndex;
 
@@ -149,6 +153,7 @@ public class AdminFacade extends AbstractSegueFacade {
    * @param segueJobService        - Service for scheduling and managing segue jobs
    * @param externalAccountManager - Manager for synchronising account information with third-party providers
    * @param misuseMonitor          - misuse monitor.
+   * @param emailManager           - manager for sending emails
    */
   @Inject
   public AdminFacade(final PropertiesLoader properties, final UserAccountManager userManager,
@@ -156,7 +161,8 @@ public class AdminFacade extends AbstractSegueFacade {
                      final ILogManager logManager, final StatisticsManager statsManager,
                      final AbstractUserPreferenceManager userPreferenceManager,
                      final EventBookingManager eventBookingManager, final SegueJobService segueJobService,
-                     final IExternalAccountManager externalAccountManager, final IMisuseMonitor misuseMonitor) {
+                     final IExternalAccountManager externalAccountManager, final IMisuseMonitor misuseMonitor,
+                     final EmailManager emailManager) {
     super(properties, logManager);
     this.userManager = userManager;
     this.contentManager = contentManager;
@@ -167,6 +173,7 @@ public class AdminFacade extends AbstractSegueFacade {
     this.externalAccountManager = externalAccountManager;
     this.misuseMonitor = misuseMonitor;
     this.segueJobService = segueJobService;
+    this.emailManager = emailManager;
   }
 
   /**
@@ -329,6 +336,7 @@ public class AdminFacade extends AbstractSegueFacade {
 
   private void modifyTeacherPendingStatusForUser(Long userId, RegisteredUserDTO requestingUser, Boolean status,
                                                  List<Long> failedUserIds) throws SegueDatabaseException {
+
     try {
       RegisteredUserDTO user = this.userManager.getUserDTOById(userId);
 
@@ -342,9 +350,15 @@ public class AdminFacade extends AbstractSegueFacade {
         log.info("ADMIN user {} has modified the teacher_pending status of {} [{}] from {} to {}",
             requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status);
       }
+      if (status == false) {
+        emailManager.sendTemplatedEmailToUser(user, emailManager.getEmailTemplateDTO("teacher_declined"),
+            Collections.<String, Object>emptyMap(), EmailType.SYSTEM);
+      }
     } catch (NoUserException e) {
       log.error("NoUserException for userId " + userId, e);
       failedUserIds.add(userId);
+    } catch (ContentManagerException e) {
+      log.error("ContentManagerException when sending email id 'teacher_declined'. Unable to send email", e);
     }
   }
 

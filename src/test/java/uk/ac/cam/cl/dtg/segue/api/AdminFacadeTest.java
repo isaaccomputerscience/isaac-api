@@ -26,6 +26,7 @@ import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.api.monitors.IMisuseMonitor;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
+import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
@@ -35,6 +36,8 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 class AdminFacadeTest {
   private PropertiesLoader properties;
   private UserAccountManager userManager;
+
+  private EmailManager emailManager;
   private GitContentManager contentManager;
   private String contentIndex;
   private ILogManager logManager;
@@ -59,8 +62,9 @@ class AdminFacadeTest {
     segueJobService = createMock(SegueJobService.class);
     externalAccountManager = createMock(IExternalAccountManager.class);
     misuseMonitor = createMock(IMisuseMonitor.class);
+    emailManager = createMock(EmailManager.class);
     adminFacade = new AdminFacade(properties, userManager, contentManager, contentIndex, logManager, statsManager,
-        userPreferenceManager, eventBookingManager, segueJobService, externalAccountManager, misuseMonitor);
+        userPreferenceManager, eventBookingManager, segueJobService, externalAccountManager, misuseMonitor, emailManager);
   }
 
   @Nested
