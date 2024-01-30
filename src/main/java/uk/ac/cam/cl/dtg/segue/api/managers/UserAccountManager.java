@@ -57,8 +57,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import ma.glasnost.orika.MapperFacade;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -705,11 +703,8 @@ public class UserAccountManager implements IUserAccountManager {
       authenticator.ensureValidPassword(newPassword);
     }
 
-    MapperFacade mergeMapper = new DefaultMapperFactory.Builder().mapNulls(false).build().getMapperFacade();
-
-    RegisteredUser userToSave = new RegisteredUser();
-    mergeMapper.map(existingUser, userToSave);
-    mergeMapper.map(userDTOContainingUpdates, userToSave);
+    RegisteredUser userToSave = dtoMapper.copy(existingUser);
+    dtoMapper.merge(userDTOContainingUpdates, userToSave);
     // Don't modify email verification status, registration date, or role
     userToSave.setEmailVerificationStatus(existingUser.getEmailVerificationStatus());
     userToSave.setRegistrationDate(existingUser.getRegistrationDate());

@@ -18,18 +18,18 @@ package uk.ac.cam.cl.dtg.isaac.api.services;
 
 import com.google.inject.Inject;
 import java.util.ArrayList;
-import ma.glasnost.orika.MapperFacade;
 import uk.ac.cam.cl.dtg.isaac.api.managers.URIManager;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
 
 public class ContentSummarizerService {
-  private final MapperFacade mapper;
+  private final MapStructMainMapper mapper;
   private final URIManager uriManager;
 
   @Inject
-  public ContentSummarizerService(final MapperFacade mapper, final URIManager uriManager) {
+  public ContentSummarizerService(final MapStructMainMapper mapper, final URIManager uriManager) {
     this.mapper = mapper;
     this.uriManager = uriManager;
   }

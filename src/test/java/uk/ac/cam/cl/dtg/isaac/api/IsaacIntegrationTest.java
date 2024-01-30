@@ -307,7 +307,7 @@ public abstract class IsaacIntegrationTest {
     GameboardPersistenceManager gameboardPersistenceManager =
         new GameboardPersistenceManager(postgresSqlDb, contentManager, mapperFacade, objectMapper,
             new URIManager(properties));
-    gameManager = new GameManager(contentManager, gameboardPersistenceManager, mapperFacade, questionManager);
+    gameManager = new GameManager(contentManager, gameboardPersistenceManager, newMapperFacade, questionManager);
     groupManager = new GroupManager(pgUserGroupPersistenceManager, userAccountManager, gameManager, mapperFacade);
     userAssociationManager = new UserAssociationManager(pgAssociationDataManager, userAccountManager, groupManager);
     PgTransactionManager pgTransactionManager = new PgTransactionManager(postgresSqlDb);
@@ -320,7 +320,7 @@ public abstract class IsaacIntegrationTest {
         new EmailService(emailManager, groupManager, userAccountManager), gameManager, properties);
 
     quizManager = new QuizManager(properties, new ContentService(contentManager), contentManager,
-        new ContentSummarizerService(mapperFacade, new URIManager(properties)), contentMapper);
+        new ContentSummarizerService(newMapperFacade, new URIManager(properties)), contentMapper);
     quizAssignmentPersistenceManager = new PgQuizAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
     quizAssignmentManager = new QuizAssignmentManager(quizAssignmentPersistenceManager,
         new EmailService(emailManager, groupManager, userAccountManager), quizManager, groupManager, properties);

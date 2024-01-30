@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-import ma.glasnost.orika.MapperFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,8 +60,7 @@ class UserAccountManagerTest {
     QuestionManager questionmanager = createNiceMock(QuestionManager.class);
     PropertiesLoader propertiesLoader = createNiceMock(PropertiesLoader.class);
     Map<AuthenticationProvider, IAuthenticator> providersToRegister = Map.of();
-    MapperFacade dtoMapper = createNiceMock(MapperFacade.class);
-    MapStructMainMapper newMapper = MapStructMainMapper.INSTANCE;
+    MapStructMainMapper objectMapper = MapStructMainMapper.INSTANCE;
     emailManager = createMock(EmailManager.class);
     PgAnonymousUsers pgAnonymousUsers = createNiceMock(PgAnonymousUsers.class);
     ILogManager logManager = createNiceMock(ILogManager.class);
@@ -78,7 +76,7 @@ class UserAccountManagerTest {
     replay(propertiesLoader);
 
     userAccountManager =
-        new UserAccountManager(database, questionmanager, propertiesLoader, providersToRegister, newMapper,
+        new UserAccountManager(database, questionmanager, propertiesLoader, providersToRegister, objectMapper,
             emailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorAuthenticator,
             userPreferenceManager, schoolListReader);
   }

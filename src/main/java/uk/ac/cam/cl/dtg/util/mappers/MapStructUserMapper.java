@@ -1,7 +1,11 @@
 package uk.ac.cam.cl.dtg.util.mappers;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValueCheckStrategy;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 import uk.ac.cam.cl.dtg.isaac.dos.users.AnonymousUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
@@ -45,10 +49,18 @@ public interface MapStructUserMapper {
       return (T) mapUserToSummaryWithEmailDTO(source);
     } else if (targetClass == UserSummaryWithGroupMembershipDTO.class) {
       return (T) mapUserToSummaryWithGroupMembershipDTO(source);
-    } else {
+    } else if (targetClass.equals(UserSummaryDTO.class)) {
       return (T) mapUserToSummary(source);
+    } else {
+      throw new UnimplementedMappingException(RegisteredUserDTO.class, targetClass);
     }
   }
+
+  RegisteredUser copy(RegisteredUser source);
+
+  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+      nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+  void merge(RegisteredUserDTO source, @MappingTarget RegisteredUser target);
 
   UserSummaryDTO mapUserToSummary(RegisteredUserDTO source);
 
