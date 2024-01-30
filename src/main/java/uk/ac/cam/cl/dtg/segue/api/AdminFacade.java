@@ -350,15 +350,22 @@ public class AdminFacade extends AbstractSegueFacade {
         log.info("ADMIN user {} has modified the teacher_pending status of {} [{}] from {} to {}",
             requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status);
       }
-      if (status == false) {
-        emailManager.sendTemplatedEmailToUser(user, emailManager.getEmailTemplateDTO("teacher_declined"),
-            Collections.<String, Object>emptyMap(), EmailType.SYSTEM);
+      if (Boolean.FALSE.equals(status)) {
+        sendTeacherDeclineEmail(user);
       }
     } catch (NoUserException e) {
       log.error("NoUserException for userId " + userId, e);
       failedUserIds.add(userId);
-    } catch (ContentManagerException e) {
-      log.error("ContentManagerException when sending email id 'teacher_declined'. Unable to send email", e);
+    }
+  }
+
+  private void sendTeacherDeclineEmail(RegisteredUserDTO user) {
+    try {
+      emailManager.sendTemplatedEmailToUser(user, emailManager.getEmailTemplateDTO("teacher_declined"),
+          Collections.<String, Object>emptyMap(), EmailType.SYSTEM);
+    } catch (ContentManagerException | SegueDatabaseException e) {
+      log.error("Exception when sending email id 'teacher_declined' to userId"
+          + user.getId() + ". Unable to send email", e);
     }
   }
 

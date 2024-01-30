@@ -19,6 +19,7 @@ import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
 import uk.ac.cam.cl.dtg.isaac.dos.AbstractUserPreferenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
+import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.IExternalAccountManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.StatisticsManager;
@@ -29,6 +30,7 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.scheduler.SegueJobService;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
@@ -36,7 +38,6 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 class AdminFacadeTest {
   private PropertiesLoader properties;
   private UserAccountManager userManager;
-
   private EmailManager emailManager;
   private GitContentManager contentManager;
   private String contentIndex;
@@ -134,7 +135,7 @@ class AdminFacadeTest {
 
       @Test
       void modifyUsersTeacherPendingStatus_failureForOneOfMultipleTargets_returnsBadRequest()
-          throws NoUserLoggedInException, SegueDatabaseException, NoUserException {
+          throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
         HttpServletRequest mockRequest = replayMockServletRequest();
         RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L, 3L);
@@ -147,7 +148,10 @@ class AdminFacadeTest {
         expect(userManager.getUserDTOById(3L)).andReturn(prepareTestUser(3L, true));
         expect(userManager.updateTeacherPendingFlag(3L, false)).andReturn(prepareTestUser(3L, false));
 
+        expect(emailManager.getEmailTemplateDTO("teacher_declined")).andReturn(new EmailTemplateDTO());
+
         replay(userManager);
+        replay(emailManager);
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -206,7 +210,7 @@ class AdminFacadeTest {
 
       @Test
       void modifyUsersTeacherPendingStatus_updateOneTarget_returnsOkOnSuccess()
-          throws NoUserLoggedInException, SegueDatabaseException, NoUserException {
+          throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
         HttpServletRequest mockRequest = replayMockServletRequest();
         RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L);
@@ -217,6 +221,8 @@ class AdminFacadeTest {
         expect(userManager.getUserDTOById(2L)).andReturn(prepareTestUser(2L, true));
         expect(userManager.updateTeacherPendingFlag(2L, false)).andReturn(prepareTestUser(2L, false));
 
+        expect(emailManager.getEmailTemplateDTO("teacher_declined")).andReturn(new EmailTemplateDTO());
+        replay(userManager);
         replay(userManager);
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
@@ -228,7 +234,7 @@ class AdminFacadeTest {
 
       @Test
       void modifyUsersTeacherPendingStatus_updateMultipleTargets_returnsOkOnSuccess()
-          throws NoUserLoggedInException, SegueDatabaseException, NoUserException {
+          throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
         HttpServletRequest mockRequest = replayMockServletRequest();
         RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L, 3L);
@@ -242,7 +248,10 @@ class AdminFacadeTest {
         expect(userManager.getUserDTOById(3L)).andReturn(prepareTestUser(3L, true));
         expect(userManager.updateTeacherPendingFlag(3L, false)).andReturn(prepareTestUser(3L, false));
 
+        expect(emailManager.getEmailTemplateDTO("teacher_declined")).andReturn(new EmailTemplateDTO());
+
         replay(userManager);
+        replay(emailManager);
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
