@@ -120,7 +120,7 @@ import uk.ac.cam.cl.dtg.segue.dao.users.IAnonymousUserDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructUserMapper;
 
 /**
  * This class is responsible for managing all user data and orchestration of calls to a user Authentication Manager for
@@ -132,7 +132,7 @@ public class UserAccountManager implements IUserAccountManager {
   private final IUserDataManager database;
   private final QuestionManager questionAttemptDb;
   private final ILogManager logManager;
-  private final MapStructMainMapper dtoMapper;
+  private final MapStructUserMapper dtoMapper;
   private final EmailManager emailManager;
 
   private final IAnonymousUserDataManager temporaryUserCache;
@@ -176,7 +176,7 @@ public class UserAccountManager implements IUserAccountManager {
   public UserAccountManager(final IUserDataManager database, final QuestionManager questionDb,
                             final PropertiesLoader properties,
                             final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
-                            final MapStructMainMapper dtoMapper,
+                            final MapStructUserMapper dtoMapper,
                             final EmailManager emailQueue, final IAnonymousUserDataManager temporaryUserCache,
                             final ILogManager logManager, final UserAuthenticationManager userAuthenticationManager,
                             final ISecondFactorAuthenticator secondFactorManager,
@@ -1096,7 +1096,7 @@ public class UserAccountManager implements IUserAccountManager {
     }
 
     RegisteredUser userToSave;
-    MapStructMainMapper mapper = this.dtoMapper;
+    MapStructUserMapper mapper = this.dtoMapper;
 
     // We want to map to DTO first to make sure that the user cannot
     // change fields that aren't exposed to them
@@ -1607,7 +1607,7 @@ public class UserAccountManager implements IUserAccountManager {
     emailManager.sendTemplatedEmailToUser(userDTO, emailChangeTemplate, emailTokens, EmailType.SYSTEM);
 
     // Defensive copy to ensure old email address is preserved (shouldn't change until new email is verified)
-    RegisteredUserDTO temporaryUser = this.dtoMapper.mapToDTO(userDTO);
+    RegisteredUserDTO temporaryUser = this.dtoMapper.copy(userDTO);
     temporaryUser.setEmail(newEmail);
     temporaryUser.setEmailVerificationStatus(EmailVerificationStatus.NOT_VERIFIED);
     this.sendVerificationEmailForCurrentEmail(temporaryUser, newEmailToken);
@@ -1755,7 +1755,7 @@ public class UserAccountManager implements IUserAccountManager {
       throw new NoUserException("No user returned by the provider!");
     }
 
-    RegisteredUser newLocalUser = this.dtoMapper.mapUserToRegisteredUser(userFromProvider);
+    RegisteredUser newLocalUser = this.dtoMapper.map(userFromProvider, RegisteredUser.class);
     newLocalUser.setRegistrationDate(new Date());
 
     // register user

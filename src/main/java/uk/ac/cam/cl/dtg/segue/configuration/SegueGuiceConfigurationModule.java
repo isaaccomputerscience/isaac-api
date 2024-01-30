@@ -190,7 +190,10 @@ import uk.ac.cam.cl.dtg.segue.search.ElasticSearchProvider;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructEventMapper;
 import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructUserMapper;
 
 /**
  * This class is responsible for injecting configuration values for persistence related classes.
@@ -883,8 +886,29 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   @Inject
-  public static MapStructMainMapper getMapperInstance() {
+  public static MapStructMainMapper getMainMapperInstance() {
     return MapStructMainMapper.INSTANCE;
+  }
+
+  @Provides
+  @Singleton
+  @Inject
+  public static MapStructContentMapper getContentMapperInstance() {
+    return MapStructContentMapper.INSTANCE;
+  }
+
+  @Provides
+  @Singleton
+  @Inject
+  public static MapStructUserMapper getUserMapperInstance() {
+    return MapStructUserMapper.INSTANCE;
+  }
+
+  @Provides
+  @Singleton
+  @Inject
+  public static MapStructEventMapper getEventMapperInstance() {
+    return MapStructEventMapper.INSTANCE;
   }
 
   /**

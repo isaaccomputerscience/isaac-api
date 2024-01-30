@@ -56,7 +56,17 @@ public interface MapStructUserMapper {
     }
   }
 
+  default <T> T map(UserFromAuthProvider source, Class<T> targetClass) {
+    if (targetClass.equals(RegisteredUser.class)) {
+      return (T) mapUserFromAuthProviderToRegisteredUser(source);
+    } else {
+      throw new UnimplementedMappingException(UserFromAuthProvider.class, targetClass);
+    }
+  }
+
   RegisteredUser copy(RegisteredUser source);
+
+  RegisteredUserDTO copy(RegisteredUserDTO source);
 
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
@@ -72,7 +82,5 @@ public interface MapStructUserMapper {
 
   UserSummaryWithGroupMembershipDTO mapUserToSummaryWithGroupMembershipDTO(RegisteredUserDTO source);
 
-  RegisteredUserDTO mapToDTO(RegisteredUserDTO source);
-
-  RegisteredUser mapUserToRegisteredUser(UserFromAuthProvider source);
+  RegisteredUser mapUserFromAuthProviderToRegisteredUser(UserFromAuthProvider source);
 }

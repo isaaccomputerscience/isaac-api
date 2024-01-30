@@ -45,7 +45,7 @@ import uk.ac.cam.cl.dtg.segue.dao.users.PgAnonymousUsers;
 import uk.ac.cam.cl.dtg.segue.dao.users.PgUsers;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructUserMapper;
 
 class UserAccountManagerTest {
 
@@ -60,7 +60,7 @@ class UserAccountManagerTest {
     QuestionManager questionmanager = createNiceMock(QuestionManager.class);
     PropertiesLoader propertiesLoader = createNiceMock(PropertiesLoader.class);
     Map<AuthenticationProvider, IAuthenticator> providersToRegister = Map.of();
-    MapStructMainMapper objectMapper = MapStructMainMapper.INSTANCE;
+    MapStructUserMapper objectMapper = MapStructUserMapper.INSTANCE;
     emailManager = createMock(EmailManager.class);
     PgAnonymousUsers pgAnonymousUsers = createNiceMock(PgAnonymousUsers.class);
     ILogManager logManager = createNiceMock(ILogManager.class);
