@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.dtg.util.mappers;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import uk.ac.cam.cl.dtg.isaac.dos.users.AnonymousUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
@@ -20,8 +21,11 @@ public interface MapStructUserMapper {
 
   MapStructUserMapper INSTANCE = Mappers.getMapper(MapStructUserMapper.class);
 
+  @Mapping(target = "emailVerificationToken", ignore = true)
+  @Mapping(target = "emailToVerify", ignore = true)
   RegisteredUser map(RegisteredUserDTO source);
 
+  @Mapping(target = "firstLogin", ignore = true)
   RegisteredUserDTO map(RegisteredUser source);
 
   UserAuthenticationSettings map(UserAuthenticationSettingsDTO source);

@@ -74,7 +74,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import ma.glasnost.orika.MapperFacade;
 import org.jboss.resteasy.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +118,7 @@ import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.DateRangeFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.SimpleExclusionInstruction;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
 
 /**
  * Events Facade.
@@ -140,7 +140,7 @@ public class EventsFacade extends AbstractIsaacFacade {
   private final UserAccountManager userAccountManager;
   private final SchoolListReader schoolListReader;
 
-  private final MapperFacade mapper;
+  private final MapStructMainMapper mapper;
 
   /**
    * EventsFacade.
@@ -163,7 +163,7 @@ public class EventsFacade extends AbstractIsaacFacade {
                       final GitContentManager contentManager,
                       final UserBadgeManager userBadgeManager, final UserAssociationManager userAssociationManager,
                       final GroupManager groupManager, final UserAccountManager userAccountManager,
-                      final SchoolListReader schoolListReader, final MapperFacade mapper) {
+                      final SchoolListReader schoolListReader, final MapStructMainMapper mapper) {
     super(properties, logManager);
     this.bookingManager = bookingManager;
     this.userManager = userManager;
@@ -366,8 +366,8 @@ public class EventsFacade extends AbstractIsaacFacade {
     List<ContentDTO> filteredResults = Lists.newArrayList();
 
     List<EventBookingDTO> userReservationList =
-        this.mapper.mapAsList(bookingManager.getAllEventReservationsForUser(currentUser.getId()),
-            EventBookingDTO.class);
+        this.mapper.mapList(bookingManager.getAllEventReservationsForUser(currentUser.getId()),
+            DetailedEventBookingDTO.class, EventBookingDTO.class);
 
     for (EventBookingDTO booking : userReservationList) {
 
@@ -616,7 +616,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       eventBookings = userAssociationManager.filterUnassociatedRecords(currentUser, eventBookings,
           booking -> booking.getUserBooked().getId());
 
-      return Response.ok(this.mapper.mapAsList(eventBookings, EventBookingDTO.class)).build();
+      return Response.ok(this.mapper.mapList(eventBookings, EventBookingDTO.class, EventBookingDTO.class)).build();
     } catch (SegueDatabaseException e) {
       String errorMsg = String.format(
           "Database error occurred while trying retrieve bookings for group (%s) on event (%s).",
@@ -656,7 +656,8 @@ public class EventsFacade extends AbstractIsaacFacade {
       }
 
       List<EventBookingDTO> eventBookings =
-          this.mapper.mapAsList(bookingManager.getBookingsByEventId(eventId), EventBookingDTO.class);
+          this.mapper.mapList(bookingManager.getBookingsByEventId(eventId), DetailedEventBookingDTO.class,
+              EventBookingDTO.class);
 
       // Only allowed to see the bookings of connected users
       eventBookings = userAssociationManager.filterUnassociatedRecords(
@@ -842,7 +843,7 @@ public class EventsFacade extends AbstractIsaacFacade {
                   additionalInformation.get("authorisation")
           ));
 
-      return Response.ok(this.mapper.map(booking, EventBookingDTO.class)).build();
+      return Response.ok(this.mapper.copy(booking)).build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
@@ -924,7 +925,7 @@ public class EventsFacade extends AbstractIsaacFacade {
               USER_ID_LIST_FKEY_FIELDNAME, userIds.toArray(),
               BOOKING_STATUS_FIELDNAME, BookingStatus.RESERVED.toString()
           ));
-      return Response.ok(this.mapper.mapAsList(bookings, EventBookingDTO.class)).build();
+      return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
@@ -1083,7 +1084,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       this.getLogManager().logEvent(userManager.getCurrentUser(request), request,
           SegueServerLogType.EVENT_BOOKING, Map.of(EVENT_ID_FKEY_FIELDNAME, event.getId()));
 
-      return Response.ok(this.mapper.map(eventBookingDTO, EventBookingDTO.class)).build();
+      return Response.ok(this.mapper.copy(eventBookingDTO)).build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
@@ -1141,7 +1142,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       this.getLogManager().logEvent(userManager.getCurrentUser(request), request,
           SegueServerLogType.EVENT_WAITING_LIST_BOOKING, Map.of(EVENT_ID_FKEY_FIELDNAME, event.getId()));
 
-      return Response.ok(this.mapper.map(eventBookingDTO, EventBookingDTO.class)).build();
+      return Response.ok(this.mapper.copy(eventBookingDTO)).build();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
@@ -1700,7 +1701,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     if (possibleEvent instanceof IsaacEventPageDTO) {
       // The Events Facade *mutates* the EventDTO returned by this method; we must return a copy of
       // the original object else we will poison the contentManager's cache!
-      return mapper.map(possibleEvent, IsaacEventPageDTO.class);
+      return (IsaacEventPageDTO) mapper.copy(possibleEvent);
     }
     return null;
   }

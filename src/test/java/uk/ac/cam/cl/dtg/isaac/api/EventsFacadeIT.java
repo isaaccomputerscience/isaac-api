@@ -46,7 +46,7 @@ class EventsFacadeIT extends IsaacIntegrationTest {
     // Get an instance of the facade to test
     eventsFacade =
         new EventsFacade(properties, logManager, eventBookingManager, userAccountManager, contentManager,
-            userBadgeManager, userAssociationManager, groupManager, userAccountManager, schoolListReader, mapperFacade);
+            userBadgeManager, userAssociationManager, groupManager, userAccountManager, schoolListReader, newMapperFacade);
   }
 
   @Test

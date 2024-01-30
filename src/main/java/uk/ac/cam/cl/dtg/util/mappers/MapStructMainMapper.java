@@ -5,6 +5,6 @@ import org.mapstruct.SubclassExhaustiveStrategy;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION)
-public interface MapStructMainMapper extends MapStructContentMapper, MapStructUserMapper {
+public interface MapStructMainMapper extends MapStructContentMapper, MapStructUserMapper, MapStructEventMapper {
   MapStructMainMapper INSTANCE = Mappers.getMapper(MapStructMainMapper.class);
 }
