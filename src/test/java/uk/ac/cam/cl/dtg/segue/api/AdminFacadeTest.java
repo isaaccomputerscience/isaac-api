@@ -1,9 +1,13 @@
 package uk.ac.cam.cl.dtg.segue.api;
 
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.ac.cam.cl.dtg.segue.api.AbstractSegueFacade.isUserAnAdminOrEventManager;
 import static uk.ac.cam.cl.dtg.util.ServletTestUtils.replayMockServletRequest;
@@ -12,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,6 +33,7 @@ import uk.ac.cam.cl.dtg.segue.api.monitors.IMisuseMonitor;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
+import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
@@ -149,6 +155,9 @@ class AdminFacadeTest {
         expect(userManager.updateTeacherPendingFlag(3L, false)).andReturn(prepareTestUser(3L, false));
 
         expect(emailManager.getEmailTemplateDTO("teacher_declined")).andReturn(new EmailTemplateDTO());
+        emailManager.sendTemplatedEmailToUser(anyObject(RegisteredUserDTO.class), anyObject(EmailTemplateDTO.class),
+            anyObject(Map.class), eq(EmailType.SYSTEM));
+        expectLastCall();
 
         replay(userManager);
         replay(emailManager);
@@ -160,6 +169,7 @@ class AdminFacadeTest {
         }
 
         verify(userManager);
+        verify(emailManager);
       }
 
       @Test
@@ -222,14 +232,18 @@ class AdminFacadeTest {
         expect(userManager.updateTeacherPendingFlag(2L, false)).andReturn(prepareTestUser(2L, false));
 
         expect(emailManager.getEmailTemplateDTO("teacher_declined")).andReturn(new EmailTemplateDTO());
+        emailManager.sendTemplatedEmailToUser(anyObject(RegisteredUserDTO.class), anyObject(EmailTemplateDTO.class),
+            anyObject(Map.class), eq(EmailType.SYSTEM));
+        expectLastCall();
         replay(userManager);
-        replay(userManager);
+        replay(emailManager);
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         }
 
         verify(userManager);
+        verify(emailManager);
       }
 
       @Test
@@ -248,7 +262,10 @@ class AdminFacadeTest {
         expect(userManager.getUserDTOById(3L)).andReturn(prepareTestUser(3L, true));
         expect(userManager.updateTeacherPendingFlag(3L, false)).andReturn(prepareTestUser(3L, false));
 
-        expect(emailManager.getEmailTemplateDTO("teacher_declined")).andReturn(new EmailTemplateDTO());
+        expect(emailManager.getEmailTemplateDTO("teacher_declined")).andReturn(new EmailTemplateDTO()).times(2);
+        emailManager.sendTemplatedEmailToUser(anyObject(RegisteredUserDTO.class), anyObject(EmailTemplateDTO.class),
+            anyObject(Map.class), eq(EmailType.SYSTEM));
+        expectLastCall().times(2);
 
         replay(userManager);
         replay(emailManager);
@@ -258,6 +275,7 @@ class AdminFacadeTest {
         }
 
         verify(userManager);
+        verify(emailManager);
       }
 
       @Test
