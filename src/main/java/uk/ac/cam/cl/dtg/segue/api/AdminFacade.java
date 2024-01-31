@@ -387,7 +387,7 @@ public class AdminFacade extends AbstractSegueFacade {
           Collections.<String, Object>emptyMap(), EmailType.SYSTEM);
     } catch (ContentManagerException | SegueDatabaseException e) {
       Long userId = user.getId();
-      log.error("Exception when sending email id 'teacher_declined' to userId"
+      log.error("Exception when sending email id 'teacher_declined' to userId "
           + userId + ". Unable to send email", e);
       if (!failedUpdates.containsKey(FAILED_TO_SEND)) {
         List<Long> userList = new ArrayList<>();

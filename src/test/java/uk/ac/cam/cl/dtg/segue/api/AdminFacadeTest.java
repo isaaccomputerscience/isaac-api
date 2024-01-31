@@ -172,6 +172,68 @@ class AdminFacadeTest {
       }
 
       @Test
+      void modifyUsersTeacherPendingStatus_emailSendFailureForOneTarget_returnsBadRequest()
+          throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
+        HttpServletRequest mockRequest = replayMockServletRequest();
+        RegisteredUserDTO currentUser = new RegisteredUserDTO();
+        List<Long> targetUsers = List.of(3L);
+
+        expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
+        expect(isUserAnAdminOrEventManager(userManager, currentUser)).andReturn(true);
+
+        expect(userManager.getUserDTOById(3L)).andReturn(prepareTestUser(3L, true));
+        expect(userManager.updateTeacherPendingFlag(3L, false)).andReturn(prepareTestUser(3L, false));
+
+        expect(emailManager.getEmailTemplateDTO("teacher_declined")).andThrow(new ContentManagerException("Content not found"));
+
+        replay(userManager);
+        replay(emailManager);
+
+        try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+          assertEquals("Emails could not be sent to userIds: [3]",
+              response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+
+        verify(userManager);
+      }
+
+      @Test
+      void modifyUsersTeacherPendingStatus_emailSendFailureForOneOfMultipleTargets_returnsBadRequest()
+          throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
+        HttpServletRequest mockRequest = replayMockServletRequest();
+        RegisteredUserDTO currentUser = new RegisteredUserDTO();
+        List<Long> targetUsers = List.of(3L, 2L);
+
+        expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
+        expect(isUserAnAdminOrEventManager(userManager, currentUser)).andReturn(true);
+
+        expect(userManager.getUserDTOById(3L)).andReturn(prepareTestUser(3L, true));
+        expect(userManager.updateTeacherPendingFlag(3L, false)).andReturn(prepareTestUser(3L, false));
+
+        expect(emailManager.getEmailTemplateDTO("teacher_declined")).andThrow(new ContentManagerException("Content not found"));
+
+        expect(userManager.getUserDTOById(2L)).andReturn(prepareTestUser(2L, true));
+        expect(userManager.updateTeacherPendingFlag(2L, false)).andReturn(prepareTestUser(2L, false));
+
+        expect(emailManager.getEmailTemplateDTO("teacher_declined")).andReturn(new EmailTemplateDTO());
+        emailManager.sendTemplatedEmailToUser(anyObject(RegisteredUserDTO.class), anyObject(EmailTemplateDTO.class),
+            anyObject(Map.class), eq(EmailType.SYSTEM));
+        expectLastCall();
+
+        replay(userManager);
+        replay(emailManager);
+
+        try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+          assertEquals("Emails could not be sent to userIds: [3]",
+              response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+
+        verify(userManager);
+      }
+
+      @Test
       void modifyUsersTeacherPendingStatus_errorAccessingDatabase_returnsInternalServerError()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException {
         HttpServletRequest mockRequest = replayMockServletRequest();
