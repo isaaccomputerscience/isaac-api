@@ -6,16 +6,36 @@ import org.mapstruct.SubclassExhaustiveStrategy;
 import org.mapstruct.SubclassMapping;
 import org.mapstruct.factory.Mappers;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacWildcard;
+import uk.ac.cam.cl.dtg.isaac.dos.content.Choice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
+import uk.ac.cam.cl.dtg.isaac.dos.content.Formula;
+import uk.ac.cam.cl.dtg.isaac.dos.content.FreeTextRule;
+import uk.ac.cam.cl.dtg.isaac.dos.content.GraphChoice;
+import uk.ac.cam.cl.dtg.isaac.dos.content.ItemChoice;
+import uk.ac.cam.cl.dtg.isaac.dos.content.LogicFormula;
+import uk.ac.cam.cl.dtg.isaac.dos.content.ParsonsChoice;
+import uk.ac.cam.cl.dtg.isaac.dos.content.Quantity;
+import uk.ac.cam.cl.dtg.isaac.dos.content.RegexPattern;
+import uk.ac.cam.cl.dtg.isaac.dos.content.StringChoice;
 import uk.ac.cam.cl.dtg.isaac.dto.GameboardItem;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.FormulaDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.FreeTextRuleDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.GraphChoiceDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.ItemChoiceDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.LogicFormulaDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.ParsonsChoiceDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.QuantityDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuizSummaryDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.RegexPatternDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.StringChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
 
 @Mapper(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION)
@@ -29,9 +49,34 @@ public interface MapStructContentMapper {
   @SubclassMapping(source = Content.class, target = ContentDTO.class)
   ContentBaseDTO map(ContentBase source);
 
+  @SubclassMapping(source = ChoiceDTO.class, target = Choice.class)
   Content map(ContentDTO source);
 
+  @SubclassMapping(source = Choice.class, target = ChoiceDTO.class)
   ContentDTO map(Content source);
+
+  @SubclassMapping(source = FormulaDTO.class, target = Formula.class)
+  @SubclassMapping(source = FreeTextRuleDTO.class, target = FreeTextRule.class)
+  @SubclassMapping(source = GraphChoiceDTO.class, target = GraphChoice.class)
+  @SubclassMapping(source = ParsonsChoiceDTO.class, target = ParsonsChoice.class)
+  @SubclassMapping(source = ItemChoiceDTO.class, target = ItemChoice.class)
+  @SubclassMapping(source = LogicFormulaDTO.class, target = LogicFormula.class)
+  @SubclassMapping(source = QuantityDTO.class, target = Quantity.class)
+  @SubclassMapping(source = RegexPatternDTO.class, target = RegexPattern.class)
+  @SubclassMapping(source = StringChoiceDTO.class, target = StringChoice.class)
+  Choice map(ChoiceDTO source);
+
+  // Note: In theory, @InheritInverseConfiguration could help here, but it was having ambiguity problems
+  @SubclassMapping(target = FormulaDTO.class, source = Formula.class)
+  @SubclassMapping(target = FreeTextRuleDTO.class, source = FreeTextRule.class)
+  @SubclassMapping(target = GraphChoiceDTO.class, source = GraphChoice.class)
+  @SubclassMapping(target = ParsonsChoiceDTO.class, source = ParsonsChoice.class)
+  @SubclassMapping(target = ItemChoiceDTO.class, source = ItemChoice.class)
+  @SubclassMapping(target = LogicFormulaDTO.class, source = LogicFormula.class)
+  @SubclassMapping(target = QuantityDTO.class, source = Quantity.class)
+  @SubclassMapping(target = RegexPatternDTO.class, source = RegexPattern.class)
+  @SubclassMapping(target = StringChoiceDTO.class, source = StringChoice.class)
+  ChoiceDTO map(Choice source);
 
   default <T> T map(ContentDTO source, Class<T> targetClass) {
     if (targetClass.equals(ContentSummaryDTO.class)) {
