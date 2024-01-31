@@ -41,13 +41,13 @@ public interface MapStructUserMapper {
   AnonymousUserDTO map(AnonymousUser source);
 
   default <T extends UserSummaryDTO> T map(RegisteredUserDTO source, Class<T> targetClass) {
-    if (targetClass == UserSummaryForAdminUsersDTO.class) {
+    if (targetClass.equals(UserSummaryForAdminUsersDTO.class)) {
       return (T) mapUserToAdminSummaryDTO(source);
-    } else if (targetClass == UserSummaryWithEmailAddressAndGenderDto.class) {
+    } else if (targetClass.equals(UserSummaryWithEmailAddressAndGenderDto.class)) {
       return (T) mapUserToSummaryWithEmailAndGenderDTO(source);
-    } else if (targetClass == UserSummaryWithEmailAddressDTO.class) {
+    } else if (targetClass.equals(UserSummaryWithEmailAddressDTO.class)) {
       return (T) mapUserToSummaryWithEmailDTO(source);
-    } else if (targetClass == UserSummaryWithGroupMembershipDTO.class) {
+    } else if (targetClass.equals(UserSummaryWithGroupMembershipDTO.class)) {
       return (T) mapUserToSummaryWithGroupMembershipDTO(source);
     } else if (targetClass.equals(UserSummaryDTO.class)) {
       return (T) mapUserToSummary(source);
