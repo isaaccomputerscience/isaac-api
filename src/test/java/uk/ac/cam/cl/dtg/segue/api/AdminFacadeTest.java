@@ -7,7 +7,6 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.ac.cam.cl.dtg.segue.api.AbstractSegueFacade.isUserAnAdminOrEventManager;
 import static uk.ac.cam.cl.dtg.util.ServletTestUtils.replayMockServletRequest;
@@ -132,7 +131,7 @@ class AdminFacadeTest {
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-          assertEquals("One or more users could not be found: [2]",
+          assertEquals("One or more users could not be found: [2]. ",
               response.readEntity(SegueErrorResponse.class).getErrorMessage());
         }
 
@@ -164,7 +163,7 @@ class AdminFacadeTest {
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-          assertEquals("One or more users could not be found: [2]",
+          assertEquals("One or more users could not be found: [2]. ",
               response.readEntity(SegueErrorResponse.class).getErrorMessage());
         }
 

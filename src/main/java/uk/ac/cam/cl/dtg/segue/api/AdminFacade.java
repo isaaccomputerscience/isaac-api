@@ -65,6 +65,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -312,14 +313,24 @@ public class AdminFacade extends AbstractSegueFacade {
             .toResponse();
       }
 
-      List<Long> failedUserIds = new ArrayList<>();
+      Map<String, List<Long>> failedUpdates = new HashMap<>();
 
       for (Long userId : userIds) {
-        modifyTeacherPendingStatusForUser(userId, requestingUser, status, failedUserIds);
+        modifyTeacherPendingStatusForUser(userId, requestingUser, status, failedUpdates);
       }
 
-      if (!failedUserIds.isEmpty()) {
-        String errorMessage = String.format("One or more users could not be found: %s", failedUserIds);
+      if (!failedUpdates.isEmpty()) {
+        String errorMessage = "";
+
+        if (failedUpdates.containsKey("usersNotFound")) {
+          errorMessage = String.format("One or more users could not be found: %s. ",
+              failedUpdates.get("usersNotFound"));
+        }
+
+        if (failedUpdates.containsKey("failedEmailSend")) {
+          errorMessage += String.format("Emails could not be sent to userIds: %s",
+              failedUpdates.get("failedEmailSend"));
+        }
         return new SegueErrorResponse(Status.BAD_REQUEST, errorMessage).toResponse();
       }
 
@@ -335,7 +346,7 @@ public class AdminFacade extends AbstractSegueFacade {
   }
 
   private void modifyTeacherPendingStatusForUser(Long userId, RegisteredUserDTO requestingUser, Boolean status,
-                                                 List<Long> failedUserIds) throws SegueDatabaseException {
+                                                 Map<String, List<Long>> failedUpdates) throws SegueDatabaseException {
 
     try {
       RegisteredUserDTO user = this.userManager.getUserDTOById(userId);
@@ -351,21 +362,37 @@ public class AdminFacade extends AbstractSegueFacade {
             requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status);
       }
       if (Boolean.FALSE.equals(status)) {
-        sendTeacherDeclineEmail(user);
+        sendTeacherDeclineEmail(user, failedUpdates);
       }
     } catch (NoUserException e) {
       log.error("NoUserException for userId " + userId, e);
-      failedUserIds.add(userId);
+      if (!failedUpdates.containsKey("usersNotFound")) {
+        List<Long> userList = new ArrayList<>();
+        userList.add(userId);
+        failedUpdates.put("usersNotFound", userList);
+      } else {
+        List<Long> userList = failedUpdates.get("usersNotFound");
+        userList.add(userId);
+      }
     }
   }
 
-  private void sendTeacherDeclineEmail(RegisteredUserDTO user) {
+  private void sendTeacherDeclineEmail(RegisteredUserDTO user, Map<String, List<Long>> failedUpdates) {
     try {
       emailManager.sendTemplatedEmailToUser(user, emailManager.getEmailTemplateDTO("teacher_declined"),
           Collections.<String, Object>emptyMap(), EmailType.SYSTEM);
     } catch (ContentManagerException | SegueDatabaseException e) {
+      Long userId = user.getId();
       log.error("Exception when sending email id 'teacher_declined' to userId"
-          + user.getId() + ". Unable to send email", e);
+          + userId + ". Unable to send email", e);
+      if (!failedUpdates.containsKey("failedEmailSend")) {
+        List<Long> userList = new ArrayList<>();
+        userList.add(userId);
+        failedUpdates.put("failedEmailSend", userList);
+      } else {
+        List<Long> userList = failedUpdates.get("failedEmailSend");
+        userList.add(userId);
+      }
     }
   }
 
