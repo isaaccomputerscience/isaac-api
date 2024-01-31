@@ -140,6 +140,9 @@ public class AdminFacade extends AbstractSegueFacade {
   private final IMisuseMonitor misuseMonitor;
   private final SegueJobService segueJobService;
 
+  private static final String USERS_NOT_FOUND = "usersNotFound";
+  private static final String FAILED_TO_SEND = "failedEmailSend";
+
   /**
    * Create an instance of the administrators' facade.
    *
@@ -306,6 +309,7 @@ public class AdminFacade extends AbstractSegueFacade {
   public synchronized Response modifyUsersTeacherPendingStatus(@Context final HttpServletRequest request,
                                                                @PathParam("status") final Boolean status,
                                                                final List<Long> userIds) {
+
     try {
       RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdminOrEventManager(userManager, requestingUser)) {
@@ -322,14 +326,14 @@ public class AdminFacade extends AbstractSegueFacade {
       if (!failedUpdates.isEmpty()) {
         String errorMessage = "";
 
-        if (failedUpdates.containsKey("usersNotFound")) {
+        if (failedUpdates.containsKey(USERS_NOT_FOUND)) {
           errorMessage = String.format("One or more users could not be found: %s. ",
-              failedUpdates.get("usersNotFound"));
+              failedUpdates.get(USERS_NOT_FOUND));
         }
 
-        if (failedUpdates.containsKey("failedEmailSend")) {
+        if (failedUpdates.containsKey(FAILED_TO_SEND)) {
           errorMessage += String.format("Emails could not be sent to userIds: %s",
-              failedUpdates.get("failedEmailSend"));
+              failedUpdates.get(FAILED_TO_SEND));
         }
         return new SegueErrorResponse(Status.BAD_REQUEST, errorMessage).toResponse();
       }
@@ -366,12 +370,12 @@ public class AdminFacade extends AbstractSegueFacade {
       }
     } catch (NoUserException e) {
       log.error("NoUserException for userId " + userId, e);
-      if (!failedUpdates.containsKey("usersNotFound")) {
+      if (!failedUpdates.containsKey(USERS_NOT_FOUND)) {
         List<Long> userList = new ArrayList<>();
         userList.add(userId);
-        failedUpdates.put("usersNotFound", userList);
+        failedUpdates.put(USERS_NOT_FOUND, userList);
       } else {
-        List<Long> userList = failedUpdates.get("usersNotFound");
+        List<Long> userList = failedUpdates.get(USERS_NOT_FOUND);
         userList.add(userId);
       }
     }
@@ -385,12 +389,12 @@ public class AdminFacade extends AbstractSegueFacade {
       Long userId = user.getId();
       log.error("Exception when sending email id 'teacher_declined' to userId"
           + userId + ". Unable to send email", e);
-      if (!failedUpdates.containsKey("failedEmailSend")) {
+      if (!failedUpdates.containsKey(FAILED_TO_SEND)) {
         List<Long> userList = new ArrayList<>();
         userList.add(userId);
-        failedUpdates.put("failedEmailSend", userList);
+        failedUpdates.put(FAILED_TO_SEND, userList);
       } else {
-        List<Long> userList = failedUpdates.get("failedEmailSend");
+        List<Long> userList = failedUpdates.get(FAILED_TO_SEND);
         userList.add(userId);
       }
     }
