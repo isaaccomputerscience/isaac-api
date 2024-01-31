@@ -2,17 +2,19 @@ package uk.ac.cam.cl.dtg.util.mappers;
 
 import java.util.List;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.SubclassExhaustiveStrategy;
 import org.mapstruct.SubclassMapping;
 import org.mapstruct.factory.Mappers;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacWildcard;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardItem;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuizSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
 
@@ -38,6 +40,10 @@ public interface MapStructContentMapper {
       return (T) mapContentDTOtoQuizSummaryDTO(source);
     } else if (targetClass.equals(IsaacWildcard.class)) {
       return (T) map(map(source), IsaacWildcard.class);
+    } else if (targetClass.equals(GameboardItem.class)) {
+      return (T) mapContentDTOtoGameboardItem(source);
+    } else if (targetClass.equals(Content.class)) {
+      return (T) map(source);
     } else {
       throw new UnimplementedMappingException(EventBookingDTO.class, targetClass);
     }
@@ -46,13 +52,12 @@ public interface MapStructContentMapper {
   default <T> T map(Content source, Class<T> targetClass) {
     if (targetClass.equals(IsaacWildcard.class)) {
       return (T) mapContentToIsaacWildcard(source);
+    } else if (targetClass.equals(ContentDTO.class)) {
+      return (T) map(source);
     } else {
       throw new UnimplementedMappingException(EventBookingDTO.class, targetClass);
     }
   }
-
-  @Mapping(target = "id", source = "source")
-  ContentSummaryDTO map(String source);
 
   ContentSummaryDTO mapContentDTOtoContentSummaryDTO(ContentDTO source);
 
@@ -60,13 +65,35 @@ public interface MapStructContentMapper {
 
   IsaacWildcard mapContentToIsaacWildcard(Content source);
 
-  List<String> mapContentSummaryDtoToString(List<ContentSummaryDTO> source);
+  List<String> mapListOfContentSummaryDtoToListOfString(List<ContentSummaryDTO> source);
 
-  List<ContentSummaryDTO> mapStringToContentSummaryDTO(List<String> source);
+  List<ContentSummaryDTO> mapListOfStringToListOfContentSummaryDTO(List<String> source);
 
-  default String mapToString(ContentSummaryDTO source) {
+  default ContentSummaryDTO mapStringToContentSummaryDTO(String source) {
+    if (source == null) {
+      return null;
+    }
+
+    ContentSummaryDTO contentSummaryDTO = new ContentSummaryDTO();
+    contentSummaryDTO.setId(source);
+    return contentSummaryDTO;
+  }
+
+  default String mapContentSummaryDTOtoString(ContentSummaryDTO source) {
+    if (source == null) {
+      return null;
+    }
+
     return source.getId();
   }
+
+  @SubclassMapping(source = QuestionDTO.class, target = GameboardItem.class)
+  GameboardItem mapContentDTOtoGameboardItem(ContentDTO source);
+
+  @SubclassMapping(source = ChoiceQuestionDTO.class, target = GameboardItem.class)
+  GameboardItem mapQuestionDTOtoGameboardItem(QuestionDTO source);
+
+  GameboardItem mapChoiceQuestionDTOtoGameboardItem(ChoiceQuestionDTO source);
 
   @SubclassMapping(source = ContentDTO.class, target = ContentDTO.class)
   ContentBaseDTO copy(ContentBaseDTO source);

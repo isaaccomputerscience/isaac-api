@@ -305,7 +305,7 @@ public abstract class IsaacIntegrationTest {
         new PgAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
 
     GameboardPersistenceManager gameboardPersistenceManager =
-        new GameboardPersistenceManager(postgresSqlDb, contentManager, mapperFacade, objectMapper,
+        new GameboardPersistenceManager(postgresSqlDb, contentManager, newMapperFacade, objectMapper,
             new URIManager(properties));
     gameManager = new GameManager(contentManager, gameboardPersistenceManager, newMapperFacade, questionManager);
     groupManager = new GroupManager(pgUserGroupPersistenceManager, userAccountManager, gameManager, mapperFacade);
