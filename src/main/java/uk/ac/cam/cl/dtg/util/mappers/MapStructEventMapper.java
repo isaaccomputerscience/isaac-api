@@ -2,11 +2,12 @@ package uk.ac.cam.cl.dtg.util.mappers;
 
 import java.util.List;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.DetailedEventBookingDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
 
-@Mapper
+@Mapper(uses = MapStructUserMapper.class)
 public interface MapStructEventMapper {
 
   MapStructEventMapper INSTANCE = Mappers.getMapper(MapStructEventMapper.class);
@@ -32,11 +33,13 @@ public interface MapStructEventMapper {
   }
 
   // Mapping an object to a new instance of the same class
+  @Mapping(source = "userBooked", target = "userBooked", qualifiedByName = "copyUserSummaryDTO")
   EventBookingDTO copy(EventBookingDTO source);
 
   // Specific mappings for use by above mappers
   List<EventBookingDTO> copyListOfEventBookingDTO(List<EventBookingDTO> source);
 
+  @Mapping(source = "userBooked", target = "userBooked", qualifiedByName = "copyUserSummaryDTO")
   EventBookingDTO mapDetailedEventBookingDTOtoEventBookingDTO(DetailedEventBookingDTO source);
 
   List<EventBookingDTO> mapListOfDetailedEventBookingDTOtoEventBookingDTO(List<DetailedEventBookingDTO> source);

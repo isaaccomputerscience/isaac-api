@@ -4,8 +4,10 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.SubclassMapping;
 import org.mapstruct.factory.Mappers;
 import uk.ac.cam.cl.dtg.isaac.dos.GroupMembership;
 import uk.ac.cam.cl.dtg.isaac.dos.UserGroup;
@@ -81,6 +83,8 @@ public interface MapStructUserMapper {
   default <T> T map(UserSummaryDTO source, Class<T> targetClass) {
     if (targetClass.equals(UserSummaryWithGroupMembershipDTO.class)) {
       return (T) mapUserSummaryDTOtoUserSummaryWithGroupMembershipDTO(source);
+    } else if (targetClass.equals(UserSummaryDTO.class)) {
+      return (T) mapExtendedUserSummaryDTOtoBaseUserSummaryDTO(source);
     } else {
       throw new UnimplementedMappingException(UserSummaryDTO.class, targetClass);
     }
@@ -94,6 +98,19 @@ public interface MapStructUserMapper {
   GroupMembership copy(GroupMembership source);
 
   GroupMembershipDTO copy(GroupMembershipDTO source);
+
+  @Named("copyUserSummaryDTO")
+  @SubclassMapping(source = UserSummaryWithEmailAddressAndGenderDto.class,
+      target = UserSummaryWithEmailAddressAndGenderDto.class)
+  @SubclassMapping(source = UserSummaryWithEmailAddressDTO.class, target = UserSummaryWithEmailAddressDTO.class)
+  @SubclassMapping(source = UserSummaryWithGroupMembershipDTO.class, target = UserSummaryWithGroupMembershipDTO.class)
+  UserSummaryDTO copy(UserSummaryDTO source);
+
+  UserSummaryWithEmailAddressAndGenderDto copy(UserSummaryWithEmailAddressAndGenderDto source);
+
+  UserSummaryWithEmailAddressDTO copy(UserSummaryWithEmailAddressDTO source);
+
+  UserSummaryWithGroupMembershipDTO copy(UserSummaryWithGroupMembershipDTO source);
 
   // Mapping to an existing target object, without overwriting any target properties where the source would be null
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
@@ -112,6 +129,10 @@ public interface MapStructUserMapper {
   UserSummaryWithGroupMembershipDTO mapUserToSummaryWithGroupMembershipDTO(RegisteredUserDTO source);
 
   UserSummaryWithGroupMembershipDTO mapUserSummaryDTOtoUserSummaryWithGroupMembershipDTO(UserSummaryDTO source);
+
+  @Named("censorUserSummaryDTO")
+  @BeanMapping(resultType = UserSummaryDTO.class)
+  UserSummaryDTO mapExtendedUserSummaryDTOtoBaseUserSummaryDTO(UserSummaryDTO source);
 
   RegisteredUser mapUserFromAuthProviderToRegisteredUser(UserFromAuthProvider source);
 }
