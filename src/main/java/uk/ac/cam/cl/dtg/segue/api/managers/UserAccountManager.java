@@ -999,7 +999,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException - If there is another database error
    */
   @Override
-  public final RegisteredUserDTO getUserDTOById(final Long id, final boolean includeDeleted) throws NoUserException,
+  public RegisteredUserDTO getUserDTOById(final Long id, final boolean includeDeleted) throws NoUserException,
       SegueDatabaseException {
     RegisteredUser user;
     if (includeDeleted) {

@@ -193,6 +193,7 @@ import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper;
 import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
 import uk.ac.cam.cl.dtg.util.mappers.MapStructEventMapper;
 import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructMiscMapper;
 import uk.ac.cam.cl.dtg.util.mappers.MapStructUserMapper;
 
 /**
@@ -775,7 +776,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Singleton
   private GroupManager getGroupManager(final IUserGroupPersistenceManager userGroupDataManager,
                                        final UserAccountManager userManager, final GameManager gameManager,
-                                       final MapperFacade dtoMapper) {
+                                       final MapStructUserMapper dtoMapper) {
 
     if (null == groupManager) {
       groupManager = new GroupManager(userGroupDataManager, userManager, gameManager, dtoMapper);
@@ -909,6 +910,13 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Inject
   public static MapStructEventMapper getEventMapperInstance() {
     return MapStructEventMapper.INSTANCE;
+  }
+
+  @Provides
+  @Singleton
+  @Inject
+  public static MapStructMiscMapper getMiscMapperInstance() {
+    return MapStructMiscMapper.INSTANCE;
   }
 
   /**

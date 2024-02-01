@@ -302,13 +302,13 @@ public abstract class IsaacIntegrationTest {
     PgAssociationDataManager pgAssociationDataManager = new PgAssociationDataManager(postgresSqlDb);
     PgUserGroupPersistenceManager pgUserGroupPersistenceManager = new PgUserGroupPersistenceManager(postgresSqlDb);
     IAssignmentPersistenceManager assignmentPersistenceManager =
-        new PgAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
+        new PgAssignmentPersistenceManager(postgresSqlDb, newMapperFacade);
 
     GameboardPersistenceManager gameboardPersistenceManager =
         new GameboardPersistenceManager(postgresSqlDb, contentManager, newMapperFacade, objectMapper,
             new URIManager(properties));
     gameManager = new GameManager(contentManager, gameboardPersistenceManager, newMapperFacade, questionManager);
-    groupManager = new GroupManager(pgUserGroupPersistenceManager, userAccountManager, gameManager, mapperFacade);
+    groupManager = new GroupManager(pgUserGroupPersistenceManager, userAccountManager, gameManager, newMapperFacade);
     userAssociationManager = new UserAssociationManager(pgAssociationDataManager, userAccountManager, groupManager);
     PgTransactionManager pgTransactionManager = new PgTransactionManager(postgresSqlDb);
     eventBookingManager =
@@ -321,11 +321,11 @@ public abstract class IsaacIntegrationTest {
 
     quizManager = new QuizManager(properties, new ContentService(contentManager), contentManager,
         new ContentSummarizerService(newMapperFacade, new URIManager(properties)), contentMapper);
-    quizAssignmentPersistenceManager = new PgQuizAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
+    quizAssignmentPersistenceManager = new PgQuizAssignmentPersistenceManager(postgresSqlDb, newMapperFacade);
     quizAssignmentManager = new QuizAssignmentManager(quizAssignmentPersistenceManager,
         new EmailService(emailManager, groupManager, userAccountManager), quizManager, groupManager, properties);
     assignmentService = new AssignmentService(userAccountManager);
-    quizAttemptPersistenceManager = new PgQuizAttemptPersistenceManager(postgresSqlDb, mapperFacade);
+    quizAttemptPersistenceManager = new PgQuizAttemptPersistenceManager(postgresSqlDb, newMapperFacade);
     quizAttemptManager = new QuizAttemptManager(quizAttemptPersistenceManager);
     quizQuestionAttemptPersistenceManager = new PgQuizQuestionAttemptPersistenceManager(postgresSqlDb, contentMapper);
     quizQuestionManager =

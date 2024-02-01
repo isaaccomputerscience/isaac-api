@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import ma.glasnost.orika.MapperFacade;
 import org.easymock.Capture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,12 +54,13 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserGroupPersistenceManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructUserMapper;
 
 /**
  * Test class for the user manager class.
  */
 class GroupManagerTest {
-  private MapperFacade dummyMapper;
+  private MapStructUserMapper userMapper;
 
   private IUserGroupPersistenceManager groupDataManager;
   private UserAccountManager userManager;
@@ -78,12 +78,12 @@ class GroupManagerTest {
    */
   @BeforeEach
   public final void setUp() throws Exception {
-    this.dummyMapper = createMock(MapperFacade.class);
+    this.userMapper = MapStructUserMapper.INSTANCE;
     this.groupDataManager = createMock(IUserGroupPersistenceManager.class);
     this.userManager = createMock(UserAccountManager.class);
     this.gameManager = createMock(GameManager.class);
 
-    this.groupManager = new GroupManager(this.groupDataManager, this.userManager, this.gameManager, this.dummyMapper);
+    this.groupManager = new GroupManager(this.groupDataManager, this.userManager, this.gameManager, this.userMapper);
 
     PropertiesLoader dummyPropertiesLoader = createMock(PropertiesLoader.class);
     expect(dummyPropertiesLoader.getProperty(Constants.SESSION_EXPIRY_SECONDS_DEFAULT)).andReturn("60").anyTimes();
@@ -97,7 +97,8 @@ class GroupManagerTest {
   final void groupManager_createValidGroup_aGroupShouldBeCreated() {
     String someGroupName = "Group Name";
     RegisteredUserDTO someGroupOwner = new RegisteredUserDTO();
-    someGroupOwner.setId(5339L);
+    Long someGroupOwnerId = 5339L;
+    someGroupOwner.setId(someGroupOwnerId);
     someGroupOwner.setEmail("test@test.com");
     Set<Long> someSetOfManagers = Sets.newHashSet();
     Capture<UserGroup> capturedGroup = Capture.newInstance();
@@ -105,10 +106,17 @@ class GroupManagerTest {
     List<RegisteredUserDTO> someListOfUsers = Lists.newArrayList();
     List<UserSummaryWithEmailAddressDTO> someListOfUsersDTOs = Lists.newArrayList();
 
+    UserSummaryWithEmailAddressDTO someGroupOwnerSummary = new UserSummaryWithEmailAddressDTO();
+    someGroupOwnerSummary.setId(someGroupOwnerId);
+    someGroupOwnerSummary.setEmail("test@test.com");
     UserGroup resultFromDB = new UserGroup();
     resultFromDB.setId(2L);
+    resultFromDB.setGroupName(someGroupName);
+    resultFromDB.setOwnerId(someGroupOwnerId);
     UserGroupDTO mappedGroup = new UserGroupDTO();
-    resultFromDB.setId(2L);
+    mappedGroup.setId(2L);
+    mappedGroup.setGroupName(someGroupName);
+    mappedGroup.setOwnerId(someGroupOwnerId);
 
     try {
       expect(this.groupDataManager.createGroup(and(capture(capturedGroup), isA(UserGroup.class))))
@@ -119,9 +127,11 @@ class GroupManagerTest {
       expect(this.userManager.getUserDTOById(null)).andThrow(new NoUserException("No user found with this ID!"));
       expect(this.userManager.convertToDetailedUserSummaryObjectList(someListOfUsers,
           UserSummaryWithEmailAddressDTO.class)).andReturn(someListOfUsersDTOs);
-      expect(this.dummyMapper.map(resultFromDB, UserGroupDTO.class)).andReturn(mappedGroup).atLeastOnce();
+      expect(this.userManager.getUserDTOById(someGroupOwnerId)).andReturn(someGroupOwner);
+      expect(this.userManager.convertToUserSummary(someGroupOwner, UserSummaryWithEmailAddressDTO.class)).andReturn(
+          someGroupOwnerSummary);
 
-      replay(this.userManager, this.groupDataManager, this.dummyMapper);
+      replay(this.userManager, this.groupDataManager);
 
       // check that the result of the method is whatever comes out of the database
       UserGroupDTO createUserGroup = this.groupManager.createUserGroup(someGroupName, someGroupOwner);

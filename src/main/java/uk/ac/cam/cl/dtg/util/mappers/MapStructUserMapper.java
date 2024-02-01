@@ -7,11 +7,15 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
+import uk.ac.cam.cl.dtg.isaac.dos.GroupMembership;
+import uk.ac.cam.cl.dtg.isaac.dos.UserGroup;
 import uk.ac.cam.cl.dtg.isaac.dos.users.AnonymousUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserAuthenticationSettings;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserFromAuthProvider;
+import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.GroupMembershipDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserAuthenticationSettingsDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
@@ -40,6 +44,10 @@ public interface MapStructUserMapper {
 
   AnonymousUserDTO map(AnonymousUser source);
 
+  GroupMembership map(GroupMembershipDTO source);
+
+  GroupMembershipDTO map(GroupMembership source);
+
   default <T extends UserSummaryDTO> T map(RegisteredUserDTO source, Class<T> targetClass) {
     if (targetClass.equals(UserSummaryForAdminUsersDTO.class)) {
       return (T) mapUserToAdminSummaryDTO(source);
@@ -64,9 +72,25 @@ public interface MapStructUserMapper {
     }
   }
 
+  default <T> T map(UserSummaryDTO source, Class<T> targetClass) {
+    if (targetClass.equals(UserSummaryWithGroupMembershipDTO.class)) {
+      return (T) mapUserSummaryDTOtoUserSummaryWithGroupMembershipDTO(source);
+    } else {
+      throw new UnimplementedMappingException(UserSummaryDTO.class, targetClass);
+    }
+  }
+
+  UserGroup map(UserGroupDTO source);
+
+  UserGroupDTO map(UserGroup source);
+
   RegisteredUser copy(RegisteredUser source);
 
   RegisteredUserDTO copy(RegisteredUserDTO source);
+
+  GroupMembership copy(GroupMembership source);
+
+  GroupMembershipDTO copy(GroupMembershipDTO source);
 
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
@@ -81,6 +105,8 @@ public interface MapStructUserMapper {
   UserSummaryWithEmailAddressDTO mapUserToSummaryWithEmailDTO(RegisteredUserDTO source);
 
   UserSummaryWithGroupMembershipDTO mapUserToSummaryWithGroupMembershipDTO(RegisteredUserDTO source);
+
+  UserSummaryWithGroupMembershipDTO mapUserSummaryDTOtoUserSummaryWithGroupMembershipDTO(UserSummaryDTO source);
 
   RegisteredUser mapUserFromAuthProviderToRegisteredUser(UserFromAuthProvider source);
 }
