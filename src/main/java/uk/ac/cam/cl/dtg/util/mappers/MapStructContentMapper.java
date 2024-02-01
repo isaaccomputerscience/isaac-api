@@ -43,6 +43,7 @@ public interface MapStructContentMapper {
 
   MapStructContentMapper INSTANCE = Mappers.getMapper(MapStructContentMapper.class);
 
+  // DO <-> DTO Mappings
   @SubclassMapping(source = ContentDTO.class, target = Content.class)
   ContentBase map(ContentBaseDTO source);
 
@@ -78,6 +79,7 @@ public interface MapStructContentMapper {
   @SubclassMapping(target = StringChoiceDTO.class, source = StringChoice.class)
   ChoiceDTO map(Choice source);
 
+  // Handling classes with multiple mapping targets
   default <T> T map(ContentDTO source, Class<T> targetClass) {
     if (targetClass.equals(ContentSummaryDTO.class)) {
       return (T) mapContentDTOtoContentSummaryDTO(source);
@@ -104,6 +106,16 @@ public interface MapStructContentMapper {
     }
   }
 
+  // Mapping an object to a new instance of the same class
+  @SubclassMapping(source = ContentDTO.class, target = ContentDTO.class)
+  ContentBaseDTO copy(ContentBaseDTO source);
+
+  @SubclassMapping(source = IsaacEventPageDTO.class, target = IsaacEventPageDTO.class)
+  ContentDTO copy(ContentDTO source);
+
+  IsaacEventPageDTO copy(IsaacEventPageDTO source);
+
+  // Specific mappings for use by above mappers
   ContentSummaryDTO mapContentDTOtoContentSummaryDTO(ContentDTO source);
 
   QuizSummaryDTO mapContentDTOtoQuizSummaryDTO(ContentDTO source);
@@ -139,12 +151,4 @@ public interface MapStructContentMapper {
   GameboardItem mapQuestionDTOtoGameboardItem(QuestionDTO source);
 
   GameboardItem mapChoiceQuestionDTOtoGameboardItem(ChoiceQuestionDTO source);
-
-  @SubclassMapping(source = ContentDTO.class, target = ContentDTO.class)
-  ContentBaseDTO copy(ContentBaseDTO source);
-
-  @SubclassMapping(source = IsaacEventPageDTO.class, target = IsaacEventPageDTO.class)
-  ContentDTO copy(ContentDTO source);
-
-  IsaacEventPageDTO copy(IsaacEventPageDTO source);
 }

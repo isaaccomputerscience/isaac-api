@@ -29,6 +29,7 @@ public interface MapStructUserMapper {
 
   MapStructUserMapper INSTANCE = Mappers.getMapper(MapStructUserMapper.class);
 
+  // DO <-> DTO Mappings
   @Mapping(target = "emailVerificationToken", ignore = true)
   @Mapping(target = "emailToVerify", ignore = true)
   RegisteredUser map(RegisteredUserDTO source);
@@ -48,6 +49,11 @@ public interface MapStructUserMapper {
 
   GroupMembershipDTO map(GroupMembership source);
 
+  UserGroup map(UserGroupDTO source);
+
+  UserGroupDTO map(UserGroup source);
+
+  // Handling classes with multiple mapping targets
   default <T extends UserSummaryDTO> T map(RegisteredUserDTO source, Class<T> targetClass) {
     if (targetClass.equals(UserSummaryForAdminUsersDTO.class)) {
       return (T) mapUserToAdminSummaryDTO(source);
@@ -80,10 +86,7 @@ public interface MapStructUserMapper {
     }
   }
 
-  UserGroup map(UserGroupDTO source);
-
-  UserGroupDTO map(UserGroup source);
-
+  // Mapping an object to a new instance of the same class
   RegisteredUser copy(RegisteredUser source);
 
   RegisteredUserDTO copy(RegisteredUserDTO source);
@@ -92,10 +95,12 @@ public interface MapStructUserMapper {
 
   GroupMembershipDTO copy(GroupMembershipDTO source);
 
+  // Mapping to an existing target object, without overwriting any target properties where the source would be null
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   void merge(RegisteredUserDTO source, @MappingTarget RegisteredUser target);
 
+  // Specific mappings for use by above mappers
   UserSummaryDTO mapUserToSummary(RegisteredUserDTO source);
 
   UserSummaryForAdminUsersDTO mapUserToAdminSummaryDTO(RegisteredUserDTO source);

@@ -17,22 +17,24 @@ public interface MapStructMiscMapper {
 
   MapStructMiscMapper INSTANCE = Mappers.getMapper(MapStructMiscMapper.class);
 
-  GameboardDTO map(GameboardDO source);
-
+  // DO <-> DTO Mappings
   GameboardDO map(GameboardDTO source);
 
-  AssignmentDTO map(AssignmentDO source);
+  GameboardDTO map(GameboardDO source);
 
   AssignmentDO map(AssignmentDTO source);
 
-  QuizAssignmentDTO map(QuizAssignmentDO source);
+  AssignmentDTO map(AssignmentDO source);
 
   QuizAssignmentDO map(QuizAssignmentDTO source);
 
-  QuizAttemptDTO map(QuizAttemptDO source);
+  QuizAssignmentDTO map(QuizAssignmentDO source);
 
   QuizAttemptDO map(QuizAttemptDTO source);
 
+  QuizAttemptDTO map(QuizAttemptDO source);
+
+  // Mapping an object to a new instance of the same class
   default ResultsWrapper<String> copy(ResultsWrapper<String> source) {
     return new ResultsWrapper<>(source.getResults(), source.getTotalResults());
   }

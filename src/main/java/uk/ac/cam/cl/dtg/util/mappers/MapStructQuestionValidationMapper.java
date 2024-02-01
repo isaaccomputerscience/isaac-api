@@ -18,11 +18,12 @@ public interface MapStructQuestionValidationMapper {
 
   MapStructQuestionValidationMapper INSTANCE = Mappers.getMapper(MapStructQuestionValidationMapper.class);
 
-  @SubclassMapping(source = FormulaValidationResponse.class, target = FormulaValidationResponseDTO.class)
-  @SubclassMapping(source = ItemValidationResponse.class, target = ItemValidationResponseDTO.class)
-  @SubclassMapping(source = QuantityValidationResponse.class, target = QuantityValidationResponseDTO.class)
-  QuestionValidationResponseDTO map(QuestionValidationResponse source);
+  // DO <-> DTO Mappings
+  @SubclassMapping(source = FormulaValidationResponseDTO.class, target = FormulaValidationResponse.class)
+  @SubclassMapping(source = ItemValidationResponseDTO.class, target = ItemValidationResponse.class)
+  @SubclassMapping(source = QuantityValidationResponseDTO.class, target = QuantityValidationResponse.class)
+  QuestionValidationResponse map(QuestionValidationResponseDTO source);
 
   @InheritInverseConfiguration
-  QuestionValidationResponse map(QuestionValidationResponseDTO source);
+  QuestionValidationResponseDTO map(QuestionValidationResponse source);
 }

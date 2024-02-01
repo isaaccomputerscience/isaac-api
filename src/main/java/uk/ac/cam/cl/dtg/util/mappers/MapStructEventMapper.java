@@ -11,6 +11,7 @@ public interface MapStructEventMapper {
 
   MapStructEventMapper INSTANCE = Mappers.getMapper(MapStructEventMapper.class);
 
+  // Handling classes with multiple mapping targets
   default <T extends EventBookingDTO> T map(DetailedEventBookingDTO source, Class<T> targetClass) {
     if (targetClass.equals(EventBookingDTO.class)) {
       return (T) mapDetailedEventBookingDTOtoEventBookingDTO(source);
@@ -30,8 +31,10 @@ public interface MapStructEventMapper {
     }
   }
 
+  // Mapping an object to a new instance of the same class
   EventBookingDTO copy(EventBookingDTO source);
 
+  // Specific mappings for use by above mappers
   List<EventBookingDTO> copyListOfEventBookingDTO(List<EventBookingDTO> source);
 
   EventBookingDTO mapDetailedEventBookingDTOtoEventBookingDTO(DetailedEventBookingDTO source);
