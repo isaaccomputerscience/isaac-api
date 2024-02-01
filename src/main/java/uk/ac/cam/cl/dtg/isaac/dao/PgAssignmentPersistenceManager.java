@@ -144,7 +144,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
               + listOfResults);
         }
 
-        if (listOfResults.size() == 0) {
+        if (listOfResults.isEmpty()) {
           return null;
         }
 
