@@ -39,7 +39,6 @@ import com.google.api.client.util.Sets;
 import com.google.common.base.Functions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -374,12 +373,12 @@ public class GitContentManager {
   ) throws ContentManagerException {
     String nestedFieldConnector = searchProvider.getNestedFieldConnector();
 
-    List<String> importantDocumentTypes = ImmutableList.of(TOPIC_SUMMARY_PAGE_TYPE);
+    List<String> importantDocumentTypes = List.of(TOPIC_SUMMARY_PAGE_TYPE);
 
-    List<String> importantFields = ImmutableList.of(
+    List<String> importantFields = List.of(
         Constants.TITLE_FIELDNAME, Constants.ID_FIELDNAME, Constants.SUMMARY_FIELDNAME, Constants.TAGS_FIELDNAME
     );
-    List<String> otherFields = ImmutableList.of(Constants.SEARCHABLE_CONTENT_FIELDNAME);
+    List<String> otherFields = List.of(Constants.SEARCHABLE_CONTENT_FIELDNAME);
 
     BooleanMatchInstruction matchQuery = new BooleanMatchInstruction();
     int numberOfExpectedShouldMatches = 1;
@@ -603,7 +602,7 @@ public class GitContentManager {
 
       for (SearchHit hit : hits) {
         Content partialContentWithErrors = new Content();
-        Map src = hit.getSourceAsMap();
+        Map<String, Object> src = hit.getSourceAsMap();
         partialContentWithErrors.setId((String) src.get("id"));
         partialContentWithErrors.setTitle((String) src.get("title"));
         //partialContentWithErrors.setTags(pair.getKey().getTags()); // TODO: Support tags

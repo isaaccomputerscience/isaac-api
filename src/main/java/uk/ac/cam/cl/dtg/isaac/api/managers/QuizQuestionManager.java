@@ -259,7 +259,7 @@ public class QuizQuestionManager {
 
       QuestionValidationResponse lastResponse = null;
 
-      if (questionAttempts != null && questionAttempts.size() > 0) {
+      if (questionAttempts != null && !questionAttempts.isEmpty()) {
         // The latest answer is the only answer we consider.
         lastResponse = questionAttempts.get(questionAttempts.size() - 1);
       }
@@ -337,9 +337,9 @@ public class QuizQuestionManager {
 
     // Make a score table
     Map<String, QuizFeedbackDTO.Mark> sectionMarks =
-        sections.stream().collect(Collectors.toMap(s -> s.getId(), s -> new QuizFeedbackDTO.Mark()));
+        sections.stream().collect(Collectors.toMap(IsaacQuizSectionDTO::getId, s -> new QuizFeedbackDTO.Mark()));
     Map<String, QuizFeedbackDTO.Mark> questionMarks =
-        questionsToAugment.stream().collect(Collectors.toMap(s -> s.getId(), s -> new QuizFeedbackDTO.Mark()));
+        questionsToAugment.stream().collect(Collectors.toMap(QuestionDTO::getId, s -> new QuizFeedbackDTO.Mark()));
 
     // Calculate the scores
     for (QuestionDTO question : questionsToAugment) {

@@ -44,7 +44,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -616,7 +615,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     ISegueHashingAlgorithm oldAlgorithm2 = new SeguePBKDF2v2();
     ISegueHashingAlgorithm oldAlgorithm3 = new SeguePBKDF2v3();
 
-    Map<String, ISegueHashingAlgorithm> possibleAlgorithms = ImmutableMap.of(
+    Map<String, ISegueHashingAlgorithm> possibleAlgorithms = Map.of(
         preferredAlgorithm.hashingAlgorithmName(), preferredAlgorithm,
         oldAlgorithm1.hashingAlgorithmName(), oldAlgorithm1,
         oldAlgorithm2.hashingAlgorithmName(), oldAlgorithm2,
@@ -1005,6 +1004,15 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     return statsManager;
   }
 
+  static final String CRON_STRING_0200_DAILY = "0 0 2 * * ?";
+  static final String CRON_STRING_0230_DAILY = "0 30 2 * * ?";
+  static final String CRON_STRING_0700_DAILY = "0 0 7 * * ?";
+  static final String CRON_STRING_2000_DAILY = "0 0 20 * * ?";
+  static final String CRON_STRING_HOURLY = "0 0 * ? * * *";
+  static final String CRON_STRING_EVERY_FOUR_HOURS = "0 0 0/4 ? * * *";
+  static final String CRON_GROUP_NAME_SQL_MAINTENANCE = "SQLMaintenance";
+  static final String CRON_GROUP_NAME_JAVA_JOB = "JavaJob";
+
   @Provides
   @Singleton
   @Inject
@@ -1019,72 +1027,72 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
 
       SegueScheduledJob piiSqlJob = new SegueScheduledDatabaseScriptJob(
           "PIIDeleteScheduledJob",
-          "SQLMaintenance",
+          CRON_GROUP_NAME_SQL_MAINTENANCE,
           "SQL scheduled job that deletes PII",
-          "0 0 2 * * ?", "db_scripts/scheduled/pii-delete-task.sql");
+          CRON_STRING_0200_DAILY, "db_scripts/scheduled/pii-delete-task.sql");
 
       SegueScheduledJob cleanUpOldAnonymousUsers = new SegueScheduledDatabaseScriptJob(
           "cleanAnonymousUsers",
-          "SQLMaintenance",
+          CRON_GROUP_NAME_SQL_MAINTENANCE,
           "SQL scheduled job that deletes old AnonymousUsers",
-          "0 30 2 * * ?", "db_scripts/scheduled/anonymous-user-clean-up.sql");
+          CRON_STRING_0230_DAILY, "db_scripts/scheduled/anonymous-user-clean-up.sql");
 
       SegueScheduledJob cleanUpExpiredReservations = new SegueScheduledDatabaseScriptJob(
           "cleanUpExpiredReservations",
-          "SQLMaintenence",
+          CRON_GROUP_NAME_SQL_MAINTENANCE,
           "SQL scheduled job that deletes expired reservations for the event booking system",
-          "0 0 7 * * ?", "db_scripts/scheduled/expired-reservations-clean-up.sql");
+          CRON_STRING_0700_DAILY, "db_scripts/scheduled/expired-reservations-clean-up.sql");
 
       SegueScheduledJob deleteEventAdditionalBookingInformation = SegueScheduledJob.createCustomJob(
           "deleteEventAdditionalBookingInformation",
-          "JavaJob",
+          CRON_GROUP_NAME_JAVA_JOB,
           "Delete event additional booking information a given period after an event has taken place",
-          "0 0 7 * * ?",
+          CRON_STRING_0700_DAILY,
           Maps.newHashMap(),
           new DeleteEventAdditionalBookingInformationJob()
       );
 
       SegueScheduledJob deleteEventAdditionalBookingInformationOneYearJob = SegueScheduledJob.createCustomJob(
           "deleteEventAdditionalBookingInformationOneYear",
-          "JavaJob",
+          CRON_GROUP_NAME_JAVA_JOB,
           "Delete event additional booking information a year after an event has taken place if not already removed",
-          "0 0 7 * * ?",
+          CRON_STRING_0700_DAILY,
           Maps.newHashMap(),
           new DeleteEventAdditionalBookingInformationOneYearJob()
       );
 
       SegueScheduledJob eventReminderEmail = SegueScheduledJob.createCustomJob(
           "eventReminderEmail",
-          "JavaJob",
+          CRON_GROUP_NAME_JAVA_JOB,
           "Send scheduled reminder emails to events",
-          "0 0 7 * * ?",
+          CRON_STRING_0700_DAILY,
           Maps.newHashMap(),
           new EventReminderEmailJob()
       );
 
       SegueScheduledJob eventFeedbackEmail = SegueScheduledJob.createCustomJob(
           "eventFeedbackEmail",
-          "JavaJob",
+          CRON_GROUP_NAME_JAVA_JOB,
           "Send scheduled feedback emails to events",
-          "0 0 20 * * ?",
+          CRON_STRING_2000_DAILY,
           Maps.newHashMap(),
           new EventFeedbackEmailJob()
       );
 
       SegueScheduledJob scheduledAssignmentsEmail = SegueScheduledJob.createCustomJob(
           "scheduledAssignmentsEmail",
-          "JavaJob",
+          CRON_GROUP_NAME_JAVA_JOB,
           "Send scheduled assignment notification emails to groups",
-          "0 0 * ? * * *",
+          CRON_STRING_HOURLY,
           Maps.newHashMap(),
           new ScheduledAssignmentsEmailJob()
       );
 
       SegueScheduledJob syncMailjetUsers = new SegueScheduledSyncMailjetUsersJob(
           "syncMailjetUsersJob",
-          "JavaJob",
+          CRON_GROUP_NAME_JAVA_JOB,
           "Sync users to mailjet",
-          "0 0 0/4 ? * * *");
+          CRON_STRING_EVERY_FOUR_HOURS);
 
       List<SegueScheduledJob> configuredScheduledJobs = new ArrayList<>(Arrays.asList(
           piiSqlJob,
