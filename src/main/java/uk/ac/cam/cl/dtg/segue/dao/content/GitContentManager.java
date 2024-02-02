@@ -87,6 +87,7 @@ import uk.ac.cam.cl.dtg.segue.search.SimpleExclusionInstruction;
 import uk.ac.cam.cl.dtg.segue.search.SimpleFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.TermsFilterInstruction;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
 
 /**
  * Implementation that specifically works with Content objects.
@@ -98,6 +99,7 @@ public class GitContentManager {
 
   private final GitDb database;
   private final ContentMapper mapper;
+  private final MapStructContentMapper objectMapper;
   private final ISearchProvider searchProvider;
   private final PropertiesLoader globalProperties;
   private final boolean allowOnlyPublishedContent;
@@ -119,9 +121,11 @@ public class GitContentManager {
    */
   @Inject
   public GitContentManager(final GitDb database, final ISearchProvider searchProvider,
-                           final ContentMapper contentMapper, final PropertiesLoader globalProperties) {
+                           final ContentMapper contentMapper, final MapStructContentMapper objectMapper,
+                           final PropertiesLoader globalProperties) {
     this.database = database;
     this.mapper = contentMapper;
+    this.objectMapper = objectMapper;
     this.searchProvider = searchProvider;
     this.globalProperties = globalProperties;
 
@@ -155,9 +159,10 @@ public class GitContentManager {
    * @param contentMapper  - The utility class for mapping content objects.
    */
   public GitContentManager(final GitDb database, final ISearchProvider searchProvider,
-                           final ContentMapper contentMapper) {
+                           final ContentMapper contentMapper, final MapStructContentMapper objectMapper) {
     this.database = database;
     this.mapper = contentMapper;
+    this.objectMapper = objectMapper;
     this.searchProvider = searchProvider;
     this.globalProperties = null;
     this.allowOnlyPublishedContent = false;
@@ -657,7 +662,7 @@ public class GitContentManager {
     for (String contentId : relatedContentIds) {
       ContentDTO relatedContent = resultsMappedById.get(contentId);
       if (relatedContent != null) {
-        ContentSummaryDTO summary = this.mapper.getAutoMapper().map(relatedContent, ContentSummaryDTO.class);
+        ContentSummaryDTO summary = this.objectMapper.map(relatedContent, ContentSummaryDTO.class);
         GitContentManager.generateDerivedSummaryValues(relatedContent, summary);
         relatedContentDTOs.add(summary);
       } else {

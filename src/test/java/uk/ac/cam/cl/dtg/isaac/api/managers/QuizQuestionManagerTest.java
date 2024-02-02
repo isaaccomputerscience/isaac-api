@@ -35,9 +35,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import ma.glasnost.orika.MapperFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import uk.ac.cam.cl.dtg.isaac.dao.IQuizQuestionAttemptPersistenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.QuantityValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.QuestionValidationResponse;
@@ -54,7 +54,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
-import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
 
 class QuizQuestionManagerTest extends AbstractManagerTest {
 
@@ -82,24 +82,19 @@ class QuizQuestionManagerTest extends AbstractManagerTest {
 
     quizQuestionAttemptPersistenceManager = createMock(IQuizQuestionAttemptPersistenceManager.class);
     questionManager = createMock(QuestionManager.class);
-    ContentMapper contentMapper = createMock(ContentMapper.class);
-    MapperFacade mapperFacade = createMock(MapperFacade.class);
+    MapStructMainMapper contentMapper = Mappers.getMapper(MapStructMainMapper.class);
     quizAttemptManager = createMock(QuizAttemptManager.class);
 
     quizQuestionManager =
         new QuizQuestionManager(questionManager, contentMapper, quizQuestionAttemptPersistenceManager, quizManager,
             quizAttemptManager);
 
-    expect(contentMapper.getAutoMapper()).andStubReturn(mapperFacade);
-    expect(mapperFacade.map(correctAnswer, ChoiceDTO.class)).andStubReturn(correctAnswerDTO);
-    expect(mapperFacade.map(wrongAnswer, ChoiceDTO.class)).andStubReturn(wrongAnswerDTO);
-
     registerDefaultsFor(questionManager, m -> {
       expect(m.convertQuestionValidationResponseToDTO(wrongResponse)).andStubReturn(wrongResponseDTO);
       expect(m.convertQuestionValidationResponseToDTO(correctResponse)).andStubReturn(correctResponseDTO);
     });
 
-    replay(quizQuestionAttemptPersistenceManager, questionManager, contentMapper, mapperFacade, quizAttemptManager);
+    replay(quizQuestionAttemptPersistenceManager, questionManager, quizAttemptManager);
   }
 
   private void initializeAdditionalObjects() {

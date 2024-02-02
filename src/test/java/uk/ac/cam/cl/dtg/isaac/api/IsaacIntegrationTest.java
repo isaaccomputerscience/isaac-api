@@ -273,7 +273,7 @@ public abstract class IsaacIntegrationTest {
 
     Git git = createNiceMock(Git.class);
     GitDb gitDb = new GitDb(git);
-    contentManager = new GitContentManager(gitDb, elasticSearchProvider, contentMapper, properties);
+    contentManager = new GitContentManager(gitDb, elasticSearchProvider, contentMapper, newMapperFacade, properties);
     logManager = createNiceMock(ILogManager.class);
 
     emailManager =
@@ -329,7 +329,7 @@ public abstract class IsaacIntegrationTest {
     quizAttemptManager = new QuizAttemptManager(quizAttemptPersistenceManager);
     quizQuestionAttemptPersistenceManager = new PgQuizQuestionAttemptPersistenceManager(postgresSqlDb, contentMapper);
     quizQuestionManager =
-        new QuizQuestionManager(questionManager, contentMapper, quizQuestionAttemptPersistenceManager, quizManager,
+        new QuizQuestionManager(questionManager, newMapperFacade, quizQuestionAttemptPersistenceManager, quizManager,
             quizAttemptManager);
 
     misuseMonitor = new InMemoryMisuseMonitor();

@@ -536,9 +536,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Singleton
   private static GitContentManager getContentManager(final GitDb database, final ISearchProvider searchProvider,
                                                      final ContentMapper contentMapper,
+                                                     final MapStructContentMapper objectMapper,
                                                      final PropertiesLoader globalProperties) {
     if (null == contentManager) {
-      contentManager = new GitContentManager(database, searchProvider, contentMapper, globalProperties);
+      contentManager = new GitContentManager(database, searchProvider, contentMapper, objectMapper, globalProperties);
       log.info("Creating singleton of ContentManager");
     }
 
