@@ -335,7 +335,7 @@ public class AdminFacade extends AbstractSegueFacade {
           errorMessage += String.format("Emails could not be sent to userIds: %s",
               failedUpdates.get(FAILED_TO_SEND));
         }
-        return new SegueErrorResponse(Status.BAD_REQUEST, errorMessage).toResponse();
+        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMessage).toResponse();
       }
 
     } catch (NoUserLoggedInException e) {
@@ -343,13 +343,14 @@ public class AdminFacade extends AbstractSegueFacade {
     } catch (SegueDatabaseException e) {
       log.error("Database error while trying to change teacher_pending status", e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Could not save new teacher_pending status to the database").toResponse();
+          "Could not update teacher_pending status").toResponse();
     }
 
-    return Response.ok().build();
+    String responseString = "Teacher pending status updated to " + status + " for requested userIds: " + userIds;
+    return Response.ok(responseString).build();
   }
 
-  private void modifyTeacherPendingStatusForUser(Long userId, RegisteredUserDTO requestingUser, Boolean status,
+  private void modifyTeacherPendingStatusForUser(Long userId, RegisteredUserDTO requestingUser, boolean status,
                                                  Map<String, List<Long>> failedUpdates) throws SegueDatabaseException {
 
     try {
@@ -361,12 +362,10 @@ public class AdminFacade extends AbstractSegueFacade {
 
       Boolean oldStatus = user.getTeacherPending();
       this.userManager.updateTeacherPendingFlag(userId, status);
-      if (log.isInfoEnabled()) {
-        log.info("ADMIN user {} has modified the teacher_pending status of {} [{}] from {} to {}",
+      log.info("ADMIN user {} has modified the teacher_pending status of {} [{}] from {} to {}",
             requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status);
-      }
-      if (Boolean.FALSE.equals(status)) {
-        sendTeacherDeclineEmail(user, failedUpdates);
+      if (!status) {
+        sendTeacherDeclinedEmail(user, failedUpdates);
       }
     } catch (NoUserException e) {
       log.error("NoUserException for userId " + userId, e);
@@ -381,7 +380,7 @@ public class AdminFacade extends AbstractSegueFacade {
     }
   }
 
-  private void sendTeacherDeclineEmail(RegisteredUserDTO user, Map<String, List<Long>> failedUpdates) {
+  private void sendTeacherDeclinedEmail(RegisteredUserDTO user, Map<String, List<Long>> failedUpdates) {
     try {
       emailManager.sendTemplatedEmailToUser(user, emailManager.getEmailTemplateDTO("teacher_declined"),
           Collections.<String, Object>emptyMap(), EmailType.SYSTEM);
