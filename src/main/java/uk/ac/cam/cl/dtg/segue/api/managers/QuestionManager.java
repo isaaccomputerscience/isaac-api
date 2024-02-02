@@ -207,7 +207,7 @@ public class QuestionManager {
           .build();
     }
 
-    Choice answerFromUser = objectMapper.map(submittedAnswer);
+    Choice answerFromUser = objectMapper.mapChoice(submittedAnswer);
     QuestionValidationResponse validateQuestionResponse;
     Histogram.Timer validatorTimer =
         VALIDATOR_LATENCY_HISTOGRAM.labels(validator.getClass().getSimpleName()).startTimer();
@@ -394,7 +394,7 @@ public class QuestionManager {
       // For each test, check its actual results against the response of the validator on the fake question
       List<TestCase> results = Lists.newArrayList();
       for (TestCase testCase : testDefinition.getTestCases()) {
-        Choice inferredChoiceSubclass = objectMapper.map(objectMapper.map(testCase.getAnswer()));
+        Choice inferredChoiceSubclass = objectMapper.mapChoice(objectMapper.mapChoice(testCase.getAnswer()));
         QuestionValidationResponse questionValidationResponse = questionValidator
             .validateQuestionResponse(testQuestion, inferredChoiceSubclass);
         testCase.setCorrect(questionValidationResponse.isCorrect());
@@ -578,7 +578,7 @@ public class QuestionManager {
           .build();
     }
 
-    Choice answerFromUser = objectMapper.map(answer);
+    Choice answerFromUser = objectMapper.mapChoice(answer);
     String specification;
     try {
       specification = specifier.createSpecification(answerFromUser);
@@ -598,7 +598,7 @@ public class QuestionManager {
       // convert submitted JSON into a Choice:
       Choice answerFromClient = mapper.getSharedContentObjectMapper().readValue(jsonAnswer, Choice.class);
       // convert to a DTO so that it strips out any untrusted data.
-      answerFromClientDTO = objectMapper.map(answerFromClient);
+      answerFromClientDTO = objectMapper.mapChoice(answerFromClient);
     } catch (JsonMappingException | JsonParseException e) {
       log.info("Failed to map to any expected input...", e);
       SegueErrorResponse error = new SegueErrorResponse(Response.Status.NOT_FOUND, "Unable to map response to a "

@@ -52,6 +52,7 @@ import uk.ac.cam.cl.dtg.segue.dao.JsonLoader;
 import uk.ac.cam.cl.dtg.segue.dao.users.AnonymousUserQuestionAttemptsOrikaConverter;
 import uk.ac.cam.cl.dtg.segue.dao.users.QuestionValidationResponseDeserializer;
 import uk.ac.cam.cl.dtg.segue.dao.users.QuestionValidationResponseOrikaConverter;
+import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
 
 /**
  * Class responsible for mapping Content objects (or contentBase objects) to their respective subclass.
@@ -229,7 +230,7 @@ public class ContentMapper {
       return null;
     }
 
-    ContentDTO result = getAutoMapper().map(content, this.mapOfDOsToDTOs.get(content.getClass()));
+    ContentDTO result = MapStructContentMapper.INSTANCE.mapContent(content);
     this.populateRelatedContentWithIDs(content, result);
     return result;
   }

@@ -290,7 +290,7 @@ public class QuizQuestionManager {
         } else {
           // Manual extract only the safe details (questionId, answer, date attempted).
           lastAttempt = new QuestionValidationResponseDTO();
-          lastAttempt.setAnswer(mapper.map(lastResponse.getAnswer()));
+          lastAttempt.setAnswer(mapper.mapChoice(lastResponse.getAnswer()));
           lastAttempt.setQuestionId(lastResponse.getQuestionId());
           lastAttempt.setDateAttempted(lastResponse.getDateAttempted());
         }
