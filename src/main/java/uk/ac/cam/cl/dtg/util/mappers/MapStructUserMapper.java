@@ -51,8 +51,13 @@ public interface MapStructUserMapper {
 
   GroupMembershipDTO map(GroupMembership source);
 
+  @Mapping(target = "status", ignore = true)
   UserGroup map(UserGroupDTO source);
 
+  @Mapping(target = "token", ignore = true)
+  @Mapping(target = "ownerSummary", ignore = true)
+  @Mapping(target = "mongoId", ignore = true)
+  @Mapping(target = "additionalManagers", ignore = true)
   UserGroupDTO map(UserGroup source);
 
   // Handling classes with multiple mapping targets
@@ -113,26 +118,47 @@ public interface MapStructUserMapper {
   UserSummaryWithGroupMembershipDTO copy(UserSummaryWithGroupMembershipDTO source);
 
   // Mapping to an existing target object, without overwriting any target properties where the source would be null
+  @Mapping(target = "emailVerificationToken", ignore = true)
+  @Mapping(target = "emailToVerify", ignore = true)
   @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
       nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
   void merge(RegisteredUserDTO source, @MappingTarget RegisteredUser target);
 
   // Specific mappings for use by above mappers
+  @Mapping(target = "authorisedFullAccess", ignore = true)
   UserSummaryDTO mapUserToSummary(RegisteredUserDTO source);
 
+  @Mapping(target = "authorisedFullAccess", ignore = true)
   UserSummaryForAdminUsersDTO mapUserToAdminSummaryDTO(RegisteredUserDTO source);
 
+  @Mapping(target = "authorisedFullAccess", ignore = true)
   UserSummaryWithEmailAddressAndGenderDto mapUserToSummaryWithEmailAndGenderDTO(RegisteredUserDTO source);
 
+  @Mapping(target = "authorisedFullAccess", ignore = true)
   UserSummaryWithEmailAddressDTO mapUserToSummaryWithEmailDTO(RegisteredUserDTO source);
 
+  @Mapping(target = "groupMembershipInformation", ignore = true)
+  @Mapping(target = "authorisedFullAccess", ignore = true)
   UserSummaryWithGroupMembershipDTO mapUserToSummaryWithGroupMembershipDTO(RegisteredUserDTO source);
 
+  @Mapping(target = "groupMembershipInformation", ignore = true)
   UserSummaryWithGroupMembershipDTO mapUserSummaryDTOtoUserSummaryWithGroupMembershipDTO(UserSummaryDTO source);
 
   @Named("censorUserSummaryDTO")
   @BeanMapping(resultType = UserSummaryDTO.class)
   UserSummaryDTO mapExtendedUserSummaryDTOtoBaseUserSummaryDTO(UserSummaryDTO source);
 
+  @Mapping(target = "teacherPending", ignore = true)
+  @Mapping(target = "schoolOther", ignore = true)
+  @Mapping(target = "schoolId", ignore = true)
+  @Mapping(target = "role", ignore = true)
+  @Mapping(target = "registrationDate", ignore = true)
+  @Mapping(target = "registeredContextsLastConfirmed", ignore = true)
+  @Mapping(target = "registeredContexts", ignore = true)
+  @Mapping(target = "lastUpdated", ignore = true)
+  @Mapping(target = "lastSeen", ignore = true)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "emailVerificationToken", ignore = true)
+  @Mapping(target = "emailToVerify", ignore = true)
   RegisteredUser mapUserFromAuthProviderToRegisteredUser(UserFromAuthProvider source);
 }

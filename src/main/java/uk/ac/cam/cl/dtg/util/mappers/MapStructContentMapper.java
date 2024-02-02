@@ -3,6 +3,7 @@ package uk.ac.cam.cl.dtg.util.mappers;
 import java.util.List;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.SubclassExhaustiveStrategy;
 import org.mapstruct.SubclassMapping;
 import org.mapstruct.factory.Mappers;
@@ -171,18 +172,23 @@ public interface MapStructContentMapper {
   @SubclassMapping(source = StringChoice.class, target = StringChoiceDTO.class)
   ChoiceDTO mapChoice(Choice source);
 
+  @Mapping(target = "searchableContent", ignore = true)
+  @Mapping(target = "explanation", ignore = true)
+  @Mapping(target = "correct", ignore = true)
   @SubclassMapping(source = ItemChoiceDTO.class, target = ItemChoice.class)
   ItemChoice map(ItemChoiceDTO source);
 
   @SubclassMapping(source = ItemChoice.class, target = ItemChoiceDTO.class)
   ItemChoiceDTO map(ItemChoice source);
 
+  @Mapping(target = "searchableContent", ignore = true)
   @SubclassMapping(source = InteractiveCodeSnippetDTO.class, target = InteractiveCodeSnippet.class)
   CodeSnippet map(CodeSnippetDTO source);
 
   @SubclassMapping(source = InteractiveCodeSnippet.class, target = InteractiveCodeSnippetDTO.class)
   CodeSnippetDTO map(CodeSnippet source);
 
+  @Mapping(target = "searchableContent", ignore = true)
   @SubclassMapping(source = ImageDTO.class, target = Image.class)
   @SubclassMapping(source = VideoDTO.class, target = Video.class)
   Media map(MediaDTO source);
@@ -191,12 +197,14 @@ public interface MapStructContentMapper {
   @SubclassMapping(source = Video.class, target = VideoDTO.class)
   MediaDTO map(Media source);
 
+  @Mapping(target = "searchableContent", ignore = true)
   @SubclassMapping(source = FigureDTO.class, target = Figure.class)
   Image map(ImageDTO source);
 
   @SubclassMapping(source = Figure.class, target = FigureDTO.class)
   ImageDTO map(Image source);
 
+  @Mapping(target = "searchableContent", ignore = true)
   @SubclassMapping(source = ParsonsItemDTO.class, target = ParsonsItem.class)
   Item map(ItemDTO source);
 
@@ -212,27 +220,35 @@ public interface MapStructContentMapper {
   @SubclassMapping(source = IsaacTopicSummaryPage.class, target = IsaacTopicSummaryPageDTO.class)
   SeguePageDTO mapSeguePage(SeguePage source);
 
+  @Mapping(target = "searchableContent", ignore = true)
   @SubclassMapping(source = IsaacFastTrackQuestionPageDTO.class, target = IsaacFastTrackQuestionPage.class)
   IsaacQuestionPage map(IsaacQuestionPageDTO source);
 
   @SubclassMapping(source = IsaacFastTrackQuestionPage.class, target = IsaacFastTrackQuestionPageDTO.class)
   IsaacQuestionPageDTO map(IsaacQuestionPage source);
 
+  @Mapping(target = "searchableContent", ignore = true)
+  @Mapping(target = "defaultFeedback", ignore = true)
   @SubclassMapping(source = ChoiceQuestionDTO.class, target = ChoiceQuestion.class)
   Question map(QuestionDTO source);
 
+  @Mapping(target = "bestAttempt", ignore = true)
   @SubclassMapping(source = ChoiceQuestion.class, target = ChoiceQuestionDTO.class)
   QuestionDTO map(Question source);
 
+  @Mapping(target = "searchableContent", ignore = true)
+  @Mapping(target = "defaultFeedback", ignore = true)
   @SubclassMapping(source = IsaacQuestionBaseDTO.class, target = IsaacQuestionBase.class)
   ChoiceQuestion map(ChoiceQuestionDTO source);
 
+  @Mapping(target = "bestAttempt", ignore = true)
   @SubclassMapping(source = IsaacQuestionBase.class, target = IsaacQuestionBaseDTO.class)
   ChoiceQuestionDTO map(ChoiceQuestion source);
 
   @InheritInverseConfiguration(name = "mapIsaacQuestionBase")
   IsaacQuestionBase mapIsaacQuestionBase(IsaacQuestionBaseDTO source);
 
+  @Mapping(target = "bestAttempt", ignore = true)
   @SubclassMapping(source = IsaacAnvilQuestion.class, target = IsaacAnvilQuestionDTO.class)
   @SubclassMapping(source = IsaacFreeTextQuestion.class, target = IsaacFreeTextQuestionDTO.class)
   @SubclassMapping(source = IsaacItemQuestion.class, target = IsaacItemQuestionDTO.class)
@@ -247,14 +263,18 @@ public interface MapStructContentMapper {
   @InheritInverseConfiguration(name = "mapIsaacItemQuestion")
   IsaacItemQuestion mapIsaacItemQuestion(IsaacItemQuestionDTO source);
 
+  @Mapping(target = "bestAttempt", ignore = true)
   @SubclassMapping(source = IsaacClozeQuestion.class, target = IsaacClozeQuestionDTO.class)
   @SubclassMapping(source = IsaacParsonsQuestion.class, target = IsaacParsonsQuestionDTO.class)
   @SubclassMapping(source = IsaacReorderQuestion.class, target = IsaacReorderQuestionDTO.class)
   IsaacItemQuestionDTO mapIsaacItemQuestion(IsaacItemQuestion source);
 
+  @Mapping(target = "searchableContent", ignore = true)
+  @Mapping(target = "defaultFeedback", ignore = true)
   @SubclassMapping(source = IsaacSymbolicLogicQuestionDTO.class, target = IsaacSymbolicLogicQuestion.class)
   IsaacSymbolicQuestion mapIsaacSymbolicQuestion(IsaacSymbolicQuestionDTO source);
 
+  @Mapping(target = "bestAttempt", ignore = true)
   @SubclassMapping(source = IsaacSymbolicLogicQuestion.class, target = IsaacSymbolicLogicQuestionDTO.class)
   IsaacSymbolicQuestionDTO mapIsaacSymbolicQuestion(IsaacSymbolicQuestion source);
 
@@ -295,10 +315,26 @@ public interface MapStructContentMapper {
   IsaacEventPageDTO copy(IsaacEventPageDTO source);
 
   // Specific mappings for use by above mappers
+  @Mapping(target = "url", ignore = true)
+  @Mapping(target = "supersededBy", ignore = true)
+  @Mapping(target = "summary", ignore = true)
+  @Mapping(target = "questionPartIds", ignore = true)
+  @Mapping(target = "difficulty", ignore = true)
+  @Mapping(target = "correct", ignore = true)
   ContentSummaryDTO mapContentDTOtoContentSummaryDTO(ContentDTO source);
 
+  @Mapping(target = "visibleToStudents", ignore = true)
+  @Mapping(target = "url", ignore = true)
+  @Mapping(target = "supersededBy", ignore = true)
+  @Mapping(target = "summary", ignore = true)
+  @Mapping(target = "questionPartIds", ignore = true)
+  @Mapping(target = "hiddenFromRoles", ignore = true)
+  @Mapping(target = "difficulty", ignore = true)
+  @Mapping(target = "correct", ignore = true)
   QuizSummaryDTO mapContentDTOtoQuizSummaryDTO(ContentDTO source);
 
+  @Mapping(target = "url", ignore = true)
+  @Mapping(target = "description", ignore = true)
   IsaacWildcard mapContentToIsaacWildcard(Content source);
 
   List<String> mapListOfContentSummaryDtoToListOfString(List<ContentSummaryDTO> source);
@@ -345,11 +381,53 @@ public interface MapStructContentMapper {
     return source.getId();
   }
 
+  @Mapping(target = "uri", ignore = true)
+  @Mapping(target = "supersededBy", ignore = true)
+  @Mapping(target = "state", ignore = true)
+  @Mapping(target = "questionPartsTotal", ignore = true)
+  @Mapping(target = "questionPartsNotAttempted", ignore = true)
+  @Mapping(target = "questionPartsIncorrect", ignore = true)
+  @Mapping(target = "questionPartsCorrect", ignore = true)
+  @Mapping(target = "questionPartStates", ignore = true)
+  @Mapping(target = "passMark", ignore = true)
+  @Mapping(target = "difficulty", ignore = true)
+  @Mapping(target = "description", ignore = true)
+  @Mapping(target = "creationContext", ignore = true)
+  @Mapping(target = "contentType", ignore = true)
+  @Mapping(target = "boardId", ignore = true)
   @SubclassMapping(source = QuestionDTO.class, target = GameboardItem.class)
   GameboardItem mapContentDTOtoGameboardItem(ContentDTO source);
 
+  @Mapping(target = "uri", ignore = true)
+  @Mapping(target = "supersededBy", ignore = true)
+  @Mapping(target = "state", ignore = true)
+  @Mapping(target = "questionPartsTotal", ignore = true)
+  @Mapping(target = "questionPartsNotAttempted", ignore = true)
+  @Mapping(target = "questionPartsIncorrect", ignore = true)
+  @Mapping(target = "questionPartsCorrect", ignore = true)
+  @Mapping(target = "questionPartStates", ignore = true)
+  @Mapping(target = "passMark", ignore = true)
+  @Mapping(target = "difficulty", ignore = true)
+  @Mapping(target = "description", ignore = true)
+  @Mapping(target = "creationContext", ignore = true)
+  @Mapping(target = "contentType", ignore = true)
+  @Mapping(target = "boardId", ignore = true)
   @SubclassMapping(source = ChoiceQuestionDTO.class, target = GameboardItem.class)
   GameboardItem mapQuestionDTOtoGameboardItem(QuestionDTO source);
 
+  @Mapping(target = "uri", ignore = true)
+  @Mapping(target = "supersededBy", ignore = true)
+  @Mapping(target = "state", ignore = true)
+  @Mapping(target = "questionPartsTotal", ignore = true)
+  @Mapping(target = "questionPartsNotAttempted", ignore = true)
+  @Mapping(target = "questionPartsIncorrect", ignore = true)
+  @Mapping(target = "questionPartsCorrect", ignore = true)
+  @Mapping(target = "questionPartStates", ignore = true)
+  @Mapping(target = "passMark", ignore = true)
+  @Mapping(target = "difficulty", ignore = true)
+  @Mapping(target = "description", ignore = true)
+  @Mapping(target = "creationContext", ignore = true)
+  @Mapping(target = "contentType", ignore = true)
+  @Mapping(target = "boardId", ignore = true)
   GameboardItem mapChoiceQuestionDTOtoGameboardItem(ChoiceQuestionDTO source);
 }
