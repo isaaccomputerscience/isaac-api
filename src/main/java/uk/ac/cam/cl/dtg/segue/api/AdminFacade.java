@@ -298,7 +298,7 @@ public class AdminFacade extends AbstractSegueFacade {
    * This method will allow users to have their teacher pending status mass changed.
    *
    * @param request - to help determine access rights.
-   * @param status    - new teacher pending status.
+   * @param status  - new teacher pending status.
    * @param userIds - a list of user ids to change en-mass
    * @return Success shown by returning an ok response
    */
@@ -310,6 +310,8 @@ public class AdminFacade extends AbstractSegueFacade {
                                                                @PathParam("status") final Boolean status,
                                                                final List<Long> userIds) {
 
+    Map<String, List<Long>> failedUpdates = new HashMap<>();
+
     try {
       RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdminOrEventManager(userManager, requestingUser)) {
@@ -317,27 +319,15 @@ public class AdminFacade extends AbstractSegueFacade {
             .toResponse();
       }
 
-      Map<String, List<Long>> failedUpdates = new HashMap<>();
-
       for (Long userId : userIds) {
         modifyTeacherPendingStatusForUser(userId, requestingUser, status, failedUpdates);
       }
 
-      if (!failedUpdates.isEmpty()) {
-        String errorMessage = "";
-
-        if (failedUpdates.containsKey(USERS_NOT_FOUND)) {
-          errorMessage = String.format("One or more users could not be found: %s. ",
-              failedUpdates.get(USERS_NOT_FOUND));
-        }
-
-        if (failedUpdates.containsKey(FAILED_TO_SEND)) {
-          errorMessage += String.format("Emails could not be sent to userIds: %s",
-              failedUpdates.get(FAILED_TO_SEND));
-        }
+      if (failedUpdates.containsKey(FAILED_TO_SEND)) {
+        String errorMessage = String.format("Emails could not be sent to userIds: %s",
+            failedUpdates.get(FAILED_TO_SEND));
         return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMessage).toResponse();
       }
-
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
@@ -347,6 +337,11 @@ public class AdminFacade extends AbstractSegueFacade {
     }
 
     String responseString = "Teacher pending status updated to " + status + " for requested userIds: " + userIds;
+
+    if (failedUpdates.containsKey(USERS_NOT_FOUND)) {
+      responseString = String.format("One or more users could not be found: %s. ", failedUpdates.get(USERS_NOT_FOUND));
+    }
+
     return Response.ok(responseString).build();
   }
 
@@ -363,7 +358,7 @@ public class AdminFacade extends AbstractSegueFacade {
       Boolean oldStatus = user.getTeacherPending();
       this.userManager.updateTeacherPendingFlag(userId, status);
       log.info("ADMIN user {} has modified the teacher_pending status of {} [{}] from {} to {}",
-            requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status);
+          requestingUser.getEmail(), user.getEmail(), user.getId(), oldStatus, status);
       if (!status) {
         sendTeacherDeclinedEmail(user, failedUpdates);
       }
@@ -723,8 +718,7 @@ public class AdminFacade extends AbstractSegueFacade {
    * @param request           - to identify if the user is authorised.
    * @param requestForCaching - to determine if the content is still fresh.
    * @return a content object, such that the content object has children. The children represent each source file in
-   *     error and the grand children represent each error.
-   */
+   *      error and the grand children represent each error.  */
   @SuppressWarnings("unchecked")
   @GET
   @Path("/content_problems")
