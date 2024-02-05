@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.easymock.EasyMock;
@@ -96,7 +95,6 @@ class UserManagerTest {
   private PropertiesLoader dummyPropertiesLoader;
   private static final String CSRF_TEST_VALUE = "CSRFTESTVALUE";
 
-  private MapperFacade dummyMapper;
   private MapStructMainMapper newMapper;
   private EmailManager dummyQueue;
   private SimpleDateFormat sdf;
@@ -121,7 +119,6 @@ class UserManagerTest {
     this.dummyProvidersMap.put(AuthenticationProvider.SEGUE, dummyLocalAuth);
 
     String dummyHostName = "bob";
-    this.dummyMapper = createMock(MapperFacade.class);
     this.newMapper = MapStructMainMapper.INSTANCE;
     this.dummyQueue = createMock(EmailManager.class);
     this.dummyPropertiesLoader = createMock(PropertiesLoader.class);
@@ -431,7 +428,7 @@ class UserManagerTest {
     dummyQueue.sendTemplatedEmailToUser(anyObject(), anyObject(), anyObject(), anyObject());
     expectLastCall().once();
 
-    replay(dummySession, request, dummyAuth, dummyQuestionDatabase, dummyMapper, dummyDatabase, dummyLocalAuth,
+    replay(dummySession, request, dummyAuth, dummyQuestionDatabase, dummyDatabase, dummyLocalAuth,
         dummyQueue, dummyUserCache);
 
     // Act

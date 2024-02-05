@@ -339,7 +339,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
       expectLastCall();
       replay(mockEmailManager);
       UserAccountManager userAccountManagerWithEmailMock = userAccountManager =
-          new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, newMapperFacade,
+          new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, mapperFacade,
               mockEmailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager,
               userPreferenceManager, schoolListReader);
       UsersFacade usersFacadeWithEmailMock =

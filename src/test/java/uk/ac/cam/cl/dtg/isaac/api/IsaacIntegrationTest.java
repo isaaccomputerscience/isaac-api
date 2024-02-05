@@ -28,7 +28,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.SystemUtils;
 import org.easymock.Capture;
 import org.eclipse.jgit.api.Git;
@@ -124,8 +123,7 @@ public abstract class IsaacIntegrationTest {
   protected static PostgresSqlDb postgresSqlDb;
   protected static ElasticSearchProvider elasticSearchProvider;
   protected static SchoolListReader schoolListReader;
-  protected static MapperFacade mapperFacade;
-  protected static MapStructMainMapper newMapperFacade;
+  protected static MapStructMainMapper mapperFacade;
   protected static Map<AuthenticationProvider, IAuthenticator> providersToRegister;
   protected static IMisuseMonitor misuseMonitor;
 
@@ -254,10 +252,9 @@ public abstract class IsaacIntegrationTest {
 
     contentMapper = new ContentMapper(getClasses("uk.ac.cam.cl.dtg"));
     PgQuestionAttempts pgQuestionAttempts = new PgQuestionAttempts(postgresSqlDb, contentMapper);
-    questionManager = new QuestionManager(contentMapper, newMapperFacade, pgQuestionAttempts, userPreferenceManager);
+    questionManager = new QuestionManager(contentMapper, mapperFacade, pgQuestionAttempts, userPreferenceManager);
 
-    mapperFacade = contentMapper.getAutoMapper();
-    newMapperFacade = MapStructMainMapper.INSTANCE;
+    mapperFacade = MapStructMainMapper.INSTANCE;
 
     // The following may need some actual authentication providers...
     providersToRegister = new HashMap<>();
@@ -273,7 +270,7 @@ public abstract class IsaacIntegrationTest {
 
     Git git = createNiceMock(Git.class);
     GitDb gitDb = new GitDb(git);
-    contentManager = new GitContentManager(gitDb, elasticSearchProvider, contentMapper, newMapperFacade, properties);
+    contentManager = new GitContentManager(gitDb, elasticSearchProvider, contentMapper, mapperFacade, properties);
     logManager = createNiceMock(ILogManager.class);
 
     emailManager =
@@ -292,7 +289,7 @@ public abstract class IsaacIntegrationTest {
     schoolListReader = new SchoolListReader(elasticSearchProvider);
 
     userAccountManager =
-        new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, newMapperFacade, emailManager,
+        new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, mapperFacade, emailManager,
             pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager, userPreferenceManager,
             schoolListReader);
 
@@ -302,13 +299,13 @@ public abstract class IsaacIntegrationTest {
     PgAssociationDataManager pgAssociationDataManager = new PgAssociationDataManager(postgresSqlDb);
     PgUserGroupPersistenceManager pgUserGroupPersistenceManager = new PgUserGroupPersistenceManager(postgresSqlDb);
     IAssignmentPersistenceManager assignmentPersistenceManager =
-        new PgAssignmentPersistenceManager(postgresSqlDb, newMapperFacade);
+        new PgAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
 
     GameboardPersistenceManager gameboardPersistenceManager =
-        new GameboardPersistenceManager(postgresSqlDb, contentManager, newMapperFacade, objectMapper,
+        new GameboardPersistenceManager(postgresSqlDb, contentManager, mapperFacade, objectMapper,
             new URIManager(properties));
-    gameManager = new GameManager(contentManager, gameboardPersistenceManager, newMapperFacade, questionManager);
-    groupManager = new GroupManager(pgUserGroupPersistenceManager, userAccountManager, gameManager, newMapperFacade);
+    gameManager = new GameManager(contentManager, gameboardPersistenceManager, mapperFacade, questionManager);
+    groupManager = new GroupManager(pgUserGroupPersistenceManager, userAccountManager, gameManager, mapperFacade);
     userAssociationManager = new UserAssociationManager(pgAssociationDataManager, userAccountManager, groupManager);
     PgTransactionManager pgTransactionManager = new PgTransactionManager(postgresSqlDb);
     eventBookingManager =
@@ -320,16 +317,16 @@ public abstract class IsaacIntegrationTest {
         new EmailService(emailManager, groupManager, userAccountManager), gameManager, properties);
 
     quizManager = new QuizManager(properties, new ContentService(contentManager), contentManager,
-        new ContentSummarizerService(newMapperFacade, new URIManager(properties)), contentMapper);
-    quizAssignmentPersistenceManager = new PgQuizAssignmentPersistenceManager(postgresSqlDb, newMapperFacade);
+        new ContentSummarizerService(mapperFacade, new URIManager(properties)), contentMapper);
+    quizAssignmentPersistenceManager = new PgQuizAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
     quizAssignmentManager = new QuizAssignmentManager(quizAssignmentPersistenceManager,
         new EmailService(emailManager, groupManager, userAccountManager), quizManager, groupManager, properties);
     assignmentService = new AssignmentService(userAccountManager);
-    quizAttemptPersistenceManager = new PgQuizAttemptPersistenceManager(postgresSqlDb, newMapperFacade);
+    quizAttemptPersistenceManager = new PgQuizAttemptPersistenceManager(postgresSqlDb, mapperFacade);
     quizAttemptManager = new QuizAttemptManager(quizAttemptPersistenceManager);
     quizQuestionAttemptPersistenceManager = new PgQuizQuestionAttemptPersistenceManager(postgresSqlDb, contentMapper);
     quizQuestionManager =
-        new QuizQuestionManager(questionManager, newMapperFacade, quizQuestionAttemptPersistenceManager, quizManager,
+        new QuizQuestionManager(questionManager, mapperFacade, quizQuestionAttemptPersistenceManager, quizManager,
             quizAttemptManager);
 
     misuseMonitor = new InMemoryMisuseMonitor();

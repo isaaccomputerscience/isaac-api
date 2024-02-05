@@ -68,7 +68,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.SystemUtils;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.quartz.SchedulerException;
@@ -870,18 +869,6 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     }
 
     return misuseMonitor;
-  }
-
-  /**
-   * Gets the instance of the dozer mapper object.
-   *
-   * @return a preconfigured instance of an Auto Mapper. This is specialised for mapping SegueObjects.
-   */
-  @Provides
-  @Singleton
-  @Inject
-  public static MapperFacade getDOtoDTOMapper() {
-    return SegueGuiceConfigurationModule.getContentMapper().getAutoMapper();
   }
 
   @Provides

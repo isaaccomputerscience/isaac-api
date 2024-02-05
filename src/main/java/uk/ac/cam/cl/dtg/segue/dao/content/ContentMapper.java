@@ -31,10 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import ma.glasnost.orika.MapperFacade;
-import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.converter.ConverterFactory;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +45,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.segue.dao.JsonLoader;
-import uk.ac.cam.cl.dtg.segue.dao.users.AnonymousUserQuestionAttemptsOrikaConverter;
 import uk.ac.cam.cl.dtg.segue.dao.users.QuestionValidationResponseDeserializer;
-import uk.ac.cam.cl.dtg.segue.dao.users.QuestionValidationResponseOrikaConverter;
 import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
 
 /**
@@ -65,9 +59,6 @@ public class ContentMapper {
   // field.
   private final Map<String, Class<? extends Content>> jsonTypes;
   private final Map<Class<? extends Content>, Class<? extends ContentDTO>> mapOfDOsToDTOs;
-
-  // this autoMapper is initialised lazily in the getAutoMapper method
-  private MapperFacade autoMapper = null;
 
   private static ObjectMapper preconfiguredObjectMapper;
 
@@ -259,7 +250,7 @@ public class ContentMapper {
 
   /**
    * Provides a pre-configured module that can be added to an object mapper so that contentBase objects can be
-   * deseerialized using the custom deserializer.
+   * deserialized using the custom deserializer.
    * <br>
    * This object Mapper is shared and should be treated as immutable.
    *
@@ -298,31 +289,6 @@ public class ContentMapper {
       }
     }
     return contentList;
-  }
-
-  /**
-   * Get an instance of the automapper which has been configured to cope with recursive content objects. This
-   * automapper is more efficient than the jackson one as there is no intermediate representation.
-   *
-   * @return autoMapper
-   */
-  public MapperFacade getAutoMapper() {
-    if (null == this.autoMapper) {
-      log.info("Creating instance of content auto mapper.");
-      MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
-
-      ConverterFactory converterFactory = mapperFactory.getConverterFactory();
-      converterFactory.registerConverter(new ContentBaseOrikaConverter(this));
-      converterFactory.registerConverter(new ChoiceOrikaConverter());
-      converterFactory.registerConverter(new ItemOrikaConverter());
-      converterFactory.registerConverter(new QuestionValidationResponseOrikaConverter());
-      converterFactory.registerConverter(new AnonymousUserQuestionAttemptsOrikaConverter());
-      converterFactory.registerConverter(new AudienceOrikaConverter());
-
-      this.autoMapper = mapperFactory.getMapperFacade();
-    }
-
-    return this.autoMapper;
   }
 
   /**
