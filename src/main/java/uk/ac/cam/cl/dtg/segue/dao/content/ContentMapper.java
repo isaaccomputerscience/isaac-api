@@ -143,8 +143,8 @@ public class ContentMapper {
     if (dtoMapping != null && ContentDTO.class.isAssignableFrom(dtoMapping.value())) {
       this.mapOfDOsToDTOs.put(cls, (Class<? extends ContentDTO>) dtoMapping.value());
     } else {
-      log.error("The DTO mapping provided is null or the annotation is not present" + " for the class " + cls
-          + ". This class cannot be auto mapped from DO to DTO.");
+      log.error("The DTO mapping provided is null or the annotation is not present for the class {}."
+          + " This class cannot be auto mapped from DO to DTO.", cls);
     }
   }
 
@@ -279,7 +279,7 @@ public class ContentMapper {
     // Required to deal with type polymorphism
     ObjectMapper objectMapper = this.getSharedContentObjectMapper();
 
-    List<Content> contentList = new ArrayList<Content>();
+    List<Content> contentList = new ArrayList<>();
 
     for (String item : stringList) {
       try {

@@ -70,7 +70,6 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.lang3.SystemUtils;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.api.managers.AssignmentManager;
@@ -1003,8 +1002,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   @Inject
-  private static SegueJobService getSegueJobService(final PropertiesLoader properties, final PostgresSqlDb database)
-      throws SchedulerException {
+  private static SegueJobService getSegueJobService(final PropertiesLoader properties, final PostgresSqlDb database) {
     if (null == segueJobService) {
       String mailjetKey = properties.getProperty(MAILJET_API_KEY);
       String mailjetSecret = properties.getProperty(MAILJET_API_SECRET);
