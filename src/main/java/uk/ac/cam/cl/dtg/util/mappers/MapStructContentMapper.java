@@ -123,7 +123,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
 import uk.ac.cam.cl.dtg.segue.dos.content.InteractiveCodeSnippet;
 import uk.ac.cam.cl.dtg.segue.dto.content.InteractiveCodeSnippetDTO;
 
-@Mapper(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION)
+@Mapper(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION, uses = MapStructAudienceContextMapper.class)
 public interface MapStructContentMapper {
 
   MapStructContentMapper INSTANCE = Mappers.getMapper(MapStructContentMapper.class);
