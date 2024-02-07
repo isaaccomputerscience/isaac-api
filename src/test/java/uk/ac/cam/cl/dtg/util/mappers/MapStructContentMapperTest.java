@@ -14,16 +14,20 @@ import org.junit.jupiter.params.provider.MethodSource;
 import uk.ac.cam.cl.dtg.isaac.dos.AudienceContext;
 import uk.ac.cam.cl.dtg.isaac.dos.Difficulty;
 import uk.ac.cam.cl.dtg.isaac.dos.ExamBoard;
+import uk.ac.cam.cl.dtg.isaac.dos.IsaacFreeTextQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.RoleRequirement;
 import uk.ac.cam.cl.dtg.isaac.dos.Stage;
 import uk.ac.cam.cl.dtg.isaac.dos.content.AnvilApp;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Choice;
+import uk.ac.cam.cl.dtg.isaac.dos.content.ChoiceQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
+import uk.ac.cam.cl.dtg.isaac.dto.IsaacFreeTextQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.AnvilAppDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
@@ -61,6 +65,8 @@ class MapStructContentMapperTest {
         Arguments.of(new Content(), new ContentDTO()),
         Arguments.of(prepareAnvilAppDO(), prepareAnvilAppDTO()),
         Arguments.of(prepareOriginalChoiceDO(), prepareChoiceDTO()),
+        Arguments.of(prepareOriginalChoiceQuestionDO(new ChoiceQuestion()), prepareMappedChoiceQuestionDTO(new ChoiceQuestionDTO())),
+        Arguments.of(prepareOriginalChoiceQuestionDO(new IsaacFreeTextQuestion()), prepareMappedChoiceQuestionDTO(new IsaacFreeTextQuestionDTO())),
         Arguments.of(prepareOriginalQuestionDO(), prepareMappedQuestionDTO())
     );
   }
@@ -70,6 +76,8 @@ class MapStructContentMapperTest {
         Arguments.of(new ContentDTO(), new Content()),
         Arguments.of(prepareAnvilAppDTO(), prepareAnvilAppDO()),
         Arguments.of(prepareChoiceDTO(), prepareMappedChoiceDO()),
+        Arguments.of(prepareOriginalChoiceQuestionDTO(new ChoiceQuestionDTO()), prepareMappedChoiceQuestionDO(new ChoiceQuestion())),
+        Arguments.of(prepareOriginalChoiceQuestionDTO(new IsaacFreeTextQuestionDTO()), prepareMappedChoiceQuestionDO(new IsaacFreeTextQuestion())),
         Arguments.of(prepareOriginalQuestionDTO(), prepareMappedQuestionDO())
     );
   }
@@ -293,7 +301,63 @@ class MapStructContentMapperTest {
     return object;
   }
 
+  // Choice Questions
+  private static ChoiceQuestion prepareOriginalChoiceQuestionDO(ChoiceQuestion object) {
+    Choice choice1 = new Choice();
+    choice1.setId("choice1");
+    Choice choice2 = new Choice();
+    choice2.setId("choice2");
+
+    ChoiceQuestion objectWithQuestionFields = (ChoiceQuestion) prepareOriginalQuestionDO(object);
+    objectWithQuestionFields.setChoices(List.of(choice1, choice2));
+    objectWithQuestionFields.setRandomiseChoices(true);
+    return objectWithQuestionFields;
+  }
+
+  private static ChoiceQuestion prepareMappedChoiceQuestionDO(ChoiceQuestion object) {
+    Choice choice1 = new Choice();
+    choice1.setId("choice1");
+    choice1.setTags(Set.of());
+    Choice choice2 = new Choice();
+    choice2.setId("choice2");
+    choice2.setTags(Set.of());
+
+    ChoiceQuestion objectWithQuestionFields = (ChoiceQuestion) prepareMappedQuestionDO(object);
+    objectWithQuestionFields.setChoices(List.of(choice1, choice2));
+    objectWithQuestionFields.setRandomiseChoices(true);
+    return objectWithQuestionFields;
+  }
+
+  private static ChoiceQuestionDTO prepareOriginalChoiceQuestionDTO(ChoiceQuestionDTO object) {
+    ChoiceDTO choice1 = new ChoiceDTO();
+    choice1.setId("choice1");
+    ChoiceDTO choice2 = new ChoiceDTO();
+    choice2.setId("choice2");
+
+    ChoiceQuestionDTO objectWithQuestionFields = (ChoiceQuestionDTO) prepareOriginalQuestionDTO(object);
+    objectWithQuestionFields.setChoices(List.of(choice1, choice2));
+    objectWithQuestionFields.setRandomiseChoices(true);
+    return objectWithQuestionFields;
+  }
+
+  private static ChoiceQuestionDTO prepareMappedChoiceQuestionDTO(ChoiceQuestionDTO object) {
+    ChoiceDTO choice1 = new ChoiceDTO();
+    choice1.setId("choice1");
+    ChoiceDTO choice2 = new ChoiceDTO();
+    choice2.setId("choice2");
+
+    ChoiceQuestionDTO objectWithQuestionFields = (ChoiceQuestionDTO) prepareMappedQuestionDTO(object);
+    objectWithQuestionFields.setChoices(List.of(choice1, choice2));
+    objectWithQuestionFields.setRandomiseChoices(true);
+    return objectWithQuestionFields;
+  }
+
+  // Questions
   private static Question prepareOriginalQuestionDO() {
+    return prepareOriginalQuestionDO(new Question());
+  }
+
+  private static Question prepareOriginalQuestionDO(Question object) {
     ContentBase answer = new Content();
     answer.setId("answerId");
     Content hint1 = new Content();
@@ -305,7 +369,6 @@ class MapStructContentMapperTest {
     Content feedback = new Content();
     feedback.setId("feedbackId");
 
-    Question object = new Question();
     object.setAnswer(answer);
     object.setHints(List.of(hint1, hint2));
     object.setDefaultFeedback(feedback);
@@ -313,6 +376,10 @@ class MapStructContentMapperTest {
   }
 
   private static Question prepareMappedQuestionDO() {
+    return prepareMappedQuestionDO(new Question());
+  }
+
+  private static Question prepareMappedQuestionDO(Question object) {
     ContentBase answer = new Content();
     answer.setId("answerId");
     answer.setTags(Set.of());
@@ -325,7 +392,6 @@ class MapStructContentMapperTest {
     hint2.setPublished(true);
     hint2.setTags(Set.of());
 
-    Question object = new Question();
     object.setAnswer(answer);
     object.setHints(List.of(hint1, hint2));
     // The DTO does not have the defaultFeedback property
@@ -334,17 +400,10 @@ class MapStructContentMapperTest {
   }
 
   private static QuestionDTO prepareOriginalQuestionDTO() {
-    return prepareQuestionDTO(new QuestionDTO());
+    return prepareOriginalQuestionDTO(new QuestionDTO());
   }
 
-  private static QuestionDTO prepareMappedQuestionDTO() {
-    QuestionDTO object = prepareQuestionDTO(new QuestionDTO());
-    // The DO does not have the bestAttempt property
-    object.setBestAttempt(null);
-    return object;
-  }
-
-  private static QuestionDTO prepareQuestionDTO(QuestionDTO object) {
+  private static QuestionDTO prepareOriginalQuestionDTO(QuestionDTO object) {
     ContentBaseDTO answer = new ContentDTO();
     answer.setId("answerId");
     ContentDTO hint1 = new ContentDTO();
@@ -358,6 +417,27 @@ class MapStructContentMapperTest {
     object.setAnswer(answer);
     object.setHints(List.of(hint1, hint2));
     object.setBestAttempt(bestAttempt);
+    return object;
+  }
+
+  private static QuestionDTO prepareMappedQuestionDTO() {
+    return prepareMappedQuestionDTO(new QuestionDTO());
+  }
+
+  private static QuestionDTO prepareMappedQuestionDTO(QuestionDTO object) {
+    ContentBaseDTO answer = new ContentDTO();
+    answer.setId("answerId");
+    ContentDTO hint1 = new ContentDTO();
+    hint1.setId("hintId1");
+    hint1.setPublished(true);
+    ContentDTO hint2 = new ContentDTO();
+    hint2.setId("hintId2");
+    hint2.setPublished(true);
+
+    object.setAnswer(answer);
+    object.setHints(List.of(hint1, hint2));
+    // The DO does not have the bestAttempt property
+    object.setBestAttempt(null);
     return object;
   }
 }
