@@ -122,6 +122,8 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.VideoDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
 import uk.ac.cam.cl.dtg.segue.dos.content.InteractiveCodeSnippet;
 import uk.ac.cam.cl.dtg.segue.dto.content.InteractiveCodeSnippetDTO;
+import uk.ac.cam.cl.dtg.util.locations.Address;
+import uk.ac.cam.cl.dtg.util.locations.Location;
 
 @Mapper(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION, uses = MapStructAudienceContextMapper.class)
 public interface ContentMapper {
@@ -313,6 +315,14 @@ public interface ContentMapper {
   ContentDTO copy(ContentDTO source);
 
   IsaacEventPageDTO copy(IsaacEventPageDTO source);
+
+  Location copy(Location source);
+
+  Address copy(Address source);
+
+  List<Location> copyListOfLocation(List<Location> source);
+
+  List<Address> copyListOfAddress(List<Address> source);
 
   // Specific mappings for use by above mappers
   @Mapping(target = "url", ignore = true)
