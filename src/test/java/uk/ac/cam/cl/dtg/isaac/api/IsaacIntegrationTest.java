@@ -93,7 +93,7 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.associations.PgAssociationDataManager;
-import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
+import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.users.PgAnonymousUsers;
@@ -154,7 +154,7 @@ public abstract class IsaacIntegrationTest {
   protected static QuizQuestionManager quizQuestionManager;
   protected static PgUsers pgUsers;
   protected static PgAnonymousUsers pgAnonymousUsers;
-  protected static ContentMapper contentMapper;
+  protected static ContentMapperUtils contentMapperUtils;
 
   // Services
   protected static AssignmentService assignmentService;
@@ -250,9 +250,9 @@ public abstract class IsaacIntegrationTest {
     pgAnonymousUsers = new PgAnonymousUsers(postgresSqlDb);
     PgPasswordDataManager passwordDataManager = new PgPasswordDataManager(postgresSqlDb);
 
-    contentMapper = new ContentMapper(getClasses("uk.ac.cam.cl.dtg"));
-    PgQuestionAttempts pgQuestionAttempts = new PgQuestionAttempts(postgresSqlDb, contentMapper);
-    questionManager = new QuestionManager(contentMapper, mapperFacade, pgQuestionAttempts, userPreferenceManager);
+    contentMapperUtils = new ContentMapperUtils(getClasses("uk.ac.cam.cl.dtg"));
+    PgQuestionAttempts pgQuestionAttempts = new PgQuestionAttempts(postgresSqlDb, contentMapperUtils);
+    questionManager = new QuestionManager(contentMapperUtils, mapperFacade, pgQuestionAttempts, userPreferenceManager);
 
     mapperFacade = MapStructMainMapper.INSTANCE;
 
@@ -270,7 +270,7 @@ public abstract class IsaacIntegrationTest {
 
     Git git = createNiceMock(Git.class);
     GitDb gitDb = new GitDb(git);
-    contentManager = new GitContentManager(gitDb, elasticSearchProvider, contentMapper, mapperFacade, properties);
+    contentManager = new GitContentManager(gitDb, elasticSearchProvider, contentMapperUtils, mapperFacade, properties);
     logManager = createNiceMock(ILogManager.class);
 
     emailManager =
@@ -317,14 +317,15 @@ public abstract class IsaacIntegrationTest {
         new EmailService(emailManager, groupManager, userAccountManager), gameManager, properties);
 
     quizManager = new QuizManager(properties, new ContentService(contentManager), contentManager,
-        new ContentSummarizerService(mapperFacade, new URIManager(properties)), contentMapper);
+        new ContentSummarizerService(mapperFacade, new URIManager(properties)), contentMapperUtils);
     quizAssignmentPersistenceManager = new PgQuizAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
     quizAssignmentManager = new QuizAssignmentManager(quizAssignmentPersistenceManager,
         new EmailService(emailManager, groupManager, userAccountManager), quizManager, groupManager, properties);
     assignmentService = new AssignmentService(userAccountManager);
     quizAttemptPersistenceManager = new PgQuizAttemptPersistenceManager(postgresSqlDb, mapperFacade);
     quizAttemptManager = new QuizAttemptManager(quizAttemptPersistenceManager);
-    quizQuestionAttemptPersistenceManager = new PgQuizQuestionAttemptPersistenceManager(postgresSqlDb, contentMapper);
+    quizQuestionAttemptPersistenceManager = new PgQuizQuestionAttemptPersistenceManager(postgresSqlDb,
+        contentMapperUtils);
     quizQuestionManager =
         new QuizQuestionManager(questionManager, mapperFacade, quizQuestionAttemptPersistenceManager, quizManager,
             quizAttemptManager);

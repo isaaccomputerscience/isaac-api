@@ -75,7 +75,7 @@ import uk.ac.cam.cl.dtg.segue.api.Constants.TimeInterval;
 import uk.ac.cam.cl.dtg.segue.api.ErrorResponseWrapper;
 import uk.ac.cam.cl.dtg.segue.configuration.SegueGuiceConfigurationModule;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
-import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
+import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
 import uk.ac.cam.cl.dtg.util.QueryUtils;
 import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
 
@@ -88,7 +88,7 @@ import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
 public class QuestionManager {
   private static final Logger log = LoggerFactory.getLogger(QuestionManager.class);
 
-  private final ContentMapper mapper;
+  private final ContentMapperUtils mapperUtils;
   private final MapStructMainMapper objectMapper;
   private final IQuestionAttemptManager questionAttemptPersistenceManager;
   private final AbstractUserPreferenceManager userPreferenceManager;
@@ -96,17 +96,17 @@ public class QuestionManager {
   /**
    * Create a default Question manager object.
    *
-   * @param mapper                     - an auto mapper to allow us to convert to and from QuestionValidationResponseDOs
+   * @param mapperUtils                     - an auto mapper to allow us to convert to and from QuestionValidationResponseDOs
    *                                   and DTOs.
    * @param questionPersistenceManager - for question attempt persistence.
    * @param userPreferenceManager      - An instance of the Abstract User preference manager to check for user
    *                                   preferences
    */
   @Inject
-  public QuestionManager(final ContentMapper mapper, final MapStructMainMapper objectMapper,
+  public QuestionManager(final ContentMapperUtils mapperUtils, final MapStructMainMapper objectMapper,
                          final IQuestionAttemptManager questionPersistenceManager,
                          final AbstractUserPreferenceManager userPreferenceManager) {
-    this.mapper = mapper;
+    this.mapperUtils = mapperUtils;
     this.objectMapper = objectMapper;
     this.questionAttemptPersistenceManager = questionPersistenceManager;
     this.userPreferenceManager = userPreferenceManager;
@@ -380,7 +380,7 @@ public class QuestionManager {
       throws BadRequestException, ValidatorUnavailableException {
     try {
       // Create a fake question
-      Class<? extends Content> questionClass = mapper.getClassByType(questionType);
+      Class<? extends Content> questionClass = mapperUtils.getClassByType(questionType);
       if (null == questionClass || !ChoiceQuestion.class.isAssignableFrom(questionClass)) {
         throw new BadRequestException(String.format("Not a valid questionType (%s)", questionType));
       }
@@ -596,7 +596,7 @@ public class QuestionManager {
     ChoiceDTO answerFromClientDTO;
     try {
       // convert submitted JSON into a Choice:
-      Choice answerFromClient = mapper.getSharedContentObjectMapper().readValue(jsonAnswer, Choice.class);
+      Choice answerFromClient = mapperUtils.getSharedContentObjectMapper().readValue(jsonAnswer, Choice.class);
       // convert to a DTO so that it strips out any untrusted data.
       answerFromClientDTO = objectMapper.mapChoice(answerFromClient);
     } catch (JsonMappingException | JsonParseException e) {

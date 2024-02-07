@@ -51,8 +51,8 @@ import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
 /**
  * Class responsible for mapping Content objects (or contentBase objects) to their respective subclass.
  */
-public class ContentMapper {
-  private static final Logger log = LoggerFactory.getLogger(ContentMapper.class);
+public class ContentMapperUtils {
+  private static final Logger log = LoggerFactory.getLogger(ContentMapperUtils.class);
 
   // Used for serialization into the correct POJO as well as deserialization.
   // Currently depends on the string key being the same text value as the type
@@ -68,7 +68,7 @@ public class ContentMapper {
    * Note: Type information must be provided by using the register type methods.
    */
   @Inject
-  public ContentMapper() {
+  public ContentMapperUtils() {
     jsonTypes = Maps.newConcurrentMap();
     mapOfDOsToDTOs = Maps.newConcurrentMap();
   }
@@ -78,7 +78,7 @@ public class ContentMapper {
    *
    * @param classes - series of classes contained within the parent package to search for content classes.
    */
-  public ContentMapper(final Collection<Class<?>> classes) {
+  public ContentMapperUtils(final Collection<Class<?>> classes) {
     this();
     requireNonNull(classes);
     Validate.notEmpty(classes);
@@ -257,7 +257,7 @@ public class ContentMapper {
    * @return a jackson object mapper.
    */
   public ObjectMapper getSharedContentObjectMapper() {
-    if (ContentMapper.preconfiguredObjectMapper != null) {
+    if (ContentMapperUtils.preconfiguredObjectMapper != null) {
       return preconfiguredObjectMapper;
     }
 
