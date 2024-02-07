@@ -95,7 +95,7 @@ class UserManagerTest {
   private PropertiesLoader dummyPropertiesLoader;
   private static final String CSRF_TEST_VALUE = "CSRFTESTVALUE";
 
-  private MapStructMainMapper newMapper;
+  private MapStructMainMapper objectMapper;
   private EmailManager dummyQueue;
   private SimpleDateFormat sdf;
 
@@ -119,7 +119,7 @@ class UserManagerTest {
     this.dummyProvidersMap.put(AuthenticationProvider.SEGUE, dummyLocalAuth);
 
     String dummyHostName = "bob";
-    this.newMapper = MapStructMainMapper.INSTANCE;
+    this.objectMapper = MapStructMainMapper.INSTANCE;
     this.dummyQueue = createMock(EmailManager.class);
     this.dummyPropertiesLoader = createMock(PropertiesLoader.class);
     this.sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
@@ -397,7 +397,7 @@ class UserManagerTest {
     expect(dummyDatabase.getSegueAccountExistenceByUsers(Collections.singletonList(mappedProviderUser)))
         .andReturn(ImmutableMap.of(mappedProviderUser, false)).atLeastOnce();
 
-    RegisteredUserDTO mappedUserDTO = newMapper.map(userFromDatabase);
+    RegisteredUserDTO mappedUserDTO = objectMapper.map(userFromDatabase);
 
     // handle duplicate account check.
     expect(dummyDatabase.getByEmail(providerUser.getEmail())).andReturn(null).once();
@@ -692,7 +692,7 @@ class UserManagerTest {
     HashMap<AuthenticationProvider, IAuthenticator> providerMap = new HashMap<>();
     providerMap.put(provider, authenticator);
     return new UserAccountManager(dummyDatabase, this.dummyQuestionDatabase, this.dummyPropertiesLoader,
-        providerMap, this.newMapper, this.dummyQueue, this.dummyUserCache, this.dummyLogManager,
+        providerMap, this.objectMapper, this.dummyQueue, this.dummyUserCache, this.dummyLogManager,
         buildTestAuthenticationManager(provider, authenticator), dummySecondFactorAuthenticator,
         dummyUserPreferenceManager, dummySchoolListReader);
   }
