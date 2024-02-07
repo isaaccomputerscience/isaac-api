@@ -18,6 +18,11 @@ import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.ExamBoard;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacEventPage;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacFreeTextQuestion;
+import uk.ac.cam.cl.dtg.isaac.dos.IsaacItemQuestion;
+import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuestionPage;
+import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuiz;
+import uk.ac.cam.cl.dtg.isaac.dos.IsaacSymbolicQuestion;
+import uk.ac.cam.cl.dtg.isaac.dos.QuizFeedbackMode;
 import uk.ac.cam.cl.dtg.isaac.dos.RoleRequirement;
 import uk.ac.cam.cl.dtg.isaac.dos.Stage;
 import uk.ac.cam.cl.dtg.isaac.dos.content.AnvilApp;
@@ -28,11 +33,18 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
 import uk.ac.cam.cl.dtg.isaac.dos.content.EmailTemplate;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ExternalReference;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Image;
+import uk.ac.cam.cl.dtg.isaac.dos.content.Item;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
+import uk.ac.cam.cl.dtg.isaac.dos.content.SeguePage;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacFreeTextQuestionDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.IsaacItemQuestionDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuestionPageDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.IsaacSymbolicQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.QuizFeedbackDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.AnvilAppDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceQuestionDTO;
@@ -41,7 +53,9 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ImageDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.ItemDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 import uk.ac.cam.cl.dtg.util.locations.Address;
 import uk.ac.cam.cl.dtg.util.locations.Location;
 
@@ -84,7 +98,12 @@ class ContentMapperTest {
         Arguments.of(prepareEmailTemplateDO(), prepareEmailTemplateDTO()),
         Arguments.of(prepareImageDO(), prepareImageDTO()),
         Arguments.of(prepareIsaacEventPageDO(), prepareMappedIsaacEventPageDTO()),
-        Arguments.of(prepareOriginalQuestionDO(), prepareMappedQuestionDTO())
+        Arguments.of(prepareOriginalIsaacItemQuestionDO(), prepareMappedIsaacItemQuestionDTO()),
+        Arguments.of(prepareIsaacQuestionPageDO(), prepareIsaacQuestionPageDTO()),
+        Arguments.of(prepareIsaacQuizDO(), prepareMappedIsaacQuizDTO()),
+        Arguments.of(prepareOriginalIsaacSymbolicQuestionDO(), prepareMappedIsaacSymbolicQuestionDTO()),
+        Arguments.of(prepareOriginalQuestionDO(), prepareMappedQuestionDTO()),
+        Arguments.of(prepareSeguePageDO(), prepareSeguePageDTO())
     );
   }
 
@@ -98,7 +117,12 @@ class ContentMapperTest {
         Arguments.of(prepareEmailTemplateDTO(), prepareEmailTemplateDO()),
         Arguments.of(prepareImageDTO(), prepareImageDO()),
         Arguments.of(prepareOriginalIsaacEventPageDTO(), prepareIsaacEventPageDO()),
-        Arguments.of(prepareOriginalQuestionDTO(), prepareMappedQuestionDO())
+        Arguments.of(prepareOriginalIsaacItemQuestionDTO(), prepareMappedIsaacItemQuestionDO()),
+        Arguments.of(prepareIsaacQuestionPageDTO(), prepareIsaacQuestionPageDO()),
+        Arguments.of(prepareOriginalIsaacQuizDTO(), prepareIsaacQuizDO()),
+        Arguments.of(prepareOriginalIsaacSymbolicQuestionDTO(), prepareMappedIsaacSymbolicQuestionDO()),
+        Arguments.of(prepareOriginalQuestionDTO(), prepareMappedQuestionDO()),
+        Arguments.of(prepareSeguePageDTO(), prepareSeguePageDO())
     );
   }
 
@@ -537,6 +561,147 @@ class ContentMapperTest {
     return object;
   }
 
+  // IsaacItemQuestion
+  private static IsaacItemQuestion prepareOriginalIsaacItemQuestionDO() {
+    Item item1 = new Item();
+    item1.setId("item1");
+    item1.setTags(Set.of());
+    Item item2 = new Item();
+    item2.setId("item1");
+    item2.setTags(Set.of());
+
+    IsaacItemQuestion object = (IsaacItemQuestion) prepareOriginalChoiceQuestionDO(new IsaacItemQuestion());
+    object.setItems(List.of(item1, item2));
+    object.setRandomiseItems(true);
+    return object;
+  }
+
+  private static IsaacItemQuestion prepareMappedIsaacItemQuestionDO() {
+    Item item1 = new Item();
+    item1.setId("item1");
+    item1.setTags(Set.of());
+    Item item2 = new Item();
+    item2.setId("item1");
+    item2.setTags(Set.of());
+
+    IsaacItemQuestion object = (IsaacItemQuestion) prepareMappedChoiceQuestionDO(new IsaacItemQuestion());
+    object.setItems(List.of(item1, item2));
+    object.setRandomiseItems(true);
+    return object;
+  }
+
+  private static IsaacItemQuestionDTO prepareOriginalIsaacItemQuestionDTO() {
+    ItemDTO item1 = new ItemDTO();
+    item1.setId("item1");
+    ItemDTO item2 = new ItemDTO();
+    item2.setId("item1");
+
+    IsaacItemQuestionDTO object = (IsaacItemQuestionDTO) prepareMappedChoiceQuestionDTO(new IsaacItemQuestionDTO());
+    object.setItems(List.of(item1, item2));
+    object.setRandomiseItems(true);
+    return object;
+  }
+
+  private static IsaacItemQuestionDTO prepareMappedIsaacItemQuestionDTO() {
+    ItemDTO item1 = new ItemDTO();
+    item1.setId("item1");
+    ItemDTO item2 = new ItemDTO();
+    item2.setId("item1");
+
+    IsaacItemQuestionDTO object = (IsaacItemQuestionDTO) prepareMappedChoiceQuestionDTO(new IsaacItemQuestionDTO());
+    object.setItems(List.of(item1, item2));
+    object.setRandomiseItems(true);
+    return object;
+  }
+
+  // IsaacQuestionPage
+  private static IsaacQuestionPage prepareIsaacQuestionPageDO() {
+    IsaacQuestionPage object = (IsaacQuestionPage) prepareSeguePageDO(new IsaacQuestionPage());
+    object.setPassMark(50F);
+    object.setSupersededBy("newVersion");
+    object.setDifficulty(3);
+    return object;
+  }
+
+  private static IsaacQuestionPageDTO prepareIsaacQuestionPageDTO() {
+    IsaacQuestionPageDTO object = (IsaacQuestionPageDTO) prepareSeguePageDTO(new IsaacQuestionPageDTO());
+    object.setPassMark(50F);
+    object.setSupersededBy("newVersion");
+    object.setDifficulty(3);
+    return object;
+  }
+
+  // IsaacQuiz
+  private static IsaacQuiz prepareIsaacQuizDO() {
+    Content rubric = new Content();
+    rubric.setId("rubricId");
+    rubric.setPublished(true);
+    rubric.setTags(Set.of());
+
+    IsaacQuiz object = (IsaacQuiz) prepareSeguePageDO(new IsaacQuiz());
+    object.setHiddenFromRoles(List.of("blockedRole1", "blockedRole2"));
+    object.setRubric(rubric);
+    return object;
+  }
+
+  private static IsaacQuizDTO prepareOriginalIsaacQuizDTO() {
+    ContentDTO rubric = new ContentDTO();
+    rubric.setId("rubricId");
+    rubric.setPublished(true);
+    QuizFeedbackDTO individualFeedback = new QuizFeedbackDTO(new QuizFeedbackDTO.Mark(),
+        Map.of("sectionA", new QuizFeedbackDTO.Mark(), "sectionB", new QuizFeedbackDTO.Mark()),
+        Map.of("question1", new QuizFeedbackDTO.Mark(), "question2", new QuizFeedbackDTO.Mark()));
+
+    IsaacQuizDTO object = (IsaacQuizDTO) prepareSeguePageDTO(new IsaacQuizDTO());
+    object.setHiddenFromRoles(List.of("blockedRole1", "blockedRole2"));
+    object.setDefaultFeedbackMode(QuizFeedbackMode.OVERALL_MARK);
+    object.setRubric(rubric);
+    object.setTotal(75);
+    object.setSectionTotals(Map.of("section1", 40, "section2", 35));
+    object.setIndividualFeedback(individualFeedback);
+    return object;
+  }
+
+  private static IsaacQuizDTO prepareMappedIsaacQuizDTO() {
+    ContentDTO rubric = new ContentDTO();
+    rubric.setId("rubricId");
+    rubric.setPublished(true);
+
+    IsaacQuizDTO object = (IsaacQuizDTO) prepareSeguePageDTO(new IsaacQuizDTO());
+    object.setHiddenFromRoles(List.of("blockedRole1", "blockedRole2"));
+    object.setRubric(rubric);
+    return object;
+  }
+
+  // IsaacSymbolicQuestion
+  private static IsaacSymbolicQuestion prepareOriginalIsaacSymbolicQuestionDO() {
+    IsaacSymbolicQuestion object = (IsaacSymbolicQuestion) prepareOriginalChoiceQuestionDO(new IsaacSymbolicQuestion());
+    object.setFormulaSeed("formulaSeed");
+    object.setAvailableSymbols(List.of("symbol1", "symbol2"));
+    return object;
+  }
+
+  private static IsaacSymbolicQuestion prepareMappedIsaacSymbolicQuestionDO() {
+    IsaacSymbolicQuestion object = (IsaacSymbolicQuestion) prepareMappedChoiceQuestionDO(new IsaacSymbolicQuestion());
+    object.setFormulaSeed("formulaSeed");
+    object.setAvailableSymbols(List.of("symbol1", "symbol2"));
+    return object;
+  }
+
+  private static IsaacSymbolicQuestionDTO prepareOriginalIsaacSymbolicQuestionDTO() {
+    IsaacSymbolicQuestionDTO object = (IsaacSymbolicQuestionDTO) prepareOriginalChoiceQuestionDTO(new IsaacSymbolicQuestionDTO());
+    object.setFormulaSeed("formulaSeed");
+    object.setAvailableSymbols(List.of("symbol1", "symbol2"));
+    return object;
+  }
+
+  private static IsaacSymbolicQuestionDTO prepareMappedIsaacSymbolicQuestionDTO() {
+    IsaacSymbolicQuestionDTO object = (IsaacSymbolicQuestionDTO) prepareMappedChoiceQuestionDTO(new IsaacSymbolicQuestionDTO());
+    object.setFormulaSeed("formulaSeed");
+    object.setAvailableSymbols(List.of("symbol1", "symbol2"));
+    return object;
+  }
+
   // Question
   private static Question prepareOriginalQuestionDO() {
     return prepareOriginalQuestionDO(new Question());
@@ -623,6 +788,25 @@ class ContentMapperTest {
     object.setHints(List.of(hint1, hint2));
     // The DO does not have the bestAttempt property
     object.setBestAttempt(null);
+    return object;
+  }
+
+  // SeguePage
+  private static SeguePage prepareSeguePageDO() {
+    return prepareSeguePageDO(new SeguePage());
+  }
+
+  private static SeguePage prepareSeguePageDO(SeguePage object) {
+    object.setSummary("summary");
+    return object;
+  }
+
+  private static SeguePageDTO prepareSeguePageDTO() {
+    return prepareSeguePageDTO(new SeguePageDTO());
+  }
+
+  private static SeguePageDTO prepareSeguePageDTO(SeguePageDTO object) {
+    object.setSummary("summary");
     return object;
   }
 }
