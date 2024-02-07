@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -13,7 +14,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.ac.cam.cl.dtg.isaac.dos.AudienceContext;
 import uk.ac.cam.cl.dtg.isaac.dos.Difficulty;
+import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.ExamBoard;
+import uk.ac.cam.cl.dtg.isaac.dos.IsaacEventPage;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacFreeTextQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.RoleRequirement;
 import uk.ac.cam.cl.dtg.isaac.dos.Stage;
@@ -22,7 +25,12 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Choice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ChoiceQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
+import uk.ac.cam.cl.dtg.isaac.dos.content.EmailTemplate;
+import uk.ac.cam.cl.dtg.isaac.dos.content.ExternalReference;
+import uk.ac.cam.cl.dtg.isaac.dos.content.Image;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
+import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacFreeTextQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.AnvilAppDTO;
@@ -31,12 +39,18 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.ImageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
+import uk.ac.cam.cl.dtg.util.locations.Address;
+import uk.ac.cam.cl.dtg.util.locations.Location;
 
 class ContentMapperTest {
   private final ContentMapper mapper = ContentMapper.INSTANCE;
 
   private final ObjectMapper jsonMapper = new ObjectMapper();
+
+  private static final Date testDate = new Date();
 
   @ParameterizedTest
   @MethodSource("testCasesDOtoDTO")
@@ -67,6 +81,9 @@ class ContentMapperTest {
         Arguments.of(prepareOriginalChoiceDO(), prepareChoiceDTO()),
         Arguments.of(prepareOriginalChoiceQuestionDO(new ChoiceQuestion()), prepareMappedChoiceQuestionDTO(new ChoiceQuestionDTO())),
         Arguments.of(prepareOriginalChoiceQuestionDO(new IsaacFreeTextQuestion()), prepareMappedChoiceQuestionDTO(new IsaacFreeTextQuestionDTO())),
+        Arguments.of(prepareEmailTemplateDO(), prepareEmailTemplateDTO()),
+        Arguments.of(prepareImageDO(), prepareImageDTO()),
+        Arguments.of(prepareIsaacEventPageDO(), prepareMappedIsaacEventPageDTO()),
         Arguments.of(prepareOriginalQuestionDO(), prepareMappedQuestionDTO())
     );
   }
@@ -78,10 +95,14 @@ class ContentMapperTest {
         Arguments.of(prepareChoiceDTO(), prepareMappedChoiceDO()),
         Arguments.of(prepareOriginalChoiceQuestionDTO(new ChoiceQuestionDTO()), prepareMappedChoiceQuestionDO(new ChoiceQuestion())),
         Arguments.of(prepareOriginalChoiceQuestionDTO(new IsaacFreeTextQuestionDTO()), prepareMappedChoiceQuestionDO(new IsaacFreeTextQuestion())),
+        Arguments.of(prepareEmailTemplateDTO(), prepareEmailTemplateDO()),
+        Arguments.of(prepareImageDTO(), prepareImageDO()),
+        Arguments.of(prepareOriginalIsaacEventPageDTO(), prepareIsaacEventPageDO()),
         Arguments.of(prepareOriginalQuestionDTO(), prepareMappedQuestionDO())
     );
   }
 
+  // Common properties for Content objects, including those inherited from the abstract ContentBase class
   private static <S extends Content> S setOriginalCommonContentProperties(S source) {
     // Set ContentBase properties
     AudienceContext audience = new AudienceContext();
@@ -275,6 +296,7 @@ class ContentMapperTest {
     return object;
   }
 
+  // Choice
   private static Choice prepareOriginalChoiceDO() {
     return prepareOriginalChoiceDO(new Choice());
   }
@@ -301,7 +323,7 @@ class ContentMapperTest {
     return object;
   }
 
-  // Choice Questions
+  // Choice Question
   private static ChoiceQuestion prepareOriginalChoiceQuestionDO(ChoiceQuestion object) {
     Choice choice1 = new Choice();
     choice1.setId("choice1");
@@ -352,7 +374,170 @@ class ContentMapperTest {
     return objectWithQuestionFields;
   }
 
-  // Questions
+  // EmailTemplate
+  private static EmailTemplate prepareEmailTemplateDO() {
+    EmailTemplate object = new EmailTemplate();
+    object.setSubject("subject");
+    object.setPlainTextContent("textContent");
+    object.setHtmlContent("htmlContent");
+    object.setOverrideFromAddress("fromAddress");
+    object.setOverrideFromName("fromName");
+    object.setOverrideEnvelopeFrom("envelopeFrom");
+    object.setReplyToEmailAddress("replyEmail");
+    object.setReplyToName("replyName");
+    return object;
+  }
+
+  private static EmailTemplateDTO prepareEmailTemplateDTO() {
+    EmailTemplateDTO object = new EmailTemplateDTO();
+    object.setSubject("subject");
+    object.setPlainTextContent("textContent");
+    object.setHtmlContent("htmlContent");
+    object.setOverrideFromAddress("fromAddress");
+    object.setOverrideFromName("fromName");
+    object.setOverrideEnvelopeFrom("envelopeFrom");
+    object.setReplyToEmailAddress("replyEmail");
+    object.setReplyToName("replyName");
+    return object;
+  }
+
+  // Image
+  private static Image prepareImageDO() {
+    Image object = new Image();
+    object.setSrc("imageSource");
+    object.setAltText("altText");
+    object.setClickUrl("clickUrl");
+    object.setClickTarget("clickTarget");
+    return object;
+  }
+
+  private static ImageDTO prepareImageDTO() {
+    ImageDTO object = new ImageDTO();
+    object.setSrc("imageSource");
+    object.setAltText("altText");
+    object.setClickUrl("clickUrl");
+    object.setClickTarget("clickTarget");
+    return object;
+  }
+
+  // IsaacEventPage
+  private static IsaacEventPage prepareIsaacEventPageDO() {
+    Address address = new Address();
+    Location location = new Location(address, 3.0, 7.0);
+    ExternalReference preResource1 = new ExternalReference();
+    preResource1.setTitle("title1");
+    preResource1.setUrl("url1");
+    ExternalReference preResource2 = new ExternalReference();
+    preResource2.setTitle("title2");
+    preResource2.setUrl("url2");
+    Content preResourceContent1 = new Content();
+    preResourceContent1.setId("preResourceContent1");
+    preResourceContent1.setTags(Set.of());
+    Content preResourceContent2 = new Content();
+    preResourceContent2.setId("preResourceContent2");
+    preResourceContent2.setTags(Set.of());
+    ExternalReference postResource1 = new ExternalReference();
+    postResource1.setTitle("title1");
+    postResource1.setUrl("url1");
+    ExternalReference postResource2 = new ExternalReference();
+    postResource2.setTitle("title2");
+    postResource2.setUrl("url2");
+    Content postResourceContent1 = new Content();
+    postResourceContent1.setId("postResourceContent1");
+    postResourceContent1.setTags(Set.of());
+    Content postResourceContent2 = new Content();
+    postResourceContent2.setId("postResourceContent2");
+    postResourceContent2.setTags(Set.of());
+    Image eventThumbnail = new Image();
+    eventThumbnail.setSrc("thumbnailSource");
+    eventThumbnail.setPublished(true);
+    eventThumbnail.setTags(Set.of());
+
+    IsaacEventPage object = new IsaacEventPage();
+    object.setDate(testDate);
+    object.setEndDate(testDate);
+    object.setBookingDeadline(testDate);
+    object.setPrepWorkDeadline(testDate);
+    object.setLocation(location);
+    object.setPreResources(List.of(preResource1, preResource2));
+    object.setPreResourceContent(List.of(preResourceContent1, preResourceContent2));
+    object.setEmailEventDetails("emailEventDetails");
+    object.setEmailConfirmedBookingText("confirmedBookingText");
+    object.setEmailWaitingListBookingText("waitingListText");
+    object.setPostResources(List.of(postResource1, postResource2));
+    object.setPostResourceContent(List.of(postResourceContent1, postResourceContent2));
+    object.setEventThumbnail(eventThumbnail);
+    object.setNumberOfPlaces(100);
+    object.setEventStatus(EventStatus.OPEN);
+    object.setIsaacGroupToken("groupToken");
+    object.setGroupReservationLimit(20);
+    object.setAllowGroupReservations(true);
+    object.setPrivateEvent(true);
+    return object;
+  }
+
+  private static IsaacEventPageDTO prepareOriginalIsaacEventPageDTO() {
+    IsaacEventPageDTO object = prepareIsaacEventPageDTO(new IsaacEventPageDTO());
+    object.setUserBookingStatus(BookingStatus.CONFIRMED);
+    return object;
+  }
+
+  private static IsaacEventPageDTO prepareMappedIsaacEventPageDTO() {
+    IsaacEventPageDTO object = prepareIsaacEventPageDTO(new IsaacEventPageDTO());
+    object.setUserBookingStatus(null);
+    return object;
+  }
+
+  private static IsaacEventPageDTO prepareIsaacEventPageDTO(IsaacEventPageDTO object) {
+    Address address = new Address();
+    Location location = new Location(address, 3.0, 7.0);
+    ExternalReference preResource1 = new ExternalReference();
+    preResource1.setTitle("title1");
+    preResource1.setUrl("url1");
+    ExternalReference preResource2 = new ExternalReference();
+    preResource2.setTitle("title2");
+    preResource2.setUrl("url2");
+    ContentDTO preResourceContent1 = new ContentDTO();
+    preResourceContent1.setId("preResourceContent1");
+    ContentDTO preResourceContent2 = new ContentDTO();
+    preResourceContent2.setId("preResourceContent2");
+    ExternalReference postResource1 = new ExternalReference();
+    postResource1.setTitle("title1");
+    postResource1.setUrl("url1");
+    ExternalReference postResource2 = new ExternalReference();
+    postResource2.setTitle("title2");
+    postResource2.setUrl("url2");
+    ContentDTO postResourceContent1 = new ContentDTO();
+    postResourceContent1.setId("postResourceContent1");
+    ContentDTO postResourceContent2 = new ContentDTO();
+    postResourceContent2.setId("postResourceContent2");
+    ImageDTO eventThumbnail = new ImageDTO();
+    eventThumbnail.setSrc("thumbnailSource");
+    eventThumbnail.setPublished(true);
+
+    object.setDate(testDate);
+    object.setEndDate(testDate);
+    object.setBookingDeadline(testDate);
+    object.setPrepWorkDeadline(testDate);
+    object.setLocation(location);
+    object.setPreResources(List.of(preResource1, preResource2));
+    object.setPreResourceContent(List.of(preResourceContent1, preResourceContent2));
+    object.setEmailEventDetails("emailEventDetails");
+    object.setEmailConfirmedBookingText("confirmedBookingText");
+    object.setEmailWaitingListBookingText("waitingListText");
+    object.setPostResources(List.of(postResource1, postResource2));
+    object.setPostResourceContent(List.of(postResourceContent1, postResourceContent2));
+    object.setEventThumbnail(eventThumbnail);
+    object.setNumberOfPlaces(100);
+    object.setEventStatus(EventStatus.OPEN);
+    object.setIsaacGroupToken("groupToken");
+    object.setGroupReservationLimit(20);
+    object.setAllowGroupReservations(true);
+    object.setPrivateEvent(true);
+    return object;
+  }
+
+  // Question
   private static Question prepareOriginalQuestionDO() {
     return prepareOriginalQuestionDO(new Question());
   }
