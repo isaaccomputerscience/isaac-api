@@ -46,7 +46,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.segue.dao.JsonLoader;
 import uk.ac.cam.cl.dtg.segue.dao.users.QuestionValidationResponseDeserializer;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
+import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 /**
  * Class responsible for mapping Content objects (or contentBase objects) to their respective subclass.
@@ -221,7 +221,7 @@ public class ContentMapperUtils {
       return null;
     }
 
-    ContentDTO result = MapStructContentMapper.INSTANCE.mapContent(content);
+    ContentDTO result = ContentMapper.INSTANCE.mapContent(content);
     this.populateRelatedContentWithIDs(content, result);
     return result;
   }

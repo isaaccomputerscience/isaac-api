@@ -34,7 +34,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.QuizFeedbackMode;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMiscMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MiscMapper;
 
 /**
  * This class is responsible for managing and persisting quiz assignments.
@@ -42,7 +42,7 @@ import uk.ac.cam.cl.dtg.util.mappers.MapStructMiscMapper;
 public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersistenceManager {
   private static final Logger log = LoggerFactory.getLogger(PgQuizAssignmentPersistenceManager.class);
 
-  private final MapStructMiscMapper mapper;
+  private final MiscMapper mapper;
   private final PostgresSqlDb database;
 
   /**
@@ -55,7 +55,7 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
    */
   @Inject
   public PgQuizAssignmentPersistenceManager(final PostgresSqlDb database,
-                                            final MapStructMiscMapper mapper) {
+                                            final MiscMapper mapper) {
     this.database = database;
     this.mapper = mapper;
   }

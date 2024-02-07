@@ -124,9 +124,9 @@ import uk.ac.cam.cl.dtg.segue.dos.content.InteractiveCodeSnippet;
 import uk.ac.cam.cl.dtg.segue.dto.content.InteractiveCodeSnippetDTO;
 
 @Mapper(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION, uses = MapStructAudienceContextMapper.class)
-public interface MapStructContentMapper {
+public interface ContentMapper {
 
-  MapStructContentMapper INSTANCE = Mappers.getMapper(MapStructContentMapper.class);
+  ContentMapper INSTANCE = Mappers.getMapper(ContentMapper.class);
 
   // DO <-> DTO Mappings
   @SubclassMapping(source = ContentDTO.class, target = Content.class)

@@ -54,7 +54,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 class QuizQuestionManagerTest extends AbstractManagerTest {
 
@@ -82,7 +82,7 @@ class QuizQuestionManagerTest extends AbstractManagerTest {
 
     quizQuestionAttemptPersistenceManager = createMock(IQuizQuestionAttemptPersistenceManager.class);
     questionManager = createMock(QuestionManager.class);
-    MapStructMainMapper contentMapper = Mappers.getMapper(MapStructMainMapper.class);
+    MainObjectMapper contentMapper = Mappers.getMapper(MainObjectMapper.class);
     quizAttemptManager = createMock(QuizAttemptManager.class);
 
     quizQuestionManager =

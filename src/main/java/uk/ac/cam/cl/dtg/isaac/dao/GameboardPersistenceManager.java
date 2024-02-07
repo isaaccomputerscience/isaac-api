@@ -67,7 +67,7 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 /**
  * This class is responsible for managing and persisting user data.
@@ -81,7 +81,7 @@ public class GameboardPersistenceManager {
   private final PostgresSqlDb database;
   private final Cache<String, GameboardDO> gameboardNonPersistentStorage;
 
-  private final MapStructMainMapper mapper; // used for content object mapping.
+  private final MainObjectMapper mapper; // used for content object mapping.
   private final ObjectMapper objectMapper; // used for json serialisation
 
   private final GitContentManager contentManager;
@@ -104,7 +104,7 @@ public class GameboardPersistenceManager {
    */
   @Inject
   public GameboardPersistenceManager(final PostgresSqlDb database, final GitContentManager contentManager,
-                                     final MapStructMainMapper mapper, final ObjectMapper objectMapper,
+                                     final MainObjectMapper mapper, final ObjectMapper objectMapper,
                                      final URIManager uriManager) {
     this.database = database;
     this.mapper = mapper;

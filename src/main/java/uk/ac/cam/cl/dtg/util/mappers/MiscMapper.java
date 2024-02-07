@@ -14,9 +14,9 @@ import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 
 @Mapper
-public interface MapStructMiscMapper {
+public interface MiscMapper {
 
-  MapStructMiscMapper INSTANCE = Mappers.getMapper(MapStructMiscMapper.class);
+  MiscMapper INSTANCE = Mappers.getMapper(MiscMapper.class);
 
   // DO <-> DTO Mappings
   GameboardDO map(GameboardDTO source);

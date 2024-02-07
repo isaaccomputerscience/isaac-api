@@ -86,7 +86,7 @@ import uk.ac.cam.cl.dtg.segue.search.SimpleExclusionInstruction;
 import uk.ac.cam.cl.dtg.segue.search.SimpleFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.TermsFilterInstruction;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
+import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 /**
  * Implementation that specifically works with Content objects.
@@ -98,7 +98,7 @@ public class GitContentManager {
 
   private final GitDb database;
   private final ContentMapperUtils mapperUtils;
-  private final MapStructContentMapper objectMapper;
+  private final ContentMapper objectMapper;
   private final ISearchProvider searchProvider;
   private final PropertiesLoader globalProperties;
   private final boolean allowOnlyPublishedContent;
@@ -120,7 +120,7 @@ public class GitContentManager {
    */
   @Inject
   public GitContentManager(final GitDb database, final ISearchProvider searchProvider,
-                           final ContentMapperUtils contentMapperUtils, final MapStructContentMapper objectMapper,
+                           final ContentMapperUtils contentMapperUtils, final ContentMapper objectMapper,
                            final PropertiesLoader globalProperties) {
     this.database = database;
     this.mapperUtils = contentMapperUtils;
@@ -158,7 +158,7 @@ public class GitContentManager {
    * @param contentMapperUtils  - The utility class for mapping content objects.
    */
   public GitContentManager(final GitDb database, final ISearchProvider searchProvider,
-                           final ContentMapperUtils contentMapperUtils, final MapStructContentMapper objectMapper) {
+                           final ContentMapperUtils contentMapperUtils, final ContentMapper objectMapper) {
     this.database = database;
     this.mapperUtils = contentMapperUtils;
     this.objectMapper = objectMapper;

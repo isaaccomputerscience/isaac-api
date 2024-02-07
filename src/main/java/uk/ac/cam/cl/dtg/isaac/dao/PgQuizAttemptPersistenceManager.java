@@ -37,7 +37,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.QuizAttemptDO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMiscMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MiscMapper;
 
 /**
  * This class is responsible for managing and persisting quiz attempts.
@@ -45,7 +45,7 @@ import uk.ac.cam.cl.dtg.util.mappers.MapStructMiscMapper;
 public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceManager {
   private static final Logger log = LoggerFactory.getLogger(PgQuizAttemptPersistenceManager.class);
 
-  private final MapStructMiscMapper mapper;
+  private final MiscMapper mapper;
   private final PostgresSqlDb database;
 
   /**
@@ -58,7 +58,7 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
    */
   @Inject
   public PgQuizAttemptPersistenceManager(final PostgresSqlDb database,
-                                         final MapStructMiscMapper mapper) {
+                                         final MiscMapper mapper) {
     this.database = database;
     this.mapper = mapper;
   }

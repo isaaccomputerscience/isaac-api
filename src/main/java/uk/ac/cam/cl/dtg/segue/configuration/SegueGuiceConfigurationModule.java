@@ -187,11 +187,11 @@ import uk.ac.cam.cl.dtg.segue.search.ElasticSearchProvider;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructEventMapper;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMiscMapper;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructUserMapper;
+import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
+import uk.ac.cam.cl.dtg.util.mappers.EventMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MiscMapper;
+import uk.ac.cam.cl.dtg.util.mappers.UserMapper;
 
 /**
  * This class is responsible for injecting configuration values for persistence related classes.
@@ -533,10 +533,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Singleton
   private static GitContentManager getContentManager(final GitDb database, final ISearchProvider searchProvider,
                                                      final ContentMapperUtils contentMapperUtils,
-                                                     final MapStructContentMapper objectMapper,
+                                                     final ContentMapper objectMapper,
                                                      final PropertiesLoader globalProperties) {
     if (null == contentManager) {
-      contentManager = new GitContentManager(database, searchProvider, contentMapperUtils, objectMapper, globalProperties);
+      contentManager =
+          new GitContentManager(database, searchProvider, contentMapperUtils, objectMapper, globalProperties);
       log.info("Creating singleton of ContentManager");
     }
 
@@ -722,7 +723,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
                                              final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
                                              final EmailManager emailQueue,
                                              final IAnonymousUserDataManager temporaryUserCache,
-                                             final ILogManager logManager, final MapStructMainMapper mapperFacade,
+                                             final ILogManager logManager, final MainObjectMapper mapperFacade,
                                              final UserAuthenticationManager userAuthenticationManager,
                                              final ISecondFactorAuthenticator secondFactorManager,
                                              final AbstractUserPreferenceManager userPreferenceManager,
@@ -774,7 +775,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Singleton
   private GroupManager getGroupManager(final IUserGroupPersistenceManager userGroupDataManager,
                                        final UserAccountManager userManager, final GameManager gameManager,
-                                       final MapStructUserMapper dtoMapper) {
+                                       final UserMapper dtoMapper) {
 
     if (null == groupManager) {
       groupManager = new GroupManager(userGroupDataManager, userManager, gameManager, dtoMapper);
@@ -873,36 +874,36 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   @Provides
   @Singleton
   @Inject
-  public static MapStructMainMapper getMainMapperInstance() {
-    return MapStructMainMapper.INSTANCE;
+  public static MainObjectMapper getMainMapperInstance() {
+    return MainObjectMapper.INSTANCE;
   }
 
   @Provides
   @Singleton
   @Inject
-  public static MapStructContentMapper getContentMapperInstance() {
-    return MapStructContentMapper.INSTANCE;
+  public static ContentMapper getContentMapperInstance() {
+    return ContentMapper.INSTANCE;
   }
 
   @Provides
   @Singleton
   @Inject
-  public static MapStructUserMapper getUserMapperInstance() {
-    return MapStructUserMapper.INSTANCE;
+  public static UserMapper getUserMapperInstance() {
+    return UserMapper.INSTANCE;
   }
 
   @Provides
   @Singleton
   @Inject
-  public static MapStructEventMapper getEventMapperInstance() {
-    return MapStructEventMapper.INSTANCE;
+  public static EventMapper getEventMapperInstance() {
+    return EventMapper.INSTANCE;
   }
 
   @Provides
   @Singleton
   @Inject
-  public static MapStructMiscMapper getMiscMapperInstance() {
-    return MapStructMiscMapper.INSTANCE;
+  public static MiscMapper getMiscMapperInstance() {
+    return MiscMapper.INSTANCE;
   }
 
   /**
@@ -1158,7 +1159,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   private static GameboardPersistenceManager getGameboardPersistenceManager(
       final PostgresSqlDb database,
       final GitContentManager contentManager,
-      final MapStructMainMapper mapper,
+      final MainObjectMapper mapper,
       final ObjectMapper objectMapper,
       final URIManager uriManager
   ) {

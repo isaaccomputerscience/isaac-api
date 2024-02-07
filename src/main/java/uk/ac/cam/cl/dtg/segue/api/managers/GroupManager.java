@@ -59,7 +59,7 @@ import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserGroupPersistenceManager;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructUserMapper;
+import uk.ac.cam.cl.dtg.util.mappers.UserMapper;
 
 /**
  * GroupManager. Responsible for managing group related logic.
@@ -72,7 +72,7 @@ public class GroupManager {
   private final IUserGroupPersistenceManager groupDatabase;
   private final UserAccountManager userManager;
   private final GameManager gameManager;
-  private final MapStructUserMapper dtoMapper;
+  private final UserMapper dtoMapper;
   private List<IGroupObserver> groupsObservers;
 
   /**
@@ -85,7 +85,7 @@ public class GroupManager {
    */
   @Inject
   public GroupManager(final IUserGroupPersistenceManager groupDatabase, final UserAccountManager userManager,
-                      final GameManager gameManager, final MapStructUserMapper dtoMapper) {
+                      final GameManager gameManager, final UserMapper dtoMapper) {
     requireNonNull(groupDatabase);
     requireNonNull(userManager);
     requireNonNull(gameManager);

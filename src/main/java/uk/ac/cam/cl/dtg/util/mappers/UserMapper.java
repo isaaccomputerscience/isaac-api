@@ -27,9 +27,9 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithGroupMembershipDTO;
 
 @Mapper
-public interface MapStructUserMapper {
+public interface UserMapper {
 
-  MapStructUserMapper INSTANCE = Mappers.getMapper(MapStructUserMapper.class);
+  UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
   // DO <-> DTO Mappings
   @Mapping(target = "emailVerificationToken", ignore = true)

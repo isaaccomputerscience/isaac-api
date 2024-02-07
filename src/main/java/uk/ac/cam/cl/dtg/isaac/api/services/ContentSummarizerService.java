@@ -22,14 +22,14 @@ import uk.ac.cam.cl.dtg.isaac.api.managers.URIManager;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
+import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 public class ContentSummarizerService {
-  private final MapStructContentMapper mapper;
+  private final ContentMapper mapper;
   private final URIManager uriManager;
 
   @Inject
-  public ContentSummarizerService(final MapStructContentMapper mapper, final URIManager uriManager) {
+  public ContentSummarizerService(final ContentMapper mapper, final URIManager uriManager) {
     this.mapper = mapper;
     this.uriManager = uriManager;
   }

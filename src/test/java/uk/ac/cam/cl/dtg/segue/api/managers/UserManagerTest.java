@@ -85,7 +85,7 @@ import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.users.IAnonymousUserDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 class UserManagerTest {
   private QuestionManager dummyQuestionDatabase;
@@ -95,7 +95,7 @@ class UserManagerTest {
   private PropertiesLoader dummyPropertiesLoader;
   private static final String CSRF_TEST_VALUE = "CSRFTESTVALUE";
 
-  private MapStructMainMapper objectMapper;
+  private MainObjectMapper objectMapper;
   private EmailManager dummyQueue;
   private SimpleDateFormat sdf;
 
@@ -119,7 +119,7 @@ class UserManagerTest {
     this.dummyProvidersMap.put(AuthenticationProvider.SEGUE, dummyLocalAuth);
 
     String dummyHostName = "bob";
-    this.objectMapper = MapStructMainMapper.INSTANCE;
+    this.objectMapper = MainObjectMapper.INSTANCE;
     this.dummyQueue = createMock(EmailManager.class);
     this.dummyPropertiesLoader = createMock(PropertiesLoader.class);
     this.sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");

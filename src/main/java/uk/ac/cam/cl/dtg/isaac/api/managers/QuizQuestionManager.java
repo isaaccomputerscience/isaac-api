@@ -53,11 +53,11 @@ import uk.ac.cam.cl.dtg.segue.api.ErrorResponseWrapper;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 public class QuizQuestionManager {
   private final QuestionManager questionManager;
-  private final MapStructMainMapper mapper;
+  private final MainObjectMapper mapper;
   private final IQuizQuestionAttemptPersistenceManager quizQuestionAttemptManager;
   private final QuizManager quizManager;
   private final QuizAttemptManager quizAttemptManager;
@@ -79,7 +79,7 @@ public class QuizQuestionManager {
    *                                         feedback.
    */
   @Inject
-  public QuizQuestionManager(final QuestionManager questionManager, final MapStructMainMapper mapper,
+  public QuizQuestionManager(final QuestionManager questionManager, final MainObjectMapper mapper,
                              final IQuizQuestionAttemptPersistenceManager quizQuestionAttemptManager,
                              final QuizManager quizManager, final QuizAttemptManager quizAttemptManager) {
     this.questionManager = questionManager;

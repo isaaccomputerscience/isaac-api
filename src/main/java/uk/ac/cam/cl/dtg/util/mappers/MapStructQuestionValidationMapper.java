@@ -13,7 +13,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.ItemValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuantityValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 
-@Mapper(uses = MapStructContentMapper.class)
+@Mapper(uses = ContentMapper.class)
 public interface MapStructQuestionValidationMapper {
 
   MapStructQuestionValidationMapper INSTANCE = Mappers.getMapper(MapStructQuestionValidationMapper.class);

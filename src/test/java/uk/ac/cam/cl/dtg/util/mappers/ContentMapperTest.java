@@ -33,8 +33,8 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 
-class MapStructContentMapperTest {
-  private final MapStructContentMapper mapper = MapStructContentMapper.INSTANCE;
+class ContentMapperTest {
+  private final ContentMapper mapper = ContentMapper.INSTANCE;
 
   private final ObjectMapper jsonMapper = new ObjectMapper();
 

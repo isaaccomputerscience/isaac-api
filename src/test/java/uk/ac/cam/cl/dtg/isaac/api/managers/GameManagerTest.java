@@ -44,12 +44,12 @@ import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager.BooleanSearchClause;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
+import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 class GameManagerTest {
   private GitContentManager dummyContentManager;
   private GameboardPersistenceManager dummyGameboardPersistenceManager;
-  private MapStructContentMapper objectMapper;
+  private ContentMapper objectMapper;
   private QuestionManager dummyQuestionManager;
   private GameManager gameManager;
 
@@ -57,7 +57,7 @@ class GameManagerTest {
   public void setUp() {
     this.dummyContentManager = createMock(GitContentManager.class);
     this.dummyGameboardPersistenceManager = createMock(GameboardPersistenceManager.class);
-    this.objectMapper = MapStructContentMapper.INSTANCE;
+    this.objectMapper = ContentMapper.INSTANCE;
     this.dummyQuestionManager = createMock(QuestionManager.class);
     this.gameManager = new GameManager(
         this.dummyContentManager,

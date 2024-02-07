@@ -99,7 +99,7 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
+import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 /**
  * Pages Facade
@@ -112,7 +112,7 @@ public class PagesFacade extends AbstractIsaacFacade {
   private static final Logger log = LoggerFactory.getLogger(PagesFacade.class);
 
   private final ContentService api;
-  private final MapStructContentMapper mapper;
+  private final ContentMapper mapper;
   private final UserAccountManager userManager;
   private final URIManager uriManager;
   private final QuestionManager questionManager;
@@ -135,7 +135,7 @@ public class PagesFacade extends AbstractIsaacFacade {
    */
   @Inject
   public PagesFacade(final ContentService api, final PropertiesLoader propertiesLoader, final ILogManager logManager,
-                     final MapStructContentMapper mapper, final GitContentManager contentManager,
+                     final ContentMapper mapper, final GitContentManager contentManager,
                      final UserAccountManager userManager, final URIManager uriManager,
                      final QuestionManager questionManager, final GameManager gameManager) {
     super(propertiesLoader, logManager);

@@ -7,10 +7,10 @@ import org.mapstruct.factory.Mappers;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.DetailedEventBookingDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
 
-@Mapper(uses = MapStructUserMapper.class)
-public interface MapStructEventMapper {
+@Mapper(uses = UserMapper.class)
+public interface EventMapper {
 
-  MapStructEventMapper INSTANCE = Mappers.getMapper(MapStructEventMapper.class);
+  EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);
 
   // Handling classes with multiple mapping targets
   default <T extends EventBookingDTO> T map(DetailedEventBookingDTO source, Class<T> targetClass) {

@@ -77,7 +77,7 @@ import uk.ac.cam.cl.dtg.segue.configuration.SegueGuiceConfigurationModule;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
 import uk.ac.cam.cl.dtg.util.QueryUtils;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 /**
  * This class is responsible for validating correct answers using the ValidatesWith annotation when it is applied on to
@@ -89,21 +89,21 @@ public class QuestionManager {
   private static final Logger log = LoggerFactory.getLogger(QuestionManager.class);
 
   private final ContentMapperUtils mapperUtils;
-  private final MapStructMainMapper objectMapper;
+  private final MainObjectMapper objectMapper;
   private final IQuestionAttemptManager questionAttemptPersistenceManager;
   private final AbstractUserPreferenceManager userPreferenceManager;
 
   /**
    * Create a default Question manager object.
    *
-   * @param mapperUtils                     - an auto mapper to allow us to convert to and from QuestionValidationResponseDOs
+   * @param mapperUtils                - an auto mapper to allow us to convert to and from QuestionValidationResponseDOs
    *                                   and DTOs.
    * @param questionPersistenceManager - for question attempt persistence.
    * @param userPreferenceManager      - An instance of the Abstract User preference manager to check for user
    *                                   preferences
    */
   @Inject
-  public QuestionManager(final ContentMapperUtils mapperUtils, final MapStructMainMapper objectMapper,
+  public QuestionManager(final ContentMapperUtils mapperUtils, final MainObjectMapper objectMapper,
                          final IQuestionAttemptManager questionPersistenceManager,
                          final AbstractUserPreferenceManager userPreferenceManager) {
     this.mapperUtils = mapperUtils;

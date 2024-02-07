@@ -34,7 +34,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.AssignmentDO;
 import uk.ac.cam.cl.dtg.isaac.dto.AssignmentDTO;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMiscMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MiscMapper;
 
 /**
  * This class is responsible for managing and persisting user data.
@@ -42,7 +42,7 @@ import uk.ac.cam.cl.dtg.util.mappers.MapStructMiscMapper;
 public class PgAssignmentPersistenceManager implements IAssignmentPersistenceManager {
   private static final Logger log = LoggerFactory.getLogger(PgAssignmentPersistenceManager.class);
 
-  private final MapStructMiscMapper mapper;
+  private final MiscMapper mapper;
   private final PostgresSqlDb database;
 
   /**
@@ -55,7 +55,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
    */
   @Inject
   public PgAssignmentPersistenceManager(final PostgresSqlDb database,
-                                        final MapStructMiscMapper mapper) {
+                                        final MiscMapper mapper) {
     this.database = database;
     this.mapper = mapper;
   }

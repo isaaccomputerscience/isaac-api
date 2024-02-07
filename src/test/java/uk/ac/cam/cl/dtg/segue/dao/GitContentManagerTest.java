@@ -27,7 +27,7 @@ import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.database.GitDb;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructContentMapper;
+import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 /**
  * Test class for the GitContentManager class.
@@ -40,7 +40,7 @@ class GitContentManagerTest {
     GitDb database = createMock(GitDb.class);
     ISearchProvider searchProvider = createMock(ISearchProvider.class);
     ContentMapperUtils contentMapperUtils = createMock(ContentMapperUtils.class);
-    MapStructContentMapper objectMapper = MapStructContentMapper.INSTANCE;
+    ContentMapper objectMapper = ContentMapper.INSTANCE;
 
     this.defaultGCM = new GitContentManager(database, searchProvider, contentMapperUtils, objectMapper);
   }

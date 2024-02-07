@@ -54,13 +54,13 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserGroupPersistenceManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructUserMapper;
+import uk.ac.cam.cl.dtg.util.mappers.UserMapper;
 
 /**
  * Test class for the user manager class.
  */
 class GroupManagerTest {
-  private MapStructUserMapper userMapper;
+  private UserMapper userMapper;
 
   private IUserGroupPersistenceManager groupDataManager;
   private UserAccountManager userManager;
@@ -78,7 +78,7 @@ class GroupManagerTest {
    */
   @BeforeEach
   public final void setUp() throws Exception {
-    this.userMapper = MapStructUserMapper.INSTANCE;
+    this.userMapper = UserMapper.INSTANCE;
     this.groupDataManager = createMock(IUserGroupPersistenceManager.class);
     this.userManager = createMock(UserAccountManager.class);
     this.gameManager = createMock(GameManager.class);

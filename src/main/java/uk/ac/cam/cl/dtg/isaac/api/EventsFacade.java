@@ -118,7 +118,7 @@ import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.DateRangeFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.SimpleExclusionInstruction;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.MapStructMainMapper;
+import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 /**
  * Events Facade.
@@ -140,7 +140,7 @@ public class EventsFacade extends AbstractIsaacFacade {
   private final UserAccountManager userAccountManager;
   private final SchoolListReader schoolListReader;
 
-  private final MapStructMainMapper mapper;
+  private final MainObjectMapper mapper;
 
   /**
    * EventsFacade.
@@ -163,7 +163,7 @@ public class EventsFacade extends AbstractIsaacFacade {
                       final GitContentManager contentManager,
                       final UserBadgeManager userBadgeManager, final UserAssociationManager userAssociationManager,
                       final GroupManager groupManager, final UserAccountManager userAccountManager,
-                      final SchoolListReader schoolListReader, final MapStructMainMapper mapper) {
+                      final SchoolListReader schoolListReader, final MainObjectMapper mapper) {
     super(properties, logManager);
     this.bookingManager = bookingManager;
     this.userManager = userManager;
