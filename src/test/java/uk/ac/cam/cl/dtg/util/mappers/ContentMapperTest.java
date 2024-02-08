@@ -1,9 +1,9 @@
 package uk.ac.cam.cl.dtg.util.mappers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +48,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.QuizFeedbackDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.AnvilAppDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceQuestionDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.CodeSnippetDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
@@ -55,14 +56,13 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ImageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ItemDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.QuizSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 import uk.ac.cam.cl.dtg.util.locations.Address;
 import uk.ac.cam.cl.dtg.util.locations.Location;
 
 class ContentMapperTest {
   private final ContentMapper mapper = ContentMapper.INSTANCE;
-
-  private final ObjectMapper jsonMapper = new ObjectMapper();
 
   private static final Date testDate = new Date();
 
@@ -74,7 +74,7 @@ class ContentMapperTest {
     T expectedWithCommonProperties = setMappedCommonContentDTOProperties(expected);
     ContentDTO actual = (ContentDTO) mapper.map(sourceWithCommonProperties);
     assertEquals(expected.getClass(), actual.getClass());
-    assertEquals(jsonMapper.writeValueAsString(expectedWithCommonProperties), jsonMapper.writeValueAsString(actual));
+    assertDeepEquals(expectedWithCommonProperties, actual);
   }
 
   @ParameterizedTest
@@ -85,7 +85,16 @@ class ContentMapperTest {
     T expectedWithCommonProperties = setMappedCommonContentProperties(expected);
     Content actual = (Content) mapper.map(sourceWithCommonProperties);
     assertEquals(expected.getClass(), actual.getClass());
-    assertEquals(jsonMapper.writeValueAsString(expectedWithCommonProperties), jsonMapper.writeValueAsString(actual));
+    assertDeepEquals(expectedWithCommonProperties, actual);
+  }
+
+  @ParameterizedTest
+  @MethodSource("testCasesFromContentDTO")
+  <T> void defaultMappingMethodFrom_ContentDTO_returnsRequestedClass(ContentDTO source, Class<T> targetClass, T expected)
+      throws JsonProcessingException {
+    T actual = mapper.map(source, targetClass);
+    assertEquals(targetClass, actual.getClass());
+    assertDeepEquals(expected, actual);
   }
 
   private static Stream<Arguments> testCasesDOtoDTO() {
@@ -123,6 +132,16 @@ class ContentMapperTest {
         Arguments.of(prepareOriginalIsaacSymbolicQuestionDTO(), prepareMappedIsaacSymbolicQuestionDO()),
         Arguments.of(prepareOriginalQuestionDTO(), prepareMappedQuestionDO()),
         Arguments.of(prepareSeguePageDTO(), prepareSeguePageDO())
+    );
+  }
+
+  private static Stream<Arguments> testCasesFromContentDTO() {
+    return Stream.of(
+        Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), ContentSummaryDTO.class, prepareContentSummaryDTOFromContentDTO()),
+        Arguments.of(setOriginalCommonContentDTOProperties(prepareChoiceDTO()), ContentSummaryDTO.class, prepareContentSummaryDTOFromChoiceDTO()),
+        Arguments.of(setOriginalCommonContentDTOProperties(prepareIsaacQuestionPageDTO()), ContentSummaryDTO.class, prepareContentSummaryDTOFromIsaacQuestionPageDTO()),
+        Arguments.of(setOriginalCommonContentDTOProperties(prepareCodeSnippetDTO()), ContentSummaryDTO.class, prepareContentSummaryDTOFromCodeSnippetDTO()),
+        Arguments.of(setOriginalCommonContentDTOProperties(prepareOriginalIsaacQuizDTO()), QuizSummaryDTO.class)
     );
   }
 
@@ -396,6 +415,11 @@ class ContentMapperTest {
     objectWithQuestionFields.setChoices(List.of(choice1, choice2));
     objectWithQuestionFields.setRandomiseChoices(true);
     return objectWithQuestionFields;
+  }
+
+  // CodeSnippet
+  private static CodeSnippetDTO prepareCodeSnippetDTO() {
+    return new CodeSnippetDTO("language", "code", false, "url");
   }
 
   // EmailTemplate
@@ -807,6 +831,129 @@ class ContentMapperTest {
 
   private static SeguePageDTO prepareSeguePageDTO(SeguePageDTO object) {
     object.setSummary("summary");
+    return object;
+  }
+
+  // ContentSummaryDTO
+  private static ContentSummaryDTO prepareContentSummaryDTOFromContentDTO() {
+    AudienceContext audience = new AudienceContext();
+    audience.setStage(List.of(Stage.a_level));
+    audience.setExamBoard(List.of(ExamBoard.aqa));
+    audience.setDifficulty(List.of(Difficulty.challenge_2));
+    audience.setRole(List.of(RoleRequirement.logged_in));
+
+    ContentSummaryDTO object = new ContentSummaryDTO();
+    object.setId("id");
+    object.setTitle("title");
+    object.setSummary(null);
+    object.setType("type");
+    object.setLevel("2");
+    object.setTags(List.of("tag2", "tag1"));
+    object.setUrl(null);
+    object.setCorrect(null);
+    object.setQuestionPartIds(List.of());
+    object.setSupersededBy(null);
+    object.setDeprecated(false);
+    object.setDifficulty(null);
+    object.setAudience(List.of(audience));
+    return object;
+  }
+
+  private static ContentSummaryDTO prepareContentSummaryDTOFromChoiceDTO() {
+    AudienceContext audience = new AudienceContext();
+    audience.setStage(List.of(Stage.a_level));
+    audience.setExamBoard(List.of(ExamBoard.aqa));
+    audience.setDifficulty(List.of(Difficulty.challenge_2));
+    audience.setRole(List.of(RoleRequirement.logged_in));
+
+    ContentSummaryDTO object = new ContentSummaryDTO();
+    object.setId("id");
+    object.setTitle("title");
+    object.setSummary(null);
+    object.setType("type");
+    object.setLevel("2");
+    object.setTags(List.of("tag2", "tag1"));
+    object.setUrl(null);
+    object.setCorrect(true);
+    object.setQuestionPartIds(List.of());
+    object.setSupersededBy(null);
+    object.setDeprecated(false);
+    object.setDifficulty(null);
+    object.setAudience(List.of(audience));
+    return object;
+  }
+
+  private static ContentSummaryDTO prepareContentSummaryDTOFromIsaacQuestionPageDTO() {
+    AudienceContext audience = new AudienceContext();
+    audience.setStage(List.of(Stage.a_level));
+    audience.setExamBoard(List.of(ExamBoard.aqa));
+    audience.setDifficulty(List.of(Difficulty.challenge_2));
+    audience.setRole(List.of(RoleRequirement.logged_in));
+
+    ContentSummaryDTO object = new ContentSummaryDTO();
+    object.setId("id");
+    object.setTitle("title");
+    object.setSummary(null);
+    object.setType("type");
+    object.setLevel("2");
+    object.setTags(List.of("tag2", "tag1"));
+    object.setUrl(null);
+    object.setCorrect(null);
+    object.setQuestionPartIds(List.of());
+    object.setSupersededBy("newVersion");
+    object.setDeprecated(false);
+    object.setDifficulty("3");
+    object.setAudience(List.of(audience));
+    return object;
+  }
+
+  private static ContentSummaryDTO prepareContentSummaryDTOFromCodeSnippetDTO() {
+    AudienceContext audience = new AudienceContext();
+    audience.setStage(List.of(Stage.a_level));
+    audience.setExamBoard(List.of(ExamBoard.aqa));
+    audience.setDifficulty(List.of(Difficulty.challenge_2));
+    audience.setRole(List.of(RoleRequirement.logged_in));
+
+    ContentSummaryDTO object = new ContentSummaryDTO();
+    object.setId("id");
+    object.setTitle("title");
+    object.setSummary(null);
+    object.setType("type");
+    object.setLevel("2");
+    object.setTags(List.of("tag2", "tag1"));
+    object.setUrl("url");
+    object.setCorrect(null);
+    object.setQuestionPartIds(List.of());
+    object.setSupersededBy(null);
+    object.setDeprecated(false);
+    object.setDifficulty(null);
+    object.setAudience(List.of(audience));
+    return object;
+  }
+
+  private static QuizSummaryDTO prepareQuizSummaryDTOFromIsaacQuiz() {
+    AudienceContext audience = new AudienceContext();
+    audience.setStage(List.of(Stage.a_level));
+    audience.setExamBoard(List.of(ExamBoard.aqa));
+    audience.setDifficulty(List.of(Difficulty.challenge_2));
+    audience.setRole(List.of(RoleRequirement.logged_in));
+
+    QuizSummaryDTO object = new QuizSummaryDTO();
+    object.setId("id");
+    object.setTitle("title");
+    object.setSummary(null);
+    object.setType("type");
+    object.setLevel("2");
+    object.setTags(List.of("tag1", "tag2"));
+    object.setUrl(null);
+    object.setCorrect(null);
+    object.setQuestionPartIds(List.of());
+    object.setSupersededBy(null);
+    object.setDeprecated(false);
+    object.setDifficulty(null);
+    object.setAudience(List.of(audience));
+
+    object.setHiddenFromRoles(List.of("blockedRole1", "blockedRole2"));
     return object;
   }
 }
