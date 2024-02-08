@@ -303,7 +303,7 @@ public class AdminFacade extends AbstractSegueFacade {
    * @return Success shown by returning an ok response
    */
   @POST
-  @Path("/users/teacher_pending/{status}")
+  @Path("/users/change_teacher_pending/{status}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   public synchronized Response modifyUsersTeacherPendingStatus(@Context final HttpServletRequest request,
@@ -312,34 +312,42 @@ public class AdminFacade extends AbstractSegueFacade {
 
     Map<String, List<Long>> failedUpdates = new HashMap<>();
 
+    RegisteredUserDTO requestingUser;
+
     try {
-      RegisteredUserDTO requestingUser = userManager.getCurrentRegisteredUser(request);
+      requestingUser = userManager.getCurrentRegisteredUser(request);
       if (!isUserAnAdminOrEventManager(userManager, requestingUser)) {
         return new SegueErrorResponse(Status.FORBIDDEN, ACCESS_DENIED_MESSAGE)
             .toResponse();
       }
-
-      for (Long userId : userIds) {
-        modifyTeacherPendingStatusForUser(userId, requestingUser, status, failedUpdates);
-      }
-
-      if (failedUpdates.containsKey(FAILED_TO_SEND)) {
-        String errorMessage = String.format("Emails could not be sent to userIds: %s",
-            failedUpdates.get(FAILED_TO_SEND));
-        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMessage).toResponse();
-      }
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
-    } catch (SegueDatabaseException e) {
-      log.error("Database error while trying to change teacher_pending status", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Could not update teacher_pending status").toResponse();
+    }
+
+    for (Long userId : userIds) {
+      try {
+        modifyTeacherPendingStatusForUser(userId, requestingUser, status, failedUpdates);
+      } catch (SegueDatabaseException e) {
+        log.error("Database error while trying to change teacher_pending status", e);
+        return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
+            "Could not update teacher_pending status").toResponse();
+      }
+    }
+
+    if (failedUpdates.containsKey(USERS_NOT_FOUND)) {
+      String errorMessage =
+          String.format("One or more users could not be found: %s", failedUpdates.get(USERS_NOT_FOUND));
+      if (failedUpdates.containsKey(FAILED_TO_SEND)) {
+        errorMessage += String.format(" Emails could not be sent to userIds: %s", failedUpdates.get(FAILED_TO_SEND));
+      }
+      return new SegueErrorResponse(Status.BAD_REQUEST, errorMessage).toResponse();
     }
 
     String responseString = "Teacher pending status updated to " + status + " for requested userIds: " + userIds;
 
-    if (failedUpdates.containsKey(USERS_NOT_FOUND)) {
-      responseString = String.format("One or more users could not be found: %s. ", failedUpdates.get(USERS_NOT_FOUND));
+    if (failedUpdates.containsKey(FAILED_TO_SEND)) {
+      responseString = String.format("Teacher pending status updated to %s, but emails could not be sent to "
+          + "userIds: %s", status, failedUpdates.get(FAILED_TO_SEND));
     }
 
     return Response.ok(responseString).build();
@@ -350,10 +358,6 @@ public class AdminFacade extends AbstractSegueFacade {
 
     try {
       RegisteredUserDTO user = this.userManager.getUserDTOById(userId);
-
-      if (null == user) {
-        throw new NoUserException("No user found with this ID.");
-      }
 
       Boolean oldStatus = user.getTeacherPending();
       this.userManager.updateTeacherPendingFlag(userId, status);
@@ -378,7 +382,7 @@ public class AdminFacade extends AbstractSegueFacade {
   private void sendTeacherDeclinedEmail(RegisteredUserDTO user, Map<String, List<Long>> failedUpdates) {
     try {
       emailManager.sendTemplatedEmailToUser(user, emailManager.getEmailTemplateDTO("teacher_declined"),
-          Collections.<String, Object>emptyMap(), EmailType.SYSTEM);
+          Collections.emptyMap(), EmailType.SYSTEM);
     } catch (ContentManagerException | SegueDatabaseException e) {
       Long userId = user.getId();
       log.error("Exception when sending email id 'teacher_declined' to userId "
@@ -718,7 +722,8 @@ public class AdminFacade extends AbstractSegueFacade {
    * @param request           - to identify if the user is authorised.
    * @param requestForCaching - to determine if the content is still fresh.
    * @return a content object, such that the content object has children. The children represent each source file in
-   *      error and the grand children represent each error.  */
+   * error and the grand children represent each error.
+   */
   @SuppressWarnings("unchecked")
   @GET
   @Path("/content_problems")

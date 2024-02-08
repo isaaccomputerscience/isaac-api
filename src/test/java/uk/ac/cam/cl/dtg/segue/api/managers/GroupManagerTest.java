@@ -133,8 +133,7 @@ class GroupManagerTest {
       assertInstanceOf(Date.class, capturedGroup.getValue().getCreated());
 
     } catch (SegueDatabaseException | NoUserException e) {
-      fail("No exception expected");
-      e.printStackTrace();
+      fail("No exception expected", e);
     }
     verify(this.groupDataManager);
   }
