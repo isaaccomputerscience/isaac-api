@@ -46,32 +46,24 @@ class AdminFacadeTest {
   private AdminFacade adminFacade;
   private EmailManager emailManager;
   private HttpServletRequest mockRequest;
+  private RegisteredUserDTO currentUser;
 
   @BeforeEach
   final void beforeEach() {
-    PropertiesLoader properties;
-    GitContentManager contentManager;
-    String contentIndex;
-    ILogManager logManager;
-    StatisticsManager statsManager;
-    AbstractUserPreferenceManager userPreferenceManager;
-    EventBookingManager eventBookingManager;
-    SegueJobService segueJobService;
-    IExternalAccountManager externalAccountManager;
-    IMisuseMonitor misuseMonitor;
+    PropertiesLoader properties = createMock(PropertiesLoader.class);
+    GitContentManager contentManager = createMock(GitContentManager.class);
+    String contentIndex = "";
+    ILogManager logManager = createMock(ILogManager.class);
+    StatisticsManager statsManager = createMock(StatisticsManager.class);
+    AbstractUserPreferenceManager userPreferenceManager = createMock(AbstractUserPreferenceManager.class);
+    EventBookingManager eventBookingManager = createMock(EventBookingManager.class);
+    SegueJobService segueJobService = createMock(SegueJobService.class);
+    IExternalAccountManager externalAccountManager = createMock(IExternalAccountManager.class);
+    IMisuseMonitor misuseMonitor = createMock(IMisuseMonitor.class);
 
+    currentUser = createMock(RegisteredUserDTO.class);
     mockRequest = replayMockServletRequest();
-    properties = createMock(PropertiesLoader.class);
     userManager = createMock(UserAccountManager.class);
-    contentManager = createMock(GitContentManager.class);
-    contentIndex = "";
-    logManager = createMock(ILogManager.class);
-    statsManager = createMock(StatisticsManager.class);
-    userPreferenceManager = createMock(AbstractUserPreferenceManager.class);
-    eventBookingManager = createMock(EventBookingManager.class);
-    segueJobService = createMock(SegueJobService.class);
-    externalAccountManager = createMock(IExternalAccountManager.class);
-    misuseMonitor = createMock(IMisuseMonitor.class);
     emailManager = createMock(EmailManager.class);
     adminFacade = new AdminFacade(properties, userManager, contentManager, contentIndex, logManager, statsManager,
         userPreferenceManager, eventBookingManager, segueJobService, externalAccountManager, misuseMonitor, emailManager);
@@ -83,7 +75,6 @@ class AdminFacadeTest {
     class FailureResponses {
       @Test
       void modifyUsersTeacherPendingStatus_anonymousUser_returnsUnauthorised() throws NoUserLoggedInException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andThrow(new NoUserLoggedInException());
@@ -101,7 +92,6 @@ class AdminFacadeTest {
 
       @Test
       void modifyUsersTeacherPendingStatus_nonAdminUser_returnsForbidden() throws NoUserLoggedInException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -121,7 +111,6 @@ class AdminFacadeTest {
       @Test
       void modifyUsersTeacherPendingStatus_unknownTarget_returnsBadRequest()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -143,7 +132,6 @@ class AdminFacadeTest {
       @Test
       void modifyUsersTeacherPendingStatus_failureForOneOfMultipleTargets_returnsBadRequest()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L, 3L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -159,8 +147,7 @@ class AdminFacadeTest {
             anyObject(), eq(EmailType.SYSTEM));
         expectLastCall();
 
-        replay(userManager);
-        replay(emailManager);
+        replay(userManager, emailManager);
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -168,14 +155,12 @@ class AdminFacadeTest {
               response.readEntity(SegueErrorResponse.class).getErrorMessage());
         }
 
-        verify(userManager);
-        verify(emailManager);
+        verify(userManager, emailManager);
       }
 
       @Test
       void modifyUsersTeacherPendingStatus_emailSendFailureAndUnknownTarget_returnsBadRequest()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(3L, 2L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -188,8 +173,7 @@ class AdminFacadeTest {
 
         expect(userManager.getUserDTOById(2L)).andThrow(new NoUserException("No user found with this ID!"));
 
-        replay(userManager);
-        replay(emailManager);
+        replay(userManager, emailManager);
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -203,7 +187,6 @@ class AdminFacadeTest {
       @Test
       void modifyUsersTeacherPendingStatus_errorAccessingDatabase_returnsInternalServerError()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -230,7 +213,6 @@ class AdminFacadeTest {
       @Test
       void modifyUsersTeacherPendingStatus_emailSendFailureForOneTarget_returnsOkWithMessage()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(3L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -241,8 +223,7 @@ class AdminFacadeTest {
 
         expect(emailManager.getEmailTemplateDTO("teacher_declined")).andThrow(new ContentManagerException("Content not found"));
 
-        replay(userManager);
-        replay(emailManager);
+        replay(userManager, emailManager);
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -256,7 +237,6 @@ class AdminFacadeTest {
       @Test
       void modifyUsersTeacherPendingStatus_emailSendFailureForOneOfMultipleTargets_returnsOkWithMessage()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(3L, 2L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -274,9 +254,9 @@ class AdminFacadeTest {
         emailManager.sendTemplatedEmailToUser(anyObject(RegisteredUserDTO.class), anyObject(EmailTemplateDTO.class),
             anyObject(), eq(EmailType.SYSTEM));
         expectLastCall();
+        expect(currentUser.getEmail()).andReturn("test@test.com").times(2);
 
-        replay(userManager);
-        replay(emailManager);
+        replay(userManager, emailManager, currentUser);
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -289,7 +269,6 @@ class AdminFacadeTest {
 
       @Test
       void modifyUsersTeacherPendingStatus_emptyTargetList_returnsOkOnSuccess() throws NoUserLoggedInException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of();
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -307,7 +286,6 @@ class AdminFacadeTest {
       @Test
       void modifyUsersTeacherPendingStatus_updateOneTarget_returnsOkOnSuccess()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -320,22 +298,20 @@ class AdminFacadeTest {
         emailManager.sendTemplatedEmailToUser(anyObject(RegisteredUserDTO.class), anyObject(EmailTemplateDTO.class),
             anyObject(Map.class), eq(EmailType.SYSTEM));
         expectLastCall();
-        replay(userManager);
-        replay(emailManager);
+
+        replay(userManager, emailManager);
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
           assertEquals("Teacher pending status updated to false for requested userIds: [2]", response.readEntity(String.class));
         }
 
-        verify(userManager);
-        verify(emailManager);
+        verify(userManager, emailManager);
       }
 
       @Test
       void modifyUsersTeacherPendingStatus_updateMultipleTargets_returnsOkOnSuccess()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException, ContentManagerException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L, 3L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -351,23 +327,21 @@ class AdminFacadeTest {
         emailManager.sendTemplatedEmailToUser(anyObject(RegisteredUserDTO.class), anyObject(EmailTemplateDTO.class),
             anyObject(Map.class), eq(EmailType.SYSTEM));
         expectLastCall().times(2);
+        expect(currentUser.getEmail()).andReturn("test@test.com").times(2);
 
-        replay(userManager);
-        replay(emailManager);
+        replay(userManager, emailManager, currentUser);
 
         try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
           assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
           assertEquals("Teacher pending status updated to false for requested userIds: [2, 3]", response.readEntity(String.class));
         }
 
-        verify(userManager);
-        verify(emailManager);
+        verify(userManager, emailManager);
       }
 
       @Test
       void modifyUsersTeacherPendingStatus_settingStatusTrue_returnsOkOnSuccess()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
@@ -389,7 +363,6 @@ class AdminFacadeTest {
       @Test
       void modifyUsersTeacherPendingStatus_settingStatusToCurrentValue_returnsOkOnSuccess()
           throws NoUserLoggedInException, SegueDatabaseException, NoUserException {
-        RegisteredUserDTO currentUser = new RegisteredUserDTO();
         List<Long> targetUsers = List.of(2L);
 
         expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
