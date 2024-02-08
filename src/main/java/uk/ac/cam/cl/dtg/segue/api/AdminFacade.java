@@ -306,6 +306,10 @@ public class AdminFacade extends AbstractSegueFacade {
   @Path("/users/change_teacher_pending/{status}")
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
+  @Operation(summary = "Update teacher_pending to true or false for a list of possible user IDs.",
+      description = "This endpoint requires an admin user to be logged in. If updating teacher_pending to false it "
+          + "also sends an email to decline teacher account upgrade. If email send fails, response is still OK but "
+          + "with added message to notify user")
   public synchronized Response modifyUsersTeacherPendingStatus(@Context final HttpServletRequest request,
                                                                @PathParam("status") final Boolean status,
                                                                final List<Long> userIds) {
@@ -722,7 +726,7 @@ public class AdminFacade extends AbstractSegueFacade {
    * @param request           - to identify if the user is authorised.
    * @param requestForCaching - to determine if the content is still fresh.
    * @return a content object, such that the content object has children. The children represent each source file in
-   * error and the grand children represent each error.
+   *     error and the grand children represent each error.
    */
   @SuppressWarnings("unchecked")
   @GET
