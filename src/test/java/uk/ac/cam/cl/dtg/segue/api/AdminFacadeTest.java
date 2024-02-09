@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -296,7 +295,7 @@ class AdminFacadeTest {
 
         expect(emailManager.getEmailTemplateDTO("teacher_declined")).andReturn(new EmailTemplateDTO());
         emailManager.sendTemplatedEmailToUser(anyObject(RegisteredUserDTO.class), anyObject(EmailTemplateDTO.class),
-            anyObject(Map.class), eq(EmailType.SYSTEM));
+            anyObject(), eq(EmailType.SYSTEM));
         expectLastCall();
 
         replay(userManager, emailManager);
@@ -325,7 +324,7 @@ class AdminFacadeTest {
 
         expect(emailManager.getEmailTemplateDTO("teacher_declined")).andReturn(new EmailTemplateDTO()).times(2);
         emailManager.sendTemplatedEmailToUser(anyObject(RegisteredUserDTO.class), anyObject(EmailTemplateDTO.class),
-            anyObject(Map.class), eq(EmailType.SYSTEM));
+            anyObject(), eq(EmailType.SYSTEM));
         expectLastCall().times(2);
         expect(currentUser.getEmail()).andReturn("test@test.com").times(2);
 

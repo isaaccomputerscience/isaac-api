@@ -66,9 +66,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.crypto.Mac;
@@ -311,10 +313,12 @@ public class AdminFacade extends AbstractSegueFacade {
           + "also sends an email to decline teacher account upgrade. If email send fails, response is still OK but "
           + "with added message to notify user")
   public synchronized Response modifyUsersTeacherPendingStatus(@Context final HttpServletRequest request,
-                                                               @PathParam("status") final Boolean status,
+                                                               @PathParam("status") final boolean status,
                                                                final List<Long> userIds) {
 
-    Map<String, List<Long>> failedUpdates = new HashMap<>();
+    Map<String, Set<Long>> failedUpdates = new HashMap<>();
+    failedUpdates.put(USERS_NOT_FOUND, new HashSet<>());
+    failedUpdates.put(FAILED_TO_SEND, new HashSet<>());
 
     RegisteredUserDTO requestingUser;
 
@@ -338,27 +342,29 @@ public class AdminFacade extends AbstractSegueFacade {
       }
     }
 
-    if (failedUpdates.containsKey(USERS_NOT_FOUND)) {
+    if (!failedUpdates.get(USERS_NOT_FOUND).isEmpty()) {
       String errorMessage =
           String.format("One or more users could not be found: %s", failedUpdates.get(USERS_NOT_FOUND));
-      if (failedUpdates.containsKey(FAILED_TO_SEND)) {
+      if (!failedUpdates.get(FAILED_TO_SEND).isEmpty()) {
         errorMessage += String.format(" Emails could not be sent to userIds: %s", failedUpdates.get(FAILED_TO_SEND));
       }
       return new SegueErrorResponse(Status.BAD_REQUEST, errorMessage).toResponse();
     }
 
-    String responseString = "Teacher pending status updated to " + status + " for requested userIds: " + userIds;
+    String responseMessage;
 
-    if (failedUpdates.containsKey(FAILED_TO_SEND)) {
-      responseString = String.format("Teacher pending status updated to %s, but emails could not be sent to "
+    if (!failedUpdates.get(FAILED_TO_SEND).isEmpty()) {
+      responseMessage = String.format("Teacher pending status updated to %s, but emails could not be sent to "
           + "userIds: %s", status, failedUpdates.get(FAILED_TO_SEND));
+    } else {
+      responseMessage = String.format("Teacher pending status updated to %s for requested userIds: %s",
+          status, userIds);
     }
-
-    return Response.ok(responseString).build();
+    return Response.ok(responseMessage).build();
   }
 
   private void modifyTeacherPendingStatusForUser(Long userId, RegisteredUserDTO requestingUser, boolean status,
-                                                 Map<String, List<Long>> failedUpdates) throws SegueDatabaseException {
+                                                 Map<String, Set<Long>> failedUpdates) throws SegueDatabaseException {
 
     try {
       RegisteredUserDTO user = this.userManager.getUserDTOById(userId);
@@ -371,34 +377,20 @@ public class AdminFacade extends AbstractSegueFacade {
         sendTeacherDeclinedEmail(user, failedUpdates);
       }
     } catch (NoUserException e) {
-      log.error("NoUserException for userId " + userId, e);
-      if (!failedUpdates.containsKey(USERS_NOT_FOUND)) {
-        List<Long> userList = new ArrayList<>();
-        userList.add(userId);
-        failedUpdates.put(USERS_NOT_FOUND, userList);
-      } else {
-        List<Long> userList = failedUpdates.get(USERS_NOT_FOUND);
-        userList.add(userId);
-      }
+      log.error("NoUserException for userId {}", userId, e);
+      failedUpdates.get(USERS_NOT_FOUND).add(userId);
     }
   }
 
-  private void sendTeacherDeclinedEmail(RegisteredUserDTO user, Map<String, List<Long>> failedUpdates) {
+  private void sendTeacherDeclinedEmail(RegisteredUserDTO user, Map<String, Set<Long>> failedUpdates) {
     try {
       emailManager.sendTemplatedEmailToUser(user, emailManager.getEmailTemplateDTO("teacher_declined"),
           Collections.emptyMap(), EmailType.SYSTEM);
     } catch (ContentManagerException | SegueDatabaseException e) {
       Long userId = user.getId();
-      log.error("Exception when sending email id 'teacher_declined' to userId "
-          + userId + ". Unable to send email", e);
-      if (!failedUpdates.containsKey(FAILED_TO_SEND)) {
-        List<Long> userList = new ArrayList<>();
-        userList.add(userId);
-        failedUpdates.put(FAILED_TO_SEND, userList);
-      } else {
-        List<Long> userList = failedUpdates.get(FAILED_TO_SEND);
-        userList.add(userId);
-      }
+      log.error("Exception when sending email id 'teacher_declined' to userId {}. Unable to send email",
+          userId, e);
+      failedUpdates.get(FAILED_TO_SEND).add(userId);
     }
   }
 
@@ -726,7 +718,7 @@ public class AdminFacade extends AbstractSegueFacade {
    * @param request           - to identify if the user is authorised.
    * @param requestForCaching - to determine if the content is still fresh.
    * @return a content object, such that the content object has children. The children represent each source file in
-   *     error and the grand children represent each error.
+   * error and the grand children represent each error.
    */
   @SuppressWarnings("unchecked")
   @GET
