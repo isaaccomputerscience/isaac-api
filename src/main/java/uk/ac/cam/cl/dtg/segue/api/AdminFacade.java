@@ -316,9 +316,10 @@ public class AdminFacade extends AbstractSegueFacade {
                                                                @PathParam("status") final boolean status,
                                                                final List<Long> userIds) {
 
-    Map<String, Set<Long>> failedUpdates = new HashMap<>();
-    failedUpdates.put(USERS_NOT_FOUND, new HashSet<>());
-    failedUpdates.put(FAILED_TO_SEND, new HashSet<>());
+    if (userIds == null || userIds.isEmpty()) {
+      return  new SegueErrorResponse(Status.BAD_REQUEST, "No userIds provided")
+          .toResponse();
+    }
 
     RegisteredUserDTO requestingUser;
 
@@ -331,6 +332,10 @@ public class AdminFacade extends AbstractSegueFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     }
+
+    Map<String, Set<Long>> failedUpdates = new HashMap<>();
+    failedUpdates.put(USERS_NOT_FOUND, new HashSet<>());
+    failedUpdates.put(FAILED_TO_SEND, new HashSet<>());
 
     for (Long userId : userIds) {
       try {

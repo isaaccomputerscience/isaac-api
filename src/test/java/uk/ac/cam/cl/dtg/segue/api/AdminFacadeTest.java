@@ -204,6 +204,25 @@ class AdminFacadeTest {
 
         verify(userManager);
       }
+
+      @Test
+      void modifyUsersTeacherPendingStatus_emptyTargetList_returnsBadRequest() {
+        List<Long> targetUsers = List.of();
+
+        try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+          assertEquals("No userIds provided", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
+
+      @Test
+      void modifyUsersTeacherPendingStatus_nullTargets_returnsBadRequest() {
+
+        try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, null)) {
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+          assertEquals("No userIds provided", response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      }
     }
 
     @Nested
@@ -261,22 +280,6 @@ class AdminFacadeTest {
           assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
           assertEquals("Teacher pending status updated to false, but emails could not be sent to userIds: [3]",
               response.readEntity(String.class));
-        }
-
-        verify(userManager);
-      }
-
-      @Test
-      void modifyUsersTeacherPendingStatus_emptyTargetList_returnsOkOnSuccess() throws NoUserLoggedInException {
-        List<Long> targetUsers = List.of();
-
-        expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(currentUser);
-        expect(isUserAnAdminOrEventManager(userManager, currentUser)).andReturn(true);
-
-        replay(userManager);
-
-        try (Response response = adminFacade.modifyUsersTeacherPendingStatus(mockRequest, false, targetUsers)) {
-          assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         }
 
         verify(userManager);
