@@ -63,7 +63,6 @@ import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -317,7 +316,7 @@ public class AdminFacade extends AbstractSegueFacade {
                                                                final List<Long> userIds) {
 
     if (userIds == null || userIds.isEmpty()) {
-      return  new SegueErrorResponse(Status.BAD_REQUEST, "No userIds provided")
+      return new SegueErrorResponse(Status.BAD_REQUEST, "No userIds provided")
           .toResponse();
     }
 
