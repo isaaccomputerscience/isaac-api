@@ -24,6 +24,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.IsaacItemQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuestionPage;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuiz;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacSymbolicQuestion;
+import uk.ac.cam.cl.dtg.isaac.dos.IsaacWildcard;
 import uk.ac.cam.cl.dtg.isaac.dos.QuizFeedbackMode;
 import uk.ac.cam.cl.dtg.isaac.dos.RoleRequirement;
 import uk.ac.cam.cl.dtg.isaac.dos.Stage;
@@ -39,12 +40,14 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Item;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
 import uk.ac.cam.cl.dtg.isaac.dos.content.SeguePage;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardItem;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacFreeTextQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacItemQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuestionPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacSymbolicQuestionDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.IsaacWildcardDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizFeedbackDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.AnvilAppDTO;
@@ -143,8 +146,11 @@ class ContentMapperTest {
         Arguments.of(setOriginalCommonContentDTOProperties(prepareIsaacQuestionPageDTO()), ContentSummaryDTO.class, prepareContentSummaryDTOFromIsaacQuestionPageDTO()),
         Arguments.of(setOriginalCommonContentDTOProperties(prepareCodeSnippetDTO()), ContentSummaryDTO.class, prepareContentSummaryDTOFromCodeSnippetDTO()),
         Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), QuizSummaryDTO.class, prepareQuizSummaryDTOFromContentDTO()),
-        Arguments.of(setOriginalCommonContentDTOProperties(prepareOriginalIsaacQuizDTO()), QuizSummaryDTO.class, prepareQuizSummaryDTOFromIsaacQuiz())
-    );
+        Arguments.of(setOriginalCommonContentDTOProperties(prepareOriginalIsaacQuizDTO()), QuizSummaryDTO.class, prepareQuizSummaryDTOFromIsaacQuiz()),
+        Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), IsaacWildcard.class, prepareIsaacWildcardFromContentDTO()),
+        Arguments.of(setOriginalCommonContentDTOProperties(prepareIsaacWildcardDTO()), IsaacWildcard.class, prepareIsaacWildcardFromIsaacWildcardDTO()),
+        Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), GameboardItem.class, prepareGameboardItemFromContentDTO())
+        );
   }
 
   // Common properties for Content objects, including those inherited from the abstract ContentBase class
@@ -864,7 +870,8 @@ class ContentMapperTest {
     object.setLevel("2");
     object.setTags(List.of("tag1", "tag2"));
     object.setUrl(null);
-    // Note: there
+    // Note: there do not appear to be any ContentDTO subclasses that currently make use of the correct field
+    // While Choice does have such a field, ChoiceDTO does not
     object.setCorrect(null);
     object.setQuestionPartIds(List.of());
     object.setSupersededBy(null);
@@ -969,6 +976,52 @@ class ContentMapperTest {
     object.setAudience(List.of(audience));
 
     object.setHiddenFromRoles(List.of("blockedRole1", "blockedRole2"));
+    return object;
+  }
+
+  private static IsaacWildcardDTO prepareIsaacWildcardDTO() {
+    IsaacWildcardDTO object = new IsaacWildcardDTO();
+    object.setDescription("description");
+    object.setUrl("url");
+    return object;
+  }
+
+  private static IsaacWildcard prepareIsaacWildcardFromContentDTO() {
+    return setMappedCommonContentProperties(new IsaacWildcard());
+  }
+
+  private static IsaacWildcard prepareIsaacWildcardFromIsaacWildcardDTO() {
+    IsaacWildcard object = setMappedCommonContentProperties(new IsaacWildcard());
+    object.setDescription("description");
+    object.setUrl("url");
+    return object;
+  }
+
+  private static GameboardItem prepareGameboardItemFromContentDTO() {
+    AudienceContext audience = new AudienceContext();
+    audience.setStage(List.of(Stage.a_level));
+    audience.setExamBoard(List.of(ExamBoard.aqa));
+    audience.setDifficulty(List.of(Difficulty.challenge_2));
+    audience.setRole(List.of(RoleRequirement.logged_in));
+
+    GameboardItem object  = new GameboardItem();
+    object.setId("id");
+    object.setContentType(null);
+    object.setTitle("title");
+    object.setDescription(null);
+    object.setUri(null);
+    object.setTags(List.of("tag1", "tag2"));
+    object.setAudience(List.of(audience));
+    object.setCreationContext(null);
+    object.setLevel(2);
+    object.setDifficulty(null);
+    object.setQuestionPartsCorrect(null);
+    object.setQuestionPartsIncorrect(null);
+    object.setQuestionPartsNotAttempted(null);
+    object.setQuestionPartsTotal(null);
+    object.setPassMark(null);
+    object.setState(null);
+    object.setQuestionPartStates(List.of());
     return object;
   }
 }
