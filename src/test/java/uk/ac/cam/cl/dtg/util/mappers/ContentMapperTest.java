@@ -848,7 +848,7 @@ class ContentMapperTest {
     object.setSummary(null);
     object.setType("type");
     object.setLevel("2");
-    object.setTags(List.of("tag2", "tag1"));
+    object.setTags(List.of("tag1", "tag2"));
     object.setUrl(null);
     object.setCorrect(null);
     object.setQuestionPartIds(List.of());
@@ -872,7 +872,7 @@ class ContentMapperTest {
     object.setSummary(null);
     object.setType("type");
     object.setLevel("2");
-    object.setTags(List.of("tag2", "tag1"));
+    object.setTags(List.of("tag1", "tag2"));
     object.setUrl(null);
     object.setCorrect(true);
     object.setQuestionPartIds(List.of());
@@ -893,10 +893,10 @@ class ContentMapperTest {
     ContentSummaryDTO object = new ContentSummaryDTO();
     object.setId("id");
     object.setTitle("title");
-    object.setSummary(null);
+    object.setSummary("summary");
     object.setType("type");
     object.setLevel("2");
-    object.setTags(List.of("tag2", "tag1"));
+    object.setTags(List.of("tag1", "tag2"));
     object.setUrl(null);
     object.setCorrect(null);
     object.setQuestionPartIds(List.of());
@@ -920,7 +920,7 @@ class ContentMapperTest {
     object.setSummary(null);
     object.setType("type");
     object.setLevel("2");
-    object.setTags(List.of("tag2", "tag1"));
+    object.setTags(List.of("tag1", "tag2"));
     object.setUrl("url");
     object.setCorrect(null);
     object.setQuestionPartIds(List.of());
