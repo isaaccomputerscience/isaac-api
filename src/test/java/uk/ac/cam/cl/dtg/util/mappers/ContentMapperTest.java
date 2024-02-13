@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.dtg.util.mappers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.elasticsearch.core.Map;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -44,6 +46,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.GameboardItem;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacFreeTextQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacItemQuestionDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.IsaacPodDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuestionPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuizDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacSymbolicQuestionDTO;
@@ -102,6 +105,13 @@ class ContentMapperTest {
     assertDeepEquals(expected, actual);
   }
 
+  @Test
+  void defaultMappingMethodFrom_ContentDTO_throwsUnimplementedMappingExceptionForUnexpectedTarget() {
+    ContentDTO source = new ContentDTO();
+    Exception exception = assertThrows(UnimplementedMappingException.class, () -> mapper.map(source, IsaacPodDTO.class));
+    assertEquals("Invocation of unimplemented mapping from ContentDTO to IsaacPodDTO", exception.getMessage());
+  }
+
   private static Stream<Arguments> testCasesDOtoDTO() {
     return Stream.of(
         Arguments.of(new Content(), new ContentDTO()),
@@ -149,7 +159,8 @@ class ContentMapperTest {
         Arguments.of(setOriginalCommonContentDTOProperties(prepareOriginalIsaacQuizDTO()), QuizSummaryDTO.class, prepareQuizSummaryDTOFromIsaacQuiz()),
         Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), IsaacWildcard.class, prepareIsaacWildcardFromContentDTO()),
         Arguments.of(setOriginalCommonContentDTOProperties(prepareIsaacWildcardDTO()), IsaacWildcard.class, prepareIsaacWildcardFromIsaacWildcardDTO()),
-        Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), GameboardItem.class, prepareGameboardItemFromContentDTO())
+        Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), GameboardItem.class, prepareGameboardItemFromContentDTO()),
+        Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), Content.class, setMappedCommonContentProperties(new Content()))
         );
   }
 

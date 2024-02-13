@@ -120,7 +120,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.RegexPatternDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.StringChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.VideoDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
 import uk.ac.cam.cl.dtg.segue.dos.content.InteractiveCodeSnippet;
 import uk.ac.cam.cl.dtg.segue.dto.content.InteractiveCodeSnippetDTO;
 import uk.ac.cam.cl.dtg.util.locations.Address;
@@ -295,7 +294,7 @@ public interface ContentMapper {
     } else if (targetClass.equals(Content.class)) {
       return (T) mapContent(source);
     } else {
-      throw new UnimplementedMappingException(EventBookingDTO.class, targetClass);
+      throw new UnimplementedMappingException(ContentDTO.class, targetClass);
     }
   }
 
@@ -305,7 +304,7 @@ public interface ContentMapper {
     } else if (targetClass.equals(ContentDTO.class)) {
       return (T) mapContent(source);
     } else {
-      throw new UnimplementedMappingException(EventBookingDTO.class, targetClass);
+      throw new UnimplementedMappingException(Content.class, targetClass);
     }
   }
 
