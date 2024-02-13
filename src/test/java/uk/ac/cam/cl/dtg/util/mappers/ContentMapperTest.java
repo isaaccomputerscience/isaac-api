@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -138,10 +140,10 @@ class ContentMapperTest {
   private static Stream<Arguments> testCasesFromContentDTO() {
     return Stream.of(
         Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), ContentSummaryDTO.class, prepareContentSummaryDTOFromContentDTO()),
-        Arguments.of(setOriginalCommonContentDTOProperties(prepareChoiceDTO()), ContentSummaryDTO.class, prepareContentSummaryDTOFromChoiceDTO()),
         Arguments.of(setOriginalCommonContentDTOProperties(prepareIsaacQuestionPageDTO()), ContentSummaryDTO.class, prepareContentSummaryDTOFromIsaacQuestionPageDTO()),
         Arguments.of(setOriginalCommonContentDTOProperties(prepareCodeSnippetDTO()), ContentSummaryDTO.class, prepareContentSummaryDTOFromCodeSnippetDTO()),
-        Arguments.of(setOriginalCommonContentDTOProperties(prepareOriginalIsaacQuizDTO()), QuizSummaryDTO.class)
+        Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), QuizSummaryDTO.class, prepareQuizSummaryDTOFromContentDTO()),
+        Arguments.of(setOriginalCommonContentDTOProperties(prepareOriginalIsaacQuizDTO()), QuizSummaryDTO.class, prepareQuizSummaryDTOFromIsaacQuiz())
     );
   }
 
@@ -154,9 +156,12 @@ class ContentMapperTest {
     audience.setDifficulty(List.of(Difficulty.challenge_2));
     audience.setRole(List.of(RoleRequirement.logged_in));
 
+    Set<String> tags = new LinkedHashSet<>();
+    Collections.addAll(tags, "tag1", "tag2");
+
     source.setId("id");
     source.setType("type");
-    source.setTags(Set.of("tag1", "tag2"));
+    source.setTags(tags);
     source.setCanonicalSourceFile("sourceFile");
     source.setVersion("version");
     source.setAudience(List.of(audience));
@@ -196,9 +201,12 @@ class ContentMapperTest {
     audience.setDifficulty(List.of(Difficulty.challenge_2));
     audience.setRole(List.of(RoleRequirement.logged_in));
 
+    Set<String> tags = new LinkedHashSet<>();
+    Collections.addAll(tags, "tag1", "tag2");
+
     source.setId("id");
     source.setType("type");
-    source.setTags(Set.of("tag1", "tag2"));
+    source.setTags(tags);
     source.setCanonicalSourceFile("sourceFile");
     source.setVersion("version");
     source.setAudience(List.of(audience));
@@ -241,9 +249,12 @@ class ContentMapperTest {
     audience.setDifficulty(List.of(Difficulty.challenge_2));
     audience.setRole(List.of(RoleRequirement.logged_in));
 
+    Set<String> tags = new LinkedHashSet<>();
+    Collections.addAll(tags, "tag1", "tag2");
+
     source.setId("id");
     source.setType("type");
-    source.setTags(Set.of("tag1", "tag2"));
+    source.setTags(tags);
     source.setCanonicalSourceFile("sourceFile");
     source.setVersion("version");
     source.setAudience(List.of(audience));
@@ -287,9 +298,12 @@ class ContentMapperTest {
     audience.setDifficulty(List.of(Difficulty.challenge_2));
     audience.setRole(List.of(RoleRequirement.logged_in));
 
+    Set<String> tags = new LinkedHashSet<>();
+    Collections.addAll(tags, "tag1", "tag2");
+
     source.setId("id");
     source.setType("type");
-    source.setTags(Set.of("tag1", "tag2"));
+    source.setTags(tags);
     source.setCanonicalSourceFile("sourceFile");
     source.setVersion("version");
     source.setAudience(List.of(audience));
@@ -850,31 +864,8 @@ class ContentMapperTest {
     object.setLevel("2");
     object.setTags(List.of("tag1", "tag2"));
     object.setUrl(null);
+    // Note: there
     object.setCorrect(null);
-    object.setQuestionPartIds(List.of());
-    object.setSupersededBy(null);
-    object.setDeprecated(false);
-    object.setDifficulty(null);
-    object.setAudience(List.of(audience));
-    return object;
-  }
-
-  private static ContentSummaryDTO prepareContentSummaryDTOFromChoiceDTO() {
-    AudienceContext audience = new AudienceContext();
-    audience.setStage(List.of(Stage.a_level));
-    audience.setExamBoard(List.of(ExamBoard.aqa));
-    audience.setDifficulty(List.of(Difficulty.challenge_2));
-    audience.setRole(List.of(RoleRequirement.logged_in));
-
-    ContentSummaryDTO object = new ContentSummaryDTO();
-    object.setId("id");
-    object.setTitle("title");
-    object.setSummary(null);
-    object.setType("type");
-    object.setLevel("2");
-    object.setTags(List.of("tag1", "tag2"));
-    object.setUrl(null);
-    object.setCorrect(true);
     object.setQuestionPartIds(List.of());
     object.setSupersededBy(null);
     object.setDeprecated(false);
@@ -931,7 +922,7 @@ class ContentMapperTest {
     return object;
   }
 
-  private static QuizSummaryDTO prepareQuizSummaryDTOFromIsaacQuiz() {
+  private static QuizSummaryDTO prepareQuizSummaryDTOFromContentDTO() {
     AudienceContext audience = new AudienceContext();
     audience.setStage(List.of(Stage.a_level));
     audience.setExamBoard(List.of(ExamBoard.aqa));
@@ -942,6 +933,30 @@ class ContentMapperTest {
     object.setId("id");
     object.setTitle("title");
     object.setSummary(null);
+    object.setType("type");
+    object.setLevel("2");
+    object.setTags(List.of("tag1", "tag2"));
+    object.setUrl(null);
+    object.setCorrect(null);
+    object.setQuestionPartIds(List.of());
+    object.setSupersededBy(null);
+    object.setDeprecated(false);
+    object.setDifficulty(null);
+    object.setAudience(List.of(audience));
+    return object;
+  }
+
+  private static QuizSummaryDTO prepareQuizSummaryDTOFromIsaacQuiz() {
+    AudienceContext audience = new AudienceContext();
+    audience.setStage(List.of(Stage.a_level));
+    audience.setExamBoard(List.of(ExamBoard.aqa));
+    audience.setDifficulty(List.of(Difficulty.challenge_2));
+    audience.setRole(List.of(RoleRequirement.logged_in));
+
+    QuizSummaryDTO object = new QuizSummaryDTO();
+    object.setId("id");
+    object.setTitle("title");
+    object.setSummary("summary");
     object.setType("type");
     object.setLevel("2");
     object.setTags(List.of("tag1", "tag2"));

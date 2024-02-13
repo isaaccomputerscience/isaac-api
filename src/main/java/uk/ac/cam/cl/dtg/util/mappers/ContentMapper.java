@@ -327,12 +327,6 @@ public interface ContentMapper {
   List<Address> copyListOfAddress(List<Address> source);
 
   // Specific mappings for use by above mappers
-  @Mapping(target = "url", ignore = true)
-  @Mapping(target = "supersededBy", ignore = true)
-  @Mapping(target = "summary", ignore = true)
-  @Mapping(target = "questionPartIds", ignore = true)
-  @Mapping(target = "difficulty", ignore = true)
-  @Mapping(target = "correct", ignore = true)
   @BeanMapping(resultType = ContentSummaryDTO.class)
   @SubclassMapping(source = InteractiveCodeSnippetDTO.class, target = ContentSummaryDTO.class)
   @SubclassMapping(source = ParsonsItemDTO.class, target = ContentSummaryDTO.class)
@@ -356,14 +350,6 @@ public interface ContentMapper {
   @SubclassMapping(source = SeguePageDTO.class, target = ContentSummaryDTO.class)
   ContentSummaryDTO mapContentDTOtoContentSummaryDTO(ContentDTO source);
 
-  @Mapping(target = "visibleToStudents", ignore = true)
-  @Mapping(target = "url", ignore = true)
-  @Mapping(target = "supersededBy", ignore = true)
-  @Mapping(target = "summary", ignore = true)
-  @Mapping(target = "questionPartIds", ignore = true)
-  @Mapping(target = "hiddenFromRoles", ignore = true)
-  @Mapping(target = "difficulty", ignore = true)
-  @Mapping(target = "correct", ignore = true)
   @SubclassMapping(source = ParsonsChoiceDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = FormulaDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = FreeTextRuleDTO.class, target = QuizSummaryDTO.class)
@@ -423,8 +409,6 @@ public interface ContentMapper {
   @SubclassMapping(source = NotificationDTO.class, target = QuizSummaryDTO.class)
   QuizSummaryDTO mapContentDTOtoQuizSummaryDTO(ContentDTO source);
 
-  @Mapping(target = "url", ignore = true)
-  @Mapping(target = "description", ignore = true)
   @SubclassMapping(source = ParsonsChoice.class, target = IsaacWildcard.class)
   @SubclassMapping(source = Formula.class, target = IsaacWildcard.class)
   @SubclassMapping(source = FreeTextRule.class, target = IsaacWildcard.class)
