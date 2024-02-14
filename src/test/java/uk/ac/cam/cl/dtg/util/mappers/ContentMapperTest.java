@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.dtg.util.mappers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
 
@@ -23,6 +24,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.ExamBoard;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacEventPage;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacFreeTextQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacItemQuestion;
+import uk.ac.cam.cl.dtg.isaac.dos.IsaacPod;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuestionPage;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacQuiz;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacSymbolicQuestion;
@@ -105,11 +107,36 @@ class ContentMapperTest {
     assertDeepEquals(expected, actual);
   }
 
+  @ParameterizedTest
+  @MethodSource("testCasesFromContent")
+  <T> void defaultMappingMethodFrom_Content_returnsRequestedClass(Content source, Class<T> targetClass, T expected)
+      throws JsonProcessingException {
+    T actual = mapper.map(source, targetClass);
+    assertEquals(targetClass, actual.getClass());
+    assertDeepEquals(expected, actual);
+  }
+
   @Test
   void defaultMappingMethodFrom_ContentDTO_throwsUnimplementedMappingExceptionForUnexpectedTarget() {
     ContentDTO source = new ContentDTO();
     Exception exception = assertThrows(UnimplementedMappingException.class, () -> mapper.map(source, IsaacPodDTO.class));
     assertEquals("Invocation of unimplemented mapping from ContentDTO to IsaacPodDTO", exception.getMessage());
+  }
+
+  @Test
+  void defaultMappingMethodFrom_Content_throwsUnimplementedMappingExceptionForUnexpectedTarget() {
+    Content source = new Content();
+    Exception exception = assertThrows(UnimplementedMappingException.class, () -> mapper.map(source, IsaacPod.class));
+    assertEquals("Invocation of unimplemented mapping from Content to IsaacPod", exception.getMessage());
+  }
+
+  @ParameterizedTest
+  @MethodSource("testCasesCopyDTO")
+  void copyContentDTOReturnsNewObjectWithSameProperties(ContentDTO source) throws JsonProcessingException {
+    ContentDTO actual = mapper.copy(source);
+    assertEquals(actual.getClass(), source.getClass());
+    assertNotSame(actual, source);
+    assertDeepEquals(actual, source);
   }
 
   private static Stream<Arguments> testCasesDOtoDTO() {
@@ -162,6 +189,20 @@ class ContentMapperTest {
         Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), GameboardItem.class, prepareGameboardItemFromContentDTO()),
         Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO()), Content.class, setMappedCommonContentProperties(new Content()))
         );
+  }
+
+  private static Stream<Arguments> testCasesFromContent() {
+    return Stream.of(
+        Arguments.of(setOriginalCommonContentProperties(new Content()), IsaacWildcard.class, prepareIsaacWildcardFromContent()),
+        Arguments.of(setOriginalCommonContentProperties(prepareIsaacWildcard()), IsaacWildcard.class, prepareIsaacWildcardFromIsaacWildcard())
+    );
+  }
+
+  private static Stream<Arguments> testCasesCopyDTO() {
+    return Stream.of(
+        Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO())),
+        Arguments.of(prepareOriginalIsaacEventPageDTO())
+    );
   }
 
   // Common properties for Content objects, including those inherited from the abstract ContentBase class
@@ -990,6 +1031,14 @@ class ContentMapperTest {
     return object;
   }
 
+  // Wildcard
+  private static IsaacWildcard prepareIsaacWildcard() {
+    IsaacWildcard object = new IsaacWildcard();
+    object.setDescription("description");
+    object.setUrl("url");
+    return object;
+  }
+
   private static IsaacWildcardDTO prepareIsaacWildcardDTO() {
     IsaacWildcardDTO object = new IsaacWildcardDTO();
     object.setDescription("description");
@@ -997,8 +1046,19 @@ class ContentMapperTest {
     return object;
   }
 
+  private static IsaacWildcard prepareIsaacWildcardFromContent() {
+    return setOriginalCommonContentProperties(new IsaacWildcard());
+  }
+
   private static IsaacWildcard prepareIsaacWildcardFromContentDTO() {
     return setMappedCommonContentProperties(new IsaacWildcard());
+  }
+
+  private static IsaacWildcard prepareIsaacWildcardFromIsaacWildcard() {
+    IsaacWildcard object = setOriginalCommonContentProperties(new IsaacWildcard());
+    object.setDescription("description");
+    object.setUrl("url");
+    return object;
   }
 
   private static IsaacWildcard prepareIsaacWildcardFromIsaacWildcardDTO() {
@@ -1008,6 +1068,7 @@ class ContentMapperTest {
     return object;
   }
 
+  // GameboardItem
   private static GameboardItem prepareGameboardItemFromContentDTO() {
     AudienceContext audience = new AudienceContext();
     audience.setStage(List.of(Stage.a_level));
