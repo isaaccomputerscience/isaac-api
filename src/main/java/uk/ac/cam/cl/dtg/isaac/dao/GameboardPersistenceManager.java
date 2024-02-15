@@ -17,7 +17,6 @@
 package uk.ac.cam.cl.dtg.isaac.dao;
 
 import static java.util.Objects.requireNonNull;
-import static uk.ac.cam.cl.dtg.isaac.api.Constants.FAST_TRACK_QUESTION_TYPE;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.QUESTION_TYPE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 
@@ -537,7 +536,7 @@ public class GameboardPersistenceManager {
         gameboardDO.getContents().stream().map(GameboardContentDescriptor::getId).collect(Collectors.toList())));
 
     fieldsToMap.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, Constants.BooleanOperator.OR, Arrays.asList(QUESTION_TYPE, FAST_TRACK_QUESTION_TYPE)));
+        TYPE_FIELDNAME, Constants.BooleanOperator.OR, List.of(QUESTION_TYPE)));
 
     // Search for questions that match the ids.
     ResultsWrapper<ContentDTO> results;

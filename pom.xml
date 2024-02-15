@@ -670,6 +670,9 @@
                                     <classPatterns>
                                         <classPattern>uk.ac.cam.cl.dtg.isaac.dto.**DTO</classPattern>
                                     </classPatterns>
+                                    <customTypeMappings>
+                                        <mapping>java.util.Date:EpochTimeStamp</mapping>
+                                    </customTypeMappings>
                                     <outputFile>isaac-dto-types.d.ts</outputFile>
                                 </configuration>
                             </execution>
@@ -683,6 +686,9 @@
                                     <classPatterns>
                                         <classPattern>uk.ac.cam.cl.dtg.isaac.dos.**</classPattern>
                                     </classPatterns>
+                                    <customTypeMappings>
+                                        <mapping>java.util.Date:EpochTimeStamp</mapping>
+                                    </customTypeMappings>
                                     <outputFile>isaac-do-types.d.ts</outputFile>
                                 </configuration>
                             </execution>

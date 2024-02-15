@@ -18,7 +18,6 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 
 import static com.google.common.collect.Maps.immutableEntry;
 import static java.util.Objects.requireNonNull;
-import static uk.ac.cam.cl.dtg.isaac.api.Constants.FAST_TRACK_QUESTION_TYPE;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacServerLogType;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.QUESTION_TYPE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.BooleanOperator;
@@ -632,7 +631,7 @@ public class StatisticsManager implements IStatisticsManager {
         new ArrayList<>(ids));
 
     fieldsToMap.put(immutableEntry(BooleanOperator.OR, TYPE_FIELDNAME),
-        Arrays.asList(QUESTION_TYPE, FAST_TRACK_QUESTION_TYPE));
+        List.of(QUESTION_TYPE));
 
     // Search for questions that match the ids.
     ResultsWrapper<ContentDTO> allMatchingIds =
