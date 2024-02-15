@@ -1,21 +1,26 @@
 package uk.ac.cam.cl.dtg.util.mappers;
 
 import org.mapstruct.BeanMapping;
+import org.mapstruct.CollectionMappingStrategy;
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.NullValueCheckStrategy;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.SubclassExhaustiveStrategy;
 import org.mapstruct.SubclassMapping;
 import org.mapstruct.factory.Mappers;
 import uk.ac.cam.cl.dtg.isaac.dos.GroupMembership;
 import uk.ac.cam.cl.dtg.isaac.dos.UserGroup;
+import uk.ac.cam.cl.dtg.isaac.dos.users.AbstractSegueUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.AnonymousUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserAuthenticationSettings;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserFromAuthProvider;
 import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.GroupMembershipDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
@@ -26,12 +31,20 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDto;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithGroupMembershipDTO;
 
-@Mapper
+@Mapper(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION, collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE)
 public interface UserMapper {
 
   UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
   // DO <-> DTO Mappings
+  @InheritInverseConfiguration
+  AbstractSegueUser map(AbstractSegueUserDTO source);
+
+  @SubclassMapping(source = RegisteredUser.class, target = RegisteredUserDTO.class)
+  @SubclassMapping(source = UserAuthenticationSettings.class, target = UserAuthenticationSettingsDTO.class)
+  @SubclassMapping(source = AnonymousUser.class, target = AnonymousUserDTO.class)
+  AbstractSegueUserDTO map(AbstractSegueUser source);
+
   @Mapping(target = "emailVerificationToken", ignore = true)
   @Mapping(target = "emailToVerify", ignore = true)
   RegisteredUser map(RegisteredUserDTO source);
@@ -105,6 +118,7 @@ public interface UserMapper {
   GroupMembershipDTO copy(GroupMembershipDTO source);
 
   @Named("copyUserSummaryDTO")
+  @SubclassMapping(source = UserSummaryForAdminUsersDTO.class, target = UserSummaryForAdminUsersDTO.class)
   @SubclassMapping(source = UserSummaryWithEmailAddressAndGenderDto.class,
       target = UserSummaryWithEmailAddressAndGenderDto.class)
   @SubclassMapping(source = UserSummaryWithEmailAddressDTO.class, target = UserSummaryWithEmailAddressDTO.class)
@@ -116,6 +130,8 @@ public interface UserMapper {
   UserSummaryWithEmailAddressDTO copy(UserSummaryWithEmailAddressDTO source);
 
   UserSummaryWithGroupMembershipDTO copy(UserSummaryWithGroupMembershipDTO source);
+
+  UserSummaryForAdminUsersDTO copy(UserSummaryForAdminUsersDTO source);
 
   // Mapping to an existing target object, without overwriting any target properties where the source would be null
   @Mapping(target = "emailVerificationToken", ignore = true)
@@ -142,6 +158,10 @@ public interface UserMapper {
   UserSummaryWithGroupMembershipDTO mapUserToSummaryWithGroupMembershipDTO(RegisteredUserDTO source);
 
   @Mapping(target = "groupMembershipInformation", ignore = true)
+  @SubclassMapping(source = UserSummaryForAdminUsersDTO.class, target = UserSummaryWithGroupMembershipDTO.class)
+  @SubclassMapping(source = UserSummaryWithEmailAddressAndGenderDto.class, target = UserSummaryWithGroupMembershipDTO.class)
+  @SubclassMapping(source = UserSummaryWithEmailAddressDTO.class, target = UserSummaryWithGroupMembershipDTO.class)
+  @SubclassMapping(source = UserSummaryWithGroupMembershipDTO.class, target = UserSummaryWithGroupMembershipDTO.class)
   UserSummaryWithGroupMembershipDTO mapUserSummaryDTOtoUserSummaryWithGroupMembershipDTO(UserSummaryDTO source);
 
   @Named("censorUserSummaryDTO")
