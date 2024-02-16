@@ -629,7 +629,7 @@ public class StatisticsManager implements IStatisticsManager {
     fieldsToMap.put(immutableEntry(BooleanOperator.OR, ID_FIELDNAME + '.' + UNPROCESSED_SEARCH_FIELD_SUFFIX),
         new ArrayList<>(ids));
 
-    fieldsToMap.put(immutableEntry(BooleanOperator.OR, TYPE_FIELDNAME),
+    fieldsToMap.put(immutableEntry(BooleanOperator.AND, TYPE_FIELDNAME),
         List.of(QUESTION_TYPE));
 
     // Search for questions that match the ids.

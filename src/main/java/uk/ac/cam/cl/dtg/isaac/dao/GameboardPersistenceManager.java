@@ -535,7 +535,7 @@ public class GameboardPersistenceManager {
         gameboardDO.getContents().stream().map(GameboardContentDescriptor::getId).collect(Collectors.toList())));
 
     fieldsToMap.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, Constants.BooleanOperator.OR, List.of(QUESTION_TYPE)));
+        TYPE_FIELDNAME, Constants.BooleanOperator.AND, List.of(QUESTION_TYPE)));
 
     // Search for questions that match the ids.
     ResultsWrapper<ContentDTO> results;

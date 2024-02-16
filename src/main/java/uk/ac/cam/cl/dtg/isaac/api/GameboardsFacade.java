@@ -316,7 +316,7 @@ public class GameboardsFacade extends AbstractIsaacFacade {
       return new SegueErrorResponse(Status.BAD_REQUEST, "No wildcard available. Unable to construct gameboard.")
           .toResponse();
     } catch (InvalidGameboardException e) {
-      return new SegueErrorResponse(Status.BAD_REQUEST, "The gameboard you provided is invalid")
+      return new SegueErrorResponse(Status.BAD_REQUEST, "The gameboard you provided is invalid", e)
           .toResponse();
     } catch (SegueDatabaseException e) {
       String message = "Database Error whilst trying to save the gameboard.";

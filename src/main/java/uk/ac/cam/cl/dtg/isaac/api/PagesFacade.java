@@ -319,7 +319,6 @@ public class PagesFacade extends AbstractIsaacFacade {
     fieldsToMatch.put(TYPE_FIELDNAME, List.of(QUESTION_TYPE));
     etagCodeBuilder.append(QUESTION_TYPE);
 
-
     // defaults
     int newLimit = DEFAULT_RESULTS_LIMIT;
     int newStartIndex = 0;
@@ -412,7 +411,7 @@ public class PagesFacade extends AbstractIsaacFacade {
                                     @Context final HttpServletRequest httpServletRequest,
                                     @PathParam("question_page_id") final String questionId) {
     Map<String, List<String>> fieldsToMatch = Maps.newHashMap();
-    fieldsToMatch.put("type", List.of(QUESTION_TYPE));
+    fieldsToMatch.put(TYPE_FIELDNAME, List.of(QUESTION_TYPE));
 
     if (null == questionId || questionId.isEmpty()) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a valid question id.").toResponse();
