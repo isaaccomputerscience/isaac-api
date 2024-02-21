@@ -39,7 +39,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserAuthenticationSettingsDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryForAdminUsersDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDto;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithGroupMembershipDTO;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
@@ -231,7 +231,7 @@ class UserMapperTest {
   private static Stream<Arguments> testCasesFromRegisteredUserDTO() {
     return Stream.of(
         Arguments.of(UserSummaryForAdminUsersDTO.class, prepareUserSummaryForAdminUsersDTOFromRegisteredUserDTO()),
-        Arguments.of(UserSummaryWithEmailAddressAndGenderDto.class, prepareUserSummaryWithEmailAddressAndGenderDtoFromRegisteredUserDTO()),
+        Arguments.of(UserSummaryWithEmailAddressAndGenderDTO.class, prepareUserSummaryWithEmailAddressAndGenderDTOFromRegisteredUserDTO()),
         Arguments.of(UserSummaryWithEmailAddressDTO.class, prepareUserSummaryWithEmailAddressDTOFromRegisteredUserDTO()),
         Arguments.of(UserSummaryWithGroupMembershipDTO.class, prepareUserSummaryWithGroupMembershipDTOFromRegisteredUserDTO()),
         Arguments.of(UserSummaryDTO.class, prepareUserSummaryDTOFromRegisteredUserDTO())
@@ -452,10 +452,10 @@ class UserMapperTest {
     return object;
   }
 
-  private static UserSummaryWithEmailAddressAndGenderDto prepareUserSummaryWithEmailAddressAndGenderDTO() {
-    UserSummaryWithEmailAddressAndGenderDto object = setUserSummaryDTOCommonFields(new UserSummaryWithEmailAddressAndGenderDto());
+  private static UserSummaryWithEmailAddressAndGenderDTO prepareUserSummaryWithEmailAddressAndGenderDTO() {
+    UserSummaryWithEmailAddressAndGenderDTO object = setUserSummaryDTOCommonFields(new UserSummaryWithEmailAddressAndGenderDTO());
     object.setEmail("email");
-    object.setGender("gender");
+    object.setGender(Gender.PREFER_NOT_TO_SAY);
     return object;
   }
 
@@ -494,10 +494,10 @@ class UserMapperTest {
 
   private static RegisteredUserDTO prepareMergeSourceRegisteredUserDTO() {
     UserContext userContext1 = new UserContext();
-    userContext1.setStage(Stage.further_a);
+    userContext1.setStage(Stage.gcse);
     userContext1.setExamBoard(ExamBoard.edexcel);
     UserContext userContext2 = new UserContext();
-    userContext2.setStage(Stage.university);
+    userContext2.setStage(Stage.all);
     userContext2.setExamBoard(ExamBoard.ocr);
 
     RegisteredUserDTO object = new RegisteredUserDTO();
@@ -523,10 +523,10 @@ class UserMapperTest {
 
   private static RegisteredUser prepareMergeExpectedRegisteredUserDO() {
     UserContext userContext1 = new UserContext();
-    userContext1.setStage(Stage.further_a);
+    userContext1.setStage(Stage.gcse);
     userContext1.setExamBoard(ExamBoard.edexcel);
     UserContext userContext2 = new UserContext();
-    userContext2.setStage(Stage.university);
+    userContext2.setStage(Stage.all);
     userContext2.setExamBoard(ExamBoard.ocr);
 
     RegisteredUser object = new RegisteredUser();
@@ -579,10 +579,10 @@ class UserMapperTest {
     return object;
   }
 
-  private static UserSummaryWithEmailAddressAndGenderDto prepareUserSummaryWithEmailAddressAndGenderDtoFromRegisteredUserDTO() {
-    UserSummaryWithEmailAddressAndGenderDto object = prepareUserSummaryWithEmailAddressAndGenderDTO();
+  private static UserSummaryWithEmailAddressAndGenderDTO prepareUserSummaryWithEmailAddressAndGenderDTOFromRegisteredUserDTO() {
+    UserSummaryWithEmailAddressAndGenderDTO object = prepareUserSummaryWithEmailAddressAndGenderDTO();
     object.setAuthorisedFullAccess(false);
-    object.setGender("MALE");
+    object.setGender(Gender.MALE);
     return object;
   }
 

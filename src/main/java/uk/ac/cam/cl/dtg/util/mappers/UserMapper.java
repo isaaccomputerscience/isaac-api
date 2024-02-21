@@ -27,7 +27,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserAuthenticationSettingsDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryForAdminUsersDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDto;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithGroupMembershipDTO;
 
@@ -77,7 +77,7 @@ public interface UserMapper {
   default <T extends UserSummaryDTO> T map(RegisteredUserDTO source, Class<T> targetClass) {
     if (targetClass.equals(UserSummaryForAdminUsersDTO.class)) {
       return (T) mapUserToAdminSummaryDTO(source);
-    } else if (targetClass.equals(UserSummaryWithEmailAddressAndGenderDto.class)) {
+    } else if (targetClass.equals(UserSummaryWithEmailAddressAndGenderDTO.class)) {
       return (T) mapUserToSummaryWithEmailAndGenderDTO(source);
     } else if (targetClass.equals(UserSummaryWithEmailAddressDTO.class)) {
       return (T) mapUserToSummaryWithEmailDTO(source);
@@ -119,13 +119,13 @@ public interface UserMapper {
 
   @Named("copyUserSummaryDTO")
   @SubclassMapping(source = UserSummaryForAdminUsersDTO.class, target = UserSummaryForAdminUsersDTO.class)
-  @SubclassMapping(source = UserSummaryWithEmailAddressAndGenderDto.class,
-      target = UserSummaryWithEmailAddressAndGenderDto.class)
+  @SubclassMapping(source = UserSummaryWithEmailAddressAndGenderDTO.class,
+      target = UserSummaryWithEmailAddressAndGenderDTO.class)
   @SubclassMapping(source = UserSummaryWithEmailAddressDTO.class, target = UserSummaryWithEmailAddressDTO.class)
   @SubclassMapping(source = UserSummaryWithGroupMembershipDTO.class, target = UserSummaryWithGroupMembershipDTO.class)
   UserSummaryDTO copy(UserSummaryDTO source);
 
-  UserSummaryWithEmailAddressAndGenderDto copy(UserSummaryWithEmailAddressAndGenderDto source);
+  UserSummaryWithEmailAddressAndGenderDTO copy(UserSummaryWithEmailAddressAndGenderDTO source);
 
   UserSummaryWithEmailAddressDTO copy(UserSummaryWithEmailAddressDTO source);
 
@@ -148,7 +148,7 @@ public interface UserMapper {
   UserSummaryForAdminUsersDTO mapUserToAdminSummaryDTO(RegisteredUserDTO source);
 
   @Mapping(target = "authorisedFullAccess", ignore = true)
-  UserSummaryWithEmailAddressAndGenderDto mapUserToSummaryWithEmailAndGenderDTO(RegisteredUserDTO source);
+  UserSummaryWithEmailAddressAndGenderDTO mapUserToSummaryWithEmailAndGenderDTO(RegisteredUserDTO source);
 
   @Mapping(target = "authorisedFullAccess", ignore = true)
   UserSummaryWithEmailAddressDTO mapUserToSummaryWithEmailDTO(RegisteredUserDTO source);
@@ -159,7 +159,7 @@ public interface UserMapper {
 
   @Mapping(target = "groupMembershipInformation", ignore = true)
   @SubclassMapping(source = UserSummaryForAdminUsersDTO.class, target = UserSummaryWithGroupMembershipDTO.class)
-  @SubclassMapping(source = UserSummaryWithEmailAddressAndGenderDto.class, target = UserSummaryWithGroupMembershipDTO.class)
+  @SubclassMapping(source = UserSummaryWithEmailAddressAndGenderDTO.class, target = UserSummaryWithGroupMembershipDTO.class)
   @SubclassMapping(source = UserSummaryWithEmailAddressDTO.class, target = UserSummaryWithGroupMembershipDTO.class)
   @SubclassMapping(source = UserSummaryWithGroupMembershipDTO.class, target = UserSummaryWithGroupMembershipDTO.class)
   UserSummaryWithGroupMembershipDTO mapUserSummaryDTOtoUserSummaryWithGroupMembershipDTO(UserSummaryDTO source);

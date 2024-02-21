@@ -14,7 +14,6 @@ import uk.ac.cam.cl.dtg.isaac.dos.IsaacCardDeck;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacClozeQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacConceptPage;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacEventPage;
-import uk.ac.cam.cl.dtg.isaac.dos.IsaacFastTrackQuestionPage;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacFeaturedProfile;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacFreeTextQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacItemQuestion;
@@ -47,8 +46,8 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Figure;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Formula;
 import uk.ac.cam.cl.dtg.isaac.dos.content.FreeTextRule;
 import uk.ac.cam.cl.dtg.isaac.dos.content.GlossaryTerm;
-import uk.ac.cam.cl.dtg.isaac.dos.content.GraphChoice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Image;
+import uk.ac.cam.cl.dtg.isaac.dos.content.InteractiveCodeSnippet;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Item;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ItemChoice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.LogicFormula;
@@ -70,7 +69,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacCardDeckDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacClozeQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacConceptPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.IsaacFastTrackQuestionPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacFeaturedProfileDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacFreeTextQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacItemQuestionDTO;
@@ -104,8 +102,8 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.FigureDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.FormulaDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.FreeTextRuleDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.GlossaryTermDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.content.GraphChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ImageDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.InteractiveCodeSnippetDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ItemChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ItemDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.LogicFormulaDTO;
@@ -120,8 +118,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.RegexPatternDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.StringChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.VideoDTO;
-import uk.ac.cam.cl.dtg.segue.dos.content.InteractiveCodeSnippet;
-import uk.ac.cam.cl.dtg.segue.dto.content.InteractiveCodeSnippetDTO;
 import uk.ac.cam.cl.dtg.util.locations.Address;
 import uk.ac.cam.cl.dtg.util.locations.Location;
 
@@ -167,7 +163,6 @@ public interface ContentMapper {
 
   @SubclassMapping(source = Formula.class, target = FormulaDTO.class)
   @SubclassMapping(source = FreeTextRule.class, target = FreeTextRuleDTO.class)
-  @SubclassMapping(source = GraphChoice.class, target = GraphChoiceDTO.class)
   @SubclassMapping(source = ItemChoice.class, target = ItemChoiceDTO.class)
   @SubclassMapping(source = LogicFormula.class, target = LogicFormulaDTO.class)
   @SubclassMapping(source = Quantity.class, target = QuantityDTO.class)
@@ -224,10 +219,8 @@ public interface ContentMapper {
   SeguePageDTO mapSeguePage(SeguePage source);
 
   @Mapping(target = "searchableContent", ignore = true)
-  @SubclassMapping(source = IsaacFastTrackQuestionPageDTO.class, target = IsaacFastTrackQuestionPage.class)
   IsaacQuestionPage map(IsaacQuestionPageDTO source);
 
-  @SubclassMapping(source = IsaacFastTrackQuestionPage.class, target = IsaacFastTrackQuestionPageDTO.class)
   IsaacQuestionPageDTO map(IsaacQuestionPage source);
 
   @Mapping(target = "searchableContent", ignore = true)
@@ -352,7 +345,6 @@ public interface ContentMapper {
   @SubclassMapping(source = ParsonsChoiceDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = FormulaDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = FreeTextRuleDTO.class, target = QuizSummaryDTO.class)
-  @SubclassMapping(source = GraphChoiceDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = ItemChoiceDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = LogicFormulaDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = QuantityDTO.class, target = QuizSummaryDTO.class)
@@ -360,7 +352,6 @@ public interface ContentMapper {
   @SubclassMapping(source = StringChoiceDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = ChoiceDTO.class, target = QuizSummaryDTO.class)
   // SeguePage Subclasses
-  @SubclassMapping(source = IsaacFastTrackQuestionPageDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = IsaacConceptPageDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = IsaacQuestionPageDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = IsaacQuizDTO.class, target = QuizSummaryDTO.class)
@@ -411,7 +402,6 @@ public interface ContentMapper {
   @SubclassMapping(source = ParsonsChoice.class, target = IsaacWildcard.class)
   @SubclassMapping(source = Formula.class, target = IsaacWildcard.class)
   @SubclassMapping(source = FreeTextRule.class, target = IsaacWildcard.class)
-  @SubclassMapping(source = GraphChoice.class, target = IsaacWildcard.class)
   @SubclassMapping(source = ItemChoice.class, target = IsaacWildcard.class)
   @SubclassMapping(source = LogicFormula.class, target = IsaacWildcard.class)
   @SubclassMapping(source = Quantity.class, target = IsaacWildcard.class)
@@ -419,7 +409,6 @@ public interface ContentMapper {
   @SubclassMapping(source = StringChoice.class, target = IsaacWildcard.class)
   @SubclassMapping(source = Choice.class, target = IsaacWildcard.class)
   // SeguePage Subclasses
-  @SubclassMapping(source = IsaacFastTrackQuestionPage.class, target = IsaacWildcard.class)
   @SubclassMapping(source = IsaacConceptPage.class, target = IsaacWildcard.class)
   @SubclassMapping(source = IsaacQuestionPage.class, target = IsaacWildcard.class)
   @SubclassMapping(source = IsaacQuiz.class, target = IsaacWildcard.class)
@@ -528,7 +517,6 @@ public interface ContentMapper {
   @SubclassMapping(source = ParsonsChoiceDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = FormulaDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = FreeTextRuleDTO.class, target = GameboardItem.class)
-  @SubclassMapping(source = GraphChoiceDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = ItemChoiceDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = LogicFormulaDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = QuantityDTO.class, target = GameboardItem.class)
@@ -536,7 +524,6 @@ public interface ContentMapper {
   @SubclassMapping(source = StringChoiceDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = ChoiceDTO.class, target = GameboardItem.class)
   // SeguePage Subclasses
-  @SubclassMapping(source = IsaacFastTrackQuestionPageDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = IsaacConceptPageDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = IsaacQuestionPageDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = IsaacQuizDTO.class, target = GameboardItem.class)

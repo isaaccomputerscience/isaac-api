@@ -715,7 +715,7 @@ class ContentMapperTest {
     IsaacQuestionPage object = (IsaacQuestionPage) prepareSeguePageDO(new IsaacQuestionPage());
     object.setPassMark(50F);
     object.setSupersededBy("newVersion");
-    object.setDifficulty(3);
+    object.setDifficulty(Difficulty.challenge_1);
     return object;
   }
 
@@ -723,7 +723,7 @@ class ContentMapperTest {
     IsaacQuestionPageDTO object = (IsaacQuestionPageDTO) prepareSeguePageDTO(new IsaacQuestionPageDTO());
     object.setPassMark(50F);
     object.setSupersededBy("newVersion");
-    object.setDifficulty(3);
+    object.setDifficulty(Difficulty.challenge_1);
     return object;
   }
 
@@ -919,7 +919,7 @@ class ContentMapperTest {
     object.setTitle("title");
     object.setSummary(null);
     object.setType("type");
-    object.setLevel("2");
+    object.setLevel(2);
     object.setTags(List.of("tag1", "tag2"));
     object.setUrl(null);
     // Note: there do not appear to be any ContentDTO subclasses that currently make use of the correct field
@@ -945,14 +945,14 @@ class ContentMapperTest {
     object.setTitle("title");
     object.setSummary("summary");
     object.setType("type");
-    object.setLevel("2");
+    object.setLevel(2);
     object.setTags(List.of("tag1", "tag2"));
     object.setUrl(null);
     object.setCorrect(null);
     object.setQuestionPartIds(List.of());
     object.setSupersededBy("newVersion");
     object.setDeprecated(false);
-    object.setDifficulty("3");
+    object.setDifficulty(Difficulty.challenge_1);
     object.setAudience(List.of(audience));
     return object;
   }
@@ -969,7 +969,7 @@ class ContentMapperTest {
     object.setTitle("title");
     object.setSummary(null);
     object.setType("type");
-    object.setLevel("2");
+    object.setLevel(2);
     object.setTags(List.of("tag1", "tag2"));
     object.setUrl("url");
     object.setCorrect(null);
@@ -993,7 +993,7 @@ class ContentMapperTest {
     object.setTitle("title");
     object.setSummary(null);
     object.setType("type");
-    object.setLevel("2");
+    object.setLevel(2);
     object.setTags(List.of("tag1", "tag2"));
     object.setUrl(null);
     object.setCorrect(null);
@@ -1017,7 +1017,7 @@ class ContentMapperTest {
     object.setTitle("title");
     object.setSummary("summary");
     object.setType("type");
-    object.setLevel("2");
+    object.setLevel(2);
     object.setTags(List.of("tag1", "tag2"));
     object.setUrl(null);
     object.setCorrect(null);

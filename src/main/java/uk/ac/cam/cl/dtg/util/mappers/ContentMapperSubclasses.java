@@ -9,7 +9,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.IsaacCardDeckDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacClozeQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacConceptPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
-import uk.ac.cam.cl.dtg.isaac.dto.IsaacFastTrackQuestionPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacFeaturedProfileDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacFreeTextQuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacItemQuestionDTO;
@@ -42,6 +41,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.FormulaDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.FreeTextRuleDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.GlossaryTermDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ImageDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.content.InteractiveCodeSnippetDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ItemChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ItemDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.LogicFormulaDTO;
@@ -55,7 +55,6 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.RegexPatternDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.StringChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.VideoDTO;
-import uk.ac.cam.cl.dtg.segue.dto.content.InteractiveCodeSnippetDTO;
 
 @Mapper
 public interface ContentMapperSubclasses {
@@ -98,7 +97,6 @@ public interface ContentMapperSubclasses {
   @BeanMapping(resultType = ContentSummaryDTO.class)
   ContentSummaryDTO mapToContentSummaryDTO(StringChoiceDTO source);
 
-  @SubclassMapping(source = IsaacFastTrackQuestionPageDTO.class, target = ContentSummaryDTO.class)
   @SubclassMapping(source = IsaacConceptPageDTO.class, target = ContentSummaryDTO.class)
   @SubclassMapping(source = IsaacQuestionPageDTO.class, target = ContentSummaryDTO.class)
   @SubclassMapping(source = IsaacQuizDTO.class, target = ContentSummaryDTO.class)
@@ -106,9 +104,6 @@ public interface ContentMapperSubclasses {
   @SubclassMapping(source = IsaacTopicSummaryPageDTO.class, target = ContentSummaryDTO.class)
   @BeanMapping(resultType = ContentSummaryDTO.class)
   ContentSummaryDTO mapToContentSummaryDTO(SeguePageDTO source);
-
-  @BeanMapping(resultType = ContentSummaryDTO.class)
-  ContentSummaryDTO mapToContentSummaryDTO(IsaacFastTrackQuestionPageDTO source);
 
   @BeanMapping(resultType = ContentSummaryDTO.class)
   ContentSummaryDTO mapToContentSummaryDTO(IsaacConceptPageDTO source);
