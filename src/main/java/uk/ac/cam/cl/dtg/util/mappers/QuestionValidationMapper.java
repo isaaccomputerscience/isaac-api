@@ -14,9 +14,9 @@ import uk.ac.cam.cl.dtg.isaac.dto.QuantityValidationResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuestionValidationResponseDTO;
 
 @Mapper(uses = ContentMapper.class)
-public interface MapStructQuestionValidationMapper {
+public interface QuestionValidationMapper {
 
-  MapStructQuestionValidationMapper INSTANCE = Mappers.getMapper(MapStructQuestionValidationMapper.class);
+  QuestionValidationMapper INSTANCE = Mappers.getMapper(QuestionValidationMapper.class);
 
   // DO <-> DTO Mappings
   @SubclassMapping(source = FormulaValidationResponseDTO.class, target = FormulaValidationResponse.class)
