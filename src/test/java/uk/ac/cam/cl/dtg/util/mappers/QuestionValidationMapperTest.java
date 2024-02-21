@@ -66,11 +66,11 @@ class QuestionValidationMapperTest {
     );
   }
 
-  static QuestionValidationResponse prepareOriginalQuestionValidationResponse() {
+  private static QuestionValidationResponse prepareOriginalQuestionValidationResponse() {
     return prepareOriginalQuestionValidationResponse(new QuestionValidationResponse());
   }
 
-  static <T extends QuestionValidationResponse> T prepareOriginalQuestionValidationResponse(T object) {
+  private static <T extends QuestionValidationResponse> T prepareOriginalQuestionValidationResponse(T object) {
     Content answerExplanation = new Content();
     answerExplanation.setId("choiceExplanationId");
     answerExplanation.setValue("answerExplanation");
@@ -89,30 +89,30 @@ class QuestionValidationMapperTest {
     return partiallyPreparedObject;
   }
 
-  static FormulaValidationResponse prepareOriginalFormulaValidationResponse() {
+  private static FormulaValidationResponse prepareOriginalFormulaValidationResponse() {
     FormulaValidationResponse object = prepareOriginalQuestionValidationResponse(new FormulaValidationResponse());
     object.setMatchType("matchType");
     return object;
   }
 
-  static ItemValidationResponse prepareOriginalItemValidationResponse() {
+  private static ItemValidationResponse prepareOriginalItemValidationResponse() {
     ItemValidationResponse object = prepareOriginalQuestionValidationResponse(new ItemValidationResponse());
     object.setItemsCorrect(List.of(true, false, true));
     return object;
   }
 
-  static QuantityValidationResponse prepareOriginalQuantityValidationResponse() {
+  private static QuantityValidationResponse prepareOriginalQuantityValidationResponse() {
     QuantityValidationResponse object = prepareOriginalQuestionValidationResponse(new QuantityValidationResponse());
     object.setCorrectValue(true);
     object.setCorrectValue(true);
     return object;
   }
 
-  static QuestionValidationResponse prepareMappedQuestionValidationResponse() {
+  private static QuestionValidationResponse prepareMappedQuestionValidationResponse() {
     return prepareMappedQuestionValidationResponse(new QuestionValidationResponse());
   }
 
-  static <T extends QuestionValidationResponse> T prepareMappedQuestionValidationResponse(T object) {
+  private static <T extends QuestionValidationResponse> T prepareMappedQuestionValidationResponse(T object) {
     Choice answer = new Choice();
     answer.setId("answerId");
     answer.setCorrect(false);
@@ -125,26 +125,26 @@ class QuestionValidationMapperTest {
     return partiallyPreparedObject;
   }
 
-  static FormulaValidationResponse prepareMappedFormulaValidationResponse() {
+  private static FormulaValidationResponse prepareMappedFormulaValidationResponse() {
     FormulaValidationResponse object = prepareMappedQuestionValidationResponse(new FormulaValidationResponse());
     object.setMatchType(null);
     return object;
   }
 
-  static ItemValidationResponse prepareMappedItemValidationResponse() {
+  private static ItemValidationResponse prepareMappedItemValidationResponse() {
     ItemValidationResponse object = prepareMappedQuestionValidationResponse(new ItemValidationResponse());
     object.setItemsCorrect(List.of(true, false, true));
     return object;
   }
 
-  static QuantityValidationResponse prepareMappedQuantityValidationResponse() {
+  private static QuantityValidationResponse prepareMappedQuantityValidationResponse() {
     QuantityValidationResponse object = prepareMappedQuestionValidationResponse(new QuantityValidationResponse());
     object.setCorrectValue(true);
     object.setCorrectValue(true);
     return object;
   }
 
-  static <T extends QuestionValidationResponse> T prepareQuestionValidationResponse(T object) {
+  private static <T extends QuestionValidationResponse> T prepareQuestionValidationResponse(T object) {
     Content responseExplanation = new Content();
     responseExplanation.setId("responseExplanationId");
     responseExplanation.setValue("responseExplanation");
@@ -158,11 +158,11 @@ class QuestionValidationMapperTest {
     return object;
   }
 
-  static QuestionValidationResponseDTO prepareQuestionValidationResponseDTO() {
+  private static QuestionValidationResponseDTO prepareQuestionValidationResponseDTO() {
     return prepareQuestionValidationResponseDTO(new QuestionValidationResponseDTO());
   }
 
-  static <T extends QuestionValidationResponseDTO> T prepareQuestionValidationResponseDTO(T object) {
+  private static <T extends QuestionValidationResponseDTO> T prepareQuestionValidationResponseDTO(T object) {
     ChoiceDTO answer = new ChoiceDTO();
     answer.setId("answerId");
     answer.setPublished(true);
@@ -180,7 +180,7 @@ class QuestionValidationMapperTest {
     return object;
   }
 
-  static FormulaValidationResponseDTO prepareOriginalFormulaValidationResponseDTO() {
+  private static FormulaValidationResponseDTO prepareOriginalFormulaValidationResponseDTO() {
     FormulaValidationResponseDTO object = prepareQuestionValidationResponseDTO(new FormulaValidationResponseDTO());
     object.setCorrectExact(true);
     object.setCorrectSymbolic(true);
@@ -188,7 +188,7 @@ class QuestionValidationMapperTest {
     return object;
   }
 
-  static FormulaValidationResponseDTO prepareMappedFormulaValidationResponseDTO() {
+  private static FormulaValidationResponseDTO prepareMappedFormulaValidationResponseDTO() {
     FormulaValidationResponseDTO object = prepareQuestionValidationResponseDTO(new FormulaValidationResponseDTO());
     object.setCorrectExact(null);
     object.setCorrectSymbolic(null);
@@ -196,13 +196,13 @@ class QuestionValidationMapperTest {
     return object;
   }
 
-  static ItemValidationResponseDTO prepareItemValidationResponseDTO() {
+  private static ItemValidationResponseDTO prepareItemValidationResponseDTO() {
     ItemValidationResponseDTO object = prepareQuestionValidationResponseDTO(new ItemValidationResponseDTO());
     object.setItemsCorrect(List.of(true, false, true));
     return object;
   }
 
-  static QuantityValidationResponseDTO prepareQuantityValidationResponseDTO() {
+  private static QuantityValidationResponseDTO prepareQuantityValidationResponseDTO() {
     QuantityValidationResponseDTO object = prepareQuestionValidationResponseDTO(new QuantityValidationResponseDTO());
     object.setCorrectValue(true);
     object.setCorrectValue(true);
