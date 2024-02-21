@@ -4,11 +4,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import uk.ac.cam.cl.dtg.isaac.dos.AssignmentDO;
+import uk.ac.cam.cl.dtg.isaac.dos.GameboardContentDescriptor;
 import uk.ac.cam.cl.dtg.isaac.dos.GameboardDO;
 import uk.ac.cam.cl.dtg.isaac.dos.QuizAssignmentDO;
 import uk.ac.cam.cl.dtg.isaac.dos.QuizAttemptDO;
 import uk.ac.cam.cl.dtg.isaac.dto.AssignmentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.GameboardDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardItem;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
@@ -57,4 +59,11 @@ public interface MiscMapper {
   default ResultsWrapper<String> copy(ResultsWrapper<String> source) {
     return new ResultsWrapper<>(source.getResults(), source.getTotalResults());
   }
+
+  // Internal object property mappings
+  @Mapping(source = "creationContext", target = "context")
+  GameboardContentDescriptor mapGameboardItemToGameboardContentDescriptor(GameboardItem source);
+
+  @Mapping(source = "context", target = "creationContext")
+  GameboardItem mapGameboardItemToGameboardContentDescriptor(GameboardContentDescriptor source);
 }
