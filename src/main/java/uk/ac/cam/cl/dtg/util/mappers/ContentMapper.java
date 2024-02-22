@@ -305,14 +305,182 @@ public interface ContentMapper {
   @SubclassMapping(source = ContentDTO.class, target = ContentDTO.class)
   ContentBaseDTO copy(ContentBaseDTO source);
 
+  @SubclassMapping(source = ParsonsChoiceDTO.class, target = ParsonsChoiceDTO.class)
+  @SubclassMapping(source = FormulaDTO.class, target = FormulaDTO.class)
+  @SubclassMapping(source = FreeTextRuleDTO.class, target = FreeTextRuleDTO.class)
+  @SubclassMapping(source = ItemChoiceDTO.class, target = ItemChoiceDTO.class)
+  @SubclassMapping(source = LogicFormulaDTO.class, target = LogicFormulaDTO.class)
+  @SubclassMapping(source = QuantityDTO.class, target = QuantityDTO.class)
+  @SubclassMapping(source = RegexPatternDTO.class, target = RegexPatternDTO.class)
+  @SubclassMapping(source = StringChoiceDTO.class, target = StringChoiceDTO.class)
+  @SubclassMapping(source = ChoiceDTO.class, target = ChoiceDTO.class)
+  // SeguePage Subclasses
+  @SubclassMapping(source = IsaacConceptPageDTO.class, target = IsaacConceptPageDTO.class)
+  @SubclassMapping(source = IsaacQuestionPageDTO.class, target = IsaacQuestionPageDTO.class)
+  @SubclassMapping(source = IsaacQuizDTO.class, target = IsaacQuizDTO.class)
+  @SubclassMapping(source = IsaacQuizSectionDTO.class, target = IsaacQuizSectionDTO.class)
+  @SubclassMapping(source = IsaacTopicSummaryPageDTO.class, target = IsaacTopicSummaryPageDTO.class)
+  @SubclassMapping(source = SeguePageDTO.class, target = SeguePageDTO.class)
+  // Question Subclasses
+  @SubclassMapping(source = IsaacSymbolicLogicQuestionDTO.class, target = IsaacSymbolicLogicQuestionDTO.class)
+  @SubclassMapping(source = IsaacClozeQuestionDTO.class, target = IsaacClozeQuestionDTO.class)
+  @SubclassMapping(source = IsaacParsonsQuestionDTO.class, target = IsaacParsonsQuestionDTO.class)
+  @SubclassMapping(source = IsaacReorderQuestionDTO.class, target = IsaacReorderQuestionDTO.class)
+  @SubclassMapping(source = IsaacAnvilQuestionDTO.class, target = IsaacAnvilQuestionDTO.class)
+  @SubclassMapping(source = IsaacFreeTextQuestionDTO.class, target = IsaacFreeTextQuestionDTO.class)
+  @SubclassMapping(source = IsaacItemQuestionDTO.class, target = IsaacItemQuestionDTO.class)
+  @SubclassMapping(source = IsaacMultiChoiceQuestionDTO.class, target = IsaacMultiChoiceQuestionDTO.class)
+  @SubclassMapping(source = IsaacNumericQuestionDTO.class, target = IsaacNumericQuestionDTO.class)
+  @SubclassMapping(source = IsaacQuickQuestionDTO.class, target = IsaacQuickQuestionDTO.class)
+  @SubclassMapping(source = IsaacRegexMatchQuestionDTO.class, target = IsaacRegexMatchQuestionDTO.class)
+  @SubclassMapping(source = IsaacStringMatchQuestionDTO.class, target = IsaacStringMatchQuestionDTO.class)
+  @SubclassMapping(source = IsaacSymbolicQuestionDTO.class, target = IsaacSymbolicQuestionDTO.class)
+  @SubclassMapping(source = IsaacQuestionBaseDTO.class, target = IsaacQuestionBaseDTO.class)
+  @SubclassMapping(source = ChoiceQuestionDTO.class, target = ChoiceQuestionDTO.class)
+  @SubclassMapping(source = QuestionDTO.class, target = QuestionDTO.class)
+  // Other Nested Subclasses
+  @SubclassMapping(source = InteractiveCodeSnippetDTO.class, target = InteractiveCodeSnippetDTO.class)
+  @SubclassMapping(source = FigureDTO.class, target = FigureDTO.class)
+  @SubclassMapping(source = ImageDTO.class, target = ImageDTO.class)
+  @SubclassMapping(source = VideoDTO.class, target = VideoDTO.class)
+  @SubclassMapping(source = ParsonsItemDTO.class, target = ParsonsItemDTO.class)
+  // Other Subclasses
+  @SubclassMapping(source = AnvilAppDTO.class, target = AnvilAppDTO.class)
+  @SubclassMapping(source = CodeSnippetDTO.class, target = CodeSnippetDTO.class)
+  @SubclassMapping(source = CodeTabsDTO.class, target = CodeTabsDTO.class)
+  @SubclassMapping(source = EmailTemplateDTO.class, target = EmailTemplateDTO.class)
+  @SubclassMapping(source = GlossaryTermDTO.class, target = GlossaryTermDTO.class)
+  @SubclassMapping(source = IsaacCardDTO.class, target = IsaacCardDTO.class)
+  @SubclassMapping(source = IsaacCardDeckDTO.class, target = IsaacCardDeckDTO.class)
   @SubclassMapping(source = IsaacEventPageDTO.class, target = IsaacEventPageDTO.class)
+  @SubclassMapping(source = IsaacFeaturedProfileDTO.class, target = IsaacFeaturedProfileDTO.class)
+  @SubclassMapping(source = IsaacPageFragmentDTO.class, target = IsaacPageFragmentDTO.class)
+  @SubclassMapping(source = IsaacPodDTO.class, target = IsaacPodDTO.class)
+  @SubclassMapping(source = IsaacWildcardDTO.class, target = IsaacWildcardDTO.class)
+  @SubclassMapping(source = ItemDTO.class, target = ItemDTO.class)
+  @SubclassMapping(source = MediaDTO.class, target = MediaDTO.class)
+  @SubclassMapping(source = NotificationDTO.class, target = NotificationDTO.class)
   ContentDTO copy(ContentDTO source);
 
+  @SubclassMapping(source = QuizSummaryDTO.class, target = QuizSummaryDTO.class)
+  ContentSummaryDTO copy(ContentSummaryDTO source);
+
+  ParsonsChoiceDTO copy(ParsonsChoiceDTO source);
+
+  FormulaDTO copy(FormulaDTO source);
+
+  FreeTextRuleDTO copy(FreeTextRuleDTO source);
+
+  ItemChoiceDTO copy(ItemChoiceDTO source);
+
+  LogicFormulaDTO copy(LogicFormulaDTO source);
+
+  QuantityDTO copy(QuantityDTO source);
+
+  RegexPatternDTO copy(RegexPatternDTO source);
+
+  StringChoiceDTO copy(StringChoiceDTO source);
+
+  ChoiceDTO copy(ChoiceDTO source);
+
+  IsaacConceptPageDTO copy(IsaacConceptPageDTO source);
+
+  IsaacQuestionPageDTO copy(IsaacQuestionPageDTO source);
+
+  IsaacQuizDTO copy(IsaacQuizDTO source);
+
+  IsaacQuizSectionDTO copy(IsaacQuizSectionDTO source);
+
+  IsaacTopicSummaryPageDTO copy(IsaacTopicSummaryPageDTO source);
+
+  SeguePageDTO copy(SeguePageDTO source);
+
+  IsaacSymbolicLogicQuestionDTO copy(IsaacSymbolicLogicQuestionDTO source);
+
+  IsaacClozeQuestionDTO copy(IsaacClozeQuestionDTO source);
+
+  IsaacParsonsQuestionDTO copy(IsaacParsonsQuestionDTO source);
+
+  IsaacReorderQuestionDTO copy(IsaacReorderQuestionDTO source);
+
+  IsaacAnvilQuestionDTO copy(IsaacAnvilQuestionDTO source);
+
+  IsaacFreeTextQuestionDTO copy(IsaacFreeTextQuestionDTO source);
+
+  IsaacItemQuestionDTO copy(IsaacItemQuestionDTO source);
+
+  IsaacMultiChoiceQuestionDTO copy(IsaacMultiChoiceQuestionDTO source);
+
+  IsaacNumericQuestionDTO copy(IsaacNumericQuestionDTO source);
+
+  IsaacQuickQuestionDTO copy(IsaacQuickQuestionDTO source);
+
+  IsaacRegexMatchQuestionDTO copy(IsaacRegexMatchQuestionDTO source);
+
+  IsaacStringMatchQuestionDTO copy(IsaacStringMatchQuestionDTO source);
+
+  IsaacSymbolicQuestionDTO copy(IsaacSymbolicQuestionDTO source);
+
+  IsaacQuestionBaseDTO copy(IsaacQuestionBaseDTO source);
+
+  ChoiceQuestionDTO copy(ChoiceQuestionDTO source);
+
+  QuestionDTO copy(QuestionDTO source);
+
+  InteractiveCodeSnippetDTO copy(InteractiveCodeSnippetDTO source);
+
+  FigureDTO copy(FigureDTO source);
+
+  ImageDTO copy(ImageDTO source);
+
+  VideoDTO copy(VideoDTO source);
+
+  ParsonsItemDTO copy(ParsonsItemDTO source);
+
+  AnvilAppDTO copy(AnvilAppDTO source);
+
+  CodeSnippetDTO copy(CodeSnippetDTO source);
+
+  CodeTabsDTO copy(CodeTabsDTO source);
+
+  EmailTemplateDTO copy(EmailTemplateDTO source);
+
+  GlossaryTermDTO copy(GlossaryTermDTO source);
+
+  IsaacCardDTO copy(IsaacCardDTO source);
+
+  IsaacCardDeckDTO copy(IsaacCardDeckDTO source);
+
   IsaacEventPageDTO copy(IsaacEventPageDTO source);
+
+  IsaacFeaturedProfileDTO copy(IsaacFeaturedProfileDTO source);
+
+  IsaacPageFragmentDTO copy(IsaacPageFragmentDTO source);
+
+  IsaacPodDTO copy(IsaacPodDTO source);
+
+  IsaacWildcardDTO copy(IsaacWildcardDTO source);
+
+  ItemDTO copy(ItemDTO source);
+
+  @SubclassMapping(source = FigureDTO.class, target = FigureDTO.class)
+  @SubclassMapping(source = ImageDTO.class, target = ImageDTO.class)
+  @SubclassMapping(source = VideoDTO.class, target = VideoDTO.class)
+  MediaDTO copy(MediaDTO source);
+
+  NotificationDTO copy(NotificationDTO source);
+
+  QuizSummaryDTO copy(QuizSummaryDTO source);
 
   Location copy(Location source);
 
   Address copy(Address source);
+
+  List<ContentBaseDTO> copyListOfContentBaseDTO(List<ContentBaseDTO> source);
+
+  List<ContentDTO> copyListOfContentDTO(List<ContentDTO> source);
+
+  List<ContentSummaryDTO> copyListOfContentSummaryDTO(List<ContentSummaryDTO> source);
 
   List<Location> copyListOfLocation(List<Location> source);
 
