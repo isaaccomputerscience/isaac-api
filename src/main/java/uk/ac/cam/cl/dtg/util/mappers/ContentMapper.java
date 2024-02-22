@@ -275,6 +275,7 @@ public interface ContentMapper {
   IsaacSymbolicQuestionDTO mapIsaacSymbolicQuestion(IsaacSymbolicQuestion source);
 
   // Handling classes with multiple mapping targets
+  @SuppressWarnings("unchecked")
   default <T> T map(ContentDTO source, Class<T> targetClass) {
     if (targetClass.equals(ContentSummaryDTO.class)) {
       return (T) mapContentDTOtoContentSummaryDTO(source);
@@ -291,6 +292,7 @@ public interface ContentMapper {
     }
   }
 
+  @SuppressWarnings("unchecked")
   default <T> T map(Content source, Class<T> targetClass) {
     if (targetClass.equals(IsaacWildcard.class)) {
       return (T) mapContentToIsaacWildcard(source);
