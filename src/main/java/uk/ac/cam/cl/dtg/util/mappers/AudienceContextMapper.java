@@ -10,9 +10,9 @@ import uk.ac.cam.cl.dtg.isaac.dos.RoleRequirement;
 import uk.ac.cam.cl.dtg.isaac.dos.Stage;
 
 @Mapper
-public interface MapStructAudienceContextMapper {
+public interface AudienceContextMapper {
 
-  MapStructAudienceContextMapper INSTANCE = Mappers.getMapper(MapStructAudienceContextMapper.class);
+  AudienceContextMapper INSTANCE = Mappers.getMapper(AudienceContextMapper.class);
 
   AudienceContext copy(AudienceContext source);
 

@@ -122,7 +122,7 @@ import uk.ac.cam.cl.dtg.util.locations.Address;
 import uk.ac.cam.cl.dtg.util.locations.Location;
 
 @Mapper(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION, uses = {
-    MapStructAudienceContextMapper.class, ContentMapperSubclasses.class})
+    AudienceContextMapper.class, ContentMapperSubclasses.class})
 public interface ContentMapper {
 
   ContentMapper INSTANCE = Mappers.getMapper(ContentMapper.class);
