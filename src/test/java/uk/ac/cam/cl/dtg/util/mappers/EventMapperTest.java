@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.dtg.util.mappers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.ExamBoard;
 import uk.ac.cam.cl.dtg.isaac.dos.Stage;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.EventBooking;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
@@ -38,9 +40,24 @@ class EventMapperTest {
     assertDeepEquals(expected, result);
   }
 
+  @Test
+  void unimplementedMappingExceptionForUnexpectedTarget() {
+    DetailedEventBookingDTO source = new DetailedEventBookingDTO();
+    Exception exception = assertThrows(UnimplementedMappingException.class, () -> eventMapper.map(source, DetailedEventBookingDTO.class));
+    assertEquals("Invocation of unimplemented mapping from EventBookingDTO to DetailedEventBookingDTO", exception.getMessage());
+  }
+
   private static EventBookingDTO prepareEventBookingDTO() {
-    return new EventBookingDTO(3L, prepareUserSummaryDTO(), 5L, "eventID", "eventTitle", testDate,
-        testDate, newTestDate, BookingStatus.CONFIRMED);
+    return new EventBookingDTO(
+        3L,
+        prepareUserSummaryDTO(),
+        5L,
+        "eventID",
+        "eventTitle",
+        testDate,
+        testDate,
+        newTestDate,
+        BookingStatus.CONFIRMED);
   }
 
   private static DetailedEventBookingDTO prepareDetailedEventBookingDTO() {
@@ -57,7 +74,6 @@ class EventMapperTest {
     detailedEvent.setAdditionalInformation(prepareAdditionalInformation());
     return detailedEvent;
   }
-
 
   private static Map<String, String> prepareAdditionalInformation() {
     Map<String, String> additionalInformation = new HashMap<>();
