@@ -49,7 +49,7 @@ class EventMapperTest {
 
   @Test
   void copyEventBookingDTOReturnsNewObjectWithSameProperties() throws JsonProcessingException {
-    EventBookingDTO source = new EventBookingDTO();
+    EventBookingDTO source = prepareEventBookingDTO();
     EventBookingDTO actual = eventMapper.copy(source);
     assertEquals(actual.getClass(), source.getClass());
     assertNotSame(actual, source);
