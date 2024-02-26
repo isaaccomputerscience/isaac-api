@@ -201,7 +201,7 @@ class ContentMapperTest {
   private static Stream<Arguments> testCasesCopyDTO() {
     return Stream.of(
         Arguments.of(setOriginalCommonContentDTOProperties(new ContentDTO())),
-        Arguments.of(prepareOriginalIsaacEventPageDTO())
+        Arguments.of(setOriginalCommonContentDTOProperties(prepareOriginalIsaacEventPageDTO()))
     );
   }
 
