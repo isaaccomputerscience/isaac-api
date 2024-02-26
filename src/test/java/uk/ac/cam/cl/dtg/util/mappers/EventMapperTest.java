@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ class EventMapperTest {
 
   @Test
   @DisplayName("Test mapping from DetailedEventBookingDTO to EventBookingDTO")
-  void testEventMapping() throws JsonProcessingException {
+  void testCaseEventMapping() throws JsonProcessingException {
     DetailedEventBookingDTO source = prepareDetailedEventBookingDTO();
     EventBookingDTO expected = prepareEventBookingDTO();
     EventBookingDTO result = eventMapper.map(source, EventBookingDTO.class);
@@ -53,6 +54,15 @@ class EventMapperTest {
     assertEquals(actual.getClass(), source.getClass());
     assertNotSame(actual, source);
     assertDeepEquals(actual, source);
+  }
+
+  @Test
+  @DisplayName("Testing mapList from DetailedEventBookingDTO to EventBookingDTO")
+  void testCaseEventMapList() throws JsonProcessingException {
+    List<DetailedEventBookingDTO> detailedSourceList = prepareDetailedEventBookingDTOList();
+    List<EventBookingDTO> resultList = eventMapper.mapListOfDetailedEventBookingDTOtoEventBookingDTO(detailedSourceList);
+    assertEquals(detailedSourceList.size(), resultList.size());
+    assertDeepEquals(resultList, detailedSourceList);
   }
 
   private static EventBookingDTO prepareEventBookingDTO() {
@@ -81,6 +91,34 @@ class EventMapperTest {
     detailedEvent.setUpdated(newTestDate);
     detailedEvent.setAdditionalInformation(prepareAdditionalInformation());
     return detailedEvent;
+  }
+
+  private List<DetailedEventBookingDTO> prepareDetailedEventBookingDTOList() {
+    List<DetailedEventBookingDTO> detailedEventList = new ArrayList<>();
+    DetailedEventBookingDTO event1 = new DetailedEventBookingDTO();
+    event1.setBookingId(7L);
+    event1.setUserBooked(prepareUserSummaryDTO());
+    event1.setReservedById(9L);
+    event1.setEventDate(testDate);
+    event1.setEventId("eventID");
+    event1.setEventTitle("eventTitle");
+    event1.setBookingStatus(BookingStatus.RESERVED);
+    event1.setBookingDate(testDate);
+    event1.setUpdated(newTestDate);
+    event1.setAdditionalInformation(prepareAdditionalInformation());
+
+    DetailedEventBookingDTO event2 = new DetailedEventBookingDTO();
+    event2.setBookingId(4L);
+    event2.setUserBooked(prepareUserSummaryDTO());
+    event2.setReservedById(1L);
+    event2.setEventDate(testDate);
+    event2.setEventId("eventID");
+    event2.setEventTitle("eventTitle");
+    event2.setBookingStatus(BookingStatus.RESERVED);
+    event2.setBookingDate(testDate);
+    event2.setUpdated(newTestDate);
+    event2.setAdditionalInformation(prepareAdditionalInformation());
+    return detailedEventList;
   }
 
   private static Map<String, String> prepareAdditionalInformation() {
