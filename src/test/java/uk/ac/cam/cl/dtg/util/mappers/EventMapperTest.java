@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.dtg.util.mappers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
 
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.ExamBoard;
 import uk.ac.cam.cl.dtg.isaac.dos.Stage;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
-import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.EventBooking;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
@@ -34,7 +34,6 @@ class EventMapperTest {
   void testEventMapping() throws JsonProcessingException {
     DetailedEventBookingDTO source = prepareDetailedEventBookingDTO();
     EventBookingDTO expected = prepareEventBookingDTO();
-
     EventBookingDTO result = eventMapper.map(source, EventBookingDTO.class);
     assertEquals(expected.getClass(), result.getClass());
     assertDeepEquals(expected, result);
@@ -45,6 +44,15 @@ class EventMapperTest {
     DetailedEventBookingDTO source = new DetailedEventBookingDTO();
     Exception exception = assertThrows(UnimplementedMappingException.class, () -> eventMapper.map(source, DetailedEventBookingDTO.class));
     assertEquals("Invocation of unimplemented mapping from EventBookingDTO to DetailedEventBookingDTO", exception.getMessage());
+  }
+
+  @Test
+  void copyEventBookingDTOReturnsNewObjectWithSameProperties() throws JsonProcessingException {
+    EventBookingDTO source = new EventBookingDTO();
+    EventBookingDTO actual = eventMapper.copy(source);
+    assertEquals(actual.getClass(), source.getClass());
+    assertNotSame(actual, source);
+    assertDeepEquals(actual, source);
   }
 
   private static EventBookingDTO prepareEventBookingDTO() {
@@ -80,7 +88,6 @@ class EventMapperTest {
     // Add additional information key-value pairs
     additionalInformation.put("key1", "value1");
     additionalInformation.put("key2", "value2");
-    // Add more key-value pairs as needed
     return additionalInformation;
   }
 
