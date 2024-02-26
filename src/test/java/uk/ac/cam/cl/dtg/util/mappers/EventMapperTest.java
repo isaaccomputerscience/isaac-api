@@ -41,7 +41,7 @@ class EventMapperTest {
   }
 
   @Test
-  void unimplementedMappingExceptionForUnexpectedTarget() {
+  void mapThrowsUnimplementedMappingExceptionForUnexpectedTarget() {
     DetailedEventBookingDTO source = new DetailedEventBookingDTO();
     Exception exception = assertThrows(UnimplementedMappingException.class, () -> eventMapper.map(source, DetailedEventBookingDTO.class));
     assertEquals("Invocation of unimplemented mapping from EventBookingDTO to DetailedEventBookingDTO", exception.getMessage());
@@ -52,17 +52,40 @@ class EventMapperTest {
     EventBookingDTO source = prepareEventBookingDTO();
     EventBookingDTO actual = eventMapper.copy(source);
     assertEquals(actual.getClass(), source.getClass());
-    assertNotSame(actual, source);
-    assertDeepEquals(actual, source);
+    assertNotSame(source, actual);
+    assertDeepEquals(source, actual);
   }
 
   @Test
   @DisplayName("Testing mapList from DetailedEventBookingDTO to EventBookingDTO")
-  void testCaseEventMapList() throws JsonProcessingException {
+  void testCaseEventMapListOfDetailedEventBooking() throws JsonProcessingException {
     List<DetailedEventBookingDTO> detailedSourceList = prepareDetailedEventBookingDTOList();
-    List<EventBookingDTO> resultList = eventMapper.mapListOfDetailedEventBookingDTOtoEventBookingDTO(detailedSourceList);
+    List<EventBookingDTO> expectedList = prepareEventBookingDTOList();
+    List<EventBookingDTO> resultList = eventMapper.mapList(detailedSourceList, DetailedEventBookingDTO.class, EventBookingDTO.class);
     assertEquals(detailedSourceList.size(), resultList.size());
-    assertDeepEquals(resultList, detailedSourceList);
+    assertEquals(EventBookingDTO.class, resultList.get(0).getClass());
+    assertEquals(EventBookingDTO.class, resultList.get(1).getClass());
+    assertDeepEquals(expectedList, resultList);
+  }
+
+  @Test
+  @DisplayName("Testing mapList from EventBookingDTO to EventBookingDTO")
+  void testCaseEventMapListCopyEventBooking() throws JsonProcessingException {
+    List<EventBookingDTO> detailedSourceList = prepareEventBookingDTOList();
+    List<EventBookingDTO> resultList = eventMapper.mapList(detailedSourceList, EventBookingDTO.class, EventBookingDTO.class);
+    assertEquals(detailedSourceList.size(), resultList.size());
+    assertEquals(EventBookingDTO.class, resultList.get(0).getClass());
+    assertEquals(EventBookingDTO.class, resultList.get(1).getClass());
+    assertNotSame(detailedSourceList.get(0), resultList.get(0));
+    assertNotSame(detailedSourceList.get(1), resultList.get(1));
+    assertDeepEquals(detailedSourceList, resultList);
+  }
+
+  @Test
+  void mapListThrowsUnimplementedMappingExceptionForUnexpectedTarget() {
+    List<DetailedEventBookingDTO> source = List.of(new DetailedEventBookingDTO());
+    Exception exception = assertThrows(UnimplementedMappingException.class, () -> eventMapper.mapList(source, DetailedEventBookingDTO.class, DetailedEventBookingDTO.class));
+    assertEquals("Invocation of unimplemented mapping from DetailedEventBookingDTO to DetailedEventBookingDTO", exception.getMessage());
   }
 
   private static EventBookingDTO prepareEventBookingDTO() {
@@ -106,6 +129,7 @@ class EventMapperTest {
     event1.setBookingDate(testDate);
     event1.setUpdated(newTestDate);
     event1.setAdditionalInformation(prepareAdditionalInformation());
+    detailedEventList.add(event1);
 
     DetailedEventBookingDTO event2 = new DetailedEventBookingDTO();
     event2.setBookingId(4L);
@@ -118,7 +142,36 @@ class EventMapperTest {
     event2.setBookingDate(testDate);
     event2.setUpdated(newTestDate);
     event2.setAdditionalInformation(prepareAdditionalInformation());
+    detailedEventList.add(event2);
     return detailedEventList;
+  }
+
+  private List<EventBookingDTO> prepareEventBookingDTOList() {
+    List<EventBookingDTO> eventList = new ArrayList<>();
+    EventBookingDTO event1 = new EventBookingDTO();
+    event1.setBookingId(7L);
+    event1.setUserBooked(prepareUserSummaryDTO());
+    event1.setReservedById(9L);
+    event1.setEventDate(testDate);
+    event1.setEventId("eventID");
+    event1.setEventTitle("eventTitle");
+    event1.setBookingStatus(BookingStatus.RESERVED);
+    event1.setBookingDate(testDate);
+    event1.setUpdated(newTestDate);
+    eventList.add(event1);
+
+    EventBookingDTO event2 = new EventBookingDTO();
+    event2.setBookingId(4L);
+    event2.setUserBooked(prepareUserSummaryDTO());
+    event2.setReservedById(1L);
+    event2.setEventDate(testDate);
+    event2.setEventId("eventID");
+    event2.setEventTitle("eventTitle");
+    event2.setBookingStatus(BookingStatus.RESERVED);
+    event2.setBookingDate(testDate);
+    event2.setUpdated(newTestDate);
+    eventList.add(event2);
+    return eventList;
   }
 
   private static Map<String, String> prepareAdditionalInformation() {

@@ -28,7 +28,7 @@ public interface EventMapper {
     } else if (sourceClass.equals(DetailedEventBookingDTO.class) && targetClass.equals(EventBookingDTO.class)) {
       return (List<T>) mapListOfDetailedEventBookingDTOtoEventBookingDTO((List<DetailedEventBookingDTO>) source);
     } else {
-      throw new UnimplementedMappingException(EventBookingDTO.class, targetClass);
+      throw new UnimplementedMappingException(sourceClass, targetClass);
     }
   }
 
