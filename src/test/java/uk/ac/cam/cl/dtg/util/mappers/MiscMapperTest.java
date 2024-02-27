@@ -123,6 +123,7 @@ class MiscMapperTest {
     ResultsWrapper<String> actual = mapper.copy(source);
     assertEquals(actual.getClass(), source.getClass());
     assertNotSame(actual, source);
+    assertNotSame(actual.getResults(), source.getResults());
     assertDeepEquals(actual, source);
   }
 

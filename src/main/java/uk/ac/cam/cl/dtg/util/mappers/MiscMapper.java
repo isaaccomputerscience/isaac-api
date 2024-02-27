@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.dtg.util.mappers;
 
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -57,8 +58,10 @@ public interface MiscMapper {
 
   // Mapping an object to a new instance of the same class
   default ResultsWrapper<String> copy(ResultsWrapper<String> source) {
-    return new ResultsWrapper<>(source.getResults(), source.getTotalResults());
+    return new ResultsWrapper<>(copyListOfString(source.getResults()), source.getTotalResults());
   }
+
+  List<String> copyListOfString(List<String> source);
 
   // Internal object property mappings
   @Mapping(source = "creationContext", target = "context")
