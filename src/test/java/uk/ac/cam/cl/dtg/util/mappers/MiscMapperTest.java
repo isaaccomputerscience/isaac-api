@@ -2,9 +2,8 @@ package uk.ac.cam.cl.dtg.util.mappers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
+import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -47,7 +46,7 @@ class MiscMapperTest {
   private static final Date newTestDate = new Instant().plus(10000).toDate();
 
   @Test
-  void mapGameboardDTO() throws JsonProcessingException {
+  void mapGameboardDTO() {
     GameboardDO source = prepareGameboardDO();
     GameboardDTO expected = prepareMappedGameboardDTO();
     GameboardDTO actual = mapper.map(source);
@@ -56,7 +55,7 @@ class MiscMapperTest {
   }
 
   @Test
-  void mapGameboardDO() throws JsonProcessingException {
+  void mapGameboardDO() {
     GameboardDTO source = prepareOriginalGameboardDTO();
     GameboardDO expected = prepareGameboardDO();
     GameboardDO actual = mapper.map(source);
@@ -65,7 +64,7 @@ class MiscMapperTest {
   }
 
   @Test
-  void mapAssignmentDTO() throws JsonProcessingException {
+  void mapAssignmentDTO() {
     AssignmentDO source = prepareAssignmentDO();
     AssignmentDTO expected = prepareMappedAssignmentDTO();
     AssignmentDTO actual = mapper.map(source);
@@ -74,7 +73,7 @@ class MiscMapperTest {
   }
 
   @Test
-  void mapAssignmentDO() throws JsonProcessingException {
+  void mapAssignmentDO() {
     AssignmentDTO source = prepareOriginalAssignmentDTO();
     AssignmentDO expected = prepareAssignmentDO();
     AssignmentDO actual = mapper.map(source);
@@ -83,7 +82,7 @@ class MiscMapperTest {
   }
 
   @Test
-  void mapQuizAssignmentDTO() throws JsonProcessingException {
+  void mapQuizAssignmentDTO() {
     QuizAssignmentDO source = prepareQuizAssignmentDO();
     QuizAssignmentDTO expected = prepareMappedQuizAssignmentDTO();
     QuizAssignmentDTO actual = mapper.map(source);
@@ -92,7 +91,7 @@ class MiscMapperTest {
   }
 
   @Test
-  void mapQuizAssignmentDO() throws JsonProcessingException {
+  void mapQuizAssignmentDO() {
     QuizAssignmentDTO source = prepareOriginalQuizAssignmentDTO();
     QuizAssignmentDO expected = prepareQuizAssignmentDO();
     QuizAssignmentDO actual = mapper.map(source);
@@ -101,7 +100,7 @@ class MiscMapperTest {
   }
 
   @Test
-  void mapQuizAttemptDTO() throws JsonProcessingException {
+  void mapQuizAttemptDTO() {
     QuizAttemptDO source = prepareQuizAttemptDO();
     QuizAttemptDTO expected = prepareMappedQuizAttemptDTO();
     QuizAttemptDTO actual = mapper.map(source);
@@ -110,7 +109,7 @@ class MiscMapperTest {
   }
 
   @Test
-  void mapQuizAttemptDO() throws JsonProcessingException {
+  void mapQuizAttemptDO() {
     QuizAttemptDTO source = prepareOriginalQuizAttemptDTO();
     QuizAttemptDO expected = prepareQuizAttemptDO();
     QuizAttemptDO actual = mapper.map(source);
@@ -119,7 +118,7 @@ class MiscMapperTest {
   }
 
   @Test
-  void copyResultsWrapperOfString() throws JsonProcessingException {
+  void copyResultsWrapperOfString() {
     ResultsWrapper<String> source = new ResultsWrapper<>(List.of("result1", "result2", "result3"), 3L);
     ResultsWrapper<String> actual = mapper.copy(source);
     assertEquals(actual.getClass(), source.getClass());

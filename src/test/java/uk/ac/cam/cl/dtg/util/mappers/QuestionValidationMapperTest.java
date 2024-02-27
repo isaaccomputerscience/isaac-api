@@ -1,9 +1,8 @@
 package uk.ac.cam.cl.dtg.util.mappers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
+import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -32,8 +31,7 @@ class QuestionValidationMapperTest {
 
   @ParameterizedTest
   @MethodSource("testCasesDOtoDTO")
-  <S extends QuestionValidationResponse, T extends QuestionValidationResponseDTO> void mappingDOReturnsExpectedDTO(S source, T expected)
-      throws JsonProcessingException {
+  <S extends QuestionValidationResponse, T extends QuestionValidationResponseDTO> void mappingDOReturnsExpectedDTO(S source, T expected) {
     QuestionValidationResponseDTO actual = mapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
@@ -41,8 +39,7 @@ class QuestionValidationMapperTest {
 
   @ParameterizedTest
   @MethodSource("testCasesDTOtoDO")
-  <S extends QuestionValidationResponseDTO, T extends QuestionValidationResponse> void mappingDTOReturnsExpectedDO(S source, T expected)
-      throws JsonProcessingException {
+  <S extends QuestionValidationResponseDTO, T extends QuestionValidationResponse> void mappingDTOReturnsExpectedDO(S source, T expected) {
     QuestionValidationResponse actual = mapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);

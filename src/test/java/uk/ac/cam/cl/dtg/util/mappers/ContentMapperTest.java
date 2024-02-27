@@ -3,9 +3,8 @@ package uk.ac.cam.cl.dtg.util.mappers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
+import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -78,8 +77,7 @@ class ContentMapperTest {
 
   @ParameterizedTest
   @MethodSource("testCasesDOtoDTO")
-  <S extends Content, T extends ContentDTO> void mappingDOReturnsExpectedDTO(S source, T expected)
-      throws JsonProcessingException {
+  <S extends Content, T extends ContentDTO> void mappingDOReturnsExpectedDTO(S source, T expected) {
     S sourceWithCommonProperties = setOriginalCommonContentProperties(source);
     T expectedWithCommonProperties = setMappedCommonContentDTOProperties(expected);
     ContentDTO actual = (ContentDTO) mapper.map(sourceWithCommonProperties);
@@ -89,8 +87,7 @@ class ContentMapperTest {
 
   @ParameterizedTest
   @MethodSource("testCasesDTOtoDO")
-  <S extends ContentDTO, T extends Content> void mappingDTOReturnsExpectedDO(S source, T expected)
-      throws JsonProcessingException {
+  <S extends ContentDTO, T extends Content> void mappingDTOReturnsExpectedDO(S source, T expected) {
     S sourceWithCommonProperties = setOriginalCommonContentDTOProperties(source);
     T expectedWithCommonProperties = setMappedCommonContentProperties(expected);
     Content actual = (Content) mapper.map(sourceWithCommonProperties);
@@ -100,8 +97,7 @@ class ContentMapperTest {
 
   @ParameterizedTest
   @MethodSource("testCasesFromContentDTO")
-  <T> void defaultMappingMethodFrom_ContentDTO_returnsRequestedClass(ContentDTO source, Class<T> targetClass, T expected)
-      throws JsonProcessingException {
+  <T> void defaultMappingMethodFrom_ContentDTO_returnsRequestedClass(ContentDTO source, Class<T> targetClass, T expected) {
     T actual = mapper.map(source, targetClass);
     assertEquals(targetClass, actual.getClass());
     assertDeepEquals(expected, actual);
@@ -109,8 +105,7 @@ class ContentMapperTest {
 
   @ParameterizedTest
   @MethodSource("testCasesFromContent")
-  <T> void defaultMappingMethodFrom_Content_returnsRequestedClass(Content source, Class<T> targetClass, T expected)
-      throws JsonProcessingException {
+  <T> void defaultMappingMethodFrom_Content_returnsRequestedClass(Content source, Class<T> targetClass, T expected) {
     T actual = mapper.map(source, targetClass);
     assertEquals(targetClass, actual.getClass());
     assertDeepEquals(expected, actual);
@@ -132,7 +127,7 @@ class ContentMapperTest {
 
   @ParameterizedTest
   @MethodSource("testCasesCopyDTO")
-  void copyContentDTOReturnsNewObjectWithSameProperties(ContentDTO source) throws JsonProcessingException {
+  void copyContentDTOReturnsNewObjectWithSameProperties(ContentDTO source) {
     ContentDTO actual = mapper.copy(source);
     assertEquals(actual.getClass(), source.getClass());
     assertNotSame(actual, source);

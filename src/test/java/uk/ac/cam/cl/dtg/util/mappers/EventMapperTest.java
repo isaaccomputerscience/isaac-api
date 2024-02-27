@@ -3,9 +3,8 @@ package uk.ac.cam.cl.dtg.util.mappers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
+import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,7 +31,7 @@ class EventMapperTest {
 
   @Test
   @DisplayName("Test mapping from DetailedEventBookingDTO to EventBookingDTO")
-  void testCaseEventMapping() throws JsonProcessingException {
+  void testCaseEventMapping() {
     DetailedEventBookingDTO source = prepareDetailedEventBookingDTO();
     EventBookingDTO expected = prepareEventBookingDTO();
     EventBookingDTO result = eventMapper.map(source, EventBookingDTO.class);
@@ -48,7 +47,7 @@ class EventMapperTest {
   }
 
   @Test
-  void copyEventBookingDTOReturnsNewObjectWithSameProperties() throws JsonProcessingException {
+  void copyEventBookingDTOReturnsNewObjectWithSameProperties() {
     EventBookingDTO source = prepareEventBookingDTO();
     EventBookingDTO actual = eventMapper.copy(source);
     assertEquals(actual.getClass(), source.getClass());
@@ -58,7 +57,7 @@ class EventMapperTest {
 
   @Test
   @DisplayName("Testing mapList from DetailedEventBookingDTO to EventBookingDTO")
-  void testCaseEventMapListOfDetailedEventBooking() throws JsonProcessingException {
+  void testCaseEventMapListOfDetailedEventBooking() {
     List<DetailedEventBookingDTO> detailedSourceList = prepareDetailedEventBookingDTOList();
     List<EventBookingDTO> expectedList = prepareEventBookingDTOList();
     List<EventBookingDTO> resultList = eventMapper.mapList(detailedSourceList, DetailedEventBookingDTO.class, EventBookingDTO.class);
@@ -70,7 +69,7 @@ class EventMapperTest {
 
   @Test
   @DisplayName("Testing mapList from EventBookingDTO to EventBookingDTO")
-  void testCaseEventMapListCopyEventBooking() throws JsonProcessingException {
+  void testCaseEventMapListCopyEventBooking() {
     List<EventBookingDTO> detailedSourceList = prepareEventBookingDTOList();
     List<EventBookingDTO> resultList = eventMapper.mapList(detailedSourceList, EventBookingDTO.class, EventBookingDTO.class);
     assertEquals(detailedSourceList.size(), resultList.size());

@@ -3,9 +3,8 @@ package uk.ac.cam.cl.dtg.util.mappers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static uk.ac.cam.cl.dtg.util.mappers.MapperTestUtils.assertDeepEquals;
+import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -54,8 +53,7 @@ class UserMapperTest {
   @ParameterizedTest
   @MethodSource("testCasesDOtoDTO")
   <S extends AbstractSegueUser, T extends AbstractSegueUserDTO> void mappingAbstractSegueUserDOReturnsExpectedDTO(
-      S source, T expected)
-      throws JsonProcessingException {
+      S source, T expected) {
     AbstractSegueUserDTO actual = mapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
@@ -64,15 +62,14 @@ class UserMapperTest {
   @ParameterizedTest
   @MethodSource("testCasesDTOtoDO")
   <S extends AbstractSegueUserDTO, T extends AbstractSegueUser> void mappingAbstractSegueUserDTOReturnsExpectedDO(
-      S source, T expected)
-      throws JsonProcessingException {
+      S source, T expected) {
     AbstractSegueUser actual = mapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
 
   @Test
-  void mappingGroupMembershipDOReturnsExpectedDTO() throws JsonProcessingException {
+  void mappingGroupMembershipDOReturnsExpectedDTO() {
     GroupMembership source = prepareGroupMembershipDO();
     GroupMembershipDTO expected = prepareGroupMembershipDTO();
     GroupMembershipDTO actual = mapper.map(source);
@@ -81,7 +78,7 @@ class UserMapperTest {
   }
 
   @Test
-  void mappingGroupMembershipDTOReturnsExpectedDO() throws JsonProcessingException {
+  void mappingGroupMembershipDTOReturnsExpectedDO() {
     GroupMembershipDTO source = prepareGroupMembershipDTO();
     GroupMembership expected = prepareGroupMembershipDO();
     GroupMembership actual = mapper.map(source);
@@ -90,7 +87,7 @@ class UserMapperTest {
   }
 
   @Test
-  void mappingUserGroupDOReturnsExpectedDTO() throws JsonProcessingException {
+  void mappingUserGroupDOReturnsExpectedDTO() {
     UserGroup source = prepareOriginalUserGroupDO();
     UserGroupDTO expected = prepareMappedUserGroupDTO();
     UserGroupDTO actual = mapper.map(source);
@@ -99,7 +96,7 @@ class UserMapperTest {
   }
 
   @Test
-  void mappingUserGroupDTOReturnsExpectedDO() throws JsonProcessingException {
+  void mappingUserGroupDTOReturnsExpectedDO() {
     UserGroupDTO source = prepareOriginalUserGroupDTO();
     UserGroup expected = prepareMappedUserGroupDO();
     UserGroup actual = mapper.map(source);
@@ -109,8 +106,7 @@ class UserMapperTest {
 
   @ParameterizedTest
   @MethodSource("testCasesFromRegisteredUserDTO")
-  <T extends UserSummaryDTO> void defaultMappingMethodFrom_RegisteredUserDTO_returnsRequestedClass(Class<T> targetClass, T expected)
-      throws JsonProcessingException {
+  <T extends UserSummaryDTO> void defaultMappingMethodFrom_RegisteredUserDTO_returnsRequestedClass(Class<T> targetClass, T expected) {
     RegisteredUserDTO source = prepareOriginalRegisteredUserDTO();
     T actual = mapper.map(source, targetClass);
     assertEquals(targetClass, actual.getClass());
@@ -118,7 +114,7 @@ class UserMapperTest {
   }
 
   @Test
-  void mappingUserFromAuthProviderToRegisteredUserReturnsExpectedObject() throws JsonProcessingException {
+  void mappingUserFromAuthProviderToRegisteredUserReturnsExpectedObject() {
     UserFromAuthProvider source = prepareUserFromAuthProvider();
     RegisteredUser expected = prepareRegisteredUserDOFromUserFromAuthProvider();
     RegisteredUser actual = mapper.map(source, RegisteredUser.class);
@@ -135,8 +131,7 @@ class UserMapperTest {
 
   @ParameterizedTest
   @MethodSource("testCasesFromUserSummaryDTO")
-  <S extends UserSummaryDTO, T> void defaultMappingMethodFrom_UserSummaryDTO_returnsExpectedClass(S source, Class<T> targetClass, T expected)
-      throws JsonProcessingException {
+  <S extends UserSummaryDTO, T> void defaultMappingMethodFrom_UserSummaryDTO_returnsExpectedClass(S source, Class<T> targetClass, T expected) {
     T actual = mapper.map(source, targetClass);
     assertEquals(targetClass, actual.getClass());
     assertDeepEquals(expected, actual);
@@ -150,7 +145,7 @@ class UserMapperTest {
   }
 
   @Test
-  void copyRegisteredUserDOReturnsNewObjectWithSameProperties() throws JsonProcessingException {
+  void copyRegisteredUserDOReturnsNewObjectWithSameProperties() {
     RegisteredUser source = prepareOriginalRegisteredUserDO();
     RegisteredUser actual = mapper.copy(source);
     assertEquals(source.getClass(), actual.getClass());
@@ -159,7 +154,7 @@ class UserMapperTest {
   }
 
   @Test
-  void copyRegisteredUserDTOReturnsNewObjectWithSameProperties() throws JsonProcessingException {
+  void copyRegisteredUserDTOReturnsNewObjectWithSameProperties() {
     RegisteredUserDTO source = prepareOriginalRegisteredUserDTO();
     RegisteredUserDTO actual = mapper.copy(source);
     assertEquals(source.getClass(), actual.getClass());
@@ -168,7 +163,7 @@ class UserMapperTest {
   }
 
   @Test
-  void copyGroupMembershipDOReturnsNewObjectWithSameProperties() throws JsonProcessingException {
+  void copyGroupMembershipDOReturnsNewObjectWithSameProperties() {
     GroupMembership source = prepareGroupMembershipDO();
     GroupMembership actual = mapper.copy(source);
     assertEquals(source.getClass(), actual.getClass());
@@ -177,7 +172,7 @@ class UserMapperTest {
   }
 
   @Test
-  void copyGroupMembershipDTOReturnsNewObjectWithSameProperties() throws JsonProcessingException {
+  void copyGroupMembershipDTOReturnsNewObjectWithSameProperties() {
     GroupMembershipDTO source = prepareGroupMembershipDTO();
     GroupMembershipDTO actual = mapper.copy(source);
     assertEquals(source.getClass(), actual.getClass());
@@ -187,7 +182,7 @@ class UserMapperTest {
 
   @ParameterizedTest
   @MethodSource("testCasesCopyUserSummaryDTO")
-  void copyContentDTOReturnsNewObjectWithSameProperties(UserSummaryDTO source) throws JsonProcessingException {
+  void copyContentDTOReturnsNewObjectWithSameProperties(UserSummaryDTO source) {
     UserSummaryDTO actual = mapper.copy(source);
     assertEquals(source.getClass(), actual.getClass());
     assertNotSame(source, actual);
@@ -195,7 +190,7 @@ class UserMapperTest {
   }
 
   @Test
-  void mergeRegisteredUserDTOtoRegisteredUserShouldModifyTargetAsExpected() throws JsonProcessingException {
+  void mergeRegisteredUserDTOtoRegisteredUserShouldModifyTargetAsExpected() {
     RegisteredUserDTO source = prepareMergeSourceRegisteredUserDTO();
     RegisteredUser target = prepareOriginalRegisteredUserDO();
     RegisteredUser expected = prepareMergeExpectedRegisteredUserDO();
@@ -204,7 +199,7 @@ class UserMapperTest {
   }
 
   @Test
-  void mergeRegisteredUserDTOtoRegisteredUserShouldIgnoreNullProperties() throws JsonProcessingException {
+  void mergeRegisteredUserDTOtoRegisteredUserShouldIgnoreNullProperties() {
     RegisteredUserDTO source = prepareMergeNullSourceRegisteredUserDTO();
     RegisteredUser target = prepareOriginalRegisteredUserDO();
     RegisteredUser expected = prepareOriginalRegisteredUserDO();
