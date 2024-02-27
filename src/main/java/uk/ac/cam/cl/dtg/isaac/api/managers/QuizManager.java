@@ -73,7 +73,7 @@ public class QuizManager {
    * @param contentService           - so we can look up content
    * @param contentManager           - so we can fetch specific content.
    * @param contentSummarizerService - so we can summarize content with links
-   * @param mapperUtils                   - so we can convert cached content DOs to DTOs.
+   * @param mapperUtils              - so we can convert cached content DOs to DTOs.
    */
   @Inject
   public QuizManager(final PropertiesLoader properties, final ContentService contentService,

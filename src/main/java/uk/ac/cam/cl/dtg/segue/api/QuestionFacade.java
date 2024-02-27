@@ -103,7 +103,7 @@ public class QuestionFacade extends AbstractSegueFacade {
 
   /**
    * @param properties             - the fully configured properties loader for the api.
-   * @param mapperUtils                 - The Content mapper object used for polymorphic mapping of content objects.
+   * @param mapperUtils            - The Content mapper object used for polymorphic mapping of content objects.
    * @param contentManager         - The content version controller used by the api.
    * @param gameManager            - The manager object responsible for games.
    * @param contentIndex           - The index string for current content version

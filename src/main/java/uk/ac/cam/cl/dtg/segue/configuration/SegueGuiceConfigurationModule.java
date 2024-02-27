@@ -522,10 +522,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * TODO: This is a singleton as the units and tags are stored in memory. If we move these out it can be an instance.
    *  This would be better as then we can give it a new search provider if the client has closed.
    *
-   * @param database         - database reference
-   * @param searchProvider   - search provider to use
-   * @param contentMapperUtils    - content mapper to use.
-   * @param globalProperties - properties loader to use
+   * @param database           - database reference
+   * @param searchProvider     - search provider to use
+   * @param contentMapperUtils - content mapper to use.
+   * @param globalProperties   - properties loader to use
    * @return a fully configured content Manager.
    */
   @Inject

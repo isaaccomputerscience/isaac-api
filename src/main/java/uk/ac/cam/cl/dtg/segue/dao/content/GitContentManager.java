@@ -113,10 +113,10 @@ public class GitContentManager {
   /**
    * Constructor for instantiating a new Git Content Manager Object.
    *
-   * @param database         - that the content Manager manages.
-   * @param searchProvider   - search provider that the content manager manages and controls.
-   * @param contentMapperUtils    - The utility class for mapping content objects.
-   * @param globalProperties - global properties.
+   * @param database           - that the content Manager manages.
+   * @param searchProvider     - search provider that the content manager manages and controls.
+   * @param contentMapperUtils - The utility class for mapping content objects.
+   * @param globalProperties   - global properties.
    */
   @Inject
   public GitContentManager(final GitDb database, final ISearchProvider searchProvider,
@@ -153,9 +153,9 @@ public class GitContentManager {
   /**
    * FOR TESTING PURPOSES ONLY - Constructor for instantiating a new Git Content Manager Object.
    *
-   * @param database       - that the content Manager manages.
-   * @param searchProvider - search provider that the content manager manages and controls.
-   * @param contentMapperUtils  - The utility class for mapping content objects.
+   * @param database           - that the content Manager manages.
+   * @param searchProvider     - search provider that the content manager manages and controls.
+   * @param contentMapperUtils - The utility class for mapping content objects.
    */
   public GitContentManager(final GitDb database, final ISearchProvider searchProvider,
                            final ContentMapperUtils contentMapperUtils, final ContentMapper objectMapper) {
