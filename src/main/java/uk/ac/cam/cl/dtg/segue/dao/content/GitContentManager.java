@@ -72,6 +72,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.database.GitDb;
 import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
@@ -86,7 +87,6 @@ import uk.ac.cam.cl.dtg.segue.search.SimpleExclusionInstruction;
 import uk.ac.cam.cl.dtg.segue.search.SimpleFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.TermsFilterInstruction;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 /**
  * Implementation that specifically works with Content objects.

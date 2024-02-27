@@ -18,8 +18,8 @@ package uk.ac.cam.cl.dtg.isaac.dos.users;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import uk.ac.cam.cl.dtg.isaac.mappers.Default;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
-import uk.ac.cam.cl.dtg.util.mappers.Default;
 
 /**
  * Immutable (virtual) Data Object to represent the user authentication settings.

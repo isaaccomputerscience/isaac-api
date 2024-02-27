@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.dtg.util.mappers;
+package uk.ac.cam.cl.dtg.isaac.mappers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -42,7 +42,8 @@ class EventMapperTest {
   @Test
   void mapThrowsUnimplementedMappingExceptionForUnexpectedTarget() {
     DetailedEventBookingDTO source = new DetailedEventBookingDTO();
-    Exception exception = assertThrows(UnimplementedMappingException.class, () -> eventMapper.map(source, DetailedEventBookingDTO.class));
+    Exception exception = assertThrows(
+        UnimplementedMappingException.class, () -> eventMapper.map(source, DetailedEventBookingDTO.class));
     assertEquals("Invocation of unimplemented mapping from EventBookingDTO to DetailedEventBookingDTO", exception.getMessage());
   }
 

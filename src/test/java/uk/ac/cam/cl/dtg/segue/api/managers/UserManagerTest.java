@@ -67,6 +67,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.UserFromAuthProvider;
 import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.MainObjectMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 import uk.ac.cam.cl.dtg.segue.auth.FacebookAuthenticator;
@@ -85,7 +86,6 @@ import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.users.IAnonymousUserDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 class UserManagerTest {
   private QuestionManager dummyQuestionDatabase;

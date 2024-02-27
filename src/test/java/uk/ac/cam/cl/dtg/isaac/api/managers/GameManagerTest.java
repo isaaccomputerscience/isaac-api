@@ -39,12 +39,12 @@ import uk.ac.cam.cl.dtg.isaac.dto.GameFilter;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuestionPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager.BooleanSearchClause;
-import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 class GameManagerTest {
   private GitContentManager dummyContentManager;

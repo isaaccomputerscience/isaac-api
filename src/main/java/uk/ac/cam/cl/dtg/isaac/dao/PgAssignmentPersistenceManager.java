@@ -32,9 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.AssignmentDO;
 import uk.ac.cam.cl.dtg.isaac.dto.AssignmentDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.MiscMapper;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.util.mappers.MiscMapper;
 
 /**
  * This class is responsible for managing and persisting user data.

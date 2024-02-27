@@ -94,6 +94,11 @@ import uk.ac.cam.cl.dtg.isaac.dos.IUserStreaksManager;
 import uk.ac.cam.cl.dtg.isaac.dos.PgUserAlerts;
 import uk.ac.cam.cl.dtg.isaac.dos.PgUserPreferenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.PgUserStreakManager;
+import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
+import uk.ac.cam.cl.dtg.isaac.mappers.EventMapper;
+import uk.ac.cam.cl.dtg.isaac.mappers.MainObjectMapper;
+import uk.ac.cam.cl.dtg.isaac.mappers.MiscMapper;
+import uk.ac.cam.cl.dtg.isaac.mappers.UserMapper;
 import uk.ac.cam.cl.dtg.isaac.quiz.IQuestionAttemptManager;
 import uk.ac.cam.cl.dtg.isaac.quiz.IsaacSymbolicLogicValidator;
 import uk.ac.cam.cl.dtg.isaac.quiz.IsaacSymbolicValidator;
@@ -187,11 +192,6 @@ import uk.ac.cam.cl.dtg.segue.search.ElasticSearchProvider;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper;
-import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
-import uk.ac.cam.cl.dtg.util.mappers.EventMapper;
-import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
-import uk.ac.cam.cl.dtg.util.mappers.MiscMapper;
-import uk.ac.cam.cl.dtg.util.mappers.UserMapper;
 
 /**
  * This class is responsible for injecting configuration values for persistence related classes.

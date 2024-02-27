@@ -85,6 +85,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserAuthenticationSettingsDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.UserMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 import uk.ac.cam.cl.dtg.segue.auth.IAuthenticator;
@@ -120,7 +121,6 @@ import uk.ac.cam.cl.dtg.segue.dao.users.IAnonymousUserDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserDataManager;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.UserMapper;
 
 /**
  * This class is responsible for managing all user data and orchestration of calls to a user Authentication Manager for

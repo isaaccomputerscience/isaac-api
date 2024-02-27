@@ -35,9 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.QuizAttemptDO;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAttemptDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.MiscMapper;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.util.mappers.MiscMapper;
 
 /**
  * This class is responsible for managing and persisting quiz attempts.

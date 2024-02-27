@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.dtg.util.mappers;
+package uk.ac.cam.cl.dtg.isaac.mappers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;

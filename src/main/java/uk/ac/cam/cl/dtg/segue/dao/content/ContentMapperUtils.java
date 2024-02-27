@@ -44,9 +44,9 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.JsonContentType;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.dao.JsonLoader;
 import uk.ac.cam.cl.dtg.segue.dao.users.QuestionValidationResponseDeserializer;
-import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 /**
  * Class responsible for mapping Content objects (or contentBase objects) to their respective subclass.

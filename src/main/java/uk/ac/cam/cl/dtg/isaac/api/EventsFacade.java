@@ -98,6 +98,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.DetailedEventBookingDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.MainObjectMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.managers.GroupManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
@@ -118,7 +119,6 @@ import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.DateRangeFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.SimpleExclusionInstruction;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 /**
  * Events Facade.

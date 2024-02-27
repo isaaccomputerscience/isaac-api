@@ -22,7 +22,7 @@ import uk.ac.cam.cl.dtg.isaac.api.managers.URIManager;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentSummaryDTO;
-import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
+import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
 
 public class ContentSummarizerService {
   private final ContentMapper mapper;

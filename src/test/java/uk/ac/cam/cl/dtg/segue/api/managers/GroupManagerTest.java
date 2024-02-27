@@ -49,12 +49,12 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.Gender;
 import uk.ac.cam.cl.dtg.isaac.dto.UserGroupDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.UserMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserGroupPersistenceManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.UserMapper;
 
 /**
  * Test class for the user manager class.

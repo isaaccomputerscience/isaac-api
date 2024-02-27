@@ -49,11 +49,11 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentBaseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.MainObjectMapper;
 import uk.ac.cam.cl.dtg.segue.api.ErrorResponseWrapper;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
-import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 public class QuizQuestionManager {
   private final QuestionManager questionManager;

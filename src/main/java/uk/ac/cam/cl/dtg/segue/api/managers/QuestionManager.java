@@ -64,6 +64,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.MainObjectMapper;
 import uk.ac.cam.cl.dtg.isaac.quiz.IQuestionAttemptManager;
 import uk.ac.cam.cl.dtg.isaac.quiz.ISpecifier;
 import uk.ac.cam.cl.dtg.isaac.quiz.IValidator;
@@ -77,7 +78,6 @@ import uk.ac.cam.cl.dtg.segue.configuration.SegueGuiceConfigurationModule;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
 import uk.ac.cam.cl.dtg.util.QueryUtils;
-import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 /**
  * This class is responsible for validating correct answers using the ValidatesWith annotation when it is applied on to

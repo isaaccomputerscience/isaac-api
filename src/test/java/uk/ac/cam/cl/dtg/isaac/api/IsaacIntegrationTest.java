@@ -60,6 +60,7 @@ import uk.ac.cam.cl.dtg.isaac.dao.PgQuizQuestionAttemptPersistenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.AbstractUserPreferenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.PgUserPreferenceManager;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.MainObjectMapper;
 import uk.ac.cam.cl.dtg.isaac.quiz.PgQuestionAttempts;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.managers.GroupManager;
@@ -104,7 +105,6 @@ import uk.ac.cam.cl.dtg.segue.database.GitDb;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 import uk.ac.cam.cl.dtg.segue.search.ElasticSearchProvider;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 /**
  * Abstract superclass for integration tests, providing them with dependencies including ElasticSearch and PostgreSQL

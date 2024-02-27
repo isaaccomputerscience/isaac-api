@@ -32,9 +32,9 @@ import uk.ac.cam.cl.dtg.isaac.api.managers.AssignmentCancelledException;
 import uk.ac.cam.cl.dtg.isaac.dos.QuizAssignmentDO;
 import uk.ac.cam.cl.dtg.isaac.dos.QuizFeedbackMode;
 import uk.ac.cam.cl.dtg.isaac.dto.QuizAssignmentDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.MiscMapper;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.util.mappers.MiscMapper;
 
 /**
  * This class is responsible for managing and persisting quiz assignments.

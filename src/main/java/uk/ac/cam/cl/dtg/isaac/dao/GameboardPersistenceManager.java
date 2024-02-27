@@ -62,12 +62,12 @@ import uk.ac.cam.cl.dtg.isaac.dto.GameboardItem;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.MainObjectMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import uk.ac.cam.cl.dtg.util.mappers.MainObjectMapper;
 
 /**
  * This class is responsible for managing and persisting user data.

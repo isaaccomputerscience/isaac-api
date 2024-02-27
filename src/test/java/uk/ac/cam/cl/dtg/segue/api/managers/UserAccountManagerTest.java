@@ -29,6 +29,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.PgUserPreferenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.School;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.UserMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 import uk.ac.cam.cl.dtg.segue.auth.IAuthenticator;
@@ -45,7 +46,6 @@ import uk.ac.cam.cl.dtg.segue.dao.users.PgAnonymousUsers;
 import uk.ac.cam.cl.dtg.segue.dao.users.PgUsers;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.UserMapper;
 
 class UserAccountManagerTest {
 

@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.dtg.util.mappers;
+package uk.ac.cam.cl.dtg.isaac.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.SubclassExhaustiveStrategy;

@@ -91,6 +91,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.api.services.ContentService;
@@ -99,7 +100,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 /**
  * Pages Facade

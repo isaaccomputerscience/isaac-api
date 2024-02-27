@@ -54,12 +54,12 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithGroupMembershipDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.UserMapper;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IUserGroupPersistenceManager;
-import uk.ac.cam.cl.dtg.util.mappers.UserMapper;
 
 /**
  * GroupManager. Responsible for managing group related logic.

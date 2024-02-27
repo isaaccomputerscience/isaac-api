@@ -87,12 +87,12 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.QuestionDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
-import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 /**
  * This class will be responsible for generating and managing gameboards used by users.

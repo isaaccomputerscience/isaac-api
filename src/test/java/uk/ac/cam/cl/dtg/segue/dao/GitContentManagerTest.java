@@ -22,12 +22,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.database.GitDb;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
-import uk.ac.cam.cl.dtg.util.mappers.ContentMapper;
 
 /**
  * Test class for the GitContentManager class.
