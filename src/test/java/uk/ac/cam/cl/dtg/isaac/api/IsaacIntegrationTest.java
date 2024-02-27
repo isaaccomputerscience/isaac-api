@@ -123,7 +123,7 @@ public abstract class IsaacIntegrationTest {
   protected static PostgresSqlDb postgresSqlDb;
   protected static ElasticSearchProvider elasticSearchProvider;
   protected static SchoolListReader schoolListReader;
-  protected static MainObjectMapper mapperFacade;
+  protected static MainObjectMapper mainObjectMapper;
   protected static Map<AuthenticationProvider, IAuthenticator> providersToRegister;
   protected static IMisuseMonitor misuseMonitor;
 
@@ -252,9 +252,10 @@ public abstract class IsaacIntegrationTest {
 
     contentMapperUtils = new ContentMapperUtils(getClasses("uk.ac.cam.cl.dtg"));
     PgQuestionAttempts pgQuestionAttempts = new PgQuestionAttempts(postgresSqlDb, contentMapperUtils);
-    questionManager = new QuestionManager(contentMapperUtils, mapperFacade, pgQuestionAttempts, userPreferenceManager);
 
-    mapperFacade = MainObjectMapper.INSTANCE;
+    mainObjectMapper = MainObjectMapper.INSTANCE;
+
+    questionManager = new QuestionManager(contentMapperUtils, mainObjectMapper, pgQuestionAttempts, userPreferenceManager);
 
     // The following may need some actual authentication providers...
     providersToRegister = new HashMap<>();
@@ -270,7 +271,7 @@ public abstract class IsaacIntegrationTest {
 
     Git git = createNiceMock(Git.class);
     GitDb gitDb = new GitDb(git);
-    contentManager = new GitContentManager(gitDb, elasticSearchProvider, contentMapperUtils, mapperFacade, properties);
+    contentManager = new GitContentManager(gitDb, elasticSearchProvider, contentMapperUtils, mainObjectMapper, properties);
     logManager = createNiceMock(ILogManager.class);
 
     emailManager =
@@ -289,7 +290,7 @@ public abstract class IsaacIntegrationTest {
     schoolListReader = new SchoolListReader(elasticSearchProvider);
 
     userAccountManager =
-        new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, mapperFacade, emailManager,
+        new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, mainObjectMapper, emailManager,
             pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager, userPreferenceManager,
             schoolListReader);
 
@@ -299,13 +300,13 @@ public abstract class IsaacIntegrationTest {
     PgAssociationDataManager pgAssociationDataManager = new PgAssociationDataManager(postgresSqlDb);
     PgUserGroupPersistenceManager pgUserGroupPersistenceManager = new PgUserGroupPersistenceManager(postgresSqlDb);
     IAssignmentPersistenceManager assignmentPersistenceManager =
-        new PgAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
+        new PgAssignmentPersistenceManager(postgresSqlDb, mainObjectMapper);
 
     GameboardPersistenceManager gameboardPersistenceManager =
-        new GameboardPersistenceManager(postgresSqlDb, contentManager, mapperFacade, objectMapper,
+        new GameboardPersistenceManager(postgresSqlDb, contentManager, mainObjectMapper, objectMapper,
             new URIManager(properties));
-    gameManager = new GameManager(contentManager, gameboardPersistenceManager, mapperFacade, questionManager);
-    groupManager = new GroupManager(pgUserGroupPersistenceManager, userAccountManager, gameManager, mapperFacade);
+    gameManager = new GameManager(contentManager, gameboardPersistenceManager, mainObjectMapper, questionManager);
+    groupManager = new GroupManager(pgUserGroupPersistenceManager, userAccountManager, gameManager, mainObjectMapper);
     userAssociationManager = new UserAssociationManager(pgAssociationDataManager, userAccountManager, groupManager);
     PgTransactionManager pgTransactionManager = new PgTransactionManager(postgresSqlDb);
     eventBookingManager =
@@ -317,17 +318,17 @@ public abstract class IsaacIntegrationTest {
         new EmailService(emailManager, groupManager, userAccountManager), gameManager, properties);
 
     quizManager = new QuizManager(properties, new ContentService(contentManager), contentManager,
-        new ContentSummarizerService(mapperFacade, new URIManager(properties)), contentMapperUtils);
-    quizAssignmentPersistenceManager = new PgQuizAssignmentPersistenceManager(postgresSqlDb, mapperFacade);
+        new ContentSummarizerService(mainObjectMapper, new URIManager(properties)), contentMapperUtils);
+    quizAssignmentPersistenceManager = new PgQuizAssignmentPersistenceManager(postgresSqlDb, mainObjectMapper);
     quizAssignmentManager = new QuizAssignmentManager(quizAssignmentPersistenceManager,
         new EmailService(emailManager, groupManager, userAccountManager), quizManager, groupManager, properties);
     assignmentService = new AssignmentService(userAccountManager);
-    quizAttemptPersistenceManager = new PgQuizAttemptPersistenceManager(postgresSqlDb, mapperFacade);
+    quizAttemptPersistenceManager = new PgQuizAttemptPersistenceManager(postgresSqlDb, mainObjectMapper);
     quizAttemptManager = new QuizAttemptManager(quizAttemptPersistenceManager);
     quizQuestionAttemptPersistenceManager = new PgQuizQuestionAttemptPersistenceManager(postgresSqlDb,
         contentMapperUtils);
     quizQuestionManager =
-        new QuizQuestionManager(questionManager, mapperFacade, quizQuestionAttemptPersistenceManager, quizManager,
+        new QuizQuestionManager(questionManager, mainObjectMapper, quizQuestionAttemptPersistenceManager, quizManager,
             quizAttemptManager);
 
     misuseMonitor = new InMemoryMisuseMonitor();
