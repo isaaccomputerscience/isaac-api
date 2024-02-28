@@ -1,16 +1,18 @@
 package uk.ac.cam.cl.dtg.isaac.mappers;
 
+import static java.time.Instant.now;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.joda.time.Instant;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.ExamBoard;
@@ -25,9 +27,16 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 
 class EventMapperTest {
 
-  private final EventMapper eventMapper = EventMapper.INSTANCE;
-  private static final Date testDate = new Date();
-  private static final Date newTestDate = new Instant().plus(10000).toDate();
+  private EventMapper eventMapper;
+  private static Date testDate;
+  private static Date newTestDate;
+
+  @BeforeEach
+  void beforeEach() {
+    eventMapper = EventMapper.INSTANCE;
+    testDate = new Date();
+    newTestDate = Date.from(now().plus(10000L, ChronoUnit.SECONDS));
+  }
 
   @Test
   @DisplayName("Test mapping from DetailedEventBookingDTO to EventBookingDTO")

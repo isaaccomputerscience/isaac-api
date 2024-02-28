@@ -1,15 +1,17 @@
 package uk.ac.cam.cl.dtg.isaac.mappers;
 
+import static java.time.Instant.now;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
-import org.joda.time.Instant;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -45,16 +47,23 @@ import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 
 class UserMapperTest {
 
-  private final UserMapper mapper = UserMapper.INSTANCE;
+  private UserMapper userMapper;
+  private static Date testDate;
+  private static Date newTestDate;
 
-  private static final Date testDate = new Date();
-  private static final Date newTestDate = new Instant().plus(10000).toDate();
+  @BeforeEach
+  void beforeEach() {
+    userMapper = UserMapper.INSTANCE;
+    testDate = new Date();
+    newTestDate = Date.from(now().plus(10000L, ChronoUnit.SECONDS));
+  }
+
 
   @ParameterizedTest
   @MethodSource("testCasesDOtoDTO")
   <S extends AbstractSegueUser, T extends AbstractSegueUserDTO> void mappingAbstractSegueUserDOReturnsExpectedDTO(
       S source, T expected) {
-    AbstractSegueUserDTO actual = mapper.map(source);
+    AbstractSegueUserDTO actual = userMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -63,7 +72,7 @@ class UserMapperTest {
   @MethodSource("testCasesDTOtoDO")
   <S extends AbstractSegueUserDTO, T extends AbstractSegueUser> void mappingAbstractSegueUserDTOReturnsExpectedDO(
       S source, T expected) {
-    AbstractSegueUser actual = mapper.map(source);
+    AbstractSegueUser actual = userMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -72,7 +81,7 @@ class UserMapperTest {
   void mappingGroupMembershipDOReturnsExpectedDTO() {
     GroupMembership source = prepareGroupMembershipDO();
     GroupMembershipDTO expected = prepareGroupMembershipDTO();
-    GroupMembershipDTO actual = mapper.map(source);
+    GroupMembershipDTO actual = userMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -81,7 +90,7 @@ class UserMapperTest {
   void mappingGroupMembershipDTOReturnsExpectedDO() {
     GroupMembershipDTO source = prepareGroupMembershipDTO();
     GroupMembership expected = prepareGroupMembershipDO();
-    GroupMembership actual = mapper.map(source);
+    GroupMembership actual = userMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -90,7 +99,7 @@ class UserMapperTest {
   void mappingUserGroupDOReturnsExpectedDTO() {
     UserGroup source = prepareOriginalUserGroupDO();
     UserGroupDTO expected = prepareMappedUserGroupDTO();
-    UserGroupDTO actual = mapper.map(source);
+    UserGroupDTO actual = userMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -99,7 +108,7 @@ class UserMapperTest {
   void mappingUserGroupDTOReturnsExpectedDO() {
     UserGroupDTO source = prepareOriginalUserGroupDTO();
     UserGroup expected = prepareMappedUserGroupDO();
-    UserGroup actual = mapper.map(source);
+    UserGroup actual = userMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -108,7 +117,7 @@ class UserMapperTest {
   @MethodSource("testCasesFromRegisteredUserDTO")
   <T extends UserSummaryDTO> void defaultMappingMethodFrom_RegisteredUserDTO_returnsRequestedClass(Class<T> targetClass, T expected) {
     RegisteredUserDTO source = prepareOriginalRegisteredUserDTO();
-    T actual = mapper.map(source, targetClass);
+    T actual = userMapper.map(source, targetClass);
     assertEquals(targetClass, actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -117,7 +126,7 @@ class UserMapperTest {
   void mappingUserFromAuthProviderToRegisteredUserReturnsExpectedObject() {
     UserFromAuthProvider source = prepareUserFromAuthProvider();
     RegisteredUser expected = prepareRegisteredUserDOFromUserFromAuthProvider();
-    RegisteredUser actual = mapper.map(source, RegisteredUser.class);
+    RegisteredUser actual = userMapper.map(source, RegisteredUser.class);
     assertEquals(RegisteredUser.class, actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -125,14 +134,14 @@ class UserMapperTest {
   @Test
   void defaultMappingMethodFrom_UserFromAuthProvider_throwsUnimplementedMappingExceptionForUnexpectedTarget() {
     UserFromAuthProvider source = prepareUserFromAuthProvider();
-    Exception exception = assertThrows(UnimplementedMappingException.class, () -> mapper.map(source, IsaacPodDTO.class));
+    Exception exception = assertThrows(UnimplementedMappingException.class, () -> userMapper.map(source, IsaacPodDTO.class));
     assertEquals("Invocation of unimplemented mapping from UserFromAuthProvider to IsaacPodDTO", exception.getMessage());
   }
 
   @ParameterizedTest
   @MethodSource("testCasesFromUserSummaryDTO")
   <S extends UserSummaryDTO, T> void defaultMappingMethodFrom_UserSummaryDTO_returnsExpectedClass(S source, Class<T> targetClass, T expected) {
-    T actual = mapper.map(source, targetClass);
+    T actual = userMapper.map(source, targetClass);
     assertEquals(targetClass, actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -140,14 +149,14 @@ class UserMapperTest {
   @Test
   void defaultMappingMethodFrom_UserSummaryDTO_throwsUnimplementedMappingExceptionForUnexpectedTarget() {
     UserSummaryDTO source = new UserSummaryDTO();
-    Exception exception = assertThrows(UnimplementedMappingException.class, () -> mapper.map(source, IsaacPodDTO.class));
+    Exception exception = assertThrows(UnimplementedMappingException.class, () -> userMapper.map(source, IsaacPodDTO.class));
     assertEquals("Invocation of unimplemented mapping from UserSummaryDTO to IsaacPodDTO", exception.getMessage());
   }
 
   @Test
   void copyRegisteredUserDOReturnsNewObjectWithSameProperties() {
     RegisteredUser source = prepareOriginalRegisteredUserDO();
-    RegisteredUser actual = mapper.copy(source);
+    RegisteredUser actual = userMapper.copy(source);
     assertEquals(source.getClass(), actual.getClass());
     assertNotSame(source, actual);
     assertDeepEquals(source, actual);
@@ -156,7 +165,7 @@ class UserMapperTest {
   @Test
   void copyRegisteredUserDTOReturnsNewObjectWithSameProperties() {
     RegisteredUserDTO source = prepareOriginalRegisteredUserDTO();
-    RegisteredUserDTO actual = mapper.copy(source);
+    RegisteredUserDTO actual = userMapper.copy(source);
     assertEquals(source.getClass(), actual.getClass());
     assertNotSame(source, actual);
     assertDeepEquals(source, actual);
@@ -165,7 +174,7 @@ class UserMapperTest {
   @Test
   void copyGroupMembershipDOReturnsNewObjectWithSameProperties() {
     GroupMembership source = prepareGroupMembershipDO();
-    GroupMembership actual = mapper.copy(source);
+    GroupMembership actual = userMapper.copy(source);
     assertEquals(source.getClass(), actual.getClass());
     assertNotSame(source, actual);
     assertDeepEquals(source, actual);
@@ -174,7 +183,7 @@ class UserMapperTest {
   @Test
   void copyGroupMembershipDTOReturnsNewObjectWithSameProperties() {
     GroupMembershipDTO source = prepareGroupMembershipDTO();
-    GroupMembershipDTO actual = mapper.copy(source);
+    GroupMembershipDTO actual = userMapper.copy(source);
     assertEquals(source.getClass(), actual.getClass());
     assertNotSame(source, actual);
     assertDeepEquals(source, actual);
@@ -183,7 +192,7 @@ class UserMapperTest {
   @ParameterizedTest
   @MethodSource("testCasesCopyUserSummaryDTO")
   void copyContentDTOReturnsNewObjectWithSameProperties(UserSummaryDTO source) {
-    UserSummaryDTO actual = mapper.copy(source);
+    UserSummaryDTO actual = userMapper.copy(source);
     assertEquals(source.getClass(), actual.getClass());
     assertNotSame(source, actual);
     assertDeepEquals(source, actual);
@@ -194,7 +203,7 @@ class UserMapperTest {
     RegisteredUserDTO source = prepareMergeSourceRegisteredUserDTO();
     RegisteredUser target = prepareOriginalRegisteredUserDO();
     RegisteredUser expected = prepareMergeExpectedRegisteredUserDO();
-    mapper.merge(source, target);
+    userMapper.merge(source, target);
     assertDeepEquals(expected, target);
   }
 
@@ -203,7 +212,7 @@ class UserMapperTest {
     RegisteredUserDTO source = prepareMergeNullSourceRegisteredUserDTO();
     RegisteredUser target = prepareOriginalRegisteredUserDO();
     RegisteredUser expected = prepareOriginalRegisteredUserDO();
-    mapper.merge(source, target);
+    userMapper.merge(source, target);
     assertDeepEquals(expected, target);
   }
 

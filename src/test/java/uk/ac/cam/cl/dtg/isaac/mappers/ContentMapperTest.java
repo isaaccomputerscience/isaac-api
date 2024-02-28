@@ -9,9 +9,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-import org.elasticsearch.core.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -71,16 +72,21 @@ import uk.ac.cam.cl.dtg.util.locations.Address;
 import uk.ac.cam.cl.dtg.util.locations.Location;
 
 class ContentMapperTest {
-  private final ContentMapper mapper = ContentMapper.INSTANCE;
+  private ContentMapper contentMapper;
+  private static Date testDate;
 
-  private static final Date testDate = new Date();
+  @BeforeEach
+  void beforeEach() {
+    contentMapper = ContentMapper.INSTANCE;
+    testDate = new Date();
+  }
 
   @ParameterizedTest
   @MethodSource("testCasesDOtoDTO")
   <S extends Content, T extends ContentDTO> void mappingDOReturnsExpectedDTO(S source, T expected) {
     S sourceWithCommonProperties = setOriginalCommonContentProperties(source);
     T expectedWithCommonProperties = setMappedCommonContentDTOProperties(expected);
-    ContentDTO actual = (ContentDTO) mapper.map(sourceWithCommonProperties);
+    ContentDTO actual = (ContentDTO) contentMapper.map(sourceWithCommonProperties);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expectedWithCommonProperties, actual);
   }
@@ -90,7 +96,7 @@ class ContentMapperTest {
   <S extends ContentDTO, T extends Content> void mappingDTOReturnsExpectedDO(S source, T expected) {
     S sourceWithCommonProperties = setOriginalCommonContentDTOProperties(source);
     T expectedWithCommonProperties = setMappedCommonContentProperties(expected);
-    Content actual = (Content) mapper.map(sourceWithCommonProperties);
+    Content actual = (Content) contentMapper.map(sourceWithCommonProperties);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expectedWithCommonProperties, actual);
   }
@@ -98,7 +104,7 @@ class ContentMapperTest {
   @ParameterizedTest
   @MethodSource("testCasesFromContentDTO")
   <T> void defaultMappingMethodFrom_ContentDTO_returnsRequestedClass(ContentDTO source, Class<T> targetClass, T expected) {
-    T actual = mapper.map(source, targetClass);
+    T actual = contentMapper.map(source, targetClass);
     assertEquals(targetClass, actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -106,7 +112,7 @@ class ContentMapperTest {
   @ParameterizedTest
   @MethodSource("testCasesFromContent")
   <T> void defaultMappingMethodFrom_Content_returnsRequestedClass(Content source, Class<T> targetClass, T expected) {
-    T actual = mapper.map(source, targetClass);
+    T actual = contentMapper.map(source, targetClass);
     assertEquals(targetClass, actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -114,21 +120,21 @@ class ContentMapperTest {
   @Test
   void defaultMappingMethodFrom_ContentDTO_throwsUnimplementedMappingExceptionForUnexpectedTarget() {
     ContentDTO source = new ContentDTO();
-    Exception exception = assertThrows(UnimplementedMappingException.class, () -> mapper.map(source, IsaacPodDTO.class));
+    Exception exception = assertThrows(UnimplementedMappingException.class, () -> contentMapper.map(source, IsaacPodDTO.class));
     assertEquals("Invocation of unimplemented mapping from ContentDTO to IsaacPodDTO", exception.getMessage());
   }
 
   @Test
   void defaultMappingMethodFrom_Content_throwsUnimplementedMappingExceptionForUnexpectedTarget() {
     Content source = new Content();
-    Exception exception = assertThrows(UnimplementedMappingException.class, () -> mapper.map(source, IsaacPod.class));
+    Exception exception = assertThrows(UnimplementedMappingException.class, () -> contentMapper.map(source, IsaacPod.class));
     assertEquals("Invocation of unimplemented mapping from Content to IsaacPod", exception.getMessage());
   }
 
   @ParameterizedTest
   @MethodSource("testCasesCopyDTO")
   void copyContentDTOReturnsNewObjectWithSameProperties(ContentDTO source) {
-    ContentDTO actual = mapper.copy(source);
+    ContentDTO actual = contentMapper.copy(source);
     assertEquals(actual.getClass(), source.getClass());
     assertNotSame(actual, source);
     assertDeepEquals(actual, source);

@@ -1,16 +1,18 @@
 package uk.ac.cam.cl.dtg.isaac.mappers;
 
+import static java.time.Instant.now;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.joda.time.Instant;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.AssignmentDO;
 import uk.ac.cam.cl.dtg.isaac.dos.AudienceContext;
@@ -40,16 +42,22 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 
 class MiscMapperTest {
 
-  MiscMapper mapper = MiscMapper.INSTANCE;
+  MiscMapper miscMapper = MiscMapper.INSTANCE;
+  private static Date testDate;
+  private static Date newTestDate;
 
-  private static final Date testDate = new Date();
-  private static final Date newTestDate = new Instant().plus(10000).toDate();
+  @BeforeEach
+  void beforeEach() {
+    miscMapper = MiscMapper.INSTANCE;
+    testDate = new Date();
+    newTestDate = Date.from(now().plus(10000L, ChronoUnit.SECONDS));
+  }
 
   @Test
   void mapGameboardDTO() {
     GameboardDO source = prepareGameboardDO();
     GameboardDTO expected = prepareMappedGameboardDTO();
-    GameboardDTO actual = mapper.map(source);
+    GameboardDTO actual = miscMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -58,7 +66,7 @@ class MiscMapperTest {
   void mapGameboardDO() {
     GameboardDTO source = prepareOriginalGameboardDTO();
     GameboardDO expected = prepareGameboardDO();
-    GameboardDO actual = mapper.map(source);
+    GameboardDO actual = miscMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -67,7 +75,7 @@ class MiscMapperTest {
   void mapAssignmentDTO() {
     AssignmentDO source = prepareAssignmentDO();
     AssignmentDTO expected = prepareMappedAssignmentDTO();
-    AssignmentDTO actual = mapper.map(source);
+    AssignmentDTO actual = miscMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -76,7 +84,7 @@ class MiscMapperTest {
   void mapAssignmentDO() {
     AssignmentDTO source = prepareOriginalAssignmentDTO();
     AssignmentDO expected = prepareAssignmentDO();
-    AssignmentDO actual = mapper.map(source);
+    AssignmentDO actual = miscMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -85,7 +93,7 @@ class MiscMapperTest {
   void mapQuizAssignmentDTO() {
     QuizAssignmentDO source = prepareQuizAssignmentDO();
     QuizAssignmentDTO expected = prepareMappedQuizAssignmentDTO();
-    QuizAssignmentDTO actual = mapper.map(source);
+    QuizAssignmentDTO actual = miscMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -94,7 +102,7 @@ class MiscMapperTest {
   void mapQuizAssignmentDO() {
     QuizAssignmentDTO source = prepareOriginalQuizAssignmentDTO();
     QuizAssignmentDO expected = prepareQuizAssignmentDO();
-    QuizAssignmentDO actual = mapper.map(source);
+    QuizAssignmentDO actual = miscMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -103,7 +111,7 @@ class MiscMapperTest {
   void mapQuizAttemptDTO() {
     QuizAttemptDO source = prepareQuizAttemptDO();
     QuizAttemptDTO expected = prepareMappedQuizAttemptDTO();
-    QuizAttemptDTO actual = mapper.map(source);
+    QuizAttemptDTO actual = miscMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -112,7 +120,7 @@ class MiscMapperTest {
   void mapQuizAttemptDO() {
     QuizAttemptDTO source = prepareOriginalQuizAttemptDTO();
     QuizAttemptDO expected = prepareQuizAttemptDO();
-    QuizAttemptDO actual = mapper.map(source);
+    QuizAttemptDO actual = miscMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -120,7 +128,7 @@ class MiscMapperTest {
   @Test
   void copyResultsWrapperOfString() {
     ResultsWrapper<String> source = new ResultsWrapper<>(List.of("result1", "result2", "result3"), 3L);
-    ResultsWrapper<String> actual = mapper.copy(source);
+    ResultsWrapper<String> actual = miscMapper.copy(source);
     assertEquals(actual.getClass(), source.getClass());
     assertNotSame(actual, source);
     assertNotSame(actual.getResults(), source.getResults());

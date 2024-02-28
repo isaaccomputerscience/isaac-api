@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -25,14 +26,19 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 
 class QuestionValidationMapperTest {
 
-  private final QuestionValidationMapper mapper = QuestionValidationMapper.INSTANCE;
+  private QuestionValidationMapper questionValidationMapper;
+  private static Date testDate;
 
-  private static final Date testDate = new Date();
+  @BeforeEach
+  void beforeEach() {
+    questionValidationMapper = QuestionValidationMapper.INSTANCE;
+    testDate = new Date();
+  }
 
   @ParameterizedTest
   @MethodSource("testCasesDOtoDTO")
   <S extends QuestionValidationResponse, T extends QuestionValidationResponseDTO> void mappingDOReturnsExpectedDTO(S source, T expected) {
-    QuestionValidationResponseDTO actual = mapper.map(source);
+    QuestionValidationResponseDTO actual = questionValidationMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
@@ -40,7 +46,7 @@ class QuestionValidationMapperTest {
   @ParameterizedTest
   @MethodSource("testCasesDTOtoDO")
   <S extends QuestionValidationResponseDTO, T extends QuestionValidationResponse> void mappingDTOReturnsExpectedDO(S source, T expected) {
-    QuestionValidationResponse actual = mapper.map(source);
+    QuestionValidationResponse actual = questionValidationMapper.map(source);
     assertEquals(expected.getClass(), actual.getClass());
     assertDeepEquals(expected, actual);
   }
