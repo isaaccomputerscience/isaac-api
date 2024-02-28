@@ -40,9 +40,9 @@ class GitContentManagerTest {
     GitDb database = createMock(GitDb.class);
     ISearchProvider searchProvider = createMock(ISearchProvider.class);
     ContentMapperUtils contentMapperUtils = createMock(ContentMapperUtils.class);
-    ContentMapper objectMapper = ContentMapper.INSTANCE;
+    ContentMapper contentMapper = createMock(ContentMapper.class);
 
-    this.defaultGCM = new GitContentManager(database, searchProvider, contentMapperUtils, objectMapper);
+    this.defaultGCM = new GitContentManager(database, searchProvider, contentMapperUtils, contentMapper);
   }
 
   /**
