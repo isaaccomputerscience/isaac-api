@@ -18,7 +18,6 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
@@ -95,7 +94,7 @@ class UserManagerTest {
   private PropertiesLoader dummyPropertiesLoader;
   private static final String CSRF_TEST_VALUE = "CSRFTESTVALUE";
 
-  private MainObjectMapper objectMapper;
+  private MainObjectMapper dummyMapper;
   private EmailManager dummyQueue;
   private SimpleDateFormat sdf;
 
@@ -119,7 +118,7 @@ class UserManagerTest {
     this.dummyProvidersMap.put(AuthenticationProvider.SEGUE, dummyLocalAuth);
 
     String dummyHostName = "bob";
-    this.objectMapper = MainObjectMapper.INSTANCE;
+    this.dummyMapper = createMock(MainObjectMapper.class);
     this.dummyQueue = createMock(EmailManager.class);
     this.dummyPropertiesLoader = createMock(PropertiesLoader.class);
     this.sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
@@ -217,7 +216,8 @@ class UserManagerTest {
         .andReturn(ImmutableMap.of(returnUser, false)).atLeastOnce();
     replay(dummyQuestionDatabase);
 
-    replay(dummyDatabase, dummyLocalAuth);
+    expect(dummyMapper.map(returnUser)).andReturn(new RegisteredUserDTO()).atLeastOnce();
+    replay(dummyMapper, dummyDatabase, dummyLocalAuth);
 
     // Act
     RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
@@ -225,7 +225,7 @@ class UserManagerTest {
     // Assert
     assertNotNull(user);
 
-    verify(dummyQuestionDatabase, request);
+    verify(dummyQuestionDatabase, request, dummyMapper);
   }
 
   /**
@@ -337,6 +337,9 @@ class UserManagerTest {
     expect(this.dummyUserCache.storeAnonymousUser(au)).andReturn(au).atLeastOnce();
     expect(this.dummyUserCache.getById(au.getSessionId())).andReturn(au).atLeastOnce();
 
+    AnonymousUserDTO someAnonymousUserDTO = new AnonymousUserDTO();
+    someAnonymousUserDTO.setSessionId(someSegueAnonymousUserId);
+
     String validOAuthProvider = "test";
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.SECOND, 500);
@@ -368,16 +371,9 @@ class UserManagerTest {
     expect(((IFederatedAuthenticator) dummyAuth).getAuthenticationProvider())
         .andReturn(AuthenticationProvider.TEST).atLeastOnce();
 
-    Date userBirthDate = new Date();
     // User object back from provider
     UserFromAuthProvider providerUser = new UserFromAuthProvider(someProviderUniqueUserId, "TestFirstName",
-        "TestLastName", "test@test.com", EmailVerificationStatus.VERIFIED, userBirthDate, Gender.MALE);
-
-    RegisteredUser mappedProviderUser = new RegisteredUser(null, "TestFirstName", "TestLastName", "test@test.com", null,
-        userBirthDate, Gender.MALE, new Date(), null, null, null, EmailVerificationStatus.VERIFIED, null);
-
-    RegisteredUser userFromDatabase = new RegisteredUser(someSegueUserId, "TestFirstName", "TestLastName", "test@test.com", Role.STUDENT,
-        userBirthDate, Gender.MALE, new Date(), null, null, null, EmailVerificationStatus.VERIFIED, false);
+        "TestLastName", "test@test.com", EmailVerificationStatus.VERIFIED, new Date(), Gender.MALE);
 
     // Mock get User Information from provider call
     expect(((IFederatedAuthenticator) dummyAuth).getUserInfo(someProviderGeneratedLookupValue)).andReturn(
@@ -388,28 +384,37 @@ class UserManagerTest {
     expect(dummyDatabase.getByLinkedAccount(AuthenticationProvider.TEST, someProviderUniqueUserId)).andReturn(null)
         .atLeastOnce();
 
-    expect(dummyDatabase.getAuthenticationProvidersByUsers(Collections.singletonList(mappedProviderUser)))
+    RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
+        new Date(), Gender.MALE, new Date(), null, null, null, null, false);
+
+    expect(dummyDatabase.getAuthenticationProvidersByUsers(Collections.singletonList(mappedUser)))
         .andReturn(new HashMap<RegisteredUser, List<AuthenticationProvider>>() {
           {
-            put(mappedProviderUser, Lists.newArrayList(AuthenticationProvider.GOOGLE));
+            put(mappedUser, Lists.newArrayList(AuthenticationProvider.GOOGLE));
           }
         }).atLeastOnce();
-    expect(dummyDatabase.getSegueAccountExistenceByUsers(Collections.singletonList(mappedProviderUser)))
-        .andReturn(ImmutableMap.of(mappedProviderUser, false)).atLeastOnce();
+    expect(dummyDatabase.getSegueAccountExistenceByUsers(Collections.singletonList(mappedUser)))
+        .andReturn(ImmutableMap.of(mappedUser, false)).atLeastOnce();
 
-    RegisteredUserDTO mappedUserDTO = objectMapper.map(userFromDatabase);
+    RegisteredUserDTO mappedUserDTO = new RegisteredUserDTO();
+
+    expect(dummyMapper.map(providerUser, RegisteredUser.class)).andReturn(mappedUser).atLeastOnce();
+    expect(dummyMapper.map(mappedUser)).andReturn(mappedUserDTO).atLeastOnce();
+    expect(dummyMapper.map(au)).andReturn(someAnonymousUserDTO).anyTimes();
 
     // handle duplicate account check.
     expect(dummyDatabase.getByEmail(providerUser.getEmail())).andReturn(null).once();
 
     // A main part of the test is to check the below call happens
     expect(
-        dummyDatabase.registerNewUserWithProvider(anyObject(RegisteredUser.class), eq(AuthenticationProvider.TEST),
-            eq(someProviderUniqueUserId))).andReturn(userFromDatabase).atLeastOnce();
+        dummyDatabase.registerNewUserWithProvider(mappedUser, AuthenticationProvider.TEST,
+            someProviderUniqueUserId)).andReturn(mappedUser).atLeastOnce();
 
-    expect(dummyDatabase.getById(someSegueUserId)).andReturn(userFromDatabase);
+    mappedUser.setId(someSegueUserId);
 
-    expect(dummyDatabase.regenerateSessionToken(userFromDatabase)).andReturn(newSessionToken);
+    expect(dummyDatabase.getById(someSegueUserId)).andReturn(mappedUser);
+
+    expect(dummyDatabase.regenerateSessionToken(mappedUser)).andReturn(newSessionToken);
 
     Map<String, String> sessionInformation = getSessionInformationAsAMap(authManager, someSegueUserId.toString(),
         validDateString, newSessionToken);
@@ -420,7 +425,7 @@ class UserManagerTest {
     expectLastCall().once();
     expect(request.getCookies()).andReturn(cookieWithSessionInfo).anyTimes();
 
-    dummyQuestionDatabase.mergeAnonymousQuestionAttemptsIntoRegisteredUser(anyObject(AnonymousUserDTO.class), eq(mappedUserDTO));
+    dummyQuestionDatabase.mergeAnonymousQuestionAttemptsIntoRegisteredUser(someAnonymousUserDTO, mappedUserDTO);
     expectLastCall().once();
 
     expect(dummyQueue.getEmailTemplateDTO("email-template-registration-confirmation-federated")).andReturn(
@@ -428,7 +433,7 @@ class UserManagerTest {
     dummyQueue.sendTemplatedEmailToUser(anyObject(), anyObject(), anyObject(), anyObject());
     expectLastCall().once();
 
-    replay(dummySession, request, dummyAuth, dummyQuestionDatabase, dummyDatabase, dummyLocalAuth,
+    replay(dummySession, request, dummyAuth, dummyQuestionDatabase, dummyMapper, dummyDatabase, dummyLocalAuth,
         dummyQueue, dummyUserCache);
 
     // Act
@@ -692,7 +697,7 @@ class UserManagerTest {
     HashMap<AuthenticationProvider, IAuthenticator> providerMap = new HashMap<>();
     providerMap.put(provider, authenticator);
     return new UserAccountManager(dummyDatabase, this.dummyQuestionDatabase, this.dummyPropertiesLoader,
-        providerMap, this.objectMapper, this.dummyQueue, this.dummyUserCache, this.dummyLogManager,
+        providerMap, this.dummyMapper, this.dummyQueue, this.dummyUserCache, this.dummyLogManager,
         buildTestAuthenticationManager(provider, authenticator), dummySecondFactorAuthenticator,
         dummyUserPreferenceManager, dummySchoolListReader);
   }

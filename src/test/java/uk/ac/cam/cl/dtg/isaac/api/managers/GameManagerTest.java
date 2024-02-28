@@ -49,7 +49,7 @@ import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager.BooleanSearchClause;
 class GameManagerTest {
   private GitContentManager dummyContentManager;
   private GameboardPersistenceManager dummyGameboardPersistenceManager;
-  private ContentMapper objectMapper;
+  private ContentMapper dummyMapper;
   private QuestionManager dummyQuestionManager;
   private GameManager gameManager;
 
@@ -57,12 +57,12 @@ class GameManagerTest {
   public void setUp() {
     this.dummyContentManager = createMock(GitContentManager.class);
     this.dummyGameboardPersistenceManager = createMock(GameboardPersistenceManager.class);
-    this.objectMapper = ContentMapper.INSTANCE;
+    this.dummyMapper = createMock(ContentMapper.class);
     this.dummyQuestionManager = createMock(QuestionManager.class);
     this.gameManager = new GameManager(
         this.dummyContentManager,
         this.dummyGameboardPersistenceManager,
-        this.objectMapper,
+        this.dummyMapper,
         this.dummyQuestionManager
     );
   }

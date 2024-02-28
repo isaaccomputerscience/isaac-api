@@ -60,7 +60,7 @@ class UserAccountManagerTest {
     QuestionManager questionmanager = createNiceMock(QuestionManager.class);
     PropertiesLoader propertiesLoader = createNiceMock(PropertiesLoader.class);
     Map<AuthenticationProvider, IAuthenticator> providersToRegister = Map.of();
-    UserMapper objectMapper = UserMapper.INSTANCE;
+    UserMapper userMapper = createMock(UserMapper.class);
     emailManager = createMock(EmailManager.class);
     PgAnonymousUsers pgAnonymousUsers = createNiceMock(PgAnonymousUsers.class);
     ILogManager logManager = createNiceMock(ILogManager.class);
@@ -76,7 +76,7 @@ class UserAccountManagerTest {
     replay(propertiesLoader);
 
     userAccountManager =
-        new UserAccountManager(database, questionmanager, propertiesLoader, providersToRegister, objectMapper,
+        new UserAccountManager(database, questionmanager, propertiesLoader, providersToRegister, userMapper,
             emailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorAuthenticator,
             userPreferenceManager, schoolListReader);
   }

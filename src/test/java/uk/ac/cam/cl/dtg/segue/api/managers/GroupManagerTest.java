@@ -60,7 +60,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  * Test class for the user manager class.
  */
 class GroupManagerTest {
-  private UserMapper userMapper;
+  private UserMapper dummyMapper;
 
   private IUserGroupPersistenceManager groupDataManager;
   private UserAccountManager userManager;
@@ -78,12 +78,12 @@ class GroupManagerTest {
    */
   @BeforeEach
   public final void setUp() throws Exception {
-    this.userMapper = UserMapper.INSTANCE;
+    this.dummyMapper = createMock(UserMapper.class);
     this.groupDataManager = createMock(IUserGroupPersistenceManager.class);
     this.userManager = createMock(UserAccountManager.class);
     this.gameManager = createMock(GameManager.class);
 
-    this.groupManager = new GroupManager(this.groupDataManager, this.userManager, this.gameManager, this.userMapper);
+    this.groupManager = new GroupManager(this.groupDataManager, this.userManager, this.gameManager, this.dummyMapper);
 
     PropertiesLoader dummyPropertiesLoader = createMock(PropertiesLoader.class);
     expect(dummyPropertiesLoader.getProperty(Constants.SESSION_EXPIRY_SECONDS_DEFAULT)).andReturn("60").anyTimes();
@@ -127,11 +127,12 @@ class GroupManagerTest {
       expect(this.userManager.getUserDTOById(null)).andThrow(new NoUserException("No user found with this ID!"));
       expect(this.userManager.convertToDetailedUserSummaryObjectList(someListOfUsers,
           UserSummaryWithEmailAddressDTO.class)).andReturn(someListOfUsersDTOs);
+      expect(this.dummyMapper.map(resultFromDB)).andReturn(mappedGroup).atLeastOnce();
       expect(this.userManager.getUserDTOById(someGroupOwnerId)).andReturn(someGroupOwner);
       expect(this.userManager.convertToUserSummary(someGroupOwner, UserSummaryWithEmailAddressDTO.class)).andReturn(
           someGroupOwnerSummary);
 
-      replay(this.userManager, this.groupDataManager);
+      replay(this.userManager, this.groupDataManager, this.dummyMapper);
 
       // check that the result of the method is whatever comes out of the database
       UserGroupDTO createUserGroup = this.groupManager.createUserGroup(someGroupName, someGroupOwner);
