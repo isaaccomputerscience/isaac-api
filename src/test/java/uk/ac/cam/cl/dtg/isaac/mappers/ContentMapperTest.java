@@ -440,19 +440,19 @@ class ContentMapperTest {
   }
 
   // Choice Question
-  private static ChoiceQuestion prepareOriginalChoiceQuestionDO(ChoiceQuestion object) {
+  private static <T extends ChoiceQuestion> T prepareOriginalChoiceQuestionDO(T object) {
     Choice choice1 = new Choice();
     choice1.setId("choice1");
     Choice choice2 = new Choice();
     choice2.setId("choice2");
 
-    ChoiceQuestion objectWithQuestionFields = (ChoiceQuestion) prepareOriginalQuestionDO(object);
+    T objectWithQuestionFields = prepareOriginalQuestionDO(object);
     objectWithQuestionFields.setChoices(List.of(choice1, choice2));
     objectWithQuestionFields.setRandomiseChoices(true);
     return objectWithQuestionFields;
   }
 
-  private static ChoiceQuestion prepareMappedChoiceQuestionDO(ChoiceQuestion object) {
+  private static <T extends ChoiceQuestion> T prepareMappedChoiceQuestionDO(T object) {
     Choice choice1 = new Choice();
     choice1.setId("choice1");
     choice1.setTags(Set.of());
@@ -460,31 +460,31 @@ class ContentMapperTest {
     choice2.setId("choice2");
     choice2.setTags(Set.of());
 
-    ChoiceQuestion objectWithQuestionFields = (ChoiceQuestion) prepareMappedQuestionDO(object);
+    T objectWithQuestionFields = prepareMappedQuestionDO(object);
     objectWithQuestionFields.setChoices(List.of(choice1, choice2));
     objectWithQuestionFields.setRandomiseChoices(true);
     return objectWithQuestionFields;
   }
 
-  private static ChoiceQuestionDTO prepareOriginalChoiceQuestionDTO(ChoiceQuestionDTO object) {
+  private static <T extends ChoiceQuestionDTO> T prepareOriginalChoiceQuestionDTO(T object) {
     ChoiceDTO choice1 = new ChoiceDTO();
     choice1.setId("choice1");
     ChoiceDTO choice2 = new ChoiceDTO();
     choice2.setId("choice2");
 
-    ChoiceQuestionDTO objectWithQuestionFields = (ChoiceQuestionDTO) prepareOriginalQuestionDTO(object);
+    T objectWithQuestionFields = prepareOriginalQuestionDTO(object);
     objectWithQuestionFields.setChoices(List.of(choice1, choice2));
     objectWithQuestionFields.setRandomiseChoices(true);
     return objectWithQuestionFields;
   }
 
-  private static ChoiceQuestionDTO prepareMappedChoiceQuestionDTO(ChoiceQuestionDTO object) {
+  private static <T extends ChoiceQuestionDTO> T prepareMappedChoiceQuestionDTO(T object) {
     ChoiceDTO choice1 = new ChoiceDTO();
     choice1.setId("choice1");
     ChoiceDTO choice2 = new ChoiceDTO();
     choice2.setId("choice2");
 
-    ChoiceQuestionDTO objectWithQuestionFields = (ChoiceQuestionDTO) prepareMappedQuestionDTO(object);
+    T objectWithQuestionFields = prepareMappedQuestionDTO(object);
     objectWithQuestionFields.setChoices(List.of(choice1, choice2));
     objectWithQuestionFields.setRandomiseChoices(true);
     return objectWithQuestionFields;
@@ -667,7 +667,7 @@ class ContentMapperTest {
     item2.setId("item1");
     item2.setTags(Set.of());
 
-    IsaacItemQuestion object = (IsaacItemQuestion) prepareOriginalChoiceQuestionDO(new IsaacItemQuestion());
+    IsaacItemQuestion object = prepareOriginalChoiceQuestionDO(new IsaacItemQuestion());
     object.setItems(List.of(item1, item2));
     object.setRandomiseItems(true);
     return object;
@@ -681,7 +681,7 @@ class ContentMapperTest {
     item2.setId("item1");
     item2.setTags(Set.of());
 
-    IsaacItemQuestion object = (IsaacItemQuestion) prepareMappedChoiceQuestionDO(new IsaacItemQuestion());
+    IsaacItemQuestion object = prepareMappedChoiceQuestionDO(new IsaacItemQuestion());
     object.setItems(List.of(item1, item2));
     object.setRandomiseItems(true);
     return object;
@@ -693,7 +693,7 @@ class ContentMapperTest {
     ItemDTO item2 = new ItemDTO();
     item2.setId("item1");
 
-    IsaacItemQuestionDTO object = (IsaacItemQuestionDTO) prepareMappedChoiceQuestionDTO(new IsaacItemQuestionDTO());
+    IsaacItemQuestionDTO object = prepareMappedChoiceQuestionDTO(new IsaacItemQuestionDTO());
     object.setItems(List.of(item1, item2));
     object.setRandomiseItems(true);
     return object;
@@ -705,7 +705,7 @@ class ContentMapperTest {
     ItemDTO item2 = new ItemDTO();
     item2.setId("item1");
 
-    IsaacItemQuestionDTO object = (IsaacItemQuestionDTO) prepareMappedChoiceQuestionDTO(new IsaacItemQuestionDTO());
+    IsaacItemQuestionDTO object = prepareMappedChoiceQuestionDTO(new IsaacItemQuestionDTO());
     object.setItems(List.of(item1, item2));
     object.setRandomiseItems(true);
     return object;
@@ -713,7 +713,7 @@ class ContentMapperTest {
 
   // IsaacQuestionPage
   private static IsaacQuestionPage prepareIsaacQuestionPageDO() {
-    IsaacQuestionPage object = (IsaacQuestionPage) prepareSeguePageDO(new IsaacQuestionPage());
+    IsaacQuestionPage object = prepareSeguePageDO(new IsaacQuestionPage());
     object.setPassMark(50F);
     object.setSupersededBy("newVersion");
     object.setDifficulty(Difficulty.challenge_1);
@@ -721,7 +721,7 @@ class ContentMapperTest {
   }
 
   private static IsaacQuestionPageDTO prepareIsaacQuestionPageDTO() {
-    IsaacQuestionPageDTO object = (IsaacQuestionPageDTO) prepareSeguePageDTO(new IsaacQuestionPageDTO());
+    IsaacQuestionPageDTO object = prepareSeguePageDTO(new IsaacQuestionPageDTO());
     object.setPassMark(50F);
     object.setSupersededBy("newVersion");
     object.setDifficulty(Difficulty.challenge_1);
@@ -735,7 +735,7 @@ class ContentMapperTest {
     rubric.setPublished(true);
     rubric.setTags(Set.of());
 
-    IsaacQuiz object = (IsaacQuiz) prepareSeguePageDO(new IsaacQuiz());
+    IsaacQuiz object = prepareSeguePageDO(new IsaacQuiz());
     object.setHiddenFromRoles(List.of("blockedRole1", "blockedRole2"));
     object.setRubric(rubric);
     return object;
@@ -749,7 +749,7 @@ class ContentMapperTest {
         Map.of("sectionA", new QuizFeedbackDTO.Mark(), "sectionB", new QuizFeedbackDTO.Mark()),
         Map.of("question1", new QuizFeedbackDTO.Mark(), "question2", new QuizFeedbackDTO.Mark()));
 
-    IsaacQuizDTO object = (IsaacQuizDTO) prepareSeguePageDTO(new IsaacQuizDTO());
+    IsaacQuizDTO object = prepareSeguePageDTO(new IsaacQuizDTO());
     object.setHiddenFromRoles(List.of("blockedRole1", "blockedRole2"));
     object.setDefaultFeedbackMode(QuizFeedbackMode.OVERALL_MARK);
     object.setRubric(rubric);
@@ -764,7 +764,7 @@ class ContentMapperTest {
     rubric.setId("rubricId");
     rubric.setPublished(true);
 
-    IsaacQuizDTO object = (IsaacQuizDTO) prepareSeguePageDTO(new IsaacQuizDTO());
+    IsaacQuizDTO object = prepareSeguePageDTO(new IsaacQuizDTO());
     object.setHiddenFromRoles(List.of("blockedRole1", "blockedRole2"));
     object.setRubric(rubric);
     return object;
@@ -772,28 +772,28 @@ class ContentMapperTest {
 
   // IsaacSymbolicQuestion
   private static IsaacSymbolicQuestion prepareOriginalIsaacSymbolicQuestionDO() {
-    IsaacSymbolicQuestion object = (IsaacSymbolicQuestion) prepareOriginalChoiceQuestionDO(new IsaacSymbolicQuestion());
+    IsaacSymbolicQuestion object = prepareOriginalChoiceQuestionDO(new IsaacSymbolicQuestion());
     object.setFormulaSeed("formulaSeed");
     object.setAvailableSymbols(List.of("symbol1", "symbol2"));
     return object;
   }
 
   private static IsaacSymbolicQuestion prepareMappedIsaacSymbolicQuestionDO() {
-    IsaacSymbolicQuestion object = (IsaacSymbolicQuestion) prepareMappedChoiceQuestionDO(new IsaacSymbolicQuestion());
+    IsaacSymbolicQuestion object = prepareMappedChoiceQuestionDO(new IsaacSymbolicQuestion());
     object.setFormulaSeed("formulaSeed");
     object.setAvailableSymbols(List.of("symbol1", "symbol2"));
     return object;
   }
 
   private static IsaacSymbolicQuestionDTO prepareOriginalIsaacSymbolicQuestionDTO() {
-    IsaacSymbolicQuestionDTO object = (IsaacSymbolicQuestionDTO) prepareOriginalChoiceQuestionDTO(new IsaacSymbolicQuestionDTO());
+    IsaacSymbolicQuestionDTO object = prepareOriginalChoiceQuestionDTO(new IsaacSymbolicQuestionDTO());
     object.setFormulaSeed("formulaSeed");
     object.setAvailableSymbols(List.of("symbol1", "symbol2"));
     return object;
   }
 
   private static IsaacSymbolicQuestionDTO prepareMappedIsaacSymbolicQuestionDTO() {
-    IsaacSymbolicQuestionDTO object = (IsaacSymbolicQuestionDTO) prepareMappedChoiceQuestionDTO(new IsaacSymbolicQuestionDTO());
+    IsaacSymbolicQuestionDTO object = prepareMappedChoiceQuestionDTO(new IsaacSymbolicQuestionDTO());
     object.setFormulaSeed("formulaSeed");
     object.setAvailableSymbols(List.of("symbol1", "symbol2"));
     return object;
@@ -804,7 +804,7 @@ class ContentMapperTest {
     return prepareOriginalQuestionDO(new Question());
   }
 
-  private static Question prepareOriginalQuestionDO(Question object) {
+  private static <T extends Question> T prepareOriginalQuestionDO(T object) {
     ContentBase answer = new Content();
     answer.setId("answerId");
     Content hint1 = new Content();
@@ -826,7 +826,7 @@ class ContentMapperTest {
     return prepareMappedQuestionDO(new Question());
   }
 
-  private static Question prepareMappedQuestionDO(Question object) {
+  private static <T extends Question> T prepareMappedQuestionDO(T object) {
     ContentBase answer = new Content();
     answer.setId("answerId");
     answer.setTags(Set.of());
@@ -850,7 +850,7 @@ class ContentMapperTest {
     return prepareOriginalQuestionDTO(new QuestionDTO());
   }
 
-  private static QuestionDTO prepareOriginalQuestionDTO(QuestionDTO object) {
+  private static <T extends QuestionDTO> T prepareOriginalQuestionDTO(T object) {
     ContentBaseDTO answer = new ContentDTO();
     answer.setId("answerId");
     ContentDTO hint1 = new ContentDTO();
@@ -871,7 +871,7 @@ class ContentMapperTest {
     return prepareMappedQuestionDTO(new QuestionDTO());
   }
 
-  private static QuestionDTO prepareMappedQuestionDTO(QuestionDTO object) {
+  private static <T extends QuestionDTO> T prepareMappedQuestionDTO(T object) {
     ContentBaseDTO answer = new ContentDTO();
     answer.setId("answerId");
     ContentDTO hint1 = new ContentDTO();
@@ -893,7 +893,7 @@ class ContentMapperTest {
     return prepareSeguePageDO(new SeguePage());
   }
 
-  private static SeguePage prepareSeguePageDO(SeguePage object) {
+  private static <T extends SeguePage> T prepareSeguePageDO(T object) {
     object.setSummary("summary");
     return object;
   }
@@ -902,7 +902,7 @@ class ContentMapperTest {
     return prepareSeguePageDTO(new SeguePageDTO());
   }
 
-  private static SeguePageDTO prepareSeguePageDTO(SeguePageDTO object) {
+  private static <T extends SeguePageDTO> T prepareSeguePageDTO(T object) {
     object.setSummary("summary");
     return object;
   }
