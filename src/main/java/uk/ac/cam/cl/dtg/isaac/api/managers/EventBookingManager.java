@@ -798,6 +798,14 @@ public class EventBookingManager {
     }
 
     addUserToEventGroup(event, userDTO);
+    sendEventBookingPromotionNotificationEmail(event, userDTO, updatedStatus);
+
+    return updatedStatus;
+  }
+
+  private void sendEventBookingPromotionNotificationEmail(IsaacEventPageDTO event, RegisteredUserDTO userDTO,
+                                                          EventBookingDTO updatedStatus)
+      throws SegueDatabaseException, EventBookingUpdateException {
     try {
       // Send an email notifying the user (unless they are being promoted after the event for the sake of our records)
       Date promotionDate = new Date();
@@ -827,8 +835,6 @@ public class EventBookingManager {
           userDTO.getEmail()), e);
       throw new EventBookingUpdateException("Unable to send event email, failed to update event booking");
     }
-
-    return updatedStatus;
   }
 
   /**
@@ -1053,82 +1059,104 @@ public class EventBookingManager {
   public void cancelBooking(final IsaacEventPageDTO event, final RegisteredUserDTO user)
       throws SegueDatabaseException, ContentManagerException {
 
-    DetailedEventBookingDTO oldestWaitingListBooking;
-    List<DetailedEventBookingDTO> bookings =
-        this.bookingPersistenceManager.adminGetBookingsByEventIdAndStatus(event.getId(), BookingStatus.WAITING_LIST);
-    if (!bookings.isEmpty()) {
-      oldestWaitingListBooking = Collections.min(bookings, Comparator.comparing(EventBookingDTO::getBookingDate));
-    } else {
-      oldestWaitingListBooking = null;
-    }
-
     Long reservedById;
-    EventBookingDTO previousBooking;
     BookingStatus previousBookingStatus;
+    EventBookingDTO updatedWaitingListBooking;
     try (ITransaction transaction = transactionManager.getTransaction()) {
       // Obtain an exclusive database lock to lock the booking
       this.bookingPersistenceManager.lockEventUntilTransactionComplete(transaction, event.getId());
 
-      previousBooking = this.bookingPersistenceManager.getBookingByEventIdAndUserId(event.getId(), user.getId());
+      EventBookingDTO previousBooking =
+          this.bookingPersistenceManager.getBookingByEventIdAndUserId(event.getId(), user.getId());
       reservedById = previousBooking.getReservedById();
       previousBookingStatus = previousBooking.getBookingStatus();
       this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(), user.getId(),
           BookingStatus.CANCELLED, null);
 
-      if (oldestWaitingListBooking != null) {
-        this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(),
-            oldestWaitingListBooking.getUserBooked().getId(), BookingStatus.CONFIRMED, null);
+      List<DetailedEventBookingDTO> waitingListBookings =
+          this.bookingPersistenceManager.adminGetBookingsByEventIdAndStatus(event.getId(), BookingStatus.WAITING_LIST);
+      if (!waitingListBookings.isEmpty()) {
+        DetailedEventBookingDTO oldestWaitingListBooking =
+            Collections.min(waitingListBookings, Comparator.comparing(EventBookingDTO::getBookingDate));
+        updatedWaitingListBooking = this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(),
+            oldestWaitingListBooking.getUserBooked().getId(), BookingStatus.CONFIRMED,
+            oldestWaitingListBooking.getAdditionalInformation());
+      } else {
+        updatedWaitingListBooking = null;
       }
 
       transaction.commit();
     }
+
     // Reservations do not auto add users to the event's group, so no need to remove them.
     if (!previousBookingStatus.equals(BookingStatus.RESERVED)) {
       // auto remove them from the group
       this.removeUserFromEventGroup(event, user);
     }
-
     try {
       // Send an email notifying the user (unless they are being canceled after the event for the sake of our records)
-      Date bookingCancellationDate = new Date();
-      if (event.getEndDate() == null || bookingCancellationDate.before(event.getEndDate())) {
-        if (previousBookingStatus.equals(BookingStatus.RESERVED) && reservedById != null) {
-          emailManager.sendTemplatedEmailToUser(user,
-              emailManager.getEmailTemplateDTO("email-event-reservation-cancellation-confirmed"),
-              new ImmutableMap.Builder<String, Object>()
-                  .put("contactUsURL", generateEventContactUsURL(event))
-                  .put("event.emailEventDetails",
-                      event.getEmailEventDetails() == null ? "" : event.getEmailEventDetails())
-                  .put("event", event)
-                  .build(),
-              EmailType.SYSTEM);
-          // We may also want to send an email to userAccountManager.getUserDTOById(reservedById)
-          RegisteredUserDTO reserver = userAccountManager.getUserDTOById(reservedById);
-          emailManager.sendTemplatedEmailToUser(reserver,
-              emailManager.getEmailTemplateDTO("email_event_reservation_cancellation_reserver_notification"),
-              new ImmutableMap.Builder<String, Object>()
-                  .put("contactUsURL", generateEventContactUsURL(event))
-                  .put("event.emailEventDetails",
-                      event.getEmailEventDetails() == null ? "" : event.getEmailEventDetails())
-                  .put("event", event)
-                  .put("reservedName", user.getGivenName() + " " + user.getFamilyName())
-                  .build(),
-              EmailType.SYSTEM);
-        } else {
-          emailManager.sendTemplatedEmailToUser(user,
-              emailManager.getEmailTemplateDTO("email-event-booking-cancellation-confirmed"),
-              new ImmutableMap.Builder<String, Object>()
-                  .put("contactUsURL", generateEventContactUsURL(event))
-                  .put("event.emailEventDetails",
-                      event.getEmailEventDetails() == null ? "" : event.getEmailEventDetails())
-                  .put("event", event)
-                  .build(),
-              EmailType.SYSTEM);
-        }
-      }
+      sentEventBookingCancellationNotificationEmail(event, user, reservedById, previousBookingStatus);
     } catch (NoUserException e) {
-      log.error("Unable to resolve reserving user (" + reservedById + ") in the database, notification of "
-          + "student cancellation email was not sent");
+      log.error("Unable to resolve reserving user ({}) in the database, notification of "
+          + "student cancellation email was not sent", reservedById);
+    }
+
+    if (updatedWaitingListBooking != null) {
+      Long promotedBookingUserId = updatedWaitingListBooking.getUserBooked().getId();
+      try {
+        RegisteredUserDTO promotedBookingUser =
+            userAccountManager.getUserDTOById(promotedBookingUserId);
+        addUserToEventGroup(event, promotedBookingUser);
+        sendEventBookingPromotionNotificationEmail(event, promotedBookingUser, updatedWaitingListBooking);
+      } catch (NoUserException e) {
+        log.error("An error occurred while promoting the booking for user {} on event {}."
+                + " They have not been added to the event group, nor has a notification email been sent",
+            promotedBookingUserId, event.getId(), e);
+      } catch (EventBookingUpdateException e) {
+        log.error("An error occurred while promoting the booking for user {} on event {}."
+            + "A notification email could not be sent.", promotedBookingUserId, event.getId(), e);
+      }
+    }
+  }
+
+  private void sentEventBookingCancellationNotificationEmail(IsaacEventPageDTO event, RegisteredUserDTO user,
+                                                             Long reservedById, BookingStatus previousBookingStatus)
+      throws ContentManagerException, SegueDatabaseException, NoUserException {
+    Date bookingCancellationDate = new Date();
+    if (event.getEndDate() == null || bookingCancellationDate.before(event.getEndDate())) {
+      if (previousBookingStatus.equals(BookingStatus.RESERVED) && reservedById != null) {
+        emailManager.sendTemplatedEmailToUser(user,
+            emailManager.getEmailTemplateDTO("email-event-reservation-cancellation-confirmed"),
+            new ImmutableMap.Builder<String, Object>()
+                .put("contactUsURL", generateEventContactUsURL(event))
+                .put("event.emailEventDetails",
+                    event.getEmailEventDetails() == null ? "" : event.getEmailEventDetails())
+                .put("event", event)
+                .build(),
+            EmailType.SYSTEM);
+        // We may also want to send an email to userAccountManager.getUserDTOById(reservedById)
+        RegisteredUserDTO reserver = userAccountManager.getUserDTOById(reservedById);
+        emailManager.sendTemplatedEmailToUser(reserver,
+            emailManager.getEmailTemplateDTO("email_event_reservation_cancellation_reserver_notification"),
+            new ImmutableMap.Builder<String, Object>()
+                .put("contactUsURL", generateEventContactUsURL(event))
+                .put("event.emailEventDetails",
+                    event.getEmailEventDetails() == null ? "" : event.getEmailEventDetails())
+                .put("event", event)
+                .put("reservedName", user.getGivenName() + " " + user.getFamilyName())
+                .build(),
+            EmailType.SYSTEM);
+      } else {
+        emailManager.sendTemplatedEmailToUser(user,
+            emailManager.getEmailTemplateDTO("email-event-booking-cancellation-confirmed"),
+            new ImmutableMap.Builder<String, Object>()
+                .put("contactUsURL", generateEventContactUsURL(event))
+                .put("event.emailEventDetails",
+                    event.getEmailEventDetails() == null ? "" : event.getEmailEventDetails())
+                .put("event", event)
+                .build(),
+            EmailType.SYSTEM);
+      }
     }
   }
 
