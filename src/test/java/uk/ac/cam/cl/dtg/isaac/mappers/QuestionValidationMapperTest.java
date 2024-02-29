@@ -27,12 +27,11 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 class QuestionValidationMapperTest {
 
   private QuestionValidationMapper questionValidationMapper;
-  private static Date testDate;
+  private static final Date testDate = new Date();
 
   @BeforeEach
   void beforeEach() {
     questionValidationMapper = QuestionValidationMapper.INSTANCE;
-    testDate = new Date();
   }
 
   @ParameterizedTest

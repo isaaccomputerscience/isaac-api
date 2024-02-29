@@ -28,14 +28,12 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 class EventMapperTest {
 
   private EventMapper eventMapper;
-  private static Date testDate;
-  private static Date newTestDate;
+  private static final Date testDate = new Date();
+  private static final Date newTestDate = Date.from(now().plus(10000L, ChronoUnit.SECONDS));
 
   @BeforeEach
   void beforeEach() {
     eventMapper = EventMapper.INSTANCE;
-    testDate = new Date();
-    newTestDate = Date.from(now().plus(10000L, ChronoUnit.SECONDS));
   }
 
   @Test

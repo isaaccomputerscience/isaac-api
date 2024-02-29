@@ -48,14 +48,13 @@ import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 class UserMapperTest {
 
   private UserMapper userMapper;
-  private static Date testDate;
-  private static Date newTestDate;
+
+  private static final Date testDate = new Date();
+  private static final Date newTestDate = Date.from(now().plus(10000L, ChronoUnit.SECONDS));
 
   @BeforeEach
   void beforeEach() {
     userMapper = UserMapper.INSTANCE;
-    testDate = new Date();
-    newTestDate = Date.from(now().plus(10000L, ChronoUnit.SECONDS));
   }
 
 

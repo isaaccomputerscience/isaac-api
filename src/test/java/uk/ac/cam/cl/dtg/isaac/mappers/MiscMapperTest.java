@@ -43,14 +43,12 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 class MiscMapperTest {
 
   MiscMapper miscMapper = MiscMapper.INSTANCE;
-  private static Date testDate;
-  private static Date newTestDate;
+  private static final Date testDate = new Date();
+  private static final Date newTestDate = Date.from(now().plus(10000L, ChronoUnit.SECONDS));
 
   @BeforeEach
   void beforeEach() {
     miscMapper = MiscMapper.INSTANCE;
-    testDate = new Date();
-    newTestDate = Date.from(now().plus(10000L, ChronoUnit.SECONDS));
   }
 
   @Test

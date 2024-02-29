@@ -73,12 +73,11 @@ import uk.ac.cam.cl.dtg.util.locations.Location;
 
 class ContentMapperTest {
   private ContentMapper contentMapper;
-  private static Date testDate;
+  private static final Date testDate = new Date();
 
   @BeforeEach
   void beforeEach() {
     contentMapper = ContentMapper.INSTANCE;
-    testDate = new Date();
   }
 
   @ParameterizedTest
