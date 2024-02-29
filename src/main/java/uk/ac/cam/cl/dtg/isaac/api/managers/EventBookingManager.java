@@ -1053,6 +1053,15 @@ public class EventBookingManager {
   public void cancelBooking(final IsaacEventPageDTO event, final RegisteredUserDTO user)
       throws SegueDatabaseException, ContentManagerException {
 
+    DetailedEventBookingDTO oldestWaitingListBooking;
+    List<DetailedEventBookingDTO> bookings =
+        this.bookingPersistenceManager.adminGetBookingsByEventIdAndStatus(event.getId(), BookingStatus.WAITING_LIST);
+    if (!bookings.isEmpty()) {
+      oldestWaitingListBooking = Collections.min(bookings, Comparator.comparing(EventBookingDTO::getBookingDate));
+    } else {
+      oldestWaitingListBooking = null;
+    }
+
     Long reservedById;
     EventBookingDTO previousBooking;
     BookingStatus previousBookingStatus;
@@ -1065,6 +1074,11 @@ public class EventBookingManager {
       previousBookingStatus = previousBooking.getBookingStatus();
       this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(), user.getId(),
           BookingStatus.CANCELLED, null);
+
+      if (oldestWaitingListBooking != null) {
+        this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(),
+            oldestWaitingListBooking.getUserBooked().getId(), BookingStatus.CONFIRMED, null);
+      }
 
       transaction.commit();
     }

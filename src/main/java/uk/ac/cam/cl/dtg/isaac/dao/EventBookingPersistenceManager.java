@@ -184,6 +184,37 @@ public class EventBookingPersistenceManager {
 
   /**
    * Get event bookings by an event id.
+   * WARNING: This pulls PII such as dietary info, email, and other stuff that should not (always) make it to end users.
+   *
+   * @param eventId - of interest
+   * @return event bookings
+   * @throws SegueDatabaseException - if an error occurs.
+   */
+  public List<DetailedEventBookingDTO> adminGetBookingsByEventIdAndStatus(final String eventId,
+                                                                          final BookingStatus status)
+      throws SegueDatabaseException {
+    try {
+      ContentDTO c = this.contentManager.getContentById(eventId);
+
+      if (null == c) {
+        return Lists.newArrayList();
+      }
+
+      if (c instanceof IsaacEventPageDTO) {
+        return this.convertToDTO(Lists.newArrayList(dao.findAllByEventIdAndStatus(eventId, status)),
+            (IsaacEventPageDTO) c);
+      } else {
+        log.error("Content object is not an event page.");
+        throw new SegueDatabaseException("Content object is not an event page.");
+      }
+    } catch (ContentManagerException e) {
+      log.error("Unable to create event booking dto.");
+      throw new SegueDatabaseException("Unable to create event booking dto from DO.", e);
+    }
+  }
+
+  /**
+   * Get event bookings by an event id.
    * NOTE: This is a patch to stop leaking PII (see adminGetBookingsByEventId).
    *
    * @param eventId - of interest
