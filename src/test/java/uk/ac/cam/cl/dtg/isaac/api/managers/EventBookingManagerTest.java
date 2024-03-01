@@ -61,6 +61,8 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  */
 class EventBookingManagerTest {
   private static final Date someFutureDate = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
+  private static final Date someLessFutureDate = new Date(System.currentTimeMillis() + 6 * 24 * 60 * 60 * 1000);
+  private static final Date someMoreFutureDate = new Date(System.currentTimeMillis() + 8 * 24 * 60 * 60 * 1000);
   private EventBookingPersistenceManager dummyEventBookingPersistenceManager;
   private EmailManager dummyEmailManager;
   private UserAssociationManager dummyUserAssociationManager;
@@ -959,13 +961,22 @@ class EventBookingManagerTest {
     DetailedEventBookingDTO updatedConfirmedBooking =
         prepareDetailedEventBookingDto(prepareUserSummaryDto(2L), BookingStatus.CANCELLED, testEvent.getId());
 
-    RegisteredUserDTO waitingListUser = new RegisteredUserDTO();
-    waitingListUser.setId(3L);
-    DetailedEventBookingDTO waitingListBooking =
+    DetailedEventBookingDTO waitingListBooking1 =
         prepareDetailedEventBookingDto(prepareUserSummaryDto(3L), BookingStatus.WAITING_LIST, testEvent.getId());
+    waitingListBooking1.setBookingDate(someFutureDate);
+    DetailedEventBookingDTO waitingListBooking2 =
+        prepareDetailedEventBookingDto(prepareUserSummaryDto(4L), BookingStatus.WAITING_LIST, testEvent.getId());
+    waitingListBooking2.setBookingDate(someLessFutureDate);
+    DetailedEventBookingDTO waitingListBooking3 =
+        prepareDetailedEventBookingDto(prepareUserSummaryDto(5L), BookingStatus.WAITING_LIST, testEvent.getId());
+    waitingListBooking3.setBookingDate(someMoreFutureDate);
+    List<DetailedEventBookingDTO> waitingListBookingsList =
+        List.of(waitingListBooking1, waitingListBooking2, waitingListBooking3);
+
+    RegisteredUserDTO waitingListUser = new RegisteredUserDTO();
+    waitingListUser.setId(4L);
     DetailedEventBookingDTO updatedWaitingListBooking =
-        prepareDetailedEventBookingDto(prepareUserSummaryDto(3L), BookingStatus.CONFIRMED, testEvent.getId());
-    List<DetailedEventBookingDTO> waitingListBookingsList = List.of(waitingListBooking);
+        prepareDetailedEventBookingDto(prepareUserSummaryDto(4L), BookingStatus.CONFIRMED, testEvent.getId());
 
     Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
     placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 1L);
@@ -987,8 +998,8 @@ class EventBookingManagerTest {
     expect(dummyEventBookingPersistenceManager.adminGetBookingsByEventIdAndStatus(testEvent.getId(),
         BookingStatus.WAITING_LIST)).andReturn(waitingListBookingsList);
     expect(dummyEventBookingPersistenceManager.updateBookingStatus(dummyTransaction, testEvent.getId(),
-        waitingListBooking.getUserBooked().getId(), BookingStatus.CONFIRMED,
-        waitingListBooking.getAdditionalInformation())).andReturn(updatedWaitingListBooking);
+        waitingListBooking2.getUserBooked().getId(), BookingStatus.CONFIRMED,
+        waitingListBooking2.getAdditionalInformation())).andReturn(updatedWaitingListBooking);
 
     expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-cancellation-confirmed")).andReturn(
         bookingCancellationNotificationTemplate);
@@ -997,7 +1008,7 @@ class EventBookingManagerTest {
             EMAIL_TEMPLATE_TOKEN_EVENT_DETAILS, "", EMAIL_TEMPLATE_TOKEN_EVENT, testEvent), EmailType.SYSTEM);
     expectLastCall();
 
-    expect(dummyUserAccountManager.getUserDTOById(3L)).andReturn(waitingListUser);
+    expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser);
     expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andReturn(
         bookingPromotionNotificationTemplate);
     dummyEmailManager.sendTemplatedEmailToUser(eq(waitingListUser), eq(bookingPromotionNotificationTemplate),
