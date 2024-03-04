@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus.CANCELLED;
+import static uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus.CONFIRMED;
+import static uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus.WAITING_LIST;
 
 import com.google.common.collect.ImmutableMap;
 import jakarta.servlet.http.Cookie;
@@ -16,13 +19,17 @@ import jakarta.ws.rs.core.Response;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.DetailedEventBookingDTO;
@@ -354,5 +361,35 @@ class EventsFacadeIT extends IsaacIntegrationTest {
     Long numberOfPrivateEventsInResults = results.stream().filter(overview -> (Boolean) overview.get("privateEvent")).count();
     assertEquals(8, numberOfPublicEventsInResults);
     assertEquals(1, numberOfPrivateEventsInResults);
+  }
+
+  @Test
+  void cancelBookingAndPromoteWaitingListTest() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+      MFARequiredButNotConfiguredException, SQLException {
+    String eventId = "dc8686cf-be3b-4c0d-8761-1e5504146867";
+    LoginResult studentLogin = loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
+    HttpServletRequest cancelBookingRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+    replay(cancelBookingRequest);
+    try (Response cancelBookingResponse = eventsFacade.cancelBooking(cancelBookingRequest, eventId)) {
+      assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelBookingResponse.getStatus());
+    }
+
+    Map<Long, BookingStatus> bookingMap = new HashMap<>();
+    try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
+        "SELECT event_bookings.* FROM event_bookings WHERE event_id=?;")) {
+      pst.setString(1, eventId);
+      try (ResultSet results = pst.executeQuery()) {
+        while (results.next()) {
+          bookingMap.put(results.getLong("user_id"), BookingStatus.valueOf(results.getString("status")));
+        }
+      }
+    }
+    assertEquals(4, bookingMap.size());
+    assertEquals(CANCELLED, bookingMap.get(6L));
+    assertEquals(CONFIRMED, bookingMap.get(7L));
+    assertEquals(WAITING_LIST, bookingMap.get(8L));
+    assertEquals(WAITING_LIST, bookingMap.get(11L));
   }
 }
