@@ -173,12 +173,12 @@ public class EventBookingPersistenceManager {
       if (c instanceof IsaacEventPageDTO) {
         return this.convertToDTO(Lists.newArrayList(dao.findAllByEventId(eventId)), (IsaacEventPageDTO) c);
       } else {
-        log.error("Content object is not an event page.");
-        throw new SegueDatabaseException("Content object is not an event page.");
+        log.error(EXCEPTION_MESSAGE_NOT_EVENT);
+        throw new SegueDatabaseException(EXCEPTION_MESSAGE_NOT_EVENT);
       }
     } catch (ContentManagerException e) {
-      log.error("Unable to create event booking dto.");
-      throw new SegueDatabaseException("Unable to create event booking dto from DO.", e);
+      log.error(EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO, e);
     }
   }
 
@@ -204,12 +204,12 @@ public class EventBookingPersistenceManager {
         return this.convertToDTO(Lists.newArrayList(dao.findAllByEventIdAndStatus(eventId, status)),
             (IsaacEventPageDTO) c);
       } else {
-        log.error("Content object is not an event page.");
-        throw new SegueDatabaseException("Content object is not an event page.");
+        log.error(EXCEPTION_MESSAGE_NOT_EVENT);
+        throw new SegueDatabaseException(EXCEPTION_MESSAGE_NOT_EVENT);
       }
     } catch (ContentManagerException e) {
-      log.error("Unable to create event booking dto.");
-      throw new SegueDatabaseException("Unable to create event booking dto from DO.", e);
+      log.error(EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO, e);
     }
   }
 
@@ -355,19 +355,19 @@ public class EventBookingPersistenceManager {
 
       if (null == c) {
         // The event this booking relates to has disappeared so treat it as though it never existed.
-        log.info(String.format("The event with id %s can no longer be found skipping...", eb.getEventId()));
+        log.info("The event with id {} can no longer be found skipping...", eb.getEventId());
         return null;
       }
 
       if (c instanceof IsaacEventPageDTO) {
         return this.convertToDTO(eb, (IsaacEventPageDTO) c);
       } else {
-        log.error(String.format("Content object (%s) is not an event page.", c));
-        throw new SegueDatabaseException("Content object is not an event page.");
+        log.error("Content object ({}) is not an event page.", c);
+        throw new SegueDatabaseException(EXCEPTION_MESSAGE_NOT_EVENT);
       }
     } catch (ContentManagerException e) {
-      log.error("Unable to create event booking dto.");
-      throw new SegueDatabaseException("Unable to create event booking dto from DO.", e);
+      log.error(EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO, e);
     }
   }
 
@@ -409,4 +409,8 @@ public class EventBookingPersistenceManager {
 
     return result;
   }
+
+  private static final String EXCEPTION_MESSAGE_NOT_EVENT = "Content object is not an event page.";
+  private static final String EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO =
+      "Unable to create event booking DTO from DO.";
 }

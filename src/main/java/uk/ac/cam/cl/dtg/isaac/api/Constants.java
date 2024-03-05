@@ -196,6 +196,11 @@ public final class Constants {
 
   public static final Integer DO_HASHCODE_PRIME = 31;
 
+  public static final String EMAIL_TEMPLATE_TOKEN_CONTACT_US_URL = "contactUsURL";
+  public static final String EMAIL_TEMPLATE_TOKEN_AUTHORIZATION_LINK = "authorizationLink";
+  public static final String EMAIL_TEMPLATE_TOKEN_EVENT_DETAILS = "event.emailEventDetails";
+  public static final String EMAIL_TEMPLATE_TOKEN_EVENT = "event";
+
   /**
    * Private constructor to prevent this class being created.
    */

@@ -72,7 +72,7 @@ public class PgEventBookings implements EventBookings {
                           final BookingStatus status, final Map<String, String> additionalEventInformation)
       throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
-      throw new SegueDatabaseException("Incorrect database transaction class type!");
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_INCORRECT_TRANSACTION_TYPE);
     }
 
     return addEventBooking((PgTransaction) transaction, eventId, userId, reserveById, status,
@@ -121,9 +121,9 @@ public class PgEventBookings implements EventBookings {
       }
 
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     } catch (JsonProcessingException e) {
-      throw new SegueDatabaseException("Unable to convert json to string for persistence.", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_UNABLE_TO_STRINGIFY_JSON, e);
     }
   }
 
@@ -159,7 +159,7 @@ public class PgEventBookings implements EventBookings {
                                    final Long reservingUserId, final BookingStatus status,
                                    final Map<String, String> additionalEventInformation) throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
-      throw new SegueDatabaseException("Incorrect database transaction class type!");
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_INCORRECT_TRANSACTION_TYPE);
     }
 
     String query =
@@ -178,12 +178,12 @@ public class PgEventBookings implements EventBookings {
       int executeUpdate = pst.executeUpdate();
 
       if (executeUpdate == 0) {
-        throw new ResourceNotFoundException("Could not update the requested booking.");
+        throw new ResourceNotFoundException(EXCEPTION_MESSAGE_UNABLE_TO_UPDATE_BOOKING);
       }
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception while trying to update event booking", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR_DURING_BOOKING_UPDATE, e);
     } catch (JsonProcessingException e) {
-      throw new SegueDatabaseException("Unable to convert json to string for persistence.", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_UNABLE_TO_STRINGIFY_JSON, e);
     }
   }
 
@@ -202,7 +202,7 @@ public class PgEventBookings implements EventBookings {
                                    final Long reservingUserId, final BookingStatus status)
       throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
-      throw new SegueDatabaseException("Incorrect database transaction class type!");
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_INCORRECT_TRANSACTION_TYPE);
     }
     String query =
         "UPDATE event_bookings SET status = ?, updated = ?, reserved_by = ? WHERE event_id = ? AND user_id = ?;";
@@ -216,10 +216,10 @@ public class PgEventBookings implements EventBookings {
       int executeUpdate = pst.executeUpdate();
 
       if (executeUpdate == 0) {
-        throw new ResourceNotFoundException("Could not update the requested booking.");
+        throw new ResourceNotFoundException(EXCEPTION_MESSAGE_UNABLE_TO_UPDATE_BOOKING);
       }
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception while trying to update event booking", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR_DURING_BOOKING_UPDATE, e);
     }
   }
 
@@ -238,7 +238,7 @@ public class PgEventBookings implements EventBookings {
                                    final BookingStatus status,
                                    final Map<String, String> additionalEventInformation) throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
-      throw new SegueDatabaseException("Incorrect database transaction class type!");
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_INCORRECT_TRANSACTION_TYPE);
     }
 
     String query =
@@ -256,12 +256,12 @@ public class PgEventBookings implements EventBookings {
       int executeUpdate = pst.executeUpdate();
 
       if (executeUpdate == 0) {
-        throw new ResourceNotFoundException("Could not update the requested booking.");
+        throw new ResourceNotFoundException(EXCEPTION_MESSAGE_UNABLE_TO_UPDATE_BOOKING);
       }
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception while trying to update event booking", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR_DURING_BOOKING_UPDATE, e);
     } catch (JsonProcessingException e) {
-      throw new SegueDatabaseException("Unable to convert json to string for persistence.", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_UNABLE_TO_STRINGIFY_JSON, e);
     }
   }
 
@@ -278,7 +278,7 @@ public class PgEventBookings implements EventBookings {
   private void updateBookingStatus(final ITransaction transaction, final String eventId, final Long userId,
                                    final BookingStatus status) throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
-      throw new SegueDatabaseException("Incorrect database transaction class type!");
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_INCORRECT_TRANSACTION_TYPE);
     }
 
     String query = "UPDATE event_bookings SET status = ?, updated = ? WHERE event_id = ? AND user_id = ?;";
@@ -292,10 +292,10 @@ public class PgEventBookings implements EventBookings {
       int executeUpdate = pst.executeUpdate();
 
       if (executeUpdate == 0) {
-        throw new ResourceNotFoundException("Could not update the requested booking.");
+        throw new ResourceNotFoundException(EXCEPTION_MESSAGE_UNABLE_TO_UPDATE_BOOKING);
       }
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception while trying to update event booking", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR_DURING_BOOKING_UPDATE, e);
     }
   }
 
@@ -303,7 +303,7 @@ public class PgEventBookings implements EventBookings {
   public void delete(final ITransaction transaction, final String eventId, final Long userId)
       throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
-      throw new SegueDatabaseException("Incorrect database transaction class type!");
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_INCORRECT_TRANSACTION_TYPE);
     }
 
     String query = "DELETE FROM event_bookings WHERE event_id = ? AND user_id = ?";
@@ -345,7 +345,7 @@ public class PgEventBookings implements EventBookings {
   public void lockEventUntilTransactionComplete(final ITransaction transaction, final String resourceId)
       throws SegueDatabaseException {
     if (!(transaction instanceof PgTransaction)) {
-      throw new SegueDatabaseException("Incorrect database transaction class type!");
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_INCORRECT_TRANSACTION_TYPE);
     }
 
     // Generate 32-bit CRC based on table id and resource id so that it is more likely to be unique globally.
@@ -355,15 +355,15 @@ public class PgEventBookings implements EventBookings {
     Connection conn = ((PgTransaction) transaction).getConnection();
     try (PreparedStatement pst = conn.prepareStatement("SELECT pg_advisory_xact_lock(?)")) {
       pst.setLong(FIELD_TRANSACTION_LOCK_CRC, crc.getValue());
-      log.debug(String.format("Attempting to acquire advisory transaction lock on %s (%s)", TABLE_NAME + resourceId,
-          crc.getValue()));
+      log.debug("Attempting to acquire advisory transaction lock on {}{} ({})", TABLE_NAME, resourceId,
+          crc.getValue());
       pst.executeQuery();
     } catch (SQLException e) {
       String msg = String.format("Unable to acquire lock for event (%s).", resourceId);
       log.error(msg);
       throw new SegueDatabaseException(msg);
     }
-    log.debug(String.format("Acquired advisory transaction lock on %s (%s)", TABLE_NAME + resourceId, crc.getValue()));
+    log.debug("Acquired advisory transaction lock on {}{} ({})", TABLE_NAME, resourceId, crc.getValue());
   }
 
   @Override
@@ -395,7 +395,7 @@ public class PgEventBookings implements EventBookings {
         }
       }
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     }
   }
 
@@ -437,7 +437,7 @@ public class PgEventBookings implements EventBookings {
         }
       }
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     }
   }
 
@@ -461,7 +461,7 @@ public class PgEventBookings implements EventBookings {
       results.next();
       return results.getLong("TOTAL");
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     }
   }
 
@@ -502,7 +502,7 @@ public class PgEventBookings implements EventBookings {
       }
     } catch (SQLException e) {
       log.error("DB error ", e);
-      throw new SegueDatabaseException("Postgres exception", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     }
   }
 
@@ -545,7 +545,7 @@ public class PgEventBookings implements EventBookings {
         return returnResult;
       }
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     }
   }
 
@@ -567,7 +567,7 @@ public class PgEventBookings implements EventBookings {
         return returnResult;
       }
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     }
   }
 
@@ -590,7 +590,7 @@ public class PgEventBookings implements EventBookings {
         return returnResult;
       }
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     }
   }
 
@@ -675,4 +675,14 @@ public class PgEventBookings implements EventBookings {
 
   // findAllReservationsByUserId
   private static final int FIELD_GET_RESERVATIONS_BY_USER_ID_RESERVED_BY = 1;
+
+  // Strings
+  private static final String EXCEPTION_MESSAGE_INCORRECT_TRANSACTION_TYPE =
+      "Incorrect database transaction class type!";
+  private static final String EXCEPTION_MESSAGE_POSTGRES_ERROR = "Postgres exception";
+  private static final String EXCEPTION_MESSAGE_UNABLE_TO_STRINGIFY_JSON =
+      "Unable to convert json to string for persistence.";
+  private static final String EXCEPTION_MESSAGE_UNABLE_TO_UPDATE_BOOKING = "Could not update the requested booking.";
+  private static final String EXCEPTION_MESSAGE_POSTGRES_ERROR_DURING_BOOKING_UPDATE =
+      "Postgres exception while trying to update event booking";
 }
