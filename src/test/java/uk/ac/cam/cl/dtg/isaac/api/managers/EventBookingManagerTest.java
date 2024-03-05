@@ -22,7 +22,7 @@ import com.google.api.client.util.Maps;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +64,7 @@ class EventBookingManagerTest {
   private static final Date someFutureDate = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
   private static final Date someLessFutureDate = new Date(System.currentTimeMillis() + 6 * 24 * 60 * 60 * 1000);
   private static final Date someMoreFutureDate = new Date(System.currentTimeMillis() + 8 * 24 * 60 * 60 * 1000);
-  private static final SimpleDateFormat urlDateFormatter = new SimpleDateFormat("dd'%2F'MM'%2F'yyyy");
+  private static final DateFormat urlDateFormatter = DateFormat.getDateInstance(DateFormat.SHORT);
   private EventBookingPersistenceManager dummyEventBookingPersistenceManager;
   private EmailManager dummyEmailManager;
   private UserAssociationManager dummyUserAssociationManager;
@@ -1005,7 +1005,7 @@ class EventBookingManagerTest {
 
     expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-cancellation-confirmed")).andReturn(
         bookingCancellationNotificationTemplate);
-    String urlDate = urlDateFormatter.format(someFutureDate);
+    String urlDate = urlDateFormatter.format(someFutureDate).replace("/", "%2F");
     dummyEmailManager.sendTemplatedEmailToUser(confirmedUser, bookingCancellationNotificationTemplate,
         Map.of(EMAIL_TEMPLATE_TOKEN_CONTACT_US_URL,
             String.format("https://hostname.com/contact?subject=Event+-++-+%s", urlDate),
@@ -1073,7 +1073,7 @@ class EventBookingManagerTest {
 
     expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-cancellation-confirmed")).andReturn(
         bookingCancellationNotificationTemplate);
-    String urlDate = urlDateFormatter.format(someFutureDate);
+    String urlDate = urlDateFormatter.format(someFutureDate).replace("/", "%2F");
     dummyEmailManager.sendTemplatedEmailToUser(confirmedUser, bookingCancellationNotificationTemplate,
         Map.of(EMAIL_TEMPLATE_TOKEN_CONTACT_US_URL, String.format("https://hostname.com/contact?subject=Event+-++-+%s", urlDate),
             EMAIL_TEMPLATE_TOKEN_EVENT_DETAILS, "", EMAIL_TEMPLATE_TOKEN_EVENT, testEvent), EmailType.SYSTEM);
