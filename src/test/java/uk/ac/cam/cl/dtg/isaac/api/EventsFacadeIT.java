@@ -12,6 +12,7 @@ import static uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus.CANCELLED;
 import static uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus.CONFIRMED;
 import static uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus.WAITING_LIST;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,10 +20,8 @@ import jakarta.ws.rs.core.Response;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +29,9 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.EventBooking;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.EventBookings;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.PgEventBookings;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.DetailedEventBookingDTO;
@@ -47,6 +49,7 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 class EventsFacadeIT extends IsaacIntegrationTest {
 
   private EventsFacade eventsFacade;
+  private EventBookings bookingDatabase;
 
   @BeforeEach
   public void setUp() {
@@ -55,6 +58,7 @@ class EventsFacadeIT extends IsaacIntegrationTest {
         new EventsFacade(properties, logManager, eventBookingManager, userAccountManager, contentManager,
             userBadgeManager, userAssociationManager, groupManager, userAccountManager, schoolListReader,
             mainObjectMapper);
+    bookingDatabase = new PgEventBookings(postgresSqlDb, new ObjectMapper());
   }
 
   @Test
@@ -367,7 +371,7 @@ class EventsFacadeIT extends IsaacIntegrationTest {
   void cancelBookingAndPromoteWaitingListTest() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
       AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
       AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
-      MFARequiredButNotConfiguredException, SQLException {
+      MFARequiredButNotConfiguredException {
     String eventId = "dc8686cf-be3b-4c0d-8761-1e5504146867";
     LoginResult studentLogin = loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
     HttpServletRequest cancelBookingRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
@@ -376,16 +380,10 @@ class EventsFacadeIT extends IsaacIntegrationTest {
       assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelBookingResponse.getStatus());
     }
 
-    Map<Long, BookingStatus> bookingMap = new HashMap<>();
-    try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
-        "SELECT event_bookings.* FROM event_bookings WHERE event_id=?;")) {
-      pst.setString(1, eventId);
-      try (ResultSet results = pst.executeQuery()) {
-        while (results.next()) {
-          bookingMap.put(results.getLong("user_id"), BookingStatus.valueOf(results.getString("status")));
-        }
-      }
-    }
+    List<EventBooking> bookingsFromDatabase =
+        (List<EventBooking>) bookingDatabase.findAllByEventIdAndStatus(eventId, null);
+    Map<Long, BookingStatus> bookingMap = bookingsFromDatabase.stream()
+        .collect(Collectors.toMap(EventBooking::getUserId, EventBooking::getBookingStatus));
     assertEquals(4, bookingMap.size());
     assertEquals(CANCELLED, bookingMap.get(6L));
     assertEquals(CONFIRMED, bookingMap.get(7L));
