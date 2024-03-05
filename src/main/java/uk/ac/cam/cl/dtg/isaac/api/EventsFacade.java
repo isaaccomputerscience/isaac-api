@@ -237,7 +237,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       sortInstructions.put(DATE_FIELDNAME, SortOrder.DESC);
     }
 
-    fieldsToMatch.put(TYPE_FIELDNAME, Arrays.asList(EVENT_TYPE));
+    fieldsToMatch.put(TYPE_FIELDNAME, List.of(EVENT_TYPE));
 
     Map<String, AbstractFilterInstruction> filterInstructions = null;
     if (null != showActiveOnly && showActiveOnly) {
@@ -340,7 +340,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       if (tags != null) {
         Set<String> tagsList = Sets.newHashSet(tags);
         tagsList.retainAll(eventDTOById.getTags()); // get intersection
-        if (tagsList.size() == 0) {
+        if (tagsList.isEmpty()) {
           // if the intersection is empty then we can continue
           continue;
         }
@@ -554,7 +554,7 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       List<DetailedEventBookingDTO> eventBookings = bookingManager.adminGetBookingsByEventId(eventId);
 
-      if (Arrays.asList(Role.EVENT_LEADER).contains(currentUser.getRole())) {
+      if (Role.EVENT_LEADER.equals(currentUser.getRole())) {
         eventBookings = userAssociationManager.filterUnassociatedRecords(currentUser, eventBookings,
             booking -> booking.getUserBooked().getId());
       }
@@ -1232,11 +1232,9 @@ public class EventsFacade extends AbstractIsaacFacade {
       }
 
       // if the user id is null then it means they are changing their own booking.
-      if (userId != null) {
-        if (!(bookingManager.isUserAbleToManageEvent(userLoggedIn, event)
-            || bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event))) {
-          return SegueErrorResponse.getIncorrectRoleResponse();
-        }
+      if (userId != null && (!(bookingManager.isUserAbleToManageEvent(userLoggedIn, event)
+          || bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event)))) {
+        return SegueErrorResponse.getIncorrectRoleResponse();
       }
 
       Set<BookingStatus> cancelableStatuses =
@@ -1299,8 +1297,7 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       this.bookingManager.resendEventEmail(event, bookedUser);
 
-      log.info(String.format("User (%s) has just resent an event email to user id (%s)",
-          currentUser.getEmail(), bookedUser.getId()));
+      log.info("User ({}) has just resent an event email to user id ({})", currentUser.getEmail(), bookedUser.getId());
 
       return Response.noContent().build();
     } catch (NoUserLoggedInException e) {
