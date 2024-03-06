@@ -30,6 +30,10 @@ import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 public class EventBookingPersistenceManager {
   private static final Logger log = LoggerFactory.getLogger(EventBookingPersistenceManager.class);
 
+  private static final String EXCEPTION_MESSAGE_NOT_EVENT = "Content object is not an event page.";
+  private static final String EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO =
+      "Unable to create event booking DTO from DO.";
+
   private final EventBookings dao;
   private final UserAccountManager userManager;
   private final GitContentManager contentManager;
@@ -409,8 +413,4 @@ public class EventBookingPersistenceManager {
 
     return result;
   }
-
-  private static final String EXCEPTION_MESSAGE_NOT_EVENT = "Content object is not an event page.";
-  private static final String EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO =
-      "Unable to create event booking DTO from DO.";
 }

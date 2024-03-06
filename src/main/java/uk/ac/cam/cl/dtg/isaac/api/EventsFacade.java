@@ -130,6 +130,20 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 public class EventsFacade extends AbstractIsaacFacade {
   private static final Logger log = LoggerFactory.getLogger(EventsFacade.class);
 
+  private static final String EXCEPTION_MESSAGE_CONTENT_ERROR_RETRIEVING_BOOKING =
+      "Content Database error occurred while trying to retrieve event booking information.";
+  private static final String EXCEPTION_MESSAGE_DATABASE_ERROR_RETRIEVING_BOOKING =
+      "Database error occurred while trying to retrieve all event booking information.";
+  private static final String EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR = "Error during event request";
+  private static final String EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT = "Error locating the content you requested.";
+  private static final String EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT =
+      "The event is cancelled, so no bookings are being accepted.";
+  private static final String EXCEPTION_MESSAGE_DATABASE_ERROR_CREATING_BOOKING =
+      "Database error occurred while trying to book a user onto an event.";
+  private static final String EXCEPTION_MESSAGE_DATABASE_ERROR_DELETING_BOOKING =
+      "Database error occurred while trying to delete an event booking.";
+  private static final String EXCEPTION_MESSAGE_CANNOT_LOCATE_USER = "Unable to locate user specified.";
+
   private final EventBookingManager bookingManager;
 
   private final UserAccountManager userManager;
@@ -1753,18 +1767,4 @@ public class EventsFacade extends AbstractIsaacFacade {
       throw new ClassCastException("The object provided was not an event.");
     }
   }
-
-  private static final String EXCEPTION_MESSAGE_CONTENT_ERROR_RETRIEVING_BOOKING =
-      "Content Database error occurred while trying to retrieve event booking information.";
-  private static final String EXCEPTION_MESSAGE_DATABASE_ERROR_RETRIEVING_BOOKING =
-      "Database error occurred while trying to retrieve all event booking information.";
-  private static final String EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR = "Error during event request";
-  private static final String EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT = "Error locating the content you requested.";
-  private static final String EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT =
-      "The event is cancelled, so no bookings are being accepted.";
-  private static final String EXCEPTION_MESSAGE_DATABASE_ERROR_CREATING_BOOKING =
-      "Database error occurred while trying to book a user onto an event.";
-  private static final String EXCEPTION_MESSAGE_DATABASE_ERROR_DELETING_BOOKING =
-      "Database error occurred while trying to delete an event booking.";
-  private static final String EXCEPTION_MESSAGE_CANNOT_LOCATE_USER = "Unable to locate user specified.";
 }
