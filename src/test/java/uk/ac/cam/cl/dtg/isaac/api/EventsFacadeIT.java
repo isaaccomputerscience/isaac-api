@@ -34,6 +34,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.EventBookings;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.PgEventBookings;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
+import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.DetailedEventBookingDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
@@ -47,6 +48,8 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 class EventsFacadeIT extends IsaacIntegrationTest {
+
+  private static final String BOOKING_CANCELLATION_TEST_EVENT_ID = "dc8686cf-be3b-4c0d-8761-1e5504146867";
 
   private EventsFacade eventsFacade;
   private EventBookings bookingDatabase;
@@ -368,20 +371,21 @@ class EventsFacadeIT extends IsaacIntegrationTest {
   }
 
   @Test
-  void cancelBookingAndPromoteWaitingListTest() throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+  void cancelBookingAndPromoteWaitingListTest()
+      throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
       AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
       AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
-      MFARequiredButNotConfiguredException {
-    String eventId = "dc8686cf-be3b-4c0d-8761-1e5504146867";
+      MFARequiredButNotConfiguredException, SQLException {
     LoginResult studentLogin = loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
     HttpServletRequest cancelBookingRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
     replay(cancelBookingRequest);
-    try (Response cancelBookingResponse = eventsFacade.cancelBooking(cancelBookingRequest, eventId)) {
+    try (Response cancelBookingResponse = eventsFacade.cancelBooking(cancelBookingRequest,
+        BOOKING_CANCELLATION_TEST_EVENT_ID)) {
       assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelBookingResponse.getStatus());
     }
 
     List<EventBooking> bookingsFromDatabase =
-        (List<EventBooking>) bookingDatabase.findAllByEventIdAndStatus(eventId, null);
+        (List<EventBooking>) bookingDatabase.findAllByEventIdAndStatus(BOOKING_CANCELLATION_TEST_EVENT_ID, null);
     Map<Long, BookingStatus> bookingMap = bookingsFromDatabase.stream()
         .collect(Collectors.toMap(EventBooking::getUserId, EventBooking::getBookingStatus));
     assertEquals(4, bookingMap.size());
@@ -389,5 +393,80 @@ class EventsFacadeIT extends IsaacIntegrationTest {
     assertEquals(CONFIRMED, bookingMap.get(7L));
     assertEquals(WAITING_LIST, bookingMap.get(8L));
     assertEquals(WAITING_LIST, bookingMap.get(11L));
+
+    resetCancellationTestDatabaseEntries();
+  }
+
+  @Test
+  void cancelOtherUserBookingAsManager()
+      throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+      MFARequiredButNotConfiguredException, SQLException {
+    LoginResult managerLogin = loginAs(httpSession, ITConstants.TEST_EVENTMANAGER_EMAIL, ITConstants.TEST_EVENTMANAGER_PASSWORD);
+    HttpServletRequest cancelBookingRequest = createRequestWithCookies(new Cookie[] {managerLogin.cookie});
+    replay(cancelBookingRequest);
+    try (Response cancelBookingResponse = eventsFacade.cancelBooking(cancelBookingRequest,
+        BOOKING_CANCELLATION_TEST_EVENT_ID, 6L)) {
+      assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelBookingResponse.getStatus());
+    }
+
+    List<EventBooking> bookingsFromDatabase =
+        (List<EventBooking>) bookingDatabase.findAllByEventIdAndStatus(BOOKING_CANCELLATION_TEST_EVENT_ID, null);
+    Map<Long, BookingStatus> bookingMap = bookingsFromDatabase.stream()
+        .collect(Collectors.toMap(EventBooking::getUserId, EventBooking::getBookingStatus));
+    assertEquals(4, bookingMap.size());
+    assertEquals(CANCELLED, bookingMap.get(6L));
+    assertEquals(CONFIRMED, bookingMap.get(7L));
+    assertEquals(WAITING_LIST, bookingMap.get(8L));
+    assertEquals(WAITING_LIST, bookingMap.get(11L));
+
+    resetCancellationTestDatabaseEntries();
+  }
+
+  @Test
+  void cancelBookingWithoutLoginReturnsError() {
+    HttpServletRequest cancelBookingRequest = createRequestWithCookies(new Cookie[] {});
+    try (Response cancelBookingResponse = eventsFacade.cancelBooking(cancelBookingRequest,
+        BOOKING_CANCELLATION_TEST_EVENT_ID, 6L)) {
+      assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), cancelBookingResponse.getStatus());
+      assertEquals("You must be logged in to access this resource.",
+          cancelBookingResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+  }
+
+  @Test
+  void cancelOtherUsersBookingWithoutPermissionsReturnsError()
+      throws NoCredentialsAvailableException, NoUserException, SegueDatabaseException,
+      AuthenticationProviderMappingException, IncorrectCredentialsProvidedException,
+      AdditionalAuthenticationRequiredException, InvalidKeySpecException, NoSuchAlgorithmException,
+      MFARequiredButNotConfiguredException {
+    LoginResult studentLogin = loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
+    HttpServletRequest cancelBookingRequest = createRequestWithCookies(new Cookie[] {studentLogin.cookie});
+    replay(cancelBookingRequest);
+    try (Response cancelBookingResponse = eventsFacade.cancelBooking(cancelBookingRequest,
+        BOOKING_CANCELLATION_TEST_EVENT_ID, 7L)) {
+      assertEquals(Response.Status.FORBIDDEN.getStatusCode(), cancelBookingResponse.getStatus());
+      assertEquals("You do not have the permissions to complete this action",
+          cancelBookingResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
+    }
+  }
+
+  private void resetCancellationTestDatabaseEntries() throws SQLException {
+    try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
+        "UPDATE event_bookings SET status = ? WHERE event_id = ? AND user_id = ?;")) {
+      pst.setString(1, CONFIRMED.name());
+      pst.setString(2, BOOKING_CANCELLATION_TEST_EVENT_ID);
+      pst.setLong(3, 6L);
+      pst.executeUpdate();
+    }
+
+    try (PreparedStatement pst = postgresSqlDb.getDatabaseConnection().prepareStatement(
+        "UPDATE event_bookings SET status = ? WHERE event_id = ? AND user_id = ?;")) {
+      pst.setString(1, WAITING_LIST.name());
+      pst.setString(2, BOOKING_CANCELLATION_TEST_EVENT_ID);
+      pst.setLong(3, 7L);
+      pst.executeUpdate();
+    }
   }
 }
