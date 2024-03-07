@@ -152,8 +152,8 @@ public class AdminFacade extends AbstractSegueFacade {
    */
   @Inject
   public AdminFacade(final PropertiesLoader properties, final UserAccountManager userManager,
-                     final GitContentManager contentManager, final ILogManager logManager, final StatisticsManager statsManager,
-                     final AbstractUserPreferenceManager userPreferenceManager,
+                     final GitContentManager contentManager, final ILogManager logManager,
+                     final StatisticsManager statsManager, final AbstractUserPreferenceManager userPreferenceManager,
                      final EventBookingManager eventBookingManager, final SegueJobService segueJobService,
                      final IExternalAccountManager externalAccountManager, final IMisuseMonitor misuseMonitor,
                      final EmailManager emailManager) {
