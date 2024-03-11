@@ -1,4 +1,4 @@
-FROM maven:3.9.6-eclipse-temurin-17 AS base
+FROM maven:3.9.6-eclipse-temurin-11 AS base
 #Set to "-P etl" for etl build
 ARG MVN_PACKAGE_PARAM=""
 ARG BUILD_VERSION=""
@@ -6,9 +6,9 @@ WORKDIR /isaac-api
 COPY pom.xml .
 RUN mvn dependency:go-offline
 COPY . /isaac-api
-RUN mvn package -Dmaven.test.skip=true -Dsegue.version= $BUILD_VERSION $MVN_PACKAGE_PARAM
+RUN mvn package -Dmaven.test.skip=true -Dsegue.version=$BUILD_VERSION $MVN_PACKAGE_PARAM
 
-FROM jetty:11.0.19-jdk17-eclipse-temurin
+FROM jetty:11.0.20-jdk11-eclipse-temurin
 USER root
 RUN mkdir /isaac-logs
 RUN chmod 755 /isaac-logs

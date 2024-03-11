@@ -50,7 +50,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.QuizSummaryDTO;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.services.ContentService;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
-import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapper;
+import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
@@ -64,7 +64,7 @@ public class QuizManager {
   private final ContentService contentService;
   private final GitContentManager contentManager;
   private final ContentSummarizerService contentSummarizerService;
-  private final ContentMapper mapper;
+  private final ContentMapperUtils mapperUtils;
 
   /**
    * Creates a quiz manager.
@@ -73,18 +73,18 @@ public class QuizManager {
    * @param contentService           - so we can look up content
    * @param contentManager           - so we can fetch specific content.
    * @param contentSummarizerService - so we can summarize content with links
-   * @param mapper                   - so we can convert cached content DOs to DTOs.
+   * @param mapperUtils              - so we can convert cached content DOs to DTOs.
    */
   @Inject
   public QuizManager(final PropertiesLoader properties, final ContentService contentService,
                      final GitContentManager contentManager,
                      final ContentSummarizerService contentSummarizerService,
-                     final ContentMapper mapper) {
+                     final ContentMapperUtils mapperUtils) {
     this.properties = properties;
     this.contentService = contentService;
     this.contentManager = contentManager;
     this.contentSummarizerService = contentSummarizerService;
-    this.mapper = mapper;
+    this.mapperUtils = mapperUtils;
   }
 
   public ResultsWrapper<ContentSummaryDTO> getAvailableQuizzes(
@@ -127,7 +127,7 @@ public class QuizManager {
     }
 
     if (cachedContent instanceof IsaacQuiz) {
-      ContentDTO contentDTO = this.mapper.getDTOByDO(cachedContent);
+      ContentDTO contentDTO = this.mapperUtils.getDTOByDO(cachedContent);
 
       if (contentDTO instanceof IsaacQuizDTO) {
         return (IsaacQuizDTO) contentDTO;
@@ -156,11 +156,11 @@ public class QuizManager {
           quiz = this.contentSummarizerService.extractContentSummary(this.findQuiz(quizId), QuizSummaryDTO.class);
         } catch (ContentManagerException e) {
           if (item instanceof QuizAttemptDTO) {
-            log.warn("Attempt (" + ((QuizAttemptDTO) item).getId() + ") exists with test ID ("
-                + item.getQuizId() + ") that does not exist!");
+            log.warn("Attempt ({}) exists with test ID ({}) that does not exist!", ((QuizAttemptDTO) item).getId(),
+                item.getQuizId());
           } else if (item instanceof QuizAssignmentDTO) {
-            log.warn("Assignment (" + ((QuizAssignmentDTO) item).getId() + ") exists with test ID ("
-                + sanitiseExternalLogValue(item.getQuizId()) + ") that does not exist!");
+            log.warn("Assignment ({}) exists with test ID ({}) that does not exist!",
+                ((QuizAssignmentDTO) item).getId(), sanitiseExternalLogValue(item.getQuizId()));
           }
         }
         quizCache.put(quizId, quiz);
@@ -191,7 +191,7 @@ public class QuizManager {
         if (c instanceof IsaacQuizSectionDTO) {
           return Stream.of((IsaacQuizSectionDTO) c);
         } else {
-          log.warn("Test id " + quiz.getId() + " contains top-level non-section with id " + c.getId());
+          log.warn("Test id {} contains top-level non-section with id {}", quiz.getId(), c.getId());
           return Stream.empty();
         }
       }).collect(Collectors.toList());

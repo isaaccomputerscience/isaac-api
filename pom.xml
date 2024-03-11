@@ -14,22 +14,23 @@
         <segue.version>${revision}</segue.version>
         <log4j.version>2.22.1</log4j.version>
         <resteasy.version>6.2.7.Final</resteasy.version>
-        <guice.version>5.1.0</guice.version>
-        <oauth-client.version>1.34.1</oauth-client.version>
-        <jackson.version>2.14.3</jackson.version>
+        <guice.version>7.0.0</guice.version>
+        <oauth-client.version>1.35.0</oauth-client.version>
+        <jackson.version>2.16.1</jackson.version>
         <swagger.version>2.2.2</swagger.version>
-        <prometheus.version>0.8.0</prometheus.version>
-        <jetty.version>11.0.19</jetty.version>
+        <prometheus.version>0.16.0</prometheus.version>
+        <jetty.version>11.0.20</jetty.version>
         <jetty.port.api>8080</jetty.port.api>
         <jetty.port.etl>8090</jetty.port.etl>
-        <testcontainers.version>1.17.3</testcontainers.version>
+        <testcontainers.version>1.19.6</testcontainers.version>
         <web.xml>web-api-live.xml</web.xml>
         <web.xml.etl>web-etl.xml</web.xml.etl>
         <web.xml.local>web-api-local.xml</web.xml.local>
-        <dependency-check.version>8.4.0</dependency-check.version>
+        <dependency-check.version>9.0.9</dependency-check.version>
         <ossindex.version>3.2.0</ossindex.version>
         <jgit.version>6.8.0.202311291450-r</jgit.version>
         <maven.surefire-failsafe.version>3.2.5</maven.surefire-failsafe.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
     </properties>
 
     <dependencies>
@@ -107,12 +108,6 @@
         </dependency>
 
         <dependency>
-            <groupId>ma.glasnost.orika</groupId>
-            <artifactId>orika-core</artifactId>
-            <version>1.5.4</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>32.0.0-jre</version>
@@ -138,7 +133,7 @@
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-jackson2</artifactId>
-            <version>1.42.2</version>
+            <version>1.44.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>
@@ -259,12 +254,12 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.10.0</version>
+            <version>1.11.0</version>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
-            <version>1.7</version>
+            <version>1.8.0</version>
         </dependency>
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
@@ -306,7 +301,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.5.1</version>
+            <version>42.7.2</version>
         </dependency>
 
         <dependency>
@@ -330,7 +325,7 @@
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.7.1</version>
+            <version>5.9</version>
         </dependency>
         <dependency>
             <groupId>net.sf.biweekly</groupId>
@@ -362,19 +357,6 @@
             <version>2.1.1</version>
         </dependency>
 
-        <!-- Graph checker code -->
-        <dependency>
-            <groupId>org.isaacphysics</groupId>
-            <artifactId>isaac-graph-checker-library</artifactId>
-            <version>1.1.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jboss.resteasy</groupId>
-                    <artifactId>resteasy-jaxrs</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
@@ -395,6 +377,11 @@
             <artifactId>ossindex-maven-plugin</artifactId>
             <version>${ossindex.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
         </dependency>
     </dependencies>
 
@@ -424,7 +411,14 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <release>17</release>
+                    <release>11</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
@@ -600,7 +594,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.10.1</version>
+                <version>5.10.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -674,6 +668,7 @@
                         <version>2.12.476</version>
                         <executions>
                             <execution>
+                                <!-- This generates a type file for use in Isaac React App -->
                                 <id>generate</id>
                                 <goals>
                                     <goal>generate</goal>
@@ -687,6 +682,7 @@
                                 </configuration>
                             </execution>
                             <execution>
+                                <!-- This generates a type file for use in Isaac Content Editor -->
                                 <id>generateDO</id>
                                 <goals>
                                     <goal>generate</goal>
@@ -705,6 +701,10 @@
                             <outputKind>module</outputKind>
                             <outputFileType>declarationFile</outputFileType>
                             <optionalProperties>all</optionalProperties>
+                            <customTypeMappings>
+                                <mapping>java.util.Date:EpochTimeStamp</mapping>
+                            </customTypeMappings>
+                            <indentString xml:space="preserve">  </indentString>
                         </configuration>
                     </plugin>
                 </plugins>

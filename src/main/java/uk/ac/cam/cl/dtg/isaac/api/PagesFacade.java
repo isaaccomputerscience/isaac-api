@@ -18,7 +18,6 @@ package uk.ac.cam.cl.dtg.isaac.api;
 
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.CONCEPT_ID_LOG_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.CONCEPT_TYPE;
-import static uk.ac.cam.cl.dtg.isaac.api.Constants.FAST_TRACK_QUESTION_TYPE;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.FRAGMENT_ID_LOG_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacServerLogType;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.MAX_PODS_TO_RETURN;
@@ -71,7 +70,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import ma.glasnost.orika.MapperFacade;
 import org.jboss.resteasy.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +91,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.api.services.ContentService;
@@ -113,7 +112,7 @@ public class PagesFacade extends AbstractIsaacFacade {
   private static final Logger log = LoggerFactory.getLogger(PagesFacade.class);
 
   private final ContentService api;
-  private final MapperFacade mapper;
+  private final ContentMapper mapper;
   private final UserAccountManager userManager;
   private final URIManager uriManager;
   private final QuestionManager questionManager;
@@ -135,11 +134,10 @@ public class PagesFacade extends AbstractIsaacFacade {
    * @param gameManager      - For looking up gameboard information.
    */
   @Inject
-  public PagesFacade(final ContentService api, final PropertiesLoader propertiesLoader,
-                     final ILogManager logManager, final MapperFacade mapper, final GitContentManager contentManager,
+  public PagesFacade(final ContentService api, final PropertiesLoader propertiesLoader, final ILogManager logManager,
+                     final ContentMapper mapper, final GitContentManager contentManager,
                      final UserAccountManager userManager, final URIManager uriManager,
-                     final QuestionManager questionManager,
-                     final GameManager gameManager) {
+                     final QuestionManager questionManager, final GameManager gameManager) {
     super(propertiesLoader, logManager);
     this.api = api;
     this.mapper = mapper;
@@ -293,7 +291,6 @@ public class PagesFacade extends AbstractIsaacFacade {
    * @param stages       - a comma separated list of stages
    * @param difficulties - a comma separated list of difficulties
    * @param examBoards   - a comma separated list of examBoards
-   * @param fasttrack    - a flag to indicate whether to search isaacFasttrackQuestions or not.
    * @param startIndex   - a string value to be converted into an integer representing the start index of the results
    * @param limit        - a string value to be converted into an integer representing the number of results to return
    * @return A response object which contains a list of questions or an empty list.
@@ -311,7 +308,6 @@ public class PagesFacade extends AbstractIsaacFacade {
                                         @QueryParam("stages") final String stages,
                                         @QueryParam("difficulties") final String difficulties,
                                         @QueryParam("examBoards") final String examBoards,
-                                        @DefaultValue("false") @QueryParam("fasttrack") final Boolean fasttrack,
                                         @DefaultValue(DEFAULT_START_INDEX_AS_STRING) @QueryParam("start_index")
                                         final Integer startIndex,
                                         @DefaultValue(DEFAULT_RESULTS_LIMIT_AS_STRING) @QueryParam("limit")
@@ -319,13 +315,8 @@ public class PagesFacade extends AbstractIsaacFacade {
     StringBuilder etagCodeBuilder = new StringBuilder();
     Map<String, List<String>> fieldsToMatch = Maps.newHashMap();
 
-    if (fasttrack) {
-      fieldsToMatch.put(TYPE_FIELDNAME, List.of(FAST_TRACK_QUESTION_TYPE));
-      etagCodeBuilder.append(FAST_TRACK_QUESTION_TYPE);
-    } else {
-      fieldsToMatch.put(TYPE_FIELDNAME, List.of(QUESTION_TYPE));
-      etagCodeBuilder.append(QUESTION_TYPE);
-    }
+    fieldsToMatch.put(TYPE_FIELDNAME, List.of(QUESTION_TYPE));
+    etagCodeBuilder.append(QUESTION_TYPE);
 
     // defaults
     int newLimit = DEFAULT_RESULTS_LIMIT;
@@ -419,7 +410,7 @@ public class PagesFacade extends AbstractIsaacFacade {
                                     @Context final HttpServletRequest httpServletRequest,
                                     @PathParam("question_page_id") final String questionId) {
     Map<String, List<String>> fieldsToMatch = Maps.newHashMap();
-    fieldsToMatch.put("type", Arrays.asList(QUESTION_TYPE, FAST_TRACK_QUESTION_TYPE));
+    fieldsToMatch.put(TYPE_FIELDNAME, List.of(QUESTION_TYPE));
 
     if (null == questionId || questionId.isEmpty()) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "You must provide a valid question id.").toResponse();

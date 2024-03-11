@@ -42,11 +42,11 @@ public class DeleteEventAdditionalBookingInformationOneYearJob implements Job {
               + " '{emergencyName}', '\"[REMOVED]\"'::JSONB, FALSE),"
               + " '{emergencyNumber}', '\"[REMOVED]\"'::JSONB, FALSE),"
               + " '{accessibilityRequirements}', '\"[REMOVED]\"'::JSONB, FALSE),"
-              + " '{medicalRequirements}', '\"[REMOVED]\"'::JSONB, FALSE),"
+              + " '{dietaryRequirements}', '\"[REMOVED]\"'::JSONB, FALSE),"
               + " pii_removed=? "
               + " WHERE created < ?"
               + " AND additional_booking_information ??| array['emergencyName', 'emergencyNumber',"
-              + " 'accessibilityRequirements', 'medicalRequirements']"
+              + " 'accessibilityRequirements', 'dietaryRequirements']"
               + " AND pii_removed IS NULL";
       try (Connection conn = database.getDatabaseConnection();
            PreparedStatement pst = conn.prepareStatement(query)
@@ -56,8 +56,8 @@ public class DeleteEventAdditionalBookingInformationOneYearJob implements Job {
 
         int affectedRows = pst.executeUpdate();
         if (affectedRows > 0) {
-          log.info(affectedRows
-              + " bookings older than a year had additional booking information which have been scrubbed of PII");
+          log.info("{} bookings older than a year had additional booking information which have been scrubbed of PII",
+              affectedRows);
         }
       }
       log.info("Ran DeleteEventAdditionalBookingInformationOneYearJob");

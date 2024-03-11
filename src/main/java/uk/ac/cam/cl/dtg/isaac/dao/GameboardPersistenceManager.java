@@ -17,7 +17,6 @@
 package uk.ac.cam.cl.dtg.isaac.dao;
 
 import static java.util.Objects.requireNonNull;
-import static uk.ac.cam.cl.dtg.isaac.api.Constants.FAST_TRACK_QUESTION_TYPE;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.QUESTION_TYPE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 
@@ -40,7 +39,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -51,7 +49,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import ma.glasnost.orika.MapperFacade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.api.managers.URIManager;
@@ -65,6 +62,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.GameboardItem;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.MainObjectMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
@@ -83,7 +81,7 @@ public class GameboardPersistenceManager {
   private final PostgresSqlDb database;
   private final Cache<String, GameboardDO> gameboardNonPersistentStorage;
 
-  private final MapperFacade mapper; // used for content object mapping.
+  private final MainObjectMapper mapper; // used for content object mapping.
   private final ObjectMapper objectMapper; // used for json serialisation
 
   private final GitContentManager contentManager;
@@ -106,7 +104,7 @@ public class GameboardPersistenceManager {
    */
   @Inject
   public GameboardPersistenceManager(final PostgresSqlDb database, final GitContentManager contentManager,
-                                     final MapperFacade mapper, final ObjectMapper objectMapper,
+                                     final MainObjectMapper mapper, final ObjectMapper objectMapper,
                                      final URIManager uriManager) {
     this.database = database;
     this.mapper = mapper;
@@ -304,7 +302,7 @@ public class GameboardPersistenceManager {
    */
   public String saveGameboardToPermanentStorage(final GameboardDTO gameboard)
       throws SegueDatabaseException {
-    GameboardDO gameboardToSave = mapper.map(gameboard, GameboardDO.class);
+    GameboardDO gameboardToSave = mapper.map(gameboard);
     // the mapping operation won't work for the list so we should just
     // create a new one.
     gameboardToSave.setContents(Lists.newArrayList());
@@ -537,7 +535,7 @@ public class GameboardPersistenceManager {
         gameboardDO.getContents().stream().map(GameboardContentDescriptor::getId).collect(Collectors.toList())));
 
     fieldsToMap.add(new GitContentManager.BooleanSearchClause(
-        TYPE_FIELDNAME, Constants.BooleanOperator.OR, Arrays.asList(QUESTION_TYPE, FAST_TRACK_QUESTION_TYPE)));
+        TYPE_FIELDNAME, Constants.BooleanOperator.AND, List.of(QUESTION_TYPE)));
 
     // Search for questions that match the ids.
     ResultsWrapper<ContentDTO> results;
@@ -612,8 +610,9 @@ public class GameboardPersistenceManager {
         if (item != null) {
           game.getContents().add(item);
         } else {
-          log.warn("The gameboard: " + game.getId() + " has a reference to a question (" + questionId
-              + ") that we cannot find. Removing it from the DTO.");
+          log.warn(
+              "The gameboard: {} has a reference to a question ({}) that we cannot find. Removing it from the DTO.",
+              game.getId(), questionId);
         }
       }
     }
@@ -717,7 +716,7 @@ public class GameboardPersistenceManager {
         throw new SegueDatabaseException("Unable to save assignment.");
       }
 
-      log.debug("Saving gameboard... Gameboard ID: " + gameboardToSave.getId());
+      log.debug("Saving gameboard... Gameboard ID: {}", gameboardToSave.getId());
 
       return gameboardToSave;
     } catch (SQLException e) {
@@ -774,7 +773,7 @@ public class GameboardPersistenceManager {
    * @return gameboard DTO
    */
   private GameboardDTO convertToGameboardDTO(final GameboardDO gameboardDO, final boolean populateGameboardItems) {
-    GameboardDTO gameboardDTO = mapper.map(gameboardDO, GameboardDTO.class);
+    GameboardDTO gameboardDTO = mapper.map(gameboardDO);
 
     if (!populateGameboardItems) {
       List<GameboardItem> listOfSparseGameItems = Lists.newArrayList();
@@ -814,7 +813,7 @@ public class GameboardPersistenceManager {
    * @return GameboardDO.
    */
   private GameboardDO convertToGameboardDO(final GameboardDTO gameboardDTO) {
-    GameboardDO gameboardDO = mapper.map(gameboardDTO, GameboardDO.class);
+    GameboardDO gameboardDO = mapper.map(gameboardDTO);
     // the mapping operation won't work for the list so we should just
     // create a new one.
     gameboardDO.setContents(Lists.newArrayList());

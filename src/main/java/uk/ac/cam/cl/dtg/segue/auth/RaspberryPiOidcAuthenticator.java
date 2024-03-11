@@ -175,7 +175,6 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
           email,
           emailStatus,
           null,
-          null,
           null
       );
     }
@@ -232,7 +231,7 @@ public class RaspberryPiOidcAuthenticator implements IOAuth2Authenticator {
       return internalCredentialID;
 
     } catch (IOException e) {
-      log.error("An error occurred during code exchange: " + e);
+      log.error("An error occurred during code exchange", e);
       throw new CodeExchangeException();
     }
   }

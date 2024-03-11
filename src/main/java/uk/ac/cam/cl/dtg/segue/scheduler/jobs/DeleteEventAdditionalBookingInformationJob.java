@@ -88,11 +88,11 @@ public class DeleteEventAdditionalBookingInformationJob implements Job {
                     + " '{emergencyName}', '\"[REMOVED]\"'::JSONB, FALSE),"
                     + " '{emergencyNumber}', '\"[REMOVED]\"'::JSONB, FALSE),"
                     + " '{accessibilityRequirements}', '\"[REMOVED]\"'::JSONB, FALSE),"
-                    + " '{medicalRequirements}', '\"[REMOVED]\"'::JSONB, FALSE),"
+                    + " '{dietaryRequirements}', '\"[REMOVED]\"'::JSONB, FALSE),"
                     + " pii_removed=? "
                     + " WHERE event_id = ?"
                     + " AND additional_booking_information ??| array['emergencyName', 'emergencyNumber',"
-                    + " 'accessibilityRequirements', 'medicalRequirements']"
+                    + " 'accessibilityRequirements', 'dietaryRequirements']"
                     + " AND pii_removed IS NULL";
             try (Connection conn = database.getDatabaseConnection();
                  PreparedStatement pst = conn.prepareStatement(query)
@@ -104,8 +104,7 @@ public class DeleteEventAdditionalBookingInformationJob implements Job {
 
               int affectedRows = pst.executeUpdate();
               if (affectedRows > 0) {
-                log.info(
-                    "Event " + page.getId() + " had " + affectedRows + " bookings which have been scrubbed of PII");
+                log.info("Event {} had {} bookings which have been scrubbed of PII", page.getId(), affectedRows);
               }
             }
           }
