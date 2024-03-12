@@ -8,7 +8,6 @@ RUN mvn dependency:go-offline
 COPY . /isaac-api
 RUN mvn package -Dmaven.test.skip=true -Dsegue.version=$BUILD_VERSION $MVN_PACKAGE_PARAM
 
-
 FROM jetty:11.0.20-jdk17-eclipse-temurin
 USER root
 RUN mkdir /isaac-logs
