@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
 
 /**
  * Common abstract class for postgres DAOs.
@@ -54,6 +55,10 @@ public abstract class AbstractPgDataManager {
 
     if (value instanceof Long) {
       pst.setLong(index, (Long) value);
+    }
+
+    if (value instanceof Instant) {
+      pst.setTimestamp(index, Timestamp.from((Instant) value));
     }
 
     if (value instanceof java.util.Date) {
