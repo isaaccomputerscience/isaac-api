@@ -541,7 +541,7 @@ public class StatisticsManager implements IStatisticsManager {
    * @throws SegueDatabaseException - if there is a problem contacting the underlying database
    */
   @Override
-  public Map<String, Map<org.joda.time.LocalDate, Long>> getEventLogsByDate(final Collection<String> eventTypes,
+  public Map<String, Map<LocalDate, Long>> getEventLogsByDate(final Collection<String> eventTypes,
                                                                             final Date fromDate, final Date toDate,
                                                                             final boolean binDataByMonth)
       throws SegueDatabaseException {
@@ -560,7 +560,7 @@ public class StatisticsManager implements IStatisticsManager {
    * @throws SegueDatabaseException - if there is a problem contacting the underlying database
    */
   @Override
-  public Map<String, Map<org.joda.time.LocalDate, Long>> getEventLogsByDateAndUserList(
+  public Map<String, Map<LocalDate, Long>> getEventLogsByDateAndUserList(
       final Collection<String> eventTypes,
       final Date fromDate, final Date toDate, final List<RegisteredUserDTO> userList,
       final boolean binDataByMonth) throws SegueDatabaseException {

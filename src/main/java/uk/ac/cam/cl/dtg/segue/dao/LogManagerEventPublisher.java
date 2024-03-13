@@ -17,13 +17,13 @@
 package uk.ac.cam.cl.dtg.segue.dao;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.joda.time.LocalDate;
 import uk.ac.cam.cl.dtg.isaac.dos.LogEvent;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
