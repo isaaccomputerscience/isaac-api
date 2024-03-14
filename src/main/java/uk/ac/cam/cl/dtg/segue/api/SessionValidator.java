@@ -55,7 +55,7 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
   }
 
   @Override
-  public void filter(final ContainerRequestContext containerRequestContext) throws IOException {
+  public void filter(final ContainerRequestContext containerRequestContext) {
     Cookie authCookie = containerRequestContext.getCookies().get(SEGUE_AUTH_COOKIE);
     if (authCookie != null && !userAuthenticationManager.isSessionValid(httpServletRequest)) {
       log.warn("Request made with invalid segue auth cookie - closing session");
