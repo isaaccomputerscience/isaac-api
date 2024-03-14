@@ -1,5 +1,8 @@
 package uk.ac.cam.cl.dtg.isaac.dao;
 
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_NOT_EVENT;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.google.inject.Inject;
@@ -29,10 +32,6 @@ import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
 public class EventBookingPersistenceManager {
   private static final Logger log = LoggerFactory.getLogger(EventBookingPersistenceManager.class);
-
-  private static final String EXCEPTION_MESSAGE_NOT_EVENT = "Content object is not an event page.";
-  private static final String EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO =
-      "Unable to create event booking DTO from DO.";
 
   private final EventBookings dao;
   private final UserAccountManager userManager;

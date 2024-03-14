@@ -16,10 +16,17 @@
 
 package uk.ac.cam.cl.dtg.isaac.api.managers;
 
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_ID_EVENT_BOOKING_CONFIRMED;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_ID_WAITING_LIST_ADDITION;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_ID_WAITING_LIST_ONLY_ADDITION;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_TOKEN_AUTHORIZATION_LINK;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_TOKEN_CONTACT_US_URL;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_TOKEN_EVENT;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_TOKEN_EVENT_DETAILS;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_TOKEN_EVENT_URL;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_TEMPLATE_CANCELLED_EVENT;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_TEMPLATE_DUPLICATE_BOOKING;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_TEMPLATE_UNABLE_TO_SEND_EMAIL;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_TIME_LOCALITY;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_ADMIN_EMAIL;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_ICAL_UID_DOMAIN;
@@ -89,18 +96,6 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 public class EventBookingManager {
   private static final Logger log = LoggerFactory.getLogger(EventBookingManager.class);
 
-  private static final String EXCEPTION_MESSAGE_TEMPLATE_DUPLICATE_BOOKING =
-      "Unable to book onto event (%s) as user (%s) is already booked on to it.";
-  private static final String EXCEPTION_MESSAGE_TEMPLATE_CANCELLED_EVENT =
-      "Unable to book user (%s) onto event (%s); the event is cancelled.";
-  private static final String EXCEPTION_MESSAGE_TEMPLATE_UNABLE_TO_SEND_EMAIL =
-      "Unable to send event email ({}) to user ({})";
-  private static final String EMAIL_TEMPLATE_ID_EVENT_BOOKING_CONFIRMED = "email-event-booking-confirmed";
-  private static final String EMAIL_TEMPLATE_ID_WAITING_LIST_ONLY_ADDITION =
-      "email-event-waiting-list-only-addition-notification";
-  private static final String EMAIL_TEMPLATE_ID_WAITING_LIST_ADDITION =
-      "email-event-waiting-list-addition-notification";
-  private static final String EMAIL_TEMPLATE_TOKEN_EVENT_URL = "eventURL";
   private static final String AUTH_TOKEN_LINK = "https://%s/account?authToken=%s";
   private static final String EVENT_STAGE_STUDENT = "student";
 
