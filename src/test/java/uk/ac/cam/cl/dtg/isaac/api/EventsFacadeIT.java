@@ -388,15 +388,7 @@ class EventsFacadeIT extends IsaacIntegrationTest {
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelBookingResponse.getStatus());
       }
 
-      List<EventBooking> bookingsFromDatabase =
-          (List<EventBooking>) bookingDatabase.findAllByEventIdAndStatus(BOOKING_CANCELLATION_TEST_EVENT_ID, null);
-      Map<Long, BookingStatus> bookingMap = bookingsFromDatabase.stream()
-          .collect(Collectors.toMap(EventBooking::getUserId, EventBooking::getBookingStatus));
-      assertEquals(4, bookingMap.size());
-      assertEquals(CANCELLED, bookingMap.get(6L));
-      assertEquals(CONFIRMED, bookingMap.get(7L));
-      assertEquals(WAITING_LIST, bookingMap.get(8L));
-      assertEquals(WAITING_LIST, bookingMap.get(11L));
+      assertUpdatedBookingsMatchExpectations();
 
       resetCancellationTestDatabaseEntries();
     }
@@ -416,15 +408,7 @@ class EventsFacadeIT extends IsaacIntegrationTest {
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), cancelBookingResponse.getStatus());
       }
 
-      List<EventBooking> bookingsFromDatabase =
-          (List<EventBooking>) bookingDatabase.findAllByEventIdAndStatus(BOOKING_CANCELLATION_TEST_EVENT_ID, null);
-      Map<Long, BookingStatus> bookingMap = bookingsFromDatabase.stream()
-          .collect(Collectors.toMap(EventBooking::getUserId, EventBooking::getBookingStatus));
-      assertEquals(4, bookingMap.size());
-      assertEquals(CANCELLED, bookingMap.get(6L));
-      assertEquals(CONFIRMED, bookingMap.get(7L));
-      assertEquals(WAITING_LIST, bookingMap.get(8L));
-      assertEquals(WAITING_LIST, bookingMap.get(11L));
+      assertUpdatedBookingsMatchExpectations();
 
       resetCancellationTestDatabaseEntries();
     }
@@ -456,6 +440,18 @@ class EventsFacadeIT extends IsaacIntegrationTest {
         assertEquals("You do not have the permissions to complete this action",
             cancelBookingResponse.readEntity(SegueErrorResponse.class).getErrorMessage());
       }
+    }
+
+    private void assertUpdatedBookingsMatchExpectations() throws SegueDatabaseException {
+      List<EventBooking> bookingsFromDatabase =
+          (List<EventBooking>) bookingDatabase.findAllByEventIdAndStatus(BOOKING_CANCELLATION_TEST_EVENT_ID, null);
+      Map<Long, BookingStatus> bookingMap = bookingsFromDatabase.stream()
+          .collect(Collectors.toMap(EventBooking::getUserId, EventBooking::getBookingStatus));
+      assertEquals(4, bookingMap.size());
+      assertEquals(CANCELLED, bookingMap.get(6L));
+      assertEquals(CONFIRMED, bookingMap.get(7L));
+      assertEquals(WAITING_LIST, bookingMap.get(8L));
+      assertEquals(WAITING_LIST, bookingMap.get(11L));
     }
 
     private void resetCancellationTestDatabaseEntries() throws SQLException {
