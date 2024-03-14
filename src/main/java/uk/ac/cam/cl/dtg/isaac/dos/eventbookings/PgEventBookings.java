@@ -549,6 +549,47 @@ public class PgEventBookings implements EventBookings {
     }
   }
 
+  /**
+   * Find all bookings for events.
+   *
+   * @param eventIds - the event of interest.
+   * @return an iterable with all the events matching the criteria.
+   * @throws SegueDatabaseException - if an error occurs.
+   */
+  @Override
+  public Iterable<EventBooking> findAllByEventIds(final List<String> eventIds) throws SegueDatabaseException {
+    StringBuilder sb = new StringBuilder();
+    sb.append("SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id IN (");
+
+    // insert placeholders into the query - append is adding on
+    for (int i = 0; i < eventIds.size(); i++) {
+      if (i > 0) {
+        sb.append(", ");
+      }
+      sb.append("?");
+    }
+    sb.append(") AND NOT users.deleted");
+
+    try (Connection conn = ds.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(sb.toString())) {
+
+      // Set values for each placeholder based on the eventIds list
+      for (int i = 0; i < eventIds.size(); i++) {
+        pst.setString(i + 1, eventIds.get(i));
+      }
+
+      try (ResultSet results = pst.executeQuery()) {
+        List<EventBooking> returnResult = Lists.newArrayList();
+        while (results.next()) {
+          returnResult.add(buildPgEventBooking(results));
+        }
+        return returnResult;
+      }
+    } catch (SQLException e) {
+      throw new SegueDatabaseException("Postgres exception", e);
+    }
+  }
+
   @Override
   public Iterable<EventBooking> findAllByUserId(final Long userId) throws SegueDatabaseException {
     requireNonNull(userId);

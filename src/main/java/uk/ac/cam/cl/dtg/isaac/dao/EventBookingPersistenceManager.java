@@ -3,7 +3,9 @@ package uk.ac.cam.cl.dtg.isaac.dao;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.google.inject.Inject;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -176,6 +178,43 @@ public class EventBookingPersistenceManager {
         log.error("Content object is not an event page.");
         throw new SegueDatabaseException("Content object is not an event page.");
       }
+    } catch (ContentManagerException e) {
+      log.error("Unable to create event booking dto.");
+      throw new SegueDatabaseException("Unable to create event booking dto from DO.", e);
+    }
+  }
+
+  /**
+   * Get event bookings by event ids.
+   * WARNING: This pulls PII such as dietary info, email, and other stuff that should not (always) make it to end users.
+   *
+   * @param eventIds - of interest
+   * @return event bookings
+   * @throws SegueDatabaseException - if an error occurs.
+   */
+  public  Map<String, List<DetailedEventBookingDTO>> adminGetBookingsByEventIds(final List<String> eventIds)
+      throws SegueDatabaseException {
+    try {
+      Map<String, ContentDTO> eventDetails = new HashMap<>();
+
+      for (String eventId : eventIds) {
+        ContentDTO c = this.contentManager.getContentById(eventId);
+        if (null == c) {
+          continue;
+        }
+        eventDetails.put(eventId, c);
+      }
+
+      Iterable<EventBooking> bookings = dao.findAllByEventIds(eventIds);
+      Map<String, List<DetailedEventBookingDTO>> result = new HashMap<>();
+
+      for (EventBooking e : bookings) {
+        if (!result.containsKey(e.getEventId())) {
+          result.put(e.getEventId(), new ArrayList<>());
+        }
+        result.get(e.getEventId()).add(convertToDTO(e, (IsaacEventPageDTO) eventDetails.get(e.getEventId())));
+      }
+      return result;
     } catch (ContentManagerException e) {
       log.error("Unable to create event booking dto.");
       throw new SegueDatabaseException("Unable to create event booking dto from DO.", e);

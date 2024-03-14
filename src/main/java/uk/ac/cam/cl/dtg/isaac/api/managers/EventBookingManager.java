@@ -193,15 +193,14 @@ public class EventBookingManager {
     return this.bookingPersistenceManager.adminGetBookingsByEventId(eventId);
   }
 
+  /**
+   * @param eventIds - of interest
+   * @return event bookings
+   * @throws SegueDatabaseException - if an error occurs.
+   */
   public Map<String, List<DetailedEventBookingDTO>> adminGetBookingsByEventIds(final List<String> eventIds)
       throws SegueDatabaseException {
-    Map<String, List<DetailedEventBookingDTO>> result = new HashMap<>();
-
-    for (String eventId : eventIds) {
-      result.put(eventId, adminGetBookingsByEventId(eventId));
-    }
-
-    return result;
+    return this.bookingPersistenceManager.adminGetBookingsByEventIds(eventIds);
   }
 
 
