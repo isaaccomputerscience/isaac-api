@@ -561,7 +561,8 @@ public class PgEventBookings implements EventBookings {
     StringBuilder sb = new StringBuilder();
     sb.append("SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id IN (");
 
-    // insert placeholders into the query - append is adding on
+    // insert placeholders into the query - sb.append is adding new content to an existing string without creating
+    // new string objects each time  to an existing string builder
     for (int i = 0; i < eventIds.size(); i++) {
       if (i > 0) {
         sb.append(", ");
