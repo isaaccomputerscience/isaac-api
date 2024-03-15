@@ -17,8 +17,8 @@
         <guice.version>7.0.0</guice.version>
         <oauth-client.version>1.35.0</oauth-client.version>
         <jackson.version>2.16.1</jackson.version>
-        <swagger.version>2.2.2</swagger.version>
-        <prometheus.version>0.8.0</prometheus.version>
+        <swagger.version>2.2.20</swagger.version>
+        <prometheus.version>0.16.0</prometheus.version>
         <jetty.version>11.0.20</jetty.version>
         <jetty.port.api>8080</jetty.port.api>
         <jetty.port.etl>8090</jetty.port.etl>
@@ -411,7 +411,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <release>11</release>
+                    <release>17</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.mapstruct</groupId>
