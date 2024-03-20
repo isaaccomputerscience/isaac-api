@@ -23,7 +23,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
+import java.sql.Timestamp;
+import java.time.Instant;
 import uk.ac.cam.cl.dtg.isaac.dos.users.AnonymousUser;
 import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
@@ -51,8 +52,8 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
     ) {
       pst.setString(FIELD_STORE_ID, user.getSessionId());
       pst.setString(FIELD_STORE_TEMPORARY_APP_DATA, "{\"questionAttempts\":{}}");
-      pst.setTimestamp(FIELD_STORE_CREATED, new java.sql.Timestamp(user.getDateCreated().getTime()));
-      pst.setTimestamp(FIELD_STORE_LAST_UPDATED, new java.sql.Timestamp(user.getDateCreated().getTime()));
+      pst.setTimestamp(FIELD_STORE_CREATED, Timestamp.from(user.getDateCreated()));
+      pst.setTimestamp(FIELD_STORE_LAST_UPDATED, Timestamp.from(user.getDateCreated()));
 
       if (pst.executeUpdate() == 0) {
         throw new SegueDatabaseException("Unable to save anonymous user.");
@@ -98,7 +99,7 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
         result.next();
 
         AnonymousUser userToReturn = new AnonymousUser(result.getString("id"),
-            result.getTimestamp("created"), result.getTimestamp("last_updated"));
+            result.getTimestamp("created").toInstant(), result.getTimestamp("last_updated").toInstant());
         updateLastUpdatedDate(userToReturn);
 
         return userToReturn;
@@ -135,8 +136,8 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query)
     ) {
-      Date newUpdatedDate = new Date();
-      pst.setTimestamp(FIELD_UPDATE_UPDATED_DATE, new java.sql.Timestamp(newUpdatedDate.getTime()));
+      Instant newUpdatedDate = Instant.now();
+      pst.setTimestamp(FIELD_UPDATE_UPDATED_DATE, Timestamp.from(newUpdatedDate));
       pst.setString(FIELD_UPDATE_UPDATED_ID, user.getSessionId());
       pst.execute();
 

@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class CustomAssertions {
-  private static final ObjectMapper jsonMapper = new ObjectMapper();
+  private static final ObjectMapper jsonMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
 
   public static void assertDeepEquals(Object expected, Object actual) {
     try {

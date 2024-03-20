@@ -26,7 +26,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.codec.binary.Base64;
@@ -239,7 +238,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
 
     // check the token matches and hasn't expired
     // (I know that we have just looked it up but that might change so checking anyway)
-    return luc.getResetToken().equals(token) && luc.getResetExpiry().after(now);
+    return luc.getResetToken().equals(token) && luc.getResetExpiry().isAfter(now);
   }
 
   @Override

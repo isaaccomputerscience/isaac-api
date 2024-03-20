@@ -41,9 +41,9 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,7 +195,7 @@ class UserManagerTest {
     int sessionToken = 7;
 
     RegisteredUser returnUser = new RegisteredUser(validUserId, "TestFirstName", "TestLastName", "", Role.STUDENT,
-        new Date(), Gender.MALE, new Date(), null, null, null, null, false);
+        Instant.now(), Gender.MALE, Instant.now(), null, null, null, null, false);
     returnUser.setId(validUserId);
 
     Map<String, String> sessionInformation =
@@ -373,7 +373,7 @@ class UserManagerTest {
 
     // User object back from provider
     UserFromAuthProvider providerUser = new UserFromAuthProvider(someProviderUniqueUserId, "TestFirstName",
-        "TestLastName", "test@test.com", EmailVerificationStatus.VERIFIED, new Date(), Gender.MALE);
+        "TestLastName", "test@test.com", EmailVerificationStatus.VERIFIED, Instant.now(), Gender.MALE);
 
     // Mock get User Information from provider call
     expect(((IFederatedAuthenticator) dummyAuth).getUserInfo(someProviderGeneratedLookupValue)).andReturn(
@@ -385,7 +385,7 @@ class UserManagerTest {
         .atLeastOnce();
 
     RegisteredUser mappedUser = new RegisteredUser(null, "TestFirstName", "testLastName", "test@test.com", Role.STUDENT,
-        new Date(), Gender.MALE, new Date(), null, null, null, null, false);
+        Instant.now(), Gender.MALE, Instant.now(), null, null, null, null, false);
 
     expect(dummyDatabase.getAuthenticationProvidersByUsers(Collections.singletonList(mappedUser)))
         .andReturn(new HashMap<RegisteredUser, List<AuthenticationProvider>>() {

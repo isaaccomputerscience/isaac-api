@@ -60,6 +60,7 @@ import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -404,7 +405,7 @@ public class QuizFacade extends AbstractIsaacFacade {
       }
 
       // Check the due date hasn't passed
-      if (quizAssignment.getDueDate() != null && !quizAssignment.dueDateIsAfter(new Date())) {
+      if (quizAssignment.getDueDate() != null && !quizAssignment.dueDateIsAfter(Instant.now())) {
         return new SegueErrorResponse(Status.FORBIDDEN, "The due date for this test has passed.").toResponse();
       }
 
@@ -694,7 +695,7 @@ public class QuizFacade extends AbstractIsaacFacade {
             "You can only mark assignments incomplete for groups you own or manage.").toResponse();
       }
 
-      if (assignment.getDueDate() != null && !assignment.dueDateIsAfter(new Date())) {
+      if (assignment.getDueDate() != null && !assignment.dueDateIsAfter(Instant.now())) {
         return new SegueErrorResponse(Status.BAD_REQUEST,
             "You cannot mark a test attempt as incomplete after the due date.").toResponse();
       }
@@ -1725,7 +1726,7 @@ public class QuizFacade extends AbstractIsaacFacade {
     // Relying on the side-effects of getting the assignment.
     QuizAssignmentDTO quizAssignment = getQuizAssignment(quizAttempt);
 
-    if (quizAssignment != null && quizAssignment.getDueDate() != null && !quizAssignment.dueDateIsAfter(new Date())) {
+    if (quizAssignment != null && quizAssignment.getDueDate() != null && !quizAssignment.dueDateIsAfter(Instant.now())) {
       throw new ErrorResponseWrapper(
           new SegueErrorResponse(Status.FORBIDDEN, "The due date for this test has passed."));
     }

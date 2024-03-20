@@ -18,6 +18,7 @@ package uk.ac.cam.cl.dtg.isaac.quiz;
 
 import static java.util.Objects.requireNonNull;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -160,7 +161,7 @@ public class IsaacReorderValidator implements IValidator {
       feedback = reorderQuestion.getDefaultFeedback();
     }
 
-    return new QuestionValidationResponse(question.getId(), answer, responseCorrect, feedback, new Date());
+    return new QuestionValidationResponse(question.getId(), answer, responseCorrect, feedback, Instant.now());
   }
 
   @Override

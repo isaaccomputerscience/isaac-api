@@ -23,7 +23,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -74,14 +76,13 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
       pst.setLong(FIELD_SAVE_OWNER_USER_ID, assignmentToSave.getOwnerUserId());
 
       if (assignment.getCreationDate() != null) {
-        pst.setTimestamp(FIELD_SAVE_CREATION_DATE,
-            new java.sql.Timestamp(assignmentToSave.getCreationDate().getTime()));
+        pst.setTimestamp(FIELD_SAVE_CREATION_DATE, Timestamp.from(assignmentToSave.getCreationDate()));
       } else {
-        pst.setTimestamp(FIELD_SAVE_CREATION_DATE, new java.sql.Timestamp(new Date().getTime()));
+        pst.setTimestamp(FIELD_SAVE_CREATION_DATE, Timestamp.from(Instant.now()));
       }
 
       if (assignment.getDueDate() != null) {
-        pst.setTimestamp(FIELD_SAVE_DUE_DATE, new java.sql.Timestamp(assignmentToSave.getDueDate().getTime()));
+        pst.setTimestamp(FIELD_SAVE_DUE_DATE, Timestamp.from(assignmentToSave.getDueDate()));
       } else {
         pst.setNull(FIELD_SAVE_DUE_DATE, Types.TIMESTAMP);
       }
@@ -93,8 +94,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
       }
 
       if (assignment.getScheduledStartDate() != null) {
-        pst.setTimestamp(FIELD_SAVE_SCHEDULED_START_DATE,
-            new java.sql.Timestamp(assignmentToSave.getScheduledStartDate().getTime()));
+        pst.setTimestamp(FIELD_SAVE_SCHEDULED_START_DATE, Timestamp.from(assignmentToSave.getScheduledStartDate()));
       } else {
         pst.setNull(FIELD_SAVE_SCHEDULED_START_DATE, Types.TIMESTAMP);
       }
@@ -332,15 +332,15 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
    * @throws SQLException if we cannot access a required field.
    */
   private AssignmentDO convertFromSQLToAssignmentDO(final ResultSet sqlResults) throws SQLException {
-    java.util.Date preciseDate = new java.util.Date(sqlResults.getTimestamp("creation_date").getTime());
+    Instant preciseDate = sqlResults.getTimestamp("creation_date").toInstant();
 
-    java.util.Date preciseDueDate = null;
+    Instant preciseDueDate = null;
     if (sqlResults.getTimestamp("due_date") != null) {
-      preciseDueDate = new java.util.Date(sqlResults.getTimestamp("due_date").getTime());
+      preciseDueDate = sqlResults.getTimestamp("due_date").toInstant();
     }
-    java.util.Date preciseScheduledStartDate = null;
+    Instant preciseScheduledStartDate = null;
     if (sqlResults.getTimestamp("scheduled_start_date") != null) {
-      preciseScheduledStartDate = new java.util.Date(sqlResults.getTimestamp("scheduled_start_date").getTime());
+      preciseScheduledStartDate = sqlResults.getTimestamp("scheduled_start_date").toInstant();
     }
 
     return new AssignmentDO(sqlResults.getLong("id"), sqlResults.getString("gameboard_id"),

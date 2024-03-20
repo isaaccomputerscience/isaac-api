@@ -26,8 +26,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,9 +104,9 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
       }
 
       if (attemptToSave.getStartDate() != null) {
-        pst.setTimestamp(FIELD_SAVE_ATTEMPT_START_DATE, new java.sql.Timestamp(attemptToSave.getStartDate().getTime()));
+        pst.setTimestamp(FIELD_SAVE_ATTEMPT_START_DATE, Timestamp.from(attemptToSave.getStartDate()));
       } else {
-        pst.setTimestamp(FIELD_SAVE_ATTEMPT_START_DATE, new java.sql.Timestamp(new Date().getTime()));
+        pst.setTimestamp(FIELD_SAVE_ATTEMPT_START_DATE, Timestamp.from(Instant.now()));
       }
 
       if (pst.executeUpdate() == 0) {
@@ -174,15 +175,15 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
 
   @Override
   @Nullable
-  public Date updateAttemptCompletionStatus(final Long quizAttemptId, final boolean newCompletionStatus)
+  public Instant updateAttemptCompletionStatus(final Long quizAttemptId, final boolean newCompletionStatus)
       throws SegueDatabaseException {
     String query = "UPDATE quiz_attempts SET completed_date = ? WHERE id = ?";
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query)
     ) {
-      Date completedDate = newCompletionStatus ? new Date() : null;
+      Instant completedDate = newCompletionStatus ? Instant.now() : null;
       if (completedDate != null) {
-        pst.setTimestamp(FIELD_UPDATE_ATTEMPT_COMPLETED_DATE, new java.sql.Timestamp(completedDate.getTime()));
+        pst.setTimestamp(FIELD_UPDATE_ATTEMPT_COMPLETED_DATE, Timestamp.from(completedDate));
       } else {
         pst.setNull(FIELD_UPDATE_ATTEMPT_COMPLETED_DATE, Types.TIMESTAMP);
       }
@@ -313,16 +314,15 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
       quizAssignmentId = null;
     }
 
-    Date startDate = new Date(sqlResults.getTimestamp("start_date").getTime());
+    Instant startDate = sqlResults.getTimestamp("start_date").toInstant();
 
-    Date completedDate = null;
+    Instant completedDate = null;
     if (sqlResults.getTimestamp("completed_date") != null) {
-      completedDate = new Date(sqlResults.getTimestamp("completed_date").getTime());
+      completedDate = sqlResults.getTimestamp("completed_date").toInstant();
     }
 
-    return new QuizAttemptDO(sqlResults.getLong("id"), sqlResults.getLong("user_id"),
-        sqlResults.getString("quiz_id"), quizAssignmentId,
-        startDate, completedDate);
+    return new QuizAttemptDO(sqlResults.getLong("id"), sqlResults.getLong("user_id"), sqlResults.getString("quiz_id"),
+        quizAssignmentId, startDate, completedDate);
   }
 
   // Field Constants
