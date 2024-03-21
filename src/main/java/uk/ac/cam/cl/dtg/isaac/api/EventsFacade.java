@@ -63,6 +63,7 @@ import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -981,7 +982,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       IsaacEventPageDTO event = getRawEventDTOById(eventId);
       RegisteredUserDTO userLoggedIn = this.userManager.getCurrentRegisteredUser(request);
 
-      if (event.getDate() != null && new Date().after(event.getDate())) {
+      if (event.getDate() != null && Instant.now().isAfter(event.getDate())) {
         return new SegueErrorResponse(Status.BAD_REQUEST,
             "You cannot cancel a reservation on an event that has already started.")
             .toResponse();
@@ -1225,7 +1226,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         userOwningBooking = this.userManager.getUserDTOById(userId);
       }
 
-      if (event.getDate() != null && new Date().after(event.getDate())) {
+      if (event.getDate() != null && Instant.now().isAfter(event.getDate())) {
         return new SegueErrorResponse(Status.BAD_REQUEST,
             "You cannot cancel a booking on an event that has already started.")
             .toResponse();

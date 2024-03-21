@@ -74,13 +74,12 @@ public class DeleteEventAdditionalBookingInformationJob implements Job {
           ContentService.generateDefaultFieldToMatch(fieldsToMatch),
           startIndex, DEFAULT_MAX_WINDOW_SIZE, sortInstructions, filterInstructions);
       for (ContentDTO contentResult : findByFieldNames.getResults()) {
-        if (contentResult instanceof IsaacEventPageDTO) {
-          IsaacEventPageDTO page = (IsaacEventPageDTO) contentResult;
+        if (contentResult instanceof IsaacEventPageDTO page) {
           // Event end date (if present) > 30 days ago, else event date > 30 days ago
           boolean endDate30DaysAgo =
-              page.getEndDate() != null && page.getEndDate().toInstant().isBefore(thirtyDaysAgo.toInstant());
+              page.getEndDate() != null && page.getEndDate().isBefore(thirtyDaysAgo.toInstant());
           boolean noEndDateAndStartDate30DaysAgo =
-              page.getEndDate() == null && page.getDate().toInstant().isBefore(thirtyDaysAgo.toInstant());
+              page.getEndDate() == null && page.getDate().isBefore(thirtyDaysAgo.toInstant());
           if (endDate30DaysAgo || noEndDateAndStartDate30DaysAgo) {
             String query =
                 "UPDATE event_bookings SET additional_booking_information="

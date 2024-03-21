@@ -18,7 +18,7 @@ package uk.ac.cam.cl.dtg.isaac.dos.eventbookings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
@@ -32,8 +32,8 @@ public class PgEventBooking implements EventBooking {
   private final Long reservedById;
   private final String eventId;
   private final BookingStatus bookingStatus;
-  private final Date created;
-  private final Date updated;
+  private final Instant created;
+  private final Instant updated;
   private final Map<String, String> additionalInformation;
 
   /**
@@ -49,7 +49,7 @@ public class PgEventBooking implements EventBooking {
    * @param additionalInformation - additional information to be stored with this booking e.g. dietary requirements.
    */
   public PgEventBooking(final Long bookingId, final Long userId, final Long reservedById, final String eventId,
-                        final BookingStatus bookingStatus, final Date created, final Date updated,
+                        final BookingStatus bookingStatus, final Instant created, final Instant updated,
                         final Object additionalInformation) throws SegueDatabaseException {
     this.bookingId = bookingId;
     this.userId = userId;
@@ -96,12 +96,12 @@ public class PgEventBooking implements EventBooking {
   }
 
   @Override
-  public Date getCreationDate() {
+  public Instant getCreationDate() {
     return created;
   }
 
   @Override
-  public Date getUpdateDate() {
+  public Instant getUpdateDate() {
     return updated;
   }
 

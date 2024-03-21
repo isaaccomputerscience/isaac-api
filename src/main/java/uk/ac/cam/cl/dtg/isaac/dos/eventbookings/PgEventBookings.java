@@ -29,7 +29,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +54,76 @@ import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
  */
 public class PgEventBookings implements EventBookings {
   private static final Logger log = LoggerFactory.getLogger(PgEventBookings.class);
+
+  // Field Constants
+  // add
+  private static final int FIELD_ADD_BOOKING_USER_ID = 1;
+  private static final int FIELD_ADD_BOOKING_RESERVED_BY = 2;
+  private static final int FIELD_ADD_BOOKING_EVENT_ID = 3;
+  private static final int FIELD_ADD_BOOKING_STATUS = 4;
+  private static final int FIELD_ADD_BOOKING_CREATED = 5;
+  private static final int FIELD_ADD_BOOKING_UPDATED = 6;
+  private static final int FIELD_ADD_BOOKING_ADDITIONAL_INFORMATION = 7;
+
+  // updateBookingStatus - common fields
+  private static final int FIELD_UPDATE_BOOKING_STATUS = 1;
+  private static final int FIELD_UPDATE_BOOKING_UPDATED = 2;
+
+  // updateBookingStatus - both additional information and reserving user
+  private static final int FIELD_UPDATE_BOOKING_BOTH_ADDITIONAL_INFORMATION = 3;
+  private static final int FIELD_UPDATE_BOOKING_BOTH_RESERVED_BY = 4;
+  private static final int FIELD_UPDATE_BOOKING_BOTH_EVENT_ID = 5;
+  private static final int FIELD_UPDATE_BOOKING_BOTH_USER_ID = 6;
+
+  // updateBookingStatus - one of additional information or reserving user
+  private static final int FIELD_UPDATE_BOOKING_SINGLE_ADDITIONAL_INFORMATION = 3;
+  private static final int FIELD_UPDATE_BOOKING_SINGLE_RESERVED_BY = 3;
+  private static final int FIELD_UPDATE_BOOKING_SINGLE_EVENT_ID = 4;
+  private static final int FIELD_UPDATE_BOOKING_SINGLE_USER_ID = 5;
+
+  // updateBookingStatus - neither additional information nor reserving user
+  private static final int FIELD_UPDATE_BOOKING_NONE_EVENT_ID = 3;
+  private static final int FIELD_UPDATE_BOOKING_NONE_USER_ID = 4;
+
+  // delete
+  private static final int FIELD_DELETE_EVENT_ID = 1;
+  private static final int FIELD_DELETE_USER_ID = 2;
+
+  // deleteAdditionalInformation
+  private static final int FIELD_DELETE_ADDITIONAL_INFORMATION_USER_ID = 1;
+
+  // lockEventUntilTransactionComplete
+  private static final int FIELD_TRANSACTION_LOCK_CRC = 1;
+
+  // findBookingById
+  private static final int FIELD_GET_BY_ID_BOOKING_ID = 1;
+
+  // findBookingByEventAndUser
+  private static final int FIELD_GET_BY_EVENT_AND_USER_EVENT_ID = 1;
+  private static final int FIELD_GET_BY_EVENT_AND_USER_USER_ID = 2;
+
+  // getEventBookingStatusCounts
+  private static final int FIELD_GET_STATUS_COUNTS_EVENT_ID = 1;
+
+  // findAllByEventIdAndStatus
+  private static final int FIELD_SGET_BY_EVENT_AND_STATUS_EVENT_ID = 1;
+  private static final int FIELD_SGET_BY_EVENT_AND_STATUS_STATUS = 2;
+
+  // findAllByUserId
+  private static final int FIELD_GET_BY_USER_ID_USER_ID = 1;
+
+  // findAllReservationsByUserId
+  private static final int FIELD_GET_RESERVATIONS_BY_USER_ID_RESERVED_BY = 1;
+
+  // Exception Message Strings
+  private static final String EXCEPTION_MESSAGE_INCORRECT_TRANSACTION_TYPE =
+      "Incorrect database transaction class type!";
+  private static final String EXCEPTION_MESSAGE_POSTGRES_ERROR = "Postgres exception";
+  private static final String EXCEPTION_MESSAGE_UNABLE_TO_STRINGIFY_JSON =
+      "Unable to convert json to string for persistence.";
+  private static final String EXCEPTION_MESSAGE_UNABLE_TO_UPDATE_BOOKING = "Could not update the requested booking.";
+  private static final String EXCEPTION_MESSAGE_POSTGRES_ERROR_DURING_BOOKING_UPDATE =
+      "Postgres exception while trying to update event booking";
   private final PostgresSqlDb ds;
 
   private final ObjectMapper objectMapper;
@@ -93,7 +165,7 @@ public class PgEventBookings implements EventBookings {
         + " additional_booking_information) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?::text::jsonb)";
     Connection conn = transaction.getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-      Date creationDate = new Date();
+      Instant creationDate = Instant.now();
       pst.setLong(FIELD_ADD_BOOKING_USER_ID, userId);
       if (reserveById == null) {
         pst.setNull(FIELD_ADD_BOOKING_RESERVED_BY, Types.INTEGER);
@@ -102,8 +174,8 @@ public class PgEventBookings implements EventBookings {
       }
       pst.setString(FIELD_ADD_BOOKING_EVENT_ID, eventId);
       pst.setString(FIELD_ADD_BOOKING_STATUS, status.name());
-      pst.setTimestamp(FIELD_ADD_BOOKING_CREATED, new java.sql.Timestamp(creationDate.getTime()));
-      pst.setTimestamp(FIELD_ADD_BOOKING_UPDATED, new java.sql.Timestamp(creationDate.getTime()));
+      pst.setTimestamp(FIELD_ADD_BOOKING_CREATED, Timestamp.from(creationDate));
+      pst.setTimestamp(FIELD_ADD_BOOKING_UPDATED, Timestamp.from(creationDate));
       pst.setString(FIELD_ADD_BOOKING_ADDITIONAL_INFORMATION,
           objectMapper.writeValueAsString(additionalEventInformation));
       if (pst.executeUpdate() == 0) {
@@ -610,69 +682,9 @@ public class PgEventBookings implements EventBookings {
         results.getLong("reserved_by"),
         results.getString("event_id"),
         BookingStatus.valueOf(results.getString("status")),
-        results.getTimestamp("created"),
-        results.getTimestamp("updated"),
+        results.getTimestamp("created").toInstant(),
+        results.getTimestamp("updated").toInstant(),
         results.getObject("additional_booking_information")
     );
   }
-
-  // Field Constants
-  // add
-  private static final int FIELD_ADD_BOOKING_USER_ID = 1;
-  private static final int FIELD_ADD_BOOKING_RESERVED_BY = 2;
-  private static final int FIELD_ADD_BOOKING_EVENT_ID = 3;
-  private static final int FIELD_ADD_BOOKING_STATUS = 4;
-  private static final int FIELD_ADD_BOOKING_CREATED = 5;
-  private static final int FIELD_ADD_BOOKING_UPDATED = 6;
-  private static final int FIELD_ADD_BOOKING_ADDITIONAL_INFORMATION = 7;
-
-  // updateBookingStatus - common fields
-  private static final int FIELD_UPDATE_BOOKING_STATUS = 1;
-  private static final int FIELD_UPDATE_BOOKING_UPDATED = 2;
-
-  // updateBookingStatus - both additional information and reserving user
-  private static final int FIELD_UPDATE_BOOKING_BOTH_ADDITIONAL_INFORMATION = 3;
-  private static final int FIELD_UPDATE_BOOKING_BOTH_RESERVED_BY = 4;
-  private static final int FIELD_UPDATE_BOOKING_BOTH_EVENT_ID = 5;
-  private static final int FIELD_UPDATE_BOOKING_BOTH_USER_ID = 6;
-
-  // updateBookingStatus - one of additional information or reserving user
-  private static final int FIELD_UPDATE_BOOKING_SINGLE_ADDITIONAL_INFORMATION = 3;
-  private static final int FIELD_UPDATE_BOOKING_SINGLE_RESERVED_BY = 3;
-  private static final int FIELD_UPDATE_BOOKING_SINGLE_EVENT_ID = 4;
-  private static final int FIELD_UPDATE_BOOKING_SINGLE_USER_ID = 5;
-
-  // updateBookingStatus - neither additional information nor reserving user
-  private static final int FIELD_UPDATE_BOOKING_NONE_EVENT_ID = 3;
-  private static final int FIELD_UPDATE_BOOKING_NONE_USER_ID = 4;
-
-  // delete
-  private static final int FIELD_DELETE_EVENT_ID = 1;
-  private static final int FIELD_DELETE_USER_ID = 2;
-
-  // deleteAdditionalInformation
-  private static final int FIELD_DELETE_ADDITIONAL_INFORMATION_USER_ID = 1;
-
-  // lockEventUntilTransactionComplete
-  private static final int FIELD_TRANSACTION_LOCK_CRC = 1;
-
-  // findBookingById
-  private static final int FIELD_GET_BY_ID_BOOKING_ID = 1;
-
-  // findBookingByEventAndUser
-  private static final int FIELD_GET_BY_EVENT_AND_USER_EVENT_ID = 1;
-  private static final int FIELD_GET_BY_EVENT_AND_USER_USER_ID = 2;
-
-  // getEventBookingStatusCounts
-  private static final int FIELD_GET_STATUS_COUNTS_EVENT_ID = 1;
-
-  // findAllByEventIdAndStatus
-  private static final int FIELD_SGET_BY_EVENT_AND_STATUS_EVENT_ID = 1;
-  private static final int FIELD_SGET_BY_EVENT_AND_STATUS_STATUS = 2;
-
-  // findAllByUserId
-  private static final int FIELD_GET_BY_USER_ID_USER_ID = 1;
-
-  // findAllReservationsByUserId
-  private static final int FIELD_GET_RESERVATIONS_BY_USER_ID_RESERVED_BY = 1;
 }

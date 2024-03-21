@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.dtg.isaac.api.managers;
 
+import static java.time.ZoneOffset.UTC;
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
@@ -18,7 +19,9 @@ import com.google.api.client.util.Maps;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.Date;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +54,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  * EventBookingManagerTest.
  */
 class EventBookingManagerTest {
-  private static final Date someFutureDate = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
+  private static final Instant someFutureDate = Instant.now().plus(7L, ChronoUnit.DAYS);
   private EventBookingPersistenceManager dummyEventBookingPersistenceManager;
   private EmailManager dummyEmailManager;
   private UserAssociationManager dummyUserAssociationManager;
@@ -239,8 +242,7 @@ class EventBookingManagerTest {
     IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
 
     // old deadline
-    Date old = new Date();
-    old.setTime(958074310000L);
+    Instant old = Instant.ofEpochMilli(958074310000L);
     testEvent.setBookingDeadline(old);
 
     RegisteredUserDTO someUser = new RegisteredUserDTO();
@@ -1047,7 +1049,7 @@ class EventBookingManagerTest {
   }
 
   private static IsaacEventPageDTO prepareIsaacEventPageDto(
-      String eventId, Integer numberOfPlaces, Set<String> tags, Date date) {
+      String eventId, Integer numberOfPlaces, Set<String> tags, Instant date) {
     IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
     testEvent.setId(eventId);
     testEvent.setNumberOfPlaces(numberOfPlaces);

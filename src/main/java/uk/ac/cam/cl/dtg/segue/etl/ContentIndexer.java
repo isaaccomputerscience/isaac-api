@@ -1058,11 +1058,10 @@ public class ContentIndexer {
 
   private void registerContentProblemEventMissingOrInvalidEndDate(
       final Content content, final Map<Content, List<String>> indexProblemCache) {
-    if (content instanceof IsaacEventPage) {
-      IsaacEventPage eventPage = (IsaacEventPage) content;
+    if (content instanceof IsaacEventPage eventPage) {
       if (eventPage.getEndDate() == null) {
         this.registerContentProblem(content, "Event has no end date", indexProblemCache);
-      } else if (eventPage.getEndDate().before(eventPage.getDate())) {
+      } else if (eventPage.getEndDate().isBefore(eventPage.getDate())) {
         this.registerContentProblem(content, "Event has end date before start date", indexProblemCache);
       }
     }
@@ -1070,19 +1069,16 @@ public class ContentIndexer {
 
   private void registerContentProblemEmailTemplateMissingPainTextContentField(
       final Content content, final Map<Content, List<String>> indexProblemCache) {
-    if (content instanceof EmailTemplate) {
-      EmailTemplate emailTemplate = (EmailTemplate) content;
-      if (emailTemplate.getPlainTextContent() == null) {
-        this.registerContentProblem(content,
-            "Email template should always have plain text content field", indexProblemCache);
-      }
+    if (content instanceof EmailTemplate emailTemplate && (emailTemplate.getPlainTextContent() == null)) {
+      this.registerContentProblem(content,
+          "Email template should always have plain text content field", indexProblemCache);
+
     }
   }
 
   private void registerContentProblemsChoiceQuestionMissingChoicesOrAnswer(
       final Content content, final Map<Content, List<String>> indexProblemCache) {
-    if (content instanceof ChoiceQuestion && !(content.getType().equals("isaacQuestion"))) {
-      ChoiceQuestion question = (ChoiceQuestion) content;
+    if (content instanceof ChoiceQuestion question && !(content.getType().equals("isaacQuestion"))) {
 
       if (question.getChoices() == null || question.getChoices().isEmpty()) {
         registerContentProblemChoiceQuestionMissingChoices(indexProblemCache, question);
