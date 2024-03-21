@@ -19,6 +19,7 @@ package uk.ac.cam.cl.dtg.isaac.dao;
 import static java.util.Objects.requireNonNull;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.QUESTION_TYPE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
+import static uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager.getInstantFromTimestamp;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -502,7 +503,7 @@ public class GameboardPersistenceManager {
         while (results.next()) {
           GameboardDO gameboard = this.convertFromSQLToGameboardDO(results);
           listOfResults.add(gameboard);
-          lastVisitedDate.put(gameboard.getId(), results.getTimestamp("last_visited").toInstant());
+          lastVisitedDate.put(gameboard.getId(), getInstantFromTimestamp(results, "last_visited"));
         }
       }
     } catch (SQLException | IOException e) {
@@ -895,7 +896,7 @@ public class GameboardPersistenceManager {
       gameboardDO.setCreationMethod(GameboardCreationMethod.valueOf(results.getString("creation_method")));
     }
 
-    gameboardDO.setCreationDate(results.getTimestamp("creation_date").toInstant());
+    gameboardDO.setCreationDate(getInstantFromTimestamp(results, "creation_date"));
     return gameboardDO;
   }
 

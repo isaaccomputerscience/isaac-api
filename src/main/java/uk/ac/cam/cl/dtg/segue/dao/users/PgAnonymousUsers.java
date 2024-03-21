@@ -17,6 +17,7 @@
 package uk.ac.cam.cl.dtg.segue.dao.users;
 
 import static java.util.Objects.requireNonNull;
+import static uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager.getInstantFromTimestamp;
 
 import com.google.inject.Inject;
 import java.sql.Connection;
@@ -98,8 +99,9 @@ public class PgAnonymousUsers implements IAnonymousUserDataManager {
         }
         result.next();
 
-        AnonymousUser userToReturn = new AnonymousUser(result.getString("id"),
-            result.getTimestamp("created").toInstant(), result.getTimestamp("last_updated").toInstant());
+        AnonymousUser userToReturn =
+            new AnonymousUser(result.getString("id"), getInstantFromTimestamp(result, "created"),
+                getInstantFromTimestamp(result, "last_updated"));
         updateLastUpdatedDate(userToReturn);
 
         return userToReturn;

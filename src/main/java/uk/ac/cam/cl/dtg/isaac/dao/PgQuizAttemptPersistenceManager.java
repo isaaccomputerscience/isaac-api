@@ -16,6 +16,8 @@
 
 package uk.ac.cam.cl.dtg.isaac.dao;
 
+import static uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager.getInstantFromTimestamp;
+
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import com.google.api.client.util.Sets;
@@ -314,12 +316,8 @@ public class PgQuizAttemptPersistenceManager implements IQuizAttemptPersistenceM
       quizAssignmentId = null;
     }
 
-    Instant startDate = sqlResults.getTimestamp("start_date").toInstant();
-
-    Instant completedDate = null;
-    if (sqlResults.getTimestamp("completed_date") != null) {
-      completedDate = sqlResults.getTimestamp("completed_date").toInstant();
-    }
+    Instant startDate = getInstantFromTimestamp(sqlResults, "start_date");
+    Instant completedDate = getInstantFromTimestamp(sqlResults, "completed_date");
 
     return new QuizAttemptDO(sqlResults.getLong("id"), sqlResults.getLong("user_id"), sqlResults.getString("quiz_id"),
         quizAssignmentId, startDate, completedDate);

@@ -17,6 +17,7 @@
 package uk.ac.cam.cl.dtg.isaac.dos.eventbookings;
 
 import static java.util.Objects.requireNonNull;
+import static uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager.getInstantFromTimestamp;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -682,8 +683,8 @@ public class PgEventBookings implements EventBookings {
         results.getLong("reserved_by"),
         results.getString("event_id"),
         BookingStatus.valueOf(results.getString("status")),
-        results.getTimestamp("created").toInstant(),
-        results.getTimestamp("updated").toInstant(),
+        getInstantFromTimestamp(results, "created"),
+        getInstantFromTimestamp(results, "updated"),
         results.getObject("additional_booking_information")
     );
   }

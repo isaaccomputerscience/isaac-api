@@ -194,9 +194,9 @@ public class PgPasswordDataManager extends AbstractPgDataManager implements IPas
     toReturn.setSecurityScheme(results.getString("security_scheme"));
     toReturn.setSecureSalt(results.getString("secure_salt"));
     toReturn.setResetToken(results.getString("reset_token"));
-    toReturn.setResetExpiry(results.getTimestamp("reset_expiry").toInstant());
-    toReturn.setCreated(results.getTimestamp("created").toInstant());
-    toReturn.setLastUpdated(results.getTimestamp("last_updated").toInstant());
+    toReturn.setResetExpiry(getInstantFromTimestamp(results, "reset_expiry"));
+    toReturn.setCreated(getInstantFromTimestamp(results, "created"));
+    toReturn.setLastUpdated(getInstantFromTimestamp(results, "last_updated"));
     return toReturn;
   }
 

@@ -19,6 +19,7 @@ package uk.ac.cam.cl.dtg.segue.dao;
 import static java.util.Objects.requireNonNull;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.ALL_ACCEPTED_LOG_TYPES;
 import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.LOG_EVENT;
+import static uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager.getInstantFromDate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -267,7 +268,7 @@ public class PgLogManager implements ILogManager {
         Map<String, Instant> resultToReturn = Maps.newHashMap();
 
         while (results.next()) {
-          resultToReturn.put(results.getString("user_id"), results.getDate("timestamp").toInstant());
+          resultToReturn.put(results.getString("user_id"), getInstantFromDate(results, "timestamp"));
         }
 
         return resultToReturn;

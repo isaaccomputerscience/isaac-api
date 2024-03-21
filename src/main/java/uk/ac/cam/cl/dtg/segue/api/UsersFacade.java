@@ -27,6 +27,7 @@ import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.client.util.Maps;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -208,6 +209,7 @@ public class UsersFacade extends AbstractSegueFacade {
     String recaptchaToken;
     try {
       ObjectMapper tmpObjectMapper = new ObjectMapper();
+      tmpObjectMapper.registerModule(new JavaTimeModule());
       tmpObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
       // TODO: We need to change the way the frontend sends passwords to reduce complexity

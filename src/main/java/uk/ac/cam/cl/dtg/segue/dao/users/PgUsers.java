@@ -980,9 +980,9 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     u.setGivenName(results.getString("given_name"));
     u.setEmail(results.getString("email"));
     u.setRole(results.getString("role") != null ? Role.valueOf(results.getString("role")) : null);
-    u.setDateOfBirth(results.getDate("date_of_birth").toInstant());
+    u.setDateOfBirth(getInstantFromDate(results, "date_of_birth"));
     u.setGender(results.getString("gender") != null ? Gender.valueOf(results.getString("gender")) : null);
-    u.setRegistrationDate(results.getTimestamp("registration_date").toInstant());
+    u.setRegistrationDate(getInstantFromTimestamp(results, "registration_date"));
 
     u.setSchoolId(results.getString("school_id"));
     if (results.wasNull()) {
@@ -998,9 +998,9 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
       }
       u.setRegisteredContexts(userContexts);
     }
-    u.setRegisteredContextsLastConfirmed(results.getTimestamp("registered_contexts_last_confirmed").toInstant());
-    u.setLastUpdated(results.getTimestamp("last_updated").toInstant());
-    u.setLastSeen(results.getTimestamp("last_seen").toInstant());
+    u.setRegisteredContextsLastConfirmed(getInstantFromTimestamp(results, "registered_contexts_last_confirmed"));
+    u.setLastUpdated(getInstantFromTimestamp(results, "last_updated"));
+    u.setLastSeen(getInstantFromTimestamp(results, "last_seen"));
     u.setEmailToVerify(results.getString("email_to_verify"));
     u.setEmailVerificationToken(results.getString("email_verification_token"));
     u.setEmailVerificationStatus(results.getString("email_verification_status") != null ? EmailVerificationStatus

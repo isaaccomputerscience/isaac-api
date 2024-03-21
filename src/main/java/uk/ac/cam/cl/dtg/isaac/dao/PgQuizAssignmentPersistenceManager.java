@@ -16,6 +16,8 @@
 
 package uk.ac.cam.cl.dtg.isaac.dao;
 
+import static uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager.getInstantFromTimestamp;
+
 import com.google.api.client.util.Lists;
 import com.google.inject.Inject;
 import java.sql.Connection;
@@ -257,12 +259,9 @@ public class PgQuizAssignmentPersistenceManager implements IQuizAssignmentPersis
    * @throws SQLException if we cannot access a required field.
    */
   private QuizAssignmentDO convertFromSQLToQuizAssignmentDO(final ResultSet sqlResults) throws SQLException {
-    Instant preciseDate = sqlResults.getTimestamp("creation_date").toInstant();
+    Instant preciseDate = getInstantFromTimestamp(sqlResults, "creation_date");
 
-    Instant preciseDueDate = null;
-    if (sqlResults.getTimestamp("due_date") != null) {
-      preciseDueDate = sqlResults.getTimestamp("due_date").toInstant();
-    }
+    Instant preciseDueDate = getInstantFromTimestamp(sqlResults, "due_date");
 
     return new QuizAssignmentDO(sqlResults.getLong("id"), sqlResults.getString("quiz_id"),
         sqlResults.getLong("owner_user_id"), sqlResults.getLong("group_id"), preciseDate,

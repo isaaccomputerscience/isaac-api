@@ -18,6 +18,7 @@ package uk.ac.cam.cl.dtg.isaac.quiz;
 
 import static java.util.Objects.requireNonNull;
 import static uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager.extractPageIdFromQuestionId;
+import static uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager.getInstantFromTimestamp;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -488,7 +489,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
 
     partialQuestionAttempt.setCorrect(results.getBoolean("correct"));
     partialQuestionAttempt.setQuestionId(results.getString("question_id"));
-    partialQuestionAttempt.setDateAttempted(results.getTimestamp("timestamp").toInstant());
+    partialQuestionAttempt.setDateAttempted(getInstantFromTimestamp(results, "timestamp"));
 
     return partialQuestionAttempt;
   }

@@ -55,6 +55,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -1120,7 +1121,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
         }
 
         if (null != assignmentDTO.getScheduledStartDate()) {
-          Instant oneYearInFuture = Instant.now(clock).plus(1L, ChronoUnit.YEARS);
+          Instant oneYearInFuture = ZonedDateTime.now(clock).plusYears(1L).toInstant();
           if (assignmentDTO.getScheduledStartDate().isAfter(oneYearInFuture)) {
             assignmentStatuses.add(new AssignmentStatusDTO(assignmentDTO.getGroupId(),
                 "The assignment cannot be scheduled to begin more than one year in the future."));

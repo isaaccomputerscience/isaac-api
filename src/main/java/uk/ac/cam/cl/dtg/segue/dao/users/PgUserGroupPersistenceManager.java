@@ -17,6 +17,7 @@
 package uk.ac.cam.cl.dtg.segue.dao.users;
 
 import static java.util.Objects.requireNonNull;
+import static uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager.getInstantFromDate;
 
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Sets;
@@ -474,15 +475,15 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
    */
   private UserGroup buildGroup(final ResultSet set) throws SQLException {
     return new UserGroup(set.getLong("id"), set.getString("group_name"), set.getLong("owner_id"),
-        GroupStatus.valueOf(set.getString("group_status")), set.getDate("created").toInstant(),
+        GroupStatus.valueOf(set.getString("group_status")), getInstantFromDate(set, "created"),
         set.getBoolean("archived"), set.getBoolean("additional_manager_privileges"),
-        set.getDate("last_updated").toInstant());
+        getInstantFromDate(set, "last_updated"));
   }
 
   private GroupMembership buildMembershipRecord(final ResultSet set) throws SQLException {
     return new GroupMembership(set.getLong("group_id"), set.getLong("user_id"),
-        GroupMembershipStatus.valueOf(set.getString("status")), set.getDate("created").toInstant(),
-        set.getDate("updated").toInstant());
+        GroupMembershipStatus.valueOf(set.getString("status")), getInstantFromDate(set, "created"),
+        getInstantFromDate(set, "updated"));
   }
 
   private List<UserGroup> getGroupsBySQLPst(final String pstString, final Long userId,
