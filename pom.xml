@@ -665,7 +665,7 @@
                     <plugin>
                         <groupId>cz.habarta.typescript-generator</groupId>
                         <artifactId>typescript-generator-maven-plugin</artifactId>
-                        <version>2.12.476</version>
+                        <version>3.2.1263</version>
                         <executions>
                             <execution>
                                 <!-- This generates a type file for use in Isaac React App -->
