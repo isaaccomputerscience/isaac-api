@@ -635,7 +635,9 @@ public class QuestionManager {
 
       for (UserContext uc : userContexts) {
         stagesList.add(uc.getStage().name());
-        examBoardsList.add(uc.getExamBoard().name());
+        if (!filterQuestionsPreference.getPreferenceValue()) {
+          examBoardsList.add(uc.getExamBoard().name());
+        }
       }
 
       gameFilter = new GameFilter(
