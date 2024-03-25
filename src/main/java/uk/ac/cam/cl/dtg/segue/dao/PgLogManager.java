@@ -378,7 +378,7 @@ public class PgLogManager implements ILogManager {
 
         Map<Instant, Long> mapToReturn = Maps.newHashMap();
         while (results.next()) {
-          mapToReturn.put(Instant.from(formatter.parse(results.getString("to_char"))), results.getLong("count"));
+          mapToReturn.put(formatter.parse(results.getString("to_char"), Instant::from), results.getLong("count"));
         }
 
         return mapToReturn;

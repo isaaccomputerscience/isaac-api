@@ -472,7 +472,7 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
 
         Map<Instant, Long> mapToReturn = Maps.newHashMap();
         while (results.next()) {
-          mapToReturn.put(Instant.from(formatter.parse(results.getString("to_char"))), results.getLong("count"));
+          mapToReturn.put(formatter.parse(results.getString("to_char"), Instant::from), results.getLong("count"));
         }
         return mapToReturn;
       }

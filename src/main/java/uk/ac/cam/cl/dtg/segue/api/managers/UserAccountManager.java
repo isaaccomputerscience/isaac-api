@@ -49,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -921,7 +920,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @param request The request to extract the session information from
    * @return The session expiry as a Date
    */
-  public Date getSessionExpiry(final HttpServletRequest request) {
+  public Instant getSessionExpiry(final HttpServletRequest request) {
     return userAuthenticationManager.getSessionExpiry(request);
   }
 

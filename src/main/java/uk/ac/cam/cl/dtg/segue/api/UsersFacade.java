@@ -53,8 +53,8 @@ import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -162,11 +162,11 @@ public class UsersFacade extends AbstractSegueFacade {
     try {
       RegisteredUserDTO currentUser = userManager.getCurrentRegisteredUser(httpServletRequest);
 
-      Date sessionExpiry = userManager.getSessionExpiry(httpServletRequest);
+      Instant sessionExpiry = userManager.getSessionExpiry(httpServletRequest);
       int sessionExpiryHashCode = 0;
       if (null != sessionExpiry) {
         sessionExpiryHashCode = sessionExpiry.hashCode();
-        response.setDateHeader("X-Session-Expires", sessionExpiry.getTime());
+        response.setDateHeader("X-Session-Expires", sessionExpiry.toEpochMilli());
       }
 
       // Calculate the ETag based on the user we just retrieved and the session expiry:
