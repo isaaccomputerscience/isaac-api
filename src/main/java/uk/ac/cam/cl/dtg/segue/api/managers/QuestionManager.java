@@ -634,7 +634,9 @@ public class QuestionManager {
       List<String> examBoardsList = new ArrayList<>();
 
       for (UserContext uc : userContexts) {
-        stagesList.add(uc.getStage().name());
+        if (!filterQuestionsPreference.getPreferenceValue()) {
+          stagesList.add(uc.getStage().name());
+        }
         if (!filterQuestionsPreference.getPreferenceValue()) {
           examBoardsList.add(uc.getExamBoard().name());
         }
