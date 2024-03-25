@@ -15,7 +15,6 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -133,7 +132,7 @@ public class EventNotificationEmailManager {
     ZonedDateTime threeDaysAhead = now.plusDays(EMAIL_EVENT_REMINDER_DAYS_AHEAD);
     Instant endOfToday = now.with(LocalTime.MAX).toInstant();
     DateRangeFilterInstruction
-        eventsWithinThreeDays = new DateRangeFilterInstruction(new Date(), Date.from(threeDaysAhead.toInstant()));
+        eventsWithinThreeDays = new DateRangeFilterInstruction(Instant.now(), threeDaysAhead.toInstant());
     filterInstructions.put(DATE_FIELDNAME, eventsWithinThreeDays);
 
     try {
@@ -172,7 +171,7 @@ public class EventNotificationEmailManager {
     ZonedDateTime sixtyDaysAgo = now.plusDays(EMAIL_EVENT_FEEDBACK_DAYS_AGO);
 
     DateRangeFilterInstruction eventsInLastSixtyDays = new DateRangeFilterInstruction(
-        Date.from(sixtyDaysAgo.toInstant()), new Date());
+        sixtyDaysAgo.toInstant(), Instant.now());
     filterInstructions.put(DATE_FIELDNAME, eventsInLastSixtyDays);
 
     try {
@@ -181,17 +180,16 @@ public class EventNotificationEmailManager {
           sortInstructions,
           filterInstructions);
       for (ContentDTO contentResult : findByFieldNames.getResults()) {
-        if (contentResult instanceof IsaacEventPageDTO) {
-          IsaacEventPageDTO event = (IsaacEventPageDTO) contentResult;
+        if (contentResult instanceof IsaacEventPageDTO event) {
           // Skip sending emails for cancelled events
           if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
             continue;
           }
           // Event end date (if present) is today or before, else event date is today or before
           boolean endDateToday =
-              event.getEndDate() != null && event.getEndDate().isBefore(new Date().toInstant());
+              event.getEndDate() != null && event.getEndDate().isBefore(Instant.now());
           boolean noEndDateAndStartDateToday =
-              event.getEndDate() == null && event.getDate().isBefore(new Date().toInstant());
+              event.getEndDate() == null && event.getDate().isBefore(Instant.now());
           if (endDateToday || noEndDateAndStartDateToday) {
             List<ExternalReference> postResources = event.getPostResources();
             boolean postResourcesPresent =
