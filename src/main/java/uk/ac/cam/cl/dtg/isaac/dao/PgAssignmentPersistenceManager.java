@@ -30,7 +30,6 @@ import java.sql.Types;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -272,7 +271,7 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
   }
 
   @Override
-  public List<AssignmentDTO> getAssignmentsScheduledForHour(final Date timestamp) throws SegueDatabaseException {
+  public List<AssignmentDTO> getAssignmentsScheduledForHour(final Instant timestamp) throws SegueDatabaseException {
     if (null == timestamp) {
       throw new SegueDatabaseException("Parameter timestamp is null, cannot search for scheduled assignments!");
     }
@@ -282,8 +281,8 @@ public class PgAssignmentPersistenceManager implements IAssignmentPersistenceMan
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query)
     ) {
-      pst.setTimestamp(FIELD_GET_SCHEDULED_FOR_HOUR_FIRST_TIMESTAMP, new java.sql.Timestamp(timestamp.getTime()));
-      pst.setTimestamp(FIELD_GET_SCHEDULED_FOR_HOUR_SECOND_TIMESTAMP, new java.sql.Timestamp(timestamp.getTime()));
+      pst.setTimestamp(FIELD_GET_SCHEDULED_FOR_HOUR_FIRST_TIMESTAMP, Timestamp.from(timestamp));
+      pst.setTimestamp(FIELD_GET_SCHEDULED_FOR_HOUR_SECOND_TIMESTAMP, Timestamp.from(timestamp));
 
       try (ResultSet results = pst.executeQuery()) {
         List<AssignmentDTO> listOfResults = Lists.newArrayList();

@@ -33,7 +33,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -241,7 +240,7 @@ public class PgEventBookings implements EventBookings {
     Connection conn = ((PgTransaction) transaction).getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_UPDATE_BOOKING_STATUS, status.name());
-      pst.setTimestamp(FIELD_UPDATE_BOOKING_UPDATED, new java.sql.Timestamp(new Date().getTime()));
+      pst.setTimestamp(FIELD_UPDATE_BOOKING_UPDATED, Timestamp.from(Instant.now()));
       pst.setString(FIELD_UPDATE_BOOKING_BOTH_ADDITIONAL_INFORMATION,
           objectMapper.writeValueAsString(additionalEventInformation));
       pst.setLong(FIELD_UPDATE_BOOKING_BOTH_RESERVED_BY, reservingUserId);
@@ -282,7 +281,7 @@ public class PgEventBookings implements EventBookings {
     Connection conn = ((PgTransaction) transaction).getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_UPDATE_BOOKING_STATUS, status.name());
-      pst.setTimestamp(FIELD_UPDATE_BOOKING_UPDATED, new java.sql.Timestamp(new Date().getTime()));
+      pst.setTimestamp(FIELD_UPDATE_BOOKING_UPDATED, Timestamp.from(Instant.now()));
       pst.setLong(FIELD_UPDATE_BOOKING_SINGLE_RESERVED_BY, reservingUserId);
       pst.setString(FIELD_UPDATE_BOOKING_SINGLE_EVENT_ID, eventId);
       pst.setLong(FIELD_UPDATE_BOOKING_SINGLE_USER_ID, userId);
@@ -320,7 +319,7 @@ public class PgEventBookings implements EventBookings {
     Connection conn = ((PgTransaction) transaction).getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_UPDATE_BOOKING_STATUS, status.name());
-      pst.setTimestamp(FIELD_UPDATE_BOOKING_UPDATED, new java.sql.Timestamp(new Date().getTime()));
+      pst.setTimestamp(FIELD_UPDATE_BOOKING_UPDATED, Timestamp.from(Instant.now()));
       pst.setString(FIELD_UPDATE_BOOKING_SINGLE_ADDITIONAL_INFORMATION,
           objectMapper.writeValueAsString(additionalEventInformation));
       pst.setString(FIELD_UPDATE_BOOKING_SINGLE_EVENT_ID, eventId);
@@ -358,7 +357,7 @@ public class PgEventBookings implements EventBookings {
     Connection conn = ((PgTransaction) transaction).getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query)) {
       pst.setString(FIELD_UPDATE_BOOKING_STATUS, status.name());
-      pst.setTimestamp(FIELD_UPDATE_BOOKING_UPDATED, new java.sql.Timestamp(new Date().getTime()));
+      pst.setTimestamp(FIELD_UPDATE_BOOKING_UPDATED, Timestamp.from(Instant.now()));
       pst.setString(FIELD_UPDATE_BOOKING_NONE_EVENT_ID, eventId);
       pst.setLong(FIELD_UPDATE_BOOKING_NONE_USER_ID, userId);
 

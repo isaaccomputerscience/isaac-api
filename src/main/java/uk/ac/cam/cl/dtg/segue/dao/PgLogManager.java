@@ -40,7 +40,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -308,8 +307,8 @@ public class PgLogManager implements ILogManager {
    */
   private LogEvent buildPgLogEventFromPgResult(final ResultSet results) throws SQLException {
     return new LogEvent(results.getString("event_type"), results.getString("event_details_type"),
-        results.getObject("event_details"), results.getString("user_id"),
-        results.getBoolean("anonymous_user"), results.getString("user_id"), results.getDate("timestamp"));
+        results.getObject("event_details"), results.getString("user_id"), results.getBoolean("anonymous_user"),
+        results.getString("user_id"), getInstantFromDate(results, "timestamp"));
   }
 
   /**
@@ -509,7 +508,7 @@ public class PgLogManager implements ILogManager {
       pst.setString(FIELD_PERSIST_LOG_EVENT_EVENT_DETAILS_TYPE, logEvent.getEventDetailsType());
       pst.setString(FIELD_PERSIST_LOG_EVENT_EVENT_DETAILS, objectMapper.writeValueAsString(logEvent.getEventDetails()));
       pst.setString(FIELD_PERSIST_LOG_EVENT_IP_ADDRESS, logEvent.getIpAddress());
-      pst.setTimestamp(FIELD_PERSIST_LOG_EVENT_TIMESTAMP, new java.sql.Timestamp(new Date().getTime()));
+      pst.setTimestamp(FIELD_PERSIST_LOG_EVENT_TIMESTAMP, Timestamp.from(Instant.now()));
 
       if (pst.executeUpdate() == 0) {
         throw new SegueDatabaseException("Unable to save user.");
@@ -570,7 +569,7 @@ public class PgLogManager implements ILogManager {
       logEvent.setIpAddress(ipAddress.split(",")[0]);
     }
 
-    logEvent.setTimestamp(new Date());
+    logEvent.setTimestamp(Instant.now());
 
     return logEvent;
   }

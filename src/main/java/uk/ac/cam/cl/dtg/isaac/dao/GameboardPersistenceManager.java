@@ -43,7 +43,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -429,8 +428,8 @@ public class GameboardPersistenceManager {
     ) {
       pst.setLong(FIELD_LINK_USER_USER_ID, userId);
       pst.setString(FIELD_LINK_USER_GAMEBOARD_ID, gameboardId);
-      pst.setTimestamp(FIELD_LINK_USER_CREATED, new Timestamp(new Date().getTime()));
-      pst.setTimestamp(FIELD_LINK_USER_LAST_VISITED, new Timestamp(new Date().getTime()));
+      pst.setTimestamp(FIELD_LINK_USER_CREATED, Timestamp.from(Instant.now()));
+      pst.setTimestamp(FIELD_LINK_USER_LAST_VISITED, Timestamp.from(Instant.now()));
 
       log.debug("Saving gameboard to user relationship...");
       int affectedRows = pst.executeUpdate();

@@ -33,17 +33,16 @@ import com.google.api.client.util.Sets;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import jakarta.annotation.Nullable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.EnumUtils;
@@ -82,7 +81,8 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
 
   private static final Logger log = LoggerFactory.getLogger(EmailManager.class);
   private static final int MINIMUM_TAG_LENGTH = 4;
-  private static final DateFormat FULL_DATE_FORMAT = new SimpleDateFormat("EEE d MMM yyyy h:mm aaa");
+  private static final DateTimeFormatter FULL_DATE_FORMAT =
+      DateTimeFormatter.ofPattern("EEE d MMM yyyy h:mm a").withZone(ZoneId.of(DEFAULT_TIME_LOCALITY));
 
   /**
    * @param communicator          class we'll use to send the actual email.
@@ -103,8 +103,6 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     this.contentManager = contentManager;
     this.logManager = logManager;
     this.globalStringTokens = globalStringTokens;
-
-    FULL_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone(DEFAULT_TIME_LOCALITY));
   }
 
   @Override
@@ -463,8 +461,8 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
       valueToStore = "";
     } else if (o instanceof String) {
       valueToStore = (String) o;
-    } else if (o instanceof Date) {
-      valueToStore = FULL_DATE_FORMAT.format((Date) o);
+    } else if (o instanceof Instant) {
+      valueToStore = FULL_DATE_FORMAT.format((Instant) o);
     } else if (o instanceof Number || o instanceof Boolean) {
       valueToStore = o.toString();
     } else if (o instanceof Enum) {

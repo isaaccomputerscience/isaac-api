@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -101,7 +101,7 @@ class ContentIndexerTest {
     Map<String, String> someUnitsMapRaw = Map.of("cleanKey", "N", "unit", "N");
     Map<String, String> someUnitsMapRaw2 = Map.of("cleanKey", "km", "unit", "km");
 
-    Date someCreatedDate = new Date();
+    Instant someCreatedDate = Instant.now();
     Map<String, String> versionMeta = Map.of("version", INITIAL_VERSION, "created", someCreatedDate.toString());
     Map<String, Set<String>> tagsMeta = Map.of("tags", someTagsList);
 

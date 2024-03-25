@@ -32,7 +32,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -152,8 +151,8 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
       pst.setLong(FIELD_ADD_USER_GROUP_ID, groupId);
       pst.setLong(FIELD_ADD_USER_USER_ID, userId);
       pst.setString(FIELD_ADD_USER_MEMBERSHIP_STATUS, GroupMembershipStatus.ACTIVE.name());
-      pst.setTimestamp(FIELD_ADD_USER_CREATED, new Timestamp(new Date().getTime()));
-      pst.setTimestamp(FIELD_ADD_USER_UPDATED, new Timestamp(new Date().getTime()));
+      pst.setTimestamp(FIELD_ADD_USER_CREATED, Timestamp.from(Instant.now()));
+      pst.setTimestamp(FIELD_ADD_USER_UPDATED, Timestamp.from(Instant.now()));
 
       int affectedRows = pst.executeUpdate();
 
@@ -174,7 +173,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
          PreparedStatement pst = conn.prepareStatement(query)
     ) {
       pst.setString(FIELD_SET_MEMBERSHIP_STATUS_MEMBERSHIP_STATUS, newStatus.name());
-      pst.setTimestamp(FIELD_SET_MEMBERSHIP_STATUS_UPDATED, new Timestamp(new Date().getTime()));
+      pst.setTimestamp(FIELD_SET_MEMBERSHIP_STATUS_UPDATED, Timestamp.from(Instant.now()));
       pst.setLong(FIELD_SET_MEMBERSHIP_STATUS_USER_ID, userId);
       pst.setLong(FIELD_SET_MEMBERSHIP_STATUS_GROUP_ID, groupId);
 
@@ -438,7 +437,7 @@ public class PgUserGroupPersistenceManager implements IUserGroupPersistenceManag
     ) {
       pst.setLong(FIELD_ADD_ADDITIONAL_MANAGER_GROUP_ID, groupId);
       pst.setLong(FIELD_ADD_ADDITIONAL_MANAGER_USER_ID, userId);
-      pst.setTimestamp(FIELD_ADD_ADDITIONAL_MANAGER_CREATED, new Timestamp(new Date().getTime()));
+      pst.setTimestamp(FIELD_ADD_ADDITIONAL_MANAGER_CREATED, Timestamp.from(Instant.now()));
 
       int affectedRows = pst.executeUpdate();
 

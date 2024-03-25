@@ -21,9 +21,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -677,7 +677,7 @@ public class ContentIndexer {
 
     try {
       es.indexObject(sha, ContentIndextype.METADATA.toString(),
-          objectMapper.writeValueAsString(Map.of("version", sha, "created", new Date().toString())), "general");
+          objectMapper.writeValueAsString(Map.of("version", sha, "created", Instant.now().toString())), "general");
       es.indexObject(sha, ContentIndextype.METADATA.toString(),
           objectMapper.writeValueAsString(Map.of("tags", tagsList)), "tags");
 
