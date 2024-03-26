@@ -1,5 +1,7 @@
 package uk.ac.cam.cl.dtg.isaac.dos;
 
+import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getBasicObjectMapper;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -23,7 +25,7 @@ public class PgUserStreakManager implements IUserStreaksManager {
   private static final String CURRENT_STREAK = "currentStreak";
 
   private final PostgresSqlDb database;
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = getBasicObjectMapper();
 
   /**
    * PgUserStreakManager.

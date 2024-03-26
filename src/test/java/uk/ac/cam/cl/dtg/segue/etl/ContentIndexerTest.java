@@ -114,7 +114,7 @@ class ContentIndexerTest {
 
     // prepare pre-canned responses for the object mapper
     ObjectMapper objectMapper = createMock(ObjectMapper.class);
-    expect(contentMapperUtils.generateNewPreconfiguredContentMapper()).andReturn(objectMapper)
+    expect(contentMapperUtils.getSharedContentObjectMapper()).andReturn(objectMapper)
         .once();
     expect(objectMapper.writeValueAsString(content)).andReturn(
         uniqueObjectHash).once();

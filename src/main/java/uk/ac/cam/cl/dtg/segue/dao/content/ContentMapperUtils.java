@@ -61,6 +61,7 @@ public class ContentMapperUtils {
   private final Map<String, Class<? extends Content>> jsonTypes;
   private final Map<Class<? extends Content>, Class<? extends ContentDTO>> mapOfDOsToDTOs;
 
+  private static ObjectMapper basicObjectMapper;
   private static ObjectMapper preconfiguredObjectMapper;
 
   /**
@@ -247,6 +248,17 @@ public class ContentMapperUtils {
     }
 
     return resultList;
+  }
+
+  /**
+   * Get an ObjectMapper with the JavaTimeModule enabled, as 'java.time' types are not supported by default.
+   */
+  public static ObjectMapper getBasicObjectMapper() {
+    if (ContentMapperUtils.basicObjectMapper != null) {
+      return basicObjectMapper;
+    }
+    basicObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    return basicObjectMapper;
   }
 
   /**

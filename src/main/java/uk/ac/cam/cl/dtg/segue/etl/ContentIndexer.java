@@ -661,7 +661,7 @@ public class ContentIndexer {
     // setup object mapper to use pre-configured deserializer module.
     // Required to deal with type polymorphism
     List<Map.Entry<String, String>> contentToIndex = Lists.newArrayList();
-    ObjectMapper objectMapper = mapperUtils.generateNewPreconfiguredContentMapper();
+    ObjectMapper objectMapper = mapperUtils.getSharedContentObjectMapper();
     for (Content content : gitCache.values()) {
       try {
         contentToIndex.add(immutableEntry(content.getId(), objectMapper.writeValueAsString(content)));
