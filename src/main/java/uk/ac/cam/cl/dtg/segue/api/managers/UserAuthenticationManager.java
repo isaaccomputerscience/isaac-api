@@ -37,7 +37,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_EXPIRY_SECONDS_FALLBA
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_TOKEN;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_USER_ID;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.STATE_PARAM_NAME;
-import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getBasicObjectMapper;
+import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getSharedBasicObjectMapper;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -146,7 +146,7 @@ public class UserAuthenticationManager {
     this.registeredAuthProviders = providersToRegister;
 
     this.emailManager = emailQueue;
-    this.serializationMapper = getBasicObjectMapper();
+    this.serializationMapper = getSharedBasicObjectMapper();
     boolean isProduction = properties.getProperty(Constants.SEGUE_APP_ENVIRONMENT).equals(EnvironmentType.PROD.name());
     this.checkOriginHeader = isProduction;
     this.setSecureCookies = isProduction;

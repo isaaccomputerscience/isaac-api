@@ -2,14 +2,13 @@ package uk.ac.cam.cl.dtg;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getSharedBasicObjectMapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class CustomAssertions {
-  private static final ObjectMapper jsonMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
+  private static final ObjectMapper jsonMapper = getSharedBasicObjectMapper();
 
   public static void assertDeepEquals(Object expected, Object actual) {
     try {

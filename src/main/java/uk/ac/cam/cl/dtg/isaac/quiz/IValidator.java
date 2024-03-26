@@ -17,7 +17,7 @@
 package uk.ac.cam.cl.dtg.isaac.quiz;
 
 
-import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getBasicObjectMapper;
+import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getSharedBasicObjectMapper;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -96,7 +96,7 @@ public interface IValidator {
                                                                    final Map<String, String> requestBody)
       throws IOException {
     // This is ridiculous. All we want to do is pass some JSON to a REST endpoint and get some JSON back.
-    ObjectMapper mapper = getBasicObjectMapper();
+    ObjectMapper mapper = getSharedBasicObjectMapper();
     StringWriter sw = new StringWriter();
     JsonGenerator g = new JsonFactory().createGenerator(sw);
     mapper.writeValue(g, requestBody);

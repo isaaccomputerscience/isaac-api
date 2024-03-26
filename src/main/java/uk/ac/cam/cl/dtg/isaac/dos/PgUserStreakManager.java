@@ -1,6 +1,6 @@
 package uk.ac.cam.cl.dtg.isaac.dos;
 
-import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getBasicObjectMapper;
+import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getSharedBasicObjectMapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +25,7 @@ public class PgUserStreakManager implements IUserStreaksManager {
   private static final String CURRENT_STREAK = "currentStreak";
 
   private final PostgresSqlDb database;
-  private final ObjectMapper objectMapper = getBasicObjectMapper();
+  private final ObjectMapper objectMapper = getSharedBasicObjectMapper();
 
   /**
    * PgUserStreakManager.

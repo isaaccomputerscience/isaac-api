@@ -16,7 +16,7 @@
 
 package uk.ac.cam.cl.dtg.isaac.dos.eventbookings;
 
-import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getBasicObjectMapper;
+import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getSharedBasicObjectMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -113,7 +113,7 @@ public class PgEventBooking implements EventBooking {
   }
 
   private Map<String, String> convertFromJsonbToMap(final Object objectToConvert) throws IOException {
-    ObjectMapper mapper = getBasicObjectMapper();
+    ObjectMapper mapper = getSharedBasicObjectMapper();
     final String stringVersion = mapper.writeValueAsString(objectToConvert);
     Map<String, String> interimResult = mapper.readValue(stringVersion, HashMap.class);
 

@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_EXPIRY_SECONDS_FALLBACK;
+import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getSharedBasicObjectMapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -723,7 +724,7 @@ class UserManagerTest {
   }
 
   private Cookie[] getCookieArray(Map<String, String> sessionInformation) throws JsonProcessingException {
-    ObjectMapper om = new ObjectMapper();
+    ObjectMapper om = getSharedBasicObjectMapper();
     Cookie[] cookieWithSessionInfo = {new Cookie(Constants.SEGUE_AUTH_COOKIE,
         Base64.encodeBase64String(om.writeValueAsString(sessionInformation).getBytes()))};
     return cookieWithSessionInfo;

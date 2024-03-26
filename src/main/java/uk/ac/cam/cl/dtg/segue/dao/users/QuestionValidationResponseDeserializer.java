@@ -16,7 +16,7 @@
 
 package uk.ac.cam.cl.dtg.segue.dao.users;
 
-import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getBasicObjectMapper;
+import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getSharedBasicObjectMapper;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import uk.ac.cam.cl.dtg.isaac.dos.ItemValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dos.QuantityValidationResponse;
@@ -60,6 +61,7 @@ public class QuestionValidationResponseDeserializer extends JsonDeserializer<Que
       contentDeserializerModule.addDeserializer(Choice.class, choiceDeserializer);
 
       mapper = new ObjectMapper();
+      mapper.registerModule(new JavaTimeModule());
       mapper.registerModule(contentDeserializerModule);
     }
   }
@@ -77,7 +79,7 @@ public class QuestionValidationResponseDeserializer extends JsonDeserializer<Que
     }
 
     // Have to get the raw json out otherwise we dates do not serialize properly.
-    String jsonString = getBasicObjectMapper().writeValueAsString(root);
+    String jsonString = getSharedBasicObjectMapper().writeValueAsString(root);
     String questionResponseType = root.get("answer").get("type").textValue();
     if (questionResponseType.equals("quantity")) {
       return mapper.readValue(jsonString, QuantityValidationResponse.class);
