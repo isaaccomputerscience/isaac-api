@@ -156,7 +156,7 @@ public class AssignmentFacade extends AbstractIsaacFacade {
     this.userBadgeManager = userBadgeManager;
     this.assignmentService = assignmentService;
     this.clock = clock;
-    this.dateFormat = DateTimeFormatter.ofPattern("EEE dd MMM yyyy HH:mm:ss z").withZone(UTC);
+    this.dateFormat = DateTimeFormatter.ofPattern("EEE dd MMM yyyy HH:mm:ss 'UTC'").withZone(UTC);
   }
 
   /**
