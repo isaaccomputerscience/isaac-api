@@ -27,6 +27,7 @@ import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.QUEUED_EMAIL;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseInternalLogValue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import com.google.api.client.util.Sets;
@@ -425,7 +426,7 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
         outputMap.putAll(temp);
 
         // now convert any java types we haven't defined specific conversions for into the basic Jackson serialisations.
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
         this.flattenTokenMap(om.convertValue(mapEntry.getValue(), HashMap.class),
             outputMap, keyPrefix + mapEntry.getKey() + ".");
 
