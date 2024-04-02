@@ -650,8 +650,8 @@ public class EventBookingManager {
 
       BookingStatus existingBookingStatus = this.getBookingStatus(event.getId(), user.getId());
       // attempt to book them on the waiting list of the event.
-      if (List.of(BookingStatus.CONFIRMED, BookingStatus.WAITING_LIST, BookingStatus.RESERVED)
-          .contains(existingBookingStatus)) {
+      if (existingBookingStatus != null && List.of(BookingStatus.CONFIRMED, BookingStatus.WAITING_LIST,
+          BookingStatus.RESERVED).contains(existingBookingStatus)) {
         throw new DuplicateBookingException(String.format("Unable to add to event (%s) waiting list as user (%s) is"
             + " already on it, reserved or booked.", event.getId(), user.getEmail()));
       } else if (BookingStatus.CANCELLED.equals(existingBookingStatus)) {
