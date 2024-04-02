@@ -432,18 +432,32 @@ public class EventBookingManager {
       // attempt to book them on the event
       BookingStatus existingBookingStatus = this.getBookingStatus(event.getId(), user.getId());
 
-      if (BookingStatus.CONFIRMED.equals(existingBookingStatus)) {
-        throw new DuplicateBookingException(
-            String.format(EXCEPTION_MESSAGE_TEMPLATE_DUPLICATE_BOOKING, event.getId(), user.getEmail()));
-      } else if (BookingStatus.RESERVED.equals(existingBookingStatus)) {
-        // as reserved bookings already count toward capacity we DO NOT check capacity
-        booking = this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(), user.getId(),
-            BookingStatus.CONFIRMED, additionalEventInformation);
-      } else if (BookingStatus.CANCELLED.equals(existingBookingStatus)) {
-        // if the user has previously cancelled we should check capacity and let them book again.
-        this.ensureCapacity(event, user);
-        booking = this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(), user.getId(),
-            BookingStatus.CONFIRMED, additionalEventInformation);
+      if (existingBookingStatus != null) {
+        // User has existing booking - update it or throw an exception as appropriate
+        booking = switch (existingBookingStatus) {
+          case CONFIRMED, ATTENDED, ABSENT ->
+              // If the user already has a confirmed booking, don't allow a duplicate
+              // Attended and absent should be caught by event validity check but handle anyway
+              throw new DuplicateBookingException(
+                  String.format(EXCEPTION_MESSAGE_TEMPLATE_DUPLICATE_BOOKING, event.getId(), user.getEmail()));
+          case CANCELLED -> {
+            // If the user has previously cancelled we should check capacity and let them book again
+            this.ensureCapacity(event, user);
+            yield this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(), user.getId(),
+                BookingStatus.CONFIRMED, additionalEventInformation);
+          }
+          case WAITING_LIST -> {
+            // If the user is on the waiting list we should check capacity and update their existing booking
+            // Automated promotion means this case probably shouldn't happen but handle it just in case
+            this.ensureCapacity(event, List.of(user), true);
+            yield this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(), user.getId(),
+                BookingStatus.CONFIRMED, additionalEventInformation);
+          }
+          case RESERVED ->
+              // as reserved bookings already count toward capacity we DO NOT check capacity
+              this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(), user.getId(),
+                  BookingStatus.CONFIRMED, additionalEventInformation);
+        };
       } else {
         // check capacity at this moment in time and then create booking
         this.ensureCapacity(event, user);
@@ -511,7 +525,7 @@ public class EventBookingManager {
         // is there space on the event? Teachers don't count for student events.
         // work out capacity information for the event at this moment in time.
         // If there is no space, no reservations are made. Throw an exception and handle in EventsFacade.
-        this.ensureCapacity(event, users);
+        this.ensureCapacity(event, users, null);
 
         // Is the request for more reservations that this event allows?
         this.enforceReservationLimit(event, users, reservingUser);
@@ -1289,9 +1303,9 @@ public class EventBookingManager {
   }
 
   /**
-   * Helper method to ensure that that the booking would not violate space restrictions on the event.
+   * Helper method to ensure that the booking would not violate space restrictions on the event.
    * <br>
-   * If it does an exception will be thrown if a new booking wouldn't no exception will be thrown.
+   * If it does an exception will be thrown otherwise no exception will be thrown.
    *
    * @param event the event the user wants to book on to
    * @param user  the user who is trying to be booked onto the event.
@@ -1300,23 +1314,24 @@ public class EventBookingManager {
    */
   private void ensureCapacity(final IsaacEventPageDTO event, final RegisteredUserDTO user) throws
       SegueDatabaseException, EventIsFullException {
-    this.ensureCapacity(event, List.of(user));
+    this.ensureCapacity(event, List.of(user), null);
   }
 
   /**
    * Helper method to ensure a batch can be booked onto an event without violating space restrictions on the event.
    * <br>
-   * If it does an exception will be thrown if a new booking wouldn't no exception will be thrown.
+   * If it does an exception will be thrown otherwise no exception will be thrown.
    *
    * @param event the event the user wants to book on to
    * @param users the users who are trying to be booked onto the event.
    * @throws SegueDatabaseException - if an error occurs
    * @throws EventIsFullException   - if the event is full according to the event rules established.
    */
-  private void ensureCapacity(final IsaacEventPageDTO event, final List<RegisteredUserDTO> users) throws
-      SegueDatabaseException, EventIsFullException {
+  private void ensureCapacity(final IsaacEventPageDTO event, final List<RegisteredUserDTO> users,
+                              final Boolean countOnlyConfirmed) throws SegueDatabaseException, EventIsFullException {
     final boolean isStudentEvent = event.getTags().contains(EVENT_STAGE_STUDENT);
-    Long numberOfPlaces = getPlacesAvailable(event);
+    Long numberOfPlaces =
+        countOnlyConfirmed != null ? getPlacesAvailable(event, countOnlyConfirmed) : getPlacesAvailable(event);
     if (numberOfPlaces != null) {
       long numberOfRequests = users.stream()
           // Consider tutors as students with regard to teacher events (for now)
