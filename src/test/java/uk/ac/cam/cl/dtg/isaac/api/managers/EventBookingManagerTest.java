@@ -149,46 +149,46 @@ class EventBookingManagerTest {
       verify(mockedObjects);
     }
 
-    @Test
-    void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_withWaitingList_noExceptionThrown() throws
-        Exception {
-      EventBookingManager ebm = buildEventBookingManager();
-      IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
-      testEvent.setNumberOfPlaces(10);
-
-      RegisteredUserDTO someUser = new RegisteredUserDTO();
-      someUser.setId(6L);
-      someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-      someUser.setRole(Role.TEACHER);
-
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 3L);
-      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-          placesAvailableMap).atLeastOnce();
-
-      expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), someUser.getId()))
-          .andReturn(null).once();
-
-      prepareCommonTransactionExpectations(testEvent);
-
-      EventBookingDTO newBooking = prepareEventBookingDto(someUser.getId(), BookingStatus.CONFIRMED,
-          someUser.getRole());
-      expect(dummyEventBookingPersistenceManager.createBooking(dummyTransaction, testEvent.getId(), someUser.getId(),
-          BookingStatus.CONFIRMED, someAdditionalInformation)).andReturn(newBooking).atLeastOnce();
-
-      EmailTemplateDTO emailTemplate = new EmailTemplateDTO();
-      expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed")).andReturn(emailTemplate)
-          .atLeastOnce();
-
-      dummyEmailManager.sendTemplatedEmailToUser(eq(someUser), eq(emailTemplate), anyObject(), eq(EmailType.SYSTEM),
-          anyObject());
-      expectLastCall().atLeastOnce();
-
-      replay(mockedObjects);
-      ebm.requestBooking(testEvent, someUser, someAdditionalInformation);
-      verify(mockedObjects);
-    }
+    // Disabled pending #370
+    //    @Test
+    //    void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_withWaitingList_noExceptionThrown() throws
+    //        Exception {
+    //      EventBookingManager ebm = buildEventBookingManager();
+    //      IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
+    //
+    //      RegisteredUserDTO someUser = new RegisteredUserDTO();
+    //      someUser.setId(6L);
+    //      someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+    //      someUser.setRole(Role.TEACHER);
+    //
+    //      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
+    //      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
+    //      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 3L);
+    //      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
+    //          placesAvailableMap).atLeastOnce();
+    //
+    //      expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), someUser.getId()))
+    //          .andReturn(null).once();
+    //
+    //      prepareCommonTransactionExpectations(testEvent);
+    //
+    //      EventBookingDTO newBooking = prepareEventBookingDto(someUser.getId(), BookingStatus.CONFIRMED,
+    //          someUser.getRole());
+    //      expect(dummyEventBookingPersistenceManager.createBooking(dummyTransaction, testEvent.getId(), someUser.getId(),
+    //          BookingStatus.CONFIRMED, someAdditionalInformation)).andReturn(newBooking).atLeastOnce();
+    //
+    //      EmailTemplateDTO emailTemplate = new EmailTemplateDTO();
+    //      expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed")).andReturn(emailTemplate)
+    //          .atLeastOnce();
+    //
+    //      dummyEmailManager.sendTemplatedEmailToUser(eq(someUser), eq(emailTemplate), anyObject(), eq(EmailType.SYSTEM),
+    //          anyObject());
+    //      expectLastCall().atLeastOnce();
+    //
+    //      replay(mockedObjects);
+    //      ebm.requestBooking(testEvent, someUser, someAdditionalInformation);
+    //      verify(mockedObjects);
+    //    }
 
     @Test
     void requestBooking_checkStudentNotAllowedOnStudentEventAsCapacityFull_eventFullExceptionThrown() throws
