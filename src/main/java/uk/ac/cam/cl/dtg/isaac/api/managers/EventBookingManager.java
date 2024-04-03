@@ -896,6 +896,10 @@ public class EventBookingManager {
 
     // capacity of the event
     if (isStudentEvent) {
+      if (studentCount > numberOfPlaces) {
+        return 0L;
+      }
+
       return numberOfPlaces - studentCount;
     }
 
@@ -1335,7 +1339,7 @@ public class EventBookingManager {
     if (numberOfPlaces != null) {
       long numberOfRequests = users.stream()
           // Consider tutors as students with regard to teacher events (for now)
-          .filter(user -> !isStudentEvent || !Role.TEACHER.equals(user.getRole()))
+          .filter(user -> !isStudentEvent || Role.STUDENT.equals(user.getRole()) || Role.TUTOR.equals(user.getRole()))
           .count();
       if (numberOfPlaces - numberOfRequests < 0) {
         throw new EventIsFullException(
