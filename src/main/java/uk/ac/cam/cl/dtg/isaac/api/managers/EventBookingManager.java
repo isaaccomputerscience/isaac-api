@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -861,53 +862,34 @@ public class EventBookingManager {
     Map<BookingStatus, Map<Role, Long>> eventBookingStatusCounts =
         this.bookingPersistenceManager.getEventBookingStatusCounts(event.getId(), includeDeletedUsersInCounts);
 
-    long totalBooked = 0L;
-    Long studentCount = 0L;
-
-    if (eventBookingStatusCounts.get(BookingStatus.CONFIRMED) != null) {
-      for (Map.Entry<Role, Long> roleLongEntry : eventBookingStatusCounts.get(BookingStatus.CONFIRMED).entrySet()) {
-        if (Role.STUDENT.equals(roleLongEntry.getKey())) {
-          studentCount = roleLongEntry.getValue();
-        }
-
-        totalBooked = totalBooked + roleLongEntry.getValue();
+    Map<Role, Long> roleCounts;
+    if (countOnlyConfirmed) {
+      roleCounts = eventBookingStatusCounts.getOrDefault(BookingStatus.CONFIRMED, new HashMap<>());
+    } else {
+      List<Map<Role, Long>> roleMaps = new ArrayList<>(3);
+      if (eventBookingStatusCounts.get(BookingStatus.CONFIRMED) != null) {
+        roleMaps.add(eventBookingStatusCounts.get(BookingStatus.CONFIRMED));
       }
+      if (eventBookingStatusCounts.get(BookingStatus.WAITING_LIST) != null) {
+        roleMaps.add(eventBookingStatusCounts.get(BookingStatus.WAITING_LIST));
+      }
+      if (eventBookingStatusCounts.get(BookingStatus.RESERVED) != null) {
+        roleMaps.add(eventBookingStatusCounts.get(BookingStatus.RESERVED));
+      }
+      roleCounts = roleMaps.stream().flatMap(map -> map.entrySet().stream())
+          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Long::sum));
     }
 
-    if (!countOnlyConfirmed && eventBookingStatusCounts.get(BookingStatus.WAITING_LIST) != null) {
-      for (Map.Entry<Role, Long> roleLongEntry : eventBookingStatusCounts.get(BookingStatus.WAITING_LIST).entrySet()) {
-        if (Role.STUDENT.equals(roleLongEntry.getKey())) {
-          studentCount = studentCount + roleLongEntry.getValue();
-        }
-
-        totalBooked = totalBooked + roleLongEntry.getValue();
-      }
-    }
-
-    if (!countOnlyConfirmed && eventBookingStatusCounts.get(BookingStatus.RESERVED) != null) {
-      for (Map.Entry<Role, Long> roleLongEntry : eventBookingStatusCounts.get(BookingStatus.RESERVED).entrySet()) {
-        if (Role.STUDENT.equals(roleLongEntry.getKey())) {
-          studentCount = studentCount + roleLongEntry.getValue();
-        }
-
-        totalBooked = totalBooked + roleLongEntry.getValue();
-      }
-    }
-
-    // capacity of the event
+    // Calculate remaining capacity with a lower bound of zero (no negatives)
     if (isStudentEvent) {
-      if (studentCount > numberOfPlaces) {
-        return 0L;
-      }
-
-      return numberOfPlaces - studentCount;
+      // For Student events we only limit the number of students, other roles do not count against the capacity
+      Long studentCount = roleCounts.getOrDefault(Role.STUDENT, 0L);
+      return Math.max(0L, numberOfPlaces - studentCount);
+    } else {
+      // For other events, count all roles
+      Long totalBooked = roleCounts.values().stream().reduce(0L, Long::sum);
+      return Math.max(0L, numberOfPlaces - totalBooked);
     }
-
-    if (totalBooked > numberOfPlaces) {
-      return 0L;
-    }
-
-    return numberOfPlaces - totalBooked;
   }
 
   /**
