@@ -176,7 +176,7 @@ class GameManagerTest {
     // check that one of the filters sent to GitContentManager was the regression test exclusion filter
     List<BooleanSearchClause> filters = capturedFilters.getValues().get(0);
     BooleanSearchClause tagsFilter = filters.stream()
-        .filter(f -> Objects.equals(f.getField(), "tags")).collect(Collectors.toList()).get(0);
+        .filter(f -> f.getField().equals("tags")).toList().get(0);
 
     assertNotNull(tagsFilter);
     assertEquals(Constants.BooleanOperator.NOT, tagsFilter.getOperator());
