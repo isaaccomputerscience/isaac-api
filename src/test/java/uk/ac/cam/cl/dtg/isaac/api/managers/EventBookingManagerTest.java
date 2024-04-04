@@ -30,10 +30,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.easymock.EasyMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import uk.ac.cam.cl.dtg.isaac.dao.EventBookingPersistenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.AssociationToken;
 import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
@@ -139,7 +143,6 @@ class EventBookingManagerTest {
       EmailTemplateDTO emailTemplate = new EmailTemplateDTO();
       expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed")).andReturn(emailTemplate)
           .atLeastOnce();
-
       dummyEmailManager.sendTemplatedEmailToUser(eq(someUser), eq(emailTemplate), anyObject(), eq(EmailType.SYSTEM),
           anyObject());
       expectLastCall().atLeastOnce();
@@ -149,46 +152,47 @@ class EventBookingManagerTest {
       verify(mockedObjects);
     }
 
-    // Disabled pending #370
-    //    @Test
-    //    void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_withWaitingList_noExceptionThrown() throws
-    //        Exception {
-    //      EventBookingManager ebm = buildEventBookingManager();
-    //      IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
-    //
-    //      RegisteredUserDTO someUser = new RegisteredUserDTO();
-    //      someUser.setId(6L);
-    //      someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-    //      someUser.setRole(Role.TEACHER);
-    //
-    //      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-    //      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-    //      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 3L);
-    //      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-    //          placesAvailableMap).atLeastOnce();
-    //
-    //      expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), someUser.getId()))
-    //          .andReturn(null).once();
-    //
-    //      prepareCommonTransactionExpectations(testEvent);
-    //
-    //      EventBookingDTO newBooking = prepareEventBookingDto(someUser.getId(), BookingStatus.CONFIRMED,
-    //          someUser.getRole());
-    //      expect(dummyEventBookingPersistenceManager.createBooking(dummyTransaction, testEvent.getId(), someUser.getId(),
-    //          BookingStatus.CONFIRMED, someAdditionalInformation)).andReturn(newBooking).atLeastOnce();
-    //
-    //      EmailTemplateDTO emailTemplate = new EmailTemplateDTO();
-    //      expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed")).andReturn(emailTemplate)
-    //          .atLeastOnce();
-    //
-    //      dummyEmailManager.sendTemplatedEmailToUser(eq(someUser), eq(emailTemplate), anyObject(), eq(EmailType.SYSTEM),
-    //          anyObject());
-    //      expectLastCall().atLeastOnce();
-    //
-    //      replay(mockedObjects);
-    //      ebm.requestBooking(testEvent, someUser, someAdditionalInformation);
-    //      verify(mockedObjects);
-    //    }
+    @Test
+    void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_withWaitingList_noExceptionThrown()
+        throws
+        Exception {
+      EventBookingManager ebm = buildEventBookingManager();
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
+
+      RegisteredUserDTO someUser = new RegisteredUserDTO();
+      someUser.setId(6L);
+      someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
+      someUser.setRole(Role.TEACHER);
+
+      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
+      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 3L);
+      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
+          placesAvailableMap).atLeastOnce();
+
+      expect(dummyEventBookingPersistenceManager.getBookingByEventIdAndUserId(testEvent.getId(), someUser.getId()))
+          .andReturn(null).once();
+
+      prepareCommonTransactionExpectations(testEvent);
+
+      EventBookingDTO newBooking = prepareEventBookingDto(BookingStatus.CONFIRMED, someUser.getId(),
+          someUser.getRole());
+      expect(
+          dummyEventBookingPersistenceManager.createBooking(dummyTransaction, testEvent.getId(), someUser.getId(),
+              BookingStatus.CONFIRMED, someAdditionalInformation)).andReturn(newBooking).atLeastOnce();
+
+      EmailTemplateDTO emailTemplate = new EmailTemplateDTO();
+      expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-confirmed")).andReturn(emailTemplate)
+          .atLeastOnce();
+
+      dummyEmailManager.sendTemplatedEmailToUser(eq(someUser), eq(emailTemplate), anyObject(), eq(EmailType.SYSTEM),
+          anyObject());
+      expectLastCall().atLeastOnce();
+
+      replay(mockedObjects);
+      ebm.requestBooking(testEvent, someUser, someAdditionalInformation);
+      verify(mockedObjects);
+    }
 
     @Test
     void requestBooking_checkStudentNotAllowedOnStudentEventAsCapacityFull_eventFullExceptionThrown() throws
@@ -1377,63 +1381,6 @@ class EventBookingManagerTest {
     }
   }
 
-  @Test
-  void getPlacesAvailable_checkEventCapacity_capacityCalculatedCorrectly() throws Exception {
-    // Create a future event and event booking manager
-    EventBookingManager ebm = buildEventBookingManager();
-    int initialNumberOfPlaces = 1000;
-    IsaacEventPageDTO testEvent =
-        prepareIsaacEventPageDto(ImmutableSet.of("student"), initialNumberOfPlaces, EventStatus.OPEN);
-
-    // Mock the event booking status count result from the event booking persistence manager
-    Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-    // Student places
-    placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-    placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 10L);
-    placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.STUDENT, 100L);
-    // Teacher places
-    placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 2L);
-    placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 20L);
-    placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 200L);
-
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false))
-        .andReturn(placesAvailableMap).atLeastOnce();
-
-    // Run the test for a student event
-    replay(mockedObjects);
-    Long actualPlacesAvailable = ebm.getPlacesAvailable(testEvent);
-    Long expectedPlacesAvailable = (long) initialNumberOfPlaces - 1 - 10;
-    assertEquals(
-        expectedPlacesAvailable, actualPlacesAvailable,
-        "STUDENT events should only count confirmed and waiting list student places in availability calculations");
-    verify(mockedObjects);
-  }
-
-  @Test
-  void getEventPage_checkWaitingListOnlyEventCapacity_capacityCalculatedCorrectly() throws
-      Exception {
-    EventBookingManager ebm = buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 2, EventStatus.WAITING_LIST_ONLY);
-
-    RegisteredUserDTO someUser = new RegisteredUserDTO();
-    someUser.setId(6L);
-    someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-    someUser.setRole(Role.STUDENT);
-
-    Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-    placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-    placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 1L);
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
-
-    replay(mockedObjects);
-    Long placesAvailable = ebm.getPlacesAvailable(testEvent);
-    Long expectedPlacesAvailable = 1L;
-    assertEquals(expectedPlacesAvailable, placesAvailable,
-        "WAITING_LIST_ONLY events should only count confirmed places in availability calculations");
-    verify(mockedObjects);
-  }
-
   @Nested
   class CapacityChecks {
     private final Map<BookingStatus, Map<Role, Long>> placesMap = Map.of(
@@ -1451,64 +1398,32 @@ class EventBookingManagerTest {
         )
     );
 
-    @Test
-    void getPlacesAvailable_studentEventOnlyConfirmed_returnsCorrectCount() throws SegueDatabaseException {
+    @ParameterizedTest(name = "{index} {2}")
+    @MethodSource
+    void getPlacesAvailable_returnsCorrectCount(IsaacEventPageDTO testEvent, Long expectedPlacesAvailable, String description)
+        throws SegueDatabaseException {
       EventBookingManager eventBookingManager = buildEventBookingManager();
-
-      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.WAITING_LIST_ONLY);
 
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesMap);
       replay(mockedObjects);
 
       Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
-      assertEquals(499L, remainingPlacesAvailable);
+      assertEquals(expectedPlacesAvailable, remainingPlacesAvailable, description);
       verify(mockedObjects);
     }
 
-    @Test
-    void getPlacesAvailable_studentEventIncludeUnconfirmed_returnsCorrectCount() throws SegueDatabaseException {
-      EventBookingManager eventBookingManager = buildEventBookingManager();
-
-      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.OPEN);
-
-      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-          placesMap);
-      replay(mockedObjects);
-
-      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
-      assertEquals(389L, remainingPlacesAvailable);
-      verify(mockedObjects);
-    }
-
-    @Test
-    void getPlacesAvailable_standardEventOnlyConfirmed_returnsCorrectCount() throws SegueDatabaseException {
-      EventBookingManager eventBookingManager = buildEventBookingManager();
-
-      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.WAITING_LIST_ONLY);
-
-      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-          placesMap);
-      replay(mockedObjects);
-
-      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
-      assertEquals(485L, remainingPlacesAvailable);
-      verify(mockedObjects);
-    }
-
-    @Test
-    void getPlacesAvailable_standardEventIncludeUnconfirmed_returnsCorrectCount() throws SegueDatabaseException {
-      EventBookingManager eventBookingManager = buildEventBookingManager();
-
-      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.OPEN);
-
-      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-          placesMap);
-      replay(mockedObjects);
-
-      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
-      assertEquals(155L, remainingPlacesAvailable);
-      verify(mockedObjects);
+    private static Stream<Arguments> getPlacesAvailable_returnsCorrectCount() {
+      return Stream.of(
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.WAITING_LIST_ONLY), 499L,
+              "WAITING_LIST_ONLY student events should count confirmed student bookings"),
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.OPEN), 389L,
+              "OPEN student events should count student bookings that are confirmed, reserved or on the waiting list"),
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.WAITING_LIST_ONLY), 485L,
+              "WAITING_LIST_ONLY standard events should count confirmed bookings for all roles"),
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.OPEN), 155L,
+              "OPEN standard events should count bookings that are confirmed, reserved or on the waiting list for all roles")
+      );
     }
 
     @Test
