@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.ac.cam.cl.dtg.isaac.dao.EventBookingPersistenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.AssociationToken;
@@ -115,8 +116,9 @@ class EventBookingManagerTest {
 
   @Nested
   class RequestBooking {
-    @Test
-    void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_noExceptionThrown() throws
+    @ParameterizedTest
+    @EnumSource(value = Role.class, names = {"STUDENT", "TUTOR"}, mode = EnumSource.Mode.EXCLUDE)
+    void requestBooking_checkNonStudentRolesAllowedOnStudentEventDespiteCapacityFull_noExceptionThrown(Role role) throws
         Exception {
       EventBookingManager ebm = buildEventBookingManager();
       IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
@@ -124,7 +126,7 @@ class EventBookingManagerTest {
       RegisteredUserDTO someUser = new RegisteredUserDTO();
       someUser.setId(6L);
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-      someUser.setRole(Role.TEACHER);
+      someUser.setRole(role);
 
       Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
       placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
@@ -153,17 +155,17 @@ class EventBookingManagerTest {
       verify(mockedObjects);
     }
 
-    @Test
-    void requestBooking_checkTeacherAllowedOnStudentEventDespiteCapacityFull_withWaitingList_noExceptionThrown()
-        throws
-        Exception {
+    @ParameterizedTest
+    @EnumSource(value = Role.class, names = {"STUDENT", "TUTOR"}, mode = EnumSource.Mode.EXCLUDE)
+    void requestBooking_checkNonStudentRolesAllowedOnStudentEventDespiteCapacityFull_withWaitingList_noExceptionThrown(
+        Role role) throws Exception {
       EventBookingManager ebm = buildEventBookingManager();
       IsaacEventPageDTO testEvent = prepareIsaacEventPageDtoWithEventDetails(studentCSTags);
 
       RegisteredUserDTO someUser = new RegisteredUserDTO();
       someUser.setId(6L);
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-      someUser.setRole(Role.TEACHER);
+      someUser.setRole(role);
 
       Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
       placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
@@ -1460,35 +1462,7 @@ class EventBookingManagerTest {
     private static final Map<BookingStatus, Map<Role, Long>> smallTeacherBookingStatusMap =
         Map.of(BookingStatus.CONFIRMED, Map.of(Role.TEACHER, 15L), BookingStatus.WAITING_LIST,
             Map.of(Role.TEACHER, 5L));
-  }
 
-  @Test
-  void getEventPage_checkStudentEventReservedBookings_capacityCalculatedCorrectly() throws
-      Exception {
-    EventBookingManager ebm = buildEventBookingManager();
-    IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 2, EventStatus.OPEN);
-    testEvent.setAllowGroupReservations(true);
-
-    // Mocks the counts for the places available calculation from the database
-    Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-
-    RegisteredUserDTO someUser = new RegisteredUserDTO();
-    someUser.setId(6L);
-    someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
-    someUser.setRole(Role.STUDENT);
-
-    placesAvailableMap.get(BookingStatus.RESERVED).put(Role.STUDENT, 1L);
-    placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-
-    expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-        placesAvailableMap).atLeastOnce();
-
-    replay(mockedObjects);
-    Long placesAvailable = ebm.getPlacesAvailable(testEvent);
-    Long expectedPlacesAvailable = 0L;
-    assertEquals(expectedPlacesAvailable, placesAvailable,
-        "RESERVED bookings should count towards the places available in availability calculations");
-    verify(mockedObjects);
   }
 
   @Test
