@@ -8,6 +8,7 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_TOKEN_AUTHORIZATION_LINK;
@@ -1383,7 +1384,61 @@ class EventBookingManagerTest {
 
   @Nested
   class CapacityChecks {
-    private final Map<BookingStatus, Map<Role, Long>> placesMap = Map.of(
+    @Test
+    void getPlacesAvailable_ifNumberOfPlacesIsNull_returnsNull() throws SegueDatabaseException {
+      EventBookingManager eventBookingManager = buildEventBookingManager();
+
+      IsaacEventPageDTO testEvent = new IsaacEventPageDTO();
+      testEvent.setNumberOfPlaces(null);
+
+      replay(mockedObjects);
+
+      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
+      assertNull(remainingPlacesAvailable);
+      verify(mockedObjects);
+    }
+
+    @ParameterizedTest(name = "{index} {3}")
+    @MethodSource
+    void getPlacesAvailable_returnsCorrectCount(IsaacEventPageDTO testEvent, Long expectedPlacesAvailable, Map<BookingStatus, Map<Role, Long>> bookingStatusMap, String description)
+        throws SegueDatabaseException {
+      EventBookingManager eventBookingManager = buildEventBookingManager();
+
+      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
+          bookingStatusMap);
+      replay(mockedObjects);
+
+      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
+      assertEquals(expectedPlacesAvailable, remainingPlacesAvailable, description);
+      verify(mockedObjects);
+    }
+
+    private static Stream<Arguments> getPlacesAvailable_returnsCorrectCount() {
+      return Stream.of(
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.WAITING_LIST_ONLY), 499L,
+              testBookingStatusMap, "WAITING_LIST_ONLY student events should count confirmed student bookings"),
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.OPEN), 389L, testBookingStatusMap,
+              "OPEN student events should count student bookings that are confirmed, reserved or on the waiting list"),
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.WAITING_LIST_ONLY), 485L,
+              testBookingStatusMap, "WAITING_LIST_ONLY standard events should count confirmed bookings for all roles"),
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.OPEN), 155L, testBookingStatusMap,
+              "OPEN standard events should count bookings that are confirmed, reserved or on the waiting list for all roles"),
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.OPEN), 0L, smallStudentBookingStatusMap,
+              "Student events should return a minimum remaining places available of zero"),
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.OPEN), 0L, smallTeacherBookingStatusMap,
+              "Standard events should return a minimum remaining places available of zero"),
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.WAITING_LIST_ONLY), 10L, Map.of(),
+              "WAITING_LIST_ONLY student events should handle an empty map"),
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.OPEN), 10L, Map.of(),
+              "OPEN student events should handle an empty map"),
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.WAITING_LIST_ONLY), 10L, Map.of(),
+              "WAITING_LIST_ONLY standard events should handle an empty map"),
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.OPEN), 10L, Map.of(),
+              "OPEN standard events should handle an empty map")
+      );
+    }
+
+    private static final Map<BookingStatus, Map<Role, Long>> testBookingStatusMap = Map.of(
         BookingStatus.CONFIRMED, Map.of(
             Role.STUDENT, 1L, Role.TEACHER, 2L, Role.TUTOR, 4L, Role.EVENT_LEADER, 8L
         ),
@@ -1398,65 +1453,13 @@ class EventBookingManagerTest {
         )
     );
 
-    @ParameterizedTest(name = "{index} {2}")
-    @MethodSource
-    void getPlacesAvailable_returnsCorrectCount(IsaacEventPageDTO testEvent, Long expectedPlacesAvailable, String description)
-        throws SegueDatabaseException {
-      EventBookingManager eventBookingManager = buildEventBookingManager();
+    private static final Map<BookingStatus, Map<Role, Long>> smallStudentBookingStatusMap =
+        Map.of(BookingStatus.CONFIRMED, Map.of(Role.STUDENT, 15L), BookingStatus.WAITING_LIST,
+            Map.of(Role.STUDENT, 5L));
 
-      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-          placesMap);
-      replay(mockedObjects);
-
-      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
-      assertEquals(expectedPlacesAvailable, remainingPlacesAvailable, description);
-      verify(mockedObjects);
-    }
-
-    private static Stream<Arguments> getPlacesAvailable_returnsCorrectCount() {
-      return Stream.of(
-          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.WAITING_LIST_ONLY), 499L,
-              "WAITING_LIST_ONLY student events should count confirmed student bookings"),
-          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.OPEN), 389L,
-              "OPEN student events should count student bookings that are confirmed, reserved or on the waiting list"),
-          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.WAITING_LIST_ONLY), 485L,
-              "WAITING_LIST_ONLY standard events should count confirmed bookings for all roles"),
-          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.OPEN), 155L,
-              "OPEN standard events should count bookings that are confirmed, reserved or on the waiting list for all roles")
-      );
-    }
-
-    @Test
-    void getPlacesAvailable_studentEventIncludeUnconfirmed_returnsMinimumOfZero() throws SegueDatabaseException {
-      EventBookingManager eventBookingManager = buildEventBookingManager();
-
-      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.OPEN);
-
-      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-          Map.of(BookingStatus.CONFIRMED, Map.of(Role.STUDENT, 10L), BookingStatus.WAITING_LIST,
-              Map.of(Role.STUDENT, 5L)));
-      replay(mockedObjects);
-
-      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
-      assertEquals(0L, remainingPlacesAvailable);
-      verify(mockedObjects);
-    }
-
-    @Test
-    void getPlacesAvailable_standardEventIncludeUnconfirmed_returnsMinimumOfZero() throws SegueDatabaseException {
-      EventBookingManager eventBookingManager = buildEventBookingManager();
-
-      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.OPEN);
-
-      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
-          Map.of(BookingStatus.CONFIRMED, Map.of(Role.TEACHER, 10L), BookingStatus.WAITING_LIST,
-              Map.of(Role.TEACHER, 5L)));
-      replay(mockedObjects);
-
-      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
-      assertEquals(0L, remainingPlacesAvailable);
-      verify(mockedObjects);
-    }
+    private static final Map<BookingStatus, Map<Role, Long>> smallTeacherBookingStatusMap =
+        Map.of(BookingStatus.CONFIRMED, Map.of(Role.TEACHER, 15L), BookingStatus.WAITING_LIST,
+            Map.of(Role.TEACHER, 5L));
   }
 
   @Test
