@@ -1434,6 +1434,116 @@ class EventBookingManagerTest {
     verify(mockedObjects);
   }
 
+  @Nested
+  class CapacityChecks {
+    private final Map<BookingStatus, Map<Role, Long>> placesMap = Map.of(
+        BookingStatus.CONFIRMED, Map.of(
+            Role.STUDENT, 1L, Role.TEACHER, 2L, Role.TUTOR, 4L, Role.EVENT_LEADER, 8L
+        ),
+        BookingStatus.RESERVED, Map.of(
+            Role.STUDENT, 10L, Role.TEACHER, 20L
+        ),
+        BookingStatus.WAITING_LIST, Map.of(
+            Role.STUDENT, 100L, Role.TEACHER, 200L
+        ),
+        BookingStatus.CANCELLED, Map.of(
+            Role.STUDENT, 1000L
+        )
+    );
+
+    @Test
+    void getPlacesAvailable_studentEventOnlyConfirmed_returnsCorrectCount() throws SegueDatabaseException {
+      EventBookingManager eventBookingManager = buildEventBookingManager();
+
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.WAITING_LIST_ONLY);
+
+      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
+          placesMap);
+      replay(mockedObjects);
+
+      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
+      assertEquals(499L, remainingPlacesAvailable);
+      verify(mockedObjects);
+    }
+
+    @Test
+    void getPlacesAvailable_studentEventIncludeUnconfirmed_returnsCorrectCount() throws SegueDatabaseException {
+      EventBookingManager eventBookingManager = buildEventBookingManager();
+
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.OPEN);
+
+      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
+          placesMap);
+      replay(mockedObjects);
+
+      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
+      assertEquals(389L, remainingPlacesAvailable);
+      verify(mockedObjects);
+    }
+
+    @Test
+    void getPlacesAvailable_standardEventOnlyConfirmed_returnsCorrectCount() throws SegueDatabaseException {
+      EventBookingManager eventBookingManager = buildEventBookingManager();
+
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.WAITING_LIST_ONLY);
+
+      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
+          placesMap);
+      replay(mockedObjects);
+
+      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
+      assertEquals(485L, remainingPlacesAvailable);
+      verify(mockedObjects);
+    }
+
+    @Test
+    void getPlacesAvailable_standardEventIncludeUnconfirmed_returnsCorrectCount() throws SegueDatabaseException {
+      EventBookingManager eventBookingManager = buildEventBookingManager();
+
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.OPEN);
+
+      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
+          placesMap);
+      replay(mockedObjects);
+
+      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
+      assertEquals(155L, remainingPlacesAvailable);
+      verify(mockedObjects);
+    }
+
+    @Test
+    void getPlacesAvailable_studentEventIncludeUnconfirmed_returnsMinimumOfZero() throws SegueDatabaseException {
+      EventBookingManager eventBookingManager = buildEventBookingManager();
+
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.OPEN);
+
+      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
+          Map.of(BookingStatus.CONFIRMED, Map.of(Role.STUDENT, 10L), BookingStatus.WAITING_LIST,
+              Map.of(Role.STUDENT, 5L)));
+      replay(mockedObjects);
+
+      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
+      assertEquals(0L, remainingPlacesAvailable);
+      verify(mockedObjects);
+    }
+
+    @Test
+    void getPlacesAvailable_standardEventIncludeUnconfirmed_returnsMinimumOfZero() throws SegueDatabaseException {
+      EventBookingManager eventBookingManager = buildEventBookingManager();
+
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.OPEN);
+
+      expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
+          Map.of(BookingStatus.CONFIRMED, Map.of(Role.TEACHER, 10L), BookingStatus.WAITING_LIST,
+              Map.of(Role.TEACHER, 5L)));
+      replay(mockedObjects);
+
+      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
+      assertEquals(0L, remainingPlacesAvailable);
+      verify(mockedObjects);
+    }
+  }
+
   @Test
   void getEventPage_checkStudentEventReservedBookings_capacityCalculatedCorrectly() throws
       Exception {
