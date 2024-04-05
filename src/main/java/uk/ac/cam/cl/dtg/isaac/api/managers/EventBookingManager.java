@@ -866,18 +866,7 @@ public class EventBookingManager {
     if (countOnlyConfirmed) {
       roleCounts = eventBookingStatusCounts.getOrDefault(BookingStatus.CONFIRMED, new HashMap<>());
     } else {
-      List<Map<Role, Long>> roleMaps = new ArrayList<>(3);
-      if (eventBookingStatusCounts.get(BookingStatus.CONFIRMED) != null) {
-        roleMaps.add(eventBookingStatusCounts.get(BookingStatus.CONFIRMED));
-      }
-      if (eventBookingStatusCounts.get(BookingStatus.WAITING_LIST) != null) {
-        roleMaps.add(eventBookingStatusCounts.get(BookingStatus.WAITING_LIST));
-      }
-      if (eventBookingStatusCounts.get(BookingStatus.RESERVED) != null) {
-        roleMaps.add(eventBookingStatusCounts.get(BookingStatus.RESERVED));
-      }
-      roleCounts = roleMaps.stream().flatMap(map -> map.entrySet().stream())
-          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Long::sum));
+      roleCounts = getCombinedBookingCountsByRole(eventBookingStatusCounts);
     }
 
     // Calculate remaining capacity with a lower bound of zero (no negatives)
@@ -890,6 +879,24 @@ public class EventBookingManager {
       Long totalBooked = roleCounts.values().stream().reduce(0L, Long::sum);
       return Math.max(0L, numberOfPlaces - totalBooked);
     }
+  }
+
+  private static Map<Role, Long> getCombinedBookingCountsByRole(
+      Map<BookingStatus, Map<Role, Long>> eventBookingStatusCounts) {
+    List<Map<Role, Long>> listOfBookingCountByRoleMaps = new ArrayList<>(3);
+    // Extract the count-by-role maps for each relevant status and add them to a list
+    if (eventBookingStatusCounts.get(BookingStatus.CONFIRMED) != null) {
+      listOfBookingCountByRoleMaps.add(eventBookingStatusCounts.get(BookingStatus.CONFIRMED));
+    }
+    if (eventBookingStatusCounts.get(BookingStatus.WAITING_LIST) != null) {
+      listOfBookingCountByRoleMaps.add(eventBookingStatusCounts.get(BookingStatus.WAITING_LIST));
+    }
+    if (eventBookingStatusCounts.get(BookingStatus.RESERVED) != null) {
+      listOfBookingCountByRoleMaps.add(eventBookingStatusCounts.get(BookingStatus.RESERVED));
+    }
+    // Flatten the list and return a single map of the summed counts for each role
+    return listOfBookingCountByRoleMaps.stream().flatMap(map -> map.entrySet().stream())
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Long::sum));
   }
 
   /**
