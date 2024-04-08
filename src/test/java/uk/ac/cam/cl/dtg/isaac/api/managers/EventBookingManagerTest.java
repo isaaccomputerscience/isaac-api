@@ -128,8 +128,8 @@ class EventBookingManagerTest {
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       someUser.setRole(role);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -167,9 +167,9 @@ class EventBookingManagerTest {
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       someUser.setRole(role);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 3L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1);
+      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 3);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -208,8 +208,8 @@ class EventBookingManagerTest {
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       someUser.setRole(Role.STUDENT);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -235,8 +235,8 @@ class EventBookingManagerTest {
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       someUser.setRole(Role.TEACHER);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -298,9 +298,9 @@ class EventBookingManagerTest {
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       someUser.setRole(Role.TEACHER);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1L);
-      placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1);
+      placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -326,8 +326,8 @@ class EventBookingManagerTest {
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       someUser.setRole(Role.TEACHER);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -364,9 +364,9 @@ class EventBookingManagerTest {
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       someUser.setRole(Role.TEACHER);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
-      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1);
+      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -437,8 +437,8 @@ class EventBookingManagerTest {
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       someUser.setRole(Role.STUDENT);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.STUDENT, 6L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.STUDENT, 6);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -529,8 +529,8 @@ class EventBookingManagerTest {
       DetailedEventBookingDTO firstBooking =
           prepareDetailedEventBookingDto(someUser.getId(), BookingStatus.WAITING_LIST, testEvent.getId());
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -570,9 +570,9 @@ class EventBookingManagerTest {
       DetailedEventBookingDTO firstBooking =
           prepareDetailedEventBookingDto(someUser.getId(), BookingStatus.WAITING_LIST, testEvent.getId());
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 3L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1);
+      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 3);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -612,8 +612,8 @@ class EventBookingManagerTest {
       DetailedEventBookingDTO firstBooking =
           prepareDetailedEventBookingDto(someUser.getId(), BookingStatus.WAITING_LIST, testEvent.getId());
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -653,9 +653,9 @@ class EventBookingManagerTest {
       DetailedEventBookingDTO firstBooking =
           prepareDetailedEventBookingDto(someUser.getId(), BookingStatus.WAITING_LIST, testEvent.getId());
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 3L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1);
+      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 3);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -692,8 +692,8 @@ class EventBookingManagerTest {
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       someUser.setRole(Role.TEACHER);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -724,9 +724,9 @@ class EventBookingManagerTest {
       DetailedEventBookingDTO existingBooking =
           prepareDetailedEventBookingDto(someUser.getId(), BookingStatus.CONFIRMED, testEvent.getId());
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1L);
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 6L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.STUDENT, 1);
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 6);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -802,9 +802,9 @@ class EventBookingManagerTest {
           prepareDetailedEventBookingDto(firstUser, BookingStatus.CANCELLED, testEvent.getId());
       secondBooking.setAdditionalInformation(someAdditionalInformation);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1L);
-      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CANCELLED).put(Role.TEACHER, 1);
+      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -847,9 +847,9 @@ class EventBookingManagerTest {
       DetailedEventBookingDTO firstBooking =
           prepareDetailedEventBookingDto(firstUser, BookingStatus.WAITING_LIST, testEvent.getId());
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 1L);
-      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.CONFIRMED).put(Role.TEACHER, 1);
+      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.TEACHER, 1);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
@@ -989,8 +989,8 @@ class EventBookingManagerTest {
       List<RegisteredUserDTO> studentsToReserve = ImmutableList.of(testCase.student1, testCase.student2);
 
       RegisteredUserDTO previouslyReservedStudent = testCase.student3;
-      Map<BookingStatus, Map<Role, Long>> previousBookingCounts = generatePlacesAvailableMap();
-      previousBookingCounts.put(BookingStatus.CONFIRMED, ImmutableMap.of(Role.STUDENT, 1L));
+      Map<BookingStatus, Map<Role, Integer>> previousBookingCounts = generatePlacesAvailableMap();
+      previousBookingCounts.put(BookingStatus.CONFIRMED, ImmutableMap.of(Role.STUDENT, 1));
       DetailedEventBookingDTO existingEventBooking = prepareDetailedEventBookingDto(
           previouslyReservedStudent.getId(), BookingStatus.CONFIRMED, testCase.event.getId());
       existingEventBooking.setReservedById(testCase.teacher.getId());
@@ -1035,8 +1035,8 @@ class EventBookingManagerTest {
       DetailedEventBookingDTO student2sCancelledReservation =
           prepareDetailedEventBookingDto(testCase.student2.getId(), BookingStatus.CANCELLED, testCase.event.getId());
       student2sCancelledReservation.setReservedById(testCase.teacher.getId());
-      Map<BookingStatus, Map<Role, Long>> previousBookingCounts = generatePlacesAvailableMap();
-      previousBookingCounts.put(BookingStatus.CANCELLED, ImmutableMap.of(Role.STUDENT, 1L));
+      Map<BookingStatus, Map<Role, Integer>> previousBookingCounts = generatePlacesAvailableMap();
+      previousBookingCounts.put(BookingStatus.CANCELLED, ImmutableMap.of(Role.STUDENT, 1));
 
       // Define expected external calls
       dummyEventBookingPersistenceManager.lockEventUntilTransactionComplete(dummyTransaction, testCase.event.getId());
@@ -1395,14 +1395,14 @@ class EventBookingManagerTest {
 
       replay(mockedObjects);
 
-      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
+      Integer remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
       assertNull(remainingPlacesAvailable);
       verify(mockedObjects);
     }
 
     @ParameterizedTest(name = "{index} {3}")
     @MethodSource
-    void getPlacesAvailable_returnsCorrectCount(IsaacEventPageDTO testEvent, Long expectedPlacesAvailable, Map<BookingStatus, Map<Role, Long>> bookingStatusMap, String description)
+    void getPlacesAvailable_returnsCorrectCount(IsaacEventPageDTO testEvent, Integer expectedPlacesAvailable, Map<BookingStatus, Map<Role, Integer>> bookingStatusMap, String description)
         throws SegueDatabaseException {
       EventBookingManager eventBookingManager = buildEventBookingManager();
 
@@ -1410,58 +1410,58 @@ class EventBookingManagerTest {
           bookingStatusMap);
       replay(mockedObjects);
 
-      Long remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
+      Integer remainingPlacesAvailable = eventBookingManager.getPlacesAvailable(testEvent);
       assertEquals(expectedPlacesAvailable, remainingPlacesAvailable, description);
       verify(mockedObjects);
     }
 
     private static Stream<Arguments> getPlacesAvailable_returnsCorrectCount() {
       return Stream.of(
-          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.WAITING_LIST_ONLY), 499L,
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.WAITING_LIST_ONLY), 499,
               testBookingStatusMap, "WAITING_LIST_ONLY student events should count confirmed student bookings"),
-          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.OPEN), 389L, testBookingStatusMap,
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 500, EventStatus.OPEN), 389, testBookingStatusMap,
               "OPEN student events should count student bookings that are confirmed, reserved or on the waiting list"),
-          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.WAITING_LIST_ONLY), 485L,
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.WAITING_LIST_ONLY), 485,
               testBookingStatusMap, "WAITING_LIST_ONLY standard events should count confirmed bookings for all roles"),
-          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.OPEN), 155L, testBookingStatusMap,
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 500, EventStatus.OPEN), 155, testBookingStatusMap,
               "OPEN standard events should count bookings that are confirmed, reserved or on the waiting list for all roles"),
-          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.OPEN), 0L, smallStudentBookingStatusMap,
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.OPEN), 0, smallStudentBookingStatusMap,
               "Student events should return a minimum remaining places available of zero"),
-          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.OPEN), 0L, smallTeacherBookingStatusMap,
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.OPEN), 0, smallTeacherBookingStatusMap,
               "Standard events should return a minimum remaining places available of zero"),
-          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.WAITING_LIST_ONLY), 10L, Map.of(),
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.WAITING_LIST_ONLY), 10, Map.of(),
               "WAITING_LIST_ONLY student events should handle an empty map"),
-          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.OPEN), 10L, Map.of(),
+          Arguments.of(prepareIsaacEventPageDto(studentCSTags, 10, EventStatus.OPEN), 10, Map.of(),
               "OPEN student events should handle an empty map"),
-          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.WAITING_LIST_ONLY), 10L, Map.of(),
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.WAITING_LIST_ONLY), 10, Map.of(),
               "WAITING_LIST_ONLY standard events should handle an empty map"),
-          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.OPEN), 10L, Map.of(),
+          Arguments.of(prepareIsaacEventPageDto(teacherCSTags, 10, EventStatus.OPEN), 10, Map.of(),
               "OPEN standard events should handle an empty map")
       );
     }
 
-    private static final Map<BookingStatus, Map<Role, Long>> testBookingStatusMap = Map.of(
+    private static final Map<BookingStatus, Map<Role, Integer>> testBookingStatusMap = Map.of(
         BookingStatus.CONFIRMED, Map.of(
-            Role.STUDENT, 1L, Role.TEACHER, 2L, Role.TUTOR, 4L, Role.EVENT_LEADER, 8L
+            Role.STUDENT, 1, Role.TEACHER, 2, Role.TUTOR, 4, Role.EVENT_LEADER, 8
         ),
         BookingStatus.RESERVED, Map.of(
-            Role.STUDENT, 10L, Role.TEACHER, 20L
+            Role.STUDENT, 10, Role.TEACHER, 20
         ),
         BookingStatus.WAITING_LIST, Map.of(
-            Role.STUDENT, 100L, Role.TEACHER, 200L
+            Role.STUDENT, 100, Role.TEACHER, 200
         ),
         BookingStatus.CANCELLED, Map.of(
-            Role.STUDENT, 1000L
+            Role.STUDENT, 1000
         )
     );
 
-    private static final Map<BookingStatus, Map<Role, Long>> smallStudentBookingStatusMap =
-        Map.of(BookingStatus.CONFIRMED, Map.of(Role.STUDENT, 15L), BookingStatus.WAITING_LIST,
-            Map.of(Role.STUDENT, 5L));
+    private static final Map<BookingStatus, Map<Role, Integer>> smallStudentBookingStatusMap =
+        Map.of(BookingStatus.CONFIRMED, Map.of(Role.STUDENT, 15), BookingStatus.WAITING_LIST,
+            Map.of(Role.STUDENT, 5));
 
-    private static final Map<BookingStatus, Map<Role, Long>> smallTeacherBookingStatusMap =
-        Map.of(BookingStatus.CONFIRMED, Map.of(Role.TEACHER, 15L), BookingStatus.WAITING_LIST,
-            Map.of(Role.TEACHER, 5L));
+    private static final Map<BookingStatus, Map<Role, Integer>> smallTeacherBookingStatusMap =
+        Map.of(BookingStatus.CONFIRMED, Map.of(Role.TEACHER, 15), BookingStatus.WAITING_LIST,
+            Map.of(Role.TEACHER, 5));
 
   }
 
@@ -1618,8 +1618,8 @@ class EventBookingManagerTest {
     expectLastCall().once();
   }
 
-  private static Map<BookingStatus, Map<Role, Long>> generatePlacesAvailableMap() {
-    Map<BookingStatus, Map<Role, Long>> placesAvailableMap = Maps.newHashMap();
+  private static Map<BookingStatus, Map<Role, Integer>> generatePlacesAvailableMap() {
+    Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = Maps.newHashMap();
     placesAvailableMap.put(BookingStatus.CANCELLED, Maps.newHashMap());
     placesAvailableMap.put(BookingStatus.WAITING_LIST, Maps.newHashMap());
     placesAvailableMap.put(BookingStatus.CONFIRMED, Maps.newHashMap());
