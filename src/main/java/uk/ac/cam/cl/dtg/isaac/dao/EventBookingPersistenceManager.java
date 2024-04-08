@@ -125,8 +125,7 @@ public class EventBookingPersistenceManager {
    * @throws SegueDatabaseException - if an error occurs.
    */
   public DetailedEventBookingDTO updateBookingStatus(final ITransaction transaction, final String eventId,
-                                                     final Long userId,
-                                                     final BookingStatus bookingStatus,
+                                                     final Long userId, final BookingStatus bookingStatus,
                                                      final Map<String, String> additionalEventInformation)
       throws SegueDatabaseException {
     return updateBookingStatus(transaction, eventId, userId, null, bookingStatus, additionalEventInformation);
@@ -192,17 +191,16 @@ public class EventBookingPersistenceManager {
    * @return event bookings
    * @throws SegueDatabaseException - if an error occurs.
    */
-  public  Map<String, List<DetailedEventBookingDTO>> adminGetBookingsByEventIds(final List<String> eventIds)
+  public Map<String, List<DetailedEventBookingDTO>> adminGetBookingsByEventIds(final List<String> eventIds)
       throws SegueDatabaseException {
     try {
-      Map<String, ContentDTO> eventDetails = new HashMap<>();
+      Map<String, IsaacEventPageDTO> eventDetails = new HashMap<>();
 
       for (String eventId : eventIds) {
         ContentDTO c = this.contentManager.getContentById(eventId);
-        if (null == c) {
-          continue;
+        if (c instanceof IsaacEventPageDTO eventPage) {
+          eventDetails.put(eventId, eventPage);
         }
-        eventDetails.put(eventId, c);
       }
 
       Iterable<EventBooking> bookings = dao.findAllByEventIds(eventIds);
@@ -212,7 +210,7 @@ public class EventBookingPersistenceManager {
         if (!result.containsKey(e.getEventId())) {
           result.put(e.getEventId(), new ArrayList<>());
         }
-        result.get(e.getEventId()).add(convertToDTO(e, (IsaacEventPageDTO) eventDetails.get(e.getEventId())));
+        result.get(e.getEventId()).add(convertToDTO(e, eventDetails.get(e.getEventId())));
       }
       return result;
     } catch (ContentManagerException e) {
@@ -263,8 +261,8 @@ public class EventBookingPersistenceManager {
    * @throws SegueDatabaseException - if an error occurs.
    */
   public EventBookingDTO createBooking(final ITransaction transaction, final String eventId, final Long userId,
-                                       final BookingStatus status,
-                                       final Map<String, String> additionalInformation) throws SegueDatabaseException {
+                                       final BookingStatus status, final Map<String, String> additionalInformation)
+      throws SegueDatabaseException {
     return this.convertToDTO(dao.add(transaction, eventId, userId, status, additionalInformation));
   }
 
@@ -279,8 +277,8 @@ public class EventBookingPersistenceManager {
   public boolean isUserBooked(final String eventId, final Long userId) throws SegueDatabaseException {
     try {
       final EventBooking bookingByEventAndUser = dao.findBookingByEventAndUser(eventId, userId);
-      List<BookingStatus> bookedStatuses = Arrays.asList(
-          BookingStatus.CONFIRMED, BookingStatus.ATTENDED, BookingStatus.ABSENT);
+      List<BookingStatus> bookedStatuses =
+          Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.ATTENDED, BookingStatus.ABSENT);
       return bookingByEventAndUser != null && bookedStatuses.contains(bookingByEventAndUser.getBookingStatus());
     } catch (ResourceNotFoundException e) {
       return false;
@@ -331,9 +329,9 @@ public class EventBookingPersistenceManager {
       // Note: This will pull back deleted users for the purpose of the events system
       // Note: This will also pull in PII that should be of no interest to anyone
       // DANGER: The User DTO gets silently upgraded to one containing the email address here
-      UserSummaryWithEmailAddressAndGenderDTO user = userManager
-              .convertToUserSummary(userManager.getUserDTOById(eb
-          .getUserId(), true), UserSummaryWithEmailAddressAndGenderDTO.class);
+      UserSummaryWithEmailAddressAndGenderDTO user =
+          userManager.convertToUserSummary(userManager.getUserDTOById(eb.getUserId(), true),
+              UserSummaryWithEmailAddressAndGenderDTO.class);
       result.setReservedById(eb.getReservedById());
       result.setUserBooked(user);
       result.setBookingId(eb.getId());
