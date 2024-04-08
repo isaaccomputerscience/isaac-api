@@ -129,11 +129,11 @@ public class EventNotificationEmailManager {
     fieldsToMatch.put(TYPE_FIELDNAME, Collections.singletonList(EVENT_TYPE));
     sortInstructions.put(DATE_FIELDNAME, Constants.SortOrder.DESC);
     ZonedDateTime now = ZonedDateTime.now();
-    ZonedDateTime threeDaysAhead = now.plusDays(EMAIL_EVENT_REMINDER_DAYS_AHEAD);
+    ZonedDateTime eventReminderThresholdDate = now.plusDays(EMAIL_EVENT_REMINDER_DAYS_AHEAD);
     Instant endOfToday = now.with(LocalTime.MAX).toInstant();
-    DateRangeFilterInstruction
-        eventsWithinThreeDays = new DateRangeFilterInstruction(Instant.now(), threeDaysAhead.toInstant());
-    filterInstructions.put(DATE_FIELDNAME, eventsWithinThreeDays);
+    DateRangeFilterInstruction eventsWithinReminderDateRange =
+        new DateRangeFilterInstruction(Instant.now(), eventReminderThresholdDate.toInstant());
+    filterInstructions.put(DATE_FIELDNAME, eventsWithinReminderDateRange);
 
     try {
       ResultsWrapper<ContentDTO> findByFieldNames = this.contentManager.findByFieldNames(
@@ -168,11 +168,11 @@ public class EventNotificationEmailManager {
     fieldsToMatch.put(TYPE_FIELDNAME, Collections.singletonList(EVENT_TYPE));
     sortInstructions.put(DATE_FIELDNAME, Constants.SortOrder.DESC);
     ZonedDateTime now = ZonedDateTime.now();
-    ZonedDateTime sixtyDaysAgo = now.plusDays(EMAIL_EVENT_FEEDBACK_DAYS_AGO);
+    ZonedDateTime eventFeedbackThresholdDate = now.minusDays(EMAIL_EVENT_FEEDBACK_DAYS_AGO);
 
-    DateRangeFilterInstruction eventsInLastSixtyDays = new DateRangeFilterInstruction(
-        sixtyDaysAgo.toInstant(), Instant.now());
-    filterInstructions.put(DATE_FIELDNAME, eventsInLastSixtyDays);
+    DateRangeFilterInstruction eventsWithinFeedbackDateRange = new DateRangeFilterInstruction(
+        eventFeedbackThresholdDate.toInstant(), Instant.now());
+    filterInstructions.put(DATE_FIELDNAME, eventsWithinFeedbackDateRange);
 
     try {
       ResultsWrapper<ContentDTO> findByFieldNames = this.contentManager.findByFieldNames(
