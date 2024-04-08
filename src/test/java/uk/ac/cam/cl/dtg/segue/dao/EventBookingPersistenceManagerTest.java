@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dao.EventBookingPersistenceManager;
@@ -78,30 +79,16 @@ class EventBookingPersistenceManagerTest {
     expect(dummyPreparedStatement.executeQuery()).andReturn(dummyResultSet);
 
     expect(dummyResultSet.next()).andReturn(true);
-    expect(dummyResultSet.getLong("id")).andReturn(1L);
-    expect(dummyResultSet.getLong("user_id")).andReturn(1L);
-    expect(dummyResultSet.getLong("reserved_by")).andReturn(7L);
-    expect(dummyResultSet.getString("event_id")).andReturn("event1");
-    expect(dummyResultSet.getString("status")).andReturn("CONFIRMED");
-    expect(dummyResultSet.getTimestamp("created")).andReturn(Timestamp.from(now));
-    expect(dummyResultSet.getTimestamp("updated")).andReturn(Timestamp.from(now));
-    expect(dummyResultSet.getObject("additional_booking_information")).andReturn(null);
+    prepareEventBookingResultSet(dummyResultSet, 1L, "event1", now);
 
     expect(dummyResultSet.next()).andReturn(true);
-    expect(dummyResultSet.getLong("id")).andReturn(2L);
-    expect(dummyResultSet.getLong("user_id")).andReturn(2L);
-    expect(dummyResultSet.getLong("reserved_by")).andReturn(7L);
-    expect(dummyResultSet.getString("event_id")).andReturn("event2");
-    expect(dummyResultSet.getString("status")).andReturn("CONFIRMED");
-    expect(dummyResultSet.getTimestamp("created")).andReturn(Timestamp.from(now));
-    expect(dummyResultSet.getTimestamp("updated")).andReturn(Timestamp.from(now));
-    expect(dummyResultSet.getObject("additional_booking_information")).andReturn(null);
+    prepareEventBookingResultSet(dummyResultSet, 2L, "event2", now);
 
     expect(dummyResultSet.next()).andReturn(false);
     dummyResultSet.close();
     dummyPreparedStatement.close();
     dummyConnection.close();
-    
+
     expect(mockAccountManager.getUserDTOById(1L, true)).andReturn(bookedUser1);
     expect(mockAccountManager.convertToUserSummary(bookedUser1, UserSummaryWithEmailAddressAndGenderDTO.class)).andReturn(bookedUserSummary1);
 
@@ -116,25 +103,37 @@ class EventBookingPersistenceManagerTest {
     Map<String, List<DetailedEventBookingDTO>> result = eventBookingPersistenceManager.adminGetBookingsByEventIds(eventIds);
 
     // Then
-    DetailedEventBookingDTO expectedBooking1 = new DetailedEventBookingDTO();
-    expectedBooking1.setBookingId(1L);
-    expectedBooking1.setUserBooked(new UserSummaryWithEmailAddressAndGenderDTO());
-    expectedBooking1.setReservedById(7L);
-    expectedBooking1.setBookingStatus(BookingStatus.CONFIRMED);
-    expectedBooking1.setBookingDate(Date.from(now));
-    expectedBooking1.setUpdated(Date.from(now));
-    DetailedEventBookingDTO expectedBooking2 = new DetailedEventBookingDTO();
-    expectedBooking2.setBookingId(2L);
-    expectedBooking2.setUserBooked(new UserSummaryWithEmailAddressAndGenderDTO());
-    expectedBooking2.setReservedById(7L);
-    expectedBooking2.setBookingStatus(BookingStatus.CONFIRMED);
-    expectedBooking2.setBookingDate(Date.from(now));
-    expectedBooking2.setUpdated(Date.from(now));
+    DetailedEventBookingDTO expectedBooking1 = prepareDetailedEventBookingDTO(1L, now);
+    DetailedEventBookingDTO expectedBooking2 = prepareDetailedEventBookingDTO(2L, now);
     assertEquals(2, result.size());
     assertDeepEquals(List.of(expectedBooking1), result.get("event1"));
     assertDeepEquals(List.of(expectedBooking2), result.get("event2"));
 
     verify(mockedObjects);
+  }
+
+  @NotNull
+  private static DetailedEventBookingDTO prepareDetailedEventBookingDTO(long bookingId, Instant now) {
+    DetailedEventBookingDTO expectedBooking1 = new DetailedEventBookingDTO();
+    expectedBooking1.setBookingId(bookingId);
+    expectedBooking1.setUserBooked(new UserSummaryWithEmailAddressAndGenderDTO());
+    expectedBooking1.setReservedById(7L);
+    expectedBooking1.setBookingStatus(BookingStatus.CONFIRMED);
+    expectedBooking1.setBookingDate(Date.from(now));
+    expectedBooking1.setUpdated(Date.from(now));
+    return expectedBooking1;
+  }
+
+  private static void prepareEventBookingResultSet(ResultSet dummyResultSet, long t, String event1, Instant now)
+      throws SQLException {
+    expect(dummyResultSet.getLong("id")).andReturn(t);
+    expect(dummyResultSet.getLong("user_id")).andReturn(t);
+    expect(dummyResultSet.getLong("reserved_by")).andReturn(7L);
+    expect(dummyResultSet.getString("event_id")).andReturn(event1);
+    expect(dummyResultSet.getString("status")).andReturn("CONFIRMED");
+    expect(dummyResultSet.getTimestamp("created")).andReturn(Timestamp.from(now));
+    expect(dummyResultSet.getTimestamp("updated")).andReturn(Timestamp.from(now));
+    expect(dummyResultSet.getObject("additional_booking_information")).andReturn(null);
   }
 }
 
