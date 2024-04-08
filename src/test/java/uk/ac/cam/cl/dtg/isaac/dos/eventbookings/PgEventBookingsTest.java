@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.dtg.isaac.dos.eventbookings;
 
+import static java.time.Instant.now;
 import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.anyString;
 import static org.easymock.EasyMock.createMock;
@@ -8,13 +9,17 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,36 +114,47 @@ class PgEventBookingsTest {
   @Test
   void testFindAllByEventIds() throws SQLException, SegueDatabaseException {
     List<String> eventIds = Arrays.asList("event1", "event2");
+    String expectedQuery = "SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id IN (?, ?) AND NOT users.deleted";
+    Instant now = now();
 
-    // Create mocked EventBooking objects
-    EventBooking mockEventBooking1 = createMock(EventBooking.class);
-    EventBooking mockEventBooking2 = createMock(EventBooking.class);
+    EventBooking expectedBooking1 =
+        new PgEventBooking(1L, 1L, 7L, "event1", BookingStatus.CONFIRMED, Date.from(now), Date.from(now), null);
+    EventBooking expectedBooking2 =
+        new PgEventBooking(2L, 2L, 7L, "event2", BookingStatus.CONFIRMED, Date.from(now), Date.from(now), null);
 
-    // Set up mock expectations for EventBooking objects
-    expect(mockEventBooking1.getEventId()).andReturn("event1");
-    expect(mockEventBooking1.getUserId()).andReturn(2L);
-    expect(mockEventBooking2.getEventId()).andReturn("event2");
-    expect(mockEventBooking2.getUserId()).andReturn(1L);
-
-    // Set up mock expectations for database interactions
     expect(dummyPostgresSqlDb.getDatabaseConnection()).andReturn(dummyConnection);
-    expect(dummyConnection.prepareStatement(anyString())).andReturn(dummyPreparedStatement);
+    expect(dummyConnection.prepareStatement(expectedQuery)).andReturn(dummyPreparedStatement);
     dummyPreparedStatement.setString(1, "event1");
     dummyPreparedStatement.setString(2, "event2");
     expect(dummyPreparedStatement.executeQuery()).andReturn(dummyResultSet);
 
     expect(dummyResultSet.next()).andReturn(true);
+    expect(dummyResultSet.getLong("id")).andReturn(1L);
+    expect(dummyResultSet.getLong("user_id")).andReturn(1L);
+    expect(dummyResultSet.getLong("reserved_by")).andReturn(7L);
     expect(dummyResultSet.getString("event_id")).andReturn("event1");
-    expect(dummyResultSet.getString("user_id")).andReturn("user1");
+    expect(dummyResultSet.getString("status")).andReturn("CONFIRMED");
+    expect(dummyResultSet.getTimestamp("created")).andReturn(Timestamp.from(now));
+    expect(dummyResultSet.getTimestamp("updated")).andReturn(Timestamp.from(now));
+    expect(dummyResultSet.getObject("additional_booking_information")).andReturn(null);
 
     expect(dummyResultSet.next()).andReturn(true);
+    expect(dummyResultSet.getLong("id")).andReturn(2L);
+    expect(dummyResultSet.getLong("user_id")).andReturn(2L);
+    expect(dummyResultSet.getLong("reserved_by")).andReturn(7L);
     expect(dummyResultSet.getString("event_id")).andReturn("event2");
-    expect(dummyResultSet.getString("user_id")).andReturn("user2");
+    expect(dummyResultSet.getString("status")).andReturn("CONFIRMED");
+    expect(dummyResultSet.getTimestamp("created")).andReturn(Timestamp.from(now));
+    expect(dummyResultSet.getTimestamp("updated")).andReturn(Timestamp.from(now));
+    expect(dummyResultSet.getObject("additional_booking_information")).andReturn(null);
 
     expect(dummyResultSet.next()).andReturn(false);
+    dummyResultSet.close();
+    dummyPreparedStatement.close();
+    dummyConnection.close();
 
     // Create an array of all mocked objects
-    Object[] mockedObjects = {dummyPostgresSqlDb, dummyObjectMapper, dummyConnection, dummyPreparedStatement, dummyResultSet, mockEventBooking1, mockEventBooking2};
+    Object[] mockedObjects = {dummyPostgresSqlDb, dummyObjectMapper, dummyConnection, dummyPreparedStatement, dummyResultSet};
     replay(mockedObjects);
 
     PgEventBookings pgEventBookings = this.buildPgEventBookings();
@@ -146,8 +162,8 @@ class PgEventBookingsTest {
     assertNotNull(result);
 
     List<EventBooking> resultList = (List<EventBooking>) result;
-    List<EventBooking> expectedEventBookings = Arrays.asList(mockEventBooking1, mockEventBooking2);
-    assertEquals(expectedEventBookings, resultList);
+    List<EventBooking> expectedEventBookings = Arrays.asList(expectedBooking1, expectedBooking2);
+    assertDeepEquals(expectedEventBookings, resultList);
 
     verify(mockedObjects);
   }
