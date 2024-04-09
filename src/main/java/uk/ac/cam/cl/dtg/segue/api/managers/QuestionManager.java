@@ -507,7 +507,7 @@ public class QuestionManager {
     Map<Instant, Long> questionAttemptCountPerDateByUser = this.questionAttemptPersistenceManager
         .getQuestionAttemptCountForUserByDateRange(fromDate, toDate, user.getId(), perDay);
 
-    // Convert the normal java dates into useful joda dates and create a new map.
+    // Convert the Instants into localised dates and create a new map.
     Map<LocalDate, Long> result = Maps.newHashMap();
     for (Map.Entry<Instant, Long> le : questionAttemptCountPerDateByUser.entrySet()) {
       LocalDate localisedDate = LocalDate.ofInstant(le.getKey(), ZoneId.systemDefault());
