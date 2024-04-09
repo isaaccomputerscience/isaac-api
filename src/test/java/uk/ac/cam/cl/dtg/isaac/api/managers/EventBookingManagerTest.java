@@ -178,8 +178,8 @@ class EventBookingManagerTest {
 
       prepareCommonTransactionExpectations(testEvent);
 
-      EventBookingDTO newBooking = prepareEventBookingDto(BookingStatus.CONFIRMED, someUser.getId(),
-          someUser.getRole());
+      EventBookingDTO newBooking = prepareEventBookingDto(someUser.getId(), BookingStatus.CONFIRMED,
+                someUser.getRole());
       expect(
           dummyEventBookingPersistenceManager.createBooking(dummyTransaction, testEvent.getId(), someUser.getId(),
               BookingStatus.CONFIRMED, someAdditionalInformation)).andReturn(newBooking).atLeastOnce();
@@ -480,8 +480,8 @@ class EventBookingManagerTest {
       someUser.setEmailVerificationStatus(EmailVerificationStatus.VERIFIED);
       someUser.setRole(Role.STUDENT);
 
-      Map<BookingStatus, Map<Role, Long>> placesAvailableMap = generatePlacesAvailableMap();
-      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 6L);
+      Map<BookingStatus, Map<Role, Integer>> placesAvailableMap = generatePlacesAvailableMap();
+      placesAvailableMap.get(BookingStatus.WAITING_LIST).put(Role.STUDENT, 6);
       expect(dummyEventBookingPersistenceManager.getEventBookingStatusCounts(testEvent.getId(), false)).andReturn(
           placesAvailableMap).atLeastOnce();
 
