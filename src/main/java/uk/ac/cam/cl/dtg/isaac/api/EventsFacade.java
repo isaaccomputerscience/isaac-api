@@ -20,6 +20,14 @@ import static java.time.ZoneOffset.UTC;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.ENDDATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EVENT_TYPE;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_CANNOT_LOCATE_USER;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_CONTENT_ERROR_RETRIEVING_BOOKING;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_DATABASE_ERROR_CREATING_BOOKING;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_DATABASE_ERROR_DELETING_BOOKING;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_DATABASE_ERROR_RETRIEVING_BOOKING;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.PRIVATE_EVENT_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ADMIN_BOOKING_REASON_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ATTENDED_FIELDNAME;
@@ -30,11 +38,13 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_DATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_ID_FKEY_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_TAGS_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EventFilterOption;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.ID_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.STAGE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SortOrder;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TAGS_FIELDNAME;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.TITLE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.USER_ID_FKEY_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.USER_ID_LIST_FKEY_FIELDNAME;
@@ -232,14 +242,14 @@ public class EventsFacade extends AbstractIsaacFacade {
     }
 
     final Map<String, Constants.SortOrder> sortInstructions = Maps.newHashMap();
-    if (sortOrder != null && sortOrder.equals("title")) {
-      sortInstructions.put(Constants.TITLE_FIELDNAME + "." + Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX,
+    if (sortOrder != null && sortOrder.equals(TITLE_FIELDNAME)) {
+      sortInstructions.put(TITLE_FIELDNAME + "." + Constants.UNPROCESSED_SEARCH_FIELD_SUFFIX,
           SortOrder.ASC);
     } else {
       sortInstructions.put(DATE_FIELDNAME, SortOrder.DESC);
     }
 
-    fieldsToMatch.put(TYPE_FIELDNAME, Arrays.asList(EVENT_TYPE));
+    fieldsToMatch.put(TYPE_FIELDNAME, List.of(EVENT_TYPE));
 
     Map<String, AbstractFilterInstruction> filterInstructions = null;
     if (null != showActiveOnly && showActiveOnly) {
@@ -306,8 +316,8 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       return Response.ok(findByFieldNames).build();
     } catch (ContentManagerException e) {
-      log.error("Error during event request", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error locating the content you requested.")
+      log.error(EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR, e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT)
           .toResponse();
     } catch (SegueDatabaseException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error accessing your bookings.")
@@ -342,7 +352,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       if (tags != null) {
         Set<String> tagsList = Sets.newHashSet(tags);
         tagsList.retainAll(eventDTOById.getTags()); // get intersection
-        if (tagsList.size() == 0) {
+        if (tagsList.isEmpty()) {
           // if the intersection is empty then we can continue
           continue;
         }
@@ -401,11 +411,11 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (ResourceNotFoundException e) {
       return new SegueErrorResponse(Status.NOT_FOUND, "The event specified does not exist.").toResponse();
     } catch (ContentManagerException e) {
-      log.error("Error during event request", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error locating the content you requested.")
+      log.error(EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR, e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT)
           .toResponse();
     } catch (SegueDatabaseException e) {
-      log.error("Error during event request", e);
+      log.error(EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error resolving event bookings.")
           .toResponse();
     }
@@ -433,7 +443,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      String errorMsg = "Database error occurred while trying to retrieve all event booking information.";
+      String errorMsg = EXCEPTION_MESSAGE_DATABASE_ERROR_RETRIEVING_BOOKING;
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     }
@@ -467,7 +477,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (ResourceNotFoundException e) {
       return new SegueErrorResponse(Status.NOT_FOUND, "The booking you requested does not exist.").toResponse();
     } catch (SegueDatabaseException e) {
-      String errorMsg = "Database error occurred while trying to retrieve all event booking information.";
+      String errorMsg = EXCEPTION_MESSAGE_DATABASE_ERROR_RETRIEVING_BOOKING;
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     }
@@ -513,7 +523,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (ContentManagerException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content Database error occurred while trying to retrieve event booking information.")
+          EXCEPTION_MESSAGE_CONTENT_ERROR_RETRIEVING_BOOKING)
           .toResponse();
     } catch (EventIsFullException e) {
       return new SegueErrorResponse(Status.CONFLICT,
@@ -528,7 +538,7 @@ public class EventsFacade extends AbstractIsaacFacade {
           "The user doesn't exist, so unable to book them onto an event", e)
           .toResponse();
     } catch (EventIsCancelledException e) {
-      return SegueErrorResponse.getBadRequestResponse("The event is cancelled, so no bookings are being accepted.");
+      return SegueErrorResponse.getBadRequestResponse(EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT);
     }
   }
 
@@ -556,7 +566,7 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       List<DetailedEventBookingDTO> eventBookings = bookingManager.adminGetBookingsByEventId(eventId);
 
-      if (Arrays.asList(Role.EVENT_LEADER).contains(currentUser.getRole())) {
+      if (Role.EVENT_LEADER.equals(currentUser.getRole())) {
         eventBookings = userAssociationManager.filterUnassociatedRecords(currentUser, eventBookings,
             booking -> booking.getUserBooked().getId());
       }
@@ -566,7 +576,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException | ContentManagerException e) {
-      String message = "Database error occurred while trying to retrieve all event booking information.";
+      String message = EXCEPTION_MESSAGE_DATABASE_ERROR_RETRIEVING_BOOKING;
       log.error(message, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, message).toResponse();
     }
@@ -763,7 +773,6 @@ public class EventsFacade extends AbstractIsaacFacade {
             .map(uc -> uc.getStage() != null ? uc.getStage().name() : "").collect(Collectors.toSet())));
         resultRow.add(String.join(" ", resultUser.getRegisteredContexts().stream()
             .map(uc -> uc.getExamBoard() != null ? uc.getExamBoard().name() : "").collect(Collectors.toSet())));
-        resultRow.add(resultAdditionalInformation.get("experienceLevel"));
         resultRow.add(resultAdditionalInformation.get("dietaryRequirements"));
         resultRow.add(resultAdditionalInformation.get("accessibilityRequirements"));
         resultRow.add(resultAdditionalInformation.get("emergencyName"));
@@ -774,7 +783,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       rows.add(totalsRow.toArray(new String[0]));
       rows.add(("Family name,Given name,Role,School,Booking status,Booking date,Last updated date,Year group,"
           // lgtm [java/missing-space-in-concatenation]
-          + "Job title,Stages,Exam boards,Level of teaching experience,dietary requirements,"
+          + "Job title,Stages,Exam boards,dietary requirements,"
           + "Accessibility requirements,Emergency name,Emergency number").split(","));
       rows.addAll(resultRows);
       csvWriter.writeAll(rows);
@@ -790,12 +799,12 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      String message = "Database error occurred while trying to retrieve all event booking information.";
+      String message = EXCEPTION_MESSAGE_DATABASE_ERROR_RETRIEVING_BOOKING;
       log.error(message, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, message).toResponse();
     } catch (ContentManagerException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content Database error occurred while trying to retrieve event booking information.")
+          EXCEPTION_MESSAGE_CONTENT_ERROR_RETRIEVING_BOOKING)
           .toResponse();
     } catch (UnableToIndexSchoolsException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error while looking up schools", e)
@@ -853,21 +862,21 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      String errorMsg = "Database error occurred while trying to book a user onto an event.";
+      String errorMsg = EXCEPTION_MESSAGE_DATABASE_ERROR_CREATING_BOOKING;
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (NoUserException e) {
       return new SegueErrorResponse(Status.NOT_FOUND, "Unable to locate the user requested").toResponse();
     } catch (ContentManagerException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content Database error occurred while trying to retrieve all event booking information.")
+          EXCEPTION_MESSAGE_CONTENT_ERROR_RETRIEVING_BOOKING)
           .toResponse();
     } catch (DuplicateBookingException e) {
       return new SegueErrorResponse(Status.BAD_REQUEST,
           "User already booked on this event. Unable to create a duplicate booking.")
           .toResponse();
     } catch (EventIsCancelledException e) {
-      return SegueErrorResponse.getBadRequestResponse("The event is cancelled, so no bookings are being accepted.");
+      return SegueErrorResponse.getBadRequestResponse(EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT);
     }
   }
 
@@ -959,7 +968,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserException e) {
       return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate one of the users specified.");
     } catch (EventIsCancelledException e) {
-      return SegueErrorResponse.getBadRequestResponse("The event is cancelled, so no bookings are being accepted.");
+      return SegueErrorResponse.getBadRequestResponse(EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT);
     }
   }
 
@@ -1030,15 +1039,15 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (ContentManagerException e) {
-      log.error("Error during event request", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error locating the content you requested.")
+      log.error(EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR, e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT)
           .toResponse();
     } catch (SegueDatabaseException e) {
-      String errorMsg = "Database error occurred while trying to delete an event booking.";
+      String errorMsg = EXCEPTION_MESSAGE_DATABASE_ERROR_DELETING_BOOKING;
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (NoUserException e) {
-      return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate user specified.");
+      return SegueErrorResponse.getResourceNotFoundResponse(EXCEPTION_MESSAGE_CANNOT_LOCATE_USER);
     }
   }
 
@@ -1094,12 +1103,12 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      String errorMsg = "Database error occurred while trying to book a user onto an event.";
+      String errorMsg = EXCEPTION_MESSAGE_DATABASE_ERROR_CREATING_BOOKING;
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (ContentManagerException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content Database error occurred while trying to retrieve all event booking information.")
+          EXCEPTION_MESSAGE_CONTENT_ERROR_RETRIEVING_BOOKING)
           .toResponse();
     } catch (EmailMustBeVerifiedException e) {
       return new SegueErrorResponse(Status.BAD_REQUEST,
@@ -1119,7 +1128,7 @@ public class EventsFacade extends AbstractIsaacFacade {
           "The booking deadline for this event has passed. No more bookings are being accepted.")
           .toResponse();
     } catch (EventIsCancelledException e) {
-      return SegueErrorResponse.getBadRequestResponse("The event is cancelled, so no bookings are being accepted.");
+      return SegueErrorResponse.getBadRequestResponse(EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT);
     }
   }
 
@@ -1152,12 +1161,12 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      String errorMsg = "Database error occurred while trying to book a user onto an event.";
+      String errorMsg = EXCEPTION_MESSAGE_DATABASE_ERROR_CREATING_BOOKING;
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (ContentManagerException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content Database error occurred while trying to retrieve all event booking information.")
+          EXCEPTION_MESSAGE_CONTENT_ERROR_RETRIEVING_BOOKING)
           .toResponse();
     } catch (EmailMustBeVerifiedException e) {
       return new SegueErrorResponse(Status.BAD_REQUEST,
@@ -1178,7 +1187,7 @@ public class EventsFacade extends AbstractIsaacFacade {
               + " Please use the request booking endpoint to book you on to it.")
           .toResponse();
     } catch (EventIsCancelledException e) {
-      return SegueErrorResponse.getBadRequestResponse("The event is cancelled, so no bookings are being accepted.");
+      return SegueErrorResponse.getBadRequestResponse(EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT);
     }
   }
 
@@ -1234,11 +1243,9 @@ public class EventsFacade extends AbstractIsaacFacade {
       }
 
       // if the user id is null then it means they are changing their own booking.
-      if (userId != null) {
-        if (!(bookingManager.isUserAbleToManageEvent(userLoggedIn, event)
-            || bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event))) {
-          return SegueErrorResponse.getIncorrectRoleResponse();
-        }
+      if (userId != null && (!(bookingManager.isUserAbleToManageEvent(userLoggedIn, event)
+          || bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event)))) {
+        return SegueErrorResponse.getIncorrectRoleResponse();
       }
 
       Set<BookingStatus> cancelableStatuses =
@@ -1262,15 +1269,15 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      String errorMsg = "Database error occurred while trying to delete an event booking.";
+      String errorMsg = EXCEPTION_MESSAGE_DATABASE_ERROR_DELETING_BOOKING;
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (ContentManagerException e) {
-      log.error("Error during event request", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error locating the content you requested.")
+      log.error(EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR, e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT)
           .toResponse();
     } catch (NoUserException e) {
-      return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate user specified.");
+      return SegueErrorResponse.getResourceNotFoundResponse(EXCEPTION_MESSAGE_CANNOT_LOCATE_USER);
     }
   }
 
@@ -1301,8 +1308,7 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       this.bookingManager.resendEventEmail(event, bookedUser);
 
-      log.info(String.format("User (%s) has just resent an event email to user id (%s)",
-          currentUser.getEmail(), bookedUser.getId()));
+      log.info("User ({}) has just resent an event email to user id ({})", currentUser.getEmail(), bookedUser.getId());
 
       return Response.noContent().build();
     } catch (NoUserLoggedInException e) {
@@ -1312,11 +1318,11 @@ public class EventsFacade extends AbstractIsaacFacade {
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (ContentManagerException e) {
-      log.error("Error during event request", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error locating the content you requested.")
+      log.error(EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR, e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT)
           .toResponse();
     } catch (NoUserException e) {
-      return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate user specified.");
+      return SegueErrorResponse.getResourceNotFoundResponse(EXCEPTION_MESSAGE_CANNOT_LOCATE_USER);
     } catch (EventIsCancelledException e) {
       return SegueErrorResponse.getBadRequestResponse("Event is cancelled, cannot resent event emails.");
     }
@@ -1365,14 +1371,14 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      String errorMsg = "Database error occurred while trying to delete an event booking.";
+      String errorMsg = EXCEPTION_MESSAGE_DATABASE_ERROR_DELETING_BOOKING;
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (NoUserException e) {
-      return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate user specified.");
+      return SegueErrorResponse.getResourceNotFoundResponse(EXCEPTION_MESSAGE_CANNOT_LOCATE_USER);
     } catch (ContentManagerException e) {
-      log.error("Error during event request", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error locating the content you requested.")
+      log.error(EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR, e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT)
           .toResponse();
     }
   }
@@ -1430,7 +1436,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
     } catch (ContentManagerException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
-          "Content Database error occurred while trying to retrieve event booking information.")
+          EXCEPTION_MESSAGE_CONTENT_ERROR_RETRIEVING_BOOKING)
           .toResponse();
     } catch (EventBookingUpdateException e) {
       return new SegueErrorResponse(Status.BAD_REQUEST,
@@ -1521,10 +1527,10 @@ public class EventsFacade extends AbstractIsaacFacade {
         }
 
         ImmutableMap.Builder<String, Object> eventOverviewBuilder = new ImmutableMap.Builder<>();
-        eventOverviewBuilder.put("id", event.getId());
-        eventOverviewBuilder.put("title", event.getTitle());
+        eventOverviewBuilder.put(ID_FIELDNAME, event.getId());
+        eventOverviewBuilder.put(TITLE_FIELDNAME, event.getTitle());
         eventOverviewBuilder.put("subtitle", event.getSubtitle());
-        eventOverviewBuilder.put("date", event.getDate());
+        eventOverviewBuilder.put(DATE_FIELDNAME, event.getDate());
         eventOverviewBuilder.put("bookingDeadline",
             event.getBookingDeadline() == null ? event.getDate() : event.getBookingDeadline());
         eventOverviewBuilder.put("eventStatus", event.getEventStatus());
@@ -1559,8 +1565,8 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       return Response.ok(new ResultsWrapper<>(resultList, findByFieldNames.getTotalResults())).build();
     } catch (ContentManagerException e) {
-      log.error("Error during event request", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error locating the content you requested.")
+      log.error(EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR, e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT)
           .toResponse();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
@@ -1657,9 +1663,9 @@ public class EventsFacade extends AbstractIsaacFacade {
         }
 
         ImmutableMap.Builder<String, Object> eventOverviewBuilder = new ImmutableMap.Builder<>();
-        eventOverviewBuilder.put("id", e.getId());
-        eventOverviewBuilder.put("title", e.getTitle());
-        eventOverviewBuilder.put("date", e.getDate());
+        eventOverviewBuilder.put(ID_FIELDNAME, e.getId());
+        eventOverviewBuilder.put(TITLE_FIELDNAME, e.getTitle());
+        eventOverviewBuilder.put(DATE_FIELDNAME, e.getDate());
         eventOverviewBuilder.put("subtitle", e.getSubtitle());
         if (e.getEventStatus() != null) {
           eventOverviewBuilder.put("status", e.getEventStatus());
@@ -1678,8 +1684,8 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       return Response.ok(new ResultsWrapper<>(resultList, findByFieldNames.getTotalResults())).build();
     } catch (ContentManagerException e) {
-      log.error("Error during event request", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Error locating the content you requested.")
+      log.error(EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR, e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT)
           .toResponse();
     }
   }

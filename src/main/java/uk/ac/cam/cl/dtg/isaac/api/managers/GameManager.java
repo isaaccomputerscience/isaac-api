@@ -1140,6 +1140,10 @@ public class GameManager {
     fieldsToMap.add(new GitContentManager.BooleanSearchClause(DEPRECATED_FIELDNAME, BooleanOperator.NOT,
         Collections.singletonList("true")));
 
+    // exclude regression test
+    fieldsToMap.add(new GitContentManager.BooleanSearchClause(TAGS_FIELDNAME, BooleanOperator.NOT,
+        Collections.singletonList("regression_test")));
+
     fieldsToMap.addAll(generateFieldToMatchForQuestionFilter(gameFilter));
 
     ResultsWrapper<ContentDTO> results = this.contentManager.findByFieldNamesRandomOrder(

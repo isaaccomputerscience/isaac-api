@@ -12,8 +12,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>v3.5.0</revision>
         <segue.version>${revision}</segue.version>
-        <log4j.version>2.22.1</log4j.version>
-        <resteasy.version>6.2.7.Final</resteasy.version>
+        <log4j.version>2.23.1</log4j.version>
+        <resteasy.version>6.2.8.Final</resteasy.version>
         <guice.version>7.0.0</guice.version>
         <oauth-client.version>1.35.0</oauth-client.version>
         <jackson.version>2.16.1</jackson.version>
@@ -403,7 +403,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.1</version>
+                <version>3.13.0</version>
                 <configuration>
                     <release>17</release>
                     <annotationProcessorPaths>
@@ -659,7 +659,7 @@
                     <plugin>
                         <groupId>cz.habarta.typescript-generator</groupId>
                         <artifactId>typescript-generator-maven-plugin</artifactId>
-                        <version>2.12.476</version>
+                        <version>3.2.1263</version>
                         <executions>
                             <execution>
                                 <!-- This generates a type file for use in Isaac React App -->
@@ -673,6 +673,8 @@
                                         <classPattern>uk.ac.cam.cl.dtg.isaac.dto.**DTO</classPattern>
                                     </classPatterns>
                                     <outputFile>isaac-dto-types.d.ts</outputFile>
+                                    <jsonLibrary/>
+                                    <outputKind/>
                                 </configuration>
                             </execution>
                             <execution>
@@ -687,6 +689,8 @@
                                         <classPattern>uk.ac.cam.cl.dtg.isaac.dos.**</classPattern>
                                     </classPatterns>
                                     <outputFile>isaac-do-types.d.ts</outputFile>
+                                    <jsonLibrary/>
+                                    <outputKind/>
                                 </configuration>
                             </execution>
                         </executions>
