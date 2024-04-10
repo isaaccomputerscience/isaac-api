@@ -9,6 +9,7 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -164,6 +165,32 @@ class PgEventBookingsTest {
     List<EventBooking> resultList = (List<EventBooking>) result;
     List<EventBooking> expectedEventBookings = Arrays.asList(expectedBooking1, expectedBooking2);
     assertDeepEquals(expectedEventBookings, resultList);
+
+    verify(mockedObjects);
+  }
+
+  @Test
+  // Test the case where a SQLException is thrown during the Database query
+  void testFindAllByEventIds_expectedException() throws SQLException {
+    List<String> eventIds = Arrays.asList("event1", "event2");
+    String expectedQuery = "SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id IN (?, ?) AND NOT users.deleted";
+
+    expect(dummyPostgresSqlDb.getDatabaseConnection()).andReturn(dummyConnection);
+    expect(dummyConnection.prepareStatement(expectedQuery)).andReturn(dummyPreparedStatement);
+    dummyPreparedStatement.setString(1, "event1");
+    dummyPreparedStatement.setString(2, "event2");
+    expect(dummyPreparedStatement.executeQuery()).andThrow(new SQLException("Database error"));
+    dummyPreparedStatement.close();
+    dummyConnection.close();
+
+    // Create an array of all mocked objects
+    Object[] mockedObjects = {dummyPostgresSqlDb, dummyObjectMapper, dummyConnection, dummyPreparedStatement, dummyResultSet};
+    replay(mockedObjects);
+
+    PgEventBookings pgEventBookings = this.buildPgEventBookings();
+
+    // Act and Assert
+    assertThrows(SegueDatabaseException.class, () -> pgEventBookings.findAllByEventIds(eventIds));
 
     verify(mockedObjects);
   }
