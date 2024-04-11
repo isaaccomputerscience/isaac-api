@@ -40,6 +40,8 @@ public class RestEasyJacksonConfiguration extends JacksonJsonProvider {
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+//    mapper.configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
+//    mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true);
     super.setMapper(mapper);
   }
 }

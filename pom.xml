@@ -700,7 +700,7 @@
                             <outputFileType>declarationFile</outputFileType>
                             <optionalProperties>all</optionalProperties>
                             <customTypeMappings>
-                                <mapping>java.util.Date:EpochTimeStamp</mapping>
+                                <mapping>java.time.Instant:EpochTimeStamp</mapping>
                             </customTypeMappings>
                             <indentString xml:space="preserve">  </indentString>
                         </configuration>
