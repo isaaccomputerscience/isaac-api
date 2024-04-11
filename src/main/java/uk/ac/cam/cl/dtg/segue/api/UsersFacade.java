@@ -262,15 +262,14 @@ public class UsersFacade extends AbstractSegueFacade {
         // which has not made any other authenticated/logged request to Isaac beforehand.
         // This _might_ be suspicious, and this logging will help establish that.
         if (request.getSession() == null || request.getSession().getAttribute(ANONYMOUS_USER) == null) {
-          log.error(String.format("Registration attempt from (%s) for (%s) without corresponding anonymous user!",
-              ipAddress, sanitiseExternalLogValue(registeredUser.getEmail())));
+          log.error("Registration attempt from ({}) for ({}) without corresponding anonymous user!",
+              ipAddress, sanitiseExternalLogValue(registeredUser.getEmail()));
         }
 
-        return userManager.createUserObjectAndLogIn(request, response, registeredUser, newPassword, userPreferences,
-            registeredUserContexts);
+        return userManager.createNewUser(request, registeredUser, newPassword, userPreferences, registeredUserContexts);
       } catch (SegueResourceMisuseException e) {
-        log.error(String.format("Blocked a registration attempt by (%s) after misuse limit hit!",
-            RequestIpExtractor.getClientIpAddr(request)));
+        log.error("Blocked a registration attempt by ({}) after misuse limit hit!",
+            RequestIpExtractor.getClientIpAddr(request));
         return SegueErrorResponse.getRateThrottledResponse(
             "Too many registration requests. Please try again later or contact us!");
       }

@@ -394,28 +394,27 @@ public class UserAccountManager implements IUserAccountManager {
    * Create a user object. This method allows new user objects to be created.
    *
    * @param request                - so that we can identify the user
-   * @param response               to tell the browser to store the session in our own segue cookie.
    * @param userObjectFromClient   - the new user object from the clients' perspective.
    * @param newPassword            - the new password for the user.
    * @param userPreferenceObject   - the new preferences for this user
    * @param registeredUserContexts - a List of User Contexts (stage, exam board)
    * @return the updated user object.
    */
-  public Response createUserObjectAndLogIn(final HttpServletRequest request, final HttpServletResponse response,
-                                           final RegisteredUser userObjectFromClient, final String newPassword,
-                                           final Map<String, Map<String, Boolean>> userPreferenceObject,
-                                           final List<UserContext> registeredUserContexts)
+  public Response createNewUser(final HttpServletRequest request, final RegisteredUser userObjectFromClient,
+                                final String newPassword,
+                                final Map<String, Map<String, Boolean>> userPreferenceObject,
+                                final List<UserContext> registeredUserContexts)
       throws InvalidKeySpecException, NoSuchAlgorithmException {
     try {
-      RegisteredUserDTO savedUser = this.createUserObjectAndSession(request, response,
-          userObjectFromClient, newPassword, registeredUserContexts);
+      RegisteredUserDTO savedUser =
+          this.createAndSaveUserObject(request, userObjectFromClient, newPassword, registeredUserContexts);
 
       if (userPreferenceObject != null) {
         List<UserPreference> userPreferences = userPreferenceObjectToList(userPreferenceObject, savedUser.getId());
         userPreferenceManager.saveUserPreferences(userPreferences);
       }
 
-      return Response.ok(savedUser).build();
+      return Response.ok().build();
     } catch (InvalidPasswordException e) {
       log.warn("Invalid password exception occurred during registration!");
       return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
@@ -430,7 +429,7 @@ public class UserAccountManager implements IUserAccountManager {
     } catch (DuplicateAccountException e) {
       log.warn("Duplicate account registration attempt for ({})",
           sanitiseExternalLogValue(userObjectFromClient.getEmail()));
-      return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
+      return Response.ok().build();
     } catch (SegueDatabaseException e) {
       String errorMsg = "Unable to set a password, due to an internal database error.";
       log.error(errorMsg, e);
@@ -1068,7 +1067,6 @@ public class UserAccountManager implements IUserAccountManager {
    * Note: this method is intended for creation of accounts in segue - not for linked account registration.
    *
    * @param request                to enable access to anonymous user information.
-   * @param response               to store the session in our own segue cookie.
    * @param user                   - the user DO to use for updates - must not contain a user id.
    * @param newPassword            - new password for the account being created.
    * @param registeredUserContexts - a List of User Contexts (stage, exam board)
@@ -1079,31 +1077,23 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws EmailMustBeVerifiedException  - if a user attempts to sign up with an email that must be verified before it
    *                                             can be used (i.e. an @isaaccomputerscience.org address).
    */
-  public RegisteredUserDTO createUserObjectAndSession(
-      final HttpServletRequest request, final HttpServletResponse response, final RegisteredUser user,
-      final String newPassword, final List<UserContext> registeredUserContexts) throws InvalidPasswordException,
-      MissingRequiredFieldException, SegueDatabaseException,
+  public RegisteredUserDTO createAndSaveUserObject(
+      final HttpServletRequest request, final RegisteredUser user, final String newPassword,
+      final List<UserContext> registeredUserContexts)
+      throws InvalidPasswordException, MissingRequiredFieldException, SegueDatabaseException,
       EmailMustBeVerifiedException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException {
-    Validate.isTrue(user.getId() == null,
-        "When creating a new user the user id must not be set.");
+    Validate.isTrue(user.getId() == null, "When creating a new user the user id must not be set.");
 
     // Ensure nobody registers with Isaac email addresses. Users can change emails to restricted ones by verifying them,
     // however.
     if (null != restrictedSignupEmailRegex && restrictedSignupEmailRegex.matcher(user.getEmail()).find()) {
-      log.warn(
-          "User attempted to register with Isaac email address '" + sanitiseExternalLogValue(user.getEmail()) + "'!");
+      log.warn("User attempted to register with Isaac email address '{}'!", sanitiseExternalLogValue(user.getEmail()));
       throw new EmailMustBeVerifiedException("You cannot register with an Isaac email address.");
     }
 
-    RegisteredUser userToSave;
-    UserMapper mapper = this.dtoMapper;
-
-    // We want to map to DTO first to make sure that the user cannot
-    // change fields that aren't exposed to them
-    RegisteredUserDTO userDtoForNewUser = mapper.map(user);
-
-    // This is a new registration
-    userToSave = mapper.map(userDtoForNewUser);
+    // We want to map to DTO first to make sure that the user cannot change fields that aren't exposed to them
+    RegisteredUserDTO userDtoForNewUser = this.dtoMapper.map(user);
+    RegisteredUser userToSave = this.dtoMapper.map(userDtoForNewUser);
 
     // Set defaults
     userToSave.setRole(Role.STUDENT);
@@ -1121,7 +1111,34 @@ public class UserAccountManager implements IUserAccountManager {
       userToSave.setTeacherPending(false);
     }
 
-    // Before save we should validate the user for mandatory fields.
+    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders
+        .get(AuthenticationProvider.SEGUE);
+
+    // Before saving, we should validate the user for mandatory fields
+    validateUserDetails(user, newPassword, userToSave, authenticator);
+
+    // Generate email verification token and add to user object
+    authenticator.createEmailVerificationTokenForUser(userToSave, userToSave.getEmail());
+
+    // save the user object to database and generate the new userId
+    RegisteredUser userToReturn = this.database.createOrUpdateUser(userToSave);
+
+    // Create password for the user (adds directly to credentials table)
+    authenticator.setOrChangeUsersPassword(userToReturn, newPassword);
+
+    // Send a confirmation email, including the verification token
+    sendRegistrationConfirmationEmail(userToReturn);
+
+    logManager.logEvent(this.convertUserDOToUserDTO(userToReturn), request, SegueServerLogType.USER_REGISTRATION,
+        ImmutableMap.builder().put("provider", AuthenticationProvider.SEGUE.name()).build());
+
+    // return it to the caller.
+    return this.dtoMapper.map(userToReturn);
+  }
+
+  private void validateUserDetails(RegisteredUser user, String newPassword, RegisteredUser userToSave,
+                         IPasswordAuthenticator authenticator)
+      throws InvalidNameException, InvalidPasswordException, MissingRequiredFieldException, SegueDatabaseException {
     // validate names
     if (!isUserNameValid(user.getGivenName())) {
       throw new InvalidNameException("The given name provided is an invalid length or contains forbidden characters.");
@@ -1130,9 +1147,6 @@ public class UserAccountManager implements IUserAccountManager {
     if (!isUserNameValid(user.getFamilyName())) {
       throw new InvalidNameException("The family name provided is an invalid length or contains forbidden characters.");
     }
-
-    IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders
-        .get(AuthenticationProvider.SEGUE);
 
     // FIXME: Before creating the user object, ensure password is valid. This should really be in a transaction.
     authenticator.ensureValidPassword(newPassword);
@@ -1145,20 +1159,13 @@ public class UserAccountManager implements IUserAccountManager {
     if (this.findUserByEmail(user.getEmail()) != null) {
       throw new DuplicateAccountException("The email address provided is invalid.");
     }
+  }
 
-    authenticator.createEmailVerificationTokenForUser(userToSave, userToSave.getEmail());
-
-    // save the user to get the userId
-    RegisteredUser userToReturn = this.database.createOrUpdateUser(userToSave);
-
-    // create password for the user
-    authenticator.setOrChangeUsersPassword(userToReturn, newPassword);
-
-    // send an email confirmation and set up verification
+  private void sendRegistrationConfirmationEmail(RegisteredUser userToReturn) throws SegueDatabaseException {
     try {
       RegisteredUserDTO userToReturnDTO = this.getUserDTOById(userToReturn.getId());
 
-      ImmutableMap<String, Object> emailTokens = ImmutableMap.of("verificationURL",
+      Map<String, Object> emailTokens = Map.of("verificationURL",
           generateEmailVerificationURL(userToReturnDTO, userToReturn.getEmailVerificationToken()));
 
       emailManager.sendTemplatedEmailToUser(userToReturnDTO,
@@ -1170,16 +1177,6 @@ public class UserAccountManager implements IUserAccountManager {
     } catch (NoUserException e) {
       log.error("Registration email could not be sent due to not being able to locate the user: {}", e.getMessage());
     }
-
-    // save the user again with updated token
-    //TODO: do we need this?
-    userToReturn = this.database.createOrUpdateUser(userToReturn);
-
-    logManager.logEvent(this.convertUserDOToUserDTO(userToReturn), request, SegueServerLogType.USER_REGISTRATION,
-        ImmutableMap.builder().put("provider", AuthenticationProvider.SEGUE.name()).build());
-
-    // return it to the caller.
-    return this.logUserIn(request, response, userToReturn);
   }
 
   /**
@@ -1841,8 +1838,7 @@ public class UserAccountManager implements IUserAccountManager {
       return new ArrayList<>();
     }
 
-    return users.parallelStream().map(user -> this.dtoMapper.map(user))
-        .collect(Collectors.toList());
+    return users.parallelStream().map(this.dtoMapper::map).collect(Collectors.toList());
   }
 
   /**
@@ -1938,7 +1934,7 @@ public class UserAccountManager implements IUserAccountManager {
 
   /**
    * @param userDTO                the userDTO of interest
-   * @param emailVerificationToken the verifcation token
+   * @param emailVerificationToken the verification token
    * @return verification URL
    */
   private String generateEmailVerificationURL(final RegisteredUserDTO userDTO, final String emailVerificationToken) {
