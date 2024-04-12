@@ -1724,7 +1724,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @return user or null if we cannot find it.
    * @throws SegueDatabaseException - If there is an internal database error.
    */
-  private RegisteredUser findUserByEmail(final String email) throws SegueDatabaseException {
+  public RegisteredUser findUserByEmail(final String email) throws SegueDatabaseException {
     if (null == email) {
       return null;
     }

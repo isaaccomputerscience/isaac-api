@@ -23,6 +23,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.LOCAL_AUTH_GROUP_MANAGER_INIT
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NEVER_CACHE_WITHOUT_ETAG_CHECK;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SegueServerLogType;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TOO_MANY_REQUESTS;
+import static uk.ac.cam.cl.dtg.segue.configuration.SegueGuiceConfigurationModule.getUserMapperInstance;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -73,6 +74,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.UserSettings;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
+import uk.ac.cam.cl.dtg.isaac.mappers.UserMapper;
 import uk.ac.cam.cl.dtg.segue.api.managers.RecaptchaManager;
 import uk.ac.cam.cl.dtg.segue.api.managers.SegueResourceMisuseException;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
@@ -717,26 +719,33 @@ public class UsersFacade extends AbstractSegueFacade {
   @Operation(summary = "Submit a contact form request.")
   public Response requestRoleChange(
       @Context final HttpServletRequest request, final Map<String, String> requestDetails) {
-    if (requestDetails == null || StringUtils.isEmpty(requestDetails.get("verificationDetails"))) {
+    if (requestDetails == null || StringUtils.isEmpty(requestDetails.get("verificationDetails"))
+        || StringUtils.isEmpty(requestDetails.get("userId"))) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "Missing form details.").toResponse();
     }
 
     try {
-      RegisteredUserDTO currentUserDto = this.userManager.getCurrentRegisteredUser(request);
+      RegisteredUser targetUser = userManager.findUserByEmail(requestDetails.get("userId"));
+      if (targetUser == null) {
+        log.warn("A role change request was made for unknown user: {}", requestDetails.get("userId"));
+        return Response.ok().build();
+      }
 
-      if (currentUserDto.getTeacherPending()) {
+      if (targetUser.getTeacherPending() == Boolean.TRUE) {
         return new SegueErrorResponse(
             Status.BAD_REQUEST, "You have already submitted a teacher upgrade request.").toResponse();
       }
-      if (currentUserDto.getRole() == Role.TEACHER) {
+      if (targetUser.getRole() == Role.TEACHER) {
         return new SegueErrorResponse(
             Status.BAD_REQUEST, "You already have a teacher role.").toResponse();
       }
 
-      userManager.sendRoleChangeRequestEmail(request, currentUserDto, Role.TEACHER, requestDetails);
-      RegisteredUserDTO updatedUser = userManager.updateTeacherPendingFlag(currentUserDto.getId(), true);
-      return Response.ok(updatedUser).build();
-    } catch (NoUserLoggedInException | NoUserException e) {
+      UserMapper userMapper = getUserMapperInstance();
+      RegisteredUserDTO targetUserDTO = userMapper.map(targetUser);
+      userManager.sendRoleChangeRequestEmail(request, targetUserDTO, Role.TEACHER, requestDetails);
+      userManager.updateTeacherPendingFlag(targetUserDTO.getId(), true);
+      return Response.ok().build();
+    } catch (NoUserException e) {
       return new SegueErrorResponse(Status.UNAUTHORIZED,
           "You must be logged in to request a role change.").toResponse();
     } catch (SegueDatabaseException e) {
