@@ -720,14 +720,16 @@ public class UsersFacade extends AbstractSegueFacade {
   public Response requestRoleChange(
       @Context final HttpServletRequest request, final Map<String, String> requestDetails) {
     if (requestDetails == null || StringUtils.isEmpty(requestDetails.get("verificationDetails"))
-        || StringUtils.isEmpty(requestDetails.get("userId"))) {
+        || StringUtils.isEmpty(requestDetails.get("userEmail"))) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "Missing form details.").toResponse();
     }
 
+    String userEmail = requestDetails.get("userEmail");
     try {
-      RegisteredUser targetUser = userManager.findUserByEmail(requestDetails.get("userId"));
+      RegisteredUser targetUser = userManager.findUserByEmail(userEmail);
       if (targetUser == null) {
-        log.warn("A role change request was made for unknown user: {}", requestDetails.get("userId"));
+        // As this endpoint does not require authentication, do not expose whether the requested user exists
+        log.warn("A role change request was made for unknown user: {}", userEmail);
         return Response.ok().build();
       }
 
@@ -746,8 +748,12 @@ public class UsersFacade extends AbstractSegueFacade {
       userManager.updateTeacherPendingFlag(targetUserDTO.getId(), true);
       return Response.ok().build();
     } catch (NoUserException e) {
-      return new SegueErrorResponse(Status.UNAUTHORIZED,
-          "You must be logged in to request a role change.").toResponse();
+      // This exception is thrown after we have already checked whether a user exists for the provided email address,
+      // so something has gone very wrong
+      log.error("Could not find user with email address ({}) to set teacherPending flag."
+              + " This should have already been caught.", userEmail);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
+          "An error occurred while trying to set the role change request flag.").toResponse();
     } catch (SegueDatabaseException e) {
       String errorMsg = "A database error has occurred while handling a role change request";
       log.error(errorMsg, e);
