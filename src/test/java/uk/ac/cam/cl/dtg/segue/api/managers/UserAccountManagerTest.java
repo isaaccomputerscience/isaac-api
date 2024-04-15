@@ -1,7 +1,9 @@
 package uk.ac.cam.cl.dtg.segue.api.managers;
 
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
@@ -9,6 +11,7 @@ import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.isaac.dos.users.Role.STUDENT;
 import static uk.ac.cam.cl.dtg.isaac.dos.users.Role.TEACHER;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
@@ -16,10 +19,15 @@ import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isEmailVali
 import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isUserNameValid;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,15 +37,20 @@ import org.junit.jupiter.params.provider.MethodSource;
 import uk.ac.cam.cl.dtg.isaac.dos.PgUserPreferenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.School;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
+import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.mappers.UserMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 import uk.ac.cam.cl.dtg.segue.auth.IAuthenticator;
 import uk.ac.cam.cl.dtg.segue.auth.ISecondFactorAuthenticator;
+import uk.ac.cam.cl.dtg.segue.auth.SegueLocalAuthenticator;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidPasswordException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.MissingRequiredFieldException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
+import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
@@ -54,14 +67,18 @@ class UserAccountManagerTest {
   private EmailManager emailManager;
   private SchoolListReader schoolListReader;
   private UserAccountManager userAccountManager;
+  private UserMapper userMapper;
+  private SegueLocalAuthenticator segueLocalAuthenticator;
 
   @BeforeEach
   public void beforeEach() {
     database = createMock(PgUsers.class);
     QuestionManager questionmanager = createNiceMock(QuestionManager.class);
     PropertiesLoader propertiesLoader = createNiceMock(PropertiesLoader.class);
-    Map<AuthenticationProvider, IAuthenticator> providersToRegister = Map.of();
-    UserMapper userMapper = createMock(UserMapper.class);
+    segueLocalAuthenticator = createMock(SegueLocalAuthenticator.class);
+    Map<AuthenticationProvider, IAuthenticator> providersToRegister =
+        Map.of(AuthenticationProvider.SEGUE, segueLocalAuthenticator);
+    userMapper = createMock(UserMapper.class);
     emailManager = createMock(EmailManager.class);
     PgAnonymousUsers pgAnonymousUsers = createNiceMock(PgAnonymousUsers.class);
     ILogManager logManager = createNiceMock(ILogManager.class);
@@ -439,6 +456,75 @@ class UserAccountManagerTest {
       user.setSchoolId(schoolUrn);
       user.setSchoolOther(schoolOther);
       return user;
+    }
+  }
+
+  @Nested
+  class CreateNewUser {
+    @Test
+    void createNewUser_success()
+        throws InvalidPasswordException, SegueDatabaseException, InvalidKeySpecException, NoSuchAlgorithmException,
+        ContentManagerException {
+      String newUserEmailAddress = "exampleAddress@test.com";
+      HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
+      RegisteredUser userObjectFromFrontEnd = prepareRegisteredUser(newUserEmailAddress);
+      String newUserPassword = "Password123!";
+      Map<String, Map<String, Boolean>> newUserPreferences = Map.of();
+      List<UserContext> newUserContexts = List.of();
+
+      RegisteredUserDTO temporaryUserDTO = new RegisteredUserDTO();
+      RegisteredUser sanitisedUserObject = prepareRegisteredUser(newUserEmailAddress);
+      expect(userMapper.map(userObjectFromFrontEnd)).andReturn(temporaryUserDTO);
+      expect(userMapper.map(temporaryUserDTO)).andReturn(sanitisedUserObject);
+
+      segueLocalAuthenticator.ensureValidPassword(newUserPassword);
+      expectLastCall();
+      expect(database.getByEmail(newUserEmailAddress)).andReturn(null);
+
+      RegisteredUser userObjectWithEmailToken = prepareRegisteredUser(newUserEmailAddress);
+      userObjectWithEmailToken.setEmailVerificationToken("emailToken");
+      expect(segueLocalAuthenticator.createEmailVerificationTokenForUser(sanitisedUserObject,
+          newUserEmailAddress)).andReturn(userObjectWithEmailToken);
+
+      RegisteredUser userFromDatabase = prepareRegisteredUser(newUserEmailAddress);
+      userFromDatabase.setEmailVerificationToken("emailToken");
+      userFromDatabase.setId(1L);
+      expect(database.createOrUpdateUser(userObjectWithEmailToken)).andReturn(userFromDatabase);
+
+      segueLocalAuthenticator.setOrChangeUsersPassword(userFromDatabase, newUserPassword);
+      expectLastCall();
+
+      expect(database.getById(1L)).andReturn(userFromDatabase);
+      RegisteredUserDTO userFromDatabaseAsDTO = new RegisteredUserDTO();
+      userFromDatabaseAsDTO.setEmail(newUserEmailAddress);
+      userFromDatabaseAsDTO.setId(1L);
+      expect(userMapper.map(userFromDatabase)).andReturn(userFromDatabaseAsDTO).times(3);
+      EmailTemplateDTO emailTemplateDTO = new EmailTemplateDTO();
+      expect(emailManager.getEmailTemplateDTO("email-template-registration-confirmation")).andReturn(emailTemplateDTO);
+      emailManager.sendTemplatedEmailToUser(eq(userFromDatabaseAsDTO), eq(emailTemplateDTO), anyObject(),
+          eq(EmailType.SYSTEM));
+      expectLastCall();
+
+      replay(userMapper, segueLocalAuthenticator, database, emailManager);
+
+      try {
+        try (Response response = userAccountManager.createNewUser(mockRequest, userObjectFromFrontEnd, newUserPassword,
+            newUserPreferences, newUserContexts)) {
+          assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+          assertNull(response.getEntity());
+        }
+      } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+        fail("Unexpected exception from method under test");
+      }
+    }
+
+    @NotNull
+    private RegisteredUser prepareRegisteredUser(String newUserEmailAddress) {
+      RegisteredUser registeredUser = new RegisteredUser();
+      registeredUser.setEmail(newUserEmailAddress);
+      registeredUser.setGivenName("givenName");
+      registeredUser.setFamilyName("familyName");
+      return registeredUser;
     }
   }
 }
