@@ -20,6 +20,7 @@ import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getSharedBas
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,6 +63,7 @@ public class QuestionValidationResponseDeserializer extends JsonDeserializer<Que
 
       mapper = new ObjectMapper();
       mapper.registerModule(new JavaTimeModule());
+      mapper.configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
       mapper.registerModule(contentDeserializerModule);
     }
   }

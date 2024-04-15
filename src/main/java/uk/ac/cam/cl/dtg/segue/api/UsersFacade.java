@@ -211,6 +211,7 @@ public class UsersFacade extends AbstractSegueFacade {
       ObjectMapper tmpObjectMapper = new ObjectMapper();
       tmpObjectMapper.registerModule(new JavaTimeModule());
       tmpObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      tmpObjectMapper.configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
 
       // TODO: We need to change the way the frontend sends passwords to reduce complexity
       Map<String, Object> mapRepresentation = tmpObjectMapper.readValue(userObjectString, HashMap.class);

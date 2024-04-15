@@ -19,6 +19,7 @@ package uk.ac.cam.cl.dtg.segue.dao.content;
 import static java.util.Objects.requireNonNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -334,6 +335,7 @@ public class ContentMapperUtils {
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     objectMapper.registerModule(contentDeserializerModule);
+    objectMapper.configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
 
     return objectMapper;
   }

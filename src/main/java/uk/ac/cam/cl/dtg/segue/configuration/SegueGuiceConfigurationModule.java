@@ -41,6 +41,7 @@ import static uk.ac.cam.cl.dtg.util.ReflectionUtils.getClasses;
 import static uk.ac.cam.cl.dtg.util.ReflectionUtils.getSubTypes;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.client.util.Lists;
@@ -565,6 +566,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.registerModule(new JavaTimeModule());
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+      objectMapper.configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
       logManager = new PgLogManagerEventListener(new PgLogManager(database, objectMapper, loggingEnabled));
 
       log.info("Creating singleton of LogManager");
