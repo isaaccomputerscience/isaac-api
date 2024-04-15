@@ -424,11 +424,11 @@ public class ElasticSearchProvider implements ISearchProvider {
         RangeQueryBuilder rangeFilter = QueryBuilders.rangeQuery(fieldToFilterInstruction.getKey());
         // Note: assumption that dates are stored in long format.
         if (dateRangeInstruction.getFromDate() != null) {
-          rangeFilter.from(dateRangeInstruction.getFromDate().getEpochSecond());
+          rangeFilter.from(dateRangeInstruction.getFromDate().toEpochMilli());
         }
 
         if (dateRangeInstruction.getToDate() != null) {
-          rangeFilter.to(dateRangeInstruction.getToDate().getEpochSecond());
+          rangeFilter.to(dateRangeInstruction.getToDate().toEpochMilli());
         }
 
         filter.must(rangeFilter);
