@@ -659,7 +659,7 @@ public class PgEventBookings implements EventBookings {
         return returnResult;
       }
     } catch (SQLException e) {
-      throw new SegueDatabaseException("Postgres exception", e);
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     }
   }
 
