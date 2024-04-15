@@ -21,10 +21,11 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_GROUP_RESERVATION_DEFAU
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.Hub;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ExternalReference;
 import uk.ac.cam.cl.dtg.isaac.dos.content.JsonContentType;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
@@ -41,10 +42,10 @@ import uk.ac.cam.cl.dtg.util.locations.Location;
  */
 @JsonContentType("isaacEventPage")
 public class IsaacEventPageDTO extends ContentDTO {
-  private Date date;
-  private Date endDate;
-  private Date bookingDeadline;
-  private Date prepWorkDeadline;
+  private Instant date;
+  private Instant endDate;
+  private Instant bookingDeadline;
+  private Instant prepWorkDeadline;
   private Location location;
 
   private List<ExternalReference> preResources;
@@ -66,13 +67,14 @@ public class IsaacEventPageDTO extends ContentDTO {
 
   private BookingStatus userBookingStatus;
 
-  private Long placesAvailable;
+  private Integer placesAvailable;
 
   private Integer groupReservationLimit;
 
   private Boolean allowGroupReservations;
 
   private Boolean privateEvent;
+  private Hub hub;
 
   /**
    * @param id
@@ -101,6 +103,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    * @param groupReservationLimit
    * @param allowGroupReservations
    * @param privateEvent if an event should be publicly visible or hidden
+   * @param hub the hub hosting the event
    */
   @JsonCreator
   public IsaacEventPageDTO(
@@ -117,10 +120,10 @@ public class IsaacEventPageDTO extends ContentDTO {
       @JsonProperty("version") final boolean published,
       @JsonProperty("deprecated") final Boolean deprecated,
       @JsonProperty("tags") final Set<String> tags,
-      @JsonProperty("date") final Date date,
-      @JsonProperty("end_date") final Date endDate,
-      @JsonProperty("bookingDeadline") final Date bookingDeadline,
-      @JsonProperty("prepWorkDeadline") final Date prepWorkDeadline,
+      @JsonProperty("date") final Instant date,
+      @JsonProperty("end_date") final Instant endDate,
+      @JsonProperty("bookingDeadline") final Instant bookingDeadline,
+      @JsonProperty("prepWorkDeadline") final Instant prepWorkDeadline,
       @JsonProperty("location") final Location location,
       @JsonProperty("preResources") final List<ExternalReference> preResources,
       @JsonProperty("postResources") final List<ExternalReference> postResources,
@@ -129,7 +132,8 @@ public class IsaacEventPageDTO extends ContentDTO {
       @JsonProperty("EventStatus") final EventStatus eventStatus,
       @JsonProperty("groupReservationLimit") final Integer groupReservationLimit,
       @JsonProperty("allowGroupReservations") final Boolean allowGroupReservations,
-      @JsonProperty("privateEvent") final Boolean privateEvent) {
+      @JsonProperty("privateEvent") final Boolean privateEvent,
+      @JsonProperty("hub") final Hub hub) {
     super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, null, null,
         relatedContent, published, deprecated, tags, null);
 
@@ -161,7 +165,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    *
    * @return the date
    */
-  public Date getDate() {
+  public Instant getDate() {
     return date;
   }
 
@@ -171,7 +175,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    * @param date
    *            the date to set
    */
-  public void setDate(final Date date) {
+  public void setDate(final Instant date) {
     this.date = date;
   }
 
@@ -180,7 +184,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    *
    * @return the end date
    */
-  public Date getEndDate() {
+  public Instant getEndDate() {
     return endDate;
   }
 
@@ -189,7 +193,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    *
    * @param endDate the end date to set
    */
-  public void setEndDate(final Date endDate) {
+  public void setEndDate(final Instant endDate) {
     // Don't want 'endDate' to be null ever; force it to 'date' for consistency if necessary.
     if (null != endDate) {
       this.endDate = endDate;
@@ -203,7 +207,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    *
    * @return bookingDeadline.
    */
-  public Date getBookingDeadline() {
+  public Instant getBookingDeadline() {
     return bookingDeadline;
   }
 
@@ -212,7 +216,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    *
    * @param bookingDeadline the booking deadline.
    */
-  public void setBookingDeadline(final Date bookingDeadline) {
+  public void setBookingDeadline(final Instant bookingDeadline) {
     this.bookingDeadline = bookingDeadline;
   }
 
@@ -384,7 +388,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    *
    * @return bookingDeadline.
    */
-  public Date getPrepWorkDeadline() {
+  public Instant getPrepWorkDeadline() {
     return prepWorkDeadline;
   }
 
@@ -393,7 +397,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    *
    * @param prepWorkDeadline the booking deadline.
    */
-  public void setPrepWorkDeadline(final Date prepWorkDeadline) {
+  public void setPrepWorkDeadline(final Instant prepWorkDeadline) {
     this.prepWorkDeadline = prepWorkDeadline;
   }
 
@@ -440,7 +444,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    *
    * @return the get the places available.
    */
-  public Long getPlacesAvailable() {
+  public Integer getPlacesAvailable() {
     return placesAvailable;
   }
 
@@ -449,7 +453,7 @@ public class IsaacEventPageDTO extends ContentDTO {
    *
    * @param placesAvailable - the number of places available.
    */
-  public void setPlacesAvailable(final Long placesAvailable) {
+  public void setPlacesAvailable(final Integer placesAvailable) {
     this.placesAvailable = placesAvailable;
   }
 
@@ -547,5 +551,13 @@ public class IsaacEventPageDTO extends ContentDTO {
 
   public void setPrivateEvent(Boolean privateEvent) {
     this.privateEvent = privateEvent;
+  }
+
+  public Hub getHub() {
+    return hub;
+  }
+
+  public void setHub(Hub hub) {
+    this.hub = hub;
   }
 }

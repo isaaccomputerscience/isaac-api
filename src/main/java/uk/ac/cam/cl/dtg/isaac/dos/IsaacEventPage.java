@@ -20,7 +20,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_GROUP_RESERVATION_DEFAU
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
@@ -39,10 +39,10 @@ import uk.ac.cam.cl.dtg.util.locations.Location;
 @DTOMapping(IsaacEventPageDTO.class)
 @JsonContentType("isaacEventPage")
 public class IsaacEventPage extends Content {
-  private Date date;
-  private Date endDate;
-  private Date bookingDeadline;
-  private Date prepWorkDeadline;
+  private Instant date;
+  private Instant endDate;
+  private Instant bookingDeadline;
+  private Instant prepWorkDeadline;
 
   private Location location;
 
@@ -70,6 +70,7 @@ public class IsaacEventPage extends Content {
   private Boolean allowGroupReservations;
 
   private Boolean privateEvent;
+  private Hub hub;
 
   @JsonCreator
   public IsaacEventPage(@JsonProperty("id") final String id,
@@ -85,10 +86,10 @@ public class IsaacEventPage extends Content {
                         @JsonProperty("version") final boolean published,
                         @JsonProperty("deprecated") final Boolean deprecated,
                         @JsonProperty("tags") final Set<String> tags,
-                        @JsonProperty("date") final Date date,
-                        @JsonProperty("end_date") final Date endDate,
-                        @JsonProperty("bookingDeadline") final Date bookingDeadline,
-                        @JsonProperty("prepWorkDeadline") final Date prepWorkDeadline,
+                        @JsonProperty("date") final Instant date,
+                        @JsonProperty("end_date") final Instant endDate,
+                        @JsonProperty("bookingDeadline") final Instant bookingDeadline,
+                        @JsonProperty("prepWorkDeadline") final Instant prepWorkDeadline,
                         @JsonProperty("location") final Location location,
                         @JsonProperty("preResources") final List<ExternalReference> preResources,
                         @JsonProperty("postResources") final List<ExternalReference> postResources,
@@ -97,7 +98,8 @@ public class IsaacEventPage extends Content {
                         @JsonProperty("EventStatus") final EventStatus eventStatus,
                         @JsonProperty("groupReservationLimit") final Integer groupReservationLimit,
                         @JsonProperty("allowGroupReservations") final Boolean allowGroupReservations,
-                        @JsonProperty("privateEvent") final Boolean privateEvent) {
+                        @JsonProperty("privateEvent") final Boolean privateEvent,
+                        @JsonProperty("hub") final Hub hub) {
     super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, null,
         null, relatedContent, published, deprecated, tags, null);
 
@@ -115,6 +117,7 @@ public class IsaacEventPage extends Content {
         groupReservationLimit != null ? groupReservationLimit : EVENT_GROUP_RESERVATION_DEFAULT_LIMIT;
     this.allowGroupReservations = allowGroupReservations != null ? allowGroupReservations : false;
     this.privateEvent = privateEvent;
+    this.hub = hub;
   }
 
   /**
@@ -129,7 +132,7 @@ public class IsaacEventPage extends Content {
    *
    * @return the date
    */
-  public Date getDate() {
+  public Instant getDate() {
     return date;
   }
 
@@ -138,7 +141,7 @@ public class IsaacEventPage extends Content {
    *
    * @param date the date to set
    */
-  public void setDate(final Date date) {
+  public void setDate(final Instant date) {
     this.date = date;
   }
 
@@ -147,7 +150,7 @@ public class IsaacEventPage extends Content {
    *
    * @return the end date
    */
-  public Date getEndDate() {
+  public Instant getEndDate() {
     return endDate;
   }
 
@@ -156,7 +159,7 @@ public class IsaacEventPage extends Content {
    *
    * @return bookingDeadline.
    */
-  public Date getBookingDeadline() {
+  public Instant getBookingDeadline() {
     return bookingDeadline;
   }
 
@@ -165,7 +168,7 @@ public class IsaacEventPage extends Content {
    *
    * @param bookingDeadline the booking deadline.
    */
-  public void setBookingDeadline(final Date bookingDeadline) {
+  public void setBookingDeadline(final Instant bookingDeadline) {
     this.bookingDeadline = bookingDeadline;
   }
 
@@ -174,7 +177,7 @@ public class IsaacEventPage extends Content {
    *
    * @return bookingDeadline.
    */
-  public Date getPrepWorkDeadline() {
+  public Instant getPrepWorkDeadline() {
     return prepWorkDeadline;
   }
 
@@ -183,7 +186,7 @@ public class IsaacEventPage extends Content {
    *
    * @param prepWorkDeadline the booking deadline.
    */
-  public void setPrepWorkDeadline(final Date prepWorkDeadline) {
+  public void setPrepWorkDeadline(final Instant prepWorkDeadline) {
     this.prepWorkDeadline = prepWorkDeadline;
   }
 
@@ -192,7 +195,7 @@ public class IsaacEventPage extends Content {
    *
    * @param endDate the end date to set
    */
-  public void setEndDate(final Date endDate) {
+  public void setEndDate(final Instant endDate) {
     // Don't want 'endDate' to be null ever; force it to 'date' for consistency if necessary.
     if (null != endDate) {
       this.endDate = endDate;
@@ -476,5 +479,13 @@ public class IsaacEventPage extends Content {
 
   public void setPrivateEvent(Boolean privateEvent) {
     this.privateEvent = privateEvent;
+  }
+
+  public Hub getHub() {
+    return hub;
+  }
+
+  public void setHub(Hub hub) {
+    this.hub = hub;
   }
 }

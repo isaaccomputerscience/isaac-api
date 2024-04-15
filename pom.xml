@@ -12,17 +12,17 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>v3.5.0</revision>
         <segue.version>${revision}</segue.version>
-        <log4j.version>2.22.1</log4j.version>
-        <resteasy.version>6.2.7.Final</resteasy.version>
+        <log4j.version>2.23.1</log4j.version>
+        <resteasy.version>6.2.8.Final</resteasy.version>
         <guice.version>7.0.0</guice.version>
         <oauth-client.version>1.35.0</oauth-client.version>
-        <jackson.version>2.16.1</jackson.version>
-        <swagger.version>2.2.20</swagger.version>
+        <jackson.version>2.17.0</jackson.version>
+        <swagger.version>2.2.21</swagger.version>
         <prometheus.version>0.16.0</prometheus.version>
         <jetty.version>11.0.20</jetty.version>
         <jetty.port.api>8080</jetty.port.api>
         <jetty.port.etl>8090</jetty.port.etl>
-        <testcontainers.version>1.19.6</testcontainers.version>
+        <testcontainers.version>1.19.7</testcontainers.version>
         <web.xml>web-api-live.xml</web.xml>
         <web.xml.etl>web-etl.xml</web.xml.etl>
         <web.xml.local>web-api-local.xml</web.xml.local>
@@ -311,12 +311,6 @@
         </dependency>
 
         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.11.1</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-high-level-client</artifactId>
             <version>7.17.6</version>
@@ -409,7 +403,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.13.0</version>
                 <configuration>
                     <release>17</release>
                     <annotationProcessorPaths>
@@ -665,7 +659,7 @@
                     <plugin>
                         <groupId>cz.habarta.typescript-generator</groupId>
                         <artifactId>typescript-generator-maven-plugin</artifactId>
-                        <version>2.12.476</version>
+                        <version>3.2.1263</version>
                         <executions>
                             <execution>
                                 <!-- This generates a type file for use in Isaac React App -->
@@ -679,6 +673,8 @@
                                         <classPattern>uk.ac.cam.cl.dtg.isaac.dto.**DTO</classPattern>
                                     </classPatterns>
                                     <outputFile>isaac-dto-types.d.ts</outputFile>
+                                    <jsonLibrary/>
+                                    <outputKind/>
                                 </configuration>
                             </execution>
                             <execution>
@@ -693,6 +689,8 @@
                                         <classPattern>uk.ac.cam.cl.dtg.isaac.dos.**</classPattern>
                                     </classPatterns>
                                     <outputFile>isaac-do-types.d.ts</outputFile>
+                                    <jsonLibrary/>
+                                    <outputKind/>
                                 </configuration>
                             </execution>
                         </executions>
@@ -702,7 +700,7 @@
                             <outputFileType>declarationFile</outputFileType>
                             <optionalProperties>all</optionalProperties>
                             <customTypeMappings>
-                                <mapping>java.util.Date:EpochTimeStamp</mapping>
+                                <mapping>java.time.Instant:EpochTimeStamp</mapping>
                             </customTypeMappings>
                             <indentString xml:space="preserve">  </indentString>
                         </configuration>
