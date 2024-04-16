@@ -192,6 +192,14 @@ public class EventBookingManager {
     return this.bookingPersistenceManager.getBookingsByEventId(eventId);
   }
 
+  /**
+   * Retrieves the event booking for the specified event ID and user ID.
+   *
+   * @param eventId the ID of the event
+   * @param userId the ID of the user
+   * @return the event booking for the specified event and user, or null if no booking is found
+   * @throws SegueDatabaseException - if an error occurs
+   */
   public EventBookingDTO getBookingByEventIdAndUserId(final String eventId, final Long userId)
       throws SegueDatabaseException {
     return this.bookingPersistenceManager.getBookingByEventIdAndUserId(eventId, userId);
