@@ -98,7 +98,6 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.AuthenticatorSecurityException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.CodeExchangeException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.CrossSiteRequestForgeryException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.DuplicateAccountException;
-import uk.ac.cam.cl.dtg.segue.auth.exceptions.FailedToHashPasswordException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.IncorrectCredentialsProvidedException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidNameException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidPasswordException;
@@ -418,10 +417,6 @@ public class UserAccountManager implements IUserAccountManager {
     } catch (InvalidPasswordException e) {
       log.warn("Invalid password exception occurred during registration!");
       return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
-    } catch (FailedToHashPasswordException e) {
-      log.error("Failed to hash password during user registration!");
-      return new SegueErrorResponse(Response.Status.INTERNAL_SERVER_ERROR,
-          "Unable to set a password.").toResponse();
     } catch (MissingRequiredFieldException e) {
       log.warn("Missing field during update operation: {}", e.getMessage());
       return new SegueErrorResponse(Response.Status.BAD_REQUEST, "You are missing a required field. "
@@ -429,6 +424,8 @@ public class UserAccountManager implements IUserAccountManager {
     } catch (DuplicateAccountException e) {
       log.warn("Duplicate account registration attempt for ({})",
           sanitiseExternalLogValue(userObjectFromClient.getEmail()));
+      // For security reasons, an otherwise-valid request for existing account should return the same response as for
+      // a new one
       return Response.ok().build();
     } catch (SegueDatabaseException e) {
       String errorMsg = "Unable to set a password, due to an internal database error.";
