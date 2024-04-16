@@ -643,6 +643,161 @@ class UserAccountManagerTest {
     }
 
     @Test
+    void createNewUser_invalidEmailAddress_returnsBadRequest() throws InvalidPasswordException {
+      String newUserEmailAddress = "badEmailAddress";
+      HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
+      RegisteredUser userObjectFromFrontEnd = prepareRegisteredUser(newUserEmailAddress);
+      String newUserPassword = "Password123!";
+      Map<String, Map<String, Boolean>> newUserPreferences = Map.of();
+      List<UserContext> newUserContexts = List.of();
+
+      RegisteredUserDTO temporaryUserDTO = new RegisteredUserDTO();
+      RegisteredUser sanitisedUserObject = prepareRegisteredUser(newUserEmailAddress);
+      expect(userMapper.map(userObjectFromFrontEnd)).andReturn(temporaryUserDTO);
+      expect(userMapper.map(temporaryUserDTO)).andReturn(sanitisedUserObject);
+
+      segueLocalAuthenticator.ensureValidPassword(newUserPassword);
+
+      replay(userMapper, segueLocalAuthenticator, database, emailManager);
+
+      try {
+        try (Response response = userAccountManager.createNewUser(mockRequest, userObjectFromFrontEnd, newUserPassword,
+            newUserPreferences, newUserContexts)) {
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+          assertEquals("The email address provided is invalid.",
+              response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+        fail("Unexpected exception from method under test");
+      }
+    }
+
+    @Test
+    void createNewUser_emptyPassword_returnsBadRequest() throws InvalidPasswordException {
+      String newUserEmailAddress = "exampleAddress@test.com";
+      HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
+      RegisteredUser userObjectFromFrontEnd = prepareRegisteredUser(newUserEmailAddress);
+      String newUserPassword = "";
+      Map<String, Map<String, Boolean>> newUserPreferences = Map.of();
+      List<UserContext> newUserContexts = List.of();
+
+      RegisteredUserDTO temporaryUserDTO = new RegisteredUserDTO();
+      RegisteredUser sanitisedUserObject = prepareRegisteredUser(newUserEmailAddress);
+      expect(userMapper.map(userObjectFromFrontEnd)).andReturn(temporaryUserDTO);
+      expect(userMapper.map(temporaryUserDTO)).andReturn(sanitisedUserObject);
+
+      segueLocalAuthenticator.ensureValidPassword(newUserPassword);
+      expectLastCall().andThrow(new InvalidPasswordException("Invalid password"));
+
+      replay(userMapper, segueLocalAuthenticator, database, emailManager);
+
+      try {
+        try (Response response = userAccountManager.createNewUser(mockRequest, userObjectFromFrontEnd, newUserPassword,
+            newUserPreferences, newUserContexts)) {
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+          assertEquals(
+              "You are missing a required field. Please make sure you have specified all mandatory fields in your response.",
+              response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+        fail("Unexpected exception from method under test");
+      }
+    }
+
+    @Test
+    void createNewUser_emptyGivenName_returnsBadRequest() throws InvalidPasswordException {
+      String newUserEmailAddress = "exampleAddress@test.com";
+      HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
+      RegisteredUser userObjectFromFrontEnd = prepareRegisteredUserEmptyGivenName(newUserEmailAddress);
+      String newUserPassword = "Password123!";
+      Map<String, Map<String, Boolean>> newUserPreferences = Map.of();
+      List<UserContext> newUserContexts = List.of();
+
+      RegisteredUserDTO temporaryUserDTO = new RegisteredUserDTO();
+      RegisteredUser sanitisedUserObject = prepareRegisteredUserEmptyGivenName(newUserEmailAddress);
+      expect(userMapper.map(userObjectFromFrontEnd)).andReturn(temporaryUserDTO);
+      expect(userMapper.map(temporaryUserDTO)).andReturn(sanitisedUserObject);
+
+      segueLocalAuthenticator.ensureValidPassword(newUserPassword);
+
+      replay(userMapper, segueLocalAuthenticator, database, emailManager);
+
+      try {
+        try (Response response = userAccountManager.createNewUser(mockRequest, userObjectFromFrontEnd, newUserPassword,
+            newUserPreferences, newUserContexts)) {
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+          assertEquals(
+              "You are missing a required field. Please make sure you have specified all mandatory fields in your response.",
+              response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+        fail("Unexpected exception from method under test");
+      }
+    }
+
+    @Test
+    void createNewUser_emptyFamilyName_returnsBadRequest() throws InvalidPasswordException {
+      String newUserEmailAddress = "exampleAddress@test.com";
+      HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
+      RegisteredUser userObjectFromFrontEnd = prepareRegisteredUserEmptyFamilyName(newUserEmailAddress);
+      String newUserPassword = "Password123!";
+      Map<String, Map<String, Boolean>> newUserPreferences = Map.of();
+      List<UserContext> newUserContexts = List.of();
+
+      RegisteredUserDTO temporaryUserDTO = new RegisteredUserDTO();
+      RegisteredUser sanitisedUserObject = prepareRegisteredUserEmptyFamilyName(newUserEmailAddress);
+      expect(userMapper.map(userObjectFromFrontEnd)).andReturn(temporaryUserDTO);
+      expect(userMapper.map(temporaryUserDTO)).andReturn(sanitisedUserObject);
+
+      segueLocalAuthenticator.ensureValidPassword(newUserPassword);
+
+      replay(userMapper, segueLocalAuthenticator, database, emailManager);
+
+      try {
+        try (Response response = userAccountManager.createNewUser(mockRequest, userObjectFromFrontEnd, newUserPassword,
+            newUserPreferences, newUserContexts)) {
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+          assertEquals(
+              "You are missing a required field. Please make sure you have specified all mandatory fields in your response.",
+              response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+        fail("Unexpected exception from method under test");
+      }
+    }
+
+    @Test
+    void createNewUser_emptyEmailAddress_returnsBadRequest() throws InvalidPasswordException {
+      String newUserEmailAddress = "";
+      HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
+      RegisteredUser userObjectFromFrontEnd = prepareRegisteredUser(newUserEmailAddress);
+      String newUserPassword = "Password123!";
+      Map<String, Map<String, Boolean>> newUserPreferences = Map.of();
+      List<UserContext> newUserContexts = List.of();
+
+      RegisteredUserDTO temporaryUserDTO = new RegisteredUserDTO();
+      RegisteredUser sanitisedUserObject = prepareRegisteredUser(newUserEmailAddress);
+      expect(userMapper.map(userObjectFromFrontEnd)).andReturn(temporaryUserDTO);
+      expect(userMapper.map(temporaryUserDTO)).andReturn(sanitisedUserObject);
+
+      segueLocalAuthenticator.ensureValidPassword(newUserPassword);
+
+      replay(userMapper, segueLocalAuthenticator, database, emailManager);
+
+      try {
+        try (Response response = userAccountManager.createNewUser(mockRequest, userObjectFromFrontEnd, newUserPassword,
+            newUserPreferences, newUserContexts)) {
+          assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+          assertEquals(
+              "You are missing a required field. Please make sure you have specified all mandatory fields in your response.",
+              response.readEntity(SegueErrorResponse.class).getErrorMessage());
+        }
+      } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+        fail("Unexpected exception from method under test");
+      }
+    }
+
+    @Test
     void createNewUser_isaacEmailAddress_returnsBadRequest() throws InvalidPasswordException, SegueDatabaseException {
       String newUserEmailAddress = "exampleAddress@isaaccomputerscience.org";
       HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
@@ -720,12 +875,28 @@ class UserAccountManagerTest {
     private RegisteredUser prepareRegisteredUserInvalidGivenName(String newUserEmailAddress) {
       RegisteredUser registeredUser = new RegisteredUser();
       registeredUser.setEmail(newUserEmailAddress);
+      registeredUser.setGivenName("a^b");
+      registeredUser.setFamilyName("familyName");
+      return registeredUser;
+    }
+
+    private RegisteredUser prepareRegisteredUserEmptyGivenName(String newUserEmailAddress) {
+      RegisteredUser registeredUser = new RegisteredUser();
+      registeredUser.setEmail(newUserEmailAddress);
       registeredUser.setGivenName("");
       registeredUser.setFamilyName("familyName");
       return registeredUser;
     }
 
     private RegisteredUser prepareRegisteredUserInvalidFamilyName(String newUserEmailAddress) {
+      RegisteredUser registeredUser = new RegisteredUser();
+      registeredUser.setEmail(newUserEmailAddress);
+      registeredUser.setGivenName("givenName");
+      registeredUser.setFamilyName("a^b");
+      return registeredUser;
+    }
+
+    private RegisteredUser prepareRegisteredUserEmptyFamilyName(String newUserEmailAddress) {
       RegisteredUser registeredUser = new RegisteredUser();
       registeredUser.setEmail(newUserEmailAddress);
       registeredUser.setGivenName("givenName");

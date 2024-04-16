@@ -99,6 +99,7 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.CodeExchangeException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.CrossSiteRequestForgeryException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.DuplicateAccountException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.IncorrectCredentialsProvidedException;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidEmailException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidNameException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidPasswordException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.InvalidTokenException;
@@ -438,6 +439,9 @@ public class UserAccountManager implements IUserAccountManager {
           "You cannot register with an Isaac email address.").toResponse();
     } catch (InvalidNameException e) {
       log.warn("Invalid name provided during registration.");
+      return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
+    } catch (InvalidEmailException e) {
+      log.warn("Invalid email address provided during registration.");
       return new SegueErrorResponse(Response.Status.BAD_REQUEST, e.getMessage()).toResponse();
     }
   }
@@ -1078,7 +1082,8 @@ public class UserAccountManager implements IUserAccountManager {
       final HttpServletRequest request, final RegisteredUser user, final String newPassword,
       final List<UserContext> registeredUserContexts)
       throws InvalidPasswordException, MissingRequiredFieldException, SegueDatabaseException,
-      EmailMustBeVerifiedException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException {
+      EmailMustBeVerifiedException, InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException,
+      InvalidEmailException {
     Validate.isTrue(user.getId() == null, "When creating a new user the user id must not be set.");
 
     // Ensure nobody registers with Isaac email addresses. Users can change emails to restricted ones by verifying them,
@@ -1135,7 +1140,14 @@ public class UserAccountManager implements IUserAccountManager {
 
   private void validateUserDetails(RegisteredUser user, String newPassword, RegisteredUser userToSave,
                          IPasswordAuthenticator authenticator)
-      throws InvalidNameException, InvalidPasswordException, MissingRequiredFieldException, SegueDatabaseException {
+      throws InvalidNameException, InvalidPasswordException, MissingRequiredFieldException, SegueDatabaseException,
+      InvalidEmailException {
+    if (user.getGivenName() == null || user.getGivenName().isEmpty() || user.getFamilyName() == null
+        || user.getFamilyName().isEmpty() || user.getEmail() == null || user.getEmail().isEmpty() || newPassword == null
+        || newPassword.isEmpty()) {
+      throw new MissingRequiredFieldException("One or more required fields are missing.");
+    }
+
     // validate names
     if (!isUserNameValid(user.getGivenName())) {
       throw new InvalidNameException("The given name provided is an invalid length or contains forbidden characters.");
@@ -1150,7 +1162,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     // Validate email address and check for existing accounts last to help mitigate enumeration attacks
     if (!this.isUserValid(userToSave)) {
-      throw new MissingRequiredFieldException("The email address provided is invalid.");
+      throw new InvalidEmailException("The email address provided is invalid.");
     }
 
     if (this.findUserByEmail(user.getEmail()) != null) {
