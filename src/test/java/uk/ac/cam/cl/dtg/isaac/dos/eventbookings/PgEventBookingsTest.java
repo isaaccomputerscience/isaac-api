@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,9 +118,9 @@ class PgEventBookingsTest {
     Instant now = now();
 
     EventBooking expectedBooking1 =
-        new PgEventBooking(1L, 1L, 7L, "event1", BookingStatus.CONFIRMED, Date.from(now), Date.from(now), null);
+        new PgEventBooking(1L, 1L, 7L, "event1", BookingStatus.CONFIRMED, now, now, null);
     EventBooking expectedBooking2 =
-        new PgEventBooking(2L, 2L, 7L, "event2", BookingStatus.CONFIRMED, Date.from(now), Date.from(now), null);
+        new PgEventBooking(2L, 2L, 7L, "event2", BookingStatus.CONFIRMED, now, now, null);
 
     expect(dummyPostgresSqlDb.getDatabaseConnection()).andReturn(dummyConnection);
     expect(dummyConnection.prepareStatement(expectedQuery)).andReturn(dummyPreparedStatement);

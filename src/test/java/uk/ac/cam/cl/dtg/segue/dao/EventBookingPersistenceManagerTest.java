@@ -10,7 +10,6 @@ import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -119,8 +118,8 @@ class EventBookingPersistenceManagerTest {
     expectedBooking1.setUserBooked(new UserSummaryWithEmailAddressAndGenderDTO());
     expectedBooking1.setReservedById(7L);
     expectedBooking1.setBookingStatus(BookingStatus.CONFIRMED);
-    expectedBooking1.setBookingDate(Date.from(now));
-    expectedBooking1.setUpdated(Date.from(now));
+    expectedBooking1.setBookingDate(now);
+    expectedBooking1.setUpdated(now);
     return expectedBooking1;
   }
 
