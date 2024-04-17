@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.dtg.segue.dao;
+package uk.ac.cam.cl.dtg.isaac.dao;
 
 import static java.time.Instant.now;
 import static org.easymock.EasyMock.createMock;
@@ -20,7 +20,6 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.ac.cam.cl.dtg.isaac.dao.EventBookingPersistenceManager;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.DetailedEventBookingDTO;
@@ -28,6 +27,7 @@ import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryWithEmailAddressAndGenderDTO;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
