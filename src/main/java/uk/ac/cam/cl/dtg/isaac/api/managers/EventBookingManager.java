@@ -206,18 +206,22 @@ public class EventBookingManager {
   }
 
   /**
-   * @param eventId - of interest
-   * @return event bookings
-   * @throws SegueDatabaseException - if an error occurs.
+   * Retrieves the detailed event booking for the specified event ID.
+   *
+   * @param eventId - the ID of the event of interest
+   * @return the list of detailed event booking for the specified event, or null if no booking is found
+   * @throws SegueDatabaseException - if an error occurs
    */
   public List<DetailedEventBookingDTO> adminGetBookingsByEventId(final String eventId) throws SegueDatabaseException {
     return this.bookingPersistenceManager.adminGetBookingsByEventId(eventId);
   }
 
   /**
-   * @param eventIds - of interest
-   * @return event bookings
-   * @throws SegueDatabaseException - if an error occurs.
+   * Retrieves the detailed event bookings for the specified event IDs.
+   *
+   * @param eventIds - the list of event IDs of interest
+   * @return a map of event IDs to their corresponding list of detailed event bookings
+   * @throws SegueDatabaseException - if an error occurs
    */
   public Map<String, List<DetailedEventBookingDTO>> adminGetBookingsByEventIds(final List<String> eventIds)
       throws SegueDatabaseException {
