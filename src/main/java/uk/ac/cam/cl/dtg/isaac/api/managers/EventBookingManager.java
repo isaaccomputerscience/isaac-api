@@ -228,7 +228,6 @@ public class EventBookingManager {
     return this.bookingPersistenceManager.adminGetBookingsByEventIds(eventIds);
   }
 
-
   /**
    * Ensure an event allows group bookings.
    *
