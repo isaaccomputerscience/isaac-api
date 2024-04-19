@@ -667,7 +667,7 @@ public class UserAccountManager implements IUserAccountManager {
    */
   public RegisteredUserDTO updateUserObject(final RegisteredUser updatedUser, final String newPassword)
       throws InvalidPasswordException, MissingRequiredFieldException, SegueDatabaseException,
-      InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException {
+      InvalidKeySpecException, NoSuchAlgorithmException, InvalidNameException, NoUserException {
     requireNonNull(updatedUser.getId());
 
     // We want to map to DTO first to make sure that the user cannot
@@ -680,31 +680,32 @@ public class UserAccountManager implements IUserAccountManager {
 
     // This is an update operation.
     final RegisteredUser existingUser = this.findUserById(updatedUser.getId());
-    // userToSave = existingUser;
-
-    // Check that the user isn't trying to take an existing users e-mail.
-    if (this.findUserByEmail(updatedUser.getEmail()) != null && !existingUser.getEmail()
-        .equals(updatedUser.getEmail())) {
-      throw new DuplicateAccountException("An account with that e-mail address already exists.");
-    }
-
-    // validate names
-    if (!isUserNameValid(updatedUser.getGivenName())) {
-      throw new InvalidNameException("The given name provided is an invalid length or contains forbidden characters.");
-    }
-
-    if (!isUserNameValid(updatedUser.getFamilyName())) {
-      throw new InvalidNameException("The family name provided is an invalid length or contains forbidden characters.");
+    if (existingUser == null) {
+      throw new NoUserException("User to be updated could not be found.");
     }
 
     IPasswordAuthenticator authenticator = (IPasswordAuthenticator) this.registeredAuthProviders
         .get(AuthenticationProvider.SEGUE);
 
-    // Check if there is a new password and it is invalid as early as possible:
+    validateUpdatingUserDetails(updatedUser, newPassword, existingUser, authenticator);
+
+    RegisteredUser userToSave =
+        constructUpdatedUserObject(updatedUser, userDTOContainingUpdates, existingUser, authenticator);
+
+    // save the user
+    RegisteredUser userToReturn = this.database.createOrUpdateUser(userToSave);
     if (null != newPassword && !newPassword.isEmpty()) {
-      authenticator.ensureValidPassword(newPassword);
+      authenticator.setOrChangeUsersPassword(userToReturn, newPassword);
     }
 
+    // return it to the caller
+    return this.convertUserDOToUserDTO(userToReturn);
+  }
+
+  private RegisteredUser constructUpdatedUserObject(RegisteredUser updatedUser,
+                                                    RegisteredUserDTO userDTOContainingUpdates,
+                                                    RegisteredUser existingUser, IPasswordAuthenticator authenticator)
+      throws MissingRequiredFieldException, SegueDatabaseException {
     RegisteredUser userToSave = dtoMapper.copy(existingUser);
     dtoMapper.merge(userDTOContainingUpdates, userToSave);
     // Don't modify email verification status, registration date, or role
@@ -751,15 +752,31 @@ public class UserAccountManager implements IUserAccountManager {
 
       userToSave.setEmail(existingUser.getEmail());
     }
+    return userToSave;
+  }
 
-    // save the user
-    RegisteredUser userToReturn = this.database.createOrUpdateUser(userToSave);
-    if (null != newPassword && !newPassword.isEmpty()) {
-      authenticator.setOrChangeUsersPassword(userToReturn, newPassword);
+  private void validateUpdatingUserDetails(RegisteredUser updatedUser, String newPassword, RegisteredUser existingUser,
+                         IPasswordAuthenticator authenticator)
+      throws SegueDatabaseException, InvalidNameException, InvalidPasswordException {
+    // Check that the user isn't trying to take an existing users e-mail.
+    if (this.findUserByEmail(updatedUser.getEmail()) != null && !existingUser.getEmail()
+        .equals(updatedUser.getEmail())) {
+      throw new DuplicateAccountException("An account with that e-mail address already exists.");
     }
 
-    // return it to the caller
-    return this.convertUserDOToUserDTO(userToReturn);
+    // validate names
+    if (!isUserNameValid(updatedUser.getGivenName())) {
+      throw new InvalidNameException("The given name provided is an invalid length or contains forbidden characters.");
+    }
+
+    if (!isUserNameValid(updatedUser.getFamilyName())) {
+      throw new InvalidNameException("The family name provided is an invalid length or contains forbidden characters.");
+    }
+
+    // Check if there is a new password and it is invalid as early as possible:
+    if (null != newPassword && !newPassword.isEmpty()) {
+      authenticator.ensureValidPassword(newPassword);
+    }
   }
 
   /**
@@ -1119,7 +1136,7 @@ public class UserAccountManager implements IUserAccountManager {
         .get(AuthenticationProvider.SEGUE);
 
     // Before saving, we should validate the user for mandatory fields
-    validateUserDetails(user, newPassword, userToSave, authenticator);
+    validateNewUserDetails(user, newPassword, userToSave, authenticator);
 
     // Generate email verification token and add to user object
     authenticator.createEmailVerificationTokenForUser(userToSave, userToSave.getEmail());
@@ -1140,8 +1157,8 @@ public class UserAccountManager implements IUserAccountManager {
     return this.dtoMapper.map(userToReturn);
   }
 
-  private void validateUserDetails(RegisteredUser user, String newPassword, RegisteredUser userToSave,
-                         IPasswordAuthenticator authenticator)
+  private void validateNewUserDetails(RegisteredUser user, String newPassword, RegisteredUser userToSave,
+                                      IPasswordAuthenticator authenticator)
       throws InvalidNameException, InvalidPasswordException, MissingRequiredFieldException, SegueDatabaseException,
       InvalidEmailException {
     if (user.getGivenName() == null || user.getGivenName().isEmpty() || user.getFamilyName() == null
