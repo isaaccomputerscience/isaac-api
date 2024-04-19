@@ -19,6 +19,7 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.text.WordUtils.capitalizeFully;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.EMAIL_SIGNATURE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.LAST_SEEN_UPDATE_FREQUENCY_MINUTES;
@@ -425,6 +426,7 @@ public class UserAccountManager implements IUserAccountManager {
     } catch (DuplicateAccountException e) {
       log.warn("Duplicate account registration attempt for ({})",
           sanitiseExternalLogValue(userObjectFromClient.getEmail()));
+      sendRegistrationDuplicateEmail(userObjectFromClient.getEmail());
       // For security reasons, an otherwise-valid request for existing account should return the same response as for
       // a new one
       return Response.ok().build();
@@ -1185,6 +1187,33 @@ public class UserAccountManager implements IUserAccountManager {
       log.error("Registration email could not be sent due to content issue: {}", e.getMessage());
     } catch (NoUserException e) {
       log.error("Registration email could not be sent due to not being able to locate the user: {}", e.getMessage());
+    }
+  }
+
+  private void sendRegistrationDuplicateEmail(String targetUserEmail) {
+    try {
+      RegisteredUserDTO existingUser = this.getUserDTOByEmail(targetUserEmail);
+
+      Map<String, Object> emailTokens = Map.of(
+          "givenName", existingUser.getGivenName(),
+          "email", existingUser.getEmail(),
+          "siteBaseURL", String.format("https://%s", properties.getProperty(HOST_NAME)),
+          "contactUsURL", String.format("https://%s/contact", properties.getProperty(HOST_NAME)),
+          "sig", properties.getProperty(EMAIL_SIGNATURE)
+      );
+
+      emailManager.sendTemplatedEmailToUser(existingUser,
+          emailManager.getEmailTemplateDTO("email-template-registration-duplicate"),
+          emailTokens, EmailType.SYSTEM);
+
+    } catch (ContentManagerException e) {
+      log.error("Duplicate registration email could not be sent due to content issue: {}", e.getMessage());
+    } catch (NoUserException e) {
+      log.error("Duplicate registration email could not be sent due to not being able to locate the user: {}",
+          e.getMessage());
+    } catch (SegueDatabaseException e) {
+      log.error("Duplicate registration email could not be sent due to an error while constructing the email: {}",
+          e.getMessage());
     }
   }
 

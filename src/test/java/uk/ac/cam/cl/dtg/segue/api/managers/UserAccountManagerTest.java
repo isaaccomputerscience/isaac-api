@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.isaac.dos.users.Role.STUDENT;
 import static uk.ac.cam.cl.dtg.isaac.dos.users.Role.TEACHER;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.EMAIL_SIGNATURE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isEmailValid;
 import static uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager.isUserNameValid;
@@ -92,6 +93,7 @@ class UserAccountManagerTest {
     expect(propertiesLoader.getProperty(Constants.HOST_NAME)).andStubReturn("HOST");
     expect(propertiesLoader.getProperty(Constants.MAIL_RECEIVERS)).andReturn("admin@localhost");
     expect(propertiesLoader.getProperty("RESTRICTED_SIGNUP_EMAIL_REGEX")).andReturn(".*@isaaccomputerscience\\.org");
+    expect(propertiesLoader.getProperty(EMAIL_SIGNATURE)).andStubReturn("Isaac Computer Science Project");
     replay(propertiesLoader);
 
     userAccountManager =
@@ -520,7 +522,8 @@ class UserAccountManagerTest {
     }
 
     @Test
-    void createNewUser_existingUser_returnsSameAsSuccessCase() throws InvalidPasswordException, SegueDatabaseException {
+    void createNewUser_existingUser_returnsSameAsSuccessCase()
+        throws InvalidPasswordException, SegueDatabaseException, ContentManagerException {
       String newUserEmailAddress = "exampleAddress@test.com";
       HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
       RegisteredUser userObjectFromFrontEnd = prepareRegisteredUser(newUserEmailAddress);
@@ -537,7 +540,18 @@ class UserAccountManagerTest {
       expectLastCall();
 
       RegisteredUser existingUser = prepareRegisteredUser(newUserEmailAddress);
-      expect(database.getByEmail(newUserEmailAddress)).andReturn(existingUser);
+      expect(database.getByEmail(newUserEmailAddress)).andReturn(existingUser).times(2);
+
+      RegisteredUserDTO existingUserDTO = new RegisteredUserDTO();
+      existingUserDTO.setEmail(newUserEmailAddress);
+      existingUserDTO.setGivenName("givenName");
+      existingUserDTO.setFamilyName("familyName");
+      expect(userMapper.map(existingUser)).andReturn(existingUserDTO);
+      EmailTemplateDTO emailTemplateDTO = new EmailTemplateDTO();
+      expect(emailManager.getEmailTemplateDTO("email-template-registration-duplicate")).andReturn(emailTemplateDTO);
+      emailManager.sendTemplatedEmailToUser(eq(existingUserDTO), eq(emailTemplateDTO), anyObject(),
+          eq(EmailType.SYSTEM));
+      expectLastCall();
 
       replay(userMapper, segueLocalAuthenticator, database, emailManager);
 
