@@ -202,6 +202,7 @@ public final class Constants {
   public static final String EMAIL_TEMPLATE_TOKEN_EVENT_DETAILS = "event.emailEventDetails";
   public static final String EMAIL_TEMPLATE_TOKEN_EVENT = "event";
   public static final String EMAIL_TEMPLATE_TOKEN_EVENT_URL = "eventURL";
+  public static final String EMAIL_TEMPLATE_TOKEN_PROVIDER = "provider";
 
   // Email Template Ids
   public static final String EMAIL_TEMPLATE_ID_EVENT_BOOKING_CONFIRMED = "email-event-booking-confirmed";
@@ -233,6 +234,7 @@ public final class Constants {
   public static final String EXCEPTION_MESSAGE_NOT_EVENT = "Content object is not an event page.";
   public static final String EXCEPTION_MESSAGE_CANNOT_CREATE_BOOKING_DTO =
       "Unable to create event booking DTO from DO.";
+  public static final String EXCEPTION_MESSAGE_INVALID_EMAIL = "The email address provided is invalid.";
 
   /**
    * Private constructor to prevent this class being created.

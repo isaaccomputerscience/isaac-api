@@ -18,6 +18,8 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.text.WordUtils.capitalizeFully;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_TOKEN_PROVIDER;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_INVALID_EMAIL;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EMAIL_SIGNATURE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
@@ -57,7 +59,6 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -313,8 +314,8 @@ public class UserAccountManager implements IUserAccountManager {
     } else {
       if (providerUserDO.getEmail() != null && !providerUserDO.getEmail().isEmpty()
           && this.findUserByEmail(providerUserDO.getEmail()) != null) {
-        log.warn("A user tried to use unknown provider '" + sanitiseExternalLogValue(capitalizeFully(provider))
-            + "' to log in to an account with matching email (" + providerUserDO.getEmail() + ").");
+        log.warn("A user tried to use unknown provider '{}' to log in to an account with matching email ({}).",
+            sanitiseExternalLogValue(capitalizeFully(provider)), providerUserDO.getEmail());
         throw new DuplicateAccountException("You do not use " + capitalizeFully(provider) + " to log on to Isaac."
             + " You may have registered using a different provider, or a username and password.");
       }
@@ -325,8 +326,7 @@ public class UserAccountManager implements IUserAccountManager {
       segueUserDTO.setFirstLogin(true);
 
       try {
-        ImmutableMap<String, Object> emailTokens = ImmutableMap.of("provider",
-            capitalizeFully(provider));
+        Map<String, Object> emailTokens = Map.of(EMAIL_TEMPLATE_TOKEN_PROVIDER, capitalizeFully(provider));
 
         emailManager.sendTemplatedEmailToUser(segueUserDTO,
             emailManager.getEmailTemplateDTO("email-template-registration-confirmation-federated"),
@@ -468,7 +468,7 @@ public class UserAccountManager implements IUserAccountManager {
       // Check if the given preference type is one we support:
       if (!EnumUtils.isValidEnum(uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacUserPreferences.class, preferenceType)
           && !EnumUtils.isValidEnum(SegueUserPreferences.class, preferenceType)) {
-        log.warn("Unknown user preference type '" + sanitiseExternalLogValue(preferenceType) + "' provided. Skipping.");
+        log.warn("Unknown user preference type '{}' provided. Skipping.", sanitiseExternalLogValue(preferenceType));
         continue;
       }
 
@@ -478,8 +478,8 @@ public class UserAccountManager implements IUserAccountManager {
         for (String preferenceName : userPreferenceObject.get(preferenceType).keySet()) {
           if (!EnumUtils.isValidEnum(EmailType.class, preferenceName)
               || !EmailType.valueOf(preferenceName).isValidEmailPreference()) {
-            log.warn("Invalid email preference name '" + sanitiseExternalLogValue(preferenceName) + "' provided for '"
-                + sanitiseExternalLogValue(preferenceType) + "'! Skipping.");
+            log.warn("Invalid email preference name '{}' provided for '{}", sanitiseExternalLogValue(preferenceName),
+                sanitiseExternalLogValue(preferenceType));
             continue;
           }
           boolean preferenceValue = userPreferenceObject.get(preferenceType).get(preferenceName);
@@ -490,15 +490,15 @@ public class UserAccountManager implements IUserAccountManager {
         // Isaac user preference names are configured in the config files:
         String acceptedPreferenceNamesProperty = properties.getProperty(preferenceType);
         if (null == acceptedPreferenceNamesProperty) {
-          log.error("Failed to find allowed user preferences names for '" + sanitiseExternalLogValue(preferenceType)
-              + "'! Has it been configured?");
+          log.error("Failed to find allowed user preferences names for '{}'! Has it been configured?",
+              sanitiseExternalLogValue(preferenceType));
           acceptedPreferenceNamesProperty = "";
         }
         List<String> acceptedPreferenceNames = Arrays.asList(acceptedPreferenceNamesProperty.split(","));
         for (String preferenceName : userPreferenceObject.get(preferenceType).keySet()) {
           if (!acceptedPreferenceNames.contains(preferenceName)) {
-            log.warn("Invalid user preference name '" + sanitiseExternalLogValue(preferenceName)
-                + "' provided for type '" + sanitiseExternalLogValue(preferenceType) + "'! Skipping.");
+            log.warn("Invalid user preference name '{}' provided for type '{}'! Skipping.",
+                sanitiseExternalLogValue(preferenceName), sanitiseExternalLogValue(preferenceType));
             continue;
           }
           boolean preferenceValue = userPreferenceObject.get(preferenceType).get(preferenceName);
@@ -506,7 +506,7 @@ public class UserAccountManager implements IUserAccountManager {
         }
       } else {
         log.warn(
-            "Unexpected user preference type '" + sanitiseExternalLogValue(preferenceType) + "' provided. Skipping.");
+            "Unexpected user preference type '{}' provided. Skipping.", sanitiseExternalLogValue(preferenceType));
       }
     }
     return userPreferences;
@@ -731,7 +731,7 @@ public class UserAccountManager implements IUserAccountManager {
     // Doing this before the email change code is necessary to ensure that (a) users cannot try and change to an
     // invalid email, and (b) that users with an invalid email can change their email to a valid one!
     if (!this.isUserValid(userToSave)) {
-      throw new MissingRequiredFieldException("The email address provided is invalid.");
+      throw new MissingRequiredFieldException(EXCEPTION_MESSAGE_INVALID_EMAIL);
     }
 
     // Make sure the email address is preserved (can't be changed until new email is verified)
@@ -1164,11 +1164,11 @@ public class UserAccountManager implements IUserAccountManager {
 
     // Validate email address and check for existing accounts last to help mitigate enumeration attacks
     if (!this.isUserValid(userToSave)) {
-      throw new InvalidEmailException("The email address provided is invalid.");
+      throw new InvalidEmailException(EXCEPTION_MESSAGE_INVALID_EMAIL);
     }
 
     if (this.findUserByEmail(user.getEmail()) != null) {
-      throw new DuplicateAccountException("The email address provided is invalid.");
+      throw new DuplicateAccountException(EXCEPTION_MESSAGE_INVALID_EMAIL);
     }
   }
 
@@ -1234,21 +1234,14 @@ public class UserAccountManager implements IUserAccountManager {
     try {
       RegisteredUserDTO existingUserDTO = this.getUserDTOById(id);
       if (userToSave.getRole() != requestedRole) {
-        String emailTemplate;
-        switch (requestedRole) {
-          case TUTOR:
-            emailTemplate = "email-template-tutor-welcome";
-            break;
-          case TEACHER:
-            emailTemplate = "email-template-teacher-welcome";
-            break;
-          default:
-            emailTemplate = "email-template-default-role-change";
-        }
+        String emailTemplate = switch (requestedRole) {
+          case TUTOR -> "email-template-tutor-welcome";
+          case TEACHER -> "email-template-teacher-welcome";
+          default -> "email-template-default-role-change";
+        };
         emailManager.sendTemplatedEmailToUser(existingUserDTO,
             emailManager.getEmailTemplateDTO(emailTemplate),
-            ImmutableMap.of("oldrole", existingUserDTO.getRole().toString(),
-                "newrole", requestedRole.toString()),
+            Map.of("oldrole", existingUserDTO.getRole().toString(), "newrole", requestedRole.toString()),
             EmailType.SYSTEM);
       }
     } catch (ContentManagerException | NoUserException e) {
@@ -1271,9 +1264,8 @@ public class UserAccountManager implements IUserAccountManager {
     requireNonNull(requestedEmailVerificationStatus);
     RegisteredUser userToSave = this.findUserByEmail(email);
     if (null == userToSave) {
-      log.warn(String.format(
-          "Could not update email verification status of email address (%s) - does not exist",
-          sanitiseExternalLogValue(email)));
+      log.warn("Could not update email verification status of email address ({}) - does not exist",
+          sanitiseExternalLogValue(email));
       return;
     }
     userToSave.setEmailVerificationStatus(requestedEmailVerificationStatus);
@@ -1612,9 +1604,9 @@ public class UserAccountManager implements IUserAccountManager {
     EmailTemplateDTO emailVerificationTemplate =
         emailManager.getEmailTemplateDTO("email-template-email-verification");
     Map<String, Object> emailTokens =
-        ImmutableMap.of("verificationURL", this.generateEmailVerificationURL(userDTO, emailVerificationToken));
+        Map.of("verificationURL", this.generateEmailVerificationURL(userDTO, emailVerificationToken));
 
-    log.info(String.format("Sending email verification message to %s", sanitiseExternalLogValue(userDTO.getEmail())));
+    log.info("Sending email verification message to {}", sanitiseExternalLogValue(userDTO.getEmail()));
 
     emailManager.sendTemplatedEmailToUser(userDTO, emailVerificationTemplate, emailTokens, EmailType.SYSTEM);
   }
@@ -1635,10 +1627,10 @@ public class UserAccountManager implements IUserAccountManager {
       throws ContentManagerException, SegueDatabaseException {
 
     EmailTemplateDTO emailChangeTemplate = emailManager.getEmailTemplateDTO("email-verification-change");
-    Map<String, Object> emailTokens = ImmutableMap.of("requestedemail", newEmail);
+    Map<String, Object> emailTokens = Map.of("requestedemail", newEmail);
 
-    log.info(String.format("Sending email for email address change for user (%s)"
-        + " from email (%s) to email (%s)", userDTO.getId(), userDTO.getEmail(), sanitiseExternalLogValue(newEmail)));
+    log.info("Sending email for email address change for user ({}) from email ({}) to email ({})", userDTO.getId(),
+        userDTO.getEmail(), sanitiseExternalLogValue(newEmail));
     emailManager.sendTemplatedEmailToUser(userDTO, emailChangeTemplate, emailTokens, EmailType.SYSTEM);
 
     // Defensive copy to ensure old email address is preserved (shouldn't change until new email is verified)
@@ -1721,7 +1713,7 @@ public class UserAccountManager implements IUserAccountManager {
                 .toString());
 
             logManager.logInternalEvent(userDTO, SegueServerLogType.MERGE_USER,
-                ImmutableMap.of("oldAnonymousUserId", anonymousUser.getSessionId()));
+                Map.of("oldAnonymousUserId", anonymousUser.getSessionId()));
 
             // delete the session attribute as merge has completed.
             try {
@@ -1832,7 +1824,7 @@ public class UserAccountManager implements IUserAccountManager {
   public static boolean isEmailValid(final String email) {
     return email != null
         && !email.isEmpty()
-        && email.matches(".*(@.+\\.[^.]+|-(facebook|google|twitter)$)")
+        && email.matches(".*(?:@.+\\.[^.]+|-(facebook|google|twitter))$")
         && EMAIL_PERMITTED_CHARS_REGEX.matcher(email).matches()
         && !EMAIL_CONSECUTIVE_FULL_STOP_REGEX.matcher(email).find();
   }
@@ -1871,12 +1863,12 @@ public class UserAccountManager implements IUserAccountManager {
    * @return the list of user dtos.
    */
   private List<RegisteredUserDTO> convertUserDOListToUserDTOList(final List<RegisteredUser> users) {
-    List<RegisteredUser> userDOs = users.parallelStream().filter(Objects::nonNull).collect(Collectors.toList());
+    List<RegisteredUser> userDOs = users.parallelStream().filter(Objects::nonNull).toList();
     if (userDOs.isEmpty()) {
       return new ArrayList<>();
     }
 
-    return users.parallelStream().map(this.dtoMapper::map).collect(Collectors.toList());
+    return users.parallelStream().map(this.dtoMapper::map).toList();
   }
 
   /**
@@ -1922,8 +1914,7 @@ public class UserAccountManager implements IUserAccountManager {
 
     } else {
       // reuse existing one
-      if (request.getSession().getAttribute(ANONYMOUS_USER) instanceof String) {
-        String userId = (String) request.getSession().getAttribute(ANONYMOUS_USER);
+      if (request.getSession().getAttribute(ANONYMOUS_USER) instanceof String userId) {
         user = this.temporaryUserCache.getById(userId);
 
         if (null == user) {
@@ -2048,6 +2039,7 @@ public class UserAccountManager implements IUserAccountManager {
     return dtoMapper.map(updatedUser);
   }
 
+  @SuppressWarnings({"java:S3457", "java:S6126"})
   public void sendRoleChangeRequestEmail(final HttpServletRequest request, final RegisteredUserDTO user,
                                          final Role requestedRole, final Map<String, String> requestDetails)
       throws SegueDatabaseException, ContentManagerException, MissingRequiredFieldException {
@@ -2094,7 +2086,7 @@ public class UserAccountManager implements IUserAccountManager {
     emailManager.sendContactUsFormEmail(properties.getProperty(Constants.MAIL_RECEIVERS), emailValues);
 
     logManager.logEvent(user, request, SegueServerLogType.CONTACT_US_FORM_USED,
-        ImmutableMap.of("message", String.format("%s %s (%s) - %s", user.getGivenName(),
+        Map.of("message", String.format("%s %s (%s) - %s", user.getGivenName(),
             user.getFamilyName(), user.getEmail(), emailMessage)));
   }
 
