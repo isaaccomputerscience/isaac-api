@@ -155,6 +155,8 @@ public class IsaacEventPageDTO extends ContentDTO {
         groupReservationLimit != null ? groupReservationLimit : EVENT_GROUP_RESERVATION_DEFAULT_LIMIT;
     this.allowGroupReservations = allowGroupReservations;
     this.privateEvent = privateEvent;
+    this.hub = hub;
+    this.meetingUrl = meetingUrl;
   }
 
   /**

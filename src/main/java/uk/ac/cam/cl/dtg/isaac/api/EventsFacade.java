@@ -1768,6 +1768,14 @@ public class EventsFacade extends AbstractIsaacFacade {
     }
   }
 
+  /**
+   * A helper method used to determine if the current user booking is confirmed and date of event is today.
+   *
+   * @param userBookingStatus - status of the current user's booking
+   * @param date - start date of event from IsaacEventPageDTO.
+   * @return boolean.
+   */
+
   private boolean isUserBookingConfirmedAndEventToday(final BookingStatus userBookingStatus, final Instant date) {
 
     if (date == null) {
