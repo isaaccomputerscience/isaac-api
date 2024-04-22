@@ -1841,7 +1841,7 @@ public class UserAccountManager implements IUserAccountManager {
   public static boolean isEmailValid(final String email) {
     return email != null
         && !email.isEmpty()
-        && email.matches(".*(?:@.+\\.[^.]+|-(facebook|google|twitter))$")
+        && email.matches("^.+(?:@(?:[a-zA-Z0-9-]{1,63}+\\.)++[a-zA-Z]{1,63}+|-(?:facebook|google|twitter))$")
         && EMAIL_PERMITTED_CHARS_REGEX.matcher(email).matches()
         && !EMAIL_CONSECUTIVE_FULL_STOP_REGEX.matcher(email).find();
   }

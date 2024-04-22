@@ -162,9 +162,12 @@ class UserAccountManagerTest {
         Arguments.of(false, " "), // Only whitespace is not valid
         Arguments.of(false, "test.email@testcom"), // Email must have at least one . after the @
         Arguments.of(false, "testemailtest.com"), // Standard email must include an @
-        Arguments.of(false, "testemail@test."), // Email must have be at least character after the last .
+        Arguments.of(false, "testemail@test."), // Email must have at least character after the last .
+        Arguments.of(false, "testemail@test.test."), // Email must have at least character after the last .
         Arguments.of(false, "testemail@.com"), // Email must have at least one character between the @ and the last .
+        Arguments.of(false, "testemail@.test.com"), // Email must have at least one character between the @ and the last .
         Arguments.of(false, "testemail@test..com"), // Email cannot contain consecutive full stops
+        Arguments.of(false, "@test.com"), // Empty local-part is not permitted
         // Other special characters are not permitted
         Arguments.of(false, "test\"email@test.com"),
         Arguments.of(false, "test(email@test.com"),

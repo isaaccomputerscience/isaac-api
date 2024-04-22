@@ -729,7 +729,7 @@ public class UsersFacade extends AbstractSegueFacade {
       RegisteredUser targetUser = userManager.findUserByEmail(userEmail);
       if (targetUser == null) {
         // As this endpoint does not require authentication, do not expose whether the requested user exists
-        log.warn("A role change request was made for unknown user: {}", userEmail);
+        log.warn("A role change request was made for unknown user: {}", sanitiseExternalLogValue(userEmail));
         return Response.ok().build();
       }
 
@@ -751,7 +751,7 @@ public class UsersFacade extends AbstractSegueFacade {
       // This exception is thrown after we have already checked whether a user exists for the provided email address,
       // so something has gone very wrong
       log.error("Could not find user with email address ({}) to set teacherPending flag."
-              + " This should have already been caught.", userEmail);
+              + " This should have already been caught.", sanitiseExternalLogValue(userEmail));
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
           "An error occurred while trying to set the role change request flag.").toResponse();
     } catch (SegueDatabaseException e) {
