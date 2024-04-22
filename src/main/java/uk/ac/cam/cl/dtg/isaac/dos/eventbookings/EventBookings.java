@@ -105,7 +105,7 @@ public interface EventBookings {
   /**
    * Find all bookings for given events.
    *
-   * @param eventIds - the event of interest.
+   * @param eventIds - the events of interest.
    * @return an iterable with all the events matching the criteria.
    * @throws SegueDatabaseException - if an error occurs.
    */
