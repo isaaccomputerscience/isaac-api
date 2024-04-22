@@ -29,6 +29,7 @@ import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_DATABASE_ER
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_ERROR_LOCATING_CONTENT;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EXCEPTION_MESSAGE_EVENT_REQUEST_ERROR;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.PRIVATE_EVENT_FIELDNAME;
+import static uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus.CONFIRMED;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ADMIN_BOOKING_REASON_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ATTENDED_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.BOOKING_STATUS_FIELDNAME;
@@ -74,6 +75,8 @@ import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -1007,7 +1010,7 @@ public class EventsFacade extends AbstractIsaacFacade {
             || bookingManager.isReservationMadeByRequestingUser(userLoggedIn, userOwningBooking, event)
             && userAssociationManager.hasPermission(userLoggedIn, userOwningBooking)) {
           if (bookingManager.hasBookingWithAnyOfStatuses(eventId, userId, new HashSet<>(Arrays.asList(
-              BookingStatus.CONFIRMED, BookingStatus.WAITING_LIST, BookingStatus.RESERVED)))) {
+              CONFIRMED, BookingStatus.WAITING_LIST, BookingStatus.RESERVED)))) {
             validUsers.add(userOwningBooking);
           } else {
             // Maybe silently carry on instead?
@@ -1249,7 +1252,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       }
 
       Set<BookingStatus> cancelableStatuses =
-          new HashSet<>(Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.WAITING_LIST, BookingStatus.RESERVED));
+          new HashSet<>(Arrays.asList(CONFIRMED, BookingStatus.WAITING_LIST, BookingStatus.RESERVED));
       if (!bookingManager.hasBookingWithAnyOfStatuses(eventId, userOwningBooking.getId(), cancelableStatuses)) {
         return new SegueErrorResponse(Status.BAD_REQUEST, "User is not booked on this event.").toResponse();
       }
@@ -1543,7 +1546,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         // Use counts from batch query
         List<DetailedEventBookingDTO> bookingsForThisEvent = allBookings.getOrDefault(event.getId(), new ArrayList<>());
         long numberOfConfirmedBookings =
-            bookingsForThisEvent.stream().filter(b -> BookingStatus.CONFIRMED.equals(b.getBookingStatus())).count();
+            bookingsForThisEvent.stream().filter(b -> CONFIRMED.equals(b.getBookingStatus())).count();
         long numberOfWaitingListBookings =
             bookingsForThisEvent.stream().filter(b -> BookingStatus.WAITING_LIST.equals(b.getBookingStatus())).count();
         long numberAttended =
@@ -1742,21 +1745,40 @@ public class EventsFacade extends AbstractIsaacFacade {
   private IsaacEventPageDTO augmentEventWithBookingInformation(final HttpServletRequest request,
                                                                final ContentDTO possibleEvent)
       throws SegueDatabaseException {
-    if (possibleEvent instanceof IsaacEventPageDTO) {
-      IsaacEventPageDTO page = (IsaacEventPageDTO) possibleEvent;
+    if (possibleEvent instanceof IsaacEventPageDTO page) {
 
       try {
         RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
-        page.setUserBookingStatus(this.bookingManager.getBookingStatus(page.getId(), user.getId()));
+        BookingStatus userBookingStatus = this.bookingManager.getBookingStatus(page.getId(), user.getId());
+        page.setUserBookingStatus(userBookingStatus);
+
+        if (!isUserBookingConfirmedAndEventToday(userBookingStatus, page.getDate())) {
+          page.setMeetingUrl(null);
+        }
+
       } catch (NoUserLoggedInException e) {
         // no action as we don't require the user to be logged in.
         page.setUserBookingStatus(null);
+        page.setMeetingUrl(null);
       }
-
       page.setPlacesAvailable(this.bookingManager.getPlacesAvailable(page));
       return page;
     } else {
       throw new ClassCastException("The object provided was not an event.");
     }
+  }
+
+  private boolean isUserBookingConfirmedAndEventToday(final BookingStatus userBookingStatus, final Instant date) {
+
+    if (date == null) {
+      return false;
+    }
+
+    LocalDate today = LocalDate.now();
+    LocalDate eventStartDate = Instant.ofEpochMilli(date.toEpochMilli())
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate();
+
+    return userBookingStatus == CONFIRMED && eventStartDate.isEqual(today);
   }
 }
