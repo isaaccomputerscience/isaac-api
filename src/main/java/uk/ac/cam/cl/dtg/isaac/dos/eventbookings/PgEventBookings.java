@@ -33,6 +33,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -630,11 +631,35 @@ public class PgEventBookings implements EventBookings {
    */
   @Override
   public Iterable<EventBooking> findAllByEventIds(final List<String> eventIds) throws SegueDatabaseException {
+    if (!eventIds.isEmpty()) {
+      String sqlQuery = createSqlQueryForEventIds(eventIds);
+
+      try (Connection conn = ds.getDatabaseConnection();
+           PreparedStatement pst = conn.prepareStatement(sqlQuery)) {
+        // Set values for each placeholder based on the eventIds list
+        for (int i = 0; i < eventIds.size(); i++) {
+          pst.setString(i + 1, eventIds.get(i));
+        }
+
+        try (ResultSet results = pst.executeQuery()) {
+          List<EventBooking> eventBookings = new ArrayList<>();
+          while (results.next()) {
+            eventBookings.add(buildPgEventBooking(results));
+          }
+          return eventBookings;
+        }
+      } catch (SQLException e) {
+        throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
+      }
+    }
+    return new ArrayList<EventBooking>();
+  }
+
+  private String createSqlQueryForEventIds(List<String> eventIds) {
     StringBuilder sb = new StringBuilder();
     sb.append("SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id IN (");
 
-    // insert placeholders into the query - sb.append is adding new content to an existing string without creating
-    // new string objects each time  to an existing string builder
+    // insert placeholders into the query
     for (int i = 0; i < eventIds.size(); i++) {
       if (i > 0) {
         sb.append(", ");
@@ -643,24 +668,7 @@ public class PgEventBookings implements EventBookings {
     }
     sb.append(") AND NOT users.deleted");
 
-    try (Connection conn = ds.getDatabaseConnection();
-         PreparedStatement pst = conn.prepareStatement(sb.toString())) {
-
-      // Set values for each placeholder based on the eventIds list
-      for (int i = 0; i < eventIds.size(); i++) {
-        pst.setString(i + 1, eventIds.get(i));
-      }
-
-      try (ResultSet results = pst.executeQuery()) {
-        List<EventBooking> returnResult = Lists.newArrayList();
-        while (results.next()) {
-          returnResult.add(buildPgEventBooking(results));
-        }
-        return returnResult;
-      }
-    } catch (SQLException e) {
-      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
-    }
+    return sb.toString();
   }
 
   @Override
