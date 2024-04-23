@@ -1710,10 +1710,10 @@ public class EventsFacade extends AbstractIsaacFacade {
       throw new ResourceNotFoundException(String.format("Unable to locate the event with id; %s", eventId));
     }
 
-    if (possibleEvent instanceof IsaacEventPageDTO) {
+    if (possibleEvent instanceof IsaacEventPageDTO definiteEvent) {
       // The Events Facade *mutates* the EventDTO returned by this method; we must return a copy of
       // the original object else we will poison the contentManager's cache!
-      return (IsaacEventPageDTO) mapper.copy(possibleEvent);
+      return mapper.copy(definiteEvent);
     }
     return null;
   }
@@ -1783,9 +1783,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     }
 
     LocalDate today = LocalDate.now();
-    LocalDate eventStartDate = Instant.ofEpochMilli(date.toEpochMilli())
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate();
+    LocalDate eventStartDate = date.atZone(ZoneId.systemDefault()).toLocalDate();
 
     return userBookingStatus == CONFIRMED && eventStartDate.isEqual(today);
   }
