@@ -733,7 +733,7 @@ public class UsersFacade extends AbstractSegueFacade {
         return Response.ok().build();
       }
 
-      if (targetUser.getTeacherPending() == Boolean.TRUE) {
+      if (Boolean.TRUE.equals(targetUser.getTeacherPending())) {
         return new SegueErrorResponse(
             Status.BAD_REQUEST, "You have already submitted a teacher upgrade request.").toResponse();
       }
