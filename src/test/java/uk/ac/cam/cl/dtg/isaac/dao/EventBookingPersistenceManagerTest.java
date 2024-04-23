@@ -2,6 +2,7 @@ package uk.ac.cam.cl.dtg.isaac.dao;
 
 import static java.time.Instant.now;
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
@@ -112,26 +113,26 @@ class EventBookingPersistenceManagerTest {
   }
 
   @NotNull
-  private static DetailedEventBookingDTO prepareDetailedEventBookingDTO(long bookingId, Instant now) {
+  private static DetailedEventBookingDTO prepareDetailedEventBookingDTO(long bookingId, Instant createAndUpdateTime) {
     DetailedEventBookingDTO expectedBooking1 = new DetailedEventBookingDTO();
     expectedBooking1.setBookingId(bookingId);
     expectedBooking1.setUserBooked(new UserSummaryWithEmailAddressAndGenderDTO());
     expectedBooking1.setReservedById(7L);
     expectedBooking1.setBookingStatus(BookingStatus.CONFIRMED);
-    expectedBooking1.setBookingDate(now);
-    expectedBooking1.setUpdated(now);
+    expectedBooking1.setBookingDate(createAndUpdateTime);
+    expectedBooking1.setUpdated(createAndUpdateTime);
     return expectedBooking1;
   }
 
-  private static void prepareEventBookingResultSet(ResultSet dummyResultSet, long t, String event1, Instant now)
+  private static void prepareEventBookingResultSet(ResultSet dummyResultSet, long eventId, String event, Instant createAndUpdateTime)
       throws SQLException {
-    expect(dummyResultSet.getLong("id")).andReturn(t);
-    expect(dummyResultSet.getLong("user_id")).andReturn(t);
+    expect(dummyResultSet.getLong("id")).andReturn(eventId);
+    expect(dummyResultSet.getLong("user_id")).andReturn(eventId);
     expect(dummyResultSet.getLong("reserved_by")).andReturn(7L);
-    expect(dummyResultSet.getString("event_id")).andReturn(event1);
+    expect(dummyResultSet.getString("event_id")).andReturn(event);
     expect(dummyResultSet.getString("status")).andReturn("CONFIRMED");
-    expect(dummyResultSet.getTimestamp("created")).andReturn(Timestamp.from(now));
-    expect(dummyResultSet.getTimestamp("updated")).andReturn(Timestamp.from(now));
+    expect(dummyResultSet.getTimestamp("created")).andReturn(Timestamp.from(createAndUpdateTime));
+    expect(dummyResultSet.getTimestamp("updated")).andReturn(Timestamp.from(createAndUpdateTime));
     expect(dummyResultSet.getObject("additional_booking_information")).andReturn(null);
   }
 }
