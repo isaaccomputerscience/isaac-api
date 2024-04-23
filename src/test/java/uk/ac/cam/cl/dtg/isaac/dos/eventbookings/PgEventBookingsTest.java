@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
@@ -152,17 +154,17 @@ class PgEventBookingsTest {
     dummyPreparedStatement.close();
     dummyConnection.close();
 
-    // Create an array of all mocked objects
     Object[] mockedObjects = {dummyPostgresSqlDb, dummyObjectMapper, dummyConnection, dummyPreparedStatement, dummyResultSet};
     replay(mockedObjects);
 
     PgEventBookings pgEventBookings = this.buildPgEventBookings();
     Iterable<EventBooking> result = pgEventBookings.findAllByEventIds(eventIds);
     assertNotNull(result);
-
-    List<EventBooking> resultList = (List<EventBooking>) result;
-    List<EventBooking> expectedEventBookings = Arrays.asList(expectedBooking1, expectedBooking2);
-    assertDeepEquals(expectedEventBookings, resultList);
+    assertEquals(StreamSupport.stream(result.spliterator(), false).count(), 2);
+    assertDeepEquals(StreamSupport.stream(result.spliterator(), false).filter(object -> object.getId().equals(1L)).collect(
+        Collectors.toList()).get(0), expectedBooking1);
+    assertDeepEquals(StreamSupport.stream(result.spliterator(), false).filter(object -> object.getId().equals(2L)).collect(
+        Collectors.toList()).get(0), expectedBooking2);
 
     verify(mockedObjects);
   }
