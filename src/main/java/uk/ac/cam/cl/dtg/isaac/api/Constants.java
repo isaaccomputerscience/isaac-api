@@ -19,9 +19,11 @@ package uk.ac.cam.cl.dtg.isaac.api;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_SERVER_LOG_TYPES;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import uk.ac.cam.cl.dtg.segue.api.Constants.LogType;
 
 /**
@@ -174,13 +176,10 @@ public final class Constants {
   public static final Set<String> ISAAC_CLIENT_LOG_TYPES =
       Arrays.stream(IsaacClientLogType.values()).map(IsaacClientLogType::name).collect(Collectors.toSet());
 
-  public static final Set<String> ALL_ACCEPTED_LOG_TYPES = new HashSet<>() {
-    {
-      addAll(SEGUE_SERVER_LOG_TYPES);
-      addAll(ISAAC_SERVER_LOG_TYPES);
-      addAll(ISAAC_CLIENT_LOG_TYPES);
-    }
-  };
+  public static final Set<String> ALL_ACCEPTED_LOG_TYPES =
+      Stream.of(SEGUE_SERVER_LOG_TYPES, ISAAC_SERVER_LOG_TYPES, ISAAC_CLIENT_LOG_TYPES)
+          .flatMap(Collection::stream)
+          .collect(Collectors.toCollection(HashSet::new));
 
   public enum IsaacUserPreferences {
     BETA_FEATURE, EXAM_BOARD, PROGRAMMING_LANGUAGE, BOOLEAN_NOTATION, DISPLAY_SETTING
