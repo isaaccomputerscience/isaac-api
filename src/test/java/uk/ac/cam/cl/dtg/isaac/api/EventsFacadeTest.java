@@ -9,9 +9,14 @@ import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
@@ -63,21 +68,32 @@ class EventsFacadeTest {
             this.userAccountManager, this.schoolListReader, this.mapper);
   }
 
-  @Test
-  void getEvent_returns_event_with_booking_info_and_meeting_url()
+  public static Stream<Arguments> getEvent_returns_event_with_expected_meeting_url() {
+    return Stream.of(
+        Arguments.of("http://www.example.com", BookingStatus.CONFIRMED, Instant.now()),
+        Arguments.of(null, BookingStatus.CONFIRMED, Instant.now().plus(2, ChronoUnit.DAYS)),
+        Arguments.of(null, BookingStatus.CANCELLED, Instant.now().plus(2, ChronoUnit.DAYS)),
+        Arguments.of(null, BookingStatus.CANCELLED, Instant.now()),
+        Arguments.of(null, null, Instant.now()));
+  }
+
+  @ParameterizedTest (name = "[{index}] Meeting URL is {0} if user booking status is {1} and event date is {2}")
+  @MethodSource
+  void getEvent_returns_event_with_expected_meeting_url(String expectedMeetingUrl, BookingStatus bookingStatus,
+                                                        Instant eventDate)
       throws ContentManagerException, NoUserLoggedInException, SegueDatabaseException {
 
     // Arrange
     HttpServletRequest mockRequest = createMock(HttpServletRequest.class);
     String eventId = "example_event";
-    IsaacEventPageDTO page = prepareMockEventPage(eventId, Instant.now());
+    IsaacEventPageDTO page = prepareMockEventPage(eventId, eventDate);
     RegisteredUserDTO mockUser = new RegisteredUserDTO();
     mockUser.setId(1234L);
 
     expect(contentManager.getContentById(eventId)).andReturn(page);
     expect(mapper.copy(page)).andReturn(page);
     expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockUser);
-    expect(bookingManager.getBookingStatus(page.getId(), mockUser.getId())).andReturn(BookingStatus.CONFIRMED);
+    expect(bookingManager.getBookingStatus(page.getId(), mockUser.getId())).andReturn(bookingStatus);
     expect(bookingManager.getPlacesAvailable(page)).andReturn(12);
 
     replay(properties, logManager, bookingManager, userManager, contentManager, userBadgeManager,
@@ -88,7 +104,7 @@ class EventsFacadeTest {
 
     // Assert
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    assertDeepEquals(page, response.getEntity());
+    assertEquals(expectedMeetingUrl, response.readEntity(IsaacEventPageDTO.class).getMeetingUrl());
   }
 
   private static @NotNull IsaacEventPageDTO prepareMockEventPage(String eventId, Instant date) {
