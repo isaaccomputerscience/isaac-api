@@ -16,6 +16,7 @@
 
 package uk.ac.cam.cl.dtg.segue.dao.users;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.requireNonNull;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NO_SESSION_TOKEN_RESERVED_VALUE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SchoolInfoStatus;
@@ -35,6 +36,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1070,7 +1072,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     user.setSchoolOther(null); // Risk this contains something identifying!
 
     if (user.getDateOfBirth() != null) {
-      user.setDateOfBirth(user.getDateOfBirth().truncatedTo(ChronoUnit.MONTHS));
+      // Instant does not support operations with units larger than days so use LocalDateTime as intermediary
+      user.setDateOfBirth(LocalDateTime.from(user.getDateOfBirth()).truncatedTo(ChronoUnit.MONTHS).toInstant(UTC));
     }
 
     return user;
