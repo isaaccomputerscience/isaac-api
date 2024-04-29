@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -65,7 +66,7 @@ class AdminFacadeIT extends IsaacIntegrationTest {
       assertNull(deletedUser.getEmailVerificationToken());
       assertNull(deletedUser.getEmailToVerify());
       assertNull(deletedUser.getSchoolOther());
-      assertNull(deletedUser.getDateOfBirth());
+      assertEquals(Instant.parse("2010-04-01T00:00:00Z"), deletedUser.getDateOfBirth());
     }
 
     @Test

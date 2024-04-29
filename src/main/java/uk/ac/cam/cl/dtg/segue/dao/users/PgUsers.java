@@ -36,7 +36,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1072,8 +1072,11 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     user.setSchoolOther(null); // Risk this contains something identifying!
 
     if (user.getDateOfBirth() != null) {
-      // Instant does not support operations with units larger than days so use LocalDateTime as intermediary
-      user.setDateOfBirth(LocalDateTime.from(user.getDateOfBirth()).truncatedTo(ChronoUnit.MONTHS).toInstant(UTC));
+      // Instant does not support operations with larger units so use a more complex time class such as ZonedDateTime
+      // as an intermediary
+      ZonedDateTime dateAsZonedDate = ZonedDateTime.from(user.getDateOfBirth().atZone(UTC));
+      ZonedDateTime truncatedDate = dateAsZonedDate.truncatedTo(ChronoUnit.DAYS).withDayOfMonth(1);
+      user.setDateOfBirth(truncatedDate.toInstant());
     }
 
     return user;
