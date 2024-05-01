@@ -201,19 +201,20 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     // generate properties from hashMap for token replacement process
     Properties propertiesToReplace = new Properties();
     propertiesToReplace.putAll(this.globalStringTokens);
-
     propertiesToReplace.putAll(this.flattenTokenMap(tokenToValueMapping, Maps.newHashMap(), ""));
 
     // Sanitizes inputs from users
     sanitizeEmailParameters(propertiesToReplace);
 
-    EmailTemplateDTO emailContent = getEmailTemplateDTO("password_reset_invalid");
-
-    EmailCommunicationMessage emailCommunicationMessage
-        = constructMultiPartEmail(null, recipientEmailAddress, emailContent, propertiesToReplace,
-        EmailType.SYSTEM, null);
-
-    this.addSystemEmailToQueue(emailCommunicationMessage);
+    try {
+      EmailTemplateDTO emailContent = getEmailTemplateDTO("password_reset_invalid");
+      EmailCommunicationMessage emailCommunicationMessage = constructMultiPartEmail(
+          null, recipientEmailAddress, emailContent, propertiesToReplace, EmailType.SYSTEM, null);
+      this.addSystemEmailToQueue(emailCommunicationMessage);
+    } catch (ContentManagerException | SegueDatabaseException e) {
+      log.error("Error sending password reset invalid email to {}: {}", recipientEmailAddress, e.getMessage());
+      throw e;
+    }
   }
 
   /**
