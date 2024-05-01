@@ -114,6 +114,7 @@ import uk.ac.cam.cl.dtg.util.RequestIpExtractor;
 @Tag(name = "/users")
 public class UsersFacade extends AbstractSegueFacade {
   private static final Logger log = LoggerFactory.getLogger(UsersFacade.class);
+  private final PropertiesLoader properties;
   private final UserAccountManager userManager;
   private final RecaptchaManager recaptchaManager;
   private final UserAssociationManager userAssociationManager;
@@ -121,7 +122,6 @@ public class UsersFacade extends AbstractSegueFacade {
   private final AbstractUserPreferenceManager userPreferenceManager;
   private final SchoolListReader schoolListReader;
   private final EmailManager emailManager;
-  private final PropertiesLoader properties;
 
   /**
    * Construct an instance of the UsersFacade.
@@ -134,6 +134,7 @@ public class UsersFacade extends AbstractSegueFacade {
    * @param misuseMonitor          - so we can check for misuse
    * @param userPreferenceManager  - so we can provide user preferences
    * @param schoolListReader       - so we can augment school info
+   * @param emailManager           - email manager
    */
   @Inject
   public UsersFacade(final PropertiesLoader properties, final UserAccountManager userManager,
@@ -143,6 +144,7 @@ public class UsersFacade extends AbstractSegueFacade {
                      final SchoolListReader schoolListReader,
                      final EmailManager emailManager) {
     super(properties, logManager);
+    this.properties = properties;
     this.userManager = userManager;
     this.recaptchaManager = recaptchaManager;
     this.userAssociationManager = userAssociationManager;
@@ -150,7 +152,6 @@ public class UsersFacade extends AbstractSegueFacade {
     this.userPreferenceManager = userPreferenceManager;
     this.schoolListReader = schoolListReader;
     this.emailManager = emailManager;
-    this.properties = properties;
   }
 
   /**
@@ -442,9 +443,7 @@ public class UsersFacade extends AbstractSegueFacade {
     }
   }
 
-
   private void sendPasswordResetInvalidEmail(String targetUserEmail) {
-
     try {
       Map<String, Object> emailTokens = Map.of(
           "email", targetUserEmail,
@@ -454,7 +453,6 @@ public class UsersFacade extends AbstractSegueFacade {
       );
 
       emailManager.sendPasswordResetInvalid(targetUserEmail, emailTokens);
-
     } catch (ContentManagerException e) {
       log.error("Invalid password reset email could not be sent due to content issue: {}", e.getMessage());
     } catch (SegueDatabaseException e) {
