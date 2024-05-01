@@ -187,6 +187,36 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
   }
 
   /**
+   * Function that enables PW reset response to be sent to a random email address (not to a known user)
+   *
+   * @param recipientEmailAddress - Email Address to send the contact us message to.
+   * @param tokenToValueMapping  - a Map of tokens to values that will be replaced in the email template.
+   * @throws ContentManagerException if we can't parse the content
+   * @throws SegueDatabaseException  if we cannot contact the database for logging.
+   */
+  public void sendPasswordResetInvalid(final String recipientEmailAddress,
+                                       final Map<String, Object> tokenToValueMapping)
+      throws ContentManagerException, SegueDatabaseException {
+
+    // generate properties from hashMap for token replacement process
+    Properties propertiesToReplace = new Properties();
+    propertiesToReplace.putAll(this.globalStringTokens);
+
+    propertiesToReplace.putAll(this.flattenTokenMap(tokenToValueMapping, Maps.newHashMap(), ""));
+
+    // Sanitizes inputs from users
+    sanitizeEmailParameters(propertiesToReplace);
+
+    EmailTemplateDTO emailContent = getEmailTemplateDTO("password_reset_invalid");
+
+    EmailCommunicationMessage emailCommunicationMessage
+        = constructMultiPartEmail(null, recipientEmailAddress, emailContent, propertiesToReplace,
+        EmailType.SYSTEM, null);
+
+    this.addSystemEmailToQueue(emailCommunicationMessage);
+  }
+
+  /**
    * Function that enables contact us messages to be sent to a random email address (not to a known user).
    *
    * @param recipientEmailAddress - Email Address to send the contact us message to.

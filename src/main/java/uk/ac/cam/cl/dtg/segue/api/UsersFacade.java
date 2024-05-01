@@ -17,6 +17,8 @@
 package uk.ac.cam.cl.dtg.segue.api;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.ANONYMOUS_USER;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.EMAIL_SIGNATURE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.LOCAL_AUTH_EMAIL_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.LOCAL_AUTH_GROUP_MANAGER_EMAIL_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.LOCAL_AUTH_GROUP_MANAGER_INITIATED_FIELDNAME;
@@ -93,6 +95,7 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.MissingRequiredFieldException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoCredentialsAvailableException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
+import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.dao.ILogManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
@@ -117,6 +120,8 @@ public class UsersFacade extends AbstractSegueFacade {
   private final IMisuseMonitor misuseMonitor;
   private final AbstractUserPreferenceManager userPreferenceManager;
   private final SchoolListReader schoolListReader;
+  private final EmailManager emailManager;
+  private final PropertiesLoader properties;
 
   /**
    * Construct an instance of the UsersFacade.
@@ -135,7 +140,8 @@ public class UsersFacade extends AbstractSegueFacade {
                      final RecaptchaManager recaptchaManager, final ILogManager logManager,
                      final UserAssociationManager userAssociationManager, final IMisuseMonitor misuseMonitor,
                      final AbstractUserPreferenceManager userPreferenceManager,
-                     final SchoolListReader schoolListReader) {
+                     final SchoolListReader schoolListReader,
+                     final EmailManager emailManager) {
     super(properties, logManager);
     this.userManager = userManager;
     this.recaptchaManager = recaptchaManager;
@@ -143,6 +149,8 @@ public class UsersFacade extends AbstractSegueFacade {
     this.misuseMonitor = misuseMonitor;
     this.userPreferenceManager = userPreferenceManager;
     this.schoolListReader = schoolListReader;
+    this.emailManager = emailManager;
+    this.properties = properties;
   }
 
   /**
@@ -404,6 +412,8 @@ public class UsersFacade extends AbstractSegueFacade {
       return new SegueErrorResponse(Status.BAD_REQUEST, "No account email address provided.").toResponse();
     }
 
+    String sanitisedUserEmail = sanitiseExternalLogValue(userObject.getEmail());
+
     try {
       String requestingIPAddress = RequestIpExtractor.getClientIpAddr(request);
       misuseMonitor.notifyEvent(userObject.getEmail(), PasswordResetByEmailMisuseHandler.class.getSimpleName());
@@ -415,10 +425,10 @@ public class UsersFacade extends AbstractSegueFacade {
               ImmutableMap.of(LOCAL_AUTH_EMAIL_FIELDNAME, userObject.getEmail()));
 
       if (userExists) {
-        log.info("Password reset requested for email: (" + sanitiseExternalLogValue(userObject.getEmail()) + ")");
+        log.info("Password reset requested for email: {}", sanitisedUserEmail);
       } else {
-        log.warn("Password reset requested for account that does not exist: ("
-            + sanitiseExternalLogValue(userObject.getEmail()) + ")");
+        log.warn("Password reset requested for account that does not exist: {}", sanitisedUserEmail);
+        sendPasswordResetInvalidEmail(sanitisedUserEmail);
       }
       return Response.ok().build();
     } catch (SegueDatabaseException e) {
@@ -427,9 +437,29 @@ public class UsersFacade extends AbstractSegueFacade {
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     } catch (SegueResourceMisuseException e) {
-      log.error("Password reset request blocked for email: (" + sanitiseExternalLogValue(userObject.getEmail()) + ")",
-          e.toString());
+      log.error("Password reset request blocked for email: {}, {}", sanitisedUserEmail, e.toString());
       return SegueErrorResponse.getRateThrottledResponse(TOO_MANY_REQUESTS);
+    }
+  }
+
+
+  private void sendPasswordResetInvalidEmail(String targetUserEmail) {
+
+    try {
+      Map<String, Object> emailTokens = Map.of(
+          "email", targetUserEmail,
+          "siteBaseURL", String.format("https://%s", properties.getProperty(HOST_NAME)),
+          "registrationURL", String.format("https://%s/register", properties.getProperty(HOST_NAME)),
+          "sig", properties.getProperty(EMAIL_SIGNATURE)
+      );
+
+      emailManager.sendPasswordResetInvalid(targetUserEmail, emailTokens);
+
+    } catch (ContentManagerException e) {
+      log.error("Invalid password reset email could not be sent due to content issue: {}", e.getMessage());
+    } catch (SegueDatabaseException e) {
+      log.error("Invalid password reset email could not be sent due to an error while constructing the email: {}",
+          e.getMessage());
     }
   }
 

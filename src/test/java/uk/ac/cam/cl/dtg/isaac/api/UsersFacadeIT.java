@@ -80,7 +80,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
     misuseMonitor.resetMisuseCount("0.0.0.0", RegistrationMisuseHandler.class.getSimpleName());
     this.usersFacade =
         new UsersFacade(properties, userAccountManager, recaptchaManager, logManager, userAssociationManager,
-            misuseMonitor, userPreferenceManager, schoolListReader);
+            misuseMonitor, userPreferenceManager, schoolListReader, emailManager);
     mockRequest = replayMockServletRequest();
     mockResponse = niceMock(HttpServletResponse.class);
   }
@@ -381,7 +381,7 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
               userPreferenceManager, schoolListReader);
       UsersFacade usersFacadeWithEmailMock =
           new UsersFacade(properties, userAccountManagerWithEmailMock, recaptchaManager, logManager,
-              userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader);
+              userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader, mockEmailManager);
 
       LoginResult currentlyStudentLogin =
           loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
