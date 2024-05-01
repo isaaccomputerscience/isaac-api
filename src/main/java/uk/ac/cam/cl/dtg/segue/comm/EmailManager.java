@@ -187,7 +187,7 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
   }
 
   /**
-   * Function that enables PW reset response to be sent to a random email address (not to a known user)
+   * Function that enables PW reset response to be sent to a random email address (not to a known user).
    *
    * @param recipientEmailAddress - Email Address to send the contact us message to.
    * @param tokenToValueMapping  - a Map of tokens to values that will be replaced in the email template.
