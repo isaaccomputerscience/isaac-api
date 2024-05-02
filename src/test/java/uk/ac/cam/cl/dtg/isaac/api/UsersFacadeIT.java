@@ -371,17 +371,16 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
           "replyToName", "Test Student Student"
       );
 
-      EmailManager mockEmailManager = createMock(EmailManager.class);
-      mockEmailManager.sendContactUsFormEmail(properties.getProperty(Constants.MAIL_RECEIVERS), expectedEmailDetails);
+      emailManager.sendContactUsFormEmail(properties.getProperty(Constants.MAIL_RECEIVERS), expectedEmailDetails);
       expectLastCall();
-      replay(mockEmailManager);
+      replay(emailManager);
       UserAccountManager userAccountManagerWithEmailMock = userAccountManager =
           new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, mainObjectMapper,
-              mockEmailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager,
+              emailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager,
               userPreferenceManager, schoolListReader);
       UsersFacade usersFacadeWithEmailMock =
           new UsersFacade(properties, userAccountManagerWithEmailMock, recaptchaManager, logManager,
-              userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader, mockEmailManager);
+              userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader, emailManager);
 
       LoginResult currentlyStudentLogin =
           loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
@@ -395,9 +394,9 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
 
       usersFacadeWithEmailMock.requestRoleChange(upgradeRequest, requestDetails);
 
-      verify(mockEmailManager);
+      verify(emailManager);
 
-      reset(mockEmailManager);
+      reset(emailManager);
 
       // Reset flag
       resetTestDatabaseTeacherPendingFlag(TEST_STUDENT_ID);
