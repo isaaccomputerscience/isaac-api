@@ -206,15 +206,12 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     // Sanitizes inputs from users
     sanitizeEmailParameters(propertiesToReplace);
 
-    try {
-      EmailTemplateDTO emailContent = getEmailTemplateDTO("password_reset_invalid");
-      EmailCommunicationMessage emailCommunicationMessage = constructMultiPartEmail(
-          null, recipientEmailAddress, emailContent, propertiesToReplace, EmailType.SYSTEM, null);
-      this.addSystemEmailToQueue(emailCommunicationMessage);
-    } catch (ContentManagerException | SegueDatabaseException e) {
-      log.error("Error sending password reset invalid email to {}: {}", recipientEmailAddress, e.getMessage());
-      throw e;
-    }
+    EmailTemplateDTO emailContent = getEmailTemplateDTO("password_reset_invalid");
+    EmailCommunicationMessage emailCommunicationMessage
+        = constructMultiPartEmail(null, recipientEmailAddress, emailContent, propertiesToReplace,
+        EmailType.SYSTEM, null);
+
+    this.addSystemEmailToQueue(emailCommunicationMessage);
   }
 
   /**
