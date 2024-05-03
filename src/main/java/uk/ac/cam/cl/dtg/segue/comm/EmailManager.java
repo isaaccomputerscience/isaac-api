@@ -191,7 +191,7 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
    *
    * @param recipientEmailAddress - Email Address to send the contact us message to.
    * @param tokenToValueMapping  - a Map of tokens to values that will be replaced in the email template.
-   * @throws ContentManagerException if we can't parse the content
+   * @throws ContentManagerException if we can't parse the content.
    * @throws SegueDatabaseException  if we cannot contact the database for logging.
    */
   public void sendPasswordResetInvalid(final String recipientEmailAddress,
