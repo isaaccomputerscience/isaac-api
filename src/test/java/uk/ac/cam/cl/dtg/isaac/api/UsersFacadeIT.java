@@ -371,21 +371,23 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
           "replyToName", "Test Student Student"
       );
 
-      emailManager.sendContactUsFormEmail(properties.getProperty(Constants.MAIL_RECEIVERS), expectedEmailDetails);
+      EmailManager mockEmailManager = createMock(EmailManager.class);
+      mockEmailManager.sendContactUsFormEmail(properties.getProperty(Constants.MAIL_RECEIVERS), expectedEmailDetails);
       expectLastCall();
-      replay(emailManager);
+      replay(mockEmailManager);
       UserAccountManager userAccountManagerWithEmailMock = userAccountManager =
           new UserAccountManager(pgUsers, questionManager, properties, providersToRegister, mainObjectMapper,
-              emailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager,
+              mockEmailManager, pgAnonymousUsers, logManager, userAuthenticationManager, secondFactorManager,
               userPreferenceManager, schoolListReader);
       UsersFacade usersFacadeWithEmailMock =
           new UsersFacade(properties, userAccountManagerWithEmailMock, recaptchaManager, logManager,
-              userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader, emailManager);
+              userAssociationManager, misuseMonitor, userPreferenceManager, schoolListReader, mockEmailManager);
 
       LoginResult currentlyStudentLogin =
           loginAs(httpSession, ITConstants.TEST_STUDENT_EMAIL, ITConstants.TEST_STUDENT_PASSWORD);
       HttpServletRequest upgradeRequest = createRequestWithCookies(new Cookie[] {currentlyStudentLogin.cookie});
       replay(upgradeRequest);
+
       Map<String, String> requestDetails = Map.of(
           "verificationDetails", "school staff url",
           "otherDetails", "more information",
@@ -393,11 +395,8 @@ public class UsersFacadeIT extends IsaacIntegrationTest {
       );
 
       usersFacadeWithEmailMock.requestRoleChange(upgradeRequest, requestDetails);
-
-      verify(emailManager);
-
-      reset(emailManager);
-
+      verify(mockEmailManager);
+      reset(mockEmailManager);
       // Reset flag
       resetTestDatabaseTeacherPendingFlag(TEST_STUDENT_ID);
     }
