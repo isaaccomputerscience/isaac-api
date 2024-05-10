@@ -5,6 +5,7 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.SubclassExhaustiveStrategy;
 import org.mapstruct.SubclassMapping;
 import org.mapstruct.factory.Mappers;
@@ -123,6 +124,7 @@ import uk.ac.cam.cl.dtg.util.locations.Location;
 
 @Mapper(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION, uses = {
     AudienceContextMapper.class, ContentMapperSubclasses.class})
+@SuppressWarnings({"unused", "checkstyle:OverloadMethodsDeclarationOrder"})
 public interface ContentMapper {
 
   ContentMapper INSTANCE = Mappers.getMapper(ContentMapper.class);
@@ -369,12 +371,14 @@ public interface ContentMapper {
 
   ParsonsChoiceDTO copy(ParsonsChoiceDTO source);
 
+  @Mapping(target = "requiresExactMatch", expression = "java(source.requiresExactMatch())")
   FormulaDTO copy(FormulaDTO source);
 
   FreeTextRuleDTO copy(FreeTextRuleDTO source);
 
   ItemChoiceDTO copy(ItemChoiceDTO source);
 
+  @Mapping(target = "requiresExactMatch", expression = "java(source.requiresExactMatch())")
   LogicFormulaDTO copy(LogicFormulaDTO source);
 
   QuantityDTO copy(QuantityDTO source);
@@ -489,6 +493,12 @@ public interface ContentMapper {
   List<Address> copyListOfAddress(List<Address> source);
 
   // Specific mappings for use by above mappers
+  @Mapping(target = "url", ignore = true)
+  @Mapping(target = "supersededBy", ignore = true)
+  @Mapping(target = "summary", ignore = true)
+  @Mapping(target = "questionPartIds", ignore = true)
+  @Mapping(target = "difficulty", ignore = true)
+  @Mapping(target = "correct", ignore = true)
   @BeanMapping(resultType = ContentSummaryDTO.class)
   @SubclassMapping(source = InteractiveCodeSnippetDTO.class, target = ContentSummaryDTO.class)
   @SubclassMapping(source = ParsonsItemDTO.class, target = ContentSummaryDTO.class)
@@ -512,6 +522,16 @@ public interface ContentMapper {
   @SubclassMapping(source = SeguePageDTO.class, target = ContentSummaryDTO.class)
   ContentSummaryDTO mapContentDTOtoContentSummaryDTO(ContentDTO source);
 
+  /*
+   * Several of the fields that cannot be mapped to the QuizSummaryDTO class from ContentDTO are valid for specific
+   * subclasses and would need to be re-enabled on a case-by-case basis. However, ambiguity in subclassing with the
+   * toContentSummaryDTO method currently renders this problematic.
+   * As such, unmapped target reporting has been suppressed on this mapping for the time being. The future MapStruct
+   * 1.6 release is expected to permit usage of qualifiers on SubclassMapping annotations, which would allow resolution
+   * of this issue (by specifying the appropriate methods to use for given subclasses).
+   */
+  @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+  // Choice Subclasses
   @SubclassMapping(source = ParsonsChoiceDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = FormulaDTO.class, target = QuizSummaryDTO.class)
   @SubclassMapping(source = FreeTextRuleDTO.class, target = QuizSummaryDTO.class)
@@ -569,6 +589,9 @@ public interface ContentMapper {
   @SubclassMapping(source = NotificationDTO.class, target = QuizSummaryDTO.class)
   QuizSummaryDTO mapContentDTOtoQuizSummaryDTO(ContentDTO source);
 
+  // Choice Subclasses
+  @Mapping(target = "url", ignore = true)
+  @Mapping(target = "description", ignore = true)
   @SubclassMapping(source = ParsonsChoice.class, target = IsaacWildcard.class)
   @SubclassMapping(source = Formula.class, target = IsaacWildcard.class)
   @SubclassMapping(source = FreeTextRule.class, target = IsaacWildcard.class)
@@ -684,6 +707,7 @@ public interface ContentMapper {
   @Mapping(target = "creationContext", ignore = true)
   @Mapping(target = "contentType", ignore = true)
   @Mapping(target = "boardId", ignore = true)
+  // Choice Subclasses
   @SubclassMapping(source = ParsonsChoiceDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = FormulaDTO.class, target = GameboardItem.class)
   @SubclassMapping(source = FreeTextRuleDTO.class, target = GameboardItem.class)
