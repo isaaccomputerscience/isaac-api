@@ -63,6 +63,11 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.SeguePageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.StringChoiceDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.VideoDTO;
 
+/**
+ * ContentMapperSubclasses is used to contain (some of) the mapping methods for Content subclasses that are not invoked
+ * directly in the code but require additional specification to function correctly, in order to improve organisation
+ * and mitigate some implementation duplication caused by the MainObjectMapper.
+ */
 @Mapper
 @SuppressWarnings({"unused", "checkstyle:OverloadMethodsDeclarationOrder"})
 public interface ContentMapperSubclasses {
