@@ -372,7 +372,7 @@ public class IsaacEventPage extends Content {
   /**
    * setPreResourceContent.
    *
-   * @param preResourceContent - the preresource content.
+   * @param preResourceContent the preresource content.
    */
   public void setPreResourceContent(final List<Content> preResourceContent) {
     this.preResourceContent = preResourceContent;
@@ -408,7 +408,7 @@ public class IsaacEventPage extends Content {
   /**
    * Set the email event details.
    *
-   * @param emailEventDetails - the text to show in the email token
+   * @param emailEventDetails the text to show in the email token
    */
   public void setEmailEventDetails(final String emailEventDetails) {
     this.emailEventDetails = emailEventDetails;
@@ -427,7 +427,7 @@ public class IsaacEventPage extends Content {
   /**
    * Set the email confirmed booking text for emails.
    *
-   * @param emailConfirmedBookingText - text to show in emails
+   * @param emailConfirmedBookingText text to show in emails
    */
   public void setEmailConfirmedBookingText(final String emailConfirmedBookingText) {
     this.emailConfirmedBookingText = emailConfirmedBookingText;
@@ -445,7 +445,7 @@ public class IsaacEventPage extends Content {
   /**
    * Set the email waiting list text for emails.
    *
-   * @param emailWaitingListBookingText - text to show in email.
+   * @param emailWaitingListBookingText text to show in email.
    */
   public void setEmailWaitingListBookingText(final String emailWaitingListBookingText) {
     this.emailWaitingListBookingText = emailWaitingListBookingText;
@@ -463,7 +463,7 @@ public class IsaacEventPage extends Content {
   /**
    * Set the maximum number of reservations per event that a teacher can request.
    *
-   * @param groupReservationLimit
+   * @param groupReservationLimit integer to set the reservation limit to
    */
   public void setGroupReservationLimit(final Integer groupReservationLimit) {
     this.groupReservationLimit = groupReservationLimit;

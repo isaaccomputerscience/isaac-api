@@ -213,10 +213,8 @@ public class TwitterAuthenticator implements IOAuth1Authenticator {
   /**
    * Helper method to retrieve the value of a parameter from a URL's query string.
    *
-   * @param url
-   *            - The URL to parse
-   * @param param
-   *            - The parameter name
+   * @param url   The URL to parse
+   * @param param The parameter name
    * @return The value of the parameter
    * @throws IOException
    */
