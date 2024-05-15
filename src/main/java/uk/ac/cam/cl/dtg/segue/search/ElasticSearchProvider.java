@@ -737,7 +737,7 @@ public class ElasticSearchProvider implements ISearchProvider {
   }
 
   /**
-   * This method returns the maximum window size. i.e. the number of results that can be returned in a single result
+   * Returns the maximum window size. i.e. the number of results that can be returned in a single result
    * set without having to do a special scroll query.
    * <br>
    * This is a configurable value but the default Elastic Search value is 10,000.
