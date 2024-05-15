@@ -8,7 +8,7 @@ package uk.ac.cam.cl.dtg.isaac.api.managers;
 public class DuplicateBookingException extends Exception {
 
   /**
-   * Constructor with message.
+   * Constructor with message for trying to book on an event when already booked onto it.
    *
    * @param message the message explaining the errors.
    */
