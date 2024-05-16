@@ -36,31 +36,6 @@ public class FacebookUser {
   private String updatedTime;
   private boolean verified;
 
-  /**
-   *
-   * @param id
-   *            -
-   * @param firstName
-   *            -
-   * @param email
-   *            -
-   * @param gender
-   *            -
-   * @param lastName
-   *            -
-   * @param link
-   *            -
-   * @param locale
-   *            -
-   * @param name
-   *            -
-   * @param timezone
-   *            -
-   * @param updatedTime
-   *            -
-   * @param verified
-   *            -
-   */
   @JsonCreator
   public FacebookUser(@JsonProperty("id") final String id, @JsonProperty("first_name") final String firstName,
                       @JsonProperty("email") final String email, @JsonProperty("gender") final String gender,

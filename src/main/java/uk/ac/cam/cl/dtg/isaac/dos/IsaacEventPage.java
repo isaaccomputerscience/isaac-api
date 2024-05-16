@@ -74,6 +74,25 @@ public class IsaacEventPage extends Content {
 
   private String meetingUrl;
 
+  /**
+   * Constructor for IsaacEventPageDTO, taking event-specific properties in addition to those from parent ContentDTO.
+   *
+   * @param date date the event is scheduled to start
+   * @param endDate date the event is scheduled to end
+   * @param bookingDeadline date at which bookings will no longer be accepted
+   * @param prepWorkDeadline date by which preceding tasks should be completed
+   * @param location where the event will occur
+   * @param preResources resources to be provided to attendees before the event
+   * @param postResources resources to be provided to attendees after the event
+   * @param eventThumbnail thumbnail image for event
+   * @param numberOfPlaces maximum number of booking places to allow
+   * @param eventStatus status of event {@link EventStatus}
+   * @param groupReservationLimit limit on student reservations that an individual teacher may request
+   * @param allowGroupReservations whether group bookings are permitted
+   * @param privateEvent if an event should be publicly visible or hidden
+   * @param hub the hub hosting the event
+   * @param meetingUrl link to virtual meeting
+   */
   @JsonCreator
   public IsaacEventPage(@JsonProperty("id") final String id,
                         @JsonProperty("title") final String title,
