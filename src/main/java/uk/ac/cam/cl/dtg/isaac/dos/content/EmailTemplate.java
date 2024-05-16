@@ -194,6 +194,8 @@ public class EmailTemplate extends Content {
   }
 
   /**
+   * Get the name of person the email is replying to.
+   *
    * @return the replyToName
    */
   public String getReplyToName() {
@@ -201,6 +203,8 @@ public class EmailTemplate extends Content {
   }
 
   /**
+   * Set the name of person the email is replying to.
+   *
    * @param replyToName the replyToName to set
    */
   public void setReplyToName(final String replyToName) {
