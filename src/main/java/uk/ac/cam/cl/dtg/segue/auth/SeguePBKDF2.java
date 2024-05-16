@@ -29,7 +29,7 @@ import org.apache.commons.codec.binary.Base64;
  * <br>
  * This is a parent class for PBKDF2 algorithms.
  *
- * @deprecated
+ * @deprecated use {@link SegueSCrypt} instead
  */
 @Deprecated
 public class SeguePBKDF2 {
