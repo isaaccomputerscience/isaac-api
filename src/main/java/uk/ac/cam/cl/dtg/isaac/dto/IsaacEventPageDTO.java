@@ -219,8 +219,6 @@ public class IsaacEventPageDTO extends ContentDTO {
     this.bookingDeadline = bookingDeadline;
   }
 
-
-
   /**
    * Gets the address.
    *
