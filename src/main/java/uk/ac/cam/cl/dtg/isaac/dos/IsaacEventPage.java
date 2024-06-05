@@ -43,6 +43,7 @@ public class IsaacEventPage extends Content {
   private Instant endDate;
   private Instant bookingDeadline;
   private Instant prepWorkDeadline;
+  private Instant publicationDate;
 
   private Location location;
 
@@ -72,6 +73,28 @@ public class IsaacEventPage extends Content {
   private Boolean privateEvent;
   private Hub hub;
 
+  private String meetingUrl;
+
+  /**
+   * Constructor for IsaacEventPageDTO, taking event-specific properties in addition to those from parent ContentDTO.
+   *
+   * @param date date the event is scheduled to start
+   * @param endDate date the event is scheduled to end
+   * @param bookingDeadline date at which bookings will no longer be accepted
+   * @param prepWorkDeadline date by which preceding tasks should be completed
+   * @param publicationDate date of when the event is published on the website
+   * @param location where the event will occur
+   * @param preResources resources to be provided to attendees before the event
+   * @param postResources resources to be provided to attendees after the event
+   * @param eventThumbnail thumbnail image for event
+   * @param numberOfPlaces maximum number of booking places to allow
+   * @param eventStatus status of event {@link EventStatus}
+   * @param groupReservationLimit limit on student reservations that an individual teacher may request
+   * @param allowGroupReservations whether group bookings are permitted
+   * @param privateEvent if an event should be publicly visible or hidden
+   * @param hub the hub hosting the event
+   * @param meetingUrl link to virtual meeting
+   */
   @JsonCreator
   public IsaacEventPage(@JsonProperty("id") final String id,
                         @JsonProperty("title") final String title,
@@ -90,6 +113,7 @@ public class IsaacEventPage extends Content {
                         @JsonProperty("end_date") final Instant endDate,
                         @JsonProperty("bookingDeadline") final Instant bookingDeadline,
                         @JsonProperty("prepWorkDeadline") final Instant prepWorkDeadline,
+                        @JsonProperty("publicationDate") final Instant publicationDate,
                         @JsonProperty("location") final Location location,
                         @JsonProperty("preResources") final List<ExternalReference> preResources,
                         @JsonProperty("postResources") final List<ExternalReference> postResources,
@@ -99,7 +123,8 @@ public class IsaacEventPage extends Content {
                         @JsonProperty("groupReservationLimit") final Integer groupReservationLimit,
                         @JsonProperty("allowGroupReservations") final Boolean allowGroupReservations,
                         @JsonProperty("privateEvent") final Boolean privateEvent,
-                        @JsonProperty("hub") final Hub hub) {
+                        @JsonProperty("hub") final Hub hub,
+                        @JsonProperty("meetingUrl") final String meetingUrl) {
     super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, null,
         null, relatedContent, published, deprecated, tags, null);
 
@@ -107,6 +132,7 @@ public class IsaacEventPage extends Content {
     this.endDate = endDate;
     this.bookingDeadline = bookingDeadline;
     this.prepWorkDeadline = prepWorkDeadline;
+    this.publicationDate = publicationDate;
     this.location = location;
     this.preResources = preResources;
     this.postResources = postResources;
@@ -118,6 +144,7 @@ public class IsaacEventPage extends Content {
     this.allowGroupReservations = allowGroupReservations != null ? allowGroupReservations : false;
     this.privateEvent = privateEvent;
     this.hub = hub;
+    this.meetingUrl = meetingUrl;
   }
 
   /**
@@ -188,6 +215,24 @@ public class IsaacEventPage extends Content {
    */
   public void setPrepWorkDeadline(final Instant prepWorkDeadline) {
     this.prepWorkDeadline = prepWorkDeadline;
+  }
+
+  /**
+   * getPublicationDate.
+   *
+   * @return publicationDate.
+   */
+  public Instant getPublicationDate() {
+    return publicationDate;
+  }
+
+  /**
+   * setPublicationDate.
+   *
+   * @param publicationDate the date of the event published.
+   */
+  public void setPublicationDate(final Instant publicationDate) {
+    this.publicationDate = publicationDate;
   }
 
   /**
@@ -368,7 +413,7 @@ public class IsaacEventPage extends Content {
   /**
    * setPreResourceContent.
    *
-   * @param preResourceContent - the preresource content.
+   * @param preResourceContent the preresource content.
    */
   public void setPreResourceContent(final List<Content> preResourceContent) {
     this.preResourceContent = preResourceContent;
@@ -404,7 +449,7 @@ public class IsaacEventPage extends Content {
   /**
    * Set the email event details.
    *
-   * @param emailEventDetails - the text to show in the email token
+   * @param emailEventDetails the text to show in the email token
    */
   public void setEmailEventDetails(final String emailEventDetails) {
     this.emailEventDetails = emailEventDetails;
@@ -423,7 +468,7 @@ public class IsaacEventPage extends Content {
   /**
    * Set the email confirmed booking text for emails.
    *
-   * @param emailConfirmedBookingText - text to show in emails
+   * @param emailConfirmedBookingText text to show in emails
    */
   public void setEmailConfirmedBookingText(final String emailConfirmedBookingText) {
     this.emailConfirmedBookingText = emailConfirmedBookingText;
@@ -441,7 +486,7 @@ public class IsaacEventPage extends Content {
   /**
    * Set the email waiting list text for emails.
    *
-   * @param emailWaitingListBookingText - text to show in email.
+   * @param emailWaitingListBookingText text to show in email.
    */
   public void setEmailWaitingListBookingText(final String emailWaitingListBookingText) {
     this.emailWaitingListBookingText = emailWaitingListBookingText;
@@ -459,7 +504,7 @@ public class IsaacEventPage extends Content {
   /**
    * Set the maximum number of reservations per event that a teacher can request.
    *
-   * @param groupReservationLimit
+   * @param groupReservationLimit integer to set the reservation limit to
    */
   public void setGroupReservationLimit(final Integer groupReservationLimit) {
     this.groupReservationLimit = groupReservationLimit;
@@ -487,5 +532,13 @@ public class IsaacEventPage extends Content {
 
   public void setHub(Hub hub) {
     this.hub = hub;
+  }
+
+  public String getMeetingUrl() {
+    return meetingUrl;
+  }
+
+  public void setMeetingUrl(String meetingUrl) {
+    this.meetingUrl = meetingUrl;
   }
 }

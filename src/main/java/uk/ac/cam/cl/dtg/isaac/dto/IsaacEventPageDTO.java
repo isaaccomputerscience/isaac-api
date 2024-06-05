@@ -46,6 +46,7 @@ public class IsaacEventPageDTO extends ContentDTO {
   private Instant endDate;
   private Instant bookingDeadline;
   private Instant prepWorkDeadline;
+  private Instant publicationDate;
   private Location location;
 
   private List<ExternalReference> preResources;
@@ -76,34 +77,27 @@ public class IsaacEventPageDTO extends ContentDTO {
   private Boolean privateEvent;
   private Hub hub;
 
+  private String meetingUrl;
+
   /**
-   * @param id
-   * @param title
-   * @param subtitle
-   * @param type
-   * @param author
-   * @param encoding
-   * @param canonicalSourceFile
-   * @param layout
-   * @param children
-   * @param relatedContent
-   * @param published
-   * @param deprecated
-   * @param tags
-   * @param date
-   * @param endDate
-   * @param bookingDeadline
-   * @param prepWorkDeadline
-   * @param location
-   * @param preResources
-   * @param postResources
-   * @param eventThumbnail
-   * @param numberOfPlaces
-   * @param eventStatus
-   * @param groupReservationLimit
-   * @param allowGroupReservations
+   * Constructor for IsaacEventPageDTO, taking event-specific properties in addition to those from parent ContentDTO.
+   *
+   * @param date date the event is scheduled to start
+   * @param endDate date the event is scheduled to end
+   * @param bookingDeadline date at which bookings will no longer be accepted
+   * @param prepWorkDeadline date by which preceding tasks should be completed
+   * @param publicationDate date of when the event is published on the website
+   * @param location where the event will occur
+   * @param preResources resources to be provided to attendees before the event
+   * @param postResources resources to be provided to attendees after the event
+   * @param eventThumbnail thumbnail image for event
+   * @param numberOfPlaces maximum number of booking places to allow
+   * @param eventStatus status of event {@link EventStatus}
+   * @param groupReservationLimit limit on student reservations that an individual teacher may request
+   * @param allowGroupReservations whether group bookings are permitted
    * @param privateEvent if an event should be publicly visible or hidden
    * @param hub the hub hosting the event
+   * @param meetingUrl link to virtual meeting
    */
   @JsonCreator
   public IsaacEventPageDTO(
@@ -124,6 +118,7 @@ public class IsaacEventPageDTO extends ContentDTO {
       @JsonProperty("end_date") final Instant endDate,
       @JsonProperty("bookingDeadline") final Instant bookingDeadline,
       @JsonProperty("prepWorkDeadline") final Instant prepWorkDeadline,
+      @JsonProperty("publicationDate") final Instant publicationDate,
       @JsonProperty("location") final Location location,
       @JsonProperty("preResources") final List<ExternalReference> preResources,
       @JsonProperty("postResources") final List<ExternalReference> postResources,
@@ -133,7 +128,8 @@ public class IsaacEventPageDTO extends ContentDTO {
       @JsonProperty("groupReservationLimit") final Integer groupReservationLimit,
       @JsonProperty("allowGroupReservations") final Boolean allowGroupReservations,
       @JsonProperty("privateEvent") final Boolean privateEvent,
-      @JsonProperty("hub") final Hub hub) {
+      @JsonProperty("hub") final Hub hub,
+      @JsonProperty("meetingUrl") final String meetingUrl) {
     super(id, title, subtitle, type, author, encoding, canonicalSourceFile, layout, children, null, null,
         relatedContent, published, deprecated, tags, null);
 
@@ -141,6 +137,7 @@ public class IsaacEventPageDTO extends ContentDTO {
     this.endDate = endDate;
     this.bookingDeadline = bookingDeadline;
     this.prepWorkDeadline = prepWorkDeadline;
+    this.publicationDate = publicationDate;
     this.location = location;
     this.preResources = preResources;
     this.postResources = postResources;
@@ -151,6 +148,8 @@ public class IsaacEventPageDTO extends ContentDTO {
         groupReservationLimit != null ? groupReservationLimit : EVENT_GROUP_RESERVATION_DEFAULT_LIMIT;
     this.allowGroupReservations = allowGroupReservations;
     this.privateEvent = privateEvent;
+    this.hub = hub;
+    this.meetingUrl = meetingUrl;
   }
 
   /**
@@ -559,5 +558,13 @@ public class IsaacEventPageDTO extends ContentDTO {
 
   public void setHub(Hub hub) {
     this.hub = hub;
+  }
+
+  public String getMeetingUrl() {
+    return meetingUrl;
+  }
+
+  public void setMeetingUrl(String meetingUrl) {
+    this.meetingUrl = meetingUrl;
   }
 }

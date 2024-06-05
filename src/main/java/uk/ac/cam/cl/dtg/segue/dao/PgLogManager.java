@@ -16,6 +16,7 @@
 
 package uk.ac.cam.cl.dtg.segue.dao;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.requireNonNull;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.ALL_ACCEPTED_LOG_TYPES;
 import static uk.ac.cam.cl.dtg.segue.api.monitors.SegueMetrics.LOG_EVENT;
@@ -66,12 +67,9 @@ public class PgLogManager implements ILogManager {
   /**
    * PgLogManager.
    *
-   * @param database
-   *            client for postgres.
-   * @param objectMapper
-   *            - so we can map event details to and from json
-   * @param loggingEnabled
-   *            - whether the log event should be persisted or not?
+   * @param database       client for postgres.
+   * @param objectMapper   so we can map event details to and from json
+   * @param loggingEnabled whether the log event should be persisted or not?
    */
   @Inject
   public PgLogManager(final PostgresSqlDb database, final ObjectMapper objectMapper,
@@ -87,8 +85,8 @@ public class PgLogManager implements ILogManager {
                        final Object eventDetails) {
     requireNonNull(user);
     try {
-      if (user instanceof RegisteredUserDTO) {
-        this.persistLogEvent(((RegisteredUserDTO) user).getId().toString(), null, eventType.name(), eventDetails,
+      if (user instanceof RegisteredUserDTO registeredUserDTO) {
+        this.persistLogEvent(registeredUserDTO.getId().toString(), null, eventType.name(), eventDetails,
             RequestIpExtractor.getClientIpAddr(httpRequest));
       } else {
         this.persistLogEvent(null, ((AnonymousUserDTO) user).getSessionId(), eventType.name(), eventDetails,
@@ -107,8 +105,8 @@ public class PgLogManager implements ILogManager {
                                final String eventType, final Object eventDetails) {
     requireNonNull(user);
     try {
-      if (user instanceof RegisteredUserDTO) {
-        this.persistLogEvent(((RegisteredUserDTO) user).getId().toString(), null, eventType, eventDetails,
+      if (user instanceof RegisteredUserDTO registeredUserDTO) {
+        this.persistLogEvent(registeredUserDTO.getId().toString(), null, eventType, eventDetails,
             RequestIpExtractor.getClientIpAddr(httpRequest));
       } else {
         this.persistLogEvent(null, ((AnonymousUserDTO) user).getSessionId(), eventType, eventDetails,
@@ -126,8 +124,8 @@ public class PgLogManager implements ILogManager {
   public void logInternalEvent(final AbstractSegueUserDTO user, final LogType eventType, final Object eventDetails) {
     requireNonNull(user);
     try {
-      if (user instanceof RegisteredUserDTO) {
-        this.persistLogEvent(((RegisteredUserDTO) user).getId().toString(), null, eventType.name(), eventDetails,
+      if (user instanceof RegisteredUserDTO registeredUserDTO) {
+        this.persistLogEvent(registeredUserDTO.getId().toString(), null, eventType.name(), eventDetails,
             null);
       } else {
         this.persistLogEvent(null, ((AnonymousUserDTO) user).getSessionId(), eventType.name(), eventDetails, null);
@@ -297,13 +295,11 @@ public class PgLogManager implements ILogManager {
   }
 
   /**
-   * Creates a log event from a pg results set..
+   * Creates a log event from a pg results set.
    *
-   * @param results
-   *            - result set containing the informaiton about the log event.
+   * @param results  result set containing the information about the log event.
    * @return a log event
-   * @throws SQLException
-   *             if we cannot read the requested column.
+   * @throws SQLException if we cannot read the requested column.
    */
   private LogEvent buildPgLogEventFromPgResult(final ResultSet results) throws SQLException {
     return new LogEvent(results.getString("event_type"), results.getString("event_details_type"),
@@ -317,17 +313,12 @@ public class PgLogManager implements ILogManager {
    * An optimised method for getting log counts data by month.
    * This relies on the database doing the binning for us.
    *
-   * @param type
-   *            - type of log event to search for.
-   * @param fromDate
-   *            - the earliest date the log event can have occurred
-   * @param toDate
-   *            - the latest date the log event can have occurred
-   * @param userIds
-   *            - the list of users ids we are interested in.
+   * @param type     type of log event to search for.
+   * @param fromDate the earliest date the log event can have occurred
+   * @param toDate   the latest date the log event can have occurred
+   * @param userIds  the list of users ids we are interested in.
    * @return a collection of log events that match the above criteria or an empty collection.
-   * @throws SegueDatabaseException
-   *             - if we cannot retrieve the data from the database.
+   * @throws SegueDatabaseException if we cannot retrieve the data from the database.
    */
   private Map<Instant, Long> getLogsCountByMonthFilteredByUserAndType(final String type, final Instant fromDate,
                                                                       final Instant toDate,
@@ -373,11 +364,13 @@ public class PgLogManager implements ILogManager {
       pst.setTimestamp(index++, Timestamp.from(toDate));
 
       try (ResultSet results = pst.executeQuery()) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(UTC);
 
         Map<Instant, Long> mapToReturn = Maps.newHashMap();
         while (results.next()) {
-          mapToReturn.put(formatter.parse(results.getString("to_char"), Instant::from), results.getLong("count"));
+          Instant parsedDate =
+              formatter.parse(results.getString("to_char"), LocalDate::from).atStartOfDay(UTC).toInstant();
+          mapToReturn.put(parsedDate, results.getLong("count"));
         }
 
         return mapToReturn;
@@ -395,17 +388,12 @@ public class PgLogManager implements ILogManager {
    * WARNING: This should be used with care. Do not request too much
    * TODO: add pagination
    *
-   * @param type
-   *            - type of log event to search for.
-   * @param fromDate
-   *            - the earliest date the log event can have occurred
-   * @param toDate
-   *            - the latest date the log event can have occurred
-   * @param userIds
-   *            - the list of users ids we are interested in.
+   * @param type     type of log event to search for.
+   * @param fromDate the earliest date the log event can have occurred
+   * @param toDate   the latest date the log event can have occurred
+   * @param userIds  the list of users ids we are interested in.
    * @return a collection of log events that match the above criteria or an empty collection.
-   * @throws SegueDatabaseException
-   *             - if we cannot retrieve the data from the database.
+   * @throws SegueDatabaseException if we cannot retrieve the data from the database.
    */
   private Collection<LogEvent> getLogsByUserAndType(final String type, final Instant fromDate, final Instant toDate,
                                                     final Collection<String> userIds) throws SegueDatabaseException {
@@ -468,19 +456,13 @@ public class PgLogManager implements ILogManager {
   /**
    * log an event in the database.
    *
-   * @param userId
-   *            -
-   * @param anonymousUserId
-   *            -
-   * @param eventType
-   *            -
-   * @param eventDetails
-   *            -
-   * @param ipAddress
-   *            -
-   * @throws JsonProcessingException
-   *             - if we are unable to serialize the eventDetails as a string.
-   * @throws SegueDatabaseException - if we cannot persist the event in the database.
+   * @param userId          owner user id
+   * @param anonymousUserId id to use if not logged in
+   * @param eventType       the type of event that has occurred
+   * @param eventDetails    the type of event that has occurred
+   * @param ipAddress       the ip address of the client making the request
+   * @throws JsonProcessingException if we are unable to serialize the eventDetails as a string.
+   * @throws SegueDatabaseException  if we cannot persist the event in the database.
    */
   private void persistLogEvent(final String userId, final String anonymousUserId, final String eventType,
                                final Object eventDetails, final String ipAddress)
@@ -530,16 +512,11 @@ public class PgLogManager implements ILogManager {
   /**
    * Generate a logEvent object.
    *
-   * @param userId
-   *            - owner user id
-   * @param anonymousUserId
-   *            - id to use if not logged in
-   * @param eventType
-   *            - the type of event that has occurred
-   * @param eventDetails
-   *            - event details if further details are required.
-   * @param ipAddress
-   *            - the ip address of the client making the request
+   * @param userId          owner user id
+   * @param anonymousUserId id to use if not logged in
+   * @param eventType       the type of event that has occurred
+   * @param eventDetails    the type of event that has occurred
+   * @param ipAddress       the ip address of the client making the request
    * @return a log event.
    */
   private LogEvent buildLogEvent(final String userId, final String anonymousUserId, final String eventType,

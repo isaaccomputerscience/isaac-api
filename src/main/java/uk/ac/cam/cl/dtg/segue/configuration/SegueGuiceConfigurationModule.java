@@ -16,7 +16,6 @@
 
 package uk.ac.cam.cl.dtg.segue.configuration;
 
-import static java.util.Objects.requireNonNull;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.CONFIG_LOCATION_SYSTEM_PROPERTY;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.CONTENT_INDEX;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_LINUX_CONFIG_LOCATION;
@@ -29,11 +28,6 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.MAILJET_API_SECRET;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.MAILJET_EVENTS_LIST_ID;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.MAILJET_LEGAL_LIST_ID;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.MAILJET_NEWS_LIST_ID;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.RASPBERRYPI_CALLBACK_URI;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.RASPBERRYPI_CLIENT_ID;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.RASPBERRYPI_CLIENT_SECRET;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.RASPBERRYPI_LOCAL_IDP_METADATA_PATH;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.RASPBERRYPI_OAUTH_SCOPES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_APP_ENVIRONMENT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_CONFIG_LOCATION_ENVIRONMENT_PROPERTY;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_CONFIG_LOCATION_NOT_SPECIFIED_MESSAGE;
@@ -145,7 +139,6 @@ import uk.ac.cam.cl.dtg.segue.auth.GoogleAuthenticator;
 import uk.ac.cam.cl.dtg.segue.auth.IAuthenticator;
 import uk.ac.cam.cl.dtg.segue.auth.ISecondFactorAuthenticator;
 import uk.ac.cam.cl.dtg.segue.auth.ISegueHashingAlgorithm;
-import uk.ac.cam.cl.dtg.segue.auth.RaspberryPiOidcAuthenticator;
 import uk.ac.cam.cl.dtg.segue.auth.SegueLocalAuthenticator;
 import uk.ac.cam.cl.dtg.segue.auth.SeguePBKDF2v1;
 import uk.ac.cam.cl.dtg.segue.auth.SeguePBKDF2v2;
@@ -335,9 +328,9 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   }
 
   /**
-   * Configure all things persistency.
+   * Configure all things persistence-related.
    *
-   * @throws IOException - when we cannot load the database.
+   * @throws IOException when we cannot load the database.
    */
   private void configureDataPersistence() throws IOException {
     this.bindConstantToProperty(Constants.SEGUE_DB_NAME, globalProperties);
@@ -401,30 +394,6 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     this.bindConstantToProperty(Constants.TWITTER_CALLBACK_URI, globalProperties);
     mapBinder.addBinding(AuthenticationProvider.TWITTER).to(TwitterAuthenticator.class);
 
-    // Raspberry Pi
-    try {
-      // Ensure all the required config properties are present.
-      requireNonNull(globalProperties.getProperty(RASPBERRYPI_CLIENT_ID));
-      requireNonNull(globalProperties.getProperty(RASPBERRYPI_CLIENT_SECRET));
-      requireNonNull(globalProperties.getProperty(RASPBERRYPI_CALLBACK_URI));
-      requireNonNull(globalProperties.getProperty(RASPBERRYPI_OAUTH_SCOPES));
-      requireNonNull(globalProperties.getProperty(RASPBERRYPI_LOCAL_IDP_METADATA_PATH));
-
-      // If so, bind them to constants.
-      this.bindConstantToProperty(Constants.RASPBERRYPI_CLIENT_ID, globalProperties);
-      this.bindConstantToProperty(Constants.RASPBERRYPI_CLIENT_SECRET, globalProperties);
-      this.bindConstantToProperty(Constants.RASPBERRYPI_CALLBACK_URI, globalProperties);
-      this.bindConstantToProperty(Constants.RASPBERRYPI_OAUTH_SCOPES, globalProperties);
-      this.bindConstantToProperty(Constants.RASPBERRYPI_LOCAL_IDP_METADATA_PATH, globalProperties);
-
-      // Register the authenticator.
-      mapBinder.addBinding(AuthenticationProvider.RASPBERRYPI).to(RaspberryPiOidcAuthenticator.class);
-
-    } catch (NullPointerException e) {
-      log.error(String.format("Failed to initialise authenticator %s due to one or more absent config properties.",
-          AuthenticationProvider.RASPBERRYPI));
-    }
-
     // Segue local
     mapBinder.addBinding(AuthenticationProvider.SEGUE).to(SegueLocalAuthenticator.class);
   }
@@ -481,10 +450,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * <br>
    * The client is threadsafe, so we don't need to keep creating new ones.
    *
-   * @param address  - address of the cluster to create.
-   * @param port     - port of the cluster to create.
-   * @param username - username for cluster user.
-   * @param password - password for cluster user.
+   * @param address  address of the cluster to create.
+   * @param port     port of the cluster to create.
+   * @param username username for cluster user.
+   * @param password password for cluster user.
    * @return Client to be injected into ElasticSearch Provider.
    */
   @Inject
@@ -524,10 +493,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * TODO: This is a singleton as the units and tags are stored in memory. If we move these out it can be an instance.
    *  This would be better as then we can give it a new search provider if the client has closed.
    *
-   * @param database           - database reference
-   * @param searchProvider     - search provider to use
-   * @param contentMapperUtils - content mapper to use.
-   * @param globalProperties   - properties loader to use
+   * @param database           database reference
+   * @param searchProvider     search provider to use
+   * @param contentMapperUtils content mapper to use.
+   * @param globalProperties   properties loader to use
    * @return a fully configured content Manager.
    */
   @Inject
@@ -552,8 +521,8 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * Note: This is a singleton as logs are created very often and we wanted to minimise the overhead in class
    * creation. Although we can convert this to instances if we want to tidy this up.
    *
-   * @param database       - database reference
-   * @param loggingEnabled - boolean to determine if we should persist log messages.
+   * @param database       database reference
+   * @param loggingEnabled boolean to determine if we should persist log messages.
    * @return A fully configured LogManager
    */
   @Inject
@@ -603,9 +572,9 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * This provides an instance of the SegueLocalAuthenticator.
    * <br>
    *
-   * @param database            - the database to access userInformation
-   * @param passwordDataManager - the database to access passwords
-   * @param properties          - the global system properties
+   * @param database            the database to access userInformation
+   * @param passwordDataManager the database to access passwords
+   * @param properties          the global system properties
    * @return an instance of the queue
    */
   @Inject
@@ -634,11 +603,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * <br>
    * Note: This has to be a singleton because it manages all emails sent using this JVM.
    *
-   * @param properties            - the properties so we can generate email
+   * @param properties            the properties so we can generate email
    * @param emailCommunicator     the class the queue will send messages with
-   * @param userPreferenceManager - the class providing email preferences
-   * @param contentManager        - the content so we can access email templates
-   * @param logManager            - the logManager to log email sent
+   * @param userPreferenceManager the class providing email preferences
+   * @param contentManager        the content so we can access email templates
+   * @param logManager            the logManager to log email sent
    * @return an instance of the queue
    */
   @Inject
@@ -680,10 +649,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * <br>
    * Note: This has to be a singleton as the User Manager keeps a temporary cache of anonymous users.
    *
-   * @param database            - the user persistence manager.
-   * @param properties          - properties loader
-   * @param providersToRegister - list of known providers.
-   * @param emailQueue          - so that we can send e-mails.
+   * @param database            the user persistence manager.
+   * @param properties          properties loader
+   * @param providersToRegister list of known providers.
+   * @param emailQueue          so that we can send e-mails.
    * @return Content version controller with associated dependencies.
    */
   @Inject
@@ -705,17 +674,17 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * <br>
    * Note: This has to be a singleton as the User Manager keeps a temporary cache of anonymous users.
    *
-   * @param database                  - the user persistence manager.
-   * @param questionManager           - IUserManager
-   * @param properties                - properties loader
-   * @param providersToRegister       - list of known providers.
-   * @param emailQueue                - so that we can send e-mails.
-   * @param temporaryUserCache        - to manage temporary anonymous users
-   * @param logManager                - so that we can log interesting user based events.
-   * @param mapperFacade              - for DO and DTO mapping.
-   * @param userAuthenticationManager - Responsible for handling the various authentication functions.
-   * @param secondFactorManager       - For managing TOTP multifactor authentication.
-   * @param userPreferenceManager     *     - For managing user preferences.
+   * @param database                  the user persistence manager.
+   * @param questionManager           IUserManager
+   * @param properties                properties loader
+   * @param providersToRegister       list of known providers.
+   * @param emailQueue                so that we can send e-mails.
+   * @param temporaryUserCache        to manage temporary anonymous users
+   * @param logManager                so that we can log interesting user based events.
+   * @param mapperFacade              for DO and DTO mapping.
+   * @param userAuthenticationManager Responsible for handling the various authentication functions.
+   * @param secondFactorManager       For managing TOTP multifactor authentication.
+   * @param userPreferenceManager     For managing user preferences.
    * @return Content version controller with associated dependencies.
    */
   @SuppressWarnings("checkstyle:ParameterNumber")
@@ -746,8 +715,8 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * QuestionManager.
    * Note: This has to be a singleton as the question manager keeps anonymous question attempts in memory.
    *
-   * @param ds           - postgres data source
-   * @param objectMapper - mapper
+   * @param ds           postgres data source
+   * @param objectMapper mapper
    * @return a singleton for question persistence.
    */
   @Inject
@@ -768,10 +737,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * <br>
    * Note: This needs to be a singleton as we register observers for groups.
    *
-   * @param userGroupDataManager - user group data manager
-   * @param userManager          - user manager
-   * @param gameManager          - game manager
-   * @param dtoMapper            - dtoMapper
+   * @param userGroupDataManager user group data manager
+   * @param userManager          user manager
+   * @param gameManager          game manager
+   * @param dtoMapper            dtoMapper
    * @return group manager
    */
   @Inject
@@ -809,8 +778,8 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * <br>
    * Note: this has to be a singleton as it tracks (in memory) the number of misuses.
    *
-   * @param emailManager - so that the monitors can send e-mails.
-   * @param properties   - so that the monitors can look up email settings etc.
+   * @param emailManager so that the monitors can send e-mails.
+   * @param properties   so that the monitors can look up email settings etc.
    * @return gets the singleton of the misuse manager.
    */
   @Inject
@@ -911,7 +880,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   }
 
   /**
-   * @return segue version currently running.
+   * Get the segue version currently running. Returns the value stored on the module if present or retrieves it from
+   * the properties if not.
+   *
+   * @return the segue version as a string or 'unknown' if it cannot be retrieved
    */
   public static String getSegueVersion() {
     if (SegueGuiceConfigurationModule.version != null) {
@@ -938,9 +910,9 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * <br>
    * Note: This needs to be a singleton as it contains a connection pool.
    *
-   * @param databaseUrl - database to connect to.
-   * @param username    - port that the mongodb service is running on.
-   * @param password    - the name of the database to configure the wrapper to use.
+   * @param databaseUrl database to connect to.
+   * @param username    port that the mongodb service is running on.
+   * @param password    the name of the database to configure the wrapper to use.
    * @return PostgresSqlDb db object preconfigured to work with the segue database.
    */
   @Provides
@@ -962,15 +934,15 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * Gets the instance of the StatisticsManager. Note: this class is a hack and needs to be refactored.... It is
    * currently only a singleton as it keeps a cache.
    *
-   * @param userManager              - to query user information
-   * @param logManager               - to query Log information
-   * @param schoolManager            - to query School information
-   * @param contentManager           - to query live version information
-   * @param contentIndex             - index string for current content version
-   * @param groupManager             - so that we can see how many groups we have site wide.
-   * @param questionManager          - so that we can see how many questions were answered.
-   * @param contentSummarizerService - to produce content summary objects
-   * @param userStreaksManager       - to notify users when their answer streak changes
+   * @param userManager              to query user information
+   * @param logManager               to query Log information
+   * @param schoolManager            to query School information
+   * @param contentManager           to query live version information
+   * @param contentIndex             index string for current content version
+   * @param groupManager             so that we can see how many groups we have site wide.
+   * @param questionManager          so that we can see how many questions were answered.
+   * @param contentSummarizerService to produce content summary objects
+   * @param userStreaksManager       to notify users when their answer streak changes
    * @return stats manager
    */
   @SuppressWarnings("checkstyle:ParameterNumber")
@@ -1150,11 +1122,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * <br>
    * This needs to be a singleton as it maintains temporary boards in memory.
    *
-   * @param database       - the database that persists gameboards.
-   * @param contentManager - api that the game manager can use for content resolution.
-   * @param mapper         - an instance of an auto mapper for translating gameboard DOs and DTOs efficiently.
-   * @param objectMapper   - a mapper to allow content to be resolved.
-   * @param uriManager     - so that we can create content that is aware of its own location
+   * @param database       the database that persists gameboards.
+   * @param contentManager api that the game manager can use for content resolution.
+   * @param mapper         an instance of an auto mapper for translating gameboard DOs and DTOs efficiently.
+   * @param objectMapper   a mapper to allow content to be resolved.
+   * @param uriManager     so that we can create content that is aware of its own location
    * @return Game persistence manager object.
    */
   @Inject
@@ -1182,11 +1154,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * This needs to be a singleton because operations like emailing are run for each IGroupObserver, the
    * assignment manager should only be one observer.
    *
-   * @param assignmentPersistenceManager - to save assignments
-   * @param groupManager                 - to allow communication with the group manager.
-   * @param emailService                 - email service
-   * @param gameManager                  - the game manager object
-   * @param properties                   - properties loader for the service's hostname
+   * @param assignmentPersistenceManager to save assignments
+   * @param groupManager                 to allow communication with the group manager.
+   * @param emailService                 email service
+   * @param gameManager                  the game manager object
+   * @param properties                   properties loader for the service's hostname
    * @return Assignment manager object.
    */
   @Inject
@@ -1206,7 +1178,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   /**
    * Gets an instance of the symbolic question validator.
    *
-   * @param properties - properties loader to get the symbolic validator host
+   * @param properties properties loader to get the symbolic validator host
    * @return IsaacSymbolicValidator preconfigured to work with the specified checker.
    */
   @Provides
@@ -1221,7 +1193,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   /**
    * Gets an instance of the symbolic logic question validator.
    *
-   * @param properties - properties loader to get the symbolic logic validator host
+   * @param properties properties loader to get the symbolic logic validator host
    * @return IsaacSymbolicLogicValidator preconfigured to work with the specified checker.
    */
   @Provides
@@ -1238,7 +1210,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * <br>
    * We want this to be a singleton as otherwise it may not be threadsafe for loading into same SearchProvider.
    *
-   * @param provider - The search provider.
+   * @param provider The search provider.
    * @return schoolList reader
    */
   @Inject
@@ -1255,8 +1227,8 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   /**
    * Utility method to make the syntax of property bindings clearer.
    *
-   * @param propertyLabel  - Key for a given property
-   * @param propertyLoader - property loader to use
+   * @param propertyLabel  Key for a given property
+   * @param propertyLoader property loader to use
    */
   private void bindConstantToProperty(final String propertyLabel, final PropertiesLoader propertyLoader) {
     bindConstant().annotatedWith(Names.named(propertyLabel)).to(propertyLoader.getProperty(propertyLabel));
@@ -1265,7 +1237,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   /**
    * Utility method to get a pre-generated reflections class for the uk.ac.cam.cl.dtg.segue package.
    *
-   * @param pkg - class name to use as key
+   * @param pkg class name to use as key
    * @return reflections.
    */
   public static Set<Class<?>> getPackageClasses(final String pkg) {

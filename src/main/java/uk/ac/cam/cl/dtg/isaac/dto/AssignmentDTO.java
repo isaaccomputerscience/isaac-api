@@ -17,8 +17,10 @@
 package uk.ac.cam.cl.dtg.isaac.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.time.Instant;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
+
 
 /**
  * This class is the Data Transfer Object used to store Assignments in the isaac CMS.
@@ -33,21 +35,24 @@ public class AssignmentDTO implements IAssignmentLike {
   private String notes;
   private UserSummaryDTO assignerSummary;
   private Instant creationDate;
+
+  // dueDate is not read correctly as an epoch by the jackson converter, this forces conversion
+  @JsonDeserialize(converter = LongToInstantConverter.class)
   private Instant dueDate;
   private Instant scheduledStartDate;
 
   /**
    * Complete AssignmentDTO constructor with all dependencies.
    *
-   * @param id                 - unique id for the gameboard
-   * @param gameboardId        - The gameboard to assign as homework.
-   * @param ownerUserId        - User id of the owner of the gameboard.
-   * @param groupId            - Group id who should be assigned the game board.
-   * @param groupName
-   * @param notes
-   * @param creationDate       - the date the assignment was created.
-   * @param dueDate            - the date the assignment is due (should be completed by)
-   * @param scheduledStartDate - the date the assignment should be shown to users/groups that it is set to
+   * @param id                 unique id for the gameboard
+   * @param gameboardId        The gameboard to assign as homework.
+   * @param ownerUserId        User id of the owner of the gameboard.
+   * @param groupId            Group id who should be assigned the game board.
+   * @param groupName          name string for the group to be assigned the game board.
+   * @param notes              any additional information added to the assignment.
+   * @param creationDate       the date the assignment was created.
+   * @param dueDate            the date the assignment is due (should be completed by)
+   * @param scheduledStartDate the date the assignment should be shown to users/groups that it is set to
    */
   public AssignmentDTO(final Long id, final String gameboardId, final Long ownerUserId, final Long groupId,
                        final String groupName, final String notes, final Instant creationDate, final Instant dueDate,

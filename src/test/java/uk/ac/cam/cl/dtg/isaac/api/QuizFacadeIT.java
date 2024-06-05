@@ -78,21 +78,14 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_EMAIL;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.TEST_TUTOR_PASSWORD;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.UNKNOWN_GROUP_ID;
 import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.UNKNOWN_QUIZ_ID;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_DATE_FORMAT;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.NUMBER_SECONDS_IN_FIVE_MINUTES;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -128,40 +121,6 @@ public class QuizFacadeIT extends IsaacIntegrationTest {
     this.quizFacade =
         new QuizFacade(properties, logManager, contentManager, quizManager, userAccountManager, userAssociationManager,
             groupManager, quizAssignmentManager, assignmentService, quizAttemptManager, quizQuestionManager);
-  }
-
-  /**
-   * As the integration tests do not currently support MFA login, we cannot use the normal login process and have to
-   * create cookies manually when testing admin accounts.
-   *
-   * @return a Cookie loaded with session information for the test admin user.
-   * @throws JsonProcessingException if the cookie serialisation fails
-   */
-  private Cookie createManualCookieForAdmin() throws JsonProcessingException {
-    SimpleDateFormat sessionDateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
-    String userId = String.valueOf(TEST_ADMIN_ID);
-    String hmacKey = properties.getProperty(HMAC_SALT);
-    int sessionExpiryTimeInSeconds = NUMBER_SECONDS_IN_FIVE_MINUTES;
-
-    Calendar calendar = Calendar.getInstance();
-    calendar.add(Calendar.SECOND, sessionExpiryTimeInSeconds);
-    String sessionExpiryDate = sessionDateFormat.format(calendar.getTime());
-
-    Map<String, String> sessionInformation =
-        userAuthenticationManager.prepareSessionInformation(userId, "0", sessionExpiryDate, hmacKey, null);
-    return userAuthenticationManager.createAuthCookie(sessionInformation, sessionExpiryTimeInSeconds);
-  }
-
-  private HttpServletRequest prepareAdminRequest() {
-    try {
-      Cookie adminSessionCookie = createManualCookieForAdmin();
-      HttpServletRequest adminRequest = createRequestWithCookies(new Cookie[] {adminSessionCookie});
-      replay(adminRequest);
-      return adminRequest;
-    } catch (JsonProcessingException e) {
-      fail(e);
-      return null;
-    }
   }
 
   protected HttpServletRequest prepareUserRequest(String userEmail, String userPassword) {

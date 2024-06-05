@@ -16,6 +16,7 @@
 
 package uk.ac.cam.cl.dtg.isaac.quiz;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.requireNonNull;
 import static uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager.extractPageIdFromQuestionId;
 import static uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager.getInstantFromTimestamp;
@@ -33,6 +34,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -52,6 +54,8 @@ import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
 /**
+ * Class to manage question attempts recorded in the database.
+ *
  * @author sac92
  */
 public class PgQuestionAttempts implements IQuestionAttemptManager {
@@ -62,8 +66,10 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
   private final ObjectMapper objectMapper;
 
   /**
-   * @param ds           - data source
-   * @param objectMapper - for mapping between DO and DTO
+   * Constructor for PgQuestionAttempts.
+   *
+   * @param ds           data source
+   * @param objectMapper for mapping between DO and DTO
    */
   @Inject
   public PgQuestionAttempts(final PostgresSqlDb ds, final ContentMapperUtils objectMapper) {
@@ -369,9 +375,9 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
   /**
    * Merges any question data stored in the session (this will only happen for anonymous users).
    *
-   * @param anonymousUserId  - containing the question attempts.
-   * @param registeredUserId - the account to merge with.
-   * @throws SegueDatabaseException - if we are unable to locate the questions attempted by this user already.
+   * @param anonymousUserId  containing the question attempts.
+   * @param registeredUserId the account to merge with.
+   * @throws SegueDatabaseException if we are unable to locate the questions attempted by this user already.
    */
   @Override
   public void mergeAnonymousQuestionInformationWithRegisteredUserRecord(final String anonymousUserId,
@@ -468,11 +474,14 @@ public class PgQuestionAttempts implements IQuestionAttemptManager {
       pst.setTimestamp(FIELD_GET_ATTEMPTS_BY_USER_AND_DATE_END_TIMESTAMP, Timestamp.from(toDate));
 
       try (ResultSet results = pst.executeQuery()) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(UTC);
 
         Map<Instant, Long> mapToReturn = Maps.newHashMap();
         while (results.next()) {
-          mapToReturn.put(formatter.parse(results.getString("to_char"), Instant::from), results.getLong("count"));
+          // Can't parse directly to Instant due to insufficient information, so convert via LocalDate
+          Instant parsedDate =
+              formatter.parse(results.getString("to_char"), LocalDate::from).atStartOfDay(UTC).toInstant();
+          mapToReturn.put(parsedDate, results.getLong("count"));
         }
         return mapToReturn;
       }
