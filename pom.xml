@@ -613,6 +613,29 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.jetty.ee9</groupId>
+                        <artifactId>jetty-ee9-maven-plugin</artifactId>
+                        <version>${jetty.version}</version>
+                        <configuration>
+                            <webApp>
+                                <contextPath>/isaac-api</contextPath>
+                                <overrideDescriptor>${web.xml}</overrideDescriptor>
+                                <webInfIncludeJarPattern>^$</webInfIncludeJarPattern>
+                                <containerIncludeJarPattern>^$</containerIncludeJarPattern>
+                            </webApp>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>segue.version</name>
+                                    <value>${segue.version}</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
         <profile>

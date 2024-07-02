@@ -74,15 +74,20 @@
     <!-- =========================================================== -->
     <!-- Set the handler structure for the Server                    -->
     <!-- =========================================================== -->
-    <Set name="defaultHandler">
-      <New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">
-        <Arg name="serveFavIcon" type="boolean"><Property name="jetty.server.default.serveFavIcon" default="true"/></Arg>
-        <Arg name="showContexts" type="boolean"><Property name="jetty.server.default.showContexts" default="true"/></Arg>
-      </New>
-    </Set>
     <Set name="handler">
-      <New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection">
-        <Set name="dynamic" property="jetty.server.contexts.dynamic"/>
+      <New id="Handlers" class="org.eclipse.jetty.server.Handler.Sequence">
+        <Set name="handlers">
+         <Array type="org.eclipse.jetty.server.Handler">
+           <Item>
+             <New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection"/>
+           </Item>
+           <Item>
+             <New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">
+                 <Set name="showContexts">false</Set>
+             </New>
+           </Item>
+         </Array>
+        </Set>
       </New>
     </Set>
 
