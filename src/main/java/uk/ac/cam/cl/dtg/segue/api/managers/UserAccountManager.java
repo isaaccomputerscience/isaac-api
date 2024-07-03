@@ -151,7 +151,7 @@ public class UserAccountManager implements IUserAccountManager {
   private final Pattern restrictedSignupEmailRegex;
   private static final int USER_NAME_MAX_LENGTH = 50;
   private static final Pattern EMAIL_PERMITTED_CHARS_REGEX = Pattern.compile("^[a-zA-Z0-9!#$%&'+\\-=?^_`.{|}~@]+$");
-  private static final Pattern USER_NAME_PERMITTED_CHARS_REGEX = Pattern.compile("^[\\p{L}\\-'` ]+$");
+  private static final Pattern USER_NAME_PERMITTED_CHARS_REGEX = Pattern.compile("^[\\p{L}\\-'`! ]+$");
   private static final Pattern EMAIL_CONSECUTIVE_FULL_STOP_REGEX = Pattern.compile("\\.\\.");
 
   private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
