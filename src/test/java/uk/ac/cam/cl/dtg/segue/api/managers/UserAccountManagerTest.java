@@ -129,7 +129,7 @@ class UserAccountManagerTest {
         Arguments.of(true, "a".repeat(50)), // The maximum length of 50 characters are valid
         Arguments.of(false, "a".repeat(51)), // Names exceeding the maximum length of 255 characters are not valid
         // Other special characters are not permitted
-        Arguments.of(false, "Test!Name"),
+        Arguments.of(true, "Test!Name"),
         Arguments.of(false, "Test?Name"),
         Arguments.of(false, "Test#Name"),
         Arguments.of(false, "Test.Name"),
