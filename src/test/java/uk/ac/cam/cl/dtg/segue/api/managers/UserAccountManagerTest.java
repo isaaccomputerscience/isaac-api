@@ -115,21 +115,21 @@ class UserAccountManagerTest {
         Arguments.of(true, "TESTNAME"), // Uppercase is valid
         Arguments.of(true, "TestName"), // Mixture of cases is valid
         Arguments.of(true, "TestName`"), // Mixture of cases is valid
-        Arguments.of(false, "TestName123"), // Numbers are valid
-        Arguments.of(false, "Test_Name"), // Underscores are valid
+        Arguments.of(false, "TestName123"), // Numbers are invalid
+        Arguments.of(false, "Test_Name"), // Underscores are invalid
         Arguments.of(true, "Test Name"), // Double-barrelled names with spaces are valid
         Arguments.of(true, "Test-Name"), // Double-barrelled names with hyphens are valid
         Arguments.of(true, "O'Name"), // Apostrophes are valid
         // Accented and non-English characters are valid.
         // Please note, this is not an exhustive test - unicode supports thousands of such characters
         Arguments.of(true, "ÃëóûÿĉĐŗǥȕḍṦμϱнӯ"),
+        Arguments.of(true, "Test!Name"),
         Arguments.of(false, null), // Null is not valid
         Arguments.of(false, ""), // Empty string is not valid
         Arguments.of(false, " "), // Only whitespace is not valid
         Arguments.of(true, "a".repeat(50)), // The maximum length of 50 characters are valid
-        Arguments.of(false, "a".repeat(51)), // Names exceeding the maximum length of 255 characters are not valid
+        Arguments.of(false, "a".repeat(51)), // Names exceeding the maximum length of 50 characters are not valid
         // Other special characters are not permitted
-        Arguments.of(true, "Test!Name"),
         Arguments.of(false, "Test?Name"),
         Arguments.of(false, "Test#Name"),
         Arguments.of(false, "Test.Name"),
