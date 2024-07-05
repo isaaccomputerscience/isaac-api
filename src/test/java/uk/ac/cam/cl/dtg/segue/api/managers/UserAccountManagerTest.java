@@ -114,9 +114,9 @@ class UserAccountManagerTest {
         Arguments.of(true, "testname"), // Lowercase is valid
         Arguments.of(true, "TESTNAME"), // Uppercase is valid
         Arguments.of(true, "TestName"), // Mixture of cases is valid
-        Arguments.of(true, "TestName`"), // Mixture of cases is valid
+        Arguments.of(false, "TestName`"), // Backticks are invalid
         Arguments.of(false, "TestName123"), // Numbers are invalid
-        Arguments.of(false, "Test_Name"), // Underscores are invalid
+        Arguments.of(true, "Test_Name"), // Underscores are valid
         Arguments.of(true, "Test Name"), // Double-barrelled names with spaces are valid
         Arguments.of(true, "Test-Name"), // Double-barrelled names with hyphens are valid
         Arguments.of(true, "O'Name"), // Apostrophes are valid
