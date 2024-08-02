@@ -18,9 +18,11 @@ COPY --from=base /isaac-api/target/isaac-api.war /var/lib/jetty/webapps/isaac-ap
 RUN chmod 755 /var/lib/jetty/webapps/*
 RUN chown jetty /var/lib/jetty/webapps/*
 
-COPY resources/jetty.xml /usr/local/jetty/etc/
 COPY resources/start.ini /var/lib/jetty/
 
 # prepare things so that jetty runs in the docker entrypoint
 USER jetty
 WORKDIR $JETTY_BASE
+
+# enable jetty modules for ee9
+RUN java -jar "$JETTY_HOME/start.jar" --add-modules=ee9-webapp,ee9-deploy,ee9-jsp,ee9-jstl,ee9-websocket-jetty,ee9-websocket-jakarta
