@@ -8,7 +8,7 @@ RUN mvn dependency:go-offline
 COPY . /isaac-api
 RUN mvn package -Dmaven.test.skip=true -Dsegue.version=$BUILD_VERSION $MVN_PACKAGE_PARAM
 
-FROM jetty:12.0.8-jdk17-eclipse-temurin
+FROM jetty:12.0.11-jdk17-eclipse-temurin
 USER root
 RUN mkdir /isaac-logs
 RUN chmod 755 /isaac-logs
@@ -18,11 +18,10 @@ COPY --from=base /isaac-api/target/isaac-api.war /var/lib/jetty/webapps/isaac-ap
 RUN chmod 755 /var/lib/jetty/webapps/*
 RUN chown jetty /var/lib/jetty/webapps/*
 
-COPY resources/start.ini /var/lib/jetty/
+#RUN mkdir $JETTY_BASE/start.d
+ADD resources/start.d/ $JETTY_BASE/start.d/
+RUN ls -l $JETTY_BASE/start.d/
 
 # prepare things so that jetty runs in the docker entrypoint
 USER jetty
 WORKDIR $JETTY_BASE
-
-# enable jetty modules for ee9
-RUN java -jar "$JETTY_HOME/start.jar" --add-modules=ee9-webapp,ee9-deploy,ee9-jsp,ee9-jstl,ee9-websocket-jetty,ee9-websocket-jakarta
