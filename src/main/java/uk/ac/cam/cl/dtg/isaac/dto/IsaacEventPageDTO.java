@@ -325,7 +325,6 @@ public class IsaacEventPageDTO extends ContentDTO {
    * @param eventSurvey
    *            the eventSurvey to set
    */
-  @JsonIgnore
   public void setEventSurvey(final List<ExternalReference> eventSurvey) {
     this.eventSurvey = eventSurvey;
   }
