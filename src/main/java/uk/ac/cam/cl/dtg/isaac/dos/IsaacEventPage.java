@@ -348,7 +348,7 @@ public class IsaacEventPage extends Content {
    * @param eventSurvey the eventSurvey to set
    */
   public void setEventSurvey(final List<ExternalReference> eventSurvey) {
-    this.postResources = eventSurvey;
+    this.eventSurvey = eventSurvey;
   }
 
   /**
