@@ -1023,7 +1023,10 @@ public class EventsFacade extends AbstractIsaacFacade {
         RegisteredUserDTO userToReserve = userManager.getUserDTOById(userId);
         if (userAssociationManager.hasPermission(reservingUser, userToReserve)) {
           usersToReserve.add(userToReserve);
-          bookingManager.deleteBooking(event, userToReserve);
+          BookingStatus status = bookingManager.getBookingStatus(event.getId(), userToReserve.getId());
+          if (null != status) {
+            bookingManager.deleteBooking(event, userToReserve);
+          }
           bookings.add(
               bookingManager.createBooking(event, userToReserve, additionalInformation, BookingStatus.CONFIRMED)
           );
