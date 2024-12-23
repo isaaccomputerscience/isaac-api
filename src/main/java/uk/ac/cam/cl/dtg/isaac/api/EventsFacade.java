@@ -82,6 +82,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -989,6 +990,9 @@ public class EventsFacade extends AbstractIsaacFacade {
                                                final CompetitionEntryDTO entryDTO) {
     RegisteredUserDTO reservingUser;
     IsaacEventPageDTO event;
+    Map<String, String> additionalInformation = new HashMap<>();
+    additionalInformation.put("submissionURL", entryDTO.getSubmissionURL());
+
     try {
       event = this.getRawEventDTOById(eventId);
     } catch (SegueDatabaseException | ContentManagerException e) {
@@ -1010,19 +1014,21 @@ public class EventsFacade extends AbstractIsaacFacade {
         return SegueErrorResponse.getIncorrectRoleResponse();
       }
 
+      List<EventBookingDTO> bookings = new ArrayList<>();
       // Enforce permission
       for (Long userId : entryDTO.getEntrantIds()) {
         RegisteredUserDTO userToReserve = userManager.getUserDTOById(userId);
         if (userAssociationManager.hasPermission(reservingUser, userToReserve)) {
           usersToReserve.add(userToReserve);
+          bookings.add(
+              bookingManager.createBooking(event, userToReserve, additionalInformation, BookingStatus.CONFIRMED)
+          );
         } else {
           return new SegueErrorResponse(Status.FORBIDDEN,
               "You do not have permission to book or reserve some of these users onto this event.")
               .toResponse();
         }
       }
-
-      List<EventBookingDTO> bookings = bookingManager.requestReservations(event, usersToReserve, reservingUser);
 
       this.getLogManager().logEvent(reservingUser, request,
           SegueServerLogType.EVENT_RESERVATIONS_CREATED,
@@ -1032,6 +1038,7 @@ public class EventsFacade extends AbstractIsaacFacade {
               USER_ID_LIST_FKEY_FIELDNAME, entryDTO.getEntrantIds().toArray(),
               BOOKING_STATUS_FIELDNAME, BookingStatus.RESERVED.toString()
           ));
+
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
     } catch (NoUserLoggedInException e) {
@@ -1043,14 +1050,6 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (EventIsFullException e) {
       return new SegueErrorResponse(Status.CONFLICT,
           "There are not enough spaces available for this event. Please try again with fewer users.")
-          .toResponse();
-    } catch (EventGroupReservationLimitException e) {
-      return new SegueErrorResponse(Status.CONFLICT,
-          String.format("You can only request a maximum of %d student reservations for this event.",
-              event.getGroupReservationLimit())).toResponse();
-    } catch (EventDeadlineException e) {
-      return new SegueErrorResponse(Status.BAD_REQUEST,
-          "The booking deadline for this event has passed. No more bookings or reservations are being accepted.")
           .toResponse();
     } catch (DuplicateBookingException e) {
       return new SegueErrorResponse(Status.BAD_REQUEST,
