@@ -991,7 +991,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     RegisteredUserDTO reservingUser;
     IsaacEventPageDTO event;
     Map<String, String> additionalInformation = new HashMap<>();
-    additionalInformation.put("submissionURL", entryDTO.getSubmissionURL());
+
 
     try {
       event = this.getRawEventDTOById(eventId);
@@ -1008,6 +1008,9 @@ public class EventsFacade extends AbstractIsaacFacade {
     List<RegisteredUserDTO> usersToReserve = Lists.newArrayList();
     try {
       reservingUser = userManager.getCurrentRegisteredUser(request);
+      additionalInformation.put("submissionURL", entryDTO.getSubmissionURL());
+      additionalInformation.put("groupName", entryDTO.getGroupName());
+      additionalInformation.put("teacher", reservingUser.getId().toString());
       // Tutors cannot yet manage event bookings for their tutees, so shouldn't be added to this list
       if (!Arrays.asList(Role.TEACHER, Role.EVENT_LEADER, Role.EVENT_MANAGER, Role.ADMIN)
           .contains(reservingUser.getRole())) {
@@ -1020,6 +1023,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         RegisteredUserDTO userToReserve = userManager.getUserDTOById(userId);
         if (userAssociationManager.hasPermission(reservingUser, userToReserve)) {
           usersToReserve.add(userToReserve);
+          bookingManager.deleteBooking(event, userToReserve);
           bookings.add(
               bookingManager.createBooking(event, userToReserve, additionalInformation, BookingStatus.CONFIRMED)
           );

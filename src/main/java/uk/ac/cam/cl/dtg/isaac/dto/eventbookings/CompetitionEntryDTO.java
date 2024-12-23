@@ -31,6 +31,7 @@ public class CompetitionEntryDTO {
 
   List<Long> entrantIds;
   String submissionURL;
+  String groupName;
 
   /**
    * CompetitionEntryDTO.
@@ -66,5 +67,13 @@ public class CompetitionEntryDTO {
 
   public void setSubmissionURL(String submissionURL) {
     this.submissionURL = submissionURL;
+  }
+
+  public String getGroupName() {
+    return groupName;
+  }
+
+  public void setGroupName(String groupName) {
+    this.groupName = groupName;
   }
 }
