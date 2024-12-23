@@ -981,7 +981,7 @@ public class EventsFacade extends AbstractIsaacFacade {
    * @return the list of bookings/reservations
    */
   @POST
-  @Path("{event_id}/competition")
+  @Path("{event_id}/competitionEntries")
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Add event reservations in the competition for the given users.")
   public final Response createCompetitionEntry(@Context final HttpServletRequest request,
