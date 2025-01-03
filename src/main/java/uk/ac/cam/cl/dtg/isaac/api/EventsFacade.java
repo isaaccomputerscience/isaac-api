@@ -977,8 +977,8 @@ public class EventsFacade extends AbstractIsaacFacade {
    * Add competition reservations for the given users.
    *
    * @param request so we can determine who is making the request
-   * @param eventId event id
-   * @param entryDTO DTO containing candidate IDs and submissionlink
+   * @param eventId event ID
+   * @param entryDTO DTO containing candidate IDs and submission link
    * @return the list of bookings/reservations
    */
   @POST
@@ -1010,7 +1010,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       reservingUser = userManager.getCurrentRegisteredUser(request);
       additionalInformation.put("submissionURL", entryDTO.getSubmissionURL());
       additionalInformation.put("groupName", entryDTO.getGroupName());
-      additionalInformation.put("teacherName", reservingUser.getGivenName() + reservingUser.getFamilyName());
+      additionalInformation.put("teacherName", reservingUser.getGivenName() + " " + reservingUser.getFamilyName());
       additionalInformation.put("teacherId", reservingUser.getId().toString());
       additionalInformation.put("school", reservingUser.getSchoolId());
 
@@ -1062,10 +1062,8 @@ public class EventsFacade extends AbstractIsaacFacade {
           "There are not enough spaces available for this event. Please try again with fewer users.")
           .toResponse();
     } catch (DuplicateBookingException e) {
-      return new SegueErrorResponse(Status.BAD_REQUEST,
-          "One of the users requested is already booked or reserved on this event."
-              + " Unable to create a duplicate booking.")
-          .toResponse();
+      return SegueErrorResponse.getBadRequestResponse("One of the users requested is already booked or reserved on this event."
+              + " Unable to create a duplicate booking.");
     } catch (NoUserException e) {
       return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate one of the users specified.");
     } catch (EventIsCancelledException e) {
