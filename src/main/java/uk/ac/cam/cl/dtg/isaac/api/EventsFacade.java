@@ -1062,8 +1062,9 @@ public class EventsFacade extends AbstractIsaacFacade {
           "There are not enough spaces available for this event. Please try again with fewer users.")
           .toResponse();
     } catch (DuplicateBookingException e) {
-      return SegueErrorResponse.getBadRequestResponse("One of the users requested is already booked or reserved on this event."
-              + " Unable to create a duplicate booking.");
+      return SegueErrorResponse.getBadRequestResponse(
+                "One of the users requested is already booked or reserved on this event."
+                  + " Unable to create a duplicate booking.");
     } catch (NoUserException e) {
       return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate one of the users specified.");
     } catch (EventIsCancelledException e) {
