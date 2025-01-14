@@ -17,9 +17,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +40,6 @@ import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.DateRangeFilterInstruction;
-
 
 public class EventNotificationEmailManager {
   private static final Logger log = LoggerFactory.getLogger(EventNotificationEmailManager.class);
@@ -110,8 +106,6 @@ public class EventNotificationEmailManager {
     }
   }
 
-  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
   private void commitAndSendStatusFilteredEmail(IsaacEventPageDTO event, String emailKeyPostfix, String templateId)
       throws SegueDatabaseException {
     String emailKey = String.format("%s@%s", event.getId(), emailKeyPostfix);
@@ -122,13 +116,7 @@ public class EventNotificationEmailManager {
      */
     List<BookingStatus> bookingStatuses = Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.ATTENDED);
     if (pgScheduledEmailManager.commitToSchedulingEmail(emailKey)) {
-      scheduler.schedule(() -> {
-        try {
-          this.sendBookingStatusFilteredEmailForEvent(event, templateId, bookingStatuses);
-        } catch (SegueDatabaseException e) {
-          e.printStackTrace();
-        }
-      }, 24, TimeUnit.HOURS);
+      this.sendBookingStatusFilteredEmailForEvent(event, templateId, bookingStatuses);
     }
   }
 
