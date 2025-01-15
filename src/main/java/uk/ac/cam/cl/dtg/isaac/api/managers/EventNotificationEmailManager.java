@@ -13,6 +13,7 @@ import com.google.inject.Inject;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -185,12 +186,13 @@ public class EventNotificationEmailManager {
           if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
             continue;
           }
-          // Event end date (if present) is today or before, else event date is today or before
-          boolean endDateToday =
-              event.getEndDate() != null && event.getEndDate().isBefore(Instant.now());
-          boolean noEndDateAndStartDateToday =
-              event.getEndDate() == null && event.getDate().isBefore(Instant.now());
-          if (endDateToday || noEndDateAndStartDateToday) {
+          // Event end date (if present) is yesterday or before, else event date is yesterday, or before
+          // We want to send the event_feedback 24 hours after the event
+          boolean endDateYesterday =
+              event.getEndDate() != null && event.getEndDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
+          boolean noEndDateAndStartDateYesterday =
+              event.getEndDate() == null && event.getDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
+          if (endDateYesterday || noEndDateAndStartDateYesterday) {
             List<ExternalReference> postResources = event.getPostResources();
             boolean postResourcesPresent =
                 postResources != null && !postResources.isEmpty() && !postResources.contains(null);
