@@ -141,10 +141,11 @@ public class MailJetApiClientWrapper {
    * @param firstName               - first name of user for contact details
    * @param role                    - role of user for contact details
    * @param emailVerificationStatus - verification status of user for contact details
+   * @param stage
    * @throws MailjetException - if underlying MailjetClient throws an exception
    */
   public void updateUserProperties(final String mailjetId, final String firstName, final String role,
-                                   final String emailVerificationStatus) throws MailjetException {
+                                   final String emailVerificationStatus, String stage) throws MailjetException {
     requireNonNull(mailjetId);
     MailjetRequest request = new MailjetRequest(Contactdata.resource, mailjetId)
         .property(Contactdata.DATA, new JSONArray()
