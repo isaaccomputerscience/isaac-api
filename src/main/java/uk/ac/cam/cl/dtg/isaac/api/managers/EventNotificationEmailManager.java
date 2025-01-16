@@ -107,13 +107,12 @@ public class EventNotificationEmailManager {
     }
   }
 
-  private void commitAndSendStatusFilteredEmail(IsaacEventPageDTO event, String emailKeyPostfix, String templateId)
+  private void commitAndSendReminderEmail(IsaacEventPageDTO event, String emailKeyPostfix, String templateId)
       throws SegueDatabaseException {
     String emailKey = String.format("%s@%s", event.getId(), emailKeyPostfix);
     /*
-    Confirmed and Attended statuses are both included for both pre- and post-event emails.
+    Confirmed and Attended statuses are both included for pre-event emails.
     Pre-event emails include the attended status in case the events team have pre-emptively marked someone as attended.
-    Post-event emails include the confirmed status in case the events team don't update the status to attended in time.
      */
     List<BookingStatus> bookingStatuses = Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.ATTENDED);
     if (pgScheduledEmailManager.commitToSchedulingEmail(emailKey)) {
@@ -149,14 +148,26 @@ public class EventNotificationEmailManager {
             continue;
           }
           if (event.getDate().isAfter(endOfToday)) {
-            commitAndSendStatusFilteredEmail(event, "pre", "event_reminder");
+            commitAndSendReminderEmail(event, "pre", "event_reminder");
           } else {
-            commitAndSendStatusFilteredEmail(event, "presameday", "event_reminder_same_day");
+            commitAndSendReminderEmail(event, "presameday", "event_reminder_same_day");
           }
         }
       }
     } catch (ContentManagerException | SegueDatabaseException e) {
       log.error("Failed to send scheduled event reminder emails: ", e);
+    }
+  }
+
+  private void commitAndSendFeedbackEmail(IsaacEventPageDTO event, String emailKeyPostfix, String templateId)
+      throws SegueDatabaseException {
+    String emailKey = String.format("%s@%s", event.getId(), emailKeyPostfix);
+    /*
+    Attended statuses included for post-event emails.
+     */
+    List<BookingStatus> bookingStatuses = List.of(BookingStatus.ATTENDED);
+    if (pgScheduledEmailManager.commitToSchedulingEmail(emailKey)) {
+      this.sendBookingStatusFilteredEmailForEvent(event, templateId, bookingStatuses);
     }
   }
 
@@ -197,12 +208,12 @@ public class EventNotificationEmailManager {
             boolean postResourcesPresent =
                 postResources != null && !postResources.isEmpty() && !postResources.contains(null);
             if (postResourcesPresent) {
-              commitAndSendStatusFilteredEmail(event, "post", "event_feedback");
+              commitAndSendFeedbackEmail(event, "post", "event_feedback");
             }
             // New logic for sending survey email
             boolean shouldSendSurvey = true; // Define your criteria for sending surveys
             if (shouldSendSurvey) {
-              commitAndSendStatusFilteredEmail(event, "survey", "event_survey");
+              commitAndSendFeedbackEmail(event, "survey", "event_survey");
             }
           }
         }
