@@ -141,7 +141,7 @@ public class MailJetApiClientWrapper {
    * @param firstName               - first name of user for contact details
    * @param role                    - role of user for contact details
    * @param emailVerificationStatus - verification status of user for contact details
-   * @param stage
+   * @param stage                   - stages of GCSE or ALevel
    * @throws MailjetException - if underlying MailjetClient throws an exception
    */
   public void updateUserProperties(final String mailjetId, final String firstName, final String role,
