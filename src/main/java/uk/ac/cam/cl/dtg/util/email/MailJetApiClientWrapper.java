@@ -152,6 +152,7 @@ public class MailJetApiClientWrapper {
             .put(new JSONObject().put("Name", "firstname").put("value", firstName))
             .put(new JSONObject().put("Name", "role").put("value", role))
             .put(new JSONObject().put("Name", "verification_status").put("value", emailVerificationStatus))
+            .put(new JSONObject().put("Name", "stage").put("value", stage))
         );
     MailjetResponse response = mailjetClient.put(request);
     if (response.getTotal() != 1) {
