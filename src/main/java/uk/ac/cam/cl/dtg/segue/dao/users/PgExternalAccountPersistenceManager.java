@@ -119,5 +119,4 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
         results.getString(String.valueOf(registeredContexts))
     );
   }
-
 }
