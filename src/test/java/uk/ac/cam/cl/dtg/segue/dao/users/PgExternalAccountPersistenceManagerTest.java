@@ -10,12 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
-import uk.ac.cam.cl.dtg.isaac.dos.users.UserExternalAccountChanges;;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserExternalAccountChanges;
+import uk.ac.cam.cl.dtg.util.ReflectionUtils;
 
 class PgExternalAccountPersistenceManagerTest {
 
@@ -29,7 +29,7 @@ class PgExternalAccountPersistenceManagerTest {
   }
 
   @Test
-  void buildUserExternalAccountChanges_ShouldCreateUserExternalAccountChangesCorrectly() throws SQLException {
+  void buildUserExternalAccountChanges_ShouldCreateUserExternalAccountChangesCorrectly() throws Exception {
     // Arrange
     String registeredContextsJson = "[\"gcse\",\"a_level\"]";
     expect(mockResultSet.getString("registered_contexts")).andReturn(registeredContextsJson);
@@ -47,7 +47,12 @@ class PgExternalAccountPersistenceManagerTest {
     replay(mockResultSet);
 
     // Act
-    UserExternalAccountChanges result = persistenceManager.buildUserExternalAccountChanges(mockResultSet);
+    UserExternalAccountChanges result = ReflectionUtils.invokePrivateMethod(
+        persistenceManager,
+        "buildUserExternalAccountChanges",
+        new Class[]{ResultSet.class},
+        new Object[]{mockResultSet}
+    );
 
     // Assert
     verify(mockResultSet);
