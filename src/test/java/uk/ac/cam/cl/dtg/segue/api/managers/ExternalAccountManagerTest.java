@@ -38,6 +38,9 @@ class ExternalAccountManagerTest {
   class SynchroniseChangedUsers {
     @Test
     void synchroniseChangedUsers_newUser() throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
+      // New user case:
+      // - providerUserId (mailjetId) is null
+      // - We expect to call addNewUserOrGetUserIfExists to create a new Mailjet account
       UserExternalAccountChanges userChanges = new UserExternalAccountChanges(
           1L, null, "test@example.com", Role.STUDENT, "John", false,
           EmailVerificationStatus.VERIFIED, true, false, "gcse"
@@ -65,9 +68,12 @@ class ExternalAccountManagerTest {
 
     @Test
     void synchroniseChangedUsers_existingUser() throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
+      // Existing user case:
+      // - providerUserId (mailjetId) is not null
+      // - We expect to call getAccountByIdOrEmail to retrieve existing Mailjet account
       UserExternalAccountChanges userChanges = new UserExternalAccountChanges(
           1L, "existingMailjetId", "test@example.com", Role.STUDENT, "John", false,
-          EmailVerificationStatus.VERIFIED, true, false, "a_level"
+          EmailVerificationStatus.VERIFIED, true, false, "gcse"
       );
       List<UserExternalAccountChanges> changedUsers = List.of(userChanges);
 
@@ -75,7 +81,7 @@ class ExternalAccountManagerTest {
       JSONObject mailjetDetails = new JSONObject();
       mailjetDetails.put("Email", "test@example.com");
       expect(mailjetApi.getAccountByIdOrEmail("existingMailjetId")).andReturn(mailjetDetails);
-      mailjetApi.updateUserProperties("existingMailjetId", "John", "STUDENT", "VERIFIED", "a_level");
+      mailjetApi.updateUserProperties("existingMailjetId", "John", "STUDENT", "VERIFIED", "gcse");
       expectLastCall();
       mailjetApi.updateUserSubscriptions("existingMailjetId",
           MailJetSubscriptionAction.FORCE_SUBSCRIBE, MailJetSubscriptionAction.UNSUBSCRIBE);
