@@ -24,14 +24,14 @@ import uk.ac.cam.cl.dtg.util.email.MailJetSubscriptionAction;
 class ExternalAccountManagerTest {
 
   private ExternalAccountManager externalAccountManager;
-  private IExternalAccountDataManager database;
+  private IExternalAccountDataManager mockDatabase;
   private MailJetApiClientWrapper mailjetApi;
 
   @BeforeEach
   public void setUp() {
-    database = createMock(IExternalAccountDataManager.class);
+    mockDatabase = createMock(IExternalAccountDataManager.class);
     mailjetApi = createMock(MailJetApiClientWrapper.class);
-    externalAccountManager = new ExternalAccountManager(mailjetApi, database);
+    externalAccountManager = new ExternalAccountManager(mailjetApi, mockDatabase);
   }
 
   @Nested
@@ -44,23 +44,23 @@ class ExternalAccountManagerTest {
       );
       List<UserExternalAccountChanges> changedUsers = List.of(userChanges);
 
-      expect(database.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
       expect(mailjetApi.addNewUserOrGetUserIfExists("test@example.com")).andReturn("mailjetId");
       mailjetApi.updateUserProperties("mailjetId", "John", "STUDENT", "VERIFIED", "gcse");
       expectLastCall();
       mailjetApi.updateUserSubscriptions("mailjetId",
           MailJetSubscriptionAction.FORCE_SUBSCRIBE, MailJetSubscriptionAction.UNSUBSCRIBE);
       expectLastCall();
-      database.updateExternalAccount(1L, "mailjetId");
+      mockDatabase.updateExternalAccount(1L, "mailjetId");
       expectLastCall();
-      database.updateProviderLastUpdated(1L);
+      mockDatabase.updateProviderLastUpdated(1L);
       expectLastCall();
 
-      replay(database, mailjetApi);
+      replay(mockDatabase, mailjetApi);
 
       externalAccountManager.synchroniseChangedUsers();
 
-      verify(database, mailjetApi);
+      verify(mockDatabase, mailjetApi);
     }
 
     @Test
@@ -71,7 +71,7 @@ class ExternalAccountManagerTest {
       );
       List<UserExternalAccountChanges> changedUsers = List.of(userChanges);
 
-      expect(database.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
       JSONObject mailjetDetails = new JSONObject();
       mailjetDetails.put("Email", "test@example.com");
       expect(mailjetApi.getAccountByIdOrEmail("existingMailjetId")).andReturn(mailjetDetails);
@@ -80,16 +80,16 @@ class ExternalAccountManagerTest {
       mailjetApi.updateUserSubscriptions("existingMailjetId",
           MailJetSubscriptionAction.FORCE_SUBSCRIBE, MailJetSubscriptionAction.UNSUBSCRIBE);
       expectLastCall();
-      database.updateExternalAccount(1L, "existingMailjetId");
+      mockDatabase.updateExternalAccount(1L, "existingMailjetId");
       expectLastCall();
-      database.updateProviderLastUpdated(1L);
+      mockDatabase.updateProviderLastUpdated(1L);
       expectLastCall();
 
-      replay(database, mailjetApi);
+      replay(mockDatabase, mailjetApi);
 
       externalAccountManager.synchroniseChangedUsers();
 
-      verify(database, mailjetApi);
+      verify(mockDatabase, mailjetApi);
     }
 
     @Test
@@ -100,20 +100,20 @@ class ExternalAccountManagerTest {
       );
       List<UserExternalAccountChanges> changedUsers = List.of(userChanges);
 
-      expect(database.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
       expect(mailjetApi.getAccountByIdOrEmail("existingMailjetId")).andReturn(new JSONObject());
       mailjetApi.permanentlyDeleteAccountById("existingMailjetId");
       expectLastCall();
-      database.updateExternalAccount(1L, null);
+      mockDatabase.updateExternalAccount(1L, null);
       expectLastCall();
-      database.updateProviderLastUpdated(1L);
+      mockDatabase.updateProviderLastUpdated(1L);
       expectLastCall();
 
-      replay(database, mailjetApi);
+      replay(mockDatabase, mailjetApi);
 
       externalAccountManager.synchroniseChangedUsers();
 
-      verify(database, mailjetApi);
+      verify(mockDatabase, mailjetApi);
     }
 
     @Test
@@ -124,14 +124,14 @@ class ExternalAccountManagerTest {
       );
       List<UserExternalAccountChanges> changedUsers = List.of(userChanges);
 
-      expect(database.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
       expect(mailjetApi.getAccountByIdOrEmail("existingMailjetId")).andThrow(new MailjetException("Mailjet error"));
 
-      replay(database, mailjetApi);
+      replay(mockDatabase, mailjetApi);
 
       assertThrows(ExternalAccountSynchronisationException.class, () -> externalAccountManager.synchroniseChangedUsers());
 
-      verify(database, mailjetApi);
+      verify(mockDatabase, mailjetApi);
     }
   }
 }
