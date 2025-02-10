@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
@@ -104,7 +105,17 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
   private UserExternalAccountChanges buildUserExternalAccountChanges(final ResultSet results) throws SQLException {
     String registeredContextsJson = results.getString("registered_contexts");
-    JSONArray registeredContexts = new JSONArray(registeredContextsJson);
+
+    // Parse the JSON string if it's not null
+    JSONObject registeredContexts = null;
+    if (registeredContextsJson != null && !registeredContextsJson.isEmpty()) {
+      registeredContexts = new JSONObject(registeredContextsJson);
+    }
+
+    // Extract stage from the JSON object, or use a default value
+    String stage = (registeredContexts != null && registeredContexts.has("stage"))
+        ? registeredContexts.getString("stage")
+        : "unknown";
 
     return new UserExternalAccountChanges(
         results.getLong("id"),
@@ -116,7 +127,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
         EmailVerificationStatus.valueOf(results.getString("email_verification_status")),
         results.getBoolean("news_emails"),
         results.getBoolean("events_emails"),
-        results.getString(String.valueOf(registeredContexts))
+        stage  // Pass the extracted stage as a string
     );
   }
 }
