@@ -198,7 +198,7 @@ public class EventNotificationEmailManager {
             continue;
           }
           // Event end date (if present) is yesterday or before, else event date is yesterday, or before
-          // We want to send the event_feedback 24 hours after the event
+          // We want to send the event_feedback email 24 hours after the event
           boolean endDateYesterday =
               event.getEndDate() != null && event.getEndDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
           boolean noEndDateAndStartDateYesterday =
