@@ -549,9 +549,9 @@ public class EventBookingManager {
           EventBookingDTO reservation;
 
           // Set the reservation close date (date at which an unconfirmed reservation is cancelled) to
-          // the day of the event or in EVENT_RESERVATION_CLOSE_INTERVAL_DAYS from now, whichever is earlier.
-          Instant reservationCloseDate = Collections.min(
-              List.of(Instant.now().plus(EVENT_RESERVATION_CLOSE_INTERVAL_DAYS, ChronoUnit.DAYS), event.getDate()));
+          // Set the reservation close date to 72 hours from now
+
+          Instant reservationCloseDate = Instant.now().plus(72, ChronoUnit.HOURS);
 
           DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").withZone(UTC);
           Map<String, String> additionalEventInformation = new HashMap<>();
