@@ -1867,30 +1867,30 @@ class EventBookingManagerTest {
     return testEvent;
   }
 
-  private static Map<String, String> reservationCloseDateMatcher(){
-    EasyMock.reportMatcher(new IArgumentMatcher(){
+  private static Map<String, String> reservationCloseDateMatcher() {
+    EasyMock.reportMatcher(new IArgumentMatcher() {
 
-    @Override
-    public boolean matches(Object argument) {
-      if (argument instanceof Map<?, ?> map) {
-        Object reservationClosedDate = map.get("reservationCloseDate");
+      @Override
+      public boolean matches(Object argument) {
+        if (argument instanceof Map<?, ?> map) {
+          Object reservationClosedDate = map.get("reservationCloseDate");
 
-        if (reservationClosedDate instanceof String) {
-          LocalDate comparisonDate = LocalDate.parse((String)reservationClosedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"));
-          Instant expectedDate = Instant.now().plus(3, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
-          comparisonDate.atStartOfDay(ZoneId.of("Europe/London"));
-          Instant actualDate = ZonedDateTime.parse((String) reservationClosedDate).toInstant().truncatedTo(ChronoUnit.DAYS);
-          return expectedDate.equals(actualDate);
+          if (reservationClosedDate instanceof String) {
+            LocalDate comparisonDate = LocalDate.parse((String)reservationClosedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"));
+            Instant expectedDate = Instant.now().plus(3, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
+            comparisonDate.atStartOfDay(ZoneId.of("Europe/London"));
+            Instant actualDate = ZonedDateTime.parse((String) reservationClosedDate).toInstant().truncatedTo(ChronoUnit.DAYS);
+            return expectedDate.equals(actualDate);
+          }
         }
+        return false;
       }
-      return false;
-    }
 
-    @Override
-    public void appendTo(StringBuffer buffer) {
-      buffer.append("Expected close date wrong: ");
-    }
-  });
+      @Override
+      public void appendTo(StringBuffer buffer) {
+        buffer.append("Expected close date wrong: ");
+      }
+    });
     return null;
   }
 }
