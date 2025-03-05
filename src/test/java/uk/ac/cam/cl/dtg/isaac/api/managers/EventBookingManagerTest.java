@@ -1892,4 +1892,5 @@ class EventBookingManagerTest {
     }
   });
     return null;
-}}
+  }
+}
