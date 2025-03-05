@@ -1876,7 +1876,7 @@ class EventBookingManagerTest {
           Object reservationClosedDate = map.get("reservationCloseDate");
 
           if (reservationClosedDate instanceof String) {
-            LocalDate comparisonDate = LocalDate.parse((String)reservationClosedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"));
+            LocalDate comparisonDate = LocalDate.parse((String) reservationClosedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"));
             Instant expectedDate = Instant.now().plus(3, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
             comparisonDate.atStartOfDay(ZoneId.of("Europe/London"));
             Instant actualDate = ZonedDateTime.parse((String) reservationClosedDate).toInstant().truncatedTo(ChronoUnit.DAYS);
