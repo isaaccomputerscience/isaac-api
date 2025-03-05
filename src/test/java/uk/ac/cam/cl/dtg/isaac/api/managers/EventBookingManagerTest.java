@@ -1873,7 +1873,7 @@ class EventBookingManagerTest {
     @Override
     public boolean matches(Object argument) {
       if (argument instanceof Map<?, ?> map) {
-        Object reservationClosedDate = map.get("reservationClosedDate");
+        Object reservationClosedDate = map.get("reservationCloseDate");
 
         if (reservationClosedDate instanceof String) {
           LocalDate comparisonDate = LocalDate.parse((String)reservationClosedDate, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"));
