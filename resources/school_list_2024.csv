@@ -1,4 +1,4 @@
-"school_id","school_name","postcode","closed","data_source"
+URN,EstablishmentName,Postcode,Closed,DataSource
 "100001","City of London School for Girls","EC2Y 8BB","FALSE","GOVERNMENT_UK"
 "100002","St Paul's Cathedral School","EC4M 9AD","FALSE","GOVERNMENT_UK"
 "100003","City of London School","EC4V 3AL","FALSE","GOVERNMENT_UK"
