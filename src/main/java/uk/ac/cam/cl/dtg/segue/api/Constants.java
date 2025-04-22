@@ -260,7 +260,7 @@ public final class Constants {
     AND, OR, NOT
   }
 
-  public static final String SCHOOLS_INDEX_BASE = "schools";
+  public static final String SCHOOLS_INDEX_BASE = "schools_2024";
 
   public enum SchoolsIndexType {
     METADATA("metadata"),
