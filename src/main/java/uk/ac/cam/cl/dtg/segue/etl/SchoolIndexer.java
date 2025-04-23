@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.users.School;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
+import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.schools.UnableToIndexSchoolsException;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 
@@ -50,8 +52,16 @@ class SchoolIndexer {
    * @throws UnableToIndexSchoolsException - when there is a problem building the index of schools.
    */
   synchronized void indexSchoolsWithSearchProvider() throws UnableToIndexSchoolsException {
-    if (es.hasIndex(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString())) {
-      log.info("Schools index already exists");
+    File f = new File(schoolsListPath);
+    SchoolListReader schoolsReader = new SchoolListReader(es);
+
+    Instant fileLastModified = Instant.ofEpochMilli(f.lastModified());
+    Instant indexLastModified = Instant.ofEpochMilli(
+        Long.parseLong(schoolsReader.getDataLastModifiedDate())
+    );
+
+    if (indexLastModified.isAfter(fileLastModified)) {
+      log.info("Schools index more recent than file");
       return;
     }
 
@@ -68,7 +78,6 @@ class SchoolIndexer {
       }
     }
 
-    File f = new File(schoolsListPath);
     try {
       es.indexObject(SCHOOLS_INDEX_BASE, SchoolsIndexType.METADATA.toString(), objectMapper.writeValueAsString(
           ImmutableMap.of("lastModified", f.lastModified())), "sourceFile");
