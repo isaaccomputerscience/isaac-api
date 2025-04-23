@@ -58,12 +58,12 @@ class SchoolIndexer {
     Instant fileLastModified = Instant.ofEpochMilli(f.lastModified());
     Instant indexLastModified;
     try {
-        indexLastModified = Instant.ofEpochMilli(
-            Long.parseLong(schoolsReader.getDataLastModifiedDate())
-        );
+      indexLastModified = Instant.ofEpochMilli(
+          Long.parseLong(schoolsReader.getDataLastModifiedDate())
+      );
     } catch (NumberFormatException e) {
-        log.error("Invalid data format for last modified date: {}", schoolsReader.getDataLastModifiedDate(), e);
-        throw new UnableToIndexSchoolsException("Failed to parse last modified date from school data.", e);
+      log.error("Invalid data format for last modified date: {}", schoolsReader.getDataLastModifiedDate(), e);
+      throw new UnableToIndexSchoolsException("Failed to parse last modified date from school data.", e);
     }
 
     if (indexLastModified.isAfter(fileLastModified)) {
