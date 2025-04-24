@@ -66,8 +66,8 @@ class SchoolIndexer {
       throw new UnableToIndexSchoolsException("Failed to parse last modified date from school data.", e);
     }
 
-    if (indexLastModified.isAfter(fileLastModified)) {
-      log.info("Schools index more recent than file");
+    if (indexLastModified.isAfter(fileLastModified) || indexLastModified.equals(fileLastModified)) {
+      log.info("Schools index is up to date");
       return;
     }
 
