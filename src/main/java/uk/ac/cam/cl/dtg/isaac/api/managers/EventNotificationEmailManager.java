@@ -214,8 +214,7 @@ public class EventNotificationEmailManager {
             boolean isInSecondWindow = referenceDate.isBefore(
                 Instant.now().minus(EMAIL_EVENT_SECOND_FEEDBACK_HOURS, ChronoUnit.HOURS))
                 && referenceDate.isAfter(
-                Instant.now().minus(EMAIL_EVENT_SECOND_FEEDBACK_HOURS + 24, ChronoUnit.HOURS));
-
+                Instant.now().minus((long) EMAIL_EVENT_SECOND_FEEDBACK_HOURS + 24, ChronoUnit.HOURS));
             if (isInFirstWindow || isInSecondWindow) {
               String timePostfix = isInFirstWindow ? "post" : "post_second_trigger";
               String surveyPostfix = isInFirstWindow ? "survey" : "survey_second_trigger";
