@@ -173,7 +173,6 @@ public class EventNotificationEmailManager {
   }
 
   public void sendFeedbackEmails() {
-    // Magic number
     Integer startIndex = 0;
     Map<String, List<String>> fieldsToMatch = Maps.newHashMap();
     Map<String, Constants.SortOrder> sortInstructions = Maps.newHashMap();
@@ -238,4 +237,3 @@ public class EventNotificationEmailManager {
     }
   }
 }
-
