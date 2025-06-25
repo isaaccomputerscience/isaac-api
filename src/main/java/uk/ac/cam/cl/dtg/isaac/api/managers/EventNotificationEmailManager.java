@@ -3,6 +3,7 @@ package uk.ac.cam.cl.dtg.isaac.api.managers;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_EVENT_FEEDBACK_DAYS_AGO;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_EVENT_REMINDER_DAYS_AHEAD;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_EVENT_SECOND_FEEDBACK_HOURS;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EVENT_TYPE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_MAX_WINDOW_SIZE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
@@ -172,7 +173,6 @@ public class EventNotificationEmailManager {
   }
 
   public void sendFeedbackEmails() {
-    // Magic number
     Integer startIndex = 0;
     Map<String, List<String>> fieldsToMatch = Maps.newHashMap();
     Map<String, Constants.SortOrder> sortInstructions = Maps.newHashMap();
@@ -197,30 +197,45 @@ public class EventNotificationEmailManager {
           if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
             continue;
           }
-          // Event end date (if present) is yesterday or before, else event date is yesterday, or before
-          // We want to send the event_feedback email 24 hours after the event
-          boolean endDateYesterday =
-              event.getEndDate() != null && event.getEndDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
-          boolean noEndDateAndStartDateYesterday =
-              event.getEndDate() == null && event.getDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
-          if (endDateYesterday || noEndDateAndStartDateYesterday) {
-            List<ExternalReference> postResources = event.getPostResources();
-            boolean postResourcesPresent =
-                postResources != null && !postResources.isEmpty() && !postResources.contains(null);
-            if (postResourcesPresent) {
-              commitAndSendFeedbackEmail(event, "post", "event_feedback");
-            }
-            // New logic for sending survey email
-            String surveyUrl = event.getEventSurvey();
-            String surveyTitle = event.getEventSurveyTitle();
 
-            // Define your criteria for sending surveys
-            // Events created before the survey title field was added may not have a title.
-            // Condition is set to handle backwards compatibility for events without title.
-            boolean shouldSendSurvey = (surveyUrl != null && !surveyUrl.isEmpty())
-                && (surveyTitle == null || !surveyTitle.isEmpty());
-            if (shouldSendSurvey) {
-              commitAndSendFeedbackEmail(event, "survey", "event_feedback");
+          // Event end date (if present) is past, else event date is past
+          boolean endDatePast = event.getEndDate() != null && event.getEndDate().isBefore(Instant.now());
+          boolean noEndDateAndStartDatePast = event.getEndDate() == null && event.getDate().isBefore(Instant.now());
+
+          if (endDatePast || noEndDateAndStartDatePast) {
+            Instant referenceDate = event.getEndDate() != null ? event.getEndDate() : event.getDate();
+
+            // Check for 24-hour window
+            boolean isInFirstWindow = referenceDate.isBefore(Instant.now().minus(1, ChronoUnit.DAYS))
+                && referenceDate.isAfter(Instant.now().minus(2, ChronoUnit.DAYS));
+
+
+            // Check for 96-hour window
+            boolean isInSecondWindow = referenceDate.isBefore(
+                Instant.now().minus(EMAIL_EVENT_SECOND_FEEDBACK_HOURS, ChronoUnit.HOURS))
+                && referenceDate.isAfter(
+                Instant.now().minus(EMAIL_EVENT_SECOND_FEEDBACK_HOURS + 24, ChronoUnit.HOURS));
+
+            if (isInFirstWindow || isInSecondWindow) {
+              String timePostfix = isInFirstWindow ? "post" : "post_second_trigger";
+              String surveyPostfix = isInFirstWindow ? "survey" : "survey_second_trigger";
+
+              List<ExternalReference> postResources = event.getPostResources();
+              boolean postResourcesPresent =
+                  postResources != null && !postResources.isEmpty() && !postResources.contains(null);
+
+              if (postResourcesPresent) {
+                commitAndSendFeedbackEmail(event, timePostfix, "event_feedback");
+              }
+
+              String surveyUrl = event.getEventSurvey();
+              String surveyTitle = event.getEventSurveyTitle();
+              boolean shouldSendSurvey = (surveyUrl != null && !surveyUrl.isEmpty())
+                  && (surveyTitle == null || !surveyTitle.isEmpty());
+
+              if (shouldSendSurvey) {
+                commitAndSendFeedbackEmail(event, surveyPostfix, "event_feedback");
+              }
             }
           }
         }
