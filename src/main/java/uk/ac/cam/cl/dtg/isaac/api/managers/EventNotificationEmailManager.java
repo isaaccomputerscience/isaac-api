@@ -198,7 +198,8 @@ public class EventNotificationEmailManager {
             continue;
           }
 
-          // Event end date (if present) is past, else event date is past
+          // Event end date (if present) is yesterday or before, else event date is yesterday, or before
+          // We want to send the event_feedback email 24 hours after the event
           boolean endDatePast = event.getEndDate() != null && event.getEndDate().isBefore(Instant.now());
           boolean noEndDateAndStartDatePast = event.getEndDate() == null && event.getDate().isBefore(Instant.now());
 
@@ -226,9 +227,13 @@ public class EventNotificationEmailManager {
               if (postResourcesPresent) {
                 commitAndSendFeedbackEmail(event, timePostfix, "event_feedback");
               }
-
+              // New logic for sending survey email
               String surveyUrl = event.getEventSurvey();
               String surveyTitle = event.getEventSurveyTitle();
+
+              // Define your criteria for sending surveys
+              // Events created before the survey title field was added may not have a title.
+              // Condition is set to handle backwards compatibility for events without title.
               boolean shouldSendSurvey = (surveyUrl != null && !surveyUrl.isEmpty())
                   && (surveyTitle == null || !surveyTitle.isEmpty());
 
