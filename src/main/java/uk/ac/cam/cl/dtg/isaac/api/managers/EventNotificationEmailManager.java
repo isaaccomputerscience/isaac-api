@@ -3,6 +3,7 @@ package uk.ac.cam.cl.dtg.isaac.api.managers;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_EVENT_FEEDBACK_DAYS_AGO;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_EVENT_REMINDER_DAYS_AHEAD;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_EVENT_SECOND_FEEDBACK_HOURS;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EVENT_TYPE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_MAX_WINDOW_SIZE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
@@ -197,28 +198,37 @@ public class EventNotificationEmailManager {
           if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
             continue;
           }
-          // New logic for sending survey email
-          String surveyUrl = event.getEventSurvey();
-          String surveyTitle = event.getEventSurveyTitle();
-          // Event end date (if present) is yesterday or before, else event date is yesterday, or before
-          // We want to send the event_feedback email 24 hours after the event
-          boolean endDateYesterday =
-              event.getEndDate() != null && event.getEndDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
 
-          boolean noEndDateAndStartDateYesterday =
-              event.getEndDate() == null && event.getDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
+          // Event end date (if present) is past, else event date is past
+          boolean endDatePast = event.getEndDate() != null && event.getEndDate().isBefore(Instant.now());
+          boolean noEndDateAndStartDatePast = event.getEndDate() == null && event.getDate().isBefore(Instant.now());
 
-          if (endDateYesterday || noEndDateAndStartDateYesterday) {
-            List<ExternalReference> postResources = event.getPostResources();
+          if (endDatePast || noEndDateAndStartDatePast) {
+            Instant referenceDate = event.getEndDate() != null ? event.getEndDate() : event.getDate();
 
-            boolean postResourcesPresent =
-                postResources != null && !postResources.isEmpty() && !postResources.contains(null);
+            // New logic for sending survey email
+            String surveyUrl = event.getEventSurvey();
+            String surveyTitle = event.getEventSurveyTitle();
+            // Event end date (if present) is yesterday or before, else event date is yesterday, or before
+            // We want to send the event_feedback email 24 hours after the event
+            boolean endDateYesterday =
+                event.getEndDate() != null && event.getEndDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
 
-            boolean eventSurveyTitleUrlPresent = (surveyUrl != null && !surveyUrl.isEmpty())
-                && (surveyTitle == null || !surveyTitle.isEmpty());
+            boolean noEndDateAndStartDateYesterday =
+                event.getEndDate() == null && event.getDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
 
-            if (postResourcesPresent || eventSurveyTitleUrlPresent) {
-              commitAndSendFeedbackEmail(event, "post", "event_feedback");
+            if (endDateYesterday || noEndDateAndStartDateYesterday) {
+              List<ExternalReference> postResources = event.getPostResources();
+
+              boolean postResourcesPresent =
+                  postResources != null && !postResources.isEmpty() && !postResources.contains(null);
+
+              boolean eventSurveyTitleUrlPresent = (surveyUrl != null && !surveyUrl.isEmpty())
+                  && (surveyTitle == null || !surveyTitle.isEmpty());
+
+              if (postResourcesPresent || eventSurveyTitleUrlPresent) {
+                commitAndSendFeedbackEmail(event, "post", "event_feedback");
+              }
             }
           }
         }
@@ -228,3 +238,4 @@ public class EventNotificationEmailManager {
     }
   }
 }
+
