@@ -11,7 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DATE_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_EVENT_FEEDBACK_DAYS_AGO;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EVENT_TYPE;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_MAX_WINDOW_SIZE;import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_EVENT_SECOND_FEEDBACK_HOURS;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_MAX_WINDOW_SIZE;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_EVENT_SECOND_FEEDBACK_HOURS;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 
@@ -67,7 +68,7 @@ class EventNotificationEmailManagerTest {
     mockEmailManager = createMock(EmailManager.class);
     mockPgScheduledEmailManager = createMock(PgScheduledEmailManager.class);
 
-    mockedObjects = new Object[]{
+    mockedObjects = new Object[] {
         mockContentManager, mockBookingManager, mockUserAccountManager,
         mockEmailManager, mockPgScheduledEmailManager
     };
@@ -138,7 +139,8 @@ class EventNotificationEmailManagerTest {
       setupBookingManagerExpectations(event.getId(), bookings, 0);
 
       // Ensure no email is sent
-      expect(mockPgScheduledEmailManager.commitToSchedulingEmail(anyObject())).andThrow(new AssertionFailedError()).anyTimes();
+      expect(mockPgScheduledEmailManager.commitToSchedulingEmail(anyObject())).andThrow(new AssertionFailedError())
+          .anyTimes();
 
       replay(mockedObjects);
 
@@ -159,7 +161,8 @@ class EventNotificationEmailManagerTest {
       setupContentManagerExpectations(Collections.singletonList(event));
 
       // Ensure no email is sent
-      expect(mockPgScheduledEmailManager.commitToSchedulingEmail(anyObject())).andThrow(new AssertionFailedError()).anyTimes();
+      expect(mockPgScheduledEmailManager.commitToSchedulingEmail(anyObject())).andThrow(new AssertionFailedError())
+          .anyTimes();
 
       replay(mockedObjects);
 
@@ -223,7 +226,8 @@ class EventNotificationEmailManagerTest {
         eventFeedbackThresholdDate.toInstant(), Instant.now());
     filterInstructions.put(DATE_FIELDNAME, eventsWithinFeedbackDateRange);
 
-    ResultsWrapper<ContentDTO> resultsWrapper = new ResultsWrapper<>((List<ContentDTO>) (List<?>) events, (long) events.size());
+    ResultsWrapper<ContentDTO> resultsWrapper =
+        new ResultsWrapper<>((List<ContentDTO>) (List<?>) events, (long) events.size());
 
     expect(mockContentManager.findByFieldNames(
         anyObject(),
@@ -253,7 +257,7 @@ class EventNotificationEmailManagerTest {
       user.setEmail("user" + (i + 1) + "@test.com");
 
       //Multiple emails maybe sent for 96 hours in test (ONLY) but are stopped by infrastructure in production.
-      for(int j = 0; j < numberOfEmails; j++) {
+      for (int j = 0; j < numberOfEmails; j++) {
         expect(mockEmailManager.getEmailTemplateDTO(templateId)).andReturn(createEmailTemplate());
         expect(mockUserAccountManager.getUserDTOById((long) (i + 1))).andReturn(user);
         expect(mockPgScheduledEmailManager.commitToSchedulingEmail(emailKey)).andReturn(true);
