@@ -923,7 +923,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
         + " gender = ?, registration_date = ?, school_id = ?, school_other = ?, last_updated = ?,"
         + " email_verification_status = ?, last_seen = ?, email_verification_token = ?, email_to_verify = ?,"
         + " teacher_pending = ?, registered_contexts = ?, registered_contexts_last_confirmed = ?,"
-        + " privacy_policy_accepted_time =?"
+        + " privacy_policy_accepted_time = ?"
         + " WHERE id = ?;";
     try (PreparedStatement pst = conn.prepareStatement(query)) {
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_FAMILY_NAME, userToCreate.getFamilyName());
