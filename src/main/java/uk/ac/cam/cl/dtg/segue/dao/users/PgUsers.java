@@ -695,6 +695,28 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
   }
 
   @Override
+  public void updatePrivacyPolicyAcceptedTime(final RegisteredUser user) throws SegueDatabaseException {
+    requireNonNull(user);
+
+    String query = "UPDATE users SET privacy_policy_accepted_time = ?, last_updated = ? WHERE id = ?";
+    try (Connection conn = database.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(query)
+    ) {
+      Instant now = Instant.now();
+      pst.setTimestamp(1, Timestamp.from(now));
+      pst.setTimestamp(2, Timestamp.from(now));
+      pst.setLong(3, user.getId());
+      pst.execute();
+
+      // Update the user object as well
+      user.setPrivacyPolicyAcceptedTime(now);
+      user.setLastUpdated(now);
+    } catch (SQLException e) {
+      throw new SegueDatabaseException("Unable to update privacy policy acceptance time", e);
+    }
+  }
+
+  @Override
   public Integer regenerateSessionToken(final RegisteredUser user) throws SegueDatabaseException {
     Integer newSessionTokenValue = generateRandomTokenInteger();
     this.updateSessionToken(user, newSessionTokenValue);
