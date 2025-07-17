@@ -46,6 +46,7 @@ public class RegisteredUser extends AbstractSegueUser {
 
   private Instant lastUpdated;
   private Instant lastSeen;
+  private Instant privacyPolicyAcceptedTime;
 
   /**
    * Full constructor for the User object.
@@ -59,6 +60,7 @@ public class RegisteredUser extends AbstractSegueUser {
    * @param gender                  gender of the user
    * @param registrationDate        date of registration
    * @param lastUpdated             the date this user was last updated.
+   * @param privacyPolicyAcceptedTime the date this user accepted the privacy policy.
    * @param emailToVerify           the most recent email for which a token has been generated
    * @param emailVerificationToken  the most recent token generated to verify email addresses
    * @param emailVerificationStatus whether the user has verified their email or not
@@ -72,6 +74,7 @@ public class RegisteredUser extends AbstractSegueUser {
       @JsonProperty("dateOfBirth") final Instant dateOfBirth, @JsonProperty("gender") final Gender gender,
       @JsonProperty("registrationDate") final Instant registrationDate,
       @JsonProperty("lastUpdated") final Instant lastUpdated,
+      @JsonProperty("privacyPolicyAcceptedTime") final Instant privacyPolicyAcceptedTime,
       @JsonProperty("emailToVerify") final String emailToVerify,
       @JsonProperty("emailVerificationToken") final String emailVerificationToken,
       @JsonProperty("emailVerificationStatus") final EmailVerificationStatus emailVerificationStatus,
@@ -86,6 +89,7 @@ public class RegisteredUser extends AbstractSegueUser {
     this.gender = gender;
     this.registrationDate = registrationDate;
     this.lastUpdated = lastUpdated;
+    this.privacyPolicyAcceptedTime = privacyPolicyAcceptedTime;
     this.emailToVerify = emailToVerify;
     this.emailVerificationToken = emailVerificationToken;
     this.emailVerificationStatus = emailVerificationStatus;
@@ -376,6 +380,24 @@ public class RegisteredUser extends AbstractSegueUser {
   }
 
   /**
+   * Gets the privacyPolicyAcceptedTime.
+   *
+   * @return the privacyPolicyAcceptedTime
+   */
+  public Instant getPrivacyPolicyAcceptedTime() {
+    return privacyPolicyAcceptedTime;
+  }
+
+  /**
+   * Sets the privacyPolicyAcceptedTime.
+   *
+   * @param privacyPolicyAcceptedTime the privacyPolicyAcceptedTime to set
+   */
+  public void setPrivacyPolicyAcceptedTime(final Instant privacyPolicyAcceptedTime) {
+    this.privacyPolicyAcceptedTime = privacyPolicyAcceptedTime;
+  }
+
+  /**
    * Gets the lastSeen.
    *
    * @return the lastSeen
@@ -474,6 +496,7 @@ public class RegisteredUser extends AbstractSegueUser {
         + ", emailVerificationStatus=" + emailVerificationStatus
         + ", teacherPending=" + teacherPending
         + ", lastUpdated=" + lastUpdated
+        + ", privacyPolicyAcceptedTime=" + privacyPolicyAcceptedTime
         + ", lastSeen=" + lastSeen
         + '}';
   }
