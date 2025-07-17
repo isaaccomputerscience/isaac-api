@@ -46,6 +46,7 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
 
   private boolean firstLogin = false;
   private Instant lastUpdated;
+  private Instant privacyPolicyAcceptedTime;
   private Instant lastSeen;
   private EmailVerificationStatus emailVerificationStatus;
   private Boolean teacherPending;
@@ -358,6 +359,24 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
   }
 
   /**
+   * Gets the privacyPolicyAcceptedTime.
+   *
+   * @return the privacyPolicyAcceptedTime
+   */
+    public Instant getPrivacyPolicyAcceptedTime() {
+      return privacyPolicyAcceptedTime;
+    }
+
+    /**
+     * Sets the privacyPolicyAcceptedTime.
+     *
+     * @param privacyPolicyAcceptedTime the privacyPolicyAcceptedTime to set
+     */
+    public void setPrivacyPolicyAcceptedTime(final Instant privacyPolicyAcceptedTime) {
+      this.privacyPolicyAcceptedTime = privacyPolicyAcceptedTime;
+    }
+
+  /**
    * Gets the lastSeen.
    *
    * @return the lastSeen
@@ -509,7 +528,13 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
     } else if (!lastUpdated.equals(other.lastUpdated)) {
       return false;
     }
-
+    if (privacyPolicyAcceptedTime == null) {
+      if (other.privacyPolicyAcceptedTime != null) {
+        return false;
+      }
+    } else if (!privacyPolicyAcceptedTime.equals(other.privacyPolicyAcceptedTime)) {
+      return false;
+    }
     if (registrationDate == null) {
       if (other.registrationDate != null) {
         return false;
@@ -561,6 +586,7 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
         + ", teacherPending=" + teacherPending
         + ", firstLogin=" + firstLogin
         + ", lastUpdated=" + lastUpdated
+        + ", privacyPolicyAcceptedTime=" + privacyPolicyAcceptedTime
         + "]";
   }
 }
