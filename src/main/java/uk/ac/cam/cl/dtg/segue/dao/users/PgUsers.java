@@ -827,8 +827,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     String query = "INSERT INTO users(family_name, given_name, email, role, date_of_birth, gender,"
         + " registration_date, school_id, school_other, last_updated, email_verification_status, last_seen,"
         + " email_verification_token, email_to_verify, teacher_pending, registered_contexts,"
-        + " registered_contexts_last_confirmed)"
-        + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        + " registered_contexts_last_confirmed, privacy_policy_accepted_time)"
+        + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
     ) {
@@ -922,7 +922,9 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     String query = "UPDATE users SET family_name = ?, given_name = ?, email = ?, role = ?, date_of_birth = ?,"
         + " gender = ?, registration_date = ?, school_id = ?, school_other = ?, last_updated = ?,"
         + " email_verification_status = ?, last_seen = ?, email_verification_token = ?, email_to_verify = ?,"
-        + " teacher_pending = ?, registered_contexts = ?, registered_contexts_last_confirmed = ? WHERE id = ?;";
+        + " teacher_pending = ?, registered_contexts = ?, registered_contexts_last_confirmed = ?,"
+        + " privacy_policy_accepted_time =?"
+        + " WHERE id = ?;";
     try (PreparedStatement pst = conn.prepareStatement(query)) {
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_FAMILY_NAME, userToCreate.getFamilyName());
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_GIVEN_NAME, userToCreate.getGivenName());
@@ -940,6 +942,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL_VERIFICATION_TOKEN, userToCreate.getEmailVerificationToken());
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL_TO_VERIFY, userToCreate.getEmailToVerify());
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_TEACHER_PENDING, userToCreate.getTeacherPending());
+      setValueHelper(pst, FIELD_CREATE_UPDATE_USER_PRIVACY_POLICY_ACCEPTED_TIME, userToCreate.getPrivacyPolicyAcceptedTime());
       List<String> userContextsJsonb = Lists.newArrayList();
       if (userToCreate.getRegisteredContexts() != null) {
         for (UserContext registeredContext : userToCreate.getRegisteredContexts()) {
@@ -1008,6 +1011,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     u.setEmailVerificationStatus(results.getString("email_verification_status") != null ? EmailVerificationStatus
         .valueOf(results.getString("email_verification_status")) : null);
     u.setTeacherPending(results.getBoolean("teacher_pending"));
+    u.setPrivacyPolicyAcceptedTime(getInstantFromTimestamp(results, "privacy_policy_accepted_time"));
 
     return u;
   }
@@ -1165,5 +1169,6 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
   private static final int FIELD_CREATE_UPDATE_USER_TEACHER_PENDING = 15;
   private static final int FIELD_CREATE_UPDATE_USER_REGISTERED_CONTEXTS = 16;
   private static final int FIELD_CREATE_UPDATE_USER_REGISTERED_CONTEXTS_LAST_CONFIRMED = 17;
-  private static final int FIELD_UPDATE_USER_USER_ID = 18;
+  private static final int FIELD_CREATE_UPDATE_USER_PRIVACY_POLICY_ACCEPTED_TIME  = 18;
+  private static final int FIELD_UPDATE_USER_USER_ID = 19;
 }
