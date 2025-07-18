@@ -1986,6 +1986,17 @@ public class UserAccountManager implements IUserAccountManager {
   }
 
   /**
+   * Update the users' last policy accepted field.
+   *
+   * @param userDTO of interest
+   * @throws SegueDatabaseException if an error occurs with the update.
+   */
+  public void updatePrivacyPolicyAcceptedTime(final RegisteredUserDTO userDTO) throws SegueDatabaseException {
+      RegisteredUser user = findUserById(userDTO.getId());
+      this.database.updatePrivacyPolicyAcceptedTime(user);
+  }
+
+  /**
    * Generate a verification link to be sent to a new user's email address.
    *
    * @param userDTO                the userDTO of interest
@@ -2134,4 +2145,14 @@ public class UserAccountManager implements IUserAccountManager {
     log.warn("User with ID: {} has no defined school information", user.getId());
     return null;
   }
+
+//  public void updatePrivacyPolicyAcceptedTime(RegisteredUserDTO user) throws SegueDatabaseException {
+//    // Get current timestamp
+//    Date now = new Date();
+//    user.setPrivacyPolicyAcceptedTime(now);
+//
+//    // Update the user in database
+//    this.database.updateUser(user);
+//    this.getLogManager().logInternalEvent(user, null, "PRIVACY_POLICY_ACCEPTED", ImmutableMap.of());
+//  }
 }
