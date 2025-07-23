@@ -849,7 +849,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     String query = "INSERT INTO users(family_name, given_name, email, role, date_of_birth, gender,"
         + " registration_date, school_id, school_other, last_updated, email_verification_status, last_seen,"
         + " email_verification_token, email_to_verify, teacher_pending, registered_contexts,"
-        + " registered_contexts_last_confirmed, privacy_policy_accepted_time)"
+        + " registered_contexts_last_confirmed, updated_privacy_policy_accepted)"
         + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)
@@ -1033,7 +1033,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     u.setEmailVerificationStatus(results.getString("email_verification_status") != null ? EmailVerificationStatus
         .valueOf(results.getString("email_verification_status")) : null);
     u.setTeacherPending(results.getBoolean("teacher_pending"));
-    u.setPrivacyPolicyAcceptedTime(getInstantFromTimestamp(results, "privacy_policy_accepted_time"));
+    u.setPrivacyPolicyAcceptedTime(getInstantFromTimestamp(results, "updated_privacy_policy_accepted"));
 
     return u;
   }
