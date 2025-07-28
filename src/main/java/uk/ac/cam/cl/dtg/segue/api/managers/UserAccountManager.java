@@ -242,7 +242,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @param request  http request that we can attach the session to.
    * @param provider the provider the user wishes to authenticate with.
    * @return A redirection URI - also this endpoint ensures that the request has a session attribute on so we know
-   * that this is a link request not a new user.
+   *    that this is a link request not a new user.
    * @throws IOException                            if there is an error when contacting the OAuth server
    * @throws AuthenticationProviderMappingException as per exception description.
    */
@@ -908,7 +908,7 @@ public class UserAccountManager implements IUserAccountManager {
    *
    * @param request to retrieve session information from
    * @return Returns the current UserDTO if we can get it or throw a NoUserLoggedInException
-   * if user is not currently logged in
+   *     if user is not currently logged in
    * @throws NoUserLoggedInException When the session has expired or there is no user currently logged in.
    */
   public RegisteredUserDTO getCurrentRegisteredUser(final HttpServletRequest request)
@@ -1902,7 +1902,7 @@ public class UserAccountManager implements IUserAccountManager {
    *
    * @param request to retrieve session information from
    * @return Returns the current UserDTO if we can get it or null if user is not currently logged in / there is an
-   * invalid session
+   *     invalid session
    */
   private RegisteredUser getCurrentRegisteredUserDO(final HttpServletRequest request) {
     return this.userAuthenticationManager.getUserFromSession(request, false);
@@ -2145,14 +2145,3 @@ public class UserAccountManager implements IUserAccountManager {
     log.warn("User with ID: {} has no defined school information", user.getId());
     return null;
   }
-
-//  public void updatePrivacyPolicyAcceptedTime(RegisteredUserDTO user) throws SegueDatabaseException {
-//    // Get current timestamp
-//    Date now = new Date();
-//    user.setPrivacyPolicyAcceptedTime(now);
-//
-//    // Update the user in database
-//    this.database.updateUser(user);
-//    this.getLogManager().logInternalEvent(user, null, "PRIVACY_POLICY_ACCEPTED", ImmutableMap.of());
-//  }
-}
