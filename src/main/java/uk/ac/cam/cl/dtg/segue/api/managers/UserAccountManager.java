@@ -242,7 +242,7 @@ public class UserAccountManager implements IUserAccountManager {
    * @param request  http request that we can attach the session to.
    * @param provider the provider the user wishes to authenticate with.
    * @return A redirection URI - also this endpoint ensures that the request has a session attribute on so we know
-   *     that this is a link request not a new user.
+   * that this is a link request not a new user.
    * @throws IOException                            if there is an error when contacting the OAuth server
    * @throws AuthenticationProviderMappingException as per exception description.
    */
@@ -755,7 +755,7 @@ public class UserAccountManager implements IUserAccountManager {
   }
 
   private void validateUpdatingUserDetails(RegisteredUser updatedUser, String newPassword, RegisteredUser existingUser,
-                         IPasswordAuthenticator authenticator)
+                                           IPasswordAuthenticator authenticator)
       throws SegueDatabaseException, InvalidNameException, InvalidPasswordException {
     // Check that the user isn't trying to take an existing users e-mail.
     if (this.findUserByEmail(updatedUser.getEmail()) != null && !existingUser.getEmail()
@@ -908,7 +908,7 @@ public class UserAccountManager implements IUserAccountManager {
    *
    * @param request to retrieve session information from
    * @return Returns the current UserDTO if we can get it or throw a NoUserLoggedInException
-   *         if user is not currently logged in
+   * if user is not currently logged in
    * @throws NoUserLoggedInException When the session has expired or there is no user currently logged in.
    */
   public RegisteredUserDTO getCurrentRegisteredUser(final HttpServletRequest request)
@@ -1902,7 +1902,7 @@ public class UserAccountManager implements IUserAccountManager {
    *
    * @param request to retrieve session information from
    * @return Returns the current UserDTO if we can get it or null if user is not currently logged in / there is an
-   *     invalid session
+   * invalid session
    */
   private RegisteredUser getCurrentRegisteredUserDO(final HttpServletRequest request) {
     return this.userAuthenticationManager.getUserFromSession(request, false);
@@ -1992,8 +1992,8 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws SegueDatabaseException if an error occurs with the update.
    */
   public void updatePrivacyPolicyAcceptedTime(final RegisteredUserDTO userDTO) throws SegueDatabaseException {
-      RegisteredUser user = findUserById(userDTO.getId());
-      this.database.updatePrivacyPolicyAcceptedTime(user);
+    RegisteredUser user = findUserById(userDTO.getId());
+    this.database.updatePrivacyPolicyAcceptedTime(user);
   }
 
   /**

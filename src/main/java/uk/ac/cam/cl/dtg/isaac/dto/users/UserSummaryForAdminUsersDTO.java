@@ -59,18 +59,18 @@ public class UserSummaryForAdminUsersDTO extends UserSummaryWithEmailAddressDTO 
    *
    * @return the privacyPolicyAcceptedTime
    */
-    public Instant getPrivacyPolicyAcceptedTime() {
-      return privacyPolicyAcceptedTime;
-    }
+  public Instant getPrivacyPolicyAcceptedTime() {
+    return privacyPolicyAcceptedTime;
+  }
 
-    /**
-     * Sets the privacyPolicyAcceptedTime.
-     *
-     * @param privacyPolicyAcceptedTime the privacyPolicyAcceptedTime to set
-     */
-    public void setPrivacyPolicyAcceptedTime(final Instant privacyPolicyAcceptedTime) {
-      this.privacyPolicyAcceptedTime = privacyPolicyAcceptedTime;
-      }
+  /**
+   * Sets the privacyPolicyAcceptedTime.
+   *
+   * @param privacyPolicyAcceptedTime the privacyPolicyAcceptedTime to set
+   */
+  public void setPrivacyPolicyAcceptedTime(final Instant privacyPolicyAcceptedTime) {
+    this.privacyPolicyAcceptedTime = privacyPolicyAcceptedTime;
+  }
 
   /**
    * Gets the lastSeen.

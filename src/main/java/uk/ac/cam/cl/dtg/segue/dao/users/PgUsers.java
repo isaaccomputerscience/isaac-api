@@ -441,8 +441,9 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     }
 
     String inParams = String.join(",", Collections.nCopies(usersToLocate.size(), "?"));
-    String query = String.format(
-            "SELECT * FROM users WHERE id IN (%s) AND NOT deleted ORDER BY family_name, given_name", inParams);
+    String query =
+        String.format("SELECT * FROM users WHERE id IN (%s) AND NOT deleted ORDER BY family_name, given_name",
+            inParams);
 
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query)) {
@@ -929,7 +930,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
    * Helper method that enables a connection configured for transactions to be passed in.
    *
    * @param conn         - A pre-created sql connection object - ideal if you want to pre-configure auto commit to be
-   *                           turned off.
+   *                     turned off.
    * @param userToCreate - user object to save.
    * @return the user as from the database
    * @throws SQLException - if there is a database problem
@@ -964,7 +965,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL_VERIFICATION_TOKEN, userToCreate.getEmailVerificationToken());
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_EMAIL_TO_VERIFY, userToCreate.getEmailToVerify());
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_TEACHER_PENDING, userToCreate.getTeacherPending());
-      setValueHelper(pst, FIELD_CREATE_UPDATE_USER_UPDATED_PRIVACY_POLICY_ACCEPTED, userToCreate.getPrivacyPolicyAcceptedTime());
+      setValueHelper(pst, FIELD_CREATE_UPDATE_USER_UPDATED_PRIVACY_POLICY_ACCEPTED,
+          userToCreate.getPrivacyPolicyAcceptedTime());
       List<String> userContextsJsonb = Lists.newArrayList();
       if (userToCreate.getRegisteredContexts() != null) {
         for (UserContext registeredContext : userToCreate.getRegisteredContexts()) {
