@@ -1986,6 +1986,17 @@ public class UserAccountManager implements IUserAccountManager {
   }
 
   /**
+   * Update the users' last policy accepted field.
+   *
+   * @param userDTO of interest
+   * @throws SegueDatabaseException if an error occurs with the update.
+   */
+  public void updatePrivacyPolicyAcceptedTime(final RegisteredUserDTO userDTO) throws SegueDatabaseException {
+    RegisteredUser user = findUserById(userDTO.getId());
+    this.database.updatePrivacyPolicyAcceptedTime(user);
+  }
+
+  /**
    * Generate a verification link to be sent to a new user's email address.
    *
    * @param userDTO                the userDTO of interest

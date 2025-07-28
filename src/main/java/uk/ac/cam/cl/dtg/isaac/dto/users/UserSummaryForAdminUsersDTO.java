@@ -23,6 +23,7 @@ import java.time.Instant;
  */
 public class UserSummaryForAdminUsersDTO extends UserSummaryWithEmailAddressDTO {
   private Instant lastUpdated;
+  private Instant privacyPolicyAcceptedTime;
   private Instant lastSeen;
   private Instant registrationDate;
   private String schoolId;
@@ -51,6 +52,24 @@ public class UserSummaryForAdminUsersDTO extends UserSummaryWithEmailAddressDTO 
    */
   public void setLastUpdated(final Instant lastUpdated) {
     this.lastUpdated = lastUpdated;
+  }
+
+  /**
+   * Gets the privacyPolicyAcceptedTime.
+   *
+   * @return the privacyPolicyAcceptedTime
+   */
+  public Instant getPrivacyPolicyAcceptedTime() {
+    return privacyPolicyAcceptedTime;
+  }
+
+  /**
+   * Sets the privacyPolicyAcceptedTime.
+   *
+   * @param privacyPolicyAcceptedTime the privacyPolicyAcceptedTime to set
+   */
+  public void setPrivacyPolicyAcceptedTime(final Instant privacyPolicyAcceptedTime) {
+    this.privacyPolicyAcceptedTime = privacyPolicyAcceptedTime;
   }
 
   /**
@@ -129,6 +148,7 @@ public class UserSummaryForAdminUsersDTO extends UserSummaryWithEmailAddressDTO 
   public String toString() {
     return "lastUpdated=" + "UserSummaryForAdminUsersDTO{" + lastUpdated
         + ", lastSeen=" + lastSeen
+        + ", privacyPolicyAcceptedTime=" + privacyPolicyAcceptedTime
         + ", registrationDate=" + registrationDate
         + ", schoolId=" + schoolId
         + ", schoolOther=" + schoolOther
