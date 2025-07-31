@@ -882,6 +882,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
       pst.setArray(FIELD_CREATE_UPDATE_USER_REGISTERED_CONTEXTS, userContexts);
       setValueHelper(pst, FIELD_CREATE_UPDATE_USER_REGISTERED_CONTEXTS_LAST_CONFIRMED,
           userToCreate.getRegisteredContextsLastConfirmed());
+      setValueHelper(pst, FIELD_CREATE_UPDATE_USER_UPDATED_PRIVACY_POLICY_ACCEPTED,
+          userToCreate.getPrivacyPolicyAcceptedTime());
 
       if (pst.executeUpdate() == 0) {
         throw new SegueDatabaseException("Unable to save user.");
