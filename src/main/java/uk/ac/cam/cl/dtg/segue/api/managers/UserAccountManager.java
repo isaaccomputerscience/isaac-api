@@ -2145,3 +2145,4 @@ public class UserAccountManager implements IUserAccountManager {
     log.warn("User with ID: {} has no defined school information", user.getId());
     return null;
   }
+}
