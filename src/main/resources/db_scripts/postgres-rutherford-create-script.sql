@@ -733,6 +733,7 @@ CREATE TABLE public.users (
     email_verification_token text,
     deleted boolean DEFAULT false NOT NULL,
     teacher_pending boolean DEFAULT false NOT NULL
+    updated_privacy_policy_accepted timestamp without time zone,
 );
 
 
