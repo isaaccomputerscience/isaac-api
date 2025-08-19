@@ -43,8 +43,10 @@ import com.google.inject.name.Named;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -487,6 +489,26 @@ public class IsaacController extends AbstractIsaacFacade {
     );
 
     return Response.ok(userSnapshot).cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+  }
+
+  @POST
+  @Path("/users/accept-privacy-policy")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  @GZIP
+  @Operation(summary = "Accept the privacy policy for the current user.")
+  public Response acceptPrivacyPolicy(@Context final HttpServletRequest request) {
+    try {
+      RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
+      userManager.updatePrivacyPolicyAcceptedTime(user);
+      log.info("User " + user.getEmail() + " accepted privacy policy");
+      return Response.ok().build();
+    } catch (NoUserLoggedInException e) {
+      return SegueErrorResponse.getNotLoggedInResponse();
+    } catch (SegueDatabaseException e) {
+      log.error("Database error during privacy policy acceptance", e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error").toResponse();
+    }
   }
 
   /**
