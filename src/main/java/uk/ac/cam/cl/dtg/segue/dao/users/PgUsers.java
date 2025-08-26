@@ -681,6 +681,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
 
   @Override
   public void updateUserLastSeen(final RegisteredUser user, final Instant date) throws SegueDatabaseException {
+
     requireNonNull(user);
 
     String query = "UPDATE users SET last_seen = ? WHERE id = ?";
@@ -697,6 +698,7 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
 
   @Override
   public void updatePrivacyPolicyAcceptedTime(final RegisteredUser user) throws SegueDatabaseException {
+
     requireNonNull(user);
 
     String query = "UPDATE users SET updated_privacy_policy_accepted = ?, last_updated = ? WHERE id = ?";
