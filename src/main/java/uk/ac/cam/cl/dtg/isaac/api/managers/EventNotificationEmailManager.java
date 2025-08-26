@@ -10,6 +10,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.TYPE_FIELDNAME;
 import com.google.api.client.util.Maps;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -18,7 +19,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
@@ -51,6 +53,7 @@ public class EventNotificationEmailManager {
   private final EmailManager emailManager;
   private final PgScheduledEmailManager pgScheduledEmailManager;
 
+  public static final Integer EMAIL_EVENT_SECOND_FEEDBACK_HOURS = 96;
 
   /**
    * This class is required by quartz and must be executable by any instance of the segue api relying only on the
@@ -86,7 +89,7 @@ public class EventNotificationEmailManager {
             detailedEventBookingDTO.getBookingStatus()))
         .map(DetailedEventBookingDTO::getUserBooked)
         .map(UserSummaryDTO::getId)
-        .distinct().collect(Collectors.toList());
+        .distinct().toList();
     for (Long id : ids) {
       try {
         RegisteredUserDTO user = userAccountManager.getUserDTOById(id);
@@ -172,59 +175,78 @@ public class EventNotificationEmailManager {
   }
 
   public void sendFeedbackEmails() {
-    // Magic number
-    Integer startIndex = 0;
-    Map<String, List<String>> fieldsToMatch = Maps.newHashMap();
-    Map<String, Constants.SortOrder> sortInstructions = Maps.newHashMap();
-    Map<String, AbstractFilterInstruction> filterInstructions = Maps.newHashMap();
-    fieldsToMatch.put(TYPE_FIELDNAME, Collections.singletonList(EVENT_TYPE));
-    sortInstructions.put(DATE_FIELDNAME, Constants.SortOrder.DESC);
-    ZonedDateTime now = ZonedDateTime.now();
-    ZonedDateTime eventFeedbackThresholdDate = now.minusDays(EMAIL_EVENT_FEEDBACK_DAYS_AGO);
-
-    DateRangeFilterInstruction eventsWithinFeedbackDateRange = new DateRangeFilterInstruction(
-        eventFeedbackThresholdDate.toInstant(), Instant.now());
-    filterInstructions.put(DATE_FIELDNAME, eventsWithinFeedbackDateRange);
+    log.info("Starting feedback email processing...");
 
     try {
-      ResultsWrapper<ContentDTO> findByFieldNames = this.contentManager.findByFieldNames(
-          ContentService.generateDefaultFieldToMatch(fieldsToMatch), startIndex, DEFAULT_MAX_WINDOW_SIZE,
-          sortInstructions,
-          filterInstructions);
-      for (ContentDTO contentResult : findByFieldNames.getResults()) {
-        if (contentResult instanceof IsaacEventPageDTO event) {
-          // Skip sending emails for cancelled events
-          if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
-            continue;
-          }
-          // New logic for sending survey email
-          String surveyUrl = event.getEventSurvey();
-          String surveyTitle = event.getEventSurveyTitle();
+      Instant thresholdDate = Instant.now().minus(EMAIL_EVENT_FEEDBACK_DAYS_AGO, ChronoUnit.DAYS);
+      Map<String, List<String>> fieldsToMatch = Map.of(TYPE_FIELDNAME, List.of(EVENT_TYPE));
+      Map<String, Constants.SortOrder> sortInstructions = Map.of(DATE_FIELDNAME, Constants.SortOrder.DESC);
+      Map<String, AbstractFilterInstruction> filterInstructions = Map.of(
+          DATE_FIELDNAME, new DateRangeFilterInstruction(thresholdDate, Instant.now())
+      );
 
-          // Event end date (if present) is yesterday or before, else event date is yesterday, or before
-          // We want to send the event_feedback email 24 hours after the event
-          boolean endDateYesterday =
-              event.getEndDate() != null && event.getEndDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
-          boolean noEndDateAndStartDateYesterday =
-              event.getEndDate() == null && event.getDate().isBefore(Instant.now().minus(1, ChronoUnit.DAYS));
+      ResultsWrapper<ContentDTO> results = contentManager.findByFieldNames(
+          ContentService.generateDefaultFieldToMatch(fieldsToMatch),
+          0, DEFAULT_MAX_WINDOW_SIZE, sortInstructions, filterInstructions);
 
-          if (endDateYesterday || noEndDateAndStartDateYesterday) {
-            List<ExternalReference> postResources = event.getPostResources();
+      Instant currentTime = Instant.now();
 
-            boolean postResourcesPresent =
-                postResources != null && !postResources.isEmpty() && !postResources.contains(null);
+      AtomicInteger successCount = new AtomicInteger(0);
+      AtomicInteger failureCount = new AtomicInteger(0);
 
-            boolean eventSurveyTitleUrlPresent = (surveyUrl != null && !surveyUrl.isEmpty())
-                && (surveyTitle == null || !surveyTitle.isEmpty());
-
-            if (postResourcesPresent || eventSurveyTitleUrlPresent) {
-              commitAndSendFeedbackEmail(event, "post", "event_feedback");
+      results.getResults().stream()
+          .filter(IsaacEventPageDTO.class::isInstance)
+          .map(IsaacEventPageDTO.class::cast)
+          .filter(event -> !EventStatus.CANCELLED.equals(event.getEventStatus()))
+          .filter(this::hasRequiredResourcesOrSurvey)
+          .forEach(event -> {
+            try {
+              processEvent(event, currentTime);
+              successCount.incrementAndGet();
+            } catch (SegueDatabaseException e) {
+              failureCount.incrementAndGet();
+              log.error("Failed to process event {}: {}", event.getId(), e.getMessage(), e);
             }
-          }
-        }
-      }
-    } catch (ContentManagerException | SegueDatabaseException e) {
-      log.error("Failed to send scheduled event feedback emails: ", e);
+          });
+
+      log.info("Completed feedback email processing: {} successes, {} failures",
+          successCount.get(), failureCount.get());
+
+    } catch (ContentManagerException e) {
+      log.error("Failed to send scheduled event feedback emails", e);
+      throw new RuntimeException("Feedback email processing failed", e);
+    }
+  }
+
+  private boolean hasRequiredResourcesOrSurvey(IsaacEventPageDTO event) {
+    boolean hasResources = Optional.ofNullable(event.getPostResources())
+        .map(resources -> !resources.isEmpty())
+        .orElse(false);
+
+    boolean hasSurvey = Optional.ofNullable(event.getEventSurvey())
+        .filter(url -> !url.trim().isEmpty())
+        .isPresent();
+
+    return hasResources || hasSurvey;
+  }
+
+  private void processEvent(IsaacEventPageDTO event, Instant currentTime) throws SegueDatabaseException {
+    Instant eventEndTime = Optional.ofNullable(event.getEndDate()).orElse(event.getDate());
+    if (eventEndTime == null) return;
+
+    Duration timeSinceEvent = Duration.between(eventEndTime, currentTime);
+
+    // 96+ hours after event
+    if (timeSinceEvent.compareTo(Duration.ofHours(EMAIL_EVENT_SECOND_FEEDBACK_HOURS)) >= 0) {
+      log.info("Sending 96-hour survey email for event: {}", event.getId());
+      commitAndSendFeedbackEmail(event, "survey96", "event_survey");
+      log.info("Sent 96-hour survey email for event: {}", event.getId());
+    }
+    // 24+ hours after event (but less than 96 hours)
+    else if (timeSinceEvent.compareTo(Duration.ofDays(1)) >= 0) {
+      log.info("Sending 24-hour feedback email for event: {}", event.getId());
+      commitAndSendFeedbackEmail(event, "post", "event_feedback");
+      log.info("Sent 24-hour feedback email for event: {}", event.getId());
     }
   }
 }
