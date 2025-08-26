@@ -495,7 +495,6 @@ public class IsaacController extends AbstractIsaacFacade {
   @Path("/users/accept-privacy-policy")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  @GZIP
   @Operation(summary = "Accept the privacy policy for the current user.")
   public Response acceptPrivacyPolicy(@Context final HttpServletRequest request) {
     try {
