@@ -232,7 +232,9 @@ public class EventNotificationEmailManager {
 
   private void processEvent(IsaacEventPageDTO event, Instant currentTime) throws SegueDatabaseException {
     Instant eventEndTime = Optional.ofNullable(event.getEndDate()).orElse(event.getDate());
-    if (eventEndTime == null) return;
+    if (eventEndTime == null) {
+      return;
+    }
 
     Duration timeSinceEvent = Duration.between(eventEndTime, currentTime);
 
@@ -241,9 +243,8 @@ public class EventNotificationEmailManager {
       log.info("Sending 96-hour survey email for event: {}", event.getId());
       commitAndSendFeedbackEmail(event, "survey96", "event_survey");
       log.info("Sent 96-hour survey email for event: {}", event.getId());
-    }
     // 24+ hours after event (but less than 96 hours)
-    else if (timeSinceEvent.compareTo(Duration.ofDays(1)) >= 0) {
+    } else if (timeSinceEvent.compareTo(Duration.ofDays(1)) >= 0) {
       log.info("Sending 24-hour feedback email for event: {}", event.getId());
       commitAndSendFeedbackEmail(event, "post", "event_feedback");
       log.info("Sent 24-hour feedback email for event: {}", event.getId());

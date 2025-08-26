@@ -83,13 +83,6 @@ public class EventNotificationEmailManagerTest {
         new ExternalReference("Resource 2", "https://resource2.com")
     );
     testEvent.setPostResources(mockPostResources);
-
-
-//    when(eventBookingManager.adminGetBookingsByEventId(any()))
-//        .thenReturn(List.of(
-//            TestDataFactory.createBooking(1L, "user1", "1"),
-//            TestDataFactory.createBooking(1L, "user1", "1"))
-//        );
   }
 
   private void setupMockContentManager(List<IsaacEventPageDTO> events) throws Exception {
