@@ -20,7 +20,7 @@ public class TestDataFactory {
     dto.setBookingId(id);
     dto.setUserBooked(createUser(id, userName));
     dto.setEventId(eventId);
-    dto.setBookingDate(Instant.now().minus(id, ChronoUnit.HOURS)); // TODO - Vary booking times
+    dto.setBookingDate(Instant.now().minus(id, ChronoUnit.HOURS));
     dto.setBookingStatus(BookingStatus.CONFIRMED);
     return dto;
   }

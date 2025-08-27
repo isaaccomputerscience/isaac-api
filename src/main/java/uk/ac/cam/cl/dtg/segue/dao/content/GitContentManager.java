@@ -473,7 +473,6 @@ public class GitContentManager {
       @Nullable final Map<String, Constants.SortOrder> sortInstructions,
       @Nullable final Map<String, AbstractFilterInstruction> filterInstructions
   ) throws ContentManagerException {
-    ResultsWrapper<ContentDTO> finalResults;
 
     final Map<String, Constants.SortOrder> newSortInstructions;
     if (null == sortInstructions || sortInstructions.isEmpty()) {
@@ -503,9 +502,7 @@ public class GitContentManager {
 
     List<ContentDTO> contentDTOResults = mapperUtils.getDTOByDOList(result);
 
-    finalResults = new ResultsWrapper<>(contentDTOResults, searchHits.getTotalResults());
-
-    return finalResults;
+    return new ResultsWrapper<>(contentDTOResults, searchHits.getTotalResults());
   }
 
   public final ResultsWrapper<ContentDTO> findByFieldNamesRandomOrder(

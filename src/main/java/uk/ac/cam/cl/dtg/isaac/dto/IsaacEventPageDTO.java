@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
+import lombok.ToString;
 import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.Hub;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ExternalReference;
@@ -40,6 +41,7 @@ import uk.ac.cam.cl.dtg.util.locations.Location;
  * DTO for isaac Event.
  *
  */
+@ToString
 @JsonContentType("isaacEventPage")
 public class IsaacEventPageDTO extends ContentDTO {
   private Instant date;
