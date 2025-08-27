@@ -36,7 +36,7 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 
 @ExtendWith(MockitoExtension.class)
-public class EventNotificationEmailManagerTest {
+class EventNotificationEmailManagerTest {
 
   @Mock
   private GitContentManager contentManager;
@@ -112,7 +112,7 @@ public class EventNotificationEmailManagerTest {
 
       spyEventNotificationEmailManager.sendFeedbackEmails();
 
-      verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail(eq("test-event-1@post"));
+      verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail("test-event-1@post");
       verify(spyEventNotificationEmailManager, atLeastOnce()).sendBookingStatusFilteredEmailForEvent(
           any(IsaacEventPageDTO.class), eq("event_feedback"), eq(List.of(BookingStatus.ATTENDED)));
     }
@@ -136,7 +136,7 @@ public class EventNotificationEmailManagerTest {
 
       spyEventNotificationEmailManager.sendFeedbackEmails();
 
-      verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail(eq("test-event-1@post"));
+      verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail("test-event-1@post");
       verify(spyEventNotificationEmailManager, atLeastOnce()).sendBookingStatusFilteredEmailForEvent(
           any(IsaacEventPageDTO.class), eq("event_feedback"), eq(List.of(BookingStatus.ATTENDED)));
     }
@@ -156,7 +156,7 @@ public class EventNotificationEmailManagerTest {
 
       spyEventNotificationEmailManager.sendFeedbackEmails();
 
-      verify(pgScheduledEmailManager, never()).commitToSchedulingEmail(eq("test-event-1@post"));
+      verify(pgScheduledEmailManager, never()).commitToSchedulingEmail("test-event-1@post");
       verify(spyEventNotificationEmailManager, never()).sendBookingStatusFilteredEmailForEvent(
           any(IsaacEventPageDTO.class), eq("event_feedback"), eq(List.of(BookingStatus.ATTENDED)));
     }
@@ -184,7 +184,7 @@ public class EventNotificationEmailManagerTest {
 
       spyEventNotificationEmailManager.sendFeedbackEmails();
 
-      verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail(eq("test-event-1@survey96"));
+      verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail("test-event-1@survey96");
       verify(spyEventNotificationEmailManager, atLeastOnce()).sendBookingStatusFilteredEmailForEvent(
           any(IsaacEventPageDTO.class), eq("event_survey"), eq(List.of(BookingStatus.ATTENDED)));
     }
@@ -209,7 +209,7 @@ public class EventNotificationEmailManagerTest {
 
       spyEventNotificationEmailManager.sendFeedbackEmails();
 
-      verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail(eq("test-event-1@survey96"));
+      verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail("test-event-1@survey96");
       verify(spyEventNotificationEmailManager, atLeastOnce()).sendBookingStatusFilteredEmailForEvent(
           any(IsaacEventPageDTO.class), eq("event_survey"), eq(List.of(BookingStatus.ATTENDED)));
     }
@@ -264,11 +264,11 @@ public class EventNotificationEmailManagerTest {
 
         spyEventNotificationEmailManager.sendFeedbackEmails();
 
-        verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail(eq("event-24h@post"));
+        verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail("event-24h@post");
         verify(spyEventNotificationEmailManager, atLeastOnce()).sendBookingStatusFilteredEmailForEvent(
             any(IsaacEventPageDTO.class), eq("event_feedback"), eq(List.of(BookingStatus.ATTENDED)));
 
-        verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail(eq("event-96h@survey96"));
+        verify(pgScheduledEmailManager, atLeastOnce()).commitToSchedulingEmail("event-96h@survey96");
         verify(spyEventNotificationEmailManager, atLeastOnce()).sendBookingStatusFilteredEmailForEvent(
             any(IsaacEventPageDTO.class), eq("event_survey"), eq(List.of(BookingStatus.ATTENDED)));
 

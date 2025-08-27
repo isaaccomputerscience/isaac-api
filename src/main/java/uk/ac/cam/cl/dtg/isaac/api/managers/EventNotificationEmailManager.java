@@ -92,9 +92,9 @@ public class EventNotificationEmailManager {
     final List<DetailedEventBookingDTO> eventBookings;
     try {
       eventBookings = bookingManager.adminGetBookingsByEventId(event.getId());
-    } catch (Exception e) {
+    } catch (SegueDatabaseException e) {
       log.error("Failed to retrieve bookings for event ID {}: ", event.getId(), e);
-      throw new RuntimeException("Unable to retrieve event bookings", e);
+      return;
     }
 
     if (eventBookings.isEmpty()) {
@@ -116,7 +116,7 @@ public class EventNotificationEmailManager {
         .toList();
 
     if (userIds.isEmpty()) {
-      log.warn("No users match the specified booking statuses for event ID {}", event.getId());
+      log.error("No users match the specified booking statuses for event ID {}", event.getId());
       return;
     }
 
@@ -264,13 +264,13 @@ public class EventNotificationEmailManager {
             try {
               processEvent(event, currentTime);
               successfulEvents.add(event);
-            } catch (SegueDatabaseException | NoUserException | ContentManagerException e) {
+            } catch (SegueDatabaseException e) {
               failedEvents.add(event);
               log.error("Failed to process event {}: {}", event.getId(), e.getMessage(), e);
             }
           });
     } catch (ContentManagerException e) {
-      log.warn("The following feedback emails processing failed for the following events: " + failedEvents);
+      log.warn("The following feedback emails processing failed for the following events: {}", failedEvents);
     }
     log.info("Completed feedback email processing: {} successes, {} failures",
         successfulEvents.size(), failedEvents.size());
@@ -289,7 +289,7 @@ public class EventNotificationEmailManager {
   }
 
   private void processEvent(IsaacEventPageDTO event, Instant currentTime)
-      throws SegueDatabaseException, NoUserException, ContentManagerException {
+      throws SegueDatabaseException {
     Instant eventEndTime = Optional.ofNullable(event.getEndDate()).orElse(event.getDate());
     if (eventEndTime == null) {
       return;
