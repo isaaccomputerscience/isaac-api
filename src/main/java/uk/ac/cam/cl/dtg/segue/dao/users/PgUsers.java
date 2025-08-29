@@ -697,16 +697,18 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
   }
 
   @Override
-  public void updatePrivacyPolicyAcceptedTime(final RegisteredUser user) throws SegueDatabaseException {
+  public void updatePrivacyPolicyAcceptedTime(final RegisteredUser user, final Instant acceptedTime) throws SegueDatabaseException {
 
     requireNonNull(user);
+    requireNonNull(acceptedTime);
 
     String query = "UPDATE users SET updated_privacy_policy_accepted = ?, last_updated = ? WHERE id = ?";
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query)
     ) {
       Instant now = Instant.now();
-      pst.setTimestamp(1, Timestamp.from(now));
+      Instant privacyPolicyAcceptedTime = acceptedTime.isAfter(now) ? now : acceptedTime;
+      pst.setTimestamp(1, Timestamp.from(privacyPolicyAcceptedTime));
       pst.setTimestamp(2, Timestamp.from(now));
       pst.setLong(3, user.getId());
       pst.execute();

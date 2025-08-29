@@ -16,6 +16,8 @@
 
 package uk.ac.cam.cl.dtg.isaac.api;
 
+import java.time.Instant;
+
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DOCUMENT_PATH_LOG_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacServerLogType;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.SITE_WIDE_SEARCH_VALID_DOC_TYPES;
@@ -86,6 +88,7 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
+
 
 /**
  * Isaac Controller
@@ -496,10 +499,13 @@ public class IsaacController extends AbstractIsaacFacade {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Accept the privacy policy for the current user.")
-  public Response acceptPrivacyPolicy(@Context final HttpServletRequest request) {
+  public Response acceptPrivacyPolicy(@Context final HttpServletRequest request, @QueryParam("privacyPolicyAcceptedTime") String privacyPolicyAcceptedTime) {
+
     try {
       RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
-      userManager.updatePrivacyPolicyAcceptedTime(user);
+      Instant policyAcceptedTime = Instant.ofEpochMilli(Long.parseLong(privacyPolicyAcceptedTime));
+
+      userManager.updatePrivacyPolicyAcceptedTime(user, policyAcceptedTime);
       log.info("User " + user.getEmail() + " accepted privacy policy");
       return Response.ok().build();
     } catch (NoUserLoggedInException e) {
