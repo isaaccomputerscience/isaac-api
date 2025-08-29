@@ -41,7 +41,7 @@ import uk.ac.cam.cl.dtg.util.locations.Location;
  * DTO for isaac Event.
  *
  */
-@ToString
+@ToString(exclude = "location")
 @JsonContentType("isaacEventPage")
 public class IsaacEventPageDTO extends ContentDTO {
   private Instant date;
