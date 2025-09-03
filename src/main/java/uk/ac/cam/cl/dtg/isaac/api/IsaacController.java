@@ -16,8 +16,6 @@
 
 package uk.ac.cam.cl.dtg.isaac.api;
 
-import java.time.Instant;
-
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.DOCUMENT_PATH_LOG_FIELDNAME;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacServerLogType;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.SITE_WIDE_SEARCH_VALID_DOC_TYPES;

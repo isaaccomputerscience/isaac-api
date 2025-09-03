@@ -1,17 +1,17 @@
 package uk.ac.cam.cl.dtg.isaac.service;
 
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import org.easymock.EasyMock;
 import org.easymock.EasyMockExtension;
-import org.easymock.Mock;
+import org.easymock.IMocksControl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,124 +24,177 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserLoggedInException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 @ExtendWith(EasyMockExtension.class)
-public class PrivacyPolicyServiceTest {
+class PrivacyPolicyServiceTest {
 
-  @Mock
-  private UserAccountManager userManager;
+  private IMocksControl control;
+  private HttpServletRequest mockRequest;
+  private PrivacyPolicyRequest mockPrivacyPolicyRequest;
+  private UserAccountManager mockUserManager;
+  private RegisteredUserDTO mockUser;
 
-  @Mock
-  private Clock mockClock;
-
-  @Mock
-  private HttpServletRequest request;
-
-  private PrivacyPolicyService service;
-  private PrivacyPolicyRequest privacyPolicyRequest;
-  private RegisteredUserDTO testUser;
-  private final Instant baseTime = Instant.parse("2023-08-29T12:00:00Z");
+  private PrivacyPolicyService privacyPolicyService;
 
   @BeforeEach
-  public void setUp() {
-    service = new PrivacyPolicyService(userManager, mockClock);
+  void setUp() {
+    control = EasyMock.createControl();
+    mockRequest = control.createMock(HttpServletRequest.class);
+    mockPrivacyPolicyRequest = control.createMock(PrivacyPolicyRequest.class);
+    mockUserManager = control.createMock(UserAccountManager.class);
+    mockUser = control.createMock(RegisteredUserDTO.class);
 
-    privacyPolicyRequest = new PrivacyPolicyRequest();
-    privacyPolicyRequest.setPrivacyPolicyAcceptedTime(baseTime.toEpochMilli());
-
-    testUser = new RegisteredUserDTO();
-    testUser.setEmail("test@example.com");
-
-    expect(mockClock.instant()).andReturn(baseTime).anyTimes();
-    replay(mockClock);
+    privacyPolicyService = new PrivacyPolicyService(mockUserManager);
   }
 
   @Test
-  public void testAcceptPrivacyPolicy_Success() throws Exception {
-    expect(userManager.getCurrentRegisteredUser(request)).andReturn(testUser);
-    userManager.updatePrivacyPolicyAcceptedTime(testUser, baseTime);
-    expectLastCall().once();
+  void acceptPrivacyPolicy_WithValidPastTime_ShouldUseProvidedTime()
+      throws NoUserLoggedInException, SegueDatabaseException, InvalidTimestampException {
 
-    replay(userManager);
+    Instant pastTime = Instant.now().minus(1, ChronoUnit.HOURS);
+    String userEmail = "test@example.com";
 
-    service.acceptPrivacyPolicy(request, privacyPolicyRequest);
+    expect(mockUserManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockUser);
+    expect(mockPrivacyPolicyRequest.getPrivacyPolicyAcceptedTimeInstant()).andReturn(pastTime);
+    expect(mockUser.getEmail()).andReturn(userEmail);
 
-    verify(userManager);
+    mockUserManager.updatePrivacyPolicyAcceptedTime(mockUser, pastTime);
+    expectLastCall();
+
+    expectLastCall();
+
+    control.replay();
+
+    privacyPolicyService.acceptPrivacyPolicy(mockRequest, mockPrivacyPolicyRequest);
+
+    control.verify();
   }
 
   @Test
-  public void testAcceptPrivacyPolicy_TimestampWithinTolerance() throws Exception {
-    // Timestamp 20 seconds in the future (within 30s tolerance)
-    Instant futureTime = baseTime.plusSeconds(20);
-    privacyPolicyRequest.setPrivacyPolicyAcceptedTime(futureTime.toEpochMilli());
+  void acceptPrivacyPolicy_WithFutureTime_ShouldUseCurrentTime()
+      throws NoUserLoggedInException, SegueDatabaseException, InvalidTimestampException {
 
-    expect(userManager.getCurrentRegisteredUser(request)).andReturn(testUser);
-    userManager.updatePrivacyPolicyAcceptedTime(testUser, futureTime);
-    expectLastCall().once();
+    Instant futureTime = Instant.now().plus(1, ChronoUnit.HOURS);
+    String userEmail = "test@example.com";
 
-    replay(userManager);
+    expect(mockUserManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockUser);
+    expect(mockPrivacyPolicyRequest.getPrivacyPolicyAcceptedTimeInstant()).andReturn(futureTime);
+    expect(mockUser.getEmail()).andReturn(userEmail);
 
-    service.acceptPrivacyPolicy(request, privacyPolicyRequest);
-    verify(userManager);
+    mockUserManager.updatePrivacyPolicyAcceptedTime(eq(mockUser), anyObject(Instant.class));
+    expectLastCall();
+
+    expectLastCall();
+
+    control.replay();
+
+    privacyPolicyService.acceptPrivacyPolicy(mockRequest, mockPrivacyPolicyRequest);
+
+    control.verify();
   }
 
   @Test
-  public void testAcceptPrivacyPolicy_TimestampTooFarInFuture() throws Exception {
-    // Timestamp 60 seconds in the future (outside 30s tolerance)
-    Instant farFutureTime = baseTime.plusSeconds(60);
-    privacyPolicyRequest.setPrivacyPolicyAcceptedTime(farFutureTime.toEpochMilli());
+  void acceptPrivacyPolicy_WithCurrentTime_ShouldUseProvidedTime()
+      throws NoUserLoggedInException, SegueDatabaseException, InvalidTimestampException {
 
-    expect(userManager.getCurrentRegisteredUser(request)).andReturn(testUser);
-    replay(userManager);
+    Instant currentTime = Instant.now();
+    String userEmail = "test@example.com";
 
-    InvalidTimestampException exception = assertThrows(InvalidTimestampException.class, () -> {
-      service.acceptPrivacyPolicy(request, privacyPolicyRequest);
-    });
+    expect(mockUserManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockUser);
+    expect(mockPrivacyPolicyRequest.getPrivacyPolicyAcceptedTimeInstant()).andReturn(currentTime);
+    expect(mockUser.getEmail()).andReturn(userEmail);
 
-    assertTrue(exception.getMessage().contains("Timestamp too far from current time"));
-    verify(userManager);
+    mockUserManager.updatePrivacyPolicyAcceptedTime(mockUser, currentTime);
+    expectLastCall();
+
+    expectLastCall();
+
+    control.replay();
+
+    privacyPolicyService.acceptPrivacyPolicy(mockRequest, mockPrivacyPolicyRequest);
+
+    control.verify();
   }
 
   @Test
-  public void testAcceptPrivacyPolicy_TimestampTooFarInPast() throws Exception {
-    Instant pastTime = baseTime.minusSeconds(45);
-    privacyPolicyRequest.setPrivacyPolicyAcceptedTime(pastTime.toEpochMilli());
+  void acceptPrivacyPolicy_WhenNoUserLoggedIn_ShouldThrowException()
+      throws NoUserLoggedInException {
 
-    expect(userManager.getCurrentRegisteredUser(request)).andReturn(testUser);
-    replay(userManager);
-
-    InvalidTimestampException exception = assertThrows(InvalidTimestampException.class, () -> {
-      service.acceptPrivacyPolicy(request, privacyPolicyRequest);
-    });
-
-    assertTrue(exception.getMessage().contains("Timestamp too far from current time"));
-    verify(userManager);
-  }
-
-  @Test
-  public void testAcceptPrivacyPolicy_NoUserLoggedIn() throws Exception {
-    expect(userManager.getCurrentRegisteredUser(request))
+    expect(mockUserManager.getCurrentRegisteredUser(mockRequest))
         .andThrow(new NoUserLoggedInException());
 
-    replay(userManager);
+    control.replay();
 
     assertThrows(NoUserLoggedInException.class, () -> {
-      service.acceptPrivacyPolicy(request, privacyPolicyRequest);
+      privacyPolicyService.acceptPrivacyPolicy(mockRequest, mockPrivacyPolicyRequest);
     });
 
-    verify(userManager);
+    control.verify();
   }
 
   @Test
-  public void testAcceptPrivacyPolicy_DatabaseError() throws Exception {
-    expect(userManager.getCurrentRegisteredUser(request)).andReturn(testUser);
-    userManager.updatePrivacyPolicyAcceptedTime(testUser, baseTime);
-    expectLastCall().andThrow(new SegueDatabaseException("Database connection failed"));
+  void acceptPrivacyPolicy_WhenDatabaseException_ShouldThrowException()
+      throws NoUserLoggedInException, SegueDatabaseException, InvalidTimestampException {
 
-    replay(userManager);
+    // Arrange
+    Instant pastTime = Instant.now().minus(1, ChronoUnit.HOURS);
+
+    expect(mockUserManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockUser);
+    expect(mockPrivacyPolicyRequest.getPrivacyPolicyAcceptedTimeInstant()).andReturn(pastTime);
+
+    mockUserManager.updatePrivacyPolicyAcceptedTime(mockUser, pastTime);
+    expectLastCall().andThrow(new SegueDatabaseException("Database error"));
+
+    control.replay();
 
     assertThrows(SegueDatabaseException.class, () -> {
-      service.acceptPrivacyPolicy(request, privacyPolicyRequest);
+      privacyPolicyService.acceptPrivacyPolicy(mockRequest, mockPrivacyPolicyRequest);
     });
 
-    verify(userManager);
+    control.verify();
+  }
+
+  @Test
+  void acceptPrivacyPolicy_LogsCorrectInformation()
+      throws NoUserLoggedInException, SegueDatabaseException, InvalidTimestampException {
+
+    Instant pastTime = Instant.now().minus(30, ChronoUnit.MINUTES);
+    String userEmail = "user@test.com";
+
+    expect(mockUserManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockUser);
+    expect(mockPrivacyPolicyRequest.getPrivacyPolicyAcceptedTimeInstant()).andReturn(pastTime);
+    expect(mockUser.getEmail()).andReturn(userEmail);
+
+    mockUserManager.updatePrivacyPolicyAcceptedTime(mockUser, pastTime);
+    expectLastCall();
+
+    expectLastCall();
+
+    control.replay();
+
+    privacyPolicyService.acceptPrivacyPolicy(mockRequest, mockPrivacyPolicyRequest);
+
+    control.verify();
+  }
+
+  @Test
+  void acceptPrivacyPolicy_WithBoundaryTime_JustBeforeNow_ShouldUseProvidedTime()
+      throws NoUserLoggedInException, SegueDatabaseException, InvalidTimestampException {
+
+    Instant almostNow = Instant.now().minus(1, ChronoUnit.MILLIS);
+    String userEmail = "boundary@example.com";
+
+    expect(mockUserManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockUser);
+    expect(mockPrivacyPolicyRequest.getPrivacyPolicyAcceptedTimeInstant()).andReturn(almostNow);
+    expect(mockUser.getEmail()).andReturn(userEmail);
+
+    mockUserManager.updatePrivacyPolicyAcceptedTime(mockUser, almostNow);
+    expectLastCall();
+
+    expectLastCall();
+
+    control.replay();
+
+    privacyPolicyService.acceptPrivacyPolicy(mockRequest, mockPrivacyPolicyRequest);
+
+    control.verify();
   }
 }
