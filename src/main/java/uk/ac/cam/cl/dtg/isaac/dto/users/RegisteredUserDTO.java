@@ -242,7 +242,9 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
   // Object Methods - Using modern Java and Objects utility
   @Override
   public boolean equals(final Object obj) {
-    if (this == obj) return true;
+    if (this == obj) {
+      return true;
+    }
     if (!(obj instanceof RegisteredUserDTO other)) return false;
     return Objects.equals(id, other.id);
   }
@@ -257,7 +259,9 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
    * Optimized using Objects.equals for cleaner null handling.
    */
   public boolean strictEquals(final Object obj) {
-    if (this == obj) return true;
+    if (this == obj) {
+      return true;
+    }
     if (!(obj instanceof RegisteredUserDTO other)) return false;
 
     return Objects.equals(id, other.id) &&
@@ -283,11 +287,11 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
   @Override
   public String toString() {
     return String.format(
-        "RegisteredUserDTO{id=%d, givenName='%s', familyName='%s', email='%s', role=%s, " +
-            "dateOfBirth=%s, gender=%s, registrationDate=%s, schoolId='%s', schoolOther='%s', " +
-            "emailVerificationStatus=%s, teacherPending=%s, firstLogin=%s, lastUpdated=%s, " +
-            "privacyPolicyAcceptedTime=%s, lastSeen=%s, registeredContexts=%s, " +
-            "registeredContextsLastConfirmed=%s}",
+        "RegisteredUserDTO{id=%d, givenName='%s', familyName='%s', email='%s', role=%s, "
+            + "dateOfBirth=%s, gender=%s, registrationDate=%s, schoolId='%s', schoolOther='%s', "
+            + "emailVerificationStatus=%s, teacherPending=%s, firstLogin=%s, lastUpdated=%s, "
+            + "privacyPolicyAcceptedTime=%s, lastSeen=%s, registeredContexts=%s, "
+            + "registeredContextsLastConfirmed=%s}",
         id, givenName, familyName, email, role, dateOfBirth, gender, registrationDate,
         schoolId, schoolOther, emailVerificationStatus, teacherPending, firstLogin,
         lastUpdated, privacyPolicyAcceptedTime, lastSeen, registeredContexts,

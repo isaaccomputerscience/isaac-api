@@ -259,7 +259,9 @@ public class RegisteredUser extends AbstractSegueUser {
 
   @Override
   public boolean equals(final Object obj) {
-    if (this == obj) return true;
+    if (this == obj) {
+      return true;
+    }
     if (!(obj instanceof RegisteredUser other)) return false;
     return Objects.equals(id, other.id);
   }
@@ -272,11 +274,11 @@ public class RegisteredUser extends AbstractSegueUser {
   @Override
   public String toString() {
     return String.format(
-        "RegisteredUser{id=%d, givenName='%s', familyName='%s', email='%s', role=%s, " +
-            "dateOfBirth=%s, gender=%s, registrationDate=%s, schoolId='%s', schoolOther='%s', " +
-            "emailVerificationToken='%s', emailToVerify='%s', emailVerificationStatus=%s, " +
-            "teacherPending=%s, lastUpdated=%s, privacyPolicyAcceptedTime=%s, lastSeen=%s, " +
-            "registeredContexts=%s, registeredContextsLastConfirmed=%s}",
+        "RegisteredUser{id=%d, givenName='%s', familyName='%s', email='%s', role=%s, "
+            + "dateOfBirth=%s, gender=%s, registrationDate=%s, schoolId='%s', schoolOther='%s', "
+            + "emailVerificationToken='%s', emailToVerify='%s', emailVerificationStatus=%s, "
+            + "teacherPending=%s, lastUpdated=%s, privacyPolicyAcceptedTime=%s, lastSeen=%s, "
+            + "registeredContexts=%s, registeredContextsLastConfirmed=%s}",
         id, givenName, familyName, email, role, dateOfBirth, gender, registrationDate,
         schoolId, schoolOther, emailVerificationToken, emailToVerify, emailVerificationStatus,
         teacherPending, lastUpdated, privacyPolicyAcceptedTime, lastSeen,
