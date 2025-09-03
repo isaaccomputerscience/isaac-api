@@ -297,7 +297,12 @@ public class EventNotificationEmailManager {
 
   private void processEvent(IsaacEventPageDTO event, Instant currentTime)
       throws SegueDatabaseException {
-    log.info("Processing event: " + event.getId() +" " + event.getEventSurveyTitle() + " : " + event.getTitle());
+
+    log.info("Processing event: "
+        + event.getId()
+        + " " + event.getEventSurveyTitle()
+        + " : " + event.getTitle());
+
     Instant eventEndTime = Optional.ofNullable(event.getEndDate()).orElse(event.getDate());
     if (eventEndTime == null) {
       return;
