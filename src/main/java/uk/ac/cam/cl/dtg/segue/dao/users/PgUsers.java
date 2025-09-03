@@ -697,7 +697,8 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
   }
 
   @Override
-  public void updatePrivacyPolicyAcceptedTime(final RegisteredUser user, final Instant acceptedTime) throws SegueDatabaseException {
+  public void updatePrivacyPolicyAcceptedTime(final RegisteredUser user, final Instant acceptedTime)
+      throws SegueDatabaseException {
 
     requireNonNull(user);
     requireNonNull(acceptedTime);

@@ -1991,7 +1991,8 @@ public class UserAccountManager implements IUserAccountManager {
    * @param userDTO of interest
    * @throws SegueDatabaseException if an error occurs with the update.
    */
-  public void updatePrivacyPolicyAcceptedTime(final RegisteredUserDTO userDTO, Instant privacyPolicyAcceptedTime) throws SegueDatabaseException {
+  public void updatePrivacyPolicyAcceptedTime(final RegisteredUserDTO userDTO, Instant privacyPolicyAcceptedTime)
+      throws SegueDatabaseException {
     RegisteredUser user = findUserById(userDTO.getId());
     this.database.updatePrivacyPolicyAcceptedTime(user, privacyPolicyAcceptedTime);
   }
