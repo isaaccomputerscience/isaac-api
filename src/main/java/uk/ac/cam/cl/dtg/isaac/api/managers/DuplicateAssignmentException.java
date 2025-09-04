@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.cam.cl.dtg.isaac.api.exceptions;
+package uk.ac.cam.cl.dtg.isaac.api.managers;
 
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
