@@ -53,7 +53,6 @@ public class UserSummaryForAdminUsersDTO extends UserSummaryWithEmailAddressDTO 
     this.lastUpdated = lastUpdated;
   }
 
-
   /**
    * Gets the lastSeen.
    *

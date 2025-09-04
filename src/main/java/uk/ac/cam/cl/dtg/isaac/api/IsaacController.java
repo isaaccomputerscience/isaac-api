@@ -43,10 +43,8 @@ import com.google.inject.name.Named;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -67,10 +65,7 @@ import java.util.concurrent.TimeUnit;
 import org.jboss.resteasy.annotations.GZIP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.cam.cl.dtg.isaac.api.exceptions.InvalidTimestampException;
-import uk.ac.cam.cl.dtg.isaac.api.requests.PrivacyPolicyRequest;
 import uk.ac.cam.cl.dtg.isaac.api.services.ContentSummarizerService;
-import uk.ac.cam.cl.dtg.isaac.api.services.PrivacyPolicyService;
 import uk.ac.cam.cl.dtg.isaac.dos.IUserStreaksManager;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
@@ -89,7 +84,6 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
-
 
 /**
  * Isaac Controller
@@ -113,7 +107,6 @@ public class IsaacController extends AbstractIsaacFacade {
   private final UserBadgeManager userBadgeManager;
   private final IUserStreaksManager userStreaksManager;
   private final ContentSummarizerService contentSummarizerService;
-  private final PrivacyPolicyService privacyPolicyService;
 
   private static long lastQuestionCount = 0L;
 
@@ -156,8 +149,7 @@ public class IsaacController extends AbstractIsaacFacade {
                          final GitContentManager contentManager, final UserAssociationManager associationManager,
                          @Named(CONTENT_INDEX) final String contentIndex, final IUserStreaksManager userStreaksManager,
                          final UserBadgeManager userBadgeManager,
-                         final ContentSummarizerService contentSummarizerService,
-                         final PrivacyPolicyService privacyPolicyService) {
+                         final ContentSummarizerService contentSummarizerService) {
     super(propertiesLoader, logManager);
     this.statsManager = statsManager;
     this.userManager = userManager;
@@ -167,7 +159,6 @@ public class IsaacController extends AbstractIsaacFacade {
     this.userBadgeManager = userBadgeManager;
     this.userStreaksManager = userStreaksManager;
     this.contentSummarizerService = contentSummarizerService;
-    this.privacyPolicyService = privacyPolicyService;
   }
 
   /**
@@ -493,30 +484,6 @@ public class IsaacController extends AbstractIsaacFacade {
     );
 
     return Response.ok(userSnapshot).cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
-  }
-
-  @POST
-  @Path("/users/accept-privacy-policy")
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(MediaType.APPLICATION_JSON)
-  @Operation(summary = "Accept the privacy policy for the current user.")
-  public Response acceptPrivacyPolicy(@Context final HttpServletRequest request,
-                                      PrivacyPolicyRequest privacyPolicyRequest) {
-    try {
-      privacyPolicyService.acceptPrivacyPolicy(request, privacyPolicyRequest);
-      return Response.ok().build();
-
-    } catch (NoUserLoggedInException e) {
-      return SegueErrorResponse.getNotLoggedInResponse();
-
-    } catch (InvalidTimestampException e) {
-      log.warn("Invalid timestamp provided: {}", e.getMessage());
-      return new SegueErrorResponse(Status.BAD_REQUEST, "Invalid timestamp: " + e.getMessage()).toResponse();
-
-    } catch (SegueDatabaseException e) {
-      log.error("Database error during privacy policy acceptance", e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, "Database error").toResponse();
-    }
   }
 
   /**

@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.dtg.isaac.api.exceptions;
+package uk.ac.cam.cl.dtg.isaac.api.managers;
 
 /**
  * EventCancelledException.
