@@ -293,10 +293,10 @@ public class EventNotificationEmailManager {
         .isPresent();
 
     if (hasResources) {
-      log.info(event.getEventSurveyTitle() + ": has resources!");
+      log.info("{} : has resources!", event.getEventSurveyTitle());
     }
     if (hasSurvey) {
-      log.info(event.getEventSurveyTitle() + ": has survey!");
+      log.info("{} : has survey!", event.getEventSurveyTitle());
     }
 
     return hasResources || hasSurvey;
@@ -309,12 +309,14 @@ public class EventNotificationEmailManager {
 
     Instant eventEndTime = Optional.ofNullable(event.getEndDate()).orElse(event.getDate());
     if (eventEndTime == null) {
-      log.warn("Processing event {} {} {} doesn't have an event date!", event.getId(), event.getEventSurveyTitle(), event.getTitle());
+      log.warn("Processing event {} {} {} doesn't have an event date!",
+          event.getId(), event.getEventSurveyTitle(), event.getTitle());
       return;
     }
 
     Duration timeSinceEvent = Duration.between(eventEndTime, currentTime);
-    log.info("Processing event {} {} with date {} and time since event {}", event.getEventSurveyTitle(), event.getTitle(), eventEndTime, timeSinceEvent);
+    log.info("Processing event {} {} with date {} and time since event {}",
+        event.getEventSurveyTitle(), event.getTitle(), eventEndTime, timeSinceEvent);
 
     // 96+ hours after event
     if (timeSinceEvent.compareTo(Duration.ofHours(EMAIL_EVENT_SECOND_FEEDBACK_HOURS)) >= 0) {
