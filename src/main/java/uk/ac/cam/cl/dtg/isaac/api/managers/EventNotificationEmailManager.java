@@ -292,31 +292,42 @@ public class EventNotificationEmailManager {
         .filter(url -> !url.trim().isEmpty())
         .isPresent();
 
+    if (hasResources) {
+      log.info(event.getEventSurveyTitle() + ": has resources!");
+    }
+    if (hasSurvey) {
+      log.info(event.getEventSurveyTitle() + ": has survey!");
+    }
+
     return hasResources || hasSurvey;
   }
 
   private void processEvent(IsaacEventPageDTO event, Instant currentTime)
       throws SegueDatabaseException {
 
-    log.info("Processing event: {} {} {}", event.getId(), event.getEventSurveyTitle(), event.getTitle());
+    log.info("Processing event {} {} {}", event.getId(), event.getEventSurveyTitle(), event.getTitle());
 
     Instant eventEndTime = Optional.ofNullable(event.getEndDate()).orElse(event.getDate());
     if (eventEndTime == null) {
+      log.warn("Processing event {} {} {} doesn't have an event date!", event.getId(), event.getEventSurveyTitle(), event.getTitle());
       return;
     }
 
     Duration timeSinceEvent = Duration.between(eventEndTime, currentTime);
+    log.info("Processing event {} {} with date {} and time since event {}", event.getEventSurveyTitle(), event.getTitle(), eventEndTime, timeSinceEvent);
 
     // 96+ hours after event
     if (timeSinceEvent.compareTo(Duration.ofHours(EMAIL_EVENT_SECOND_FEEDBACK_HOURS)) >= 0) {
-      log.info("Sending 96-hour survey email for event: {}", event.getId());
+      log.info("Sending 96-hour survey email for event {}", event.getId());
       commitAndSendFeedbackEmail(event, "survey96", "event_survey");
-      log.info("Sent 96-hour survey email for event: {}", event.getId());
+      log.info("Sent 96-hour survey email for event {}", event.getId());
       // 24+ hours after event (but less than 96 hours)
     } else if (timeSinceEvent.compareTo(Duration.ofDays(1)) >= 0) {
-      log.info("Sending 24-hour feedback email for event: {}", event.getId());
+      log.info("Sending 24-hour feedback email for event {}", event.getId());
       commitAndSendFeedbackEmail(event, "post", "event_feedback");
-      log.info("Sent 24-hour feedback email for event: {}", event.getId());
+      log.info("Sent 24-hour feedback email for event {}", event.getId());
+    } else {
+      log.info("Event {} is less then 24 hours!", event.getId());
     }
   }
 }
