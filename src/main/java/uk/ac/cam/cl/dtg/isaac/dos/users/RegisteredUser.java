@@ -20,6 +20,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.UserUtils;
+import uk.ac.cam.cl.dtg.isaac.mappers.RegisteredUserMapper;
 
 /**
  * Data Object to represent a user of the system. This object will be persisted in the database.
@@ -45,9 +48,6 @@ public class RegisteredUser extends AbstractSegueUser {
   private Instant lastSeen;
   private Instant privacyPolicyAcceptedTime;
 
-  /**
-   * Full constructor for the User object.
-   */
   @JsonCreator
   public RegisteredUser(
       @JsonProperty("id") final Long id,
@@ -82,179 +82,95 @@ public class RegisteredUser extends AbstractSegueUser {
     setEmailToVerify(emailToVerify);
   }
 
-  /**
-   * Default constructor required for Jackson.
-   */
-  public RegisteredUser() {
-  }
+  public RegisteredUser() {}
+  public Long getId() { return id; }
+  public void setId(final Long id) { this.id = id; }
 
-  // ID Management
   @JsonProperty("_id")
   @Deprecated
-  public Long getLegacyId() {
-    return this.id;
-  }
-
-  @JsonProperty("id")
-  public Long getId() {
-    return id;
-  }
+  public Long getLegacyId() { return this.id; }
 
   @JsonProperty("_id")
-  public void setId(final Long id) {
-    this.id = id;
-  }
+  public void setId2(final Long id) { this.id = id; }
 
-  public String getGivenName() {
-    return givenName;
-  }
+  public String getGivenName() { return givenName; }
+  public void setGivenName(final String givenName) { this.givenName = givenName; }
 
-  public void setGivenName(final String givenName) {
-    this.givenName = givenName;
-  }
+  public String getFamilyName() { return familyName; }
+  public void setFamilyName(final String familyName) { this.familyName = familyName; }
 
-  public String getFamilyName() {
-    return familyName;
-  }
-
-  public void setFamilyName(final String familyName) {
-    this.familyName = familyName;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
+  public String getEmail() { return email; }
   public void setEmail(final String email) {
-    this.email = trimIfNotNull(email);
+    this.email = UserUtils.trimIfNotNull(email);
   }
 
-  public Role getRole() {
-    return role;
-  }
+  public Role getRole() { return role; }
+  public void setRole(final Role role) { this.role = role; }
 
-  public void setRole(final Role role) {
-    this.role = role;
-  }
+  public Instant getDateOfBirth() { return dateOfBirth; }
+  public void setDateOfBirth(final Instant dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
-  public Instant getDateOfBirth() {
-    return dateOfBirth;
-  }
+  public Gender getGender() { return gender; }
+  public void setGender(final Gender gender) { this.gender = gender; }
 
-  public void setDateOfBirth(final Instant dateOfBirth) {
-    this.dateOfBirth = dateOfBirth;
-  }
+  public Instant getRegistrationDate() { return registrationDate; }
+  public void setRegistrationDate(final Instant registrationDate) { this.registrationDate = registrationDate; }
 
-  public Gender getGender() {
-    return gender;
-  }
+  public String getSchoolId() { return schoolId; }
+  public void setSchoolId(final String schoolId) { this.schoolId = schoolId; }
 
-  public void setGender(final Gender gender) {
-    this.gender = gender;
-  }
+  public String getSchoolOther() { return schoolOther; }
+  public void setSchoolOther(final String schoolOther) { this.schoolOther = schoolOther; }
 
-  public Instant getRegistrationDate() {
-    return registrationDate;
-  }
-
-  public void setRegistrationDate(final Instant registrationDate) {
-    this.registrationDate = registrationDate;
-  }
-
-  public String getSchoolId() {
-    return schoolId;
-  }
-
-  public void setSchoolId(final String schoolId) {
-    this.schoolId = schoolId;
-  }
-
-  public String getSchoolOther() {
-    return schoolOther;
-  }
-
-  public void setSchoolOther(final String schoolOther) {
-    this.schoolOther = schoolOther;
-  }
-
-  public String getEmailToVerify() {
-    return emailToVerify;
-  }
-
+  public String getEmailToVerify() { return emailToVerify; }
   public void setEmailToVerify(final String emailToVerify) {
-    this.emailToVerify = trimIfNotNull(emailToVerify);
+    this.emailToVerify = UserUtils.trimIfNotNull(emailToVerify);
   }
 
-  public String getEmailVerificationToken() {
-    return emailVerificationToken;
-  }
-
+  public String getEmailVerificationToken() { return emailVerificationToken; }
   public void setEmailVerificationToken(final String emailVerificationToken) {
     this.emailVerificationToken = emailVerificationToken;
   }
 
-  public EmailVerificationStatus getEmailVerificationStatus() {
-    return emailVerificationStatus;
-  }
-
+  public EmailVerificationStatus getEmailVerificationStatus() { return emailVerificationStatus; }
   public void setEmailVerificationStatus(final EmailVerificationStatus emailVerificationStatus) {
     this.emailVerificationStatus = emailVerificationStatus;
   }
 
-  public Instant getLastUpdated() {
-    return lastUpdated;
-  }
+  public Instant getLastUpdated() { return lastUpdated; }
+  public void setLastUpdated(final Instant lastUpdated) { this.lastUpdated = lastUpdated; }
 
-  public void setLastUpdated(final Instant lastUpdated) {
-    this.lastUpdated = lastUpdated;
-  }
-
-  public Instant getPrivacyPolicyAcceptedTime() {
-    return privacyPolicyAcceptedTime;
-  }
-
+  public Instant getPrivacyPolicyAcceptedTime() { return privacyPolicyAcceptedTime; }
   public void setPrivacyPolicyAcceptedTime(final Instant privacyPolicyAcceptedTime) {
     this.privacyPolicyAcceptedTime = privacyPolicyAcceptedTime;
   }
 
-  public Instant getLastSeen() {
-    return lastSeen;
-  }
+  public Instant getLastSeen() { return lastSeen; }
+  public void setLastSeen(final Instant lastSeen) { this.lastSeen = lastSeen; }
 
-  public void setLastSeen(final Instant lastSeen) {
-    this.lastSeen = lastSeen;
-  }
+  public Boolean getTeacherPending() { return teacherPending; }
+  public void setTeacherPending(final Boolean teacherPending) { this.teacherPending = teacherPending; }
 
-  public Boolean getTeacherPending() {
-    return teacherPending;
-  }
-
-  public void setTeacherPending(final Boolean teacherPending) {
-    this.teacherPending = teacherPending;
-  }
-
-  public List<UserContext> getRegisteredContexts() {
-    return registeredContexts;
-  }
-
+  public List<UserContext> getRegisteredContexts() { return registeredContexts; }
   public void setRegisteredContexts(final List<UserContext> registeredContexts) {
     this.registeredContexts = registeredContexts;
   }
 
-  public Instant getRegisteredContextsLastConfirmed() {
-    return registeredContextsLastConfirmed;
-  }
-
+  public Instant getRegisteredContextsLastConfirmed() { return registeredContextsLastConfirmed; }
   public void setRegisteredContextsLastConfirmed(final Instant registeredContextsLastConfirmed) {
     this.registeredContextsLastConfirmed = registeredContextsLastConfirmed;
   }
 
-  /**
-   * Utility method to trim strings consistently, handling null values.
-   * Eliminates duplicated trimming logic in email setters.
-   */
-  private String trimIfNotNull(final String value) {
-    return value != null ? value.trim() : null;
+  public RegisteredUserDTO toDto() {
+    return RegisteredUserMapper.INSTANCE.toDto(this);
+  }
+
+  public static RegisteredUser fromDto(RegisteredUserDTO dto) {
+    return RegisteredUserMapper.INSTANCE.toEntity(dto);
+  }
+
+  public void updateFromDto(RegisteredUserDTO dto) {
+    RegisteredUserMapper.INSTANCE.updateEntityFromDto(dto, this);
   }
 
   @Override
@@ -273,16 +189,12 @@ public class RegisteredUser extends AbstractSegueUser {
 
   @Override
   public String toString() {
-    return String.format(
-        "RegisteredUser{id=%d, givenName='%s', familyName='%s', email='%s', role=%s, "
-            + "dateOfBirth=%s, gender=%s, registrationDate=%s, schoolId='%s', schoolOther='%s', "
-            + "emailVerificationToken='%s', emailToVerify='%s', emailVerificationStatus=%s, "
-            + "teacherPending=%s, lastUpdated=%s, privacyPolicyAcceptedTime=%s, lastSeen=%s, "
-            + "registeredContexts=%s, registeredContextsLastConfirmed=%s}",
-        id, givenName, familyName, email, role, dateOfBirth, gender, registrationDate,
-        schoolId, schoolOther, emailVerificationToken, emailToVerify, emailVerificationStatus,
-        teacherPending, lastUpdated, privacyPolicyAcceptedTime, lastSeen,
-        registeredContexts, registeredContextsLastConfirmed
-    );
+    return UserUtils.buildCommonToString("RegisteredUser", id, givenName, familyName,
+        email, role, dateOfBirth, gender, registrationDate,
+        schoolId, schoolOther, emailVerificationStatus,
+        teacherPending, lastUpdated, privacyPolicyAcceptedTime,
+        lastSeen, registeredContexts, registeredContextsLastConfirmed)
+        + String.format(", emailVerificationToken='%s', emailToVerify='%s'}",
+        emailVerificationToken, emailToVerify);
   }
 }

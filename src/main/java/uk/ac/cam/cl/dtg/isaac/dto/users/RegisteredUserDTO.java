@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Objects;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Gender;
+import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
+import uk.ac.cam.cl.dtg.isaac.mappers.RegisteredUserMapper;
 
 /**
  * Data Transfer Object to represent a user of the system. This object will be persisted in the database.
@@ -49,9 +51,6 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
   private EmailVerificationStatus emailVerificationStatus;
   private Boolean teacherPending;
 
-  /**
-   * Full constructor for the User object.
-   */
   @JsonCreator
   public RegisteredUserDTO(
       @JsonProperty("givenName") final String givenName,
@@ -75,18 +74,13 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
     this.teacherPending = teacherPending;
   }
 
-  /**
-   * Default constructor required for Jackson.
-   */
   public RegisteredUserDTO() {
   }
 
-  @JsonProperty("id")
   public Long getId() {
     return id;
   }
 
-  @JsonProperty("id")
   public void setId(final Long id) {
     this.id = id;
   }
@@ -239,7 +233,10 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
     this.registeredContextsLastConfirmed = registeredContextsLastConfirmed;
   }
 
-  // Object Methods - Using modern Java and Objects utility
+  public RegisteredUser toEntity() {
+    return RegisteredUserMapper.INSTANCE.toEntity(this);
+  }
+
   @Override
   public boolean equals(final Object obj) {
     if (this == obj) {
@@ -254,48 +251,13 @@ public class RegisteredUserDTO extends AbstractSegueUserDTO {
     return Objects.hash(id);
   }
 
-  /**
-   * A method that tests if each field in the object is equal to each in the other.
-   * Optimized using Objects.equals for cleaner null handling.
-   */
-  public boolean strictEquals(final Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!(obj instanceof RegisteredUserDTO other)) return false;
-
-    return Objects.equals(id, other.id) &&
-        Objects.equals(dateOfBirth, other.dateOfBirth) &&
-        Objects.equals(email, other.email) &&
-        Objects.equals(emailVerificationStatus, other.emailVerificationStatus) &&
-        Objects.equals(familyName, other.familyName) &&
-        firstLogin == other.firstLogin &&
-        gender == other.gender &&
-        Objects.equals(givenName, other.givenName) &&
-        Objects.equals(lastUpdated, other.lastUpdated) &&
-        Objects.equals(privacyPolicyAcceptedTime, other.privacyPolicyAcceptedTime) &&
-        Objects.equals(registrationDate, other.registrationDate) &&
-        role == other.role &&
-        Objects.equals(schoolId, other.schoolId) &&
-        Objects.equals(schoolOther, other.schoolOther) &&
-        Objects.equals(teacherPending, other.teacherPending) &&
-        Objects.equals(lastSeen, other.lastSeen) &&
-        Objects.equals(registeredContexts, other.registeredContexts) &&
-        Objects.equals(registeredContextsLastConfirmed, other.registeredContextsLastConfirmed);
-  }
-
   @Override
   public String toString() {
-    return String.format(
-        "RegisteredUserDTO{id=%d, givenName='%s', familyName='%s', email='%s', role=%s, "
-            + "dateOfBirth=%s, gender=%s, registrationDate=%s, schoolId='%s', schoolOther='%s', "
-            + "emailVerificationStatus=%s, teacherPending=%s, firstLogin=%s, lastUpdated=%s, "
-            + "privacyPolicyAcceptedTime=%s, lastSeen=%s, registeredContexts=%s, "
-            + "registeredContextsLastConfirmed=%s}",
-        id, givenName, familyName, email, role, dateOfBirth, gender, registrationDate,
-        schoolId, schoolOther, emailVerificationStatus, teacherPending, firstLogin,
-        lastUpdated, privacyPolicyAcceptedTime, lastSeen, registeredContexts,
-        registeredContextsLastConfirmed
-    );
+    return UserUtils.buildCommonToString("RegisteredUserDTO", id, givenName, familyName,
+        email, role, dateOfBirth, gender, registrationDate,
+        schoolId, schoolOther, emailVerificationStatus,
+        teacherPending, lastUpdated, privacyPolicyAcceptedTime,
+        lastSeen, registeredContexts, registeredContextsLastConfirmed)
+        + String.format(", firstLogin=%s}", firstLogin);
   }
 }
