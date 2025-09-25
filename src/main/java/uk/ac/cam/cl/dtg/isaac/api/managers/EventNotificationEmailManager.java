@@ -125,7 +125,7 @@ public class EventNotificationEmailManager {
     try {
       emailTemplate = emailManager.getEmailTemplateDTO(templateId);
     } catch (ContentManagerException | ResourceNotFoundException e) {
-      log.error("Failed to retrieve email template with ID {}: ", templateId, e);
+      log.error("Failed to retrieve email template with ID {} : {}", templateId, e);
       return;
     }
 
@@ -321,7 +321,7 @@ public class EventNotificationEmailManager {
     // 96+ hours after event
     if (timeSinceEvent.compareTo(Duration.ofHours(EMAIL_EVENT_SECOND_FEEDBACK_HOURS)) >= 0) {
       log.info("Sending 96-hour survey email for event {}", event.getId());
-      commitAndSendFeedbackEmail(event, "survey96", "event_survey");
+      commitAndSendFeedbackEmail(event, "survey96", "event_feedback");
       log.info("Sent 96-hour survey email for event {}", event.getId());
       // 24+ hours after event (but less than 96 hours)
     } else if (timeSinceEvent.compareTo(Duration.ofDays(1)) >= 0) {

@@ -215,7 +215,7 @@ class EventNotificationEmailManagerTest {
 
       partialMock.sendBookingStatusFilteredEmailForEvent(
           anyObject(IsaacEventPageDTO.class),
-          eq("event_survey"),
+          eq("event_feedback"),
           eq(List.of(BookingStatus.ATTENDED))
       );
       expectLastCall().atLeastOnce();
@@ -253,7 +253,7 @@ class EventNotificationEmailManagerTest {
 
       partialMock.sendBookingStatusFilteredEmailForEvent(
           anyObject(IsaacEventPageDTO.class),
-          eq("event_survey"),
+          eq("event_feedback"),
           eq(List.of(BookingStatus.ATTENDED))
       );
       expectLastCall().atLeastOnce();
@@ -330,13 +330,6 @@ class EventNotificationEmailManagerTest {
         partialMock.sendBookingStatusFilteredEmailForEvent(
             anyObject(IsaacEventPageDTO.class),
             eq("event_feedback"),
-            eq(List.of(BookingStatus.ATTENDED))
-        );
-        expectLastCall().atLeastOnce();
-
-        partialMock.sendBookingStatusFilteredEmailForEvent(
-            anyObject(IsaacEventPageDTO.class),
-            eq("event_survey"),
             eq(List.of(BookingStatus.ATTENDED))
         );
         expectLastCall().atLeastOnce();
