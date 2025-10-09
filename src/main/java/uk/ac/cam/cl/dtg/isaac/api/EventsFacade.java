@@ -990,8 +990,6 @@ public class EventsFacade extends AbstractIsaacFacade {
                                                final CompetitionEntryDTO entryDTO) {
     RegisteredUserDTO reservingUser;
     IsaacEventPageDTO event;
-    Map<String, String> additionalInformation = new HashMap<>();
-
 
     try {
       event = this.getRawEventDTOById(eventId);
@@ -1005,16 +1003,21 @@ public class EventsFacade extends AbstractIsaacFacade {
       return new SegueErrorResponse(Status.FORBIDDEN, "This event does not accept group bookings.").toResponse();
     }
 
+    if (entryDTO.getEntrantIds() == null || entryDTO.getEntrantIds().isEmpty()) {
+      return new SegueErrorResponse(Status.BAD_REQUEST,
+          "At least one student must be selected for competition entry.")
+          .toResponse();
+    }
+
+    if (entryDTO.getEntrantIds().size() > event.getGroupReservationLimit()) {
+      return new SegueErrorResponse(Status.BAD_REQUEST,
+          "Competition entries are limited to a maximum of " + entryDTO.getEntrantIds().size() + " students.")
+          .toResponse();
+    }
+
     List<RegisteredUserDTO> usersToReserve = Lists.newArrayList();
     try {
       reservingUser = userManager.getCurrentRegisteredUser(request);
-      additionalInformation.put("submissionURL", entryDTO.getSubmissionURL());
-      additionalInformation.put("groupName", entryDTO.getGroupName());
-      additionalInformation.put("teacherName", reservingUser.getGivenName() + " " + reservingUser.getFamilyName());
-      additionalInformation.put("teacherEmail", reservingUser.getEmail());
-      additionalInformation.put("teacherId", reservingUser.getId().toString());
-      additionalInformation.put("school", reservingUser.getSchoolId());
-      additionalInformation.put("schoolName", reservingUser.getSchoolOther());
 
       // Tutors cannot yet manage event bookings for their tutees, so shouldn't be added to this list
       if (!Arrays.asList(Role.TEACHER, Role.EVENT_LEADER, Role.EVENT_MANAGER, Role.ADMIN)
@@ -1026,20 +1029,65 @@ public class EventsFacade extends AbstractIsaacFacade {
       // Enforce permission
       for (Long userId : entryDTO.getEntrantIds()) {
         RegisteredUserDTO userToReserve = userManager.getUserDTOById(userId);
-        if (userAssociationManager.hasPermission(reservingUser, userToReserve)) {
-          usersToReserve.add(userToReserve);
-          BookingStatus status = bookingManager.getBookingStatus(event.getId(), userToReserve.getId());
-          if (null != status) {
-            bookingManager.deleteBooking(event, userToReserve);
-          }
-          bookings.add(
-              bookingManager.createBooking(event, userToReserve, additionalInformation, BookingStatus.CONFIRMED)
-          );
-        } else {
+
+        if (!userAssociationManager.hasPermission(reservingUser, userToReserve)) {
           return new SegueErrorResponse(Status.FORBIDDEN,
               "You do not have permission to book or reserve some of these users onto this event.")
               .toResponse();
         }
+
+        // Private event is considered as competition event which allows multiple entries
+        if(!event.isPrivateEvent()) {
+          // Check if student already has a booking and delete it
+          BookingStatus status = bookingManager.getBookingStatus(event.getId(), userToReserve.getId());
+          if (null != status) {
+            bookingManager.deleteBooking(event, userToReserve);
+          }
+        }
+
+        usersToReserve.add(userToReserve);
+
+        Map<String, String> additionalInformation = new HashMap<>();
+
+        additionalInformation.put("submissionURL", entryDTO.getSubmissionURL());
+        additionalInformation.put("groupName", entryDTO.getGroupName());
+        additionalInformation.put("projectTitle", entryDTO.getProjectTitle());
+        additionalInformation.put("student_count", String.valueOf(entryDTO.getEntrantIds().size()));
+
+        additionalInformation.put("teacherName", reservingUser.getGivenName() + " " + reservingUser.getFamilyName());
+        additionalInformation.put("teacherEmail", reservingUser.getEmail());
+        additionalInformation.put("teacherId", reservingUser.getId().toString());
+        additionalInformation.put("teacherSchoolId", reservingUser.getSchoolId() != null ? reservingUser.getSchoolId() : "");
+        additionalInformation.put("teacherSchoolName", reservingUser.getSchoolOther() != null ? reservingUser.getSchoolOther() : "");
+
+        additionalInformation.put("student_user_id", userToReserve.getId().toString());
+        additionalInformation.put("student_given_name", userToReserve.getGivenName() != null ? userToReserve.getGivenName() : "");
+        additionalInformation.put("student_family_name", userToReserve.getFamilyName() != null ? userToReserve.getFamilyName() : "");
+        additionalInformation.put("student_email", userToReserve.getEmail() != null ? userToReserve.getEmail() : "");
+        additionalInformation.put("student_school_name", userToReserve.getSchoolOther() != null ? userToReserve.getSchoolOther() : "");
+        additionalInformation.put("student_school_urn", userToReserve.getSchoolId() != null ? userToReserve.getSchoolId() : "");
+
+        // Handle stage and exam board
+        if (userToReserve.getRegisteredContexts() != null && !userToReserve.getRegisteredContexts().isEmpty()) {
+          additionalInformation.put("student_stage",
+              userToReserve.getRegisteredContexts().get(0).getStage() != null
+                  ? userToReserve.getRegisteredContexts().get(0).getStage().name()
+                  : "");
+          additionalInformation.put("student_exam_board",
+              userToReserve.getRegisteredContexts().get(0).getExamBoard() != null
+                  ? userToReserve.getRegisteredContexts().get(0).getExamBoard().name()
+                  : "");
+        } else {
+          additionalInformation.put("student_stage", "");
+          additionalInformation.put("student_exam_board", "");
+        }
+
+        additionalInformation.put("student_gender",
+            userToReserve.getGender() != null ? userToReserve.getGender().name() : "");
+
+        bookings.add(
+            bookingManager.createCompetitionBooking(event, userToReserve, reservingUser, additionalInformation, BookingStatus.CONFIRMED)
+        );
       }
 
       this.getLogManager().logEvent(reservingUser, request,
@@ -1048,7 +1096,7 @@ public class EventsFacade extends AbstractIsaacFacade {
               EVENT_ID_FKEY_FIELDNAME, event.getId(),
               USER_ID_FKEY_FIELDNAME, reservingUser.getId(),
               USER_ID_LIST_FKEY_FIELDNAME, entryDTO.getEntrantIds().toArray(),
-              BOOKING_STATUS_FIELDNAME, BookingStatus.RESERVED.toString()
+              BOOKING_STATUS_FIELDNAME, BookingStatus.CONFIRMED.toString()
           ));
 
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
@@ -1065,8 +1113,8 @@ public class EventsFacade extends AbstractIsaacFacade {
           .toResponse();
     } catch (DuplicateBookingException e) {
       return SegueErrorResponse.getBadRequestResponse(
-                "One of the users requested is already booked or reserved on this event."
-                  + " Unable to create a duplicate booking.");
+          "One of the users requested is already booked or reserved on this event."
+              + " Unable to create a duplicate booking.");
     } catch (NoUserException e) {
       return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate one of the users specified.");
     } catch (EventIsCancelledException e) {

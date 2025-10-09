@@ -65,6 +65,7 @@ public class PgEventBookings implements EventBookings {
   private static final int FIELD_ADD_BOOKING_CREATED = 5;
   private static final int FIELD_ADD_BOOKING_UPDATED = 6;
   private static final int FIELD_ADD_BOOKING_ADDITIONAL_INFORMATION = 7;
+  private static final int FIELD_ADD_PROJECT_TITLE = 8;
 
   // updateBookingStatus - common fields
   private static final int FIELD_UPDATE_BOOKING_STATUS = 1;
@@ -164,8 +165,9 @@ public class PgEventBookings implements EventBookings {
   private PgEventBooking addEventBooking(
       final PgTransaction transaction, final String eventId, final Long userId, final Long reserveById,
       final BookingStatus status, final Map<String, String> additionalEventInformation) throws SegueDatabaseException {
+    String project_title = additionalEventInformation.getOrDefault("projectTitle", null);
     String query = "INSERT INTO event_bookings (id, user_id, reserved_by, event_id, status, created, updated,"
-        + " additional_booking_information) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?::text::jsonb)";
+        + " additional_booking_information, project_title) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?::text::jsonb, ?)";
     Connection conn = transaction.getConnection();
     try (PreparedStatement pst = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
       Instant creationDate = Instant.now();
@@ -181,6 +183,7 @@ public class PgEventBookings implements EventBookings {
       pst.setTimestamp(FIELD_ADD_BOOKING_UPDATED, Timestamp.from(creationDate));
       pst.setString(FIELD_ADD_BOOKING_ADDITIONAL_INFORMATION,
           objectMapper.writeValueAsString(additionalEventInformation));
+      pst.setString(FIELD_ADD_PROJECT_TITLE, project_title);
       if (pst.executeUpdate() == 0) {
         throw new SegueDatabaseException("Unable to save event booking.");
       }

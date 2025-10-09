@@ -421,6 +421,76 @@ public class EventBookingManager {
   }
 
   /**
+   * Create booking on behalf of a user with a reserving user.
+   * This method will allow users to be booked onto an event providing there is space. No other rules are applied.
+   * This is similar to createBooking but sets the reserved_by field to track who made the booking.
+   * <br>
+   * This method will not enforce some of the restrictions such as event deadlines and email verification
+   * !Booking a student multiple times for an event is allowed
+   *
+   * @param event                      of interest
+   * @param user                       user to book on to the event.
+   * @param reservingUser              user who is making the booking/reservation
+   * @param additionalEventInformation any additional information for the event organisers (nullable)
+   * @param status                     the booking status to create i.e. CONFIRMED, WAITING_LIST etc.
+   * @return the newly created booking.
+   * @throws SegueDatabaseException    if an error occurs.
+   * @throws EventIsFullException      No space on the event
+   * @throws DuplicateBookingException Duplicate booking, only unique bookings.
+   * @throws EventIsCancelledException if the event is cancelled
+   */
+  public EventBookingDTO createCompetitionBooking(final IsaacEventPageDTO event,
+                                                        final RegisteredUserDTO user,
+                                                        final RegisteredUserDTO reservingUser,
+                                                        final Map<String, String> additionalEventInformation,
+                                                        final BookingStatus status)
+      throws SegueDatabaseException, DuplicateBookingException, EventIsFullException, EventIsCancelledException {
+    // Check if event is cancelled
+    if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
+      throw new EventIsCancelledException(
+          String.format(EXCEPTION_MESSAGE_TEMPLATE_CANCELLED_EVENT, user.getId(), event.getId()));
+    }
+
+    EventBookingDTO booking;
+    try (ITransaction transaction = transactionManager.getTransaction()) {
+      // Obtain an exclusive database lock to lock the booking
+      this.bookingPersistenceManager.lockEventUntilTransactionComplete(transaction, event.getId());
+
+      if (BookingStatus.CONFIRMED.equals(status)) {
+        this.ensureCapacity(event, user);
+      }
+
+      booking = this.bookingPersistenceManager.createBooking(
+          transaction,
+          event.getId(),
+          user.getId(),
+          reservingUser.getId(),
+          status,
+          additionalEventInformation
+      );
+      transaction.commit();
+    }
+
+    addUserToEventGroup(event, user);
+
+    try {
+      Instant bookingDate = Instant.now();
+      if (event.getEndDate() == null || bookingDate.isBefore(event.getEndDate())) {
+        if (BookingStatus.CONFIRMED.equals(status)) {
+          sendEventBookingConfirmationNotificationEmail(event, user, booking);
+        } else if (BookingStatus.WAITING_LIST.equals(status)) {
+          sendBookingWaitingListAdditionNotificationEmail2(event, user);
+        }
+      }
+    } catch (ContentManagerException e) {
+      log.error(String.format("Unable to send booking confirmation email (%s) to user (%s)", event.getId(), user
+          .getEmail()), e);
+    }
+
+    return booking;
+  }
+
+  /**
    * Attempt to book onto an event.
    * This method will allow attempt to book a onto an event if the rules are not broken.
    *

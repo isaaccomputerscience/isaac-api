@@ -13,6 +13,7 @@ public class CompetitionEntryDTO {
   private List<Long> entrantIds;
   private String submissionURL;
   private String groupName;
+  private String projectTitle;
 
   public List<Long> getEntrantIds() {
     return entrantIds;
@@ -36,5 +37,13 @@ public class CompetitionEntryDTO {
 
   public void setGroupName(String groupName) {
     this.groupName = groupName;
+  }
+
+  public String getProjectTitle() {
+    return projectTitle;
+  }
+
+  public void setProjectTitle(String projectTitle) {
+    this.projectTitle = projectTitle;
   }
 }
