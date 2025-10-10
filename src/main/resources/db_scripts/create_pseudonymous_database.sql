@@ -137,7 +137,8 @@ CREATE TABLE anonymous.event_bookings AS
         status,
         updated,
         NULL as additional_booking_information,
-        coalesce(pii_removed, CURRENT_TIMESTAMP) as pii_removed
+        coalesce(pii_removed, CURRENT_TIMESTAMP) as pii_removed,
+        project_title
     FROM public.event_bookings;
 
 

@@ -85,7 +85,8 @@ CREATE TABLE public.event_bookings (
     status text DEFAULT 'CONFIRMED'::text NOT NULL,
     updated timestamp without time zone,
     additional_booking_information jsonb,
-    pii_removed timestamp without time zone
+    pii_removed timestamp without time zone,
+    project_title text DEFAULT NULL
 );
 
 
@@ -1112,8 +1113,8 @@ CREATE INDEX assignments_group_id ON public.assignments USING btree (group_id DE
 -- Name: event_booking_user_event_id_index; Type: INDEX; Schema: public; Owner: rutherford
 --
 
-CREATE UNIQUE INDEX event_booking_user_event_id_index ON public.event_bookings USING btree (event_id, user_id);
-
+CREATE UNIQUE INDEX event_booking_user_event_id_index ON public.event_bookings USING btree (event_id, user_id) WHERE project_title IS NULL;
+CREATE UNIQUE INDEX event_booking_user_event_title_index ON public.event_bookings USING btree (event_id, user_id, project_title) WHERE project_title IS NOT NULL;
 
 --
 -- Name: fki_user_id fkey; Type: INDEX; Schema: public; Owner: rutherford
