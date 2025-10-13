@@ -46,7 +46,7 @@ import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
-class EventsFacadeCompetitionEntryTest {
+class EventsFacadeTest {
 
   private EventsFacade eventsFacade;
   private PropertiesLoader properties;
