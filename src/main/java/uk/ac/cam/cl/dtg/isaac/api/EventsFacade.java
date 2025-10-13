@@ -104,6 +104,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dos.users.School;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
@@ -988,90 +989,211 @@ public class EventsFacade extends AbstractIsaacFacade {
   public final Response createCompetitionEntry(@Context final HttpServletRequest request,
                                                @PathParam("event_id") final String eventId,
                                                final CompetitionEntryDTO entryDTO) {
-    RegisteredUserDTO reservingUser;
-    IsaacEventPageDTO event;
-    Map<String, String> additionalInformation = new HashMap<>();
-
-
     try {
-      event = this.getRawEventDTOById(eventId);
-    } catch (SegueDatabaseException | ContentManagerException e) {
-      event = null;
-    }
-    if (null == event) {
-      return new SegueErrorResponse(Status.BAD_REQUEST, "No event found with this ID.").toResponse();
-    }
-    if (!EventBookingManager.eventAllowsGroupBookings(event)) {
-      return new SegueErrorResponse(Status.FORBIDDEN, "This event does not accept group bookings.").toResponse();
-    }
+      IsaacEventPageDTO event = validateAndGetEvent(eventId);
+      validateEntryDTO(entryDTO, event);
+      RegisteredUserDTO reservingUser = validateReservingUser(request);
 
-    List<RegisteredUserDTO> usersToReserve = Lists.newArrayList();
-    try {
-      reservingUser = userManager.getCurrentRegisteredUser(request);
-      additionalInformation.put("submissionURL", entryDTO.getSubmissionURL());
-      additionalInformation.put("groupName", entryDTO.getGroupName());
-      additionalInformation.put("teacherName", reservingUser.getGivenName() + " " + reservingUser.getFamilyName());
-      additionalInformation.put("teacherEmail", reservingUser.getEmail());
-      additionalInformation.put("teacherId", reservingUser.getId().toString());
-      additionalInformation.put("school", reservingUser.getSchoolId());
-      additionalInformation.put("schoolName", reservingUser.getSchoolOther());
+      List<EventBookingDTO> bookings = createBookingsForEntrants(
+          event, entryDTO, reservingUser);
 
-      // Tutors cannot yet manage event bookings for their tutees, so shouldn't be added to this list
-      if (!Arrays.asList(Role.TEACHER, Role.EVENT_LEADER, Role.EVENT_MANAGER, Role.ADMIN)
-          .contains(reservingUser.getRole())) {
-        return SegueErrorResponse.getIncorrectRoleResponse();
-      }
-
-      List<EventBookingDTO> bookings = new ArrayList<>();
-      // Enforce permission
-      for (Long userId : entryDTO.getEntrantIds()) {
-        RegisteredUserDTO userToReserve = userManager.getUserDTOById(userId);
-        if (userAssociationManager.hasPermission(reservingUser, userToReserve)) {
-          usersToReserve.add(userToReserve);
-          BookingStatus status = bookingManager.getBookingStatus(event.getId(), userToReserve.getId());
-          if (null != status) {
-            bookingManager.deleteBooking(event, userToReserve);
-          }
-          bookings.add(
-              bookingManager.createBooking(event, userToReserve, additionalInformation, BookingStatus.CONFIRMED)
-          );
-        } else {
-          return new SegueErrorResponse(Status.FORBIDDEN,
-              "You do not have permission to book or reserve some of these users onto this event.")
-              .toResponse();
-        }
-      }
-
-      this.getLogManager().logEvent(reservingUser, request,
-          SegueServerLogType.EVENT_RESERVATIONS_CREATED,
-          Map.of(
-              EVENT_ID_FKEY_FIELDNAME, event.getId(),
-              USER_ID_FKEY_FIELDNAME, reservingUser.getId(),
-              USER_ID_LIST_FKEY_FIELDNAME, entryDTO.getEntrantIds().toArray(),
-              BOOKING_STATUS_FIELDNAME, BookingStatus.RESERVED.toString()
-          ));
+      logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
+    } catch (IllegalArgumentException e) {
+      return new SegueErrorResponse(Status.BAD_REQUEST, e.getMessage()).toResponse();
+    } catch (IllegalStateException | SecurityException e) {
+      return new SegueErrorResponse(Status.FORBIDDEN, e.getMessage()).toResponse();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      String errorMsg = "Database error occurred while trying to reserve space for a user onto an event.";
-      log.error(errorMsg, e);
-      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
+      return handleDatabaseError(e);
     } catch (EventIsFullException e) {
-      return new SegueErrorResponse(Status.CONFLICT,
-          "There are not enough spaces available for this event. Please try again with fewer users.")
-          .toResponse();
+      return handleEventFullError();
     } catch (DuplicateBookingException e) {
-      return SegueErrorResponse.getBadRequestResponse(
-                "One of the users requested is already booked or reserved on this event."
-                  + " Unable to create a duplicate booking.");
+      return handleDuplicateBookingError();
     } catch (NoUserException e) {
       return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate one of the users specified.");
     } catch (EventIsCancelledException e) {
       return SegueErrorResponse.getBadRequestResponse(EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT);
     }
+  }
+
+  private IsaacEventPageDTO validateAndGetEvent(final String eventId) {
+    try {
+      IsaacEventPageDTO event = this.getRawEventDTOById(eventId);
+      if (event == null) {
+        throw new IllegalArgumentException("No event found with this ID.");
+      }
+
+      if (!EventBookingManager.eventAllowsGroupBookings(event)) {
+        throw new IllegalStateException("This event does not accept group bookings.");
+      }
+
+      return event;
+    } catch (SegueDatabaseException | ContentManagerException e) {
+      throw new IllegalArgumentException("No event found with this ID.");
+    }
+  }
+
+  private RegisteredUserDTO validateReservingUser(final HttpServletRequest request)
+      throws NoUserLoggedInException {
+    RegisteredUserDTO reservingUser = userManager.getCurrentRegisteredUser(request);
+
+    if (!hasRequiredRole(reservingUser)) {
+      throw new SecurityException("Incorrect role for this operation");
+    }
+
+    return reservingUser;
+  }
+
+  private boolean hasRequiredRole(final RegisteredUserDTO user) {
+    return Arrays.asList(Role.TEACHER, Role.EVENT_LEADER, Role.EVENT_MANAGER, Role.ADMIN)
+        .contains(user.getRole());
+  }
+
+  private void validateEntryDTO(final CompetitionEntryDTO entryDTO, final IsaacEventPageDTO event) {
+    if (entryDTO.getEntrantIds() == null || entryDTO.getEntrantIds().isEmpty()) {
+      throw new IllegalArgumentException("At least one student must be selected for competition entry.");
+    }
+
+    Integer groupLimit = event.getGroupReservationLimit();
+    if (groupLimit != null && entryDTO.getEntrantIds().size() > groupLimit) {
+      throw new IllegalArgumentException(
+          "Competition entries are limited to a maximum of " + groupLimit + " students.");
+    }
+  }
+
+  private List<EventBookingDTO> createBookingsForEntrants(
+      final IsaacEventPageDTO event,
+      final CompetitionEntryDTO entryDTO,
+      final RegisteredUserDTO reservingUser)
+      throws SegueDatabaseException, NoUserException, EventIsFullException,
+      DuplicateBookingException, EventIsCancelledException {
+
+    List<EventBookingDTO> bookings = new ArrayList<>();
+
+    for (Long userId : entryDTO.getEntrantIds()) {
+      RegisteredUserDTO userToReserve = userManager.getUserDTOById(userId);
+      validateUserPermission(reservingUser, userToReserve);
+      removeExistingBookingIfNeeded(event, userToReserve);
+
+      Map<String, String> additionalInfo = buildAdditionalInformation(
+          entryDTO, reservingUser, userToReserve);
+
+      EventBookingDTO booking = bookingManager.createCompetitionBooking(
+          event, userToReserve, reservingUser, additionalInfo, BookingStatus.CONFIRMED);
+
+      bookings.add(booking);
+    }
+
+    return bookings;
+  }
+
+  private void validateUserPermission(final RegisteredUserDTO reservingUser,
+                                      final RegisteredUserDTO userToReserve) {
+    if (!userAssociationManager.hasPermission(reservingUser, userToReserve)) {
+      throw new SecurityException(
+          "You do not have permission to book or reserve some of these users onto this event.");
+    }
+  }
+
+  private void removeExistingBookingIfNeeded(final IsaacEventPageDTO event,
+                                             final RegisteredUserDTO userToReserve)
+      throws SegueDatabaseException {
+    if (Boolean.FALSE.equals(event.isPrivateEvent())) {
+      BookingStatus status = bookingManager.getBookingStatus(event.getId(), userToReserve.getId());
+      if (status != null) {
+        bookingManager.deleteBooking(event, userToReserve);
+      }
+    }
+  }
+
+  private Map<String, String> buildAdditionalInformation(
+      final CompetitionEntryDTO entryDTO,
+      final RegisteredUserDTO reservingUser,
+      final RegisteredUserDTO userToReserve) {
+
+    Map<String, String> additionalInfo = new HashMap<>();
+
+    addEntryInformation(additionalInfo, entryDTO);
+    addTeacherInformation(additionalInfo, reservingUser);
+    addStudentInformation(additionalInfo, userToReserve);
+
+    return additionalInfo;
+  }
+
+  private void addEntryInformation(final Map<String, String> info, final CompetitionEntryDTO entryDTO) {
+    info.put("submissionURL", entryDTO.getSubmissionURL() != null ? entryDTO.getSubmissionURL() : "");
+    info.put("groupName", entryDTO.getGroupName() != null ? entryDTO.getGroupName() : "");
+    info.put("project_title", entryDTO.getProjectTitle() != null ? entryDTO.getProjectTitle() : "");
+    info.put("student_count", String.valueOf(entryDTO.getEntrantIds().size()));
+  }
+
+  private void addTeacherInformation(final Map<String, String> info, final RegisteredUserDTO teacher) {
+    info.put("teacherName", teacher.getGivenName() + " " + teacher.getFamilyName());
+    info.put("teacherEmail", teacher.getEmail());
+    info.put("teacherId", teacher.getId().toString());
+    info.put("teacherSchoolId", teacher.getSchoolId() != null ? teacher.getSchoolId() : "");
+    info.put("teacherSchoolName", teacher.getSchoolOther() != null ? teacher.getSchoolOther() : "");
+  }
+
+  private void addStudentInformation(final Map<String, String> info, final RegisteredUserDTO student) {
+    info.put("student_user_id", student.getId().toString());
+    info.put("student_given_name", student.getGivenName() != null ? student.getGivenName() : "");
+    info.put("student_family_name", student.getFamilyName() != null ? student.getFamilyName() : "");
+    info.put("student_email", student.getEmail() != null ? student.getEmail() : "");
+    info.put("student_school_name", student.getSchoolOther() != null ? student.getSchoolOther() : "");
+    info.put("student_school_urn", student.getSchoolId() != null ? student.getSchoolId() : "");
+
+    addStudentContextInformation(info, student);
+
+    info.put("student_gender", student.getGender() != null ? student.getGender().name() : "");
+  }
+
+  private void addStudentContextInformation(final Map<String, String> info,
+                                            final RegisteredUserDTO student) {
+    if (student.getRegisteredContexts() != null && !student.getRegisteredContexts().isEmpty()) {
+      UserContext context = student.getRegisteredContexts().get(0);
+      info.put("student_stage", context.getStage() != null ? context.getStage().name() : "");
+      info.put("student_exam_board", context.getExamBoard() != null ? context.getExamBoard().name() : "");
+    } else {
+      info.put("student_stage", "");
+      info.put("student_exam_board", "");
+    }
+  }
+
+  private void logCompetitionEntryCreation(final RegisteredUserDTO reservingUser,
+                                           final HttpServletRequest request,
+                                           final IsaacEventPageDTO event,
+                                           final CompetitionEntryDTO entryDTO) {
+    this.getLogManager().logEvent(reservingUser, request,
+        SegueServerLogType.EVENT_RESERVATIONS_CREATED,
+        Map.of(
+            EVENT_ID_FKEY_FIELDNAME, event.getId(),
+            USER_ID_FKEY_FIELDNAME, reservingUser.getId(),
+            USER_ID_LIST_FKEY_FIELDNAME, entryDTO.getEntrantIds().toArray(),
+            BOOKING_STATUS_FIELDNAME, BookingStatus.CONFIRMED.toString()
+        ));
+  }
+
+  private Response handleDatabaseError(final SegueDatabaseException e) {
+    String errorMsg = "Database error occurred while trying to reserve space for a user onto an event.";
+    log.error(errorMsg, e);
+    return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
+  }
+
+  private Response handleEventFullError() {
+    return new SegueErrorResponse(Status.CONFLICT,
+        "There are not enough spaces available for this event. Please try again with fewer users.")
+        .toResponse();
+  }
+
+  private Response handleDuplicateBookingError() {
+    return SegueErrorResponse.getBadRequestResponse(
+        "One of the users requested is already booked or reserved on this event."
+            + " Unable to create a duplicate booking.");
   }
 
   /**
