@@ -995,7 +995,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       RegisteredUserDTO reservingUser = validateReservingUser(request);
 
       List<EventBookingDTO> bookings = createBookingsForEntrants(
-          event, entryDTO, reservingUser, request);
+          event, entryDTO, reservingUser);
 
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
@@ -1038,7 +1038,7 @@ public class EventsFacade extends AbstractIsaacFacade {
   }
 
   private RegisteredUserDTO validateReservingUser(final HttpServletRequest request)
-      throws NoUserLoggedInException, SegueDatabaseException {
+      throws NoUserLoggedInException {
     RegisteredUserDTO reservingUser = userManager.getCurrentRegisteredUser(request);
 
     if (!hasRequiredRole(reservingUser)) {
@@ -1068,8 +1068,7 @@ public class EventsFacade extends AbstractIsaacFacade {
   private List<EventBookingDTO> createBookingsForEntrants(
       final IsaacEventPageDTO event,
       final CompetitionEntryDTO entryDTO,
-      final RegisteredUserDTO reservingUser,
-      final HttpServletRequest request)
+      final RegisteredUserDTO reservingUser)
       throws SegueDatabaseException, NoUserException, EventIsFullException,
       DuplicateBookingException, EventIsCancelledException {
 
@@ -1093,8 +1092,7 @@ public class EventsFacade extends AbstractIsaacFacade {
   }
 
   private void validateUserPermission(final RegisteredUserDTO reservingUser,
-                                      final RegisteredUserDTO userToReserve)
-      throws SegueDatabaseException {
+                                      final RegisteredUserDTO userToReserve) {
     if (!userAssociationManager.hasPermission(reservingUser, userToReserve)) {
       throw new SecurityException(
           "You do not have permission to book or reserve some of these users onto this event.");
