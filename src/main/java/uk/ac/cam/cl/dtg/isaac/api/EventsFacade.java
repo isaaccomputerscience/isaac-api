@@ -1102,7 +1102,7 @@ public class EventsFacade extends AbstractIsaacFacade {
   private void removeExistingBookingIfNeeded(final IsaacEventPageDTO event,
                                              final RegisteredUserDTO userToReserve)
       throws SegueDatabaseException {
-    if (Boolean.FALSE.equals(event.isPrivateEvent())) {
+    if (Boolean.TRUE.equals(event.isPrivateEvent())) {
       BookingStatus status = bookingManager.getBookingStatus(event.getId(), userToReserve.getId());
       if (status != null) {
         bookingManager.deleteBooking(event, userToReserve);
@@ -1181,7 +1181,8 @@ public class EventsFacade extends AbstractIsaacFacade {
   private Response handleDatabaseError(final SegueDatabaseException e) {
     String errorMsg = "Database error occurred while trying to reserve space for a user onto an event.";
     log.error(errorMsg, e);
-    return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
+    Status status = e.getMessage().contains("Postgres") ? Status.CONFLICT : Status.INTERNAL_SERVER_ERROR;
+    return new SegueErrorResponse(status, errorMsg).toResponse();
   }
 
   private Response handleEventFullError() {
