@@ -127,7 +127,7 @@ class EventsFacadeTest {
     event.setTitle("Test Competition");
     event.setIsaacGroupToken("GROUP_TOKEN");
     event.setGroupReservationLimit(5);
-    event.setPrivateEvent(false);
+    event.setPrivateEvent(true);
     event.setAllowGroupReservations(true);
     return event;
   }
@@ -190,7 +190,7 @@ class EventsFacadeTest {
     entryDTO.setEntrantIds(List.of(1001L));
 
     IsaacEventPageDTO privateEvent = createMockCompetitionEvent();
-    privateEvent.setPrivateEvent(true);
+    privateEvent.setPrivateEvent(false);
 
     EventBookingDTO booking = new EventBookingDTO();
     booking.setBookingStatus(BookingStatus.CONFIRMED);
