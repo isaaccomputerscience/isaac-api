@@ -1181,7 +1181,8 @@ public class EventsFacade extends AbstractIsaacFacade {
   private Response handleDatabaseError(final SegueDatabaseException e) {
     String errorMsg = "Database error occurred while trying to reserve space for a user onto an event.";
     log.error(errorMsg, e);
-    return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
+    Status status = e.getMessage().contains("Postgres") ? Status.CONFLICT : Status.INTERNAL_SERVER_ERROR;
+    return new SegueErrorResponse(status, errorMsg).toResponse();
   }
 
   private Response handleEventFullError() {

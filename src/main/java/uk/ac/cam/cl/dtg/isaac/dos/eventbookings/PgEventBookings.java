@@ -164,8 +164,9 @@ public class PgEventBookings implements EventBookings {
 
   private PgEventBooking addEventBooking(
       final PgTransaction transaction, final String eventId, final Long userId, final Long reserveById,
-      final BookingStatus status, final Map<String, String> additionalEventInformation) throws SegueDatabaseException {
-    String projectTitle = additionalEventInformation.getOrDefault("projectTitle", null);
+      final BookingStatus status, final Map<String, String> additionalEventInformation)
+      throws SegueDatabaseException {
+    String projectTitle = additionalEventInformation.getOrDefault("project_title", null);
     String query = "INSERT INTO event_bookings (id, user_id, reserved_by, event_id, status, created, updated,"
         + " additional_booking_information, project_title) VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?::text::jsonb, ?)";
     Connection conn = transaction.getConnection();

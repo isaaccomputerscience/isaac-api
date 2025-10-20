@@ -127,7 +127,7 @@ class EventsFacadeTest {
     event.setTitle("Test Competition");
     event.setIsaacGroupToken("GROUP_TOKEN");
     event.setGroupReservationLimit(5);
-    event.setPrivateEvent(false);
+    event.setPrivateEvent(true);
     event.setAllowGroupReservations(true);
     return event;
   }
@@ -739,6 +739,8 @@ class EventsFacadeTest {
     EventBookingDTO booking = new EventBookingDTO();
     booking.setBookingStatus(BookingStatus.CONFIRMED);
 
+    mockEvent.setPrivateEvent(false);
+
     expectGetRawEventDTOById(eventId, mockEvent);
     expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
     expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
@@ -781,6 +783,8 @@ class EventsFacadeTest {
     entryDTO.setGroupName("Team Beta");
 
     List<EventBookingDTO> bookings = new ArrayList<>();
+
+    mockEvent.setPrivateEvent(false);
 
     expectGetRawEventDTOById(eventId, mockEvent);
     expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
