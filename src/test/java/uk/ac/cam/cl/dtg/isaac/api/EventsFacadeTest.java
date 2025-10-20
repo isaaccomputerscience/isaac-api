@@ -190,7 +190,7 @@ class EventsFacadeTest {
     entryDTO.setEntrantIds(List.of(1001L));
 
     IsaacEventPageDTO privateEvent = createMockCompetitionEvent();
-    privateEvent.setPrivateEvent(false);
+    privateEvent.setPrivateEvent(true);
 
     EventBookingDTO booking = new EventBookingDTO();
     booking.setBookingStatus(BookingStatus.CONFIRMED);
@@ -739,6 +739,8 @@ class EventsFacadeTest {
     EventBookingDTO booking = new EventBookingDTO();
     booking.setBookingStatus(BookingStatus.CONFIRMED);
 
+    mockEvent.setPrivateEvent(false);
+
     expectGetRawEventDTOById(eventId, mockEvent);
     expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
     expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
@@ -781,6 +783,8 @@ class EventsFacadeTest {
     entryDTO.setGroupName("Team Beta");
 
     List<EventBookingDTO> bookings = new ArrayList<>();
+
+    mockEvent.setPrivateEvent(false);
 
     expectGetRawEventDTOById(eventId, mockEvent);
     expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);

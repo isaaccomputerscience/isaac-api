@@ -1102,7 +1102,7 @@ public class EventsFacade extends AbstractIsaacFacade {
   private void removeExistingBookingIfNeeded(final IsaacEventPageDTO event,
                                              final RegisteredUserDTO userToReserve)
       throws SegueDatabaseException {
-    if (Boolean.TRUE.equals(event.isPrivateEvent())) {
+    if (Boolean.FALSE.equals(event.isPrivateEvent())) {
       BookingStatus status = bookingManager.getBookingStatus(event.getId(), userToReserve.getId());
       if (status != null) {
         bookingManager.deleteBooking(event, userToReserve);
