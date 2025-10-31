@@ -991,34 +991,34 @@ public class EventsFacade extends AbstractIsaacFacade {
                                                final CompetitionEntryDTO entryDTO) {
 
     // Quick fix - wrap all user inputs with safe()
-    log.info("Competition entry request - Event ID: {}", sanitiseExternalLogValue(eventId));
-    log.info("Entry DTO - Entrant IDs: {}, Submission URL: {}, Group Name: {}, Project Title: {}",
-        sanitiseExternalLogValue(entryDTO.getEntrantIds().toString()),
-        sanitiseExternalLogValue(entryDTO.getSubmissionURL()),
-        sanitiseExternalLogValue(entryDTO.getGroupName()),
-        sanitiseExternalLogValue(entryDTO.getProjectTitle()));
+    log.info("MMMM - Competition entry request - Event ID: {}", eventId);
+    log.info("MMMM - Entry DTO - Entrant IDs: {}, Submission URL: {}, Group Name: {}, Project Title: {}",
+        entryDTO.getEntrantIds().toString(),
+        entryDTO.getSubmissionURL(),
+        entryDTO.getGroupName(),
+        entryDTO.getProjectTitle());
 
     try {
-      log.debug("Validating event with ID: {}", sanitiseExternalLogValue(eventId));
+      log.debug("MMMM - Validating event with ID: {}", eventId);
       IsaacEventPageDTO event = validateAndGetEvent(eventId);
-      log.info("Event validated - Title: {}, ID: {}", sanitiseExternalLogValue(event.getTitle()), sanitiseExternalLogValue(event.getId()));
+      log.info("MMMM - Event validated - Title: {}, ID: {}", event.getTitle(), event.getId());
 
       validateEntryDTO(entryDTO, event);
-      log.info("Entry DTO validated successfully");
+      log.info("MMMM - Entry DTO validated successfully");
 
       RegisteredUserDTO reservingUser = validateReservingUser(request);
-      log.info("User validated - ID: {}, Email: {}, Role: {}",
-          reservingUser.getId(),  // IDs are safe
-          sanitiseExternalLogValue(reservingUser.getEmail()),
-          reservingUser.getRole()); // Enums are safe
+      log.info("MMMM - User validated - ID: {}, Email: {}, Role: {}",
+          reservingUser.getId(),
+          reservingUser.getEmail(),
+          reservingUser.getRole());
 
-      log.info("Creating bookings for {} entrants", entryDTO.getEntrantIds().size());
+      log.info("MMMM - Creating bookings for {} entrants", entryDTO.getEntrantIds().size());
       List<EventBookingDTO> bookings = createBookingsForEntrants(event, entryDTO, reservingUser);
-      log.info("Successfully created {} bookings", bookings.size());
+      log.info("MMMM - Successfully created {} bookings", bookings.size());
 
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
-      log.info("Competition entry completed for event: {}", sanitiseExternalLogValue(eventId));
+      log.info("MMMM - Competition entry completed for event: {}", eventId);
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
     } catch (IllegalArgumentException e) {
