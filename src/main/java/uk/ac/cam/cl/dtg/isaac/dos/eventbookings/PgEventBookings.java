@@ -200,6 +200,7 @@ public class PgEventBookings implements EventBookings {
       }
 
     } catch (SQLException e) {
+      log.error("DB error ", e);
       throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     } catch (JsonProcessingException e) {
       throw new SegueDatabaseException(EXCEPTION_MESSAGE_UNABLE_TO_STRINGIFY_JSON, e);
@@ -580,7 +581,6 @@ public class PgEventBookings implements EventBookings {
         return returnResult;
       }
     } catch (SQLException e) {
-      log.error("DB error ", e);
       throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
     }
   }

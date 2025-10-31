@@ -989,55 +989,68 @@ public class EventsFacade extends AbstractIsaacFacade {
   public final Response createCompetitionEntry(@Context final HttpServletRequest request,
                                                @PathParam("event_id") final String eventId,
                                                final CompetitionEntryDTO entryDTO) {
-    log.info("Competition entry request received - Event ID: {}", eventId);
+
+    // Quick fix - wrap all user inputs with safe()
+    log.info("Competition entry request - Event ID: {}", safe(eventId));
     log.info("Entry DTO - Entrant IDs: {}, Submission URL: {}, Group Name: {}, Project Title: {}",
-        entryDTO.getEntrantIds(),
-        entryDTO.getSubmissionURL(),
-        entryDTO.getGroupName(),
-        entryDTO.getProjectTitle());
+        safe(entryDTO.getEntrantIds()),
+        safe(entryDTO.getSubmissionURL()),
+        safe(entryDTO.getGroupName()),
+        safe(entryDTO.getProjectTitle()));
 
     try {
-      log.info("Validating event with ID: {}", eventId);
+      log.debug("Validating event with ID: {}", safe(eventId));
       IsaacEventPageDTO event = validateAndGetEvent(eventId);
-      log.info("Event validated successfully - Event Title: {}, Event ID: {}",
-          event.getTitle(), event.getId());
-      log.debug("Validating entry DTO for event: {}", eventId);
+      log.info("Event validated - Title: {}, ID: {}", safe(event.getTitle()), safe(event.getId()));
+
       validateEntryDTO(entryDTO, event);
       log.info("Entry DTO validated successfully");
-      log.debug("Validating reserving user from request");
+
       RegisteredUserDTO reservingUser = validateReservingUser(request);
-      log.info("Reserving user validated - User ID: {}, Email: {}, Role: {}",
-          reservingUser.getId(),
-          reservingUser.getEmail(),
-          reservingUser.getRole());
+      log.info("User validated - ID: {}, Email: {}, Role: {}",
+          reservingUser.getId(),  // IDs are safe
+          safe(reservingUser.getEmail()),
+          reservingUser.getRole()); // Enums are safe
 
       log.info("Creating bookings for {} entrants", entryDTO.getEntrantIds().size());
-      List<EventBookingDTO> bookings = createBookingsForEntrants(
-          event, entryDTO, reservingUser);
+      List<EventBookingDTO> bookings = createBookingsForEntrants(event, entryDTO, reservingUser);
       log.info("Successfully created {} bookings", bookings.size());
 
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
-      log.info("Competition entry completed successfully for event: {}", eventId);
+      log.info("Competition entry completed for event: {}", safe(eventId));
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
     } catch (IllegalArgumentException e) {
+      log.error("Bad Request for event {}: {}", safe(eventId), safe(e.getMessage()));
       return new SegueErrorResponse(Status.BAD_REQUEST, e.getMessage()).toResponse();
     } catch (IllegalStateException | SecurityException e) {
+      log.error("Forbidden for event {}: {}", safe(eventId), safe(e.getMessage()));
       return new SegueErrorResponse(Status.FORBIDDEN, e.getMessage()).toResponse();
     } catch (NoUserLoggedInException e) {
+      log.error("No user logged in for event: {}", safe(eventId));
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
+      log.error("Database error for event {}: {}", safe(eventId), safe(e.getMessage()));
       return handleDatabaseError(e);
     } catch (EventIsFullException e) {
+      log.error("Event {} is full", safe(eventId));
       return handleEventFullError();
     } catch (DuplicateBookingException e) {
+      log.error("Duplicate booking for event {}", safe(eventId));
       return handleDuplicateBookingError();
     } catch (NoUserException e) {
+      log.error("User not found - IDs: {} for event: {}", safe(entryDTO.getEntrantIds()), safe(eventId));
       return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate one of the users specified.");
     } catch (EventIsCancelledException e) {
+      log.error("Cancelled event booking attempt: {}", safe(eventId));
       return SegueErrorResponse.getBadRequestResponse(EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT);
     }
+  }
+
+  private String safe(Object input) {
+    if (input == null) return "null";
+    return input.toString().replaceAll("[\\r\\n]", "_").substring(0, Math.min(input.toString().length(), 200));
   }
 
   private IsaacEventPageDTO validateAndGetEvent(final String eventId) {
