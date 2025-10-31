@@ -989,16 +989,43 @@ public class EventsFacade extends AbstractIsaacFacade {
   public final Response createCompetitionEntry(@Context final HttpServletRequest request,
                                                @PathParam("event_id") final String eventId,
                                                final CompetitionEntryDTO entryDTO) {
-    try {
-      IsaacEventPageDTO event = validateAndGetEvent(eventId);
-      validateEntryDTO(entryDTO, event);
-      RegisteredUserDTO reservingUser = validateReservingUser(request);
+    log.info("Competition entry request received - Event ID: {}", eventId);
+    log.info("Entry DTO - Entrant IDs: {}, Submission URL: {}, Group Name: {}, Project Title: {}",
+        entryDTO.getEntrantIds(),
+        entryDTO.getSubmissionURL(),
+        entryDTO.getGroupName(),
+        entryDTO.getProjectTitle());
 
+    try {
+      log.info("Validating event with ID: {}", eventId);
+      IsaacEventPageDTO event = validateAndGetEvent(eventId);
+      log.info("Event validated successfully - Event Title: {}, Event ID: {}",
+          event.getTitle(), event.getId());
+      log.debug("Validating entry DTO for event: {}", eventId);
+      validateEntryDTO(entryDTO, event);
+      log.info("Entry DTO validated successfully");
+      log.debug("Validating reserving user from request");
+      RegisteredUserDTO reservingUser = validateReservingUser(request);
+      log.info("Reserving user validated - User ID: {}, Email: {}, Role: {}",
+          reservingUser.getId(),
+          reservingUser.getEmail(),
+          reservingUser.getRole());
+
+      log.info("Creating bookings for {} entrants", entryDTO.getEntrantIds().size());
       List<EventBookingDTO> bookings = createBookingsForEntrants(
           event, entryDTO, reservingUser);
+      log.info("Successfully created {} bookings", bookings.size());
+
+      for (EventBookingDTO booking : bookings) {
+        log.info("Booking created - Booking ID: {}, User ID: {}, Status: {}",
+            booking.getBookingId(),
+            booking.getUserBooked().getId(),
+            booking.getBookingStatus());
+      }
 
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
+      log.info("Competition entry completed successfully for event: {}", eventId);
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
     } catch (IllegalArgumentException e) {
