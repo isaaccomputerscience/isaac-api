@@ -991,17 +991,17 @@ public class EventsFacade extends AbstractIsaacFacade {
                                                final CompetitionEntryDTO entryDTO) {
 
     // Quick fix - wrap all user inputs with safe()
-    log.info("Competition entry request - Event ID: {}", safe(eventId));
+    log.info("Competition entry request - Event ID: {}", sanitiseExternalLogValue(eventId));
     log.info("Entry DTO - Entrant IDs: {}, Submission URL: {}, Group Name: {}, Project Title: {}",
-        safe(entryDTO.getEntrantIds()),
-        safe(entryDTO.getSubmissionURL()),
-        safe(entryDTO.getGroupName()),
-        safe(entryDTO.getProjectTitle()));
+        sanitiseExternalLogValue(entryDTO.getEntrantIds().toString()),
+        sanitiseExternalLogValue(entryDTO.getSubmissionURL()),
+        sanitiseExternalLogValue(entryDTO.getGroupName()),
+        sanitiseExternalLogValue(entryDTO.getProjectTitle()));
 
     try {
-      log.debug("Validating event with ID: {}", safe(eventId));
+      log.debug("Validating event with ID: {}", sanitiseExternalLogValue(eventId));
       IsaacEventPageDTO event = validateAndGetEvent(eventId);
-      log.info("Event validated - Title: {}, ID: {}", safe(event.getTitle()), safe(event.getId()));
+      log.info("Event validated - Title: {}, ID: {}", sanitiseExternalLogValue(event.getTitle()), sanitiseExternalLogValue(event.getId()));
 
       validateEntryDTO(entryDTO, event);
       log.info("Entry DTO validated successfully");
@@ -1009,7 +1009,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       RegisteredUserDTO reservingUser = validateReservingUser(request);
       log.info("User validated - ID: {}, Email: {}, Role: {}",
           reservingUser.getId(),  // IDs are safe
-          safe(reservingUser.getEmail()),
+          sanitiseExternalLogValue(reservingUser.getEmail()),
           reservingUser.getRole()); // Enums are safe
 
       log.info("Creating bookings for {} entrants", entryDTO.getEntrantIds().size());
@@ -1018,39 +1018,26 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
-      log.info("Competition entry completed for event: {}", safe(eventId));
+      log.info("Competition entry completed for event: {}", sanitiseExternalLogValue(eventId));
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
     } catch (IllegalArgumentException e) {
-      log.error("Bad Request for event {}: {}", safe(eventId), safe(e.getMessage()));
       return new SegueErrorResponse(Status.BAD_REQUEST, e.getMessage()).toResponse();
     } catch (IllegalStateException | SecurityException e) {
-      log.error("Forbidden for event {}: {}", safe(eventId), safe(e.getMessage()));
       return new SegueErrorResponse(Status.FORBIDDEN, e.getMessage()).toResponse();
     } catch (NoUserLoggedInException e) {
-      log.error("No user logged in for event: {}", safe(eventId));
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      log.error("Database error for event {}: {}", safe(eventId), safe(e.getMessage()));
       return handleDatabaseError(e);
     } catch (EventIsFullException e) {
-      log.error("Event {} is full", safe(eventId));
       return handleEventFullError();
     } catch (DuplicateBookingException e) {
-      log.error("Duplicate booking for event {}", safe(eventId));
       return handleDuplicateBookingError();
     } catch (NoUserException e) {
-      log.error("User not found - IDs: {} for event: {}", safe(entryDTO.getEntrantIds()), safe(eventId));
       return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate one of the users specified.");
     } catch (EventIsCancelledException e) {
-      log.error("Cancelled event booking attempt: {}", safe(eventId));
       return SegueErrorResponse.getBadRequestResponse(EXCEPTION_MESSAGE_CANNOT_BOOK_CANCELLED_EVENT);
     }
-  }
-
-  private String safe(Object input) {
-    if (input == null) return "null";
-    return input.toString().replaceAll("[\\r\\n]", "_").substring(0, Math.min(input.toString().length(), 200));
   }
 
   private IsaacEventPageDTO validateAndGetEvent(final String eventId) {
