@@ -184,7 +184,7 @@ public class PgEventBookings implements EventBookings {
       pst.setTimestamp(FIELD_ADD_BOOKING_UPDATED, Timestamp.from(creationDate));
       pst.setString(FIELD_ADD_BOOKING_ADDITIONAL_INFORMATION,
           objectMapper.writeValueAsString(additionalEventInformation));
-      pst.setString(FIELD_ADD_PROJECT_TITLE, projectTitle);
+      pst.setString(FIELD_ADD_PROJECT_TITLE, projectTitle.trim());
       if (pst.executeUpdate() == 0) {
         throw new SegueDatabaseException("Unable to save event booking.");
       }

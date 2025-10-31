@@ -1016,13 +1016,6 @@ public class EventsFacade extends AbstractIsaacFacade {
           event, entryDTO, reservingUser);
       log.info("Successfully created {} bookings", bookings.size());
 
-      for (EventBookingDTO booking : bookings) {
-        log.info("Booking created - Booking ID: {}, User ID: {}, Status: {}",
-            booking.getBookingId(),
-            booking.getUserBooked().getId(),
-            booking.getBookingStatus());
-      }
-
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
       log.info("Competition entry completed successfully for event: {}", eventId);
