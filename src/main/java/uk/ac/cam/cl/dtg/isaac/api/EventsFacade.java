@@ -182,7 +182,9 @@ public class EventsFacade extends AbstractIsaacFacade {
                       final GitContentManager contentManager,
                       final UserBadgeManager userBadgeManager, final UserAssociationManager userAssociationManager,
                       final GroupManager groupManager,
-                      final SchoolListReader schoolListReader, CompetitionEntryService competitionEntryService, final MainObjectMapper mapper) {
+                      final SchoolListReader schoolListReader,
+                      final CompetitionEntryService competitionEntryService,
+                      final MainObjectMapper mapper) {
     super(properties, logManager);
     this.bookingManager = bookingManager;
     this.userManager = userManager;
@@ -1004,9 +1006,7 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
-      if (reservingUser.getRole().equals(Role.ADMIN)) { // Temporary condition for PROD testing with ADMINs
-        competitionEntryService.sendCompetitionEntryConfirmation(event, entryDTO, reservingUser);
-      }
+      competitionEntryService.sendCompetitionEntryConfirmation(event, entryDTO, reservingUser);
 
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
