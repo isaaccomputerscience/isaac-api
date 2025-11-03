@@ -181,6 +181,8 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     // Sanitizes inputs from users
     sanitizeEmailParameters(propertiesToReplace);
 
+    propertiesToReplace.forEach((k,v) -> log.info("MMM - " + k.toString() + " : " + v.toString()));
+
     EmailCommunicationMessage emailCommunicationMessage
         = constructMultiPartEmail(userDTO.getId(), userDTO.getEmail(), emailContentTemplate, propertiesToReplace,
         emailType, attachments);
@@ -345,6 +347,8 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     requireNonNull(email);
     requireNonNull(userDTO);
 
+    log.info("MMM - filterByPreferencesAndAddToQueue 1");
+
     ImmutableMap<String, Object> eventDetails = new ImmutableMap.Builder<String, Object>()
         .put("userId", userDTO.getId())
         .put("email", email.getRecipientAddress())
@@ -354,18 +358,22 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     // don't send an email if we know it has failed before
     // FIXME - should system emails ignore this setting to avoid abuse?
     if (userDTO.getEmailVerificationStatus() == EmailVerificationStatus.DELIVERY_FAILED) {
-      log.info("Email sending abandoned - verification status is DELIVERY_FAILED");
+      log.info("MMM - Email sending abandoned - verification status is DELIVERY_FAILED");
       return false;
     }
 
+    log.info("MMM - filterByPreferencesAndAddToQueue 2");
+
     // if this is an email type that cannot have a preference, send it and log as appropriate
     if (!email.getEmailType().isValidEmailPreference()) {
-      log.info(String.format("Added %s email to the queue with subject: %s",
+      log.info(String.format("MMM - Added %s email to the queue with subject: %s",
           email.getEmailType().toString().toLowerCase(), sanitiseInternalLogValue(email.getSubject())));
       logManager.logInternalEvent(userDTO, SegueServerLogType.SENT_EMAIL, eventDetails);
       addToQueue(email);
       return true;
     }
+
+    log.info("MMM - filterByPreferencesAndAddToQueue 3");
 
     try {
       UserPreference preference = userPreferenceManager.getUserPreference(SegueUserPreferences.EMAIL_PREFERENCE.name(),
@@ -377,9 +385,11 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
         return true;
       }
 
+      log.info("MMM - filterByPreferencesAndAddToQueue 4");
+
       return false;
     } catch (SegueDatabaseException e1) {
-      throw new SegueDatabaseException(String.format("Email of type %s cannot be sent - "
+      throw new SegueDatabaseException(String.format("MMM - Email of type %s cannot be sent - "
           + "error accessing preferences in database", email.getEmailType().toString()));
     }
   }
@@ -682,14 +692,14 @@ public class EmailManager extends AbstractCommunicationQueue<EmailCommunicationM
     ContentDTO c = this.contentManager.getContentById(id);
 
     if (null == c) {
-      throw new ResourceNotFoundException(String.format("E-mail template %s does not exist!", id));
+      throw new ResourceNotFoundException(String.format("MMM - E-mail template %s does not exist!", id));
     }
 
     EmailTemplateDTO emailTemplateDTO;
     if (c instanceof EmailTemplateDTO) {
       emailTemplateDTO = (EmailTemplateDTO) c;
     } else {
-      throw new ContentManagerException("Content is of incorrect type:" + c.getType());
+      throw new ContentManagerException("MMM - Content is of incorrect type:" + c.getType());
     }
 
     return emailTemplateDTO;

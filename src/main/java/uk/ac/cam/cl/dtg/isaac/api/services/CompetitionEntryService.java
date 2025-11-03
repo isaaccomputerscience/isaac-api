@@ -71,17 +71,18 @@ public class CompetitionEntryService {
       final RegisteredUserDTO reservingUser) {
 
     if (event == null || entryDTO == null || reservingUser == null) {
-      log.error("Cannot send competition entry confirmation: null parameter provided");
+      log.error("MMM - Cannot send competition entry confirmation: null parameter provided");
       return;
     }
 
     try {
-      log.info("Preparing to send competition entry confirmation email for user ID: {}, event: {}",
+      log.info("MMM -Preparing to send competition entry confirmation email for user ID: {}, event: {}",
           reservingUser.getId(), event.getId());
 
       // Build email context with submission details
       final Map<String, Object> emailContext = buildEmailContext(event, entryDTO, reservingUser);
 
+      emailContext.forEach((k,v) -> log.info("MMM - " + v.toString()));
       // Load email template
       final EmailTemplateDTO emailTemplate = emailManager.getEmailTemplateDTO(EMAIL_TEMPLATE_ID);
 
@@ -93,20 +94,20 @@ public class CompetitionEntryService {
           EmailType.SYSTEM
       );
 
-      log.info("Successfully sent competition entry confirmation email to teacher: {} {}, email: {}",
+      log.info("MMM - Successfully sent competition entry confirmation email to teacher: {} {}, email: {}",
           reservingUser.getGivenName(), reservingUser.getFamilyName(), reservingUser.getEmail());
 
     } catch (ContentManagerException e) {
       // Template not found or content issue - log error but don't fail submission
-      log.error("Failed to send competition entry confirmation: Email template '{}' not found or invalid",
+      log.error("MMM - Failed to send competition entry confirmation: Email template '{}' not found or invalid",
           EMAIL_TEMPLATE_ID, e);
     } catch (SegueDatabaseException e) {
       // Database issue - log error but don't fail submission
-      log.error("Failed to send competition entry confirmation: Database error for user ID {}",
+      log.error("MMM - Failed to send competition entry confirmation: Database error for user ID {}",
           reservingUser.getId(), e);
     } catch (Exception e) {
       // Any other unexpected error - log but don't fail submission
-      log.error("Unexpected error sending competition entry confirmation email for user ID {}",
+      log.error("MMM - Unexpected error sending competition entry confirmation email for user ID {}",
           reservingUser.getId(), e);
     }
   }

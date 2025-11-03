@@ -1004,7 +1004,8 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
-      if(Objects.equals(reservingUser.getRole(), Role.ADMIN)) { // Temporary condition for PROD testing with ADMINs
+      log.info("MMM - role: " + reservingUser.getRole().name());
+      if(reservingUser.getRole().equals(Role.ADMIN)) { // Temporary condition for PROD testing with ADMINs
         competitionEntryService.sendCompetitionEntryConfirmation(event, entryDTO, reservingUser);
       }
 
