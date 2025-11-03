@@ -26,7 +26,6 @@ import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
  * The email includes details of the submission such as project title,
  * project link, group name, and list of students.
  *
- * @author Isaac Computer Science Team
  */
 public class CompetitionEntryService {
   private static final Logger log = LoggerFactory.getLogger(CompetitionEntryService.class);
@@ -37,12 +36,6 @@ public class CompetitionEntryService {
   private final EmailManager emailManager;
   private final UserAccountManager userAccountManager;
 
-  /**
-   * Constructor for dependency injection.
-   *
-   * @param emailManager       Manager for sending templated emails
-   * @param userAccountManager Manager for user account operations
-   */
   @Inject
   public CompetitionEntryService(
       final EmailManager emailManager,
@@ -54,12 +47,7 @@ public class CompetitionEntryService {
   /**
    * Send confirmation email to teacher after competition entry submission.
    * <p>
-   * This method extracts the necessary information from the CompetitionEntryDTO
-   * and the event, then sends a confirmation email to the reserving user (teacher).
-   * <p>
-   * IMPORTANT: If email sending fails, this method logs the error but does NOT
-   * throw an exception, ensuring the submission is still considered successful.
-   * This is by design - email delivery issues should not cause submission failures.
+   * ! Only logs the error !
    *
    * @param event         The competition event (must not be null)
    * @param entryDTO      The competition entry DTO containing submission details
@@ -71,22 +59,18 @@ public class CompetitionEntryService {
       final RegisteredUserDTO reservingUser) {
 
     if (event == null || entryDTO == null || reservingUser == null) {
-      log.error("MMM - Cannot send competition entry confirmation: null parameter provided");
+      log.error("Cannot send competition entry confirmation: null parameter provided");
       return;
     }
 
     try {
-      log.info("MMM -Preparing to send competition entry confirmation email for user ID: {}, event: {}",
+      log.info("Preparing to send competition entry confirmation email for user ID: {}, event: {}",
           reservingUser.getId(), event.getId());
 
-      // Build email context with submission details
       final Map<String, Object> emailContext = buildEmailContext(event, entryDTO, reservingUser);
 
-      emailContext.forEach((k,v) -> log.info("MMM - " + v.toString()));
-      // Load email template
       final EmailTemplateDTO emailTemplate = emailManager.getEmailTemplateDTO(EMAIL_TEMPLATE_ID);
 
-      // Send email immediately to the reserving user (teacher)
       emailManager.sendTemplatedEmailToUser(
           reservingUser,
           emailTemplate,
@@ -94,20 +78,17 @@ public class CompetitionEntryService {
           EmailType.SYSTEM
       );
 
-      log.info("MMM - Successfully sent competition entry confirmation email to teacher: {} {}, email: {}",
+      log.info("Successfully sent competition entry confirmation email to teacher: {} {}, email: {}",
           reservingUser.getGivenName(), reservingUser.getFamilyName(), reservingUser.getEmail());
 
     } catch (ContentManagerException e) {
-      // Template not found or content issue - log error but don't fail submission
-      log.error("MMM - Failed to send competition entry confirmation: Email template '{}' not found or invalid",
+      log.error("Failed to send competition entry confirmation: Email template '{}' not found or invalid",
           EMAIL_TEMPLATE_ID, e);
     } catch (SegueDatabaseException e) {
-      // Database issue - log error but don't fail submission
-      log.error("MMM - Failed to send competition entry confirmation: Database error for user ID {}",
+      log.error("Failed to send competition entry confirmation: Database error for user ID {}",
           reservingUser.getId(), e);
     } catch (Exception e) {
-      // Any other unexpected error - log but don't fail submission
-      log.error("MMM - Unexpected error sending competition entry confirmation email for user ID {}",
+      log.error("Unexpected error sending competition entry confirmation email for user ID {}",
           reservingUser.getId(), e);
     }
   }
@@ -131,17 +112,12 @@ public class CompetitionEntryService {
       final CompetitionEntryDTO entryDTO,
       final RegisteredUserDTO reservingUser) {
 
-    // Format students list from entrant IDs
     final String studentsList = formatStudentsList(entryDTO.getEntrantIds());
 
-    // Extract submission details from DTO
     final String projectTitle = entryDTO.getProjectTitle() != null ? entryDTO.getProjectTitle() : "";
     final String projectLink = entryDTO.getSubmissionURL() != null ? entryDTO.getSubmissionURL() : "";
     final String groupName = entryDTO.getGroupName() != null ? entryDTO.getGroupName() : "";
 
-    // Build context map with all template variables
-    // Note: givenName and sig will be automatically added by EmailManager
-    // from user properties and globalStringTokens respectively
     return Map.of(
         "event", event,
         "givenName", reservingUser.getGivenName(),
@@ -149,20 +125,12 @@ public class CompetitionEntryService {
         "projectLink", projectLink,
         "groupName", groupName,
         "studentsList", studentsList,
-        "contactUsURL", String.format("<a href=\"mailto:%s\">contact us</a>", CONTACT_US_EMAIL)
+        "contactUsURL", CONTACT_US_EMAIL
     );
   }
 
   /**
    * Format the list of students as a readable string for the email.
-   * <p>
-   * This method looks up each student by their user ID and formats their
-   * full name on a new line with a bullet point.
-   * <p>
-   * Example output:
-   * - John Smith
-   * - Jane Doe
-   * - Bob Johnson
    * <p>
    * If a user cannot be found or there's an error, that student will be
    * skipped with a log message.
@@ -179,7 +147,6 @@ public class CompetitionEntryService {
 
     for (Long userId : entrantIds) {
       try {
-        // Look up each student by their user ID
         RegisteredUserDTO student = userAccountManager.getUserDTOById(userId);
 
         String firstName = student.getGivenName() != null ? student.getGivenName() : "";
@@ -192,13 +159,11 @@ public class CompetitionEntryService {
             .append("\n");
 
       } catch (NoUserException e) {
-        // Student not found - log but continue with others
         log.warn("Could not find student with ID {} for competition entry confirmation email", userId);
         sb.append("- Student ID ")
             .append(userId)
             .append(" (user not found)\n");
       } catch (Exception e) {
-        // Unexpected error - log but continue
         log.error("Error looking up student ID {} for email", userId, e);
       }
     }
