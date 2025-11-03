@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.api.exceptions.DuplicateBookingException;
 import uk.ac.cam.cl.dtg.isaac.api.exceptions.EventIsFullException;
 import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
+import uk.ac.cam.cl.dtg.isaac.api.services.CompetitionEntryService;
 import uk.ac.cam.cl.dtg.isaac.dos.ExamBoard;
 import uk.ac.cam.cl.dtg.isaac.dos.Stage;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
@@ -64,6 +65,7 @@ class EventsFacadeTest {
   private RegisteredUserDTO mockTeacher;
   private RegisteredUserDTO mockStudent;
   private IsaacEventPageDTO mockEvent;
+  private CompetitionEntryService competitionEntryService;
 
   @BeforeEach
   void beforeEach() {
@@ -77,10 +79,11 @@ class EventsFacadeTest {
     this.groupManager = createMock(GroupManager.class);
     this.schoolListReader = createMock(SchoolListReader.class);
     this.mapper = createMock(MainObjectMapper.class);
+    this.competitionEntryService = createMock(CompetitionEntryService.class);
     this.eventsFacade = new EventsFacade(
         this.properties, this.logManager, this.bookingManager, this.userManager,
         this.contentManager, this.userBadgeManager, this.userAssociationManager,
-        this.groupManager, this.schoolListReader, this.mapper
+        this.groupManager, this.schoolListReader, competitionEntryService, this.mapper
     );
     this.mockRequest = createMock(HttpServletRequest.class);
     this.eventId = "competition_event_123";

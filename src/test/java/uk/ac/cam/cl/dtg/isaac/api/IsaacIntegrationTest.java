@@ -56,6 +56,7 @@ import uk.ac.cam.cl.dtg.isaac.api.managers.QuizManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.QuizQuestionManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.URIManager;
 import uk.ac.cam.cl.dtg.isaac.api.services.AssignmentService;
+import uk.ac.cam.cl.dtg.isaac.api.services.CompetitionEntryService;
 import uk.ac.cam.cl.dtg.isaac.api.services.ContentSummarizerService;
 import uk.ac.cam.cl.dtg.isaac.api.services.EmailService;
 import uk.ac.cam.cl.dtg.isaac.dao.EventBookingPersistenceManager;
@@ -165,6 +166,8 @@ public abstract class IsaacIntegrationTest {
   protected static PgUsers pgUsers;
   protected static PgAnonymousUsers pgAnonymousUsers;
   protected static ContentMapperUtils contentMapperUtils;
+
+  protected static CompetitionEntryService competitionEntryService;
 
   // Services
   protected static AssignmentService assignmentService;

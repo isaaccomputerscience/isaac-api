@@ -61,7 +61,7 @@ class EventsFacadeIT extends IsaacIntegrationTest {
     eventsFacade =
         new EventsFacade(properties, logManager, eventBookingManager, userAccountManager, contentManager,
             userBadgeManager, userAssociationManager, groupManager, schoolListReader,
-            mainObjectMapper);
+            competitionEntryService, mainObjectMapper);
     bookingDatabase = new PgEventBookings(postgresSqlDb, new ObjectMapper());
   }
 

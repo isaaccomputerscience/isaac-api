@@ -100,6 +100,7 @@ import uk.ac.cam.cl.dtg.isaac.api.exceptions.EventIsCancelledException;
 import uk.ac.cam.cl.dtg.isaac.api.exceptions.EventIsFullException;
 import uk.ac.cam.cl.dtg.isaac.api.exceptions.EventIsNotFullException;
 import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
+import uk.ac.cam.cl.dtg.isaac.api.services.CompetitionEntryService;
 import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
@@ -156,21 +157,24 @@ public class EventsFacade extends AbstractIsaacFacade {
   private final UserAssociationManager userAssociationManager;
   private final SchoolListReader schoolListReader;
 
+  private final CompetitionEntryService competitionEntryService;
+
   private final MainObjectMapper mapper;
 
   /**
    * EventsFacade.
    *
-   * @param properties             global properties map
-   * @param logManager             for managing logs.
-   * @param bookingManager         Instance of Booking Manager
-   * @param userManager            Instance of User Manager
-   * @param contentManager         for retrieving event content
-   * @param userBadgeManager       for updating badge information
-   * @param userAssociationManager for checking permissions and filtering records
-   * @param groupManager           Instance of Group Manager
-   * @param schoolListReader       for retrieving school information
-   * @param mapper                 Instance of Mapper Facade, to map between DO and DTO classes
+   * @param properties              global properties map
+   * @param logManager              for managing logs.
+   * @param bookingManager          Instance of Booking Manager
+   * @param userManager             Instance of User Manager
+   * @param contentManager          for retrieving event content
+   * @param userBadgeManager        for updating badge information
+   * @param userAssociationManager  for checking permissions and filtering records
+   * @param groupManager            Instance of Group Manager
+   * @param schoolListReader        for retrieving school information
+   * @param competitionEntryService
+   * @param mapper                  Instance of Mapper Facade, to map between DO and DTO classes
    */
   @Inject
   public EventsFacade(final PropertiesLoader properties, final ILogManager logManager,
@@ -178,7 +182,7 @@ public class EventsFacade extends AbstractIsaacFacade {
                       final GitContentManager contentManager,
                       final UserBadgeManager userBadgeManager, final UserAssociationManager userAssociationManager,
                       final GroupManager groupManager,
-                      final SchoolListReader schoolListReader, final MainObjectMapper mapper) {
+                      final SchoolListReader schoolListReader, CompetitionEntryService competitionEntryService, final MainObjectMapper mapper) {
     super(properties, logManager);
     this.bookingManager = bookingManager;
     this.userManager = userManager;
@@ -187,6 +191,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     this.userAssociationManager = userAssociationManager;
     this.groupManager = groupManager;
     this.schoolListReader = schoolListReader;
+    this.competitionEntryService = competitionEntryService;
     this.mapper = mapper;
   }
 
@@ -998,6 +1003,10 @@ public class EventsFacade extends AbstractIsaacFacade {
           event, entryDTO, reservingUser);
 
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
+
+      if(Objects.equals(reservingUser.getRole(), Role.ADMIN)) { // Temporary condition for PROD testing with ADMINs
+        competitionEntryService.sendCompetitionEntryConfirmation(event, entryDTO, reservingUser);
+      }
 
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
