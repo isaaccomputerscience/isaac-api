@@ -1120,6 +1120,7 @@ public class UserAccountManager implements IUserAccountManager {
     userToSave.setEmailVerificationStatus(EmailVerificationStatus.NOT_VERIFIED);
     userToSave.setRegistrationDate(Instant.now());
     userToSave.setLastUpdated(Instant.now());
+    userToSave.setPrivacyPolicyAcceptedTime(Instant.now());
 
     if (registeredUserContexts != null) {
       // We always set the last confirmed date from code rather than trusting the client
