@@ -1009,9 +1009,8 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
-      if (reservingUser.getRole().equals(Role.ADMIN)) { // Temporary condition for PROD testing with ADMINs
-        competitionEntryService.sendCompetitionEntryConfirmation(event, entryDTO, reservingUser);
-      }
+      competitionEntryService.sendCompetitionEntryConfirmation(event, entryDTO, reservingUser);
+
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
     } catch (IllegalArgumentException e) {
