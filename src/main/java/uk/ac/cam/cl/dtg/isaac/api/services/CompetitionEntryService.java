@@ -19,10 +19,8 @@ import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 
 /**
  * Service for handling competition entry submissions and confirmations.
- *
  * This service is responsible for sending automated confirmation emails
  * to teachers immediately after they submit a competition entry.
- *
  * The email includes details of the submission such as project title,
  * project link, group name, and list of students.
  *
@@ -46,9 +44,7 @@ public class CompetitionEntryService {
 
   /**
    * Send confirmation email to teacher after competition entry submission.
-   * <p>
    * ! Only logs the error !
-   *
    * @param event         The competition event (must not be null)
    * @param entryDTO      The competition entry DTO containing submission details
    * @param reservingUser The teacher who submitted the entry (must not be null)
@@ -95,13 +91,10 @@ public class CompetitionEntryService {
 
   /**
    * Build the email context map with all template variables.
-   * <p>
    * This creates a map containing all the variables that will be substituted
    * into the email template, including event details and submission data.
-   * <p>
    * This method extracts information from the CompetitionEntryDTO and looks up
    * student names from their user IDs.
-   *
    * @param event         The competition event
    * @param entryDTO      The competition entry DTO
    * @param reservingUser The teacher submitting the entry
@@ -130,13 +123,12 @@ public class CompetitionEntryService {
   }
 
   /**
-   * Format the list of students as a readable string for the email.
-   * <p>
+   * Format the list of students as an HTML bullet list for the email.
+   * Returns an HTML unordered list (&lt;ul&gt;) with each student as a list item (&lt;li&gt;).
    * If a user cannot be found or there's an error, that student will be
    * skipped with a log message.
-   *
    * @param entrantIds List of student user IDs
-   * @return Formatted string of students
+   * @return HTML formatted bullet list of students
    */
   private String formatStudentsList(final List<Long> entrantIds) {
     if (entrantIds == null || entrantIds.isEmpty()) {
@@ -144,6 +136,7 @@ public class CompetitionEntryService {
     }
 
     final StringBuilder sb = new StringBuilder();
+    sb.append("<ul>");
 
     for (Long userId : entrantIds) {
       try {
@@ -151,24 +144,36 @@ public class CompetitionEntryService {
 
         String firstName = student.getGivenName() != null ? student.getGivenName() : "";
         String lastName = student.getFamilyName() != null ? student.getFamilyName() : "";
+        String fullName = (firstName + " " + lastName).trim();
 
-        sb.append("- ")
-            .append(firstName)
-            .append(" ")
-            .append(lastName)
-            .append("\n");
+        if (fullName.isEmpty()) {
+          fullName = "Unknown name";
+        }
+
+        sb.append("<li>")
+            .append(fullName)
+            .append("</li>");
 
       } catch (NoUserException e) {
         log.warn("Could not find student with ID {} for competition entry confirmation email", userId);
-        sb.append("- Student ID ")
+        sb.append("<li>")
+            .append("Student ID ")
             .append(userId)
-            .append(" (user not found)\n");
+            .append(" (user not found)")
+            .append("</li>");
       } catch (Exception e) {
         log.error("Error looking up student ID {} for email", userId, e);
       }
     }
 
-    String result = sb.toString().trim();
-    return result.isEmpty() ? "No students listed" : result;
+    sb.append("</ul>");
+
+    // If only the opening and closing tags exist, return fallback message
+    String result = sb.toString();
+    if (result.equals("<ul></ul>")) {
+      return "No students listed";
+    }
+
+    return result;
   }
 }

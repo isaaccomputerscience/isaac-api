@@ -10,6 +10,7 @@ import static org.easymock.EasyMock.newCapture;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,6 +31,7 @@ import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
+import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 
 class CompetitionEntryServiceTest {
 
@@ -129,7 +131,8 @@ class CompetitionEntryServiceTest {
   }
 
   @Test
-  void sendCompetitionEntryConfirmation_nullEvent_logsErrorAndDoesNotSendEmail() {
+  void sendCompetitionEntryConfirmation_nullEvent_logsErrorAndDoesNotSendEmail()
+      throws Exception {
     // Arrange
     replay(emailManager, userAccountManager);
 
@@ -146,7 +149,8 @@ class CompetitionEntryServiceTest {
   }
 
   @Test
-  void sendCompetitionEntryConfirmation_nullEntryDTO_logsErrorAndDoesNotSendEmail() {
+  void sendCompetitionEntryConfirmation_nullEntryDTO_logsErrorAndDoesNotSendEmail()
+      throws Exception {
     // Arrange
     replay(emailManager, userAccountManager);
 
@@ -163,7 +167,8 @@ class CompetitionEntryServiceTest {
   }
 
   @Test
-  void sendCompetitionEntryConfirmation_nullReservingUser_logsErrorAndDoesNotSendEmail() {
+  void sendCompetitionEntryConfirmation_nullReservingUser_logsErrorAndDoesNotSendEmail()
+      throws Exception {
     // Arrange
     replay(emailManager, userAccountManager);
 
@@ -376,10 +381,12 @@ class CompetitionEntryServiceTest {
     expect(emailManager.getEmailTemplateDTO("email_competition_entry_confirmation"))
         .andReturn(mockEmailTemplate);
 
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
     emailManager.sendTemplatedEmailToUser(
         eq(mockTeacher),
         eq(mockEmailTemplate),
-        anyObject(Map.class),
+        capture(emailContextCapture),
         eq(EmailType.SYSTEM)
     );
     expectLastCall();
@@ -395,6 +402,8 @@ class CompetitionEntryServiceTest {
 
     // Assert
     verify(emailManager, userAccountManager);
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    assertEquals("No students listed", capturedContext.get("studentsList"));
   }
 
   @Test
@@ -406,10 +415,12 @@ class CompetitionEntryServiceTest {
     expect(emailManager.getEmailTemplateDTO("email_competition_entry_confirmation"))
         .andReturn(mockEmailTemplate);
 
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
     emailManager.sendTemplatedEmailToUser(
         eq(mockTeacher),
         eq(mockEmailTemplate),
-        anyObject(Map.class),
+        capture(emailContextCapture),
         eq(EmailType.SYSTEM)
     );
     expectLastCall();
@@ -425,6 +436,8 @@ class CompetitionEntryServiceTest {
 
     // Assert
     verify(emailManager, userAccountManager);
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    assertEquals("No students listed", capturedContext.get("studentsList"));
   }
 
   @Test
@@ -442,10 +455,12 @@ class CompetitionEntryServiceTest {
     expect(userAccountManager.getUserDTOById(1002L))
         .andThrow(new NoUserException("User not found"));
 
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
     emailManager.sendTemplatedEmailToUser(
         eq(mockTeacher),
         eq(mockEmailTemplate),
-        anyObject(Map.class),
+        capture(emailContextCapture),
         eq(EmailType.SYSTEM)
     );
     expectLastCall();
@@ -461,6 +476,12 @@ class CompetitionEntryServiceTest {
 
     // Assert
     verify(emailManager, userAccountManager);
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    String studentsList = (String) capturedContext.get("studentsList");
+    assertTrue(studentsList.contains("<ul>"));
+    assertTrue(studentsList.contains("</ul>"));
+    assertTrue(studentsList.contains("<li>Alice Johnson</li>"));
+    assertTrue(studentsList.contains("<li>Student ID 1002 (user not found)</li>"));
   }
 
   @Test
@@ -477,10 +498,12 @@ class CompetitionEntryServiceTest {
     expect(userAccountManager.getUserDTOById(1002L))
         .andThrow(new NoUserException("User not found"));
 
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
     emailManager.sendTemplatedEmailToUser(
         eq(mockTeacher),
         eq(mockEmailTemplate),
-        anyObject(Map.class),
+        capture(emailContextCapture),
         eq(EmailType.SYSTEM)
     );
     expectLastCall();
@@ -496,6 +519,12 @@ class CompetitionEntryServiceTest {
 
     // Assert
     verify(emailManager, userAccountManager);
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    String studentsList = (String) capturedContext.get("studentsList");
+    assertTrue(studentsList.contains("<ul>"));
+    assertTrue(studentsList.contains("</ul>"));
+    assertTrue(studentsList.contains("<li>Student ID 1001 (user not found)</li>"));
+    assertTrue(studentsList.contains("<li>Student ID 1002 (user not found)</li>"));
   }
 
   @Test
@@ -512,10 +541,12 @@ class CompetitionEntryServiceTest {
 
     expect(userAccountManager.getUserDTOById(1001L)).andReturn(student1);
 
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
     emailManager.sendTemplatedEmailToUser(
         eq(mockTeacher),
         eq(mockEmailTemplate),
-        anyObject(Map.class),
+        capture(emailContextCapture),
         eq(EmailType.SYSTEM)
     );
     expectLastCall();
@@ -531,6 +562,9 @@ class CompetitionEntryServiceTest {
 
     // Assert
     verify(emailManager, userAccountManager);
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    String studentsList = (String) capturedContext.get("studentsList");
+    assertTrue(studentsList.contains("<li>Johnson</li>"));
   }
 
   @Test
@@ -547,10 +581,12 @@ class CompetitionEntryServiceTest {
 
     expect(userAccountManager.getUserDTOById(1001L)).andReturn(student1);
 
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
     emailManager.sendTemplatedEmailToUser(
         eq(mockTeacher),
         eq(mockEmailTemplate),
-        anyObject(Map.class),
+        capture(emailContextCapture),
         eq(EmailType.SYSTEM)
     );
     expectLastCall();
@@ -566,6 +602,9 @@ class CompetitionEntryServiceTest {
 
     // Assert
     verify(emailManager, userAccountManager);
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    String studentsList = (String) capturedContext.get("studentsList");
+    assertTrue(studentsList.contains("<li>Alice</li>"));
   }
 
   @Test
@@ -583,10 +622,12 @@ class CompetitionEntryServiceTest {
 
     expect(userAccountManager.getUserDTOById(1001L)).andReturn(student1);
 
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
     emailManager.sendTemplatedEmailToUser(
         eq(mockTeacher),
         eq(mockEmailTemplate),
-        anyObject(Map.class),
+        capture(emailContextCapture),
         eq(EmailType.SYSTEM)
     );
     expectLastCall();
@@ -602,6 +643,9 @@ class CompetitionEntryServiceTest {
 
     // Assert
     verify(emailManager, userAccountManager);
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    String studentsList = (String) capturedContext.get("studentsList");
+    assertTrue(studentsList.contains("<li>Unknown name</li>"));
   }
 
   @Test
@@ -619,10 +663,12 @@ class CompetitionEntryServiceTest {
     expect(userAccountManager.getUserDTOById(1002L))
         .andThrow(new RuntimeException("Unexpected error"));
 
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
     emailManager.sendTemplatedEmailToUser(
         eq(mockTeacher),
         eq(mockEmailTemplate),
-        anyObject(Map.class),
+        capture(emailContextCapture),
         eq(EmailType.SYSTEM)
     );
     expectLastCall();
@@ -638,6 +684,50 @@ class CompetitionEntryServiceTest {
 
     // Assert
     verify(emailManager, userAccountManager);
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    String studentsList = (String) capturedContext.get("studentsList");
+    assertTrue(studentsList.contains("<li>Alice Johnson</li>"));
+    // Student 1002 should be skipped due to exception
+  }
+
+  @Test
+  void formatStudentsList_allExceptionsSkipped_returnsNoStudentsListed()
+      throws Exception {
+    // Arrange
+    mockEntryDTO.setEntrantIds(Arrays.asList(1001L, 1002L));
+
+    expect(emailManager.getEmailTemplateDTO("email_competition_entry_confirmation"))
+        .andReturn(mockEmailTemplate);
+
+    expect(userAccountManager.getUserDTOById(1001L))
+        .andThrow(new RuntimeException("Unexpected error"));
+    expect(userAccountManager.getUserDTOById(1002L))
+        .andThrow(new RuntimeException("Unexpected error"));
+
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
+    emailManager.sendTemplatedEmailToUser(
+        eq(mockTeacher),
+        eq(mockEmailTemplate),
+        capture(emailContextCapture),
+        eq(EmailType.SYSTEM)
+    );
+    expectLastCall();
+
+    replay(emailManager, userAccountManager);
+
+    // Act
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        mockEvent,
+        mockEntryDTO,
+        mockTeacher
+    );
+
+    // Assert
+    verify(emailManager, userAccountManager);
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    String studentsList = (String) capturedContext.get("studentsList");
+    assertEquals("No students listed", studentsList);
   }
 
   @Test
@@ -698,10 +788,12 @@ class CompetitionEntryServiceTest {
         .andThrow(new NoUserException("User not found"));
     expect(userAccountManager.getUserDTOById(1003L)).andReturn(student3);
 
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
     emailManager.sendTemplatedEmailToUser(
         eq(mockTeacher),
         eq(mockEmailTemplate),
-        anyObject(Map.class),
+        capture(emailContextCapture),
         eq(EmailType.SYSTEM)
     );
     expectLastCall();
@@ -717,6 +809,11 @@ class CompetitionEntryServiceTest {
 
     // Assert
     verify(emailManager, userAccountManager);
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    String studentsList = (String) capturedContext.get("studentsList");
+    assertTrue(studentsList.contains("<li>Alice Johnson</li>"));
+    assertTrue(studentsList.contains("<li>Student ID 1002 (user not found)</li>"));
+    assertTrue(studentsList.contains("<li>Charlie Brown</li>"));
   }
 
   @Test
@@ -811,9 +908,97 @@ class CompetitionEntryServiceTest {
     assertEquals("contact@isaaccomputerscience.org", capturedContext.get("contactUsURL"));
 
     String studentsList = (String) capturedContext.get("studentsList");
-    assertTrue(studentsList.contains("Alice Johnson"));
-    assertTrue(studentsList.contains("Bob Smith"));
-    assertTrue(studentsList.contains("Charlie Brown"));
+    assertTrue(studentsList.contains("<ul>"));
+    assertTrue(studentsList.contains("</ul>"));
+    assertTrue(studentsList.contains("<li>Alice Johnson</li>"));
+    assertTrue(studentsList.contains("<li>Bob Smith</li>"));
+    assertTrue(studentsList.contains("<li>Charlie Brown</li>"));
   }
-  
+
+  @Test
+  void sendCompetitionEntryConfirmation_verifyCorrectEmailTypeIsUsed()
+      throws Exception {
+    // Arrange
+    RegisteredUserDTO student1 = createMockStudent(1001L, "Alice", "Johnson");
+    RegisteredUserDTO student2 = createMockStudent(1002L, "Bob", "Smith");
+    RegisteredUserDTO student3 = createMockStudent(1003L, "Charlie", "Brown");
+
+    expect(emailManager.getEmailTemplateDTO("email_competition_entry_confirmation"))
+        .andReturn(mockEmailTemplate);
+
+    expect(userAccountManager.getUserDTOById(1001L)).andReturn(student1);
+    expect(userAccountManager.getUserDTOById(1002L)).andReturn(student2);
+    expect(userAccountManager.getUserDTOById(1003L)).andReturn(student3);
+
+    // Verify EMAIL_TYPE is SYSTEM
+    emailManager.sendTemplatedEmailToUser(
+        eq(mockTeacher),
+        eq(mockEmailTemplate),
+        anyObject(Map.class),
+        eq(EmailType.SYSTEM)
+    );
+    expectLastCall();
+
+    replay(emailManager, userAccountManager);
+
+    // Act
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        mockEvent,
+        mockEntryDTO,
+        mockTeacher
+    );
+
+    // Assert
+    verify(emailManager, userAccountManager);
+  }
+
+  @Test
+  void formatStudentsList_generatesValidHtmlBulletList()
+      throws Exception {
+    // Arrange
+    RegisteredUserDTO student1 = createMockStudent(1001L, "Alice", "Johnson");
+    RegisteredUserDTO student2 = createMockStudent(1002L, "Bob", "Smith");
+
+    mockEntryDTO.setEntrantIds(Arrays.asList(1001L, 1002L));
+
+    expect(emailManager.getEmailTemplateDTO("email_competition_entry_confirmation"))
+        .andReturn(mockEmailTemplate);
+
+    expect(userAccountManager.getUserDTOById(1001L)).andReturn(student1);
+    expect(userAccountManager.getUserDTOById(1002L)).andReturn(student2);
+
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
+    emailManager.sendTemplatedEmailToUser(
+        eq(mockTeacher),
+        eq(mockEmailTemplate),
+        capture(emailContextCapture),
+        eq(EmailType.SYSTEM)
+    );
+    expectLastCall();
+
+    replay(emailManager, userAccountManager);
+
+    // Act
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        mockEvent,
+        mockEntryDTO,
+        mockTeacher
+    );
+
+    // Assert
+    verify(emailManager, userAccountManager);
+
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    String studentsList = (String) capturedContext.get("studentsList");
+
+    // Verify HTML structure
+    assertTrue(studentsList.startsWith("<ul>"));
+    assertTrue(studentsList.endsWith("</ul>"));
+    assertTrue(studentsList.contains("<li>Alice Johnson</li>"));
+    assertTrue(studentsList.contains("<li>Bob Smith</li>"));
+
+    // Verify no plain text newlines
+    assertFalse(studentsList.contains("\n- "));
+  }
 }

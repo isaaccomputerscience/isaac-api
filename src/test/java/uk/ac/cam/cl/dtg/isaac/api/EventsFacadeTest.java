@@ -64,6 +64,7 @@ class EventsFacadeTest {
   private HttpServletRequest mockRequest;
   private String eventId;
   private RegisteredUserDTO mockTeacher;
+  private RegisteredUserDTO mockAdmin;
   private RegisteredUserDTO mockStudent;
   private IsaacEventPageDTO mockEvent;
   private CompetitionEntryService competitionEntryService;
@@ -90,6 +91,7 @@ class EventsFacadeTest {
     this.eventId = "competition_event_123";
 
     this.mockTeacher = createMockTeacher();
+    this.mockAdmin = createMockAdmin();
     this.mockStudent = createMockStudent(1001L);
     this.mockEvent = createMockCompetitionEvent();
   }
@@ -104,6 +106,18 @@ class EventsFacadeTest {
     teacher.setSchoolId("URN12345");
     teacher.setSchoolOther("Test School");
     return teacher;
+  }
+
+  private RegisteredUserDTO createMockAdmin() {
+    RegisteredUserDTO admin = new RegisteredUserDTO();
+    admin.setId(6000L);
+    admin.setRole(Role.ADMIN);
+    admin.setGivenName("John2");
+    admin.setFamilyName("Doe2");
+    admin.setEmail("john.doe2@school.com");
+    admin.setSchoolId("URN123456");
+    admin.setSchoolOther("Test School 2");
+    return admin;
   }
 
   private RegisteredUserDTO createMockStudent(Long id) {
@@ -202,21 +216,21 @@ class EventsFacadeTest {
     booking.setBookingStatus(BookingStatus.CONFIRMED);
 
     expectGetRawEventDTOById(eventId, privateEvent);
-    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
+    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockAdmin);
     expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
-    expect(userAssociationManager.hasPermission(mockTeacher, mockStudent)).andReturn(true);
+    expect(userAssociationManager.hasPermission(mockAdmin, mockStudent)).andReturn(true);
     expect(bookingManager.createCompetitionBooking(
-        eq(privateEvent), eq(mockStudent), eq(mockTeacher),
+        eq(privateEvent), eq(mockStudent), eq(mockAdmin),
         anyObject(Map.class), eq(BookingStatus.CONFIRMED)))
         .andReturn(booking);
 
-    logManager.logEvent(eq(mockTeacher), eq(mockRequest),
+    logManager.logEvent(eq(mockAdmin), eq(mockRequest),
         eq(SegueServerLogType.EVENT_RESERVATIONS_CREATED),
         anyObject(Map.class));
     expectLastCall();
 
     competitionEntryService.sendCompetitionEntryConfirmation(
-        eq(privateEvent), eq(entryDTO), eq(mockTeacher));
+        eq(privateEvent), eq(entryDTO), eq(mockAdmin));
     expectLastCall();
 
     expect(mapper.mapList(anyObject(List.class), eq(EventBookingDTO.class),
@@ -757,22 +771,22 @@ class EventsFacadeTest {
     booking.setBookingStatus(BookingStatus.CONFIRMED);
 
     expectGetRawEventDTOById(eventId, mockEvent);
-    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
+    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockAdmin);
     expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
-    expect(userAssociationManager.hasPermission(mockTeacher, mockStudent)).andReturn(true);
+    expect(userAssociationManager.hasPermission(mockAdmin, mockStudent)).andReturn(true);
     expect(bookingManager.getBookingStatus(eventId, 1001L)).andReturn(null);
     expect(bookingManager.createCompetitionBooking(
-        eq(mockEvent), eq(mockStudent), eq(mockTeacher),
+        eq(mockEvent), eq(mockStudent), eq(mockAdmin),
         anyObject(Map.class), eq(BookingStatus.CONFIRMED)))
         .andReturn(booking);
 
-    logManager.logEvent(eq(mockTeacher), eq(mockRequest),
+    logManager.logEvent(eq(mockAdmin), eq(mockRequest),
         eq(SegueServerLogType.EVENT_RESERVATIONS_CREATED),
         anyObject(Map.class));
     expectLastCall();
 
     competitionEntryService.sendCompetitionEntryConfirmation(
-        eq(mockEvent), eq(entryDTO), eq(mockTeacher));
+        eq(mockEvent), eq(entryDTO), eq(mockAdmin));
     expectLastCall();
 
     expect(mapper.mapList(anyObject(List.class), eq(EventBookingDTO.class),
@@ -1015,23 +1029,23 @@ class EventsFacadeTest {
     booking.setBookingStatus(BookingStatus.CONFIRMED);
 
     expectGetRawEventDTOById(eventId, mockEvent);
-    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
+    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockAdmin);
     expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
-    expect(userAssociationManager.hasPermission(mockTeacher, mockStudent)).andReturn(true);
+    expect(userAssociationManager.hasPermission(mockAdmin, mockStudent)).andReturn(true);
     expect(bookingManager.getBookingStatus(eventId, 1001L)).andReturn(null);
     expect(bookingManager.createCompetitionBooking(
-        eq(mockEvent), eq(mockStudent), eq(mockTeacher),
+        eq(mockEvent), eq(mockStudent), eq(mockAdmin),
         anyObject(Map.class), eq(BookingStatus.CONFIRMED)))
         .andReturn(booking);
 
-    logManager.logEvent(eq(mockTeacher), eq(mockRequest),
+    logManager.logEvent(eq(mockAdmin), eq(mockRequest),
         eq(SegueServerLogType.EVENT_RESERVATIONS_CREATED),
         anyObject(Map.class));
     expectLastCall();
 
     // Verify confirmation email is sent
     competitionEntryService.sendCompetitionEntryConfirmation(
-        eq(mockEvent), eq(entryDTO), eq(mockTeacher));
+        eq(mockEvent), eq(entryDTO), eq(mockAdmin));
     expectLastCall().once();
 
     expect(mapper.mapList(anyObject(List.class), eq(EventBookingDTO.class),

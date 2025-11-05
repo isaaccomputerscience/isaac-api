@@ -173,14 +173,17 @@ public class EventsFacade extends AbstractIsaacFacade {
    * @param userAssociationManager  for checking permissions and filtering records
    * @param groupManager            Instance of Group Manager
    * @param schoolListReader        for retrieving school information
-   * @param competitionEntryService
+   * @param competitionEntryService provides competition related services
    * @param mapper                  Instance of Mapper Facade, to map between DO and DTO classes
    */
   @Inject
-  public EventsFacade(final PropertiesLoader properties, final ILogManager logManager,
-                      final EventBookingManager bookingManager, final UserAccountManager userManager,
+  public EventsFacade(final PropertiesLoader properties,
+                      final ILogManager logManager,
+                      final EventBookingManager bookingManager,
+                      final UserAccountManager userManager,
                       final GitContentManager contentManager,
-                      final UserBadgeManager userBadgeManager, final UserAssociationManager userAssociationManager,
+                      final UserBadgeManager userBadgeManager,
+                      final UserAssociationManager userAssociationManager,
                       final GroupManager groupManager,
                       final SchoolListReader schoolListReader,
                       final CompetitionEntryService competitionEntryService,
@@ -1006,8 +1009,9 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       logCompetitionEntryCreation(reservingUser, request, event, entryDTO);
 
-      competitionEntryService.sendCompetitionEntryConfirmation(event, entryDTO, reservingUser);
-
+      if (reservingUser.getRole().equals(Role.ADMIN)) { // Temporary condition for PROD testing with ADMINs
+        competitionEntryService.sendCompetitionEntryConfirmation(event, entryDTO, reservingUser);
+      }
       return Response.ok(this.mapper.mapList(bookings, EventBookingDTO.class, EventBookingDTO.class)).build();
 
     } catch (IllegalArgumentException e) {
