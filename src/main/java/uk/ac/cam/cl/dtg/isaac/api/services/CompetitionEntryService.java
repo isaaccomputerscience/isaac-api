@@ -44,7 +44,7 @@ public class CompetitionEntryService {
 
   /**
    * Send confirmation email to teacher after competition entry submission.
-   * ! Only logs the error !
+   *
    * @param event         The competition event (must not be null)
    * @param entryDTO      The competition entry DTO containing submission details
    * @param reservingUser The teacher who submitted the entry (must not be null)
@@ -95,6 +95,7 @@ public class CompetitionEntryService {
    * into the email template, including event details and submission data.
    * This method extracts information from the CompetitionEntryDTO and looks up
    * student names from their user IDs.
+   *
    * @param event         The competition event
    * @param entryDTO      The competition entry DTO
    * @param reservingUser The teacher submitting the entry
@@ -127,6 +128,7 @@ public class CompetitionEntryService {
    * Returns an HTML unordered list (&lt;ul&gt;) with each student as a list item (&lt;li&gt;).
    * If a user cannot be found or there's an error, that student will be
    * skipped with a log message.
+   * 
    * @param entrantIds List of student user IDs
    * @return HTML formatted bullet list of students
    */

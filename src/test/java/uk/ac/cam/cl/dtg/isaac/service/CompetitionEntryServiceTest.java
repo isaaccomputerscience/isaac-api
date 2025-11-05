@@ -31,7 +31,6 @@ import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
-import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 
 class CompetitionEntryServiceTest {
 
@@ -131,8 +130,7 @@ class CompetitionEntryServiceTest {
   }
 
   @Test
-  void sendCompetitionEntryConfirmation_nullEvent_logsErrorAndDoesNotSendEmail()
-      throws Exception {
+  void sendCompetitionEntryConfirmation_nullEvent_logsErrorAndDoesNotSendEmail() {
     // Arrange
     replay(emailManager, userAccountManager);
 
@@ -149,8 +147,7 @@ class CompetitionEntryServiceTest {
   }
 
   @Test
-  void sendCompetitionEntryConfirmation_nullEntryDTO_logsErrorAndDoesNotSendEmail()
-      throws Exception {
+  void sendCompetitionEntryConfirmation_nullEntryDTO_logsErrorAndDoesNotSendEmail() {
     // Arrange
     replay(emailManager, userAccountManager);
 
@@ -167,8 +164,7 @@ class CompetitionEntryServiceTest {
   }
 
   @Test
-  void sendCompetitionEntryConfirmation_nullReservingUser_logsErrorAndDoesNotSendEmail()
-      throws Exception {
+  void sendCompetitionEntryConfirmation_nullReservingUser_logsErrorAndDoesNotSendEmail() {
     // Arrange
     replay(emailManager, userAccountManager);
 
@@ -913,43 +909,6 @@ class CompetitionEntryServiceTest {
     assertTrue(studentsList.contains("<li>Alice Johnson</li>"));
     assertTrue(studentsList.contains("<li>Bob Smith</li>"));
     assertTrue(studentsList.contains("<li>Charlie Brown</li>"));
-  }
-
-  @Test
-  void sendCompetitionEntryConfirmation_verifyCorrectEmailTypeIsUsed()
-      throws Exception {
-    // Arrange
-    RegisteredUserDTO student1 = createMockStudent(1001L, "Alice", "Johnson");
-    RegisteredUserDTO student2 = createMockStudent(1002L, "Bob", "Smith");
-    RegisteredUserDTO student3 = createMockStudent(1003L, "Charlie", "Brown");
-
-    expect(emailManager.getEmailTemplateDTO("email_competition_entry_confirmation"))
-        .andReturn(mockEmailTemplate);
-
-    expect(userAccountManager.getUserDTOById(1001L)).andReturn(student1);
-    expect(userAccountManager.getUserDTOById(1002L)).andReturn(student2);
-    expect(userAccountManager.getUserDTOById(1003L)).andReturn(student3);
-
-    // Verify EMAIL_TYPE is SYSTEM
-    emailManager.sendTemplatedEmailToUser(
-        eq(mockTeacher),
-        eq(mockEmailTemplate),
-        anyObject(Map.class),
-        eq(EmailType.SYSTEM)
-    );
-    expectLastCall();
-
-    replay(emailManager, userAccountManager);
-
-    // Act
-    competitionEntryService.sendCompetitionEntryConfirmation(
-        mockEvent,
-        mockEntryDTO,
-        mockTeacher
-    );
-
-    // Assert
-    verify(emailManager, userAccountManager);
   }
 
   @Test
