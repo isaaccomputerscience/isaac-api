@@ -106,7 +106,7 @@ public class CompetitionEntryService {
       final CompetitionEntryDTO entryDTO,
       final RegisteredUserDTO reservingUser) {
 
-    final String studentsList = formatStudentsList(entryDTO.getEntrantIds());
+    var studentsList = formatStudentsList(entryDTO.getEntrantIds());
 
     final String projectTitle = entryDTO.getProjectTitle() != null ? entryDTO.getProjectTitle() : "";
     final String projectLink = entryDTO.getSubmissionURL() != null ? entryDTO.getSubmissionURL() : "";
@@ -118,7 +118,8 @@ public class CompetitionEntryService {
         "projectTitle", projectTitle,
         "projectLink", projectLink,
         "groupName", groupName,
-        "studentsList", studentsList,
+        "studentsList", studentsList.get("studentsList"),
+        "studentsList_HTML", studentsList.get("studentsList_HTML"),
         "contactUsURL", CONTACT_US_EMAIL
     );
   }
@@ -128,17 +129,18 @@ public class CompetitionEntryService {
    * Returns an HTML unordered list (&lt;ul&gt;) with each student as a list item (&lt;li&gt;).
    * If a user cannot be found or there's an error, that student will be
    * skipped with a log message.
-   * 
+   *
    * @param entrantIds List of student user IDs
    * @return HTML formatted bullet list of students
    */
-  private String formatStudentsList(final List<Long> entrantIds) {
+  private Map<String, String> formatStudentsList(final List<Long> entrantIds) {
     if (entrantIds == null || entrantIds.isEmpty()) {
-      return "No students listed";
+      return null;
     }
 
-    final StringBuilder sb = new StringBuilder();
-    sb.append("<ul>");
+    StringBuilder htmlSB = new StringBuilder();
+    StringBuilder plainTextSB = new StringBuilder();
+    htmlSB.append("<ul>");
 
     for (Long userId : entrantIds) {
       try {
@@ -146,36 +148,26 @@ public class CompetitionEntryService {
 
         String firstName = student.getGivenName() != null ? student.getGivenName() : "";
         String lastName = student.getFamilyName() != null ? student.getFamilyName() : "";
-        String fullName = (firstName + " " + lastName).trim();
 
-        if (fullName.isEmpty()) {
-          fullName = "Unknown name";
-        }
-
-        sb.append("<li>")
-            .append(fullName)
-            .append("</li>");
+        String userFullName = String.format("%s %s", firstName, lastName);
+        htmlSB.append(String.format("<li>%s</li>", userFullName));
+        plainTextSB.append(String.format("- %s\n", userFullName));
 
       } catch (NoUserException e) {
-        log.warn("Could not find student with ID {} for competition entry confirmation email", userId);
-        sb.append("<li>")
-            .append("Student ID ")
-            .append(userId)
-            .append(" (user not found)")
-            .append("</li>");
+        log.error("Could not find student with ID {} for competition entry confirmation email", userId);
       } catch (Exception e) {
         log.error("Error looking up student ID {} for email", userId, e);
       }
     }
 
-    sb.append("</ul>");
+    htmlSB.append("</ul>");
 
     // If only the opening and closing tags exist, return fallback message
-    String result = sb.toString();
+    String result = htmlSB.toString();
     if (result.equals("<ul></ul>")) {
-      return "No students listed";
+      return null;
     }
 
-    return result;
+    return Map.of("studentsList_HTML", result, "studentsList", plainTextSB.toString());
   }
 }

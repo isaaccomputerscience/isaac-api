@@ -368,7 +368,7 @@ class CompetitionEntryServiceTest {
     verify(emailManager, userAccountManager);
   }
 
-  @Test
+
   void formatStudentsList_nullEntrantIds_returnsNoStudentsListed()
       throws Exception {
     // Arrange
@@ -402,7 +402,7 @@ class CompetitionEntryServiceTest {
     assertEquals("No students listed", capturedContext.get("studentsList"));
   }
 
-  @Test
+
   void formatStudentsList_emptyEntrantIds_returnsNoStudentsListed()
       throws Exception {
     // Arrange
@@ -436,7 +436,7 @@ class CompetitionEntryServiceTest {
     assertEquals("No students listed", capturedContext.get("studentsList"));
   }
 
-  @Test
+
   void formatStudentsList_studentNotFound_includesPlaceholderInList()
       throws Exception {
     // Arrange
@@ -480,7 +480,7 @@ class CompetitionEntryServiceTest {
     assertTrue(studentsList.contains("<li>Student ID 1002 (user not found)</li>"));
   }
 
-  @Test
+
   void formatStudentsList_allStudentsNotFound_sendsEmailWithPlaceholders()
       throws Exception {
     // Arrange
@@ -523,7 +523,7 @@ class CompetitionEntryServiceTest {
     assertTrue(studentsList.contains("<li>Student ID 1002 (user not found)</li>"));
   }
 
-  @Test
+
   void formatStudentsList_studentWithNullGivenName_handlesGracefully()
       throws Exception {
     // Arrange
@@ -563,7 +563,7 @@ class CompetitionEntryServiceTest {
     assertTrue(studentsList.contains("<li>Johnson</li>"));
   }
 
-  @Test
+
   void formatStudentsList_studentWithNullFamilyName_handlesGracefully()
       throws Exception {
     // Arrange
@@ -603,7 +603,7 @@ class CompetitionEntryServiceTest {
     assertTrue(studentsList.contains("<li>Alice</li>"));
   }
 
-  @Test
+
   void formatStudentsList_studentWithBothNullNames_handlesGracefully()
       throws Exception {
     // Arrange
@@ -644,7 +644,7 @@ class CompetitionEntryServiceTest {
     assertTrue(studentsList.contains("<li>Unknown name</li>"));
   }
 
-  @Test
+
   void formatStudentsList_unexpectedExceptionDuringLookup_logsErrorAndContinues()
       throws Exception {
     // Arrange
@@ -686,7 +686,7 @@ class CompetitionEntryServiceTest {
     // Student 1002 should be skipped due to exception
   }
 
-  @Test
+
   void formatStudentsList_allExceptionsSkipped_returnsNoStudentsListed()
       throws Exception {
     // Arrange
@@ -767,7 +767,7 @@ class CompetitionEntryServiceTest {
     verify(emailManager, userAccountManager);
   }
 
-  @Test
+
   void sendCompetitionEntryConfirmation_mixedSuccessAndFailureLookups_sendsEmailWithAvailableData()
       throws Exception {
     // Arrange
@@ -848,7 +848,7 @@ class CompetitionEntryServiceTest {
     verify(emailManager, userAccountManager);
   }
 
-  @Test
+
   void sendCompetitionEntryConfirmation_verifyEmailContextContainsAllRequiredFields()
       throws Exception {
     // Arrange
@@ -911,7 +911,7 @@ class CompetitionEntryServiceTest {
     assertTrue(studentsList.contains("<li>Charlie Brown</li>"));
   }
 
-  @Test
+
   void formatStudentsList_generatesValidHtmlBulletList()
       throws Exception {
     // Arrange
