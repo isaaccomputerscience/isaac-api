@@ -21,6 +21,7 @@ import java.util.Map;
 import org.easymock.Capture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
 import uk.ac.cam.cl.dtg.isaac.api.services.CompetitionEntryService;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
@@ -41,20 +42,28 @@ class CompetitionEntryServiceTest {
   private CompetitionEntryDTO mockEntryDTO;
   private RegisteredUserDTO mockTeacher;
   private EmailTemplateDTO mockEmailTemplate;
+  private EventBookingManager eventBookingManager;
 
   @BeforeEach
   void beforeEach() {
     this.emailManager = createMock(EmailManager.class);
     this.userAccountManager = createMock(UserAccountManager.class);
-    this.competitionEntryService = new CompetitionEntryService(
-        this.emailManager,
-        this.userAccountManager
-    );
-
     this.mockEvent = createMockEvent();
     this.mockEntryDTO = createMockEntryDTO();
     this.mockTeacher = createMockTeacher();
     this.mockEmailTemplate = createMock(EmailTemplateDTO.class);
+    this.eventBookingManager = createMock(EventBookingManager.class);
+
+    expect(eventBookingManager.generateEventContactUsURL(anyObject(IsaacEventPageDTO.class)))
+        .andReturn("studentURL")
+        .anyTimes();
+
+    replay(eventBookingManager);
+
+    this.competitionEntryService = new CompetitionEntryService(
+        this.emailManager,
+        this.userAccountManager,
+        this.eventBookingManager);
   }
 
   private IsaacEventPageDTO createMockEvent() {

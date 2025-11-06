@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.CompetitionEntryDTO;
@@ -29,17 +30,18 @@ public class CompetitionEntryService {
   private static final Logger log = LoggerFactory.getLogger(CompetitionEntryService.class);
 
   private static final String EMAIL_TEMPLATE_ID = "email_competition_entry_confirmation";
-  private static final String CONTACT_US_EMAIL = "contact@isaaccomputerscience.org";
 
   private final EmailManager emailManager;
   private final UserAccountManager userAccountManager;
+  private final EventBookingManager eventBookingManager;
 
   @Inject
   public CompetitionEntryService(
       final EmailManager emailManager,
-      final UserAccountManager userAccountManager) {
+      final UserAccountManager userAccountManager, EventBookingManager eventBookingManager) {
     this.emailManager = emailManager;
     this.userAccountManager = userAccountManager;
+    this.eventBookingManager = eventBookingManager;
   }
 
   /**
@@ -120,7 +122,7 @@ public class CompetitionEntryService {
         "groupName", groupName,
         "studentsList", studentsList.get("studentsList"),
         "studentsList_HTML", studentsList.get("studentsList_HTML"),
-        "contactUsURL", CONTACT_US_EMAIL
+        "contactUsURL", eventBookingManager.generateEventContactUsURL(event)
     );
   }
 
