@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager.STUDENTS_LIST;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -408,7 +409,7 @@ class CompetitionEntryServiceTest {
     // Assert
     verify(emailManager, userAccountManager);
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    assertEquals("No students listed", capturedContext.get("studentsList"));
+    assertEquals("No students listed", capturedContext.get(STUDENTS_LIST));
   }
 
 
@@ -442,7 +443,7 @@ class CompetitionEntryServiceTest {
     // Assert
     verify(emailManager, userAccountManager);
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    assertEquals("No students listed", capturedContext.get("studentsList"));
+    assertEquals("No students listed", capturedContext.get(STUDENTS_LIST));
   }
 
 
@@ -482,7 +483,7 @@ class CompetitionEntryServiceTest {
     // Assert
     verify(emailManager, userAccountManager);
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    String studentsList = (String) capturedContext.get("studentsList");
+    String studentsList = (String) capturedContext.get(STUDENTS_LIST);
     assertTrue(studentsList.contains("<ul>"));
     assertTrue(studentsList.contains("</ul>"));
     assertTrue(studentsList.contains("<li>Alice Johnson</li>"));
@@ -525,7 +526,7 @@ class CompetitionEntryServiceTest {
     // Assert
     verify(emailManager, userAccountManager);
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    String studentsList = (String) capturedContext.get("studentsList");
+    String studentsList = (String) capturedContext.get(STUDENTS_LIST);
     assertTrue(studentsList.contains("<ul>"));
     assertTrue(studentsList.contains("</ul>"));
     assertTrue(studentsList.contains("<li>Student ID 1001 (user not found)</li>"));
@@ -568,7 +569,7 @@ class CompetitionEntryServiceTest {
     // Assert
     verify(emailManager, userAccountManager);
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    String studentsList = (String) capturedContext.get("studentsList");
+    String studentsList = (String) capturedContext.get(STUDENTS_LIST);
     assertTrue(studentsList.contains("<li>Johnson</li>"));
   }
 
@@ -608,7 +609,7 @@ class CompetitionEntryServiceTest {
     // Assert
     verify(emailManager, userAccountManager);
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    String studentsList = (String) capturedContext.get("studentsList");
+    String studentsList = (String) capturedContext.get(STUDENTS_LIST);
     assertTrue(studentsList.contains("<li>Alice</li>"));
   }
 
@@ -649,7 +650,7 @@ class CompetitionEntryServiceTest {
     // Assert
     verify(emailManager, userAccountManager);
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    String studentsList = (String) capturedContext.get("studentsList");
+    String studentsList = (String) capturedContext.get(STUDENTS_LIST);
     assertTrue(studentsList.contains("<li>Unknown name</li>"));
   }
 
@@ -690,7 +691,7 @@ class CompetitionEntryServiceTest {
     // Assert
     verify(emailManager, userAccountManager);
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    String studentsList = (String) capturedContext.get("studentsList");
+    String studentsList = (String) capturedContext.get(STUDENTS_LIST);
     assertTrue(studentsList.contains("<li>Alice Johnson</li>"));
     // Student 1002 should be skipped due to exception
   }
@@ -731,7 +732,7 @@ class CompetitionEntryServiceTest {
     // Assert
     verify(emailManager, userAccountManager);
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    String studentsList = (String) capturedContext.get("studentsList");
+    String studentsList = (String) capturedContext.get(STUDENTS_LIST);
     assertEquals("No students listed", studentsList);
   }
 
@@ -815,7 +816,7 @@ class CompetitionEntryServiceTest {
     // Assert
     verify(emailManager, userAccountManager);
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    String studentsList = (String) capturedContext.get("studentsList");
+    String studentsList = (String) capturedContext.get(STUDENTS_LIST);
     assertTrue(studentsList.contains("<li>Alice Johnson</li>"));
     assertTrue(studentsList.contains("<li>Student ID 1002 (user not found)</li>"));
     assertTrue(studentsList.contains("<li>Charlie Brown</li>"));
@@ -902,7 +903,7 @@ class CompetitionEntryServiceTest {
     assertTrue(capturedContext.containsKey("projectTitle"));
     assertTrue(capturedContext.containsKey("projectLink"));
     assertTrue(capturedContext.containsKey("groupName"));
-    assertTrue(capturedContext.containsKey("studentsList"));
+    assertTrue(capturedContext.containsKey(STUDENTS_LIST));
     assertTrue(capturedContext.containsKey("contactUsURL"));
 
     assertEquals(mockEvent, capturedContext.get("event"));
@@ -912,7 +913,7 @@ class CompetitionEntryServiceTest {
     assertEquals("Team Alpha", capturedContext.get("groupName"));
     assertEquals("contact@isaaccomputerscience.org", capturedContext.get("contactUsURL"));
 
-    String studentsList = (String) capturedContext.get("studentsList");
+    String studentsList = (String) capturedContext.get(STUDENTS_LIST);
     assertTrue(studentsList.contains("<ul>"));
     assertTrue(studentsList.contains("</ul>"));
     assertTrue(studentsList.contains("<li>Alice Johnson</li>"));
@@ -958,7 +959,7 @@ class CompetitionEntryServiceTest {
     verify(emailManager, userAccountManager);
 
     Map<String, Object> capturedContext = emailContextCapture.getValue();
-    String studentsList = (String) capturedContext.get("studentsList");
+    String studentsList = (String) capturedContext.get(STUDENTS_LIST);
 
     // Verify HTML structure
     assertTrue(studentsList.startsWith("<ul>"));

@@ -105,6 +105,8 @@ public class EventBookingManager {
 
   private static final String AUTH_TOKEN_LINK = "https://%s/account?authToken=%s";
   private static final String EVENT_STAGE_STUDENT = "student";
+  public static final String STUDENTS_LIST = "studentsList";
+  public static final String STUDENTS_LIST_HTML = "studentsList_HTML";
 
   private final EventBookingPersistenceManager bookingPersistenceManager;
   private final EmailManager emailManager;
@@ -442,7 +444,7 @@ public class EventBookingManager {
                                                         final RegisteredUserDTO reservingUser,
                                                         final Map<String, String> additionalEventInformation,
                                                         final BookingStatus status)
-      throws SegueDatabaseException, DuplicateBookingException, EventIsFullException, EventIsCancelledException {
+      throws SegueDatabaseException, EventIsFullException, EventIsCancelledException {
 
     if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
       throw new EventIsCancelledException(
@@ -669,7 +671,7 @@ public class EventBookingManager {
         RegisteredUserDTO user = userAccountManager.getUserDTOById(reservation.getUserBooked().getId());
         String userFullName = String.format("%s %s", user.getGivenName(), user.getFamilyName());
         htmlSB.append(String.format("<li>%s</li>", userFullName));
-        plainTextSB.append(String.format("- %s\n", userFullName));
+        plainTextSB.append(String.format("- %s%n", userFullName));
       }
       htmlSB.append("</ul>");
       sendEventReservationRecapEmail(event, reservingUser, htmlSB, plainTextSB);
@@ -1233,8 +1235,8 @@ public class EventBookingManager {
             .put(EMAIL_TEMPLATE_TOKEN_EVENT_URL,
                 String.format("https://%s/events/%s", propertiesLoader.getProperty(HOST_NAME), event.getId()))
             .put(EMAIL_TEMPLATE_TOKEN_EVENT, event)
-            .put("studentsList", plainTextSB.toString())
-            .put("studentsList_HTML", htmlSB.toString())
+            .put(STUDENTS_LIST, plainTextSB.toString())
+            .put(STUDENTS_LIST_HTML, htmlSB.toString())
             .build(),
         EmailType.SYSTEM);
   }

@@ -940,34 +940,6 @@ class EventsFacadeTest {
   }
 
   @Test
-  void createCompetitionEntry_duplicateBooking_returnsBadRequest()
-      throws Exception {
-    // Arrange
-    CompetitionEntryDTO entryDTO = new CompetitionEntryDTO();
-    entryDTO.setEntrantIds(List.of(1001L));
-
-    expectGetRawEventDTOById(eventId, mockEvent);
-    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
-    expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
-    expect(userAssociationManager.hasPermission(mockTeacher, mockStudent)).andReturn(true);
-    expect(bookingManager.getBookingStatus(eventId, 1001L)).andReturn(null);
-    expect(bookingManager.createCompetitionBooking(
-        eq(mockEvent), eq(mockStudent), eq(mockTeacher),
-        anyObject(Map.class), eq(BookingStatus.CONFIRMED)))
-        .andThrow(new DuplicateBookingException("Duplicate booking"));
-
-    replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
-        competitionEntryService, mapper);
-
-    // Act
-    Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
-
-    // Assert
-    assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-  }
-
-  @Test
   void createCompetitionEntry_userNotFound_returnsNotFound()
       throws Exception {
     // Arrange

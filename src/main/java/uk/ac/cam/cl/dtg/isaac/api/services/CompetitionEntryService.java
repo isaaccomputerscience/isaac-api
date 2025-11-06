@@ -1,6 +1,9 @@
 package uk.ac.cam.cl.dtg.isaac.api.services;
 
 
+import static uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager.STUDENTS_LIST;
+import static uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager.STUDENTS_LIST_HTML;
+
 import com.google.inject.Inject;
 import java.util.List;
 import java.util.Map;
@@ -120,8 +123,8 @@ public class CompetitionEntryService {
         "projectTitle", projectTitle,
         "projectLink", projectLink,
         "groupName", groupName,
-        "studentsList", studentsList.get("studentsList"),
-        "studentsList_HTML", studentsList.get("studentsList_HTML"),
+        STUDENTS_LIST, studentsList.get(STUDENTS_LIST),
+        STUDENTS_LIST_HTML, studentsList.get(STUDENTS_LIST_HTML),
         "contactUsURL", eventBookingManager.generateEventContactUsURL(event)
     );
   }
@@ -140,9 +143,9 @@ public class CompetitionEntryService {
       return null;
     }
 
-    StringBuilder htmlSB = new StringBuilder();
-    StringBuilder plainTextSB = new StringBuilder();
-    htmlSB.append("<ul>");
+    StringBuilder htmlString = new StringBuilder();
+    StringBuilder plainTextString = new StringBuilder();
+    htmlString.append("<ul>");
 
     for (Long userId : entrantIds) {
       try {
@@ -152,8 +155,8 @@ public class CompetitionEntryService {
         String lastName = student.getFamilyName() != null ? student.getFamilyName() : "";
 
         String userFullName = String.format("%s %s", firstName, lastName);
-        htmlSB.append(String.format("<li>%s</li>", userFullName));
-        plainTextSB.append(String.format("- %s\n", userFullName));
+        htmlString.append(String.format("<li>%s</li>", userFullName));
+        plainTextString.append(String.format("- %s\n", userFullName));
 
       } catch (NoUserException e) {
         log.error("Could not find student with ID {} for competition entry confirmation email", userId);
@@ -162,14 +165,14 @@ public class CompetitionEntryService {
       }
     }
 
-    htmlSB.append("</ul>");
+    htmlString.append("</ul>");
 
     // If only the opening and closing tags exist, return fallback message
-    String result = htmlSB.toString();
+    String result = htmlString.toString();
     if (result.equals("<ul></ul>")) {
-      return null;
+      return Map.of();
     }
 
-    return Map.of("studentsList_HTML", result, "studentsList", plainTextSB.toString());
+    return Map.of(STUDENTS_LIST_HTML, result, STUDENTS_LIST, plainTextString.toString());
   }
 }
