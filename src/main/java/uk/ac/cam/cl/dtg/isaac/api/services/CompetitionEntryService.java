@@ -3,13 +3,16 @@ package uk.ac.cam.cl.dtg.isaac.api.services;
 
 import static uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager.STUDENTS_LIST;
 import static uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager.STUDENTS_LIST_HTML;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
 
 import com.google.inject.Inject;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.content.EmailTemplateDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.CompetitionEntryDTO;
@@ -20,6 +23,7 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
+import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
  * Service for handling competition entry submissions and confirmations.
@@ -36,15 +40,16 @@ public class CompetitionEntryService {
 
   private final EmailManager emailManager;
   private final UserAccountManager userAccountManager;
-  private final EventBookingManager eventBookingManager;
+  private final PropertiesLoader propertiesLoader;
 
   @Inject
   public CompetitionEntryService(
       final EmailManager emailManager,
-      final UserAccountManager userAccountManager, EventBookingManager eventBookingManager) {
+      final UserAccountManager userAccountManager,
+      PropertiesLoader propertiesLoader) {
     this.emailManager = emailManager;
     this.userAccountManager = userAccountManager;
-    this.eventBookingManager = eventBookingManager;
+    this.propertiesLoader = propertiesLoader;
   }
 
   /**
@@ -125,8 +130,36 @@ public class CompetitionEntryService {
         "groupName", groupName,
         STUDENTS_LIST, studentsList.get(STUDENTS_LIST),
         STUDENTS_LIST_HTML, studentsList.get(STUDENTS_LIST_HTML),
-        "contactUsURL", eventBookingManager.generateEventContactUsURL(event)
+        "contactUsURL", generateEventContactUsURL(reservingUser.getGivenName(),
+            reservingUser.getFamilyName(),
+            reservingUser.getEmail(),
+            "Competition event - " + entryDTO.getProjectTitle())
     );
+  }
+
+  public String generateEventContactUsURL(String givenName, String familyName, String email, String subject) {
+    List<String> params = new ArrayList<>();
+
+    if (subject != null) {
+      params.add("subject=" + URLEncoder.encode(subject, StandardCharsets.UTF_8));
+    }
+    if (email != null) {
+      params.add("email=" + URLEncoder.encode(email, StandardCharsets.UTF_8));
+    }
+    if (givenName != null) {
+      params.add("firstName=" + URLEncoder.encode(givenName, StandardCharsets.UTF_8));
+    }
+    if (familyName != null) {
+      params.add("lastName=" + URLEncoder.encode(familyName, StandardCharsets.UTF_8));
+    }
+
+    String baseUrl = String.format("https://%s/contact", propertiesLoader.getProperty(HOST_NAME));
+
+    if (!params.isEmpty()) {
+      return baseUrl + "?" + String.join("&", params);
+    }
+
+    return baseUrl;
   }
 
   /**
