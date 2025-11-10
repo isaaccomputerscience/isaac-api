@@ -1023,8 +1023,6 @@ public class EventsFacade extends AbstractIsaacFacade {
       return handleDatabaseError(e);
     } catch (EventIsFullException e) {
       return handleEventFullError();
-    } catch (DuplicateBookingException e) {
-      return handleDuplicateBookingError();
     } catch (NoUserException e) {
       return SegueErrorResponse.getResourceNotFoundResponse("Unable to locate one of the users specified.");
     } catch (EventIsCancelledException e) {
