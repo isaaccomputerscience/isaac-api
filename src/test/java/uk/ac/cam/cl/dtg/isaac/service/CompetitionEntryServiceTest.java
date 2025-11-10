@@ -22,7 +22,6 @@ import java.util.Map;
 import org.easymock.Capture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
 import uk.ac.cam.cl.dtg.isaac.api.services.CompetitionEntryService;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
@@ -33,6 +32,7 @@ import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
+import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 class CompetitionEntryServiceTest {
 
@@ -43,7 +43,7 @@ class CompetitionEntryServiceTest {
   private CompetitionEntryDTO mockEntryDTO;
   private RegisteredUserDTO mockTeacher;
   private EmailTemplateDTO mockEmailTemplate;
-  private EventBookingManager eventBookingManager;
+  private PropertiesLoader propertiesLoader;
 
   @BeforeEach
   void beforeEach() {
@@ -53,18 +53,18 @@ class CompetitionEntryServiceTest {
     this.mockEntryDTO = createMockEntryDTO();
     this.mockTeacher = createMockTeacher();
     this.mockEmailTemplate = createMock(EmailTemplateDTO.class);
-    this.eventBookingManager = createMock(EventBookingManager.class);
+    this.propertiesLoader = createMock(PropertiesLoader.class);
 
-    expect(eventBookingManager.generateEventContactUsURL(anyObject(IsaacEventPageDTO.class)))
-        .andReturn("studentURL")
+    expect(propertiesLoader.getProperty(anyObject(String.class)))
+        .andReturn("localhost")
         .anyTimes();
 
-    replay(eventBookingManager);
+    replay(propertiesLoader);
 
     this.competitionEntryService = new CompetitionEntryService(
         this.emailManager,
         this.userAccountManager,
-        this.eventBookingManager);
+        this.propertiesLoader);
   }
 
   private IsaacEventPageDTO createMockEvent() {

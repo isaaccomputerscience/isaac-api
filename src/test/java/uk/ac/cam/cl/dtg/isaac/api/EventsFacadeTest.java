@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.ac.cam.cl.dtg.isaac.api.exceptions.DuplicateBookingException;
 import uk.ac.cam.cl.dtg.isaac.api.exceptions.EventIsCancelledException;
 import uk.ac.cam.cl.dtg.isaac.api.exceptions.EventIsFullException;
 import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
