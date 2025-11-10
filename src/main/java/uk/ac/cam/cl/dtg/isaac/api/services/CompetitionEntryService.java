@@ -173,7 +173,7 @@ public class CompetitionEntryService {
    */
   private Map<String, String> formatStudentsList(final List<Long> entrantIds) {
     if (entrantIds == null || entrantIds.isEmpty()) {
-      return null;
+      return Map.of();
     }
 
     StringBuilder htmlString = new StringBuilder();
@@ -189,7 +189,7 @@ public class CompetitionEntryService {
 
         String userFullName = String.format("%s %s", firstName, lastName);
         htmlString.append(String.format("<li>%s</li>", userFullName));
-        plainTextString.append(String.format("- %s\n", userFullName));
+        plainTextString.append(String.format("- %s%n", userFullName));
 
       } catch (NoUserException e) {
         log.error("Could not find student with ID {} for competition entry confirmation email", userId);

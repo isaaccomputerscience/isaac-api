@@ -128,6 +128,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
  * This class is responsible for managing all user data and orchestration of calls to a user Authentication Manager for
  * dealing with sessions and passwords.
  */
+@SuppressWarnings("java:S107")
 public class UserAccountManager implements IUserAccountManager {
   private static final Logger log = LoggerFactory.getLogger(UserAccountManager.class);
 
@@ -174,12 +175,16 @@ public class UserAccountManager implements IUserAccountManager {
    * @param schoolListReader          to look up a users school.
    */
   @Inject
-  public UserAccountManager(final IUserDataManager database, final QuestionManager questionDb,
+  public UserAccountManager(final IUserDataManager database,
+                            final QuestionManager questionDb,
                             final PropertiesLoader properties,
-                            final Map<AuthenticationProvider, IAuthenticator> providersToRegister,
+                            final Map<AuthenticationProvider,
+                                IAuthenticator> providersToRegister,
                             final UserMapper dtoMapper,
-                            final EmailManager emailQueue, final IAnonymousUserDataManager temporaryUserCache,
-                            final ILogManager logManager, final UserAuthenticationManager userAuthenticationManager,
+                            final EmailManager emailQueue,
+                            final IAnonymousUserDataManager temporaryUserCache,
+                            final ILogManager logManager,
+                            final UserAuthenticationManager userAuthenticationManager,
                             final ISecondFactorAuthenticator secondFactorManager,
                             final AbstractUserPreferenceManager userPreferenceManager,
                             final SchoolListReader schoolListReader) {

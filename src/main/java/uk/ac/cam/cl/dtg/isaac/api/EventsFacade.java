@@ -1081,8 +1081,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       final IsaacEventPageDTO event,
       final CompetitionEntryDTO entryDTO,
       final RegisteredUserDTO reservingUser)
-      throws SegueDatabaseException, NoUserException, EventIsFullException,
-      DuplicateBookingException, EventIsCancelledException {
+      throws SegueDatabaseException, NoUserException, EventIsFullException, EventIsCancelledException {
 
     List<EventBookingDTO> bookings = new ArrayList<>();
 
