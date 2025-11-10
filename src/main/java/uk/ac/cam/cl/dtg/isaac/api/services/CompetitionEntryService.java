@@ -133,7 +133,7 @@ public class CompetitionEntryService {
         "contactUsURL", generateEventContactUsURL(reservingUser.getGivenName(),
             reservingUser.getFamilyName(),
             reservingUser.getEmail(),
-            "Competition event - " + entryDTO.getProjectTitle())
+            "Competition entry - " + entryDTO.getProjectTitle())
     );
   }
 
