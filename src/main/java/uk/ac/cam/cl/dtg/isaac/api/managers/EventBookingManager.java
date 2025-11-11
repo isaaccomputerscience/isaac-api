@@ -105,6 +105,8 @@ public class EventBookingManager {
 
   private static final String AUTH_TOKEN_LINK = "https://%s/account?authToken=%s";
   private static final String EVENT_STAGE_STUDENT = "student";
+  public static final String STUDENTS_LIST = "studentsList";
+  public static final String STUDENTS_LIST_HTML = "studentsList_HTML";
 
   private final EventBookingPersistenceManager bookingPersistenceManager;
   private final EmailManager emailManager;
@@ -423,7 +425,6 @@ public class EventBookingManager {
   /**
    * Create booking on behalf of a user with a reserving user.
    * This method will allow users to be booked onto an event providing there is space. No other rules are applied.
-   * This is similar to createBooking but sets the reserved_by field to track who made the booking.
    * <br>
    * This method will not enforce some of the restrictions such as event deadlines and email verification
    * !Booking a student multiple times for an event is allowed
@@ -436,7 +437,6 @@ public class EventBookingManager {
    * @return the newly created booking.
    * @throws SegueDatabaseException    if an error occurs.
    * @throws EventIsFullException      No space on the event
-   * @throws DuplicateBookingException Duplicate booking, only unique bookings.
    * @throws EventIsCancelledException if the event is cancelled
    */
   public EventBookingDTO createCompetitionBooking(final IsaacEventPageDTO event,
@@ -444,8 +444,8 @@ public class EventBookingManager {
                                                         final RegisteredUserDTO reservingUser,
                                                         final Map<String, String> additionalEventInformation,
                                                         final BookingStatus status)
-      throws SegueDatabaseException, DuplicateBookingException, EventIsFullException, EventIsCancelledException {
-    // Check if event is cancelled
+      throws SegueDatabaseException, EventIsFullException, EventIsCancelledException {
+
     if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
       throw new EventIsCancelledException(
           String.format(EXCEPTION_MESSAGE_TEMPLATE_CANCELLED_EVENT, user.getId(), event.getId()));
@@ -453,7 +453,6 @@ public class EventBookingManager {
 
     EventBookingDTO booking;
     try (ITransaction transaction = transactionManager.getTransaction()) {
-      // Obtain an exclusive database lock to lock the booking
       this.bookingPersistenceManager.lockEventUntilTransactionComplete(transaction, event.getId());
 
       if (BookingStatus.CONFIRMED.equals(status)) {
@@ -472,20 +471,6 @@ public class EventBookingManager {
     }
 
     addUserToEventGroup(event, user);
-
-    try {
-      Instant bookingDate = Instant.now();
-      if (event.getEndDate() == null || bookingDate.isBefore(event.getEndDate())) {
-        if (BookingStatus.CONFIRMED.equals(status)) {
-          sendEventBookingConfirmationNotificationEmail(event, user, booking);
-        } else if (BookingStatus.WAITING_LIST.equals(status)) {
-          sendBookingWaitingListAdditionNotificationEmail2(event, user);
-        }
-      }
-    } catch (ContentManagerException e) {
-      log.error(String.format("Unable to send booking confirmation email (%s) to user (%s)", event.getId(), user
-          .getEmail()), e);
-    }
 
     return booking;
   }
@@ -686,7 +671,7 @@ public class EventBookingManager {
         RegisteredUserDTO user = userAccountManager.getUserDTOById(reservation.getUserBooked().getId());
         String userFullName = String.format("%s %s", user.getGivenName(), user.getFamilyName());
         htmlSB.append(String.format("<li>%s</li>", userFullName));
-        plainTextSB.append(String.format("- %s\n", userFullName));
+        plainTextSB.append(String.format("- %s%n", userFullName));
       }
       htmlSB.append("</ul>");
       sendEventReservationRecapEmail(event, reservingUser, htmlSB, plainTextSB);
@@ -1250,8 +1235,8 @@ public class EventBookingManager {
             .put(EMAIL_TEMPLATE_TOKEN_EVENT_URL,
                 String.format("https://%s/events/%s", propertiesLoader.getProperty(HOST_NAME), event.getId()))
             .put(EMAIL_TEMPLATE_TOKEN_EVENT, event)
-            .put("studentsList", plainTextSB.toString())
-            .put("studentsList_HTML", htmlSB.toString())
+            .put(STUDENTS_LIST, plainTextSB.toString())
+            .put(STUDENTS_LIST_HTML, htmlSB.toString())
             .build(),
         EmailType.SYSTEM);
   }
@@ -1552,7 +1537,7 @@ public class EventBookingManager {
    * @param event the event of interest
    * @return customised contactUs url for the event.
    */
-  private String generateEventContactUsURL(final IsaacEventPageDTO event) {
+  public String generateEventContactUsURL(final IsaacEventPageDTO event) {
     String defaultURL = String.format("https://%s/contact", propertiesLoader.getProperty(HOST_NAME));
     if (event.getDate() == null) {
       return defaultURL;

@@ -18,9 +18,10 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.ac.cam.cl.dtg.isaac.api.exceptions.DuplicateBookingException;
+import uk.ac.cam.cl.dtg.isaac.api.exceptions.EventIsCancelledException;
 import uk.ac.cam.cl.dtg.isaac.api.exceptions.EventIsFullException;
 import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
+import uk.ac.cam.cl.dtg.isaac.api.services.CompetitionEntryService;
 import uk.ac.cam.cl.dtg.isaac.dos.ExamBoard;
 import uk.ac.cam.cl.dtg.isaac.dos.Stage;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
@@ -62,8 +63,10 @@ class EventsFacadeTest {
   private HttpServletRequest mockRequest;
   private String eventId;
   private RegisteredUserDTO mockTeacher;
+  private RegisteredUserDTO mockAdmin;
   private RegisteredUserDTO mockStudent;
   private IsaacEventPageDTO mockEvent;
+  private CompetitionEntryService competitionEntryService;
 
   @BeforeEach
   void beforeEach() {
@@ -77,15 +80,17 @@ class EventsFacadeTest {
     this.groupManager = createMock(GroupManager.class);
     this.schoolListReader = createMock(SchoolListReader.class);
     this.mapper = createMock(MainObjectMapper.class);
+    this.competitionEntryService = createMock(CompetitionEntryService.class);
     this.eventsFacade = new EventsFacade(
         this.properties, this.logManager, this.bookingManager, this.userManager,
         this.contentManager, this.userBadgeManager, this.userAssociationManager,
-        this.groupManager, this.schoolListReader, this.mapper
+        this.groupManager, this.schoolListReader, competitionEntryService, this.mapper
     );
     this.mockRequest = createMock(HttpServletRequest.class);
     this.eventId = "competition_event_123";
 
     this.mockTeacher = createMockTeacher();
+    this.mockAdmin = createMockAdmin();
     this.mockStudent = createMockStudent(1001L);
     this.mockEvent = createMockCompetitionEvent();
   }
@@ -100,6 +105,18 @@ class EventsFacadeTest {
     teacher.setSchoolId("URN12345");
     teacher.setSchoolOther("Test School");
     return teacher;
+  }
+
+  private RegisteredUserDTO createMockAdmin() {
+    RegisteredUserDTO admin = new RegisteredUserDTO();
+    admin.setId(6000L);
+    admin.setRole(Role.ADMIN);
+    admin.setGivenName("John2");
+    admin.setFamilyName("Doe2");
+    admin.setEmail("john.doe2@school.com");
+    admin.setSchoolId("URN123456");
+    admin.setSchoolOther("Test School 2");
+    return admin;
   }
 
   private RegisteredUserDTO createMockStudent(Long id) {
@@ -151,7 +168,8 @@ class EventsFacadeTest {
     expectGetRawEventDTOById(eventId, null);
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -173,7 +191,8 @@ class EventsFacadeTest {
         .andThrow(new SegueDatabaseException("Database error"));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -196,24 +215,29 @@ class EventsFacadeTest {
     booking.setBookingStatus(BookingStatus.CONFIRMED);
 
     expectGetRawEventDTOById(eventId, privateEvent);
-    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
+    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockAdmin);
     expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
-    expect(userAssociationManager.hasPermission(mockTeacher, mockStudent)).andReturn(true);
+    expect(userAssociationManager.hasPermission(mockAdmin, mockStudent)).andReturn(true);
     expect(bookingManager.createCompetitionBooking(
-        eq(privateEvent), eq(mockStudent), eq(mockTeacher),
+        eq(privateEvent), eq(mockStudent), eq(mockAdmin),
         anyObject(Map.class), eq(BookingStatus.CONFIRMED)))
         .andReturn(booking);
 
-    logManager.logEvent(eq(mockTeacher), eq(mockRequest),
+    logManager.logEvent(eq(mockAdmin), eq(mockRequest),
         eq(SegueServerLogType.EVENT_RESERVATIONS_CREATED),
         anyObject(Map.class));
+    expectLastCall();
+
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        eq(privateEvent), eq(entryDTO), eq(mockAdmin));
     expectLastCall();
 
     expect(mapper.mapList(anyObject(List.class), eq(EventBookingDTO.class),
         eq(EventBookingDTO.class))).andReturn(List.of(booking));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -221,6 +245,7 @@ class EventsFacadeTest {
     // Assert
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     verify(bookingManager);
+    verify(competitionEntryService);
   }
 
   @Test
@@ -245,11 +270,16 @@ class EventsFacadeTest {
     logManager.logEvent(anyObject(), anyObject(), anyObject(), anyObject(Map.class));
     expectLastCall();
 
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        anyObject(), anyObject(), anyObject());
+    expectLastCall();
+
     expect(mapper.mapList(anyObject(List.class), anyObject(), anyObject()))
         .andReturn(Arrays.asList(booking));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -281,11 +311,16 @@ class EventsFacadeTest {
     logManager.logEvent(anyObject(), anyObject(), anyObject(), anyObject(Map.class));
     expectLastCall();
 
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        anyObject(), anyObject(), anyObject());
+    expectLastCall();
+
     expect(mapper.mapList(anyObject(List.class), anyObject(), anyObject()))
         .andReturn(Arrays.asList(booking));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -317,11 +352,16 @@ class EventsFacadeTest {
     logManager.logEvent(anyObject(), anyObject(), anyObject(), anyObject(Map.class));
     expectLastCall();
 
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        anyObject(), anyObject(), anyObject());
+    expectLastCall();
+
     expect(mapper.mapList(anyObject(List.class), anyObject(), anyObject()))
         .andReturn(List.of(booking));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -353,11 +393,16 @@ class EventsFacadeTest {
     logManager.logEvent(anyObject(), anyObject(), anyObject(), anyObject(Map.class));
     expectLastCall();
 
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        anyObject(), anyObject(), anyObject());
+    expectLastCall();
+
     expect(mapper.mapList(anyObject(List.class), anyObject(), anyObject()))
         .andReturn(List.of(booking));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -391,11 +436,16 @@ class EventsFacadeTest {
     logManager.logEvent(anyObject(), anyObject(), anyObject(), anyObject(Map.class));
     expectLastCall();
 
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        eq(mockEvent), eq(entryDTO), eq(mockTeacher));
+    expectLastCall();
+
     expect(mapper.mapList(anyObject(List.class), anyObject(), anyObject()))
         .andReturn(List.of(booking));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -429,11 +479,16 @@ class EventsFacadeTest {
     logManager.logEvent(anyObject(), anyObject(), anyObject(), anyObject(Map.class));
     expectLastCall();
 
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        eq(mockEvent), eq(entryDTO), eq(mockTeacher));
+    expectLastCall();
+
     expect(mapper.mapList(anyObject(List.class), anyObject(), anyObject()))
         .andReturn(Arrays.asList(booking));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -452,7 +507,8 @@ class EventsFacadeTest {
     expect(contentManager.getContentById(eventId)).andThrow(new ContentManagerException("Error"));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -475,7 +531,8 @@ class EventsFacadeTest {
     expectGetRawEventDTOById(eventId, nonGroupEvent);
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -496,7 +553,8 @@ class EventsFacadeTest {
     expectGetRawEventDTOById(eventId, mockEvent);
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -517,7 +575,8 @@ class EventsFacadeTest {
     expectGetRawEventDTOById(eventId, mockEvent);
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -541,7 +600,8 @@ class EventsFacadeTest {
     expectGetRawEventDTOById(eventId, limitedEvent);
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -583,11 +643,16 @@ class EventsFacadeTest {
         anyObject(Map.class));
     expectLastCall();
 
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        eq(unlimitedEvent), eq(entryDTO), eq(mockTeacher));
+    expectLastCall();
+
     expect(mapper.mapList(anyObject(List.class), eq(EventBookingDTO.class),
         eq(EventBookingDTO.class))).andReturn(new ArrayList<>());
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -608,7 +673,8 @@ class EventsFacadeTest {
         .andThrow(new NoUserLoggedInException());
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -631,7 +697,8 @@ class EventsFacadeTest {
     expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(studentUser);
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -654,7 +721,8 @@ class EventsFacadeTest {
     expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(tutorUser);
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -676,7 +744,8 @@ class EventsFacadeTest {
     expect(userAssociationManager.hasPermission(mockTeacher, mockStudent)).andReturn(false);
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -701,25 +770,30 @@ class EventsFacadeTest {
     booking.setBookingStatus(BookingStatus.CONFIRMED);
 
     expectGetRawEventDTOById(eventId, mockEvent);
-    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
+    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockAdmin);
     expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
-    expect(userAssociationManager.hasPermission(mockTeacher, mockStudent)).andReturn(true);
+    expect(userAssociationManager.hasPermission(mockAdmin, mockStudent)).andReturn(true);
     expect(bookingManager.getBookingStatus(eventId, 1001L)).andReturn(null);
     expect(bookingManager.createCompetitionBooking(
-        eq(mockEvent), eq(mockStudent), eq(mockTeacher),
+        eq(mockEvent), eq(mockStudent), eq(mockAdmin),
         anyObject(Map.class), eq(BookingStatus.CONFIRMED)))
         .andReturn(booking);
 
-    logManager.logEvent(eq(mockTeacher), eq(mockRequest),
+    logManager.logEvent(eq(mockAdmin), eq(mockRequest),
         eq(SegueServerLogType.EVENT_RESERVATIONS_CREATED),
         anyObject(Map.class));
+    expectLastCall();
+
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        eq(mockEvent), eq(entryDTO), eq(mockAdmin));
     expectLastCall();
 
     expect(mapper.mapList(anyObject(List.class), eq(EventBookingDTO.class),
         eq(EventBookingDTO.class))).andReturn(List.of(booking));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -727,6 +801,7 @@ class EventsFacadeTest {
     // Assert
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     verify(logManager);
+    verify(competitionEntryService);
   }
 
   @Test
@@ -759,11 +834,16 @@ class EventsFacadeTest {
         anyObject(Map.class));
     expectLastCall();
 
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        eq(mockEvent), eq(entryDTO), eq(mockTeacher));
+    expectLastCall();
+
     expect(mapper.mapList(anyObject(List.class), eq(EventBookingDTO.class),
         eq(EventBookingDTO.class))).andReturn(List.of(booking));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -809,11 +889,16 @@ class EventsFacadeTest {
         anyObject(Map.class));
     expectLastCall();
 
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        eq(mockEvent), eq(entryDTO), eq(mockTeacher));
+    expectLastCall();
+
     expect(mapper.mapList(eq(bookings), eq(EventBookingDTO.class),
         eq(EventBookingDTO.class))).andReturn(bookings);
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -841,7 +926,8 @@ class EventsFacadeTest {
         .andThrow(new EventIsFullException("Event is full"));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
@@ -850,33 +936,6 @@ class EventsFacadeTest {
     assertEquals(Response.Status.CONFLICT.getStatusCode(), response.getStatus());
     assertEquals("There are not enough spaces available for this event. Please try again with fewer users.",
         response.readEntity(SegueErrorResponse.class).getErrorMessage());
-  }
-
-  @Test
-  void createCompetitionEntry_duplicateBooking_returnsBadRequest()
-      throws Exception {
-    // Arrange
-    CompetitionEntryDTO entryDTO = new CompetitionEntryDTO();
-    entryDTO.setEntrantIds(List.of(1001L));
-
-    expectGetRawEventDTOById(eventId, mockEvent);
-    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
-    expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
-    expect(userAssociationManager.hasPermission(mockTeacher, mockStudent)).andReturn(true);
-    expect(bookingManager.getBookingStatus(eventId, 1001L)).andReturn(null);
-    expect(bookingManager.createCompetitionBooking(
-        eq(mockEvent), eq(mockStudent), eq(mockTeacher),
-        anyObject(Map.class), eq(BookingStatus.CONFIRMED)))
-        .andThrow(new DuplicateBookingException("Duplicate booking"));
-
-    replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
-
-    // Act
-    Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
-
-    // Assert
-    assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
   }
 
   @Test
@@ -891,12 +950,87 @@ class EventsFacadeTest {
     expect(userManager.getUserDTOById(1001L)).andThrow(new NoUserException("User not found"));
 
     replay(properties, logManager, bookingManager, userManager, contentManager,
-        userBadgeManager, userAssociationManager, groupManager, schoolListReader, mapper);
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
 
     // Act
     Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
 
     // Assert
     assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  void createCompetitionEntry_eventIsCancelled_returnsBadRequest()
+      throws Exception {
+    // Arrange
+    CompetitionEntryDTO entryDTO = new CompetitionEntryDTO();
+    entryDTO.setEntrantIds(List.of(1001L));
+
+    expectGetRawEventDTOById(eventId, mockEvent);
+    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
+    expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
+    expect(userAssociationManager.hasPermission(mockTeacher, mockStudent)).andReturn(true);
+    expect(bookingManager.getBookingStatus(eventId, 1001L)).andReturn(null);
+    expect(bookingManager.createCompetitionBooking(
+        eq(mockEvent), eq(mockStudent), eq(mockTeacher),
+        anyObject(Map.class), eq(BookingStatus.CONFIRMED)))
+        .andThrow(new EventIsCancelledException("Event is cancelled"));
+
+    replay(properties, logManager, bookingManager, userManager, contentManager,
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
+
+    // Act
+    Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
+
+    // Assert
+    assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  void createCompetitionEntry_confirmationEmailSent_succeeds()
+      throws Exception {
+    // Arrange
+    CompetitionEntryDTO entryDTO = new CompetitionEntryDTO();
+    entryDTO.setEntrantIds(List.of(1001L));
+    entryDTO.setGroupName("Test Team");
+
+    EventBookingDTO booking = new EventBookingDTO();
+    booking.setBookingStatus(BookingStatus.CONFIRMED);
+
+    expectGetRawEventDTOById(eventId, mockEvent);
+    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockAdmin);
+    expect(userManager.getUserDTOById(1001L)).andReturn(mockStudent);
+    expect(userAssociationManager.hasPermission(mockAdmin, mockStudent)).andReturn(true);
+    expect(bookingManager.getBookingStatus(eventId, 1001L)).andReturn(null);
+    expect(bookingManager.createCompetitionBooking(
+        eq(mockEvent), eq(mockStudent), eq(mockAdmin),
+        anyObject(Map.class), eq(BookingStatus.CONFIRMED)))
+        .andReturn(booking);
+
+    logManager.logEvent(eq(mockAdmin), eq(mockRequest),
+        eq(SegueServerLogType.EVENT_RESERVATIONS_CREATED),
+        anyObject(Map.class));
+    expectLastCall();
+
+    // Verify confirmation email is sent
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        eq(mockEvent), eq(entryDTO), eq(mockAdmin));
+    expectLastCall().once();
+
+    expect(mapper.mapList(anyObject(List.class), eq(EventBookingDTO.class),
+        eq(EventBookingDTO.class))).andReturn(List.of(booking));
+
+    replay(properties, logManager, bookingManager, userManager, contentManager,
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
+
+    // Act
+    Response response = eventsFacade.createCompetitionEntry(mockRequest, eventId, entryDTO);
+
+    // Assert
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    verify(competitionEntryService);
   }
 }
