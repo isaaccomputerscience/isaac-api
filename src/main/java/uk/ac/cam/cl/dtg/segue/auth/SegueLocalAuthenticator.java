@@ -53,6 +53,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
   private static final Logger log = LoggerFactory.getLogger(SegueLocalAuthenticator.class);
   private static final Integer SHORT_KEY_LENGTH = 128;
   private static final Integer MINIMUM_PASSWORD_LENGTH = 12;
+  private static final Integer MAXIMUM_PASSWORD_LENGTH = 128;
 
   private final IPasswordDataManager passwordDataManager;
   private final IUserDataManager userDataManager;
@@ -146,11 +147,7 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
     }
 
     LocalUserCredential localUserCredential = this.passwordDataManager.getLocalUserCredential(userToCheck.getId());
-    if (null == localUserCredential || localUserCredential.getPassword() == null) {
-      return false;
-    }
-
-    return true;
+    return null != localUserCredential && localUserCredential.getPassword() != null;
   }
 
   @Override
@@ -247,7 +244,12 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
       throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
     }
 
-    if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\\p{P}).{" + MINIMUM_PASSWORD_LENGTH + ",}$")) {
+    if (password.length() > MAXIMUM_PASSWORD_LENGTH) {
+      throw new InvalidPasswordException("Password must be no more than " + MAXIMUM_PASSWORD_LENGTH + " characters.");
+    }
+
+    // ASCII punctuation ranges: ! to / (33-47), : to @ (58-64), [ to ` (91-96), { to ~ (123-126)
+    if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!-/:-@\\[-`{-~]).{" + MINIMUM_PASSWORD_LENGTH + ",}$")) {
       throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
     }
   }
