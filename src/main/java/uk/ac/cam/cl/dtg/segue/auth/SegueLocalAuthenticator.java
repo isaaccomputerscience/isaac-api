@@ -249,7 +249,9 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
     }
 
     // ASCII punctuation ranges: ! to / (33-47), : to @ (58-64), [ to ` (91-96), { to ~ (123-126)
-    if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!-/:-@\\[-`{-~]).{" + MINIMUM_PASSWORD_LENGTH + ",}$")) {
+    if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!-/:-@\\[-`{-~]).{"
+        + MINIMUM_PASSWORD_LENGTH
+        + ",}$")) {
       throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
     }
   }

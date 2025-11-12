@@ -334,7 +334,8 @@ public final class Constants {
   public static final String LOCAL_AUTH_GROUP_MANAGER_EMAIL_FIELDNAME = "groupManagerEmail";
 
   // Local authentication response messages
-  public static final String PASSWORD_REQUIREMENTS_ERROR_MESSAGE = "Passwords must be 12-128 characters in length and contain at least one of each of: "
+  public static final String PASSWORD_REQUIREMENTS_ERROR_MESSAGE =
+      "Passwords must be 12-128 characters in length and contain at least one of each of: "
       + "uppercase character, lowercase character, number and ASCII punctuation character "
       + "(e.g., !@#$%^&*).";
   public static final String LOGIN_MISSING_CREDENTIALS_MESSAGE =
