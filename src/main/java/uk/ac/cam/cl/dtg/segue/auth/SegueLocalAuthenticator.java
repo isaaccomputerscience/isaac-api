@@ -240,18 +240,27 @@ public class SegueLocalAuthenticator implements IPasswordAuthenticator {
 
   @Override
   public void ensureValidPassword(final String password) throws InvalidPasswordException {
-    if (null == password || password.isEmpty()) {
+    if (password == null || password.isEmpty()) {
       throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
     }
 
-    if (password.length() > MAXIMUM_PASSWORD_LENGTH) {
-      throw new InvalidPasswordException("Password must be no more than " + MAXIMUM_PASSWORD_LENGTH + " characters.");
+    if (password.length() < MINIMUM_PASSWORD_LENGTH || password.length() > MAXIMUM_PASSWORD_LENGTH) {
+      throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
     }
 
-    // ASCII punctuation ranges: ! to / (33-47), : to @ (58-64), [ to ` (91-96), { to ~ (123-126)
-    if (!password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!-/:-@\\[-`{-~]).{"
-        + MINIMUM_PASSWORD_LENGTH
-        + ",}$")) {
+    if (!password.matches(".*\\d.*")) {
+      throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
+    }
+
+    if (!password.matches(".*[a-z].*")) {
+      throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
+    }
+
+    if (!password.matches(".*[A-Z].*")) {
+      throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
+    }
+
+    if (!password.matches(".*[!-/:-@\\[-`{-~].*")) {
       throw new InvalidPasswordException(PASSWORD_REQUIREMENTS_ERROR_MESSAGE);
     }
   }
