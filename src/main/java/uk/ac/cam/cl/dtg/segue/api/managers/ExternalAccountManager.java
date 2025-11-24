@@ -19,6 +19,8 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 import com.mailjet.client.errors.MailjetClientCommunicationException;
 import com.mailjet.client.errors.MailjetException;
 import com.mailjet.client.errors.MailjetRateLimitException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -58,111 +60,348 @@ public class ExternalAccountManager implements IExternalAccountManager {
    */
   @Override
   public synchronized void synchroniseChangedUsers() throws ExternalAccountSynchronisationException {
+    log.info("MMAILJETT - === Starting Mailjet user synchronisation ===");
+    int totalUsersProcessed = 0;
+    int successfulSyncs = 0;
+    int failedSyncs = 0;
+    int skippedUsers = 0;
+
     try {
       List<UserExternalAccountChanges> userRecordsToUpdate = database.getRecentlyChangedRecords();
+      log.info("MMAILJETT - Found {} users requiring synchronisation", userRecordsToUpdate.size());
 
       for (UserExternalAccountChanges userRecord : userRecordsToUpdate) {
-
+        totalUsersProcessed++;
         Long userId = userRecord.getUserId();
-        log.debug(String.format("Processing user: %s", userId));
+        String accountEmail = userRecord.getAccountEmail();
+
+        log.info("MMAILJETT - [User {}] Starting sync for email: {}", userId, sanitiseEmailForLogging(accountEmail));
+        log.debug("MMAILJETT - [User {}] Full user record: deleted={}, emailVerificationStatus={}, providerUserId={}, " +
+                "allowsNews={}, allowsEvents={}, givenName={}, role={}, stage={}",
+            userId,
+            userRecord.isDeleted(),
+            userRecord.getEmailVerificationStatus(),
+            userRecord.getProviderUserId(),
+            userRecord.allowsNewsEmails(),
+            userRecord.allowsEventsEmails(),
+            userRecord.getGivenName(),
+            userRecord.getRole(),
+            userRecord.getStage());
+
         try {
+          boolean syncSuccess = processSingleUser(userRecord);
 
-          String accountEmail = userRecord.getAccountEmail();
-          boolean accountEmailDeliveryFailed =
-              EmailVerificationStatus.DELIVERY_FAILED.equals(userRecord.getEmailVerificationStatus());
-          String mailjetId = userRecord.getProviderUserId();
-          JSONObject mailjetDetails;
-
-          if (null != mailjetId) {
-            // If there is a "mailjet_id", get the account from MailJet.
-            mailjetDetails = mailjetApi.getAccountByIdOrEmail(mailjetId);
-            if (userRecord.isDeleted()) {
-              // Case: deleted from Isaac but still on MailJet:
-              //    Expect: "deleted" but non-null "mailjet_id"
-              //    Action: GDPR deletion, null out MailJet ID?, update provider_last_updated
-              log.debug("Case: deletion.");
-              deleteUserFromMailJet(mailjetId, userRecord);
-            } else if (accountEmailDeliveryFailed) {
-              // Case: DELIVERY_FAILED but already on MailJet
-              //    Expect: DELIVERY_FAILED, but non-null "mailjet_id"
-              //    Action: same as deletion? Or just remove from lists for now?
-              log.debug("Case: delivery failed.");
-              mailjetApi.updateUserSubscriptions(mailjetId, MailJetSubscriptionAction.REMOVE,
-                  MailJetSubscriptionAction.REMOVE);
-            } else if (!accountEmail.toLowerCase().equals(mailjetDetails.getString("Email"))) {
-              // Case: account email change:
-              //    Expect: non-null "mailjet_id", email in MailJet != email in database
-              //    Action: delete old email, add new user for new email
-              log.debug("Case: account email change.");
-              mailjetApi.permanentlyDeleteAccountById(mailjetId);
-              mailjetId = mailjetApi.addNewUserOrGetUserIfExists(accountEmail);
-              updateUserOnMailJet(mailjetId, userRecord);
-            } else {
-              // Case: changed details/preferences:
-              //    Expect: not deleted, not DELIVERY_FAILED
-              //    Action: update details, update subscriptions, update provider_last_updated
-              log.debug("Case: generic preferences update.");
-              updateUserOnMailJet(mailjetId, userRecord);
-            }
+          if (syncSuccess) {
+            successfulSyncs++;
+            log.info("MMAILJETT - [User {}] Successfully synced to Mailjet", userId);
           } else {
-            if (!accountEmailDeliveryFailed && !userRecord.isDeleted()) {
-              // Case: new to Isaac, not on MailJet:
-              //    Expect: null "mailjet_id", not DELIVERY_FAILED, not deleted
-              //    Action: create MailJet ID, update details, update subscriptions, update provider_last_updated
-              //            This will upload even users who are not subscribed to emails.
-              log.debug("Case: new to Isaac/not yet on MailJet");
-              mailjetId = mailjetApi.addNewUserOrGetUserIfExists(accountEmail);
-              updateUserOnMailJet(mailjetId, userRecord);
-            } else {
-              // Case: not on MailJet, do not upload to Mailjet:
-              //     Expect: either invalid email, deleted, or not subscribed at all so don't upload.
-              log.debug("Case: invalid/incorrect/already-unsubscribed user to skip.");
-              database.updateExternalAccount(userId, null);
-            }
+            skippedUsers++;
+            log.info("MMAILJETT - [User {}] Skipped (invalid/deleted user not requiring Mailjet)", userId);
           }
-          // Iff action done successfully, update the provider_last_updated time:
-          log.debug("Update provider_last_updated.");
-          database.updateProviderLastUpdated(userId);
 
         } catch (SegueDatabaseException e) {
-          log.error(String.format("Error storing record of MailJet update to user (%s)!", userId));
+          failedSyncs++;
+          log.error(String.format("MMAILJETT - [User %s] Database error during sync - will retry on next run", userId), e);
+          // Don't update provider_last_updated so it will be retried
+
         } catch (MailjetClientCommunicationException e) {
-          log.error("Failed to talk to MailJet!");
+          failedSyncs++;
+          log.error(String.format("MMAILJETT - [User %s] Failed to communicate with Mailjet API", userId), e);
+          log.error("MMAILJETT - [User {}] MailjetClientCommunicationException details: {}", userId, e.getMessage());
           throw new ExternalAccountSynchronisationException("Failed to successfully connect to MailJet!");
+
         } catch (MailjetRateLimitException e) {
-          log.warn("MailJet rate limiting!");
+          failedSyncs++;
+          log.warn(String.format("MMAILJETT - [User %s] Hit Mailjet rate limit - stopping sync", userId), e);
           throw new ExternalAccountSynchronisationException("MailJet API rate limits exceeded!");
+
         } catch (MailjetException e) {
-          log.error(e.getMessage());
-          throw new ExternalAccountSynchronisationException(e.getMessage());
+          failedSyncs++;
+          log.error(String.format("MMAILJETT - [User %s] Mailjet API error during sync", userId), e);
+          log.error("MMAILJETT - [User {}] MailjetException type: {}, message: {}",
+              userId, e.getClass().getName(), e.getMessage());
+          // Log the full stack trace for debugging
+          StringWriter sw = new StringWriter();
+          e.printStackTrace(new PrintWriter(sw));
+          log.error("MMAILJETT - [User {}] Full stack trace: {}", userId, sw.toString());
+
+          // Don't throw - continue processing other users, but don't update provider_last_updated
+          // so this user will be retried next time
+
+        } catch (Exception e) {
+          failedSyncs++;
+          log.error(String.format("MMAILJETT - [User %s] Unexpected error during sync", userId), e);
+          log.error("MMAILJETT - [User {}] Unexpected exception type: {}, message: {}",
+              userId, e.getClass().getName(), e.getMessage());
+          StringWriter sw = new StringWriter();
+          e.printStackTrace(new PrintWriter(sw));
+          log.error("MMAILJETT - [User {}] Full stack trace: {}", userId, sw.toString());
+          // Continue processing other users
         }
       }
+
     } catch (SegueDatabaseException e) {
-      log.error("Database error whilst collecting users whose details have changed!", e);
+      log.error("MMAILJETT - Database error whilst collecting users whose details have changed!", e);
+      throw new ExternalAccountSynchronisationException("Database error during user collection");
     }
+
+    log.info("MMAILJETT - === Mailjet synchronisation complete ===");
+    log.info("MMAILJETT - Total users processed: {}", totalUsersProcessed);
+    log.info("MMAILJETT - Successful syncs: {}", successfulSyncs);
+    log.info("MMAILJETT - Failed syncs: {}", failedSyncs);
+    log.info("MMAILJETT - Skipped users: {}", skippedUsers);
+  }
+
+  /**
+   * Process a single user synchronisation.
+   *
+   * @param userRecord the user record to process
+   * @return true if sync succeeded, false if user was skipped
+   * @throws SegueDatabaseException if database operations fail
+   * @throws MailjetException if Mailjet API calls fail
+   */
+  private boolean processSingleUser(UserExternalAccountChanges userRecord)
+      throws SegueDatabaseException, MailjetException {
+
+    Long userId = userRecord.getUserId();
+    String accountEmail = userRecord.getAccountEmail();
+    boolean accountEmailDeliveryFailed =
+        EmailVerificationStatus.DELIVERY_FAILED.equals(userRecord.getEmailVerificationStatus());
+    String mailjetId = userRecord.getProviderUserId();
+
+    // Validate user data before attempting sync
+    if (!validateUserData(userRecord)) {
+      log.warn("MMAILJETT - [User {}] Skipping sync due to invalid user data", userId);
+      // Still update provider_last_updated to prevent repeated attempts
+      database.updateProviderLastUpdated(userId);
+      return false;
+    }
+
+    if (null != mailjetId) {
+      log.debug("MMAILJETT - [User {}] Existing Mailjet user with ID: {}", userId, mailjetId);
+
+      // Verify the user still exists in Mailjet
+      JSONObject mailjetDetails = mailjetApi.getAccountByIdOrEmail(mailjetId);
+
+      if (mailjetDetails == null) {
+        log.warn("MMAILJETT - [User {}] Mailjet ID {} not found in Mailjet - will recreate", userId, mailjetId);
+        // Clear the mailjet ID and recreate
+        database.updateExternalAccount(userId, null);
+        mailjetId = null;
+      } else {
+        log.debug("MMAILJETT - [User {}] Found existing Mailjet account: {}", userId, mailjetDetails.toString());
+      }
+    }
+
+    if (null != mailjetId) {
+      // User exists in Mailjet - handle updates/deletions
+      JSONObject mailjetDetails = mailjetApi.getAccountByIdOrEmail(mailjetId);
+
+      if (userRecord.isDeleted()) {
+        log.info("MMAILJETT - [User {}] Processing deletion from Mailjet", userId);
+        deleteUserFromMailJet(mailjetId, userRecord);
+
+      } else if (accountEmailDeliveryFailed) {
+        log.info("MMAILJETT - [User {}] Email delivery failed - removing from lists", userId);
+        mailjetApi.updateUserSubscriptions(mailjetId, MailJetSubscriptionAction.REMOVE,
+            MailJetSubscriptionAction.REMOVE);
+        database.updateProviderLastUpdated(userId);
+
+      } else if (!accountEmail.toLowerCase().equals(mailjetDetails.getString("Email"))) {
+        log.info("MMAILJETT - [User {}] Email changed from {} to {} - recreating Mailjet contact",
+            userId, sanitiseEmailForLogging(mailjetDetails.getString("Email")),
+            sanitiseEmailForLogging(accountEmail));
+        mailjetApi.permanentlyDeleteAccountById(mailjetId);
+        log.debug("MMAILJETT - [User {}] Deleted old Mailjet contact", userId);
+
+        mailjetId = mailjetApi.addNewUserOrGetUserIfExists(accountEmail);
+        log.info("MMAILJETT - [User {}] Created new Mailjet contact with ID: {}", userId, mailjetId);
+
+        updateUserOnMailJet(mailjetId, userRecord);
+
+      } else {
+        log.info("MMAILJETT - [User {}] Updating existing Mailjet contact", userId);
+        updateUserOnMailJet(mailjetId, userRecord);
+      }
+
+    } else {
+      // User doesn't exist in Mailjet yet
+      if (!accountEmailDeliveryFailed && !userRecord.isDeleted()) {
+        log.info("MMAILJETT - [User {}] New user - creating Mailjet contact", userId);
+
+        // Create the contact
+        mailjetId = mailjetApi.addNewUserOrGetUserIfExists(accountEmail);
+
+        if (mailjetId == null) {
+          log.error("MMAILJETT - [User {}] Failed to create Mailjet contact - addNewUserOrGetUserIfExists returned null", userId);
+          throw new MailjetException("Failed to create Mailjet contact - returned null ID");
+        }
+
+        log.info("MMAILJETT - [User {}] Created Mailjet contact with ID: {}", userId, mailjetId);
+
+        // Now update properties and subscriptions
+        // Use try-finally to ensure we record the mailjet ID even if updates fail
+        boolean updateSucceeded = false;
+        try {
+          updateUserOnMailJet(mailjetId, userRecord);
+          updateSucceeded = true;
+        } finally {
+          if (!updateSucceeded) {
+            log.error("MMAILJETT - [User {}] Failed to update properties/subscriptions for Mailjet ID {} - " +
+                "contact exists but may have incomplete data", userId, mailjetId);
+            // Store the mailjet ID anyway so we don't create duplicates
+            database.updateExternalAccount(userId, mailjetId);
+          }
+        }
+
+      } else {
+        log.info("MMAILJETT - [User {}] Skipping - delivery failed or deleted (not uploading to Mailjet)", userId);
+        database.updateExternalAccount(userId, null);
+        database.updateProviderLastUpdated(userId);
+        return false;
+      }
+    }
+
+    // If we got here, sync succeeded
+    database.updateProviderLastUpdated(userId);
+    return true;
+  }
+
+  /**
+   * Validate user data before attempting Mailjet sync.
+   *
+   * @param userRecord the user record to validate
+   * @return true if data is valid, false otherwise
+   */
+  private boolean validateUserData(UserExternalAccountChanges userRecord) {
+    Long userId = userRecord.getUserId();
+    String accountEmail = userRecord.getAccountEmail();
+
+    if (accountEmail == null || accountEmail.trim().isEmpty()) {
+      log.error("MMAILJETT - [User {}] Invalid data: email is null or empty", userId);
+      return false;
+    }
+
+    if (!accountEmail.contains("@")) {
+      log.error("MMAILJETT - [User {}] Invalid data: email '{}' does not contain @",
+          userId, sanitiseEmailForLogging(accountEmail));
+      return false;
+    }
+
+    // Check for required fields (allowing nulls but logging them)
+    if (userRecord.getGivenName() == null) {
+      log.warn("MMAILJETT - [User {}] Warning: given_name is null", userId);
+    }
+
+    if (userRecord.getRole() == null) {
+      log.warn("MMAILJETT - [User {}] Warning: role is null", userId);
+    }
+
+    if (userRecord.getStage() == null) {
+      log.warn("MMAILJETT - [User {}] Warning: stage is null", userId);
+    }
+
+    if (userRecord.getEmailVerificationStatus() == null) {
+      log.warn("MMAILJETT - [User {}] Warning: email_verification_status is null", userId);
+    }
+
+    return true;
   }
 
   private void updateUserOnMailJet(final String mailjetId, final UserExternalAccountChanges userRecord)
       throws SegueDatabaseException, MailjetException {
+
     Long userId = userRecord.getUserId();
-    mailjetApi.updateUserProperties(mailjetId, userRecord.getGivenName(), userRecord.getRole().toString(),
-        userRecord.getEmailVerificationStatus().toString(), userRecord.getStage());
+    log.debug("MMAILJETT - [User {}] Updating properties for Mailjet ID: {}", userId, mailjetId);
 
-    MailJetSubscriptionAction newsStatus = (userRecord.allowsNewsEmails() != null
-        && userRecord.allowsNewsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
-        MailJetSubscriptionAction.UNSUBSCRIBE;
-    MailJetSubscriptionAction eventsStatus = (userRecord.allowsEventsEmails() != null
-        && userRecord.allowsEventsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
-        MailJetSubscriptionAction.UNSUBSCRIBE;
-    mailjetApi.updateUserSubscriptions(mailjetId, newsStatus, eventsStatus);
+    // Update properties
+    try {
+      String firstName = userRecord.getGivenName();
+      String role = userRecord.getRole() != null ? userRecord.getRole().toString() : "";
+      String verificationStatus = userRecord.getEmailVerificationStatus() != null
+          ? userRecord.getEmailVerificationStatus().toString() : "";
+      String stage = userRecord.getStage();
 
-    database.updateExternalAccount(userId, mailjetId);
+      log.debug("MMAILJETT - [User {}] Setting properties - firstName: {}, role: {}, verificationStatus: {}, stage: {}",
+          userId, firstName, role, verificationStatus, stage);
+
+      mailjetApi.updateUserProperties(mailjetId, firstName, role, verificationStatus, stage);
+      log.info("MMAILJETT - [User {}] Successfully updated Mailjet properties", userId);
+
+    } catch (MailjetException e) {
+      log.error("MMAILJETT - [User {}] Failed to update Mailjet properties for ID {}", userId, mailjetId, e);
+      throw e;
+    }
+
+    // Update subscriptions
+    try {
+      MailJetSubscriptionAction newsStatus = (userRecord.allowsNewsEmails() != null
+          && userRecord.allowsNewsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
+          MailJetSubscriptionAction.UNSUBSCRIBE;
+      MailJetSubscriptionAction eventsStatus = (userRecord.allowsEventsEmails() != null
+          && userRecord.allowsEventsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
+          MailJetSubscriptionAction.UNSUBSCRIBE;
+
+      log.debug("MMAILJETT - [User {}] Setting subscriptions - news: {}, events: {}",
+          userId, newsStatus, eventsStatus);
+
+      mailjetApi.updateUserSubscriptions(mailjetId, newsStatus, eventsStatus);
+      log.info("MMAILJETT - [User {}] Successfully updated Mailjet subscriptions", userId);
+
+    } catch (MailjetException e) {
+      log.error("MMAILJETT - [User {}] Failed to update Mailjet subscriptions for ID {}", userId, mailjetId, e);
+      throw e;
+    }
+
+    // Store the Mailjet ID
+    try {
+      database.updateExternalAccount(userId, mailjetId);
+      log.debug("MMAILJETT - [User {}] Stored Mailjet ID in database: {}", userId, mailjetId);
+    } catch (SegueDatabaseException e) {
+      log.error("MMAILJETT - [User {}] Failed to store Mailjet ID {} in database", userId, mailjetId, e);
+      throw e;
+    }
   }
 
   private void deleteUserFromMailJet(final String mailjetId, final UserExternalAccountChanges userRecord)
       throws SegueDatabaseException, MailjetException {
     Long userId = userRecord.getUserId();
-    mailjetApi.permanentlyDeleteAccountById(mailjetId);
-    database.updateExternalAccount(userId, null);
+    log.info("MMAILJETT - [User {}] Deleting from Mailjet, ID: {}", userId, mailjetId);
+
+    try {
+      mailjetApi.permanentlyDeleteAccountById(mailjetId);
+      log.info("MMAILJETT - [User {}] Successfully deleted from Mailjet", userId);
+    } catch (MailjetException e) {
+      log.error("MMAILJETT - [User {}] Failed to delete from Mailjet, ID: {}", userId, mailjetId, e);
+      throw e;
+    }
+
+    try {
+      database.updateExternalAccount(userId, null);
+      log.debug("MMAILJETT - [User {}] Cleared Mailjet ID from database", userId);
+    } catch (SegueDatabaseException e) {
+      log.error("MMAILJETT - [User {}] Failed to clear Mailjet ID from database", userId, e);
+      throw e;
+    }
+  }
+
+  /**
+   * Sanitise email for logging to prevent log injection and reduce PII exposure.
+   *
+   * @param email the email to sanitise
+   * @return sanitised email (e.g., "u***@example.com")
+   */
+  private String sanitiseEmailForLogging(String email) {
+    if (email == null) {
+      return "null";
+    }
+    if (!email.contains("@")) {
+      return "invalid-email";
+    }
+    String[] parts = email.split("@");
+    if (parts[0].length() <= 2) {
+      return parts[0].charAt(0) + "***@" + parts[1];
+    }
+    return parts[0].charAt(0) + "***@" + parts[1];
   }
 }

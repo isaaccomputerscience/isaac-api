@@ -66,6 +66,9 @@ public class MailJetApiClientWrapper {
     this.newsListId = mailjetNewsListId;
     this.eventsListId = mailjetEventsListId;
     this.legalListId = mailjetLegalListId;
+
+    log.info("MMAILJETT - MailJetApiClientWrapper initialized with list IDs - News: {}, Events: {}, Legal: {}",
+        newsListId, eventsListId, legalListId);
   }
 
   /**
@@ -77,15 +80,37 @@ public class MailJetApiClientWrapper {
    */
   public JSONObject getAccountByIdOrEmail(final String mailjetIdOrEmail) throws MailjetException {
     if (null == mailjetIdOrEmail) {
+      log.warn("MMAILJETT - getAccountByIdOrEmail called with null mailjetIdOrEmail");
       return null;
     }
-    MailjetRequest request = new MailjetRequest(Contact.resource, mailjetIdOrEmail);
-    MailjetResponse response = mailjetClient.get(request);
-    JSONArray responseData = response.getData();
-    if (response.getTotal() == 1) {
-      return responseData.getJSONObject(0);
+
+    log.debug("MMAILJETT - Getting Mailjet account for: {}", mailjetIdOrEmail);
+
+    try {
+      MailjetRequest request = new MailjetRequest(Contact.resource, mailjetIdOrEmail);
+      MailjetResponse response = mailjetClient.get(request);
+
+      log.debug("MMAILJETT - Mailjet GET Contact response - Status: {}, Total: {}",
+          response.getStatus(), response.getTotal());
+
+      JSONArray responseData = response.getData();
+      if (response.getTotal() == 1) {
+        JSONObject result = responseData.getJSONObject(0);
+        log.debug("MMAILJETT - Found Mailjet contact: ID={}, Email={}",
+            result.optInt("ID"), result.optString("Email"));
+        return result;
+      }
+
+      log.warn("MMAILJETT - Mailjet account not found for: {}", mailjetIdOrEmail);
+      return null;
+
+    } catch (MailjetException e) {
+      log.error("MMAILJETT - MailjetException in getAccountByIdOrEmail for: {}", mailjetIdOrEmail, e);
+      throw e;
+    } catch (Exception e) {
+      log.error("MMAILJETT - Unexpected exception in getAccountByIdOrEmail for: {}", mailjetIdOrEmail, e);
+      throw new MailjetException("Unexpected error getting account: " + e.getMessage(), e);
     }
-    return null;
   }
 
   /**
@@ -96,8 +121,28 @@ public class MailJetApiClientWrapper {
    */
   public void permanentlyDeleteAccountById(final String mailjetId) throws MailjetException {
     requireNonNull(mailjetId);
-    MailjetRequest request = new MailjetRequest(Contacts.resource, mailjetId);
-    mailjetClient.delete(request);
+
+    log.info("MMAILJETT - Permanently deleting Mailjet account: {}", mailjetId);
+
+    try {
+      MailjetRequest request = new MailjetRequest(Contacts.resource, mailjetId);
+      MailjetResponse response = mailjetClient.delete(request);
+
+      log.info("MMAILJETT - Mailjet DELETE response - Status: {}, mailjetId: {}",
+          response.getStatus(), mailjetId);
+
+      if (response.getStatus() != 204 && response.getStatus() != 200) {
+        log.warn("MMAILJETT - Unexpected status code {} when deleting Mailjet account {}",
+            response.getStatus(), mailjetId);
+      }
+
+    } catch (MailjetException e) {
+      log.error("MMAILJETT - MailjetException deleting account: {}", mailjetId, e);
+      throw e;
+    } catch (Exception e) {
+      log.error("MMAILJETT - Unexpected exception deleting account: {}", mailjetId, e);
+      throw new MailjetException("Unexpected error deleting account: " + e.getMessage(), e);
+    }
   }
 
   /**
@@ -111,27 +156,67 @@ public class MailJetApiClientWrapper {
    */
   public String addNewUserOrGetUserIfExists(final String email) throws MailjetException {
     if (null == email) {
+      log.error("MMAILJETT - addNewUserOrGetUserIfExists called with null email");
       return null;
     }
+
+    log.info("MMAILJETT - Creating Mailjet contact for email: {}", sanitiseEmailForLogging(email));
+
     try {
       MailjetRequest request = new MailjetRequest(Contact.resource).property(Contact.EMAIL, email);
       MailjetResponse response = mailjetClient.post(request);
+
+      log.debug("MMAILJETT - Mailjet POST Contact response - Status: {}, Total: {}",
+          response.getStatus(), response.getTotal());
+
       // Get MailJet ID out:
       JSONObject responseData = response.getData().getJSONObject(0);
-      return Integer.toString(responseData.getInt("ID"));
+      String mailjetId = Integer.toString(responseData.getInt("ID"));
+
+      log.info("MMAILJETT - Successfully created Mailjet contact with ID: {} for email: {}",
+          mailjetId, sanitiseEmailForLogging(email));
+
+      return mailjetId;
+
     } catch (MailjetClientRequestException e) {
+      log.warn("MMAILJETT - MailjetClientRequestException creating contact for email: {} - Message: {}",
+          sanitiseEmailForLogging(email), e.getMessage());
+
       if (e.getMessage().contains("already exists")) {
-        // FIXME - we need to test that this response always comes back with "already exists" in the message
-        log.warn(String.format("Attempted to create a user with email (%s) that already existed!", email));
-        JSONObject existingMailJetAccount = getAccountByIdOrEmail(email);
-        return Integer.toString(existingMailJetAccount.getInt("ID"));
+        log.info("MMAILJETT - Contact already exists, attempting to retrieve existing contact for: {}",
+            sanitiseEmailForLogging(email));
+
+        try {
+          JSONObject existingMailJetAccount = getAccountByIdOrEmail(email);
+          if (existingMailJetAccount != null) {
+            String existingId = Integer.toString(existingMailJetAccount.getInt("ID"));
+            log.info("MMAILJETT - Found existing Mailjet contact with ID: {} for email: {}",
+                existingId, sanitiseEmailForLogging(email));
+            return existingId;
+          } else {
+            log.error("MMAILJETT - Contact 'already exists' but getAccountByIdOrEmail returned null for: {}",
+                sanitiseEmailForLogging(email));
+            throw new MailjetException("Contact exists but could not be retrieved");
+          }
+        } catch (JSONException jsonEx) {
+          log.error("MMAILJETT - JSONException retrieving existing contact for: {}",
+              sanitiseEmailForLogging(email), jsonEx);
+          throw new MailjetException("Failed to parse existing contact data", jsonEx);
+        }
       } else {
-        log.error(String.format("Failed to create user in MailJet with email: %s", email), e);
+        log.error("MMAILJETT - Failed to create user in MailJet with email: {} - Error: {}",
+            sanitiseEmailForLogging(email), e.getMessage(), e);
+        throw new MailjetException("Failed to create contact: " + e.getMessage(), e);
       }
     } catch (JSONException e) {
-      log.error(String.format("Failed to create user in MailJet with email: %s", email), e);
+      log.error("MMAILJETT - JSONException creating user in MailJet with email: {}",
+          sanitiseEmailForLogging(email), e);
+      throw new MailjetException("Failed to parse Mailjet response", e);
+    } catch (Exception e) {
+      log.error("MMAILJETT - Unexpected exception creating user in MailJet with email: {}",
+          sanitiseEmailForLogging(email), e);
+      throw new MailjetException("Unexpected error creating contact: " + e.getMessage(), e);
     }
-    return null;
   }
 
   /**
@@ -147,16 +232,47 @@ public class MailJetApiClientWrapper {
   public void updateUserProperties(final String mailjetId, final String firstName, final String role,
                                    final String emailVerificationStatus, String stage) throws MailjetException {
     requireNonNull(mailjetId);
-    MailjetRequest request = new MailjetRequest(Contactdata.resource, mailjetId)
-        .property(Contactdata.DATA, new JSONArray()
-            .put(new JSONObject().put("Name", "firstname").put("value", firstName))
-            .put(new JSONObject().put("Name", "role").put("value", role))
-            .put(new JSONObject().put("Name", "verification_status").put("value", emailVerificationStatus))
-            .put(new JSONObject().put("Name", "stage").put("value", stage))
-        );
-    MailjetResponse response = mailjetClient.put(request);
-    if (response.getTotal() != 1) {
-      throw new MailjetException("Failed to update user!" + response.getTotal());
+
+    log.info("MMAILJETT - Updating properties for Mailjet ID: {}", mailjetId);
+    log.debug("MMAILJETT - Properties - firstName: {}, role: {}, verificationStatus: {}, stage: {}",
+        firstName, role, emailVerificationStatus, stage);
+
+    try {
+      JSONArray propertiesArray = new JSONArray()
+          .put(new JSONObject().put("Name", "firstname").put("value", firstName))
+          .put(new JSONObject().put("Name", "role").put("value", role))
+          .put(new JSONObject().put("Name", "verification_status").put("value", emailVerificationStatus))
+          .put(new JSONObject().put("Name", "stage").put("value", stage));
+
+      log.debug("MMAILJETT - Property JSON array: {}", propertiesArray.toString());
+
+      MailjetRequest request = new MailjetRequest(Contactdata.resource, mailjetId)
+          .property(Contactdata.DATA, propertiesArray);
+
+      MailjetResponse response = mailjetClient.put(request);
+
+      log.debug("MMAILJETT - Mailjet PUT Contactdata response - Status: {}, Total: {}",
+          response.getStatus(), response.getTotal());
+
+      if (response.getTotal() != 1) {
+        log.error("MMAILJETT - Failed to update user properties! Expected 1, got {} for Mailjet ID: {}",
+            response.getTotal(), mailjetId);
+        log.error("MMAILJETT - Response status: {}, Response data: {}",
+            response.getStatus(), response.getData().toString());
+        throw new MailjetException("Failed to update user! Response total: " + response.getTotal());
+      }
+
+      log.info("MMAILJETT - Successfully updated properties for Mailjet ID: {}", mailjetId);
+
+    } catch (MailjetException e) {
+      log.error("MMAILJETT - MailjetException updating properties for Mailjet ID: {}", mailjetId, e);
+      throw e;
+    } catch (JSONException e) {
+      log.error("MMAILJETT - JSONException creating property data for Mailjet ID: {}", mailjetId, e);
+      throw new MailjetException("Failed to create property JSON", e);
+    } catch (Exception e) {
+      log.error("MMAILJETT - Unexpected exception updating properties for Mailjet ID: {}", mailjetId, e);
+      throw new MailjetException("Unexpected error updating properties: " + e.getMessage(), e);
     }
   }
 
@@ -171,22 +287,72 @@ public class MailJetApiClientWrapper {
   public void updateUserSubscriptions(final String mailjetId, final MailJetSubscriptionAction newsEmails,
                                       final MailJetSubscriptionAction eventsEmails) throws MailjetException {
     requireNonNull(mailjetId);
-    MailjetRequest request = new MailjetRequest(ContactManagecontactslists.resource, mailjetId)
-        .property(ContactManagecontactslists.CONTACTSLISTS, new JSONArray()
-            .put(new JSONObject()
-                .put(ContactslistImportList.LISTID, legalListId)
-                .put(ContactslistImportList.ACTION, MailJetSubscriptionAction.FORCE_SUBSCRIBE.getValue()))
-            .put(new JSONObject()
-                .put(ContactslistImportList.LISTID, newsListId)
-                .put(ContactslistImportList.ACTION, newsEmails.getValue()))
-            .put(new JSONObject()
-                .put(ContactslistImportList.LISTID, eventsListId)
-                .put(ContactslistImportList.ACTION, eventsEmails.getValue()))
-        );
-    MailjetResponse response = mailjetClient.post(request);
-    if (response.getTotal() != 1) {
-      throw new MailjetException("Failed to update user subscriptions!" + response.getTotal());
+
+    log.info("MMAILJETT - Updating subscriptions for Mailjet ID: {}", mailjetId);
+    log.debug("MMAILJETT - Subscriptions - news: {}, events: {}", newsEmails, eventsEmails);
+    log.debug("MMAILJETT - Using list IDs - Legal: {}, News: {}, Events: {}", legalListId, newsListId, eventsListId);
+
+    try {
+      JSONArray subscriptionsArray = new JSONArray()
+          .put(new JSONObject()
+              .put(ContactslistImportList.LISTID, legalListId)
+              .put(ContactslistImportList.ACTION, MailJetSubscriptionAction.FORCE_SUBSCRIBE.getValue()))
+          .put(new JSONObject()
+              .put(ContactslistImportList.LISTID, newsListId)
+              .put(ContactslistImportList.ACTION, newsEmails.getValue()))
+          .put(new JSONObject()
+              .put(ContactslistImportList.LISTID, eventsListId)
+              .put(ContactslistImportList.ACTION, eventsEmails.getValue()));
+
+      log.debug("MMAILJETT - Subscription JSON array: {}", subscriptionsArray.toString());
+
+      MailjetRequest request = new MailjetRequest(ContactManagecontactslists.resource, mailjetId)
+          .property(ContactManagecontactslists.CONTACTSLISTS, subscriptionsArray);
+
+      MailjetResponse response = mailjetClient.post(request);
+
+      log.debug("MMAILJETT - Mailjet POST ContactManagecontactslists response - Status: {}, Total: {}",
+          response.getStatus(), response.getTotal());
+
+      if (response.getTotal() != 1) {
+        log.error("MMAILJETT - Failed to update user subscriptions! Expected 1, got {} for Mailjet ID: {}",
+            response.getTotal(), mailjetId);
+        log.error("MMAILJETT - Response status: {}, Response data: {}",
+            response.getStatus(), response.getData().toString());
+        throw new MailjetException("Failed to update user subscriptions! Response total: " + response.getTotal());
+      }
+
+      log.info("MMAILJETT - Successfully updated subscriptions for Mailjet ID: {}", mailjetId);
+
+    } catch (MailjetException e) {
+      log.error("MMAILJETT - MailjetException updating subscriptions for Mailjet ID: {}", mailjetId, e);
+      throw e;
+    } catch (JSONException e) {
+      log.error("MMAILJETT - JSONException creating subscription data for Mailjet ID: {}", mailjetId, e);
+      throw new MailjetException("Failed to create subscription JSON", e);
+    } catch (Exception e) {
+      log.error("MMAILJETT - Unexpected exception updating subscriptions for Mailjet ID: {}", mailjetId, e);
+      throw new MailjetException("Unexpected error updating subscriptions: " + e.getMessage(), e);
     }
   }
 
+  /**
+   * Sanitise email for logging to prevent log injection and reduce PII exposure.
+   *
+   * @param email the email to sanitise
+   * @return sanitised email (e.g., "u***@example.com")
+   */
+  private String sanitiseEmailForLogging(String email) {
+    if (email == null) {
+      return "null";
+    }
+    if (!email.contains("@")) {
+      return "invalid-email";
+    }
+    String[] parts = email.split("@");
+    if (parts[0].length() <= 2) {
+      return parts[0].charAt(0) + "***@" + parts[1];
+    }
+    return parts[0].charAt(0) + "***@" + parts[1];
+  }
 }
