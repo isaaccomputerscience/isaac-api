@@ -1602,4 +1602,11 @@ public class EventBookingManager {
           user.getEmail(), event.getTitle()));
     }
   }
+
+  public List<String> getCompetitionProjectTitlesForUsers(String competitionId, List<Long> userIds)
+      throws SegueDatabaseException {
+    return this.bookingPersistenceManager.getBookingsByEventIdForUsers(competitionId, userIds)
+        .stream()
+        .map(EventBookingDTO::getEventTitle).toList();
+  }
 }

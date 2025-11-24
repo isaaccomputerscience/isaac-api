@@ -104,7 +104,8 @@ class EventMapperTest {
         testDate,
         testDate,
         newTestDate,
-        BookingStatus.CONFIRMED);
+        BookingStatus.CONFIRMED,
+        "projectTitle");
   }
 
   private static DetailedEventBookingDTO prepareDetailedEventBookingDTO() {

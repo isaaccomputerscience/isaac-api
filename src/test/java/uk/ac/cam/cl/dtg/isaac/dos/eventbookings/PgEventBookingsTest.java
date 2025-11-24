@@ -119,9 +119,9 @@ class PgEventBookingsTest {
     Instant now = now();
 
     EventBooking expectedBooking1 =
-        new PgEventBooking(1L, 1L, 7L, "event1", BookingStatus.CONFIRMED, now, now, null);
+        new PgEventBooking(1L, 1L, 7L, "event1", BookingStatus.CONFIRMED, now, now, "projectTitle1", null);
     EventBooking expectedBooking2 =
-        new PgEventBooking(2L, 2L, 7L, "event2", BookingStatus.CONFIRMED, now, now, null);
+        new PgEventBooking(2L, 2L, 7L, "event2", BookingStatus.CONFIRMED, now, now, "projectTitle2", null);
 
     expect(dummyPostgresSqlDb.getDatabaseConnection()).andReturn(dummyConnection);
     expect(dummyConnection.prepareStatement(expectedQuery)).andReturn(dummyPreparedStatement);
