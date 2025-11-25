@@ -528,7 +528,10 @@ public class PgEventBookings implements EventBookings {
     Validate.notNull(userIds);
     Validate.notEmpty(userIds);
 
-    String query = "SELECT * FROM event_bookings WHERE event_id = ? AND user_id = ANY(?)";
+    String query = "SELECT * FROM event_bookings WHERE event_id = ? "
+        + "AND user_id = ANY(?) "
+        + "AND project_title IS NOT NULL "
+        + "AND TRIM(project_title) != ''";
 
     try (Connection conn = ds.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query)

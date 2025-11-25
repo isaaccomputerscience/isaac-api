@@ -1603,10 +1603,13 @@ public class EventBookingManager {
     }
   }
 
-  public List<String> getCompetitionProjectTitlesForUsers(String competitionId, List<Long> userIds)
+  public Set<String> getCompetitionProjectTitlesForUsers(String competitionId, List<Long> userIds)
       throws SegueDatabaseException {
     return this.bookingPersistenceManager.getBookingsByEventIdForUsers(competitionId, userIds)
         .stream()
-        .map(EventBookingDTO::getEventTitle).toList();
+        .map(EventBookingDTO::getProjectTitle)
+        .filter(title -> title != null && !title.trim().isEmpty())
+        .collect(Collectors.toSet());
   }
+
 }

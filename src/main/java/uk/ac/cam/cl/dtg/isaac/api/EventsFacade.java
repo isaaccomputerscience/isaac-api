@@ -502,7 +502,7 @@ public class EventsFacade extends AbstractIsaacFacade {
             "User IDs must be specified.").toResponse();
       }
 
-      List<String> projectTitles = bookingManager.getCompetitionProjectTitlesForUsers(
+      Set<String> projectTitles = bookingManager.getCompetitionProjectTitlesForUsers(
           requestBody.getCompetitionId(),
           requestBody.getUserIds()
       );
