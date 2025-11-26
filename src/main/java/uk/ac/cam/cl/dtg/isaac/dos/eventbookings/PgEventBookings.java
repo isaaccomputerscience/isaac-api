@@ -525,7 +525,7 @@ public class PgEventBookings implements EventBookings {
   public List<EventBooking> findBookingByEventAndUsers(final String eventId, final List<Long> userIds)
       throws SegueDatabaseException {
     Validate.notBlank(eventId);
-    Validate.notNull(userIds);
+    requireNonNull(userIds);
     Validate.notEmpty(userIds);
 
     String query = "SELECT * FROM event_bookings WHERE event_id = ? "

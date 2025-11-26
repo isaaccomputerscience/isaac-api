@@ -1,9 +1,7 @@
 package uk.ac.cam.cl.dtg.isaac.dto.eventbookings;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -50,8 +48,9 @@ public class ProjectTitlesResponseDTO {
 
   @Override
   public String toString() {
-    return "ProjectTitlesResponseDTO{" +
-        "projectTitles=" + projectTitles +
-        '}';
+    return "ProjectTitlesResponseDTO{"
+        + "projectTitles="
+        + projectTitles
+        + '}';
   }
 }

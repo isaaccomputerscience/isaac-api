@@ -120,7 +120,7 @@ class EventBookingPersistenceManagerTest {
     expectedBooking1.setReservedById(7L);
     expectedBooking1.setBookingStatus(BookingStatus.CONFIRMED);
     expectedBooking1.setBookingDate(createAndUpdateTime);
-    expectedBooking1.setUpdated(createAndUpdateTime);
+    expectedBooking1.setLastUpdated(createAndUpdateTime);
     return expectedBooking1;
   }
 

@@ -50,7 +50,7 @@ public class PgEventBooking implements EventBooking {
    * @param bookingStatus         - the status of the booking
    * @param created               - the date the booking was made.
    * @param updated               - the date the booking was last updated
-   * @param projectTitle
+   * @param projectTitle          - the list of project titles
    * @param additionalInformation - additional information to be stored with this booking e.g. dietary requirements.
    */
   public PgEventBooking(final Long bookingId, final Long userId, final Long reservedById, final String eventId,

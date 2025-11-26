@@ -403,7 +403,7 @@ public class EventBookingPersistenceManager {
       result.setEventId(eventInformation.getId());
       result.setEventTitle(eventInformation.getTitle());
       result.setBookingDate(eb.getCreationDate());
-      result.setUpdated(eb.getUpdateDate());
+      result.setLastUpdated(eb.getUpdateDate());
       result.setBookingStatus(eb.getBookingStatus());
       result.setAdditionalInformation(eb.getAdditionalInformation());
       result.setProjectTitle(eb.projectTitle());
