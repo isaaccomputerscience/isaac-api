@@ -119,6 +119,7 @@ class EventMapperTest {
     detailedEvent.setBookingStatus(BookingStatus.CONFIRMED);
     detailedEvent.setBookingDate(testDate);
     detailedEvent.setLastUpdated(newTestDate);
+    detailedEvent.setProjectTitle("projectTitle");
     detailedEvent.setAdditionalInformation(prepareAdditionalInformation());
     return detailedEvent;
   }
