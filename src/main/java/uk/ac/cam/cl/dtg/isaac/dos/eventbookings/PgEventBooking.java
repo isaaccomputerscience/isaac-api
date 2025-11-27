@@ -36,6 +36,8 @@ public class PgEventBooking implements EventBooking {
   private final BookingStatus bookingStatus;
   private final Instant created;
   private final Instant updated;
+
+  private final String projectTitle;
   private final Map<String, String> additionalInformation;
 
   /**
@@ -48,11 +50,12 @@ public class PgEventBooking implements EventBooking {
    * @param bookingStatus         - the status of the booking
    * @param created               - the date the booking was made.
    * @param updated               - the date the booking was last updated
+   * @param projectTitle          - the list of project titles
    * @param additionalInformation - additional information to be stored with this booking e.g. dietary requirements.
    */
   public PgEventBooking(final Long bookingId, final Long userId, final Long reservedById, final String eventId,
                         final BookingStatus bookingStatus, final Instant created, final Instant updated,
-                        final Object additionalInformation) throws SegueDatabaseException {
+                        String projectTitle, final Object additionalInformation) throws SegueDatabaseException {
     this.bookingId = bookingId;
     this.userId = userId;
     this.reservedById = reservedById;
@@ -60,6 +63,7 @@ public class PgEventBooking implements EventBooking {
     this.bookingStatus = bookingStatus;
     this.updated = updated;
     this.created = created;
+    this.projectTitle = projectTitle;
     if (additionalInformation != null) {
       try {
         this.additionalInformation = this.convertFromJsonbToMap(additionalInformation);
@@ -90,6 +94,11 @@ public class PgEventBooking implements EventBooking {
   @Override
   public String getEventId() {
     return eventId;
+  }
+
+  @Override
+  public String projectTitle() {
+    return projectTitle;
   }
 
   @Override

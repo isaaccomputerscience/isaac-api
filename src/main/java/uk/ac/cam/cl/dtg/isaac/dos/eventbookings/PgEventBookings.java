@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.Maps;
 import jakarta.annotation.Nullable;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -193,7 +194,7 @@ public class PgEventBookings implements EventBookings {
         if (generatedKeys.next()) {
           Long id = generatedKeys.getLong(1);
           return new PgEventBooking(id, userId, reserveById, eventId, status, creationDate, creationDate,
-              additionalEventInformation);
+              projectTitle, additionalEventInformation);
         } else {
           throw new SQLException("Creating event booking failed, no ID obtained.");
         }
@@ -520,6 +521,41 @@ public class PgEventBookings implements EventBookings {
     }
   }
 
+  @Override
+  public List<EventBooking> findBookingByEventAndUsers(final String eventId, final List<Long> userIds)
+      throws SegueDatabaseException {
+    Validate.notBlank(eventId);
+    requireNonNull(userIds);
+    Validate.notEmpty(userIds);
+
+    String query = "SELECT * FROM event_bookings WHERE event_id = ? "
+        + "AND user_id = ANY(?) "
+        + "AND project_title IS NOT NULL "
+        + "AND TRIM(project_title) != ''";
+
+    try (Connection conn = ds.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(query)
+    ) {
+      pst.setString(1, eventId);
+
+      Long[] userIdArray = userIds.toArray(new Long[0]);
+      Array sqlArray = conn.createArrayOf("BIGINT", userIdArray);
+      pst.setArray(2, sqlArray);
+
+      try (ResultSet results = pst.executeQuery()) {
+        List<EventBooking> bookings = new ArrayList<>();
+
+        while (results.next()) {
+          bookings.add(buildPgEventBooking(results));
+        }
+
+        return bookings;
+      }
+    } catch (SQLException e) {
+      throw new SegueDatabaseException("Error retrieving event bookings", e);
+    }
+  }
+
   /*
    * (non-Javadoc)
    *
@@ -740,6 +776,7 @@ public class PgEventBookings implements EventBookings {
         BookingStatus.valueOf(results.getString("status")),
         getInstantFromTimestamp(results, "created"),
         getInstantFromTimestamp(results, "updated"),
+        results.getString("project_title"),
         results.getObject("additional_booking_information")
     );
   }

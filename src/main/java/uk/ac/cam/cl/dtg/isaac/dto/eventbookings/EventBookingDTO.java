@@ -45,6 +45,8 @@ public class EventBookingDTO {
 
   private Instant bookingDate;
 
+  private String projectTitle;
+
   /**
    * EventBookingDTO.
    */
@@ -76,7 +78,8 @@ public class EventBookingDTO {
    */
   public EventBookingDTO(final Long bookingId, final UserSummaryDTO userBooked, final Long reservedById,
                          final String eventId, final String eventTitle, final Instant eventDate,
-                         final Instant bookingDate, final Instant lastUpdated, final BookingStatus status) {
+                         final Instant bookingDate, final Instant lastUpdated, final BookingStatus status,
+                         final String projectTitle) {
     this.bookingId = bookingId;
     this.userBooked = userBooked;
     this.reservedById = reservedById;
@@ -86,6 +89,7 @@ public class EventBookingDTO {
     this.bookingStatus = status;
     this.lastUpdated = lastUpdated;
     this.bookingDate = bookingDate;
+    this.projectTitle = projectTitle;
   }
 
   /**
@@ -221,24 +225,6 @@ public class EventBookingDTO {
   }
 
   /**
-   * Get the lastUpdate date.
-   *
-   * @return the Date it was most recently updated
-   */
-  public Instant getUpdated() {
-    return lastUpdated;
-  }
-
-  /**
-   * Set the lastUpdate Date.
-   *
-   * @param lastUpdated - date it was updated.
-   */
-  public void setUpdated(final Instant lastUpdated) {
-    this.lastUpdated = lastUpdated;
-  }
-
-  /**
    * Get the booking status.
    *
    * @return the status of the booking.
@@ -254,5 +240,21 @@ public class EventBookingDTO {
    */
   public void setBookingStatus(final BookingStatus bookingStatus) {
     this.bookingStatus = bookingStatus;
+  }
+
+  public Instant getLastUpdated() {
+    return lastUpdated;
+  }
+
+  public void setLastUpdated(Instant lastUpdated) {
+    this.lastUpdated = lastUpdated;
+  }
+
+  public String getProjectTitle() {
+    return projectTitle;
+  }
+
+  public void setProjectTitle(String projectTitle) {
+    this.projectTitle = projectTitle;
   }
 }

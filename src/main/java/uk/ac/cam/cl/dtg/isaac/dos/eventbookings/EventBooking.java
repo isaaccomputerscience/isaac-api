@@ -56,6 +56,13 @@ public interface EventBooking {
   String getEventId();
 
   /**
+   * Getter project title
+   *
+   * @return event id
+   */
+  String projectTitle();
+
+  /**
    * Gets the current status of the booking.
    *
    * @return booking status

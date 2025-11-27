@@ -59,6 +59,7 @@ import com.opencsv.CSVWriter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -114,6 +115,8 @@ import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.CompetitionEntryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.DetailedEventBookingDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.ProjectTitlesRequestDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.ProjectTitlesResponseDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.UserSummaryDTO;
 import uk.ac.cam.cl.dtg.isaac.mappers.MainObjectMapper;
@@ -462,6 +465,63 @@ public class EventsFacade extends AbstractIsaacFacade {
   }
 
   /**
+   * Count all event bookings.
+   *
+   * @param request so we can determine if the user is logged in
+   * @return a list of booking objects
+   */
+  @POST
+  @Path("/bookings/titles")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  @GZIP
+  @Operation(summary = "Get all project titles for the specified users in a competition")
+  public final Response getAllProjectTitlesForUsers(
+      @Context final HttpServletRequest request,
+      final ProjectTitlesRequestDTO requestBody) {
+
+    try {
+      RegisteredUserDTO user = userManager.getCurrentRegisteredUser(request);
+
+      if (!isUserTeacherOrAbove(userManager, user)) {
+        return SegueErrorResponse.getIncorrectRoleResponse();
+      }
+
+      if (requestBody == null) {
+        return new SegueErrorResponse(Status.BAD_REQUEST,
+            "Request body must be provided.").toResponse();
+      }
+
+      if (requestBody.getCompetitionId() == null || requestBody.getCompetitionId().isEmpty()) {
+        return new SegueErrorResponse(Status.BAD_REQUEST,
+            "Competition ID must be specified.").toResponse();
+      }
+
+      if (requestBody.getUserIds() == null || requestBody.getUserIds().isEmpty()) {
+        return new SegueErrorResponse(Status.BAD_REQUEST,
+            "User IDs must be specified.").toResponse();
+      }
+
+      Set<String> projectTitles = bookingManager.getCompetitionProjectTitlesForUsers(
+          requestBody.getCompetitionId(),
+          requestBody.getUserIds()
+      );
+
+      ProjectTitlesResponseDTO response = new ProjectTitlesResponseDTO(projectTitles);
+
+      return Response.ok(response)
+          .cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false))
+          .build();
+
+    } catch (NoUserLoggedInException e) {
+      return SegueErrorResponse.getNotLoggedInResponse();
+    } catch (SegueDatabaseException e) {
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, EXCEPTION_MESSAGE_DATABASE_ERROR_RETRIEVING_BOOKING)
+          .toResponse();
+    }
+  }
+
+  /**
    * Find a booking by id.
    *
    * @param request   for authentication
@@ -778,7 +838,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         }
         resultRow.add(resultBookingStatus.toString());
         resultRow.add(dateFormat.format(booking.getBookingDate()));
-        resultRow.add(dateFormat.format(booking.getUpdated()));
+        resultRow.add(dateFormat.format(booking.getLastUpdated()));
         resultRow.add(resultAdditionalInformation.get("yearGroup"));
         resultRow.add(resultAdditionalInformation.get("jobTitle"));
         resultRow.add(String.join(" ", resultUser.getRegisteredContexts().stream()

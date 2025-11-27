@@ -102,6 +102,19 @@ public class EventBookingPersistenceManager {
   }
 
   /**
+   * Gets a specific event booking.
+   *
+   * @param eventId of interest
+   * @param usersId  of interest
+   * @return event booking or null if we can't find one.
+   * @throws SegueDatabaseException if an error occurs.
+   */
+  public List<DetailedEventBookingDTO> getBookingByEventIdAndUsersId(final String eventId, final List<Long> usersId)
+      throws SegueDatabaseException {
+    return this.convertToDTO(dao.findBookingByEventAndUsers(eventId, usersId));
+  }
+
+  /**
    * Modify an existing event booking's status.
    *
    * @param transaction                the database transaction to use
@@ -390,9 +403,10 @@ public class EventBookingPersistenceManager {
       result.setEventId(eventInformation.getId());
       result.setEventTitle(eventInformation.getTitle());
       result.setBookingDate(eb.getCreationDate());
-      result.setUpdated(eb.getUpdateDate());
+      result.setLastUpdated(eb.getUpdateDate());
       result.setBookingStatus(eb.getBookingStatus());
       result.setAdditionalInformation(eb.getAdditionalInformation());
+      result.setProjectTitle(eb.projectTitle());
 
       return result;
     } catch (NoUserException e) {
@@ -471,5 +485,10 @@ public class EventBookingPersistenceManager {
     }
 
     return result;
+  }
+
+  public List<DetailedEventBookingDTO> getBookingsByEventIdForUsers(String competitionId, List<Long> userIds)
+      throws SegueDatabaseException {
+    return this.getBookingByEventIdAndUsersId(competitionId, userIds);
   }
 }

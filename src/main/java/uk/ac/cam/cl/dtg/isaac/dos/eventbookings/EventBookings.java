@@ -176,6 +176,16 @@ public interface EventBookings {
   EventBooking findBookingByEventAndUser(String eventId, Long userId) throws SegueDatabaseException;
 
   /**
+   * Find an event booking by event and users id.
+   *
+   * @param eventId - the event of interest.
+   * @param usersId  - the users of interest.
+   * @return the event or an error.
+   * @throws SegueDatabaseException - if an error occurs.
+   */
+  List<EventBooking> findBookingByEventAndUsers(String eventId, List<Long> usersId) throws SegueDatabaseException;
+
+  /**
    * Find an event booking by id.
    *
    * @param bookingId - the event ID of interest.
