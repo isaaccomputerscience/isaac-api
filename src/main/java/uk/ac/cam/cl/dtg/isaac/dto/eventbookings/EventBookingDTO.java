@@ -225,24 +225,6 @@ public class EventBookingDTO {
   }
 
   /**
-   * Get the lastUpdate date.
-   *
-   * @return the Date it was most recently updated
-   */
-  public Instant getUpdated() {
-    return lastUpdated;
-  }
-
-  /**
-   * Set the lastUpdate Date.
-   *
-   * @param lastUpdated - date it was updated.
-   */
-  public void setUpdated(final Instant lastUpdated) {
-    this.lastUpdated = lastUpdated;
-  }
-
-  /**
    * Get the booking status.
    *
    * @return the status of the booking.

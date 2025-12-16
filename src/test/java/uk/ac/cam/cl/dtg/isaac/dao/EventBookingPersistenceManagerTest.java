@@ -120,7 +120,8 @@ class EventBookingPersistenceManagerTest {
     expectedBooking1.setReservedById(7L);
     expectedBooking1.setBookingStatus(BookingStatus.CONFIRMED);
     expectedBooking1.setBookingDate(createAndUpdateTime);
-    expectedBooking1.setUpdated(createAndUpdateTime);
+    expectedBooking1.setProjectTitle("projectTitle");
+    expectedBooking1.setLastUpdated(createAndUpdateTime);
     return expectedBooking1;
   }
 
@@ -133,6 +134,7 @@ class EventBookingPersistenceManagerTest {
     expect(dummyResultSet.getString("status")).andReturn("CONFIRMED");
     expect(dummyResultSet.getTimestamp("created")).andReturn(Timestamp.from(createAndUpdateTime));
     expect(dummyResultSet.getTimestamp("updated")).andReturn(Timestamp.from(createAndUpdateTime));
+    expect(dummyResultSet.getString("project_title")).andReturn("projectTitle");
     expect(dummyResultSet.getObject("additional_booking_information")).andReturn(null);
   }
 }

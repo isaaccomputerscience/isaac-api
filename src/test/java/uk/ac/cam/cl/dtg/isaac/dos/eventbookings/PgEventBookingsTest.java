@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -137,6 +136,7 @@ class PgEventBookingsTest {
     expect(dummyResultSet.getString("status")).andReturn("CONFIRMED");
     expect(dummyResultSet.getTimestamp("created")).andReturn(Timestamp.from(now));
     expect(dummyResultSet.getTimestamp("updated")).andReturn(Timestamp.from(now));
+    expect(dummyResultSet.getString("project_title")).andReturn("projectTitle1");
     expect(dummyResultSet.getObject("additional_booking_information")).andReturn(null);
 
     expect(dummyResultSet.next()).andReturn(true);
@@ -147,6 +147,7 @@ class PgEventBookingsTest {
     expect(dummyResultSet.getString("status")).andReturn("CONFIRMED");
     expect(dummyResultSet.getTimestamp("created")).andReturn(Timestamp.from(now));
     expect(dummyResultSet.getTimestamp("updated")).andReturn(Timestamp.from(now));
+    expect(dummyResultSet.getString("project_title")).andReturn("projectTitle2");  // ADD THIS
     expect(dummyResultSet.getObject("additional_booking_information")).andReturn(null);
 
     expect(dummyResultSet.next()).andReturn(false);
@@ -161,10 +162,10 @@ class PgEventBookingsTest {
     Iterable<EventBooking> result = pgEventBookings.findAllByEventIds(eventIds);
     assertNotNull(result);
     assertEquals(StreamSupport.stream(result.spliterator(), false).count(), 2);
-    assertDeepEquals(StreamSupport.stream(result.spliterator(), false).filter(object -> object.getId().equals(1L)).collect(
-        Collectors.toList()).get(0), expectedBooking1);
-    assertDeepEquals(StreamSupport.stream(result.spliterator(), false).filter(object -> object.getId().equals(2L)).collect(
-        Collectors.toList()).get(0), expectedBooking2);
+    assertDeepEquals(
+        StreamSupport.stream(result.spliterator(), false).filter(object -> object.getId().equals(1L)).toList().get(0), expectedBooking1);
+    assertDeepEquals(
+        StreamSupport.stream(result.spliterator(), false).filter(object -> object.getId().equals(2L)).toList().get(0), expectedBooking2);
 
     verify(mockedObjects);
   }

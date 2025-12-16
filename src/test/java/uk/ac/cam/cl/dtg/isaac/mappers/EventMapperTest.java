@@ -118,7 +118,8 @@ class EventMapperTest {
     detailedEvent.setEventTitle("eventTitle");
     detailedEvent.setBookingStatus(BookingStatus.CONFIRMED);
     detailedEvent.setBookingDate(testDate);
-    detailedEvent.setUpdated(newTestDate);
+    detailedEvent.setLastUpdated(newTestDate);
+    detailedEvent.setProjectTitle("projectTitle");
     detailedEvent.setAdditionalInformation(prepareAdditionalInformation());
     return detailedEvent;
   }
@@ -134,7 +135,7 @@ class EventMapperTest {
     event1.setEventTitle("eventTitle");
     event1.setBookingStatus(BookingStatus.RESERVED);
     event1.setBookingDate(testDate);
-    event1.setUpdated(newTestDate);
+    event1.setLastUpdated(newTestDate);
     event1.setAdditionalInformation(prepareAdditionalInformation());
     detailedEventList.add(event1);
 
@@ -147,7 +148,7 @@ class EventMapperTest {
     event2.setEventTitle("eventTitle");
     event2.setBookingStatus(BookingStatus.RESERVED);
     event2.setBookingDate(testDate);
-    event2.setUpdated(newTestDate);
+    event2.setLastUpdated(newTestDate);
     event2.setAdditionalInformation(prepareAdditionalInformation());
     detailedEventList.add(event2);
     return detailedEventList;
@@ -164,7 +165,7 @@ class EventMapperTest {
     event1.setEventTitle("eventTitle");
     event1.setBookingStatus(BookingStatus.RESERVED);
     event1.setBookingDate(testDate);
-    event1.setUpdated(newTestDate);
+    event1.setLastUpdated(newTestDate);
     eventList.add(event1);
 
     EventBookingDTO event2 = new EventBookingDTO();
@@ -176,7 +177,7 @@ class EventMapperTest {
     event2.setEventTitle("eventTitle");
     event2.setBookingStatus(BookingStatus.RESERVED);
     event2.setBookingDate(testDate);
-    event2.setUpdated(newTestDate);
+    event2.setLastUpdated(newTestDate);
     eventList.add(event2);
     return eventList;
   }

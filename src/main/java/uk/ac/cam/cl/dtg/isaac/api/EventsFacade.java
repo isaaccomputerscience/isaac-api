@@ -502,7 +502,7 @@ public class EventsFacade extends AbstractIsaacFacade {
             "User IDs must be specified.").toResponse();
       }
 
-      List<String> projectTitles = bookingManager.getCompetitionProjectTitlesForUsers(
+      Set<String> projectTitles = bookingManager.getCompetitionProjectTitlesForUsers(
           requestBody.getCompetitionId(),
           requestBody.getUserIds()
       );
@@ -516,7 +516,8 @@ public class EventsFacade extends AbstractIsaacFacade {
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueDatabaseException e) {
-      throw new RuntimeException(e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, EXCEPTION_MESSAGE_DATABASE_ERROR_RETRIEVING_BOOKING)
+          .toResponse();
     }
   }
 
@@ -837,7 +838,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         }
         resultRow.add(resultBookingStatus.toString());
         resultRow.add(dateFormat.format(booking.getBookingDate()));
-        resultRow.add(dateFormat.format(booking.getUpdated()));
+        resultRow.add(dateFormat.format(booking.getLastUpdated()));
         resultRow.add(resultAdditionalInformation.get("yearGroup"));
         resultRow.add(resultAdditionalInformation.get("jobTitle"));
         resultRow.add(String.join(" ", resultUser.getRegisteredContexts().stream()
