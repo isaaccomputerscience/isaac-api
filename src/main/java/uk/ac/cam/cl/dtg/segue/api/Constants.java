@@ -548,11 +548,11 @@ public final class Constants {
   public static final Integer ESCAPED_ID_SPLIT_LIMIT = 3;
 
   // School List loading - raw data
-  public static final String SCHOOL_URN_FIELDNAME = "URN";
-  public static final String SCHOOL_ESTABLISHMENT_NAME_FIELDNAME = "EstablishmentName";
-  public static final String SCHOOL_POSTCODE_FIELDNAME = "Postcode";
-  public static final String SCHOOL_DATA_SOURCE_FIELDNAME = "DataSource";
-  public static final String SCHOOL_CLOSED_FIELDNAME = "Closed";
+  public static final String SCHOOL_URN_FIELDNAME = "urn";
+  public static final String SCHOOL_ESTABLISHMENT_NAME_FIELDNAME = "school_name";
+  public static final String SCHOOL_POSTCODE_FIELDNAME = "postcode";
+  public static final String SCHOOL_DATA_SOURCE_FIELDNAME = "data_source";
+  public static final String SCHOOL_CLOSED_FIELDNAME = "closed";
 
   // School List loading POJO fields
   public static final String SCHOOL_URN_FIELDNAME_POJO = "urn";
