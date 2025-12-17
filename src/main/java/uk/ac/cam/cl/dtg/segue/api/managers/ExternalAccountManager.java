@@ -33,6 +33,7 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IExternalAccountDataManager;
 import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper;
 import uk.ac.cam.cl.dtg.util.email.MailJetSubscriptionAction;
+
 public class ExternalAccountManager implements IExternalAccountManager {
   private static final Logger log = LoggerFactory.getLogger(ExternalAccountManager.class);
 
@@ -61,6 +62,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
    */
   @Override
   public synchronized void synchroniseChangedUsers() throws ExternalAccountSynchronisationException {
+    long startTime = System.currentTimeMillis();
     log.info("MAILJET - === Starting Mailjet user synchronisation ===");
     int totalUsersProcessed = 0;
     int successfulSyncs = 0;
@@ -75,6 +77,27 @@ public class ExternalAccountManager implements IExternalAccountManager {
         totalUsersProcessed++;
         Long userId = userRecord.getUserId();
         String accountEmail = userRecord.getAccountEmail();
+
+        // Rate limiting: 2 second delay between each user
+        if (totalUsersProcessed > 1) {
+          try {
+            Thread.sleep(2000); // 2 seconds between users
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("MAILJET - Thread interrupted during rate limit delay");
+          }
+        }
+
+        // Additional delay every 100 users to avoid rate limits
+        if (totalUsersProcessed % 100 == 0) {
+          try {
+            log.info("MAILJET - Processed {} users, pausing 10 seconds to avoid rate limits", totalUsersProcessed);
+            Thread.sleep(10000); // 10 seconds every 100 users
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("MAILJET - Thread interrupted during extended rate limit delay");
+          }
+        }
 
         log.debug("MAILJET - [User {}] Starting sync for email: {}", userId, sanitiseEmailForLogging(accountEmail));
         log.debug("MAILJET - [User {}] Details: deleted={}, emailStatus={}, mailjetId={}, allowsNews={}, allowsEvents={}, role={}, stage={}",
@@ -138,6 +161,9 @@ public class ExternalAccountManager implements IExternalAccountManager {
     log.info("MAILJET - Successful syncs: {}", successfulSyncs);
     log.info("MAILJET - Failed syncs: {}", failedSyncs);
     log.info("MAILJET - Skipped users: {}", skippedUsers);
+
+    long duration = (System.currentTimeMillis() - startTime) / 1000;
+    log.info("MAILJET - Sync duration: {} seconds ({} minutes)", duration, duration / 60);
   }
 
   /**
