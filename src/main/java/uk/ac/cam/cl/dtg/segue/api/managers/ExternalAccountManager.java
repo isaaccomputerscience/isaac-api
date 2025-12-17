@@ -76,7 +76,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
         String accountEmail = userRecord.getAccountEmail();
 
         log.info("MMAILJETT - [User {}] Starting sync for email: {}", userId, sanitiseEmailForLogging(accountEmail));
-        log.debug("MMAILJETT - [User {}] Full user record: deleted={}, emailVerificationStatus={}, providerUserId={}, " +
+        log.info("MMAILJETT - [User {}] Full user record: deleted={}, emailVerificationStatus={}, providerUserId={}, " +
                 "allowsNews={}, allowsEvents={}, givenName={}, role={}, stage={}",
             userId,
             userRecord.isDeleted(),
@@ -142,7 +142,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
 
     } catch (SegueDatabaseException e) {
       log.error("MMAILJETT - Database error whilst collecting users whose details have changed!", e);
-      throw new ExternalAccountSynchronisationException("Database error during user collection");
+      throw new ExternalAccountSynchronisationException("MMAILJETT - Database error during user collection");
     }
 
     log.info("MMAILJETT - === Mailjet synchronisation complete ===");
@@ -178,7 +178,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
     }
 
     if (null != mailjetId) {
-      log.debug("MMAILJETT - [User {}] Existing Mailjet user with ID: {}", userId, mailjetId);
+      log.info("MMAILJETT - [User {}] Existing Mailjet user with ID: {}", userId, mailjetId);
 
       // Verify the user still exists in Mailjet
       JSONObject mailjetDetails = mailjetApi.getAccountByIdOrEmail(mailjetId);
@@ -189,7 +189,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
         database.updateExternalAccount(userId, null);
         mailjetId = null;
       } else {
-        log.debug("MMAILJETT - [User {}] Found existing Mailjet account: {}", userId, mailjetDetails.toString());
+        log.warn("MMAILJETT - [User {}] Found existing Mailjet account: {}", userId, mailjetDetails.toString());
       }
     }
 
@@ -212,7 +212,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
             userId, sanitiseEmailForLogging(mailjetDetails.getString("Email")),
             sanitiseEmailForLogging(accountEmail));
         mailjetApi.permanentlyDeleteAccountById(mailjetId);
-        log.debug("MMAILJETT - [User {}] Deleted old Mailjet contact", userId);
+        log.info("MMAILJETT - [User {}] Deleted old Mailjet contact", userId);
 
         mailjetId = mailjetApi.addNewUserOrGetUserIfExists(accountEmail);
         log.info("MMAILJETT - [User {}] Created new Mailjet contact with ID: {}", userId, mailjetId);
@@ -312,7 +312,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
       throws SegueDatabaseException, MailjetException {
 
     Long userId = userRecord.getUserId();
-    log.debug("MMAILJETT - [User {}] Updating properties for Mailjet ID: {}", userId, mailjetId);
+    log.info("MMAILJETT - [User {}] Updating properties for Mailjet ID: {}", userId, mailjetId);
 
     // Update properties
     try {
@@ -322,7 +322,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
           ? userRecord.getEmailVerificationStatus().toString() : "";
       String stage = userRecord.getStage();
 
-      log.debug("MMAILJETT - [User {}] Setting properties - firstName: {}, role: {}, verificationStatus: {}, stage: {}",
+      log.info("MMAILJETT - [User {}] Setting properties - firstName: {}, role: {}, verificationStatus: {}, stage: {}",
           userId, firstName, role, verificationStatus, stage);
 
       mailjetApi.updateUserProperties(mailjetId, firstName, role, verificationStatus, stage);
@@ -342,7 +342,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
           && userRecord.allowsEventsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
           MailJetSubscriptionAction.UNSUBSCRIBE;
 
-      log.debug("MMAILJETT - [User {}] Setting subscriptions - news: {}, events: {}",
+      log.info("MMAILJETT - [User {}] Setting subscriptions - news: {}, events: {}",
           userId, newsStatus, eventsStatus);
 
       mailjetApi.updateUserSubscriptions(mailjetId, newsStatus, eventsStatus);
@@ -356,7 +356,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
     // Store the Mailjet ID
     try {
       database.updateExternalAccount(userId, mailjetId);
-      log.debug("MMAILJETT - [User {}] Stored Mailjet ID in database: {}", userId, mailjetId);
+      log.info("MMAILJETT - [User {}] Stored Mailjet ID in database: {}", userId, mailjetId);
     } catch (SegueDatabaseException e) {
       log.error("MMAILJETT - [User {}] Failed to store Mailjet ID {} in database", userId, mailjetId, e);
       throw e;
@@ -378,7 +378,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
 
     try {
       database.updateExternalAccount(userId, null);
-      log.debug("MMAILJETT - [User {}] Cleared Mailjet ID from database", userId);
+      log.info("MMAILJETT - [User {}] Cleared Mailjet ID from database", userId);
     } catch (SegueDatabaseException e) {
       log.error("MMAILJETT - [User {}] Failed to clear Mailjet ID from database", userId, e);
       throw e;

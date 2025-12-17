@@ -40,17 +40,20 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
   @Override
   public List<UserExternalAccountChanges> getRecentlyChangedRecords() throws SegueDatabaseException {
     String query = "SELECT id, provider_user_identifier, email, role, given_name, deleted, email_verification_status, "
-        + "       news_prefs.preference_value AS news_emails, events_prefs.preference_value AS events_emails "
-        + "FROM users "
-        + "    LEFT OUTER JOIN user_preferences AS news_prefs ON users.id = news_prefs.user_id "
-        + "AND news_prefs.preference_type='EMAIL_PREFERENCE' "
-        + "AND news_prefs.preference_name='NEWS_AND_UPDATES' "
-        + "    LEFT OUTER JOIN user_preferences AS events_prefs ON users.id = events_prefs.user_id "
-        + "AND events_prefs.preference_type='EMAIL_PREFERENCE' "
-        + "AND events_prefs.preference_name='EVENTS' "
-        + "    LEFT OUTER JOIN external_accounts ON users.id=external_accounts.user_id AND provider_name='MailJet' "
-        + "WHERE (users.last_updated >= provider_last_updated OR news_prefs.last_updated >= provider_last_updated "
-        + "           OR events_prefs.last_updated >= provider_last_updated OR provider_last_updated IS NULL)";
+            + "       registered_contexts, "
+            + "       news_prefs.preference_value AS news_emails, events_prefs.preference_value AS events_emails "
+            + "FROM users "
+            + "    LEFT OUTER JOIN user_preferences AS news_prefs ON users.id = news_prefs.user_id "
+            + "AND news_prefs.preference_type='EMAIL_PREFERENCE' "
+            + "AND news_prefs.preference_name='NEWS_AND_UPDATES' "
+            + "    LEFT OUTER JOIN user_preferences AS events_prefs ON users.id = events_prefs.user_id "
+            + "AND events_prefs.preference_type='EMAIL_PREFERENCE' "
+            + "AND events_prefs.preference_name='EVENTS' "
+            + "    LEFT OUTER JOIN external_accounts ON users.id=external_accounts.user_id AND provider_name='MailJet' "
+            + "WHERE (users.last_updated >= provider_last_updated OR news_prefs.last_updated >= provider_last_updated "
+            + "           OR events_prefs.last_updated >= provider_last_updated OR provider_last_updated IS NULL)";
+
+      log.info("QUERY :{}", query);
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query);
          ResultSet results = pst.executeQuery()
@@ -64,6 +67,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       return listOfResults;
 
     } catch (SQLException e) {
+      log.info("QUERY :{}", query);
       throw new SegueDatabaseException("Postgres exception", e);
     }
   }
