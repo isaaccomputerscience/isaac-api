@@ -181,15 +181,28 @@ public class ExternalAccountManager implements IExternalAccountManager {
       log.info("MMAILJETT - [User {}] Existing Mailjet user with ID: {}", userId, mailjetId);
 
       // Verify the user still exists in Mailjet
-      JSONObject mailjetDetails = mailjetApi.getAccountByIdOrEmail(mailjetId);
+      try {
+        JSONObject mailjetDetails = mailjetApi.getAccountByIdOrEmail(mailjetId);
 
-      if (mailjetDetails == null) {
-        log.warn("MMAILJETT - [User {}] Mailjet ID {} not found in Mailjet - will recreate", userId, mailjetId);
-        // Clear the mailjet ID and recreate
-        database.updateExternalAccount(userId, null);
-        mailjetId = null;
-      } else {
-        log.warn("MMAILJETT - [User {}] Found existing Mailjet account: {}", userId, mailjetDetails.toString());
+        if (mailjetDetails == null) {
+          log.warn("MMAILJETT - [User {}] Mailjet ID {} not found in Mailjet - will recreate", userId, mailjetId);
+          // Clear the mailjet ID and recreate
+          database.updateExternalAccount(userId, null);
+          mailjetId = null;
+        } else {
+          log.info("MMAILJETT - [User {}] Found existing Mailjet account: {}", userId, mailjetDetails.toString());
+        }
+      } catch (MailjetException e) {
+        // If we get 404, clear the ID and recreate
+        if (e.getMessage() != null && (e.getMessage().contains("404") || e.getMessage().contains("Object not found"))) {
+          log.warn("MMAILJETT - [User {}] Mailjet contact {} returned 404 - clearing and recreating",
+                  userId, mailjetId);
+          database.updateExternalAccount(userId, null);
+          mailjetId = null;
+        } else {
+          // Re-throw other errors
+          throw e;
+        }
       }
     }
 
