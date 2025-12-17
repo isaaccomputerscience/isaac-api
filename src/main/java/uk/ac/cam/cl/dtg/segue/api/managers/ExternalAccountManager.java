@@ -322,7 +322,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
   }
 
   private void updateUserOnMailJet(final String mailjetId, final UserExternalAccountChanges userRecord)
-      throws SegueDatabaseException, MailjetException {
+          throws SegueDatabaseException, MailjetException {
 
     Long userId = userRecord.getUserId();
     log.info("MMAILJETT - [User {}] Updating properties for Mailjet ID: {}", userId, mailjetId);
@@ -332,16 +332,24 @@ public class ExternalAccountManager implements IExternalAccountManager {
       String firstName = userRecord.getGivenName();
       String role = userRecord.getRole() != null ? userRecord.getRole().toString() : "";
       String verificationStatus = userRecord.getEmailVerificationStatus() != null
-          ? userRecord.getEmailVerificationStatus().toString() : "";
+              ? userRecord.getEmailVerificationStatus().toString() : "";
       String stage = userRecord.getStage();
 
       log.info("MMAILJETT - [User {}] Setting properties - firstName: {}, role: {}, verificationStatus: {}, stage: {}",
-          userId, firstName, role, verificationStatus, stage);
+              userId, firstName, role, verificationStatus, stage);
 
       mailjetApi.updateUserProperties(mailjetId, firstName, role, verificationStatus, stage);
       log.info("MMAILJETT - [User {}] Successfully updated Mailjet properties", userId);
 
     } catch (MailjetException e) {
+      // Check if this is a 404 - contact was deleted from Mailjet but we still have the ID
+      if (is404Error(e)) {
+        log.warn("MMAILJETT - [User {}] Contact with Mailjet ID {} not found (404) during property update - clearing stale ID",
+                userId, mailjetId);
+        handleStaleMailjetId(userId, mailjetId);
+        return; // Exit early - contact will be recreated on next sync
+      }
+
       log.error("MMAILJETT - [User {}] Failed to update Mailjet properties for ID {}", userId, mailjetId, e);
       throw e;
     }
@@ -349,19 +357,27 @@ public class ExternalAccountManager implements IExternalAccountManager {
     // Update subscriptions
     try {
       MailJetSubscriptionAction newsStatus = (userRecord.allowsNewsEmails() != null
-          && userRecord.allowsNewsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
-          MailJetSubscriptionAction.UNSUBSCRIBE;
+              && userRecord.allowsNewsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
+              MailJetSubscriptionAction.UNSUBSCRIBE;
       MailJetSubscriptionAction eventsStatus = (userRecord.allowsEventsEmails() != null
-          && userRecord.allowsEventsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
-          MailJetSubscriptionAction.UNSUBSCRIBE;
+              && userRecord.allowsEventsEmails()) ? MailJetSubscriptionAction.FORCE_SUBSCRIBE :
+              MailJetSubscriptionAction.UNSUBSCRIBE;
 
       log.info("MMAILJETT - [User {}] Setting subscriptions - news: {}, events: {}",
-          userId, newsStatus, eventsStatus);
+              userId, newsStatus, eventsStatus);
 
       mailjetApi.updateUserSubscriptions(mailjetId, newsStatus, eventsStatus);
       log.info("MMAILJETT - [User {}] Successfully updated Mailjet subscriptions", userId);
 
     } catch (MailjetException e) {
+      // Check if this is a 404 - contact was deleted from Mailjet but we still have the ID
+      if (is404Error(e)) {
+        log.warn("MMAILJETT - [User {}] Contact with Mailjet ID {} not found (404) during subscription update - clearing stale ID",
+                userId, mailjetId);
+        handleStaleMailjetId(userId, mailjetId);
+        return; // Exit early - contact will be recreated on next sync
+      }
+
       log.error("MMAILJETT - [User {}] Failed to update Mailjet subscriptions for ID {}", userId, mailjetId, e);
       throw e;
     }
@@ -372,6 +388,52 @@ public class ExternalAccountManager implements IExternalAccountManager {
       log.info("MMAILJETT - [User {}] Stored Mailjet ID in database: {}", userId, mailjetId);
     } catch (SegueDatabaseException e) {
       log.error("MMAILJETT - [User {}] Failed to store Mailjet ID {} in database", userId, mailjetId, e);
+      throw e;
+    }
+  }
+
+  /**
+   * Checks if a MailjetException is a 404 error.
+   *
+   * @param e The MailjetException to check
+   * @return true if this is a 404 error, false otherwise
+   */
+  private boolean is404Error(MailjetException e) {
+    if (e == null) {
+      return false;
+    }
+
+    String message = e.getMessage();
+    if (message == null) {
+      return false;
+    }
+
+    // Check for 404 status code in the error message
+    return message.contains("\"StatusCode\" : 404") ||
+            message.contains("\"StatusCode\": 404") ||
+            message.contains("Object not found");
+  }
+
+  /**
+   * Handles a stale Mailjet ID by clearing it from the database.
+   * The contact will be recreated on the next sync run.
+   *
+   * @param userId The user ID
+   * @param staleMailjetId The stale Mailjet ID to clear
+   * @throws SegueDatabaseException if clearing the ID fails
+   */
+  private void handleStaleMailjetId(Long userId, String staleMailjetId) throws SegueDatabaseException {
+    log.info("MMAILJETT - [User {}] Clearing stale Mailjet ID: {}", userId, staleMailjetId);
+
+    try {
+      // Clear the Mailjet ID from the database by setting it to null
+      database.updateExternalAccount(userId, null);
+      log.info("MMAILJETT - [User {}] Successfully cleared stale Mailjet ID {}. " +
+              "Contact will be recreated on next sync run.", userId, staleMailjetId);
+
+    } catch (SegueDatabaseException e) {
+      log.error("MMAILJETT - [User {}] CRITICAL: Failed to clear stale Mailjet ID {} from database",
+              userId, staleMailjetId, e);
       throw e;
     }
   }
