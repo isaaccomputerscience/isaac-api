@@ -81,10 +81,10 @@ public class ExternalAccountManager implements IExternalAccountManager {
       Long userId = userRecord.getUserId();
 
       try {
-        log.debug("Processing user ID: {} with email: {}", userId, maskEmail(userRecord.getAccountEmail()));
+        log.info("Processing user ID: {} with email: {}", userId, maskEmail(userRecord.getAccountEmail()));
         processUserSync(userRecord, metrics);
         metrics.incrementSuccess();
-        log.debug("Successfully processed user ID: {}", userId);
+        log.info("Successfully processed user ID: {}", userId);
 
       } catch (SegueDatabaseException e) {
         metrics.incrementDatabaseError();
@@ -152,7 +152,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
 
     // Update the provider_last_updated timestamp on success
     database.updateProviderLastUpdated(userId);
-    log.debug("Updated provider_last_updated timestamp for user ID: {}", userId);
+    log.info("Updated provider_last_updated timestamp for user ID: {}", userId);
   }
 
   /**
@@ -202,7 +202,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
       metrics.incrementEmailChanged();
 
     } else {
-      log.debug("User ID {} has updated details/preferences. Updating Mailjet.", userId);
+      log.info("User ID {} has updated details/preferences. Updating Mailjet.", userId);
       updateUserOnMailJet(mailjetId, userRecord);
       metrics.incrementUpdated();
     }
@@ -232,7 +232,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
       metrics.incrementCreated();
 
     } else {
-      log.debug("User ID {} not eligible for Mailjet (deleted={}, deliveryFailed={}). Skipping.",
+      log.info("User ID {} not eligible for Mailjet (deleted={}, deliveryFailed={}). Skipping.",
               userId, userRecord.isDeleted(), accountEmailDeliveryFailed);
       database.updateExternalAccount(userId, null);
       metrics.incrementSkipped();
@@ -275,7 +275,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
     // Store the Mailjet ID in the database
     database.updateExternalAccount(userId, mailjetId);
 
-    log.debug("Updated Mailjet account {} for user ID {} (news={}, events={})",
+    log.info("Updated Mailjet account {} for user ID {} (news={}, events={})",
             mailjetId, userId, newsStatus, eventsStatus);
   }
 

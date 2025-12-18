@@ -73,7 +73,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query)
     ) {
-      log.debug("Executing query to fetch recently changed user records");
+      log.info("Executing query to fetch recently changed user records");
 
       try (ResultSet results = pst.executeQuery()) {
         List<UserExternalAccountChanges> listOfResults = new ArrayList<>();
@@ -123,7 +123,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
         log.warn("No rows updated when setting provider_last_updated for user ID: {}. "
                 + "User may not have an external_accounts record yet.", userId);
       } else {
-        log.debug("Updated provider_last_updated for user ID: {}", userId);
+        log.info("Updated provider_last_updated for user ID: {}", userId);
       }
 
     } catch (SQLException e) {
@@ -155,7 +155,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       int rowsAffected = pst.executeUpdate();
 
       if (rowsAffected > 0) {
-        log.debug("Upserted external_account for user ID: {} with Mailjet ID: {}",
+        log.info("Upserted external_account for user ID: {} with Mailjet ID: {}",
                 userId, providerUserIdentifier != null ? providerUserIdentifier : "[null]");
       } else {
         log.warn("Upsert returned 0 rows for user ID: {}. This is unexpected.", userId);
@@ -219,12 +219,12 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
     if (wasNull) {
       // User has no preference set - treat as null (not subscribed)
-      log.debug("User ID {} has NULL preference for {}. Treating as not subscribed.",
+      log.info("User ID {} has NULL preference for {}. Treating as not subscribed.",
               userId, preferenceName);
       return null;
     }
 
-    log.debug("User ID {} has preference {} = {}", userId, preferenceName, value);
+    log.info("User ID {} has preference {} = {}", userId, preferenceName, value);
     return value;
   }
 
@@ -243,7 +243,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
    */
   private String extractStageFromRegisteredContexts(Long userId, String registeredContextsJson) {
     if (registeredContextsJson == null || registeredContextsJson.trim().isEmpty()) {
-      log.debug("User ID {} has NULL/empty registered_contexts. Stage: unknown", userId);
+      log.info("User ID {} has NULL/empty registered_contexts. Stage: unknown", userId);
       return "unknown";
     }
 
@@ -251,7 +251,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
     // Check for empty JSON object or array
     if ("{}".equals(trimmed) || "[]".equals(trimmed)) {
-      log.debug("User ID {} has empty registered_contexts '{}'. Stage: unknown", userId, trimmed);
+      log.info("User ID {} has empty registered_contexts '{}'. Stage: unknown", userId, trimmed);
       return "unknown";
     }
 
@@ -282,7 +282,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
     JSONArray array = new JSONArray(jsonArrayString);
 
     if (array.isEmpty()) {
-      log.debug("User ID {} has empty JSON array in registered_contexts. Stage: unknown", userId);
+      log.info("User ID {} has empty JSON array in registered_contexts. Stage: unknown", userId);
       return "unknown";
     }
 
@@ -294,7 +294,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
         if (obj.has("stage")) {
           String stage = obj.getString("stage");
           String normalized = normalizeStage(stage);
-          log.debug("User ID {} has stage '{}' in registered_contexts[{}]. Normalized: {}",
+          log.info("User ID {} has stage '{}' in registered_contexts[{}]. Normalized: {}",
                   userId, stage, i, normalized);
           return normalized;
         }
@@ -321,7 +321,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
     if (obj.has("stage")) {
       String stage = obj.getString("stage");
       String normalized = normalizeStage(stage);
-      log.debug("User ID {} has stage '{}' in registered_contexts. Normalized: {}",
+      log.info("User ID {} has stage '{}' in registered_contexts. Normalized: {}",
               userId, stage, normalized);
       return normalized;
     }
