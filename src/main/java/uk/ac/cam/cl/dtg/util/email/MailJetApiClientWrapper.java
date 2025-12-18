@@ -38,10 +38,16 @@ import org.slf4j.LoggerFactory;
 public class MailJetApiClientWrapper {
 
   private static final Logger log = LoggerFactory.getLogger(MailJetApiClientWrapper.class);
+  private static final long DEFAULT_RATE_LIMIT_DELAY_MS = 2000; // 2 seconds between API calls
+
   private final MailjetClient mailjetClient;
   private final String newsListId;
   private final String eventsListId;
   private final String legalListId;
+  private final long rateLimitDelayMs;
+
+  // Track last API call time for rate limiting
+  private long lastApiCallTime = 0;
 
   /**
    * Wrapper for MailjetClient class.
@@ -56,6 +62,23 @@ public class MailJetApiClientWrapper {
   public MailJetApiClientWrapper(final String mailjetApiKey, final String mailjetApiSecret,
                                  final String mailjetNewsListId, final String mailjetEventsListId,
                                  final String mailjetLegalListId) {
+    this(mailjetApiKey, mailjetApiSecret, mailjetNewsListId, mailjetEventsListId,
+            mailjetLegalListId, DEFAULT_RATE_LIMIT_DELAY_MS);
+  }
+
+  /**
+   * Wrapper for MailjetClient class with configurable rate limiting.
+   *
+   * @param mailjetApiKey         - MailJet API Key
+   * @param mailjetApiSecret      - MailJet API Client Secret
+   * @param mailjetNewsListId     - MailJet list ID for NEWS_AND_UPDATES
+   * @param mailjetEventsListId   - MailJet list ID for EVENTS
+   * @param mailjetLegalListId    - MailJet list ID for legal notices (all users)
+   * @param rateLimitDelayMs      - Delay in milliseconds between API calls (default: 2000ms)
+   */
+  public MailJetApiClientWrapper(final String mailjetApiKey, final String mailjetApiSecret,
+                                 final String mailjetNewsListId, final String mailjetEventsListId,
+                                 final String mailjetLegalListId, final long rateLimitDelayMs) {
 
     if (mailjetApiKey == null || mailjetApiSecret == null) {
       throw new IllegalArgumentException("Mailjet API credentials cannot be null");
@@ -70,9 +93,11 @@ public class MailJetApiClientWrapper {
     this.newsListId = mailjetNewsListId;
     this.eventsListId = mailjetEventsListId;
     this.legalListId = mailjetLegalListId;
+    this.rateLimitDelayMs = rateLimitDelayMs;
 
     log.info("MailJet API wrapper initialized with list IDs - News: {}, Events: {}, Legal: {}",
             newsListId, eventsListId, legalListId);
+    log.info("Rate limiting enabled: {}ms delay between API calls", rateLimitDelayMs);
   }
 
   /**
@@ -87,6 +112,8 @@ public class MailJetApiClientWrapper {
       log.debug("Attempted to get account with null/empty identifier");
       return null;
     }
+
+    waitForRateLimit(); // Apply rate limiting
 
     try {
       log.debug("Fetching Mailjet account: {}", mailjetIdOrEmail);
@@ -105,7 +132,7 @@ public class MailJetApiClientWrapper {
       }
 
       JSONArray responseData = response.getData();
-      if (response.getTotal() == 1 && !responseData.isEmpty()) {
+      if (response.getTotal() == 1 && responseData.length() > 0) {
         log.debug("Successfully retrieved Mailjet account: {}", mailjetIdOrEmail);
         return responseData.getJSONObject(0);
       }
@@ -136,6 +163,8 @@ public class MailJetApiClientWrapper {
     if (mailjetId == null || mailjetId.trim().isEmpty()) {
       throw new IllegalArgumentException("Mailjet ID cannot be null or empty");
     }
+
+    waitForRateLimit(); // Apply rate limiting
 
     try {
       log.info("Deleting Mailjet account: {}", mailjetId);
@@ -182,6 +211,8 @@ public class MailJetApiClientWrapper {
     }
 
     String normalizedEmail = email.trim().toLowerCase();
+
+    waitForRateLimit(); // Apply rate limiting
 
     try {
       log.debug("Creating Mailjet account for email: {}", maskEmail(normalizedEmail));
@@ -265,6 +296,8 @@ public class MailJetApiClientWrapper {
       throw new IllegalArgumentException("Mailjet ID cannot be null or empty");
     }
 
+    waitForRateLimit(); // Apply rate limiting
+
     try {
       log.debug("Updating properties for Mailjet account: {} (role={}, stage={}, status={})",
               mailjetId, role, stage, emailVerificationStatus);
@@ -323,6 +356,8 @@ public class MailJetApiClientWrapper {
     if (newsEmails == null || eventsEmails == null) {
       throw new IllegalArgumentException("Subscription actions cannot be null");
     }
+
+    waitForRateLimit(); // Apply rate limiting
 
     try {
       log.debug("Updating subscriptions for Mailjet account: {} (news={}, events={})",
@@ -384,5 +419,31 @@ public class MailJetApiClientWrapper {
     String masked = localPart.substring(0, Math.min(3, localPart.length())) + "***";
 
     return masked + domain;
+  }
+
+  /**
+   * Wait for rate limiting before making an API call.
+   * Ensures minimum delay between consecutive API calls to avoid rate limits.
+   *
+   * This method is synchronized to ensure thread-safety when multiple threads
+   * might be using the same MailJetApiClientWrapper instance.
+   */
+  private synchronized void waitForRateLimit() {
+    long currentTime = System.currentTimeMillis();
+    long timeSinceLastCall = currentTime - lastApiCallTime;
+
+    if (timeSinceLastCall < rateLimitDelayMs && lastApiCallTime > 0) {
+      long waitTime = rateLimitDelayMs - timeSinceLastCall;
+      log.debug("Rate limiting: waiting {}ms before next API call", waitTime);
+
+      try {
+        Thread.sleep(waitTime);
+      } catch (InterruptedException e) {
+        log.warn("Rate limit wait interrupted", e);
+        Thread.currentThread().interrupt();
+      }
+    }
+
+    lastApiCallTime = System.currentTimeMillis();
   }
 }
