@@ -118,6 +118,7 @@ public class MailJetApiClientWrapper {
     try {
       log.info("MAILJETT - Fetching Mailjet account: {}", mailjetIdOrEmail);
       MailjetRequest request = new MailjetRequest(Contact.resource, mailjetIdOrEmail);
+      log.info("MAILJETT - request: {}", request.getBody());
       MailjetResponse response = mailjetClient.get(request);
 
       log.info("MAILJETT - response: {}", response.getRawResponseContent());
@@ -180,7 +181,11 @@ public class MailJetApiClientWrapper {
 
     try {
       log.info("MAILJETT - Deleting Mailjet account: {}", mailjetId);
+
       MailjetRequest request = new MailjetRequest(Contacts.resource, mailjetId);
+
+      log.info("MAILJETT - request: {}", request.getBody());
+
       MailjetResponse response = mailjetClient.delete(request);
 
       log.info("MAILJETT - response: {}", response.getRawResponseContent());
@@ -242,6 +247,7 @@ public class MailJetApiClientWrapper {
 
       MailjetRequest request = new MailjetRequest(Contact.resource)
               .property(Contact.EMAIL, normalizedEmail);
+      log.info("MAILJETT - request: {}", request.getBody());
       MailjetResponse response = mailjetClient.post(request);
 
       log.info("MAILJETT - response: {}", response.getRawResponseContent());
@@ -337,6 +343,8 @@ public class MailJetApiClientWrapper {
                       .put(new JSONObject().put("Name", "stage").put("value", stage != null ? stage : "unknown"))
               );
 
+      log.info("MAILJETT - request: {}", request.getBody());
+
       MailjetResponse response = mailjetClient.put(request);
 
       log.info("MAILJETT - response: {}", response.getRawResponseContent());
@@ -412,6 +420,8 @@ public class MailJetApiClientWrapper {
                               .put(ContactslistImportList.LISTID, eventsListId)
                               .put(ContactslistImportList.ACTION, eventsEmails.getValue()))
               );
+
+      log.info("MAILJETT - request: {}", request.getBody());
 
       MailjetResponse response = mailjetClient.post(request);
 
