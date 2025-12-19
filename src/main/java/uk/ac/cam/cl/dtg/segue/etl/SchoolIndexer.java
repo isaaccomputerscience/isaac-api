@@ -138,7 +138,7 @@ class SchoolIndexer {
               .valueOf(schoolArray[fieldNameMapping.get(Constants.SCHOOL_DATA_SOURCE_FIELDNAME)]);
 
           School schoolToSave = new School(schoolArray[fieldNameMapping.get(Constants.SCHOOL_URN_FIELDNAME)],
-              schoolArray[fieldNameMapping.get(Constants.SCHOOL_ESTABLISHMENT_NAME_FIELDNAME)],
+              schoolArray[fieldNameMapping.get(Constants.SCHOOL_NAME_FIELDNAME)],
               schoolArray[fieldNameMapping.get(Constants.SCHOOL_POSTCODE_FIELDNAME)],
               // CSV file contains string "t" and "f" values to denote true and false, but need a boolean:
               "t".equals(schoolArray[fieldNameMapping.get(Constants.SCHOOL_CLOSED_FIELDNAME)]),

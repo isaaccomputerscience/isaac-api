@@ -18,7 +18,7 @@ package uk.ac.cam.cl.dtg.segue.dao.schools;
 
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_RESULTS_LIMIT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOLS_INDEX_BASE;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_ESTABLISHMENT_NAME_FIELDNAME_POJO;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_NAME_FIELDNAME_POJO;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_POSTCODE_FIELDNAME_POJO;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_URN_FIELDNAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SCHOOL_URN_FIELDNAME_POJO;
@@ -98,7 +98,7 @@ public class SchoolListReader {
     List<String> schoolSearchResults = searchProvider.fuzzySearch(
         new BasicSearchParameters(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString(), 0,
             DEFAULT_RESULTS_LIMIT),
-        searchQuery, null, null, SCHOOL_URN_FIELDNAME_POJO, SCHOOL_ESTABLISHMENT_NAME_FIELDNAME_POJO,
+        searchQuery, null, null, SCHOOL_URN_FIELDNAME_POJO, SCHOOL_NAME_FIELDNAME_POJO,
         SCHOOL_POSTCODE_FIELDNAME_POJO
     ).getResults();
 
