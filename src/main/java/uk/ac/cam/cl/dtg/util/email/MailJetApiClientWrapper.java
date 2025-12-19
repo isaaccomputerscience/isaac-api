@@ -95,9 +95,9 @@ public class MailJetApiClientWrapper {
     this.legalListId = mailjetLegalListId;
     this.rateLimitDelayMs = rateLimitDelayMs;
 
-    log.info("MailJet API wrapper initialized with list IDs - News: {}, Events: {}, Legal: {}",
+    log.info("MAILJETT - MailJet API wrapper initialized with list IDs - News: {}, Events: {}, Legal: {}",
             newsListId, eventsListId, legalListId);
-    log.info("Rate limiting enabled: {}ms delay between API calls", rateLimitDelayMs);
+    log.info("MAILJETT - Rate limiting enabled: {}ms delay between API calls", rateLimitDelayMs);
   }
 
   /**
@@ -109,46 +109,56 @@ public class MailJetApiClientWrapper {
    */
   public JSONObject getAccountByIdOrEmail(final String mailjetIdOrEmail) throws MailjetException {
     if (mailjetIdOrEmail == null || mailjetIdOrEmail.trim().isEmpty()) {
-      log.debug("Attempted to get account with null/empty identifier");
+      log.info("MAILJETT - Attempted to get account with null/empty identifier");
       return null;
     }
 
     waitForRateLimit(); // Apply rate limiting
 
     try {
-      log.debug("Fetching Mailjet account: {}", mailjetIdOrEmail);
+      log.info("MAILJETT - Fetching Mailjet account: {}", mailjetIdOrEmail);
       MailjetRequest request = new MailjetRequest(Contact.resource, mailjetIdOrEmail);
       MailjetResponse response = mailjetClient.get(request);
 
       if (response.getStatus() == 404) {
-        log.debug("Mailjet account not found: {}", mailjetIdOrEmail);
+        log.info("MAILJETT - Mailjet account not found: {}", mailjetIdOrEmail);
         return null;
       }
 
       if (response.getStatus() != 200) {
-        log.warn("Unexpected Mailjet response status {} when fetching account: {}",
+        log.warn("MAILJETT - Unexpected Mailjet response status {} when fetching account: {}",
                 response.getStatus(), mailjetIdOrEmail);
         throw new MailjetException("Unexpected response status: " + response.getStatus());
       }
 
       JSONArray responseData = response.getData();
-      if (response.getTotal() == 1 && responseData.length() > 0) {
-        log.debug("Successfully retrieved Mailjet account: {}", mailjetIdOrEmail);
+      if (response.getTotal() == 1 && !responseData.isEmpty()) {
+        log.info("MAILJETT - Successfully retrieved Mailjet account: {}", mailjetIdOrEmail);
         return responseData.getJSONObject(0);
       }
 
-      log.debug("Mailjet account not found (total={}): {}", response.getTotal(), mailjetIdOrEmail);
+      log.info("MAILJETT - Mailjet account not found (total={}): {}", response.getTotal(), mailjetIdOrEmail);
       return null;
 
     } catch (MailjetException e) {
+      // Check if it's a 404 "Object not found" error
+      if (e.getMessage() != null &&
+              (e.getMessage().contains("404") ||
+                      e.getMessage().toLowerCase().contains("not found") ||
+                      e.getMessage().toLowerCase().contains("object not found"))) {
+        log.info("MAILJETT - Mailjet account not found (404): {}. Error: {}", mailjetIdOrEmail, e.getMessage());
+        return null;  // Treat 404 as "not found", not an error
+      }
+
       // Check if it's a timeout/communication issue
       if (e.getMessage() != null &&
               (e.getMessage().toLowerCase().contains("timeout") ||
                       e.getMessage().toLowerCase().contains("connection"))) {
-        log.error("Communication error fetching Mailjet account: {}", mailjetIdOrEmail, e);
+        log.error("MAILJETT - Communication error fetching Mailjet account: {}", mailjetIdOrEmail, e);
         throw new MailjetClientCommunicationException("Failed to communicate with Mailjet", e);
       }
-      log.error("Error fetching Mailjet account: {}", mailjetIdOrEmail, e);
+
+      log.error("MAILJETT - Error fetching Mailjet account: {}", mailjetIdOrEmail, e);
       throw e;
     }
   }
@@ -167,30 +177,39 @@ public class MailJetApiClientWrapper {
     waitForRateLimit(); // Apply rate limiting
 
     try {
-      log.info("Deleting Mailjet account: {}", mailjetId);
+      log.info("MAILJETT - Deleting Mailjet account: {}", mailjetId);
       MailjetRequest request = new MailjetRequest(Contacts.resource, mailjetId);
       MailjetResponse response = mailjetClient.delete(request);
 
       if (response.getStatus() == 204 || response.getStatus() == 200) {
-        log.info("Successfully deleted Mailjet account: {}", mailjetId);
+        log.info("MAILJETT - Successfully deleted Mailjet account: {}", mailjetId);
       } else if (response.getStatus() == 404) {
-        log.warn("Attempted to delete non-existent Mailjet account: {}", mailjetId);
+        log.warn("MAILJETT - Attempted to delete non-existent Mailjet account: {}", mailjetId);
         // Don't throw - account is already gone
       } else {
-        log.error("Unexpected response status {} when deleting Mailjet account: {}",
+        log.error("MAILJETT - Unexpected response status {} when deleting Mailjet account: {}",
                 response.getStatus(), mailjetId);
         throw new MailjetException("Failed to delete account. Status: " + response.getStatus());
       }
 
     } catch (MailjetException e) {
+      // Check if it's a 404 - account already deleted
+      if (e.getMessage() != null &&
+              (e.getMessage().contains("404") ||
+                      e.getMessage().toLowerCase().contains("not found") ||
+                      e.getMessage().toLowerCase().contains("object not found"))) {
+        log.warn("MAILJETT - Mailjet account already deleted or not found: {}. Treating as success.", mailjetId);
+        return;  // Already deleted - treat as success
+      }
+
       // Check if it's a timeout/communication issue
       if (e.getMessage() != null &&
               (e.getMessage().toLowerCase().contains("timeout") ||
                       e.getMessage().toLowerCase().contains("connection"))) {
-        log.error("Communication error deleting Mailjet account: {}", mailjetId, e);
+        log.error("MAILJETT - Communication error deleting Mailjet account: {}", mailjetId, e);
         throw new MailjetClientCommunicationException("Failed to communicate with Mailjet", e);
       }
-      log.error("Error deleting Mailjet account: {}", mailjetId, e);
+      log.error("MAILJETT - Error deleting Mailjet account: {}", mailjetId, e);
       throw e;
     }
   }
@@ -206,7 +225,7 @@ public class MailJetApiClientWrapper {
    */
   public String addNewUserOrGetUserIfExists(final String email) throws MailjetException {
     if (email == null || email.trim().isEmpty()) {
-      log.warn("Attempted to create Mailjet account with null/empty email");
+      log.warn("MAILJETT - Attempted to create Mailjet account with null/empty email");
       return null;
     }
 
@@ -215,7 +234,7 @@ public class MailJetApiClientWrapper {
     waitForRateLimit(); // Apply rate limiting
 
     try {
-      log.debug("Creating Mailjet account for email: {}", maskEmail(normalizedEmail));
+      log.info("MAILJETT - Creating Mailjet account for email: {}", maskEmail(normalizedEmail));
 
       MailjetRequest request = new MailjetRequest(Contact.resource)
               .property(Contact.EMAIL, normalizedEmail);
@@ -224,40 +243,40 @@ public class MailJetApiClientWrapper {
       if (response.getStatus() == 201 || response.getStatus() == 200) {
         JSONObject responseData = response.getData().getJSONObject(0);
         String mailjetId = Integer.toString(responseData.getInt("ID"));
-        log.info("Successfully created Mailjet account {} for email: {}",
+        log.info("MAILJETT - Successfully created Mailjet account {} for email: {}",
                 mailjetId, maskEmail(normalizedEmail));
         return mailjetId;
       }
 
-      log.error("Unexpected response status {} when creating Mailjet account for: {}",
+      log.error("MAILJETT - Unexpected response status {} when creating Mailjet account for: {}",
               response.getStatus(), maskEmail(normalizedEmail));
       throw new MailjetException("Failed to create account. Status: " + response.getStatus());
 
     } catch (MailjetClientRequestException e) {
       // Check if user already exists
       if (e.getMessage() != null && e.getMessage().toLowerCase().contains("already exists")) {
-        log.info("User already exists in Mailjet for email: {}. Fetching existing account.",
+        log.info("MAILJETT - User already exists in Mailjet for email: {}. Fetching existing account.",
                 maskEmail(normalizedEmail));
 
         try {
           JSONObject existingAccount = getAccountByIdOrEmail(normalizedEmail);
           if (existingAccount != null) {
             String mailjetId = Integer.toString(existingAccount.getInt("ID"));
-            log.info("Retrieved existing Mailjet account {} for email: {}",
+            log.info("MAILJETT - Retrieved existing Mailjet account {} for email: {}",
                     mailjetId, maskEmail(normalizedEmail));
             return mailjetId;
           } else {
-            log.error("User reported as existing but couldn't fetch account for: {}",
+            log.error("MAILJETT - User reported as existing but couldn't fetch account for: {}",
                     maskEmail(normalizedEmail));
             throw new MailjetException("Account exists but couldn't be retrieved");
           }
         } catch (JSONException je) {
-          log.error("JSON parsing error when retrieving existing account for: {}",
+          log.error("MAILJETT - JSON parsing error when retrieving existing account for: {}",
                   maskEmail(normalizedEmail), je);
           throw new MailjetException("Failed to parse existing account data", je);
         }
       } else {
-        log.error("Failed to create Mailjet account for: {}. Error: {}",
+        log.error("MAILJETT - Failed to create Mailjet account for: {}. Error: {}",
                 maskEmail(normalizedEmail), e.getMessage(), e);
         throw new MailjetException("Failed to create account: " + e.getMessage(), e);
       }
@@ -267,14 +286,14 @@ public class MailJetApiClientWrapper {
       if (e.getMessage() != null &&
               (e.getMessage().toLowerCase().contains("timeout") ||
                       e.getMessage().toLowerCase().contains("connection"))) {
-        log.error("Communication error creating Mailjet account for: {}", maskEmail(normalizedEmail), e);
+        log.error("MAILJETT - Communication error creating Mailjet account for: {}", maskEmail(normalizedEmail), e);
         throw new MailjetClientCommunicationException("Failed to communicate with Mailjet", e);
       }
-      log.error("Error creating Mailjet account for: {}", maskEmail(normalizedEmail), e);
+      log.error("MAILJETT - Error creating Mailjet account for: {}", maskEmail(normalizedEmail), e);
       throw e;
 
     } catch (JSONException e) {
-      log.error("JSON parsing error when creating account for: {}", maskEmail(normalizedEmail), e);
+      log.error("MAILJETT - JSON parsing error when creating account for: {}", maskEmail(normalizedEmail), e);
       throw new MailjetException("Failed to parse Mailjet response", e);
     }
   }
@@ -299,7 +318,7 @@ public class MailJetApiClientWrapper {
     waitForRateLimit(); // Apply rate limiting
 
     try {
-      log.debug("Updating properties for Mailjet account: {} (role={}, stage={}, status={})",
+      log.info("MAILJETT - Updating properties for Mailjet account: {} (role={}, stage={}, status={})",
               mailjetId, role, stage, emailVerificationStatus);
 
       MailjetRequest request = new MailjetRequest(Contactdata.resource, mailjetId)
@@ -314,9 +333,9 @@ public class MailJetApiClientWrapper {
       MailjetResponse response = mailjetClient.put(request);
 
       if (response.getStatus() == 200 && response.getTotal() == 1) {
-        log.debug("Successfully updated properties for Mailjet account: {}", mailjetId);
+        log.info("MAILJETT - Successfully updated properties for Mailjet account: {}", mailjetId);
       } else {
-        log.error("Failed to update properties for Mailjet account: {}. Status: {}, Total: {}",
+        log.error("MAILJETT - Failed to update properties for Mailjet account: {}. Status: {}, Total: {}",
                 mailjetId, response.getStatus(), response.getTotal());
         throw new MailjetException(
                 String.format("Failed to update user properties. Status: %d, Total: %d",
@@ -324,14 +343,23 @@ public class MailJetApiClientWrapper {
       }
 
     } catch (MailjetException e) {
+      // Check if it's a 404 - contact not found
+      if (e.getMessage() != null &&
+              (e.getMessage().contains("404") ||
+                      e.getMessage().toLowerCase().contains("not found") ||
+                      e.getMessage().toLowerCase().contains("object not found"))) {
+        log.error("MAILJETT - Mailjet contact not found when updating properties: {}. The contact may have been deleted.", mailjetId);
+        throw new MailjetException("Contact not found (404) when updating properties: " + mailjetId, e);
+      }
+
       // Check if it's a timeout/communication issue
       if (e.getMessage() != null &&
               (e.getMessage().toLowerCase().contains("timeout") ||
                       e.getMessage().toLowerCase().contains("connection"))) {
-        log.error("Communication error updating properties for Mailjet account: {}", mailjetId, e);
+        log.error("MAILJETT - Communication error updating properties for Mailjet account: {}", mailjetId, e);
         throw new MailjetClientCommunicationException("Failed to communicate with Mailjet", e);
       }
-      log.error("Error updating properties for Mailjet account: {}", mailjetId, e);
+      log.error("MAILJETT - Error updating properties for Mailjet account: {}", mailjetId, e);
       throw e;
     }
   }
@@ -360,7 +388,7 @@ public class MailJetApiClientWrapper {
     waitForRateLimit(); // Apply rate limiting
 
     try {
-      log.debug("Updating subscriptions for Mailjet account: {} (news={}, events={})",
+      log.info("MAILJETT - Updating subscriptions for Mailjet account: {} (news={}, events={})",
               mailjetId, newsEmails, eventsEmails);
 
       MailjetRequest request = new MailjetRequest(ContactManagecontactslists.resource, mailjetId)
@@ -379,9 +407,9 @@ public class MailJetApiClientWrapper {
       MailjetResponse response = mailjetClient.post(request);
 
       if (response.getStatus() == 201 && response.getTotal() == 1) {
-        log.debug("Successfully updated subscriptions for Mailjet account: {}", mailjetId);
+        log.info("MAILJETT - Successfully updated subscriptions for Mailjet account: {}", mailjetId);
       } else {
-        log.error("Failed to update subscriptions for Mailjet account: {}. Status: {}, Total: {}",
+        log.error("MAILJETT - Failed to update subscriptions for Mailjet account: {}. Status: {}, Total: {}",
                 mailjetId, response.getStatus(), response.getTotal());
         throw new MailjetException(
                 String.format("Failed to update user subscriptions. Status: %d, Total: %d",
@@ -389,14 +417,23 @@ public class MailJetApiClientWrapper {
       }
 
     } catch (MailjetException e) {
+      // Check if it's a 404 - contact not found
+      if (e.getMessage() != null &&
+              (e.getMessage().contains("404") ||
+                      e.getMessage().toLowerCase().contains("not found") ||
+                      e.getMessage().toLowerCase().contains("object not found"))) {
+        log.error("MAILJETT - Mailjet contact not found when updating subscriptions: {}. The contact may have been deleted.", mailjetId);
+        throw new MailjetException("Contact not found (404) when updating subscriptions: " + mailjetId, e);
+      }
+
       // Check if it's a timeout/communication issue
       if (e.getMessage() != null &&
               (e.getMessage().toLowerCase().contains("timeout") ||
                       e.getMessage().toLowerCase().contains("connection"))) {
-        log.error("Communication error updating subscriptions for Mailjet account: {}", mailjetId, e);
+        log.error("MAILJETT - Communication error updating subscriptions for Mailjet account: {}", mailjetId, e);
         throw new MailjetClientCommunicationException("Failed to communicate with Mailjet", e);
       }
-      log.error("Error updating subscriptions for Mailjet account: {}", mailjetId, e);
+      log.error("MAILJETT - Error updating subscriptions for Mailjet account: {}", mailjetId, e);
       throw e;
     }
   }
@@ -434,12 +471,12 @@ public class MailJetApiClientWrapper {
 
     if (timeSinceLastCall < rateLimitDelayMs && lastApiCallTime > 0) {
       long waitTime = rateLimitDelayMs - timeSinceLastCall;
-      log.debug("Rate limiting: waiting {}ms before next API call", waitTime);
+      log.info("MAILJETT - Rate limiting: waiting {}ms before next API call", waitTime);
 
       try {
         Thread.sleep(waitTime);
       } catch (InterruptedException e) {
-        log.warn("Rate limit wait interrupted", e);
+        log.warn("MAILJETT - Rate limit wait interrupted", e);
         Thread.currentThread().interrupt();
       }
     }

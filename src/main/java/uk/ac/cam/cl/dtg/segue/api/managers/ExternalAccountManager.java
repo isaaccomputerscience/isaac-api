@@ -30,7 +30,6 @@ import uk.ac.cam.cl.dtg.segue.dao.users.IExternalAccountDataManager;
 import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper;
 import uk.ac.cam.cl.dtg.util.email.MailJetSubscriptionAction;
 
-
 public class ExternalAccountManager implements IExternalAccountManager {
   private static final Logger log = LoggerFactory.getLogger(ExternalAccountManager.class);
 
@@ -59,19 +58,19 @@ public class ExternalAccountManager implements IExternalAccountManager {
    */
   @Override
   public synchronized void synchroniseChangedUsers() throws ExternalAccountSynchronisationException {
-    log.info("Starting Mailjet synchronization process");
+    log.info("MAILJETT - Starting Mailjet synchronization process");
 
     List<UserExternalAccountChanges> userRecordsToUpdate;
     try {
       userRecordsToUpdate = database.getRecentlyChangedRecords();
-      log.info("Found {} users to synchronize with Mailjet", userRecordsToUpdate.size());
+      log.info("MAILJETT - Found {} users to synchronize with Mailjet", userRecordsToUpdate.size());
     } catch (SegueDatabaseException e) {
-      log.error("Database error whilst collecting users whose details have changed!", e);
-      throw new ExternalAccountSynchronisationException("Failed to retrieve users for synchronization: " + e);
+      log.error("MAILJETT - Database error whilst collecting users whose details have changed!", e);
+      throw new ExternalAccountSynchronisationException("Failed to retrieve users for synchronization" + e);
     }
 
     if (userRecordsToUpdate.isEmpty()) {
-      log.info("No users to synchronize. Exiting.");
+      log.info("MAILJETT - No users to synchronize. Exiting.");
       return;
     }
 
@@ -81,41 +80,38 @@ public class ExternalAccountManager implements IExternalAccountManager {
       Long userId = userRecord.getUserId();
 
       try {
-        log.info("Processing user ID: {} with email: {}", userId, maskEmail(userRecord.getAccountEmail()));
+        log.info("MAILJETT - Processing user ID: {} with email: {}", userId, maskEmail(userRecord.getAccountEmail()));
         processUserSync(userRecord, metrics);
         metrics.incrementSuccess();
-        log.info("Successfully processed user ID: {}", userId);
+        log.info("MAILJETT - Successfully processed user ID: {}", userId);
 
       } catch (SegueDatabaseException e) {
         metrics.incrementDatabaseError();
-        log.error("Database error storing Mailjet update for user ID: {}. Error: {}",
+        log.error("MAILJETT - Database error storing Mailjet update for user ID: {}. Error: {}",
                 userId, e.getMessage(), e);
         // Continue processing other users - database errors shouldn't stop the entire sync
 
       } catch (MailjetClientCommunicationException e) {
         metrics.incrementCommunicationError();
-        log.error("Failed to communicate with Mailjet while processing user ID: {}. Error: {}",
+        log.error("MAILJETT - Failed to communicate with Mailjet while processing user ID: {}. Error: {}",
                 userId, e.getMessage(), e);
         throw new ExternalAccountSynchronisationException(
                 "Failed to successfully connect to Mailjet" + e);
 
       } catch (MailjetRateLimitException e) {
         metrics.incrementRateLimitError();
-        log.warn("Mailjet rate limit exceeded while processing user ID: {}. Processed {} users before limit.",
+        log.warn("MAILJETT - Mailjet rate limit exceeded while processing user ID: {}. Processed {} users before limit.",
                 userId, metrics.getSuccessCount());
         throw new ExternalAccountSynchronisationException(
                 "Mailjet API rate limits exceeded after processing " + metrics.getSuccessCount() + " users" + e);
 
       } catch (MailjetException e) {
         metrics.incrementMailjetError();
-        log.error("Mailjet API error while processing user ID: {}. Error: {}",
+        log.error("MAILJETT - Mailjet API error while processing user ID: {}. Error: {}. Continuing with next user.",
                 userId, e.getMessage(), e);
-        throw new ExternalAccountSynchronisationException(
-                "Mailjet API error: " + e.getMessage() + e);
-
       } catch (Exception e) {
         metrics.incrementUnexpectedError();
-        log.error("Unexpected error processing user ID: {}. Error: {}",
+        log.error("MAILJETT - Unexpected error processing user ID: {}. Error: {}",
                 userId, e.getMessage(), e);
         // Don't throw - log and continue to avoid blocking all syncs
       }
@@ -135,7 +131,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
 
     // Validate required fields
     if (accountEmail == null || accountEmail.trim().isEmpty()) {
-      log.warn("User ID {} has null or empty email address. Skipping.", userId);
+      log.warn("MAILJETT - User ID {} has null or empty email address. Skipping.", userId);
       metrics.incrementSkipped();
       return;
     }
@@ -152,7 +148,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
 
     // Update the provider_last_updated timestamp on success
     database.updateProviderLastUpdated(userId);
-    log.info("Updated provider_last_updated timestamp for user ID: {}", userId);
+    log.info("MAILJETT - Updated provider_last_updated timestamp for user ID: {}", userId);
   }
 
   /**
@@ -168,7 +164,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
     JSONObject mailjetDetails = mailjetApi.getAccountByIdOrEmail(mailjetId);
 
     if (mailjetDetails == null) {
-      log.warn("User ID {} has Mailjet ID {} but account not found in Mailjet. Treating as new user.",
+      log.warn("MAILJETT - User ID {} has Mailjet ID {} but account not found in Mailjet. Treating as new user.",
               userId, mailjetId);
       // Mailjet account doesn't exist - clear the ID and treat as new
       database.updateExternalAccount(userId, null);
@@ -177,19 +173,19 @@ public class ExternalAccountManager implements IExternalAccountManager {
     }
 
     if (userRecord.isDeleted()) {
-      log.info("User ID {} is deleted. Removing from Mailjet.", userId);
+      log.info("MAILJETT - User ID {} is deleted. Removing from Mailjet.", userId);
       deleteUserFromMailJet(mailjetId, userRecord);
       metrics.incrementDeleted();
 
     } else if (accountEmailDeliveryFailed) {
-      log.info("User ID {} has delivery failed status. Unsubscribing from all lists.", userId);
+      log.info("MAILJETT - User ID {} has delivery failed status. Unsubscribing from all lists.", userId);
       mailjetApi.updateUserSubscriptions(mailjetId,
               MailJetSubscriptionAction.REMOVE,
               MailJetSubscriptionAction.REMOVE);
       metrics.incrementUnsubscribed();
 
     } else if (!accountEmail.equalsIgnoreCase(mailjetDetails.getString("Email"))) {
-      log.info("User ID {} changed email from {} to {}. Recreating Mailjet account.",
+      log.info("MAILJETT - User ID {} changed email from {} to {}. Recreating Mailjet account.",
               userId, maskEmail(mailjetDetails.getString("Email")), maskEmail(accountEmail));
       mailjetApi.permanentlyDeleteAccountById(mailjetId);
       String newMailjetId = mailjetApi.addNewUserOrGetUserIfExists(accountEmail);
@@ -202,7 +198,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
       metrics.incrementEmailChanged();
 
     } else {
-      log.info("User ID {} has updated details/preferences. Updating Mailjet.", userId);
+      log.info("MAILJETT - User ID {} has updated details/preferences. Updating Mailjet.", userId);
       updateUserOnMailJet(mailjetId, userRecord);
       metrics.incrementUpdated();
     }
@@ -218,13 +214,13 @@ public class ExternalAccountManager implements IExternalAccountManager {
     Long userId = userRecord.getUserId();
 
     if (!accountEmailDeliveryFailed && !userRecord.isDeleted()) {
-      log.info("Creating new Mailjet account for user ID {} with email {}",
+      log.info("MAILJETT - Creating new Mailjet account for user ID {} with email {}",
               userId, maskEmail(accountEmail));
 
       String mailjetId = mailjetApi.addNewUserOrGetUserIfExists(accountEmail);
 
       if (mailjetId == null) {
-        log.error("Failed to create Mailjet account for user ID {}. Mailjet returned null ID.", userId);
+        log.error("MAILJETT - Failed to create Mailjet account for user ID {}. Mailjet returned null ID.", userId);
         throw new MailjetException("Mailjet returned null ID when creating account for user: " + userId);
       }
 
@@ -232,7 +228,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
       metrics.incrementCreated();
 
     } else {
-      log.info("User ID {} not eligible for Mailjet (deleted={}, deliveryFailed={}). Skipping.",
+      log.info("MAILJETT - User ID {} not eligible for Mailjet (deleted={}, deliveryFailed={}). Skipping.",
               userId, userRecord.isDeleted(), accountEmailDeliveryFailed);
       database.updateExternalAccount(userId, null);
       metrics.incrementSkipped();
@@ -275,7 +271,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
     // Store the Mailjet ID in the database
     database.updateExternalAccount(userId, mailjetId);
 
-    log.info("Updated Mailjet account {} for user ID {} (news={}, events={})",
+    log.info("MAILJETT - Updated Mailjet account {} for user ID {} (news={}, events={})",
             mailjetId, userId, newsStatus, eventsStatus);
   }
 
@@ -286,7 +282,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
           throws SegueDatabaseException, MailjetException {
 
     if (mailjetId == null || mailjetId.trim().isEmpty()) {
-      log.warn("Attempted to delete user with null/empty Mailjet ID. User ID: {}", userRecord.getUserId());
+      log.warn("MAILJETT - Attempted to delete user with null/empty Mailjet ID. User ID: {}", userRecord.getUserId());
       return;
     }
 
@@ -294,7 +290,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
     mailjetApi.permanentlyDeleteAccountById(mailjetId);
     database.updateExternalAccount(userId, null);
 
-    log.info("Deleted Mailjet account {} for user ID {} (GDPR deletion)", mailjetId, userId);
+    log.info("MAILJETT - Deleted Mailjet account {} for user ID {} (GDPR deletion)", mailjetId, userId);
   }
 
   /**
@@ -321,22 +317,22 @@ public class ExternalAccountManager implements IExternalAccountManager {
    * Log summary of synchronization results.
    */
   private void logSyncSummary(SyncMetrics metrics, int totalUsers) {
-    log.info("=== Mailjet Synchronization Complete ===");
-    log.info("Total users to process: {}", totalUsers);
-    log.info("Successfully processed: {}", metrics.getSuccessCount());
-    log.info("  - Created: {}", metrics.getCreatedCount());
-    log.info("  - Updated: {}", metrics.getUpdatedCount());
-    log.info("  - Deleted: {}", metrics.getDeletedCount());
-    log.info("  - Email changed: {}", metrics.getEmailChangedCount());
-    log.info("  - Unsubscribed: {}", metrics.getUnsubscribedCount());
-    log.info("  - Skipped: {}", metrics.getSkippedCount());
-    log.info("Errors:");
-    log.info("  - Database errors: {}", metrics.getDatabaseErrorCount());
-    log.info("  - Communication errors: {}", metrics.getCommunicationErrorCount());
-    log.info("  - Rate limit errors: {}", metrics.getRateLimitErrorCount());
-    log.info("  - Mailjet API errors: {}", metrics.getMailjetErrorCount());
-    log.info("  - Unexpected errors: {}", metrics.getUnexpectedErrorCount());
-    log.info("========================================");
+    log.info("MAILJETT - === Mailjet Synchronization Complete ===");
+    log.info("MAILJETT - Total users to process: {}", totalUsers);
+    log.info("MAILJETT - Successfully processed: {}", metrics.getSuccessCount());
+    log.info("MAILJETT -   - Created: {}", metrics.getCreatedCount());
+    log.info("MAILJETT -   - Updated: {}", metrics.getUpdatedCount());
+    log.info("MAILJETT -   - Deleted: {}", metrics.getDeletedCount());
+    log.info("MAILJETT -   - Email changed: {}", metrics.getEmailChangedCount());
+    log.info("MAILJETT -   - Unsubscribed: {}", metrics.getUnsubscribedCount());
+    log.info("MAILJETT -   - Skipped: {}", metrics.getSkippedCount());
+    log.info("MAILJETT - Errors:");
+    log.info("MAILJETT -   - Database errors: {}", metrics.getDatabaseErrorCount());
+    log.info("MAILJETT -   - Communication errors: {}", metrics.getCommunicationErrorCount());
+    log.info("MAILJETT -   - Rate limit errors: {}", metrics.getRateLimitErrorCount());
+    log.info("MAILJETT -   - Mailjet API errors: {}", metrics.getMailjetErrorCount());
+    log.info("MAILJETT -   - Unexpected errors: {}", metrics.getUnexpectedErrorCount());
+    log.info("MAILJETT - ========================================");
   }
 
   /**
