@@ -242,7 +242,8 @@ public class MailJetApiClientWrapper {
 
       if (response.getStatus() == 201 || response.getStatus() == 200) {
         JSONObject responseData = response.getData().getJSONObject(0);
-        String mailjetId = Integer.toString(responseData.getInt("ID"));
+        log.info("MAILJETT - responseData : {}", responseData.toString());
+        String mailjetId = responseData.getString("ID");
         log.info("MAILJETT - Successfully created Mailjet account {} for email: {}",
                 mailjetId, maskEmail(normalizedEmail));
         return mailjetId;
