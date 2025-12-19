@@ -249,7 +249,7 @@ public class MailJetApiClientWrapper {
       if (response.getStatus() == 201 || response.getStatus() == 200) {
         JSONObject responseData = response.getData().getJSONObject(0);
         log.info("MAILJETT - responseData : {}", responseData.toString());
-        String mailjetId = responseData.getString("ID");
+        String mailjetId = String.valueOf(responseData.get("ID"));
         log.info("MAILJETT - Successfully created Mailjet account {} for email: {}",
                 mailjetId, maskEmail(normalizedEmail));
         return mailjetId;
@@ -268,7 +268,7 @@ public class MailJetApiClientWrapper {
         try {
           JSONObject existingAccount = getAccountByIdOrEmail(normalizedEmail);
           if (existingAccount != null) {
-            String mailjetId = existingAccount.getString("ID");
+            String mailjetId = String.valueOf(existingAccount.get("ID"));
             log.info("MAILJETT - Retrieved existing Mailjet account {} for email: {}",
                     mailjetId, maskEmail(normalizedEmail));
             return mailjetId;
