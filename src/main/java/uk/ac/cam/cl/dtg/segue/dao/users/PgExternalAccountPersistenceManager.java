@@ -19,6 +19,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserExternalAccountChanges;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
+
 /**
  * This class is responsible for managing and persisting user data.
  */
@@ -39,8 +40,8 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
   @Override
   public List<UserExternalAccountChanges> getRecentlyChangedRecords() throws SegueDatabaseException {
-    // Note: registered_contexts is JSONB[] (array of JSONB objects) in PostgreSQL
-    // We need to cast it to TEXT to parse it properly in Java
+    // IMPORTANT: registered_contexts is JSONB[] (array of JSONB objects) in PostgreSQL
+    // We use array_to_json() to convert it to proper JSON that Java can parse
     String query = "SELECT users.id, "
             + "       external_accounts.provider_user_identifier, "
             + "       users.email, "
@@ -48,7 +49,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
             + "       users.given_name, "
             + "       users.deleted, "
             + "       users.email_verification_status, "
-            + "       CAST(users.registered_contexts AS TEXT) AS registered_contexts, "  // CAST JSONB[] to TEXT
+            + "       array_to_json(users.registered_contexts) AS registered_contexts, "  // Convert JSONB[] to JSON
             + "       news_prefs.preference_value AS news_emails, "
             + "       events_prefs.preference_value AS events_emails, "
             + "       external_accounts.provider_last_updated "
@@ -73,7 +74,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query)
     ) {
-      log.info("MAILJETT - Executing query to fetch recently changed user records");
+      log.debug("MAILJETT - Executing query to fetch recently changed user records");
 
       try (ResultSet results = pst.executeQuery()) {
         List<UserExternalAccountChanges> listOfResults = new ArrayList<>();
@@ -90,7 +91,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
           }
         }
 
-        log.info("MAILJETT - Retrieved {} user records requiring synchronization", listOfResults.size());
+        log.debug("MAILJETT - Retrieved {} user records requiring synchronization", listOfResults.size());
         return listOfResults;
       }
 
@@ -123,7 +124,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
         log.warn("MAILJETT - No rows updated when setting provider_last_updated for user ID: {}. "
                 + "User may not have an external_accounts record yet.", userId);
       } else {
-        log.info("MAILJETT - Updated provider_last_updated for user ID: {}", userId);
+        log.debug("MAILJETT - Updated provider_last_updated for user ID: {}", userId);
       }
 
     } catch (SQLException e) {
@@ -155,7 +156,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       int rowsAffected = pst.executeUpdate();
 
       if (rowsAffected > 0) {
-        log.info("MAILJETT - Upserted external_account for user ID: {} with Mailjet ID: {}",
+        log.debug("MAILJETT - Upserted external_account for user ID: {} with Mailjet ID: {}",
                 userId, providerUserIdentifier != null ? providerUserIdentifier : "[null]");
       } else {
         log.warn("MAILJETT - Upsert returned 0 rows for user ID: {}. This is unexpected.", userId);
@@ -219,122 +220,78 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
     if (wasNull) {
       // User has no preference set - treat as null (not subscribed)
-      log.info("MAILJETT - User ID {} has NULL preference for {}. Treating as not subscribed.",
+      log.debug("MAILJETT - User ID {} has NULL preference for {}. Treating as not subscribed.",
               userId, preferenceName);
       return null;
     }
 
-    log.info("MAILJETT - User ID {} has preference {} = {}", userId, preferenceName, value);
+    log.debug("MAILJETT - User ID {} has preference {} = {}", userId, preferenceName, value);
     return value;
   }
 
   /**
    * Extract stage information from registered_contexts JSONB[] field.
    *
-   * PostgreSQL stores this as JSONB[] (array of JSONB objects), which we cast to TEXT in the query.
-   * The TEXT representation looks like:
-   *   - Single object: '{"stage": "gcse"}'
-   *   - Array of objects: '[{"stage": "gcse"}, {"exam_board": "AQA"}]'
-   *   - Empty: NULL, '{}', or '[]'
+   * PostgreSQL JSONB[] is converted to JSON using array_to_json() in the query.
+   * This gives us clean JSON like: [{"stage": "gcse", "examBoard": "aqa"}]
    *
    * @param userId User ID for logging
-   * @param registeredContextsJson JSONB[] field cast to TEXT
+   * @param registeredContextsJson JSONB[] converted to JSON via array_to_json()
    * @return stage string: "GCSE", "A Level", "GCSE and A Level", or "unknown"
    */
   private String extractStageFromRegisteredContexts(Long userId, String registeredContextsJson) {
     if (registeredContextsJson == null || registeredContextsJson.trim().isEmpty()) {
-      log.info("MAILJETT - User ID {} has NULL/empty registered_contexts. Stage: unknown", userId);
+      log.debug("MAILJETT - User ID {} has NULL/empty registered_contexts. Stage: unknown", userId);
       return "unknown";
     }
 
     String trimmed = registeredContextsJson.trim();
 
-    // Check for empty JSON object or array
-    if ("{}".equals(trimmed) || "[]".equals(trimmed)) {
-      log.info("MAILJETT - User ID {} has empty registered_contexts '{}'. Stage: unknown", userId, trimmed);
+    // Check for empty JSON array
+    if ("[]".equals(trimmed) || "null".equals(trimmed)) {
+      log.debug("MAILJETT - User ID {} has empty/null registered_contexts. Stage: unknown", userId);
       return "unknown";
     }
 
     try {
-      // Try to parse as JSONArray first (JSONB[] is typically an array)
-      if (trimmed.startsWith("[")) {
-        return extractStageFromJsonArray(userId, trimmed);
-      } else if (trimmed.startsWith("{")) {
-        // Single JSON object (less common but possible)
-        return extractStageFromJsonObject(userId, trimmed);
-      } else {
-        log.warn("MAILJETT - User ID {} has unexpected registered_contexts format (not JSON): '{}'. Stage: unknown",
-                userId, truncateForLog(registeredContextsJson));
+      // Parse as JSONArray (array_to_json returns proper JSON array)
+      JSONArray array = new JSONArray(trimmed);
+
+      if (array.length() == 0) {
+        log.debug("MAILJETT - User ID {} has empty JSON array in registered_contexts. Stage: unknown", userId);
         return "unknown";
       }
+
+      // Search through array for 'stage' key
+      for (int i = 0; i < array.length(); i++) {
+        Object item = array.get(i);
+        if (item instanceof JSONObject) {
+          JSONObject obj = (JSONObject) item;
+          if (obj.has("stage")) {
+            String stage = obj.getString("stage");
+            String normalized = normalizeStage(stage);
+            log.debug("MAILJETT - User ID {} has stage '{}' in registered_contexts[{}]. Normalized: {}",
+                    userId, stage, i, normalized);
+            return normalized;
+          }
+        }
+      }
+
+      // No 'stage' key found, use fallback pattern matching
+      String fallbackStage = fallbackStageDetection(userId, trimmed);
+      if (!"unknown".equals(fallbackStage)) {
+        log.debug("MAILJETT - User ID {} stage detected via fallback pattern matching: {}", userId, fallbackStage);
+      } else {
+        log.warn("MAILJETT - User ID {} has registered_contexts but no 'stage' key found: {}. Stage: unknown",
+                userId, truncateForLog(trimmed));
+      }
+      return fallbackStage;
 
     } catch (JSONException e) {
       log.warn("MAILJETT - User ID {} has invalid JSON in registered_contexts: '{}'. Error: {}. Stage: unknown",
               userId, truncateForLog(registeredContextsJson), e.getMessage());
       return "unknown";
     }
-  }
-
-  /**
-   * Extract stage from JSON array format: [{"stage": "gcse"}, {...}]
-   */
-  private String extractStageFromJsonArray(Long userId, String jsonArrayString) throws JSONException {
-    JSONArray array = new JSONArray(jsonArrayString);
-
-    if (array.isEmpty()) {
-      log.info("MAILJETT - User ID {} has empty JSON array in registered_contexts. Stage: unknown", userId);
-      return "unknown";
-    }
-
-    // Check each object in the array for 'stage' key
-    for (int i = 0; i < array.length(); i++) {
-      Object item = array.get(i);
-      if (item instanceof JSONObject) {
-        JSONObject obj = (JSONObject) item;
-        if (obj.has("stage")) {
-          String stage = obj.getString("stage");
-          String normalized = normalizeStage(stage);
-          log.info("MAILJETT - User ID {} has stage '{}' in registered_contexts[{}]. Normalized: {}",
-                  userId, stage, i, normalized);
-          return normalized;
-        }
-      }
-    }
-
-    // No 'stage' key found, use fallback pattern matching
-    String fallbackStage = fallbackStageDetection(userId, jsonArrayString);
-    if (!"unknown".equals(fallbackStage)) {
-      log.info("MAILJETT - User ID {} stage detected via fallback pattern matching: {}", userId, fallbackStage);
-    } else {
-      log.warn("MAILJETT - User ID {} has registered_contexts array but no 'stage' key found: {}. Stage: unknown",
-              userId, truncateForLog(jsonArrayString));
-    }
-    return fallbackStage;
-  }
-
-  /**
-   * Extract stage from JSON object format: {"stage": "gcse", ...}
-   */
-  private String extractStageFromJsonObject(Long userId, String jsonObjectString) throws JSONException {
-    JSONObject obj = new JSONObject(jsonObjectString);
-
-    if (obj.has("stage")) {
-      String stage = obj.getString("stage");
-      String normalized = normalizeStage(stage);
-      log.info("MAILJETT - User ID {} has stage '{}' in registered_contexts. Normalized: {}",
-              userId, stage, normalized);
-      return normalized;
-    }
-
-    // No 'stage' key found, use fallback pattern matching
-    String fallbackStage = fallbackStageDetection(userId, jsonObjectString);
-    if (!"unknown".equals(fallbackStage)) {
-      log.info("MAILJETT - User ID {} stage detected via fallback pattern matching: {}", userId, fallbackStage);
-    } else {
-      log.warn("MAILJETT - User ID {} has registered_contexts object but no 'stage' key: {}. Stage: unknown",
-              userId, truncateForLog(jsonObjectString));
-    }
-    return fallbackStage;
   }
 
   /**
