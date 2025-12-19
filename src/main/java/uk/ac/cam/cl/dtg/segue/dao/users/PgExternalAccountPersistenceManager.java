@@ -338,6 +338,8 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       case "gcse,a_level":
       case "gcse, a level":
         return "GCSE and A Level";
+      case "all":
+        return "ALL";
       default:
         // Warn about unexpected stage values
         log.warn("MAILJETT - Unexpected stage value '{}' encountered. Returning 'unknown'. "

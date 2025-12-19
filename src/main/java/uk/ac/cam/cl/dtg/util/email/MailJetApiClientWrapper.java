@@ -120,6 +120,8 @@ public class MailJetApiClientWrapper {
       MailjetRequest request = new MailjetRequest(Contact.resource, mailjetIdOrEmail);
       MailjetResponse response = mailjetClient.get(request);
 
+      log.info("MAILJETT - response: {}", response.getRawResponseContent());
+
       if (response.getStatus() == 404) {
         log.info("MAILJETT - Mailjet account not found: {}", mailjetIdOrEmail);
         return null;
@@ -181,6 +183,8 @@ public class MailJetApiClientWrapper {
       MailjetRequest request = new MailjetRequest(Contacts.resource, mailjetId);
       MailjetResponse response = mailjetClient.delete(request);
 
+      log.info("MAILJETT - response: {}", response.getRawResponseContent());
+
       if (response.getStatus() == 204 || response.getStatus() == 200) {
         log.info("MAILJETT - Successfully deleted Mailjet account: {}", mailjetId);
       } else if (response.getStatus() == 404) {
@@ -240,6 +244,8 @@ public class MailJetApiClientWrapper {
               .property(Contact.EMAIL, normalizedEmail);
       MailjetResponse response = mailjetClient.post(request);
 
+      log.info("MAILJETT - response: {}", response.getRawResponseContent());
+
       if (response.getStatus() == 201 || response.getStatus() == 200) {
         JSONObject responseData = response.getData().getJSONObject(0);
         log.info("MAILJETT - responseData : {}", responseData.toString());
@@ -262,7 +268,7 @@ public class MailJetApiClientWrapper {
         try {
           JSONObject existingAccount = getAccountByIdOrEmail(normalizedEmail);
           if (existingAccount != null) {
-            String mailjetId = Integer.toString(existingAccount.getInt("ID"));
+            String mailjetId = existingAccount.getString("ID");
             log.info("MAILJETT - Retrieved existing Mailjet account {} for email: {}",
                     mailjetId, maskEmail(normalizedEmail));
             return mailjetId;
@@ -332,6 +338,8 @@ public class MailJetApiClientWrapper {
               );
 
       MailjetResponse response = mailjetClient.put(request);
+
+      log.info("MAILJETT - response: {}", response.getRawResponseContent());
 
       if (response.getStatus() == 200 && response.getTotal() == 1) {
         log.info("MAILJETT - Successfully updated properties for Mailjet account: {}", mailjetId);
@@ -406,6 +414,8 @@ public class MailJetApiClientWrapper {
               );
 
       MailjetResponse response = mailjetClient.post(request);
+
+      log.info("MAILJETT - response: {}", response.getRawResponseContent());
 
       if (response.getStatus() == 201 && response.getTotal() == 1) {
         log.info("MAILJETT - Successfully updated subscriptions for Mailjet account: {}", mailjetId);
