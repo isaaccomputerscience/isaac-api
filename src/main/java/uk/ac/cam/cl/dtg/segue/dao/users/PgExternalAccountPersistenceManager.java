@@ -74,7 +74,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
     try (Connection conn = database.getDatabaseConnection();
          PreparedStatement pst = conn.prepareStatement(query)
     ) {
-      log.debug("MAILJETT - Executing query to fetch recently changed user records");
+      log.debug("MAILJET - Executing query to fetch recently changed user records");
 
       try (ResultSet results = pst.executeQuery()) {
         List<UserExternalAccountChanges> listOfResults = new ArrayList<>();
@@ -86,17 +86,17 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
           } catch (SQLException | JSONException e) {
             // Log but continue processing other users
             long userId = results.getLong("id");
-            log.error("MAILJETT - Error building UserExternalAccountChanges for user ID: {}. Error: {}",
+            log.error("MAILJET - Error building UserExternalAccountChanges for user ID: {}. Error: {}",
                     userId, e.getMessage(), e);
           }
         }
 
-        log.debug("MAILJETT - Retrieved {} user records requiring synchronization", listOfResults.size());
+        log.debug("MAILJET - Retrieved {} user records requiring synchronization", listOfResults.size());
         return listOfResults;
       }
 
     } catch (SQLException e) {
-      log.error("MAILJETT - Database error while fetching recently changed records", e);
+      log.error("MAILJET - Database error while fetching recently changed records", e);
       throw new SegueDatabaseException("Failed to retrieve recently changed user records", e);
     }
   }
@@ -121,14 +121,14 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       int rowsUpdated = pst.executeUpdate();
 
       if (rowsUpdated == 0) {
-        log.warn("MAILJETT - No rows updated when setting provider_last_updated for user ID: {}. "
+        log.warn("MAILJET - No rows updated when setting provider_last_updated for user ID: {}. "
                 + "User may not have an external_accounts record yet.", userId);
       } else {
-        log.debug("MAILJETT - Updated provider_last_updated for user ID: {}", userId);
+        log.debug("MAILJET - Updated provider_last_updated for user ID: {}", userId);
       }
 
     } catch (SQLException e) {
-      log.error("MAILJETT - Database error updating provider_last_updated for user ID: {}", userId, e);
+      log.error("MAILJET - Database error updating provider_last_updated for user ID: {}", userId, e);
       throw new SegueDatabaseException("Failed to update provider_last_updated for user: " + userId, e);
     }
   }
@@ -156,14 +156,14 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       int rowsAffected = pst.executeUpdate();
 
       if (rowsAffected > 0) {
-        log.debug("MAILJETT - Upserted external_account for user ID: {} with Mailjet ID: {}",
+        log.debug("MAILJET - Upserted external_account for user ID: {} with Mailjet ID: {}",
                 userId, providerUserIdentifier != null ? providerUserIdentifier : "[null]");
       } else {
-        log.warn("MAILJETT - Upsert returned 0 rows for user ID: {}. This is unexpected.", userId);
+        log.warn("MAILJET - Upsert returned 0 rows for user ID: {}. This is unexpected.", userId);
       }
 
     } catch (SQLException e) {
-      log.error("MAILJETT - Database error upserting external_account for user ID: {} with Mailjet ID: {}",
+      log.error("MAILJET - Database error upserting external_account for user ID: {} with Mailjet ID: {}",
               userId, providerUserIdentifier, e);
       throw new SegueDatabaseException(
               "Failed to upsert external_account for user: " + userId, e);
@@ -220,12 +220,12 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
     if (wasNull) {
       // User has no preference set - treat as null (not subscribed)
-      log.debug("MAILJETT - User ID {} has NULL preference for {}. Treating as not subscribed.",
+      log.debug("MAILJET - User ID {} has NULL preference for {}. Treating as not subscribed.",
               userId, preferenceName);
       return null;
     }
 
-    log.debug("MAILJETT - User ID {} has preference {} = {}", userId, preferenceName, value);
+    log.debug("MAILJET - User ID {} has preference {} = {}", userId, preferenceName, value);
     return value;
   }
 
@@ -241,7 +241,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
    */
   private String extractStageFromRegisteredContexts(Long userId, String registeredContextsJson) {
     if (registeredContextsJson == null || registeredContextsJson.trim().isEmpty()) {
-      log.debug("MAILJETT - User ID {} has NULL/empty registered_contexts. Stage: unknown", userId);
+      log.debug("MAILJET - User ID {} has NULL/empty registered_contexts. Stage: unknown", userId);
       return "unknown";
     }
 
@@ -249,7 +249,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
     // Check for empty JSON array
     if ("[]".equals(trimmed) || "null".equals(trimmed)) {
-      log.debug("MAILJETT - User ID {} has empty/null registered_contexts. Stage: unknown", userId);
+      log.debug("MAILJET - User ID {} has empty/null registered_contexts. Stage: unknown", userId);
       return "unknown";
     }
 
@@ -257,8 +257,8 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       // Parse as JSONArray (array_to_json returns proper JSON array)
       JSONArray array = new JSONArray(trimmed);
 
-      if (array.length() == 0) {
-        log.debug("MAILJETT - User ID {} has empty JSON array in registered_contexts. Stage: unknown", userId);
+      if (array.isEmpty()) {
+        log.debug("MAILJET - User ID {} has empty JSON array in registered_contexts. Stage: unknown", userId);
         return "unknown";
       }
 
@@ -270,7 +270,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
           if (obj.has("stage")) {
             String stage = obj.getString("stage");
             String normalized = normalizeStage(stage);
-            log.debug("MAILJETT - User ID {} has stage '{}' in registered_contexts[{}]. Normalized: {}",
+            log.debug("MAILJET - User ID {} has stage '{}' in registered_contexts[{}]. Normalized: {}",
                     userId, stage, i, normalized);
             return normalized;
           }
@@ -278,17 +278,17 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       }
 
       // No 'stage' key found, use fallback pattern matching
-      String fallbackStage = fallbackStageDetection(userId, trimmed);
+      String fallbackStage = fallbackStageDetection(trimmed);
       if (!"unknown".equals(fallbackStage)) {
-        log.debug("MAILJETT - User ID {} stage detected via fallback pattern matching: {}", userId, fallbackStage);
+        log.debug("MAILJET - User ID {} stage detected via fallback pattern matching: {}", userId, fallbackStage);
       } else {
-        log.warn("MAILJETT - User ID {} has registered_contexts but no 'stage' key found: {}. Stage: unknown",
+        log.warn("MAILJET - User ID {} has registered_contexts but no 'stage' key found: {}. Stage: unknown",
                 userId, truncateForLog(trimmed));
       }
       return fallbackStage;
 
     } catch (JSONException e) {
-      log.warn("MAILJETT - User ID {} has invalid JSON in registered_contexts: '{}'. Error: {}. Stage: unknown",
+      log.warn("MAILJET - User ID {} has invalid JSON in registered_contexts: '{}'. Error: {}. Stage: unknown",
               userId, truncateForLog(registeredContextsJson), e.getMessage());
       return "unknown";
     }
@@ -298,7 +298,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
    * Fallback stage detection by pattern matching in the JSON string.
    * Used when no explicit 'stage' key is found.
    */
-  private String fallbackStageDetection(Long userId, String jsonString) {
+  private String fallbackStageDetection(String jsonString) {
     String lower = jsonString.toLowerCase();
     boolean hasGcse = lower.contains("gcse");
     boolean hasALevel = lower.contains("a_level") || lower.contains("alevel") || lower.contains("a level");
@@ -342,7 +342,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
         return "ALL";
       default:
         // Warn about unexpected stage values
-        log.warn("MAILJETT - Unexpected stage value '{}' encountered. Returning 'unknown'. "
+        log.warn("MAILJET - Unexpected stage value '{}' encountered. Returning 'unknown'. "
                 + "Expected values: gcse, a_level, gcse_and_a_level, both", stage);
         return "unknown";
     }
