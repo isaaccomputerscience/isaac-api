@@ -972,7 +972,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   static final String CRON_STRING_0700_DAILY = "0 0 7 * * ?";
   static final String CRON_STRING_2000_DAILY = "0 0 20 * * ?";
   static final String CRON_STRING_HOURLY = "0 0 * ? * * *";
-  static final String CRON_STRING_EVERY_FOUR_HOURS = "0 0 0/4 ? * * *";
+  static final String CRON_STRING_EVERY_FOUR_HOURS = "0 0/30 * ? * * *";
   static final String CRON_GROUP_NAME_SQL_MAINTENANCE = "SQLMaintenance";
   static final String CRON_GROUP_NAME_JAVA_JOB = "JavaJob";
 
