@@ -150,8 +150,8 @@ class SchoolIndexer {
               schoolArray[fieldNameMapping.get(Constants.SCHOOL_POSTCODE_FIELDNAME)],
               // CSV file contains string "TRUE" and "FALSE" values to denote true and false, but need a boolean:
               // Handle both "TRUE"/"FALSE" (current format) and "t"/"f" (legacy format) for backwards compatibility
-              "TRUE".equalsIgnoreCase(schoolArray[fieldNameMapping.get(Constants.SCHOOL_CLOSED_FIELDNAME)]) ||
-              "t".equalsIgnoreCase(schoolArray[fieldNameMapping.get(Constants.SCHOOL_CLOSED_FIELDNAME)]),
+              "TRUE".equalsIgnoreCase(schoolArray[fieldNameMapping.get(Constants.SCHOOL_CLOSED_FIELDNAME)])
+                  || "t".equalsIgnoreCase(schoolArray[fieldNameMapping.get(Constants.SCHOOL_CLOSED_FIELDNAME)]),
               source);
 
           if (null == schoolToSave.getPostcode() || schoolToSave.getPostcode().isEmpty()) {
@@ -165,7 +165,8 @@ class SchoolIndexer {
               Arrays.toString(schoolArray));
         } catch (IllegalArgumentException e) {
           // This happens when data_source field is missing, empty, or has an invalid value
-          log.warn("Unable to load the following school into the school list due to invalid data_source value. URN: {}, Error: {}, Row: {}",
+          log.warn("Unable to load the following school into the school list due to invalid data_source value. "
+                  + "URN: {}, Error: {}, Row: {}",
               schoolArray.length > fieldNameMapping.get(Constants.SCHOOL_URN_FIELDNAME) 
                   ? schoolArray[fieldNameMapping.get(Constants.SCHOOL_URN_FIELDNAME)] : "unknown",
               e.getMessage(),
