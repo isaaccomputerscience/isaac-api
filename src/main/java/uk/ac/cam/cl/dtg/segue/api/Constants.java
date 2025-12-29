@@ -549,7 +549,7 @@ public final class Constants {
 
   // School List loading - raw data
   public static final String SCHOOL_URN_FIELDNAME = "urn";
-  public static final String  SCHOOL_NAME_FIELDNAME = "school_name";
+  public static final String SCHOOL_NAME_FIELDNAME = "school_name";
   public static final String SCHOOL_POSTCODE_FIELDNAME = "postcode";
   public static final String SCHOOL_DATA_SOURCE_FIELDNAME = "data_source";
   public static final String SCHOOL_CLOSED_FIELDNAME = "closed";
@@ -557,7 +557,7 @@ public final class Constants {
   // School List loading POJO fields
   // Note: These are the JSON field names as serialized by Jackson (matches School class field names)
   public static final String SCHOOL_URN_FIELDNAME_POJO = "urn";
-  public static final String  SCHOOL_NAME_FIELDNAME_POJO = "name";
+  public static final String SCHOOL_NAME_FIELDNAME_POJO = "name";
   public static final String SCHOOL_POSTCODE_FIELDNAME_POJO = "postcode";
 
   // User School Reporting
