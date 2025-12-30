@@ -69,6 +69,14 @@ class SchoolIndexer {
     }
 
     log.info("Creating schools index with search provider.");
+    // Clear the existing school index to remove any old/corrupted entries
+    boolean cleared = es.expungeIndexFromSearchCache(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString());
+    if (cleared) {
+      log.info("Cleared existing school index before reindexing.");
+    } else {
+      log.info("School index did not exist or could not be cleared (this is OK for first-time indexing).");
+    }
+    
     List<School> schoolList = this.loadAndBuildSchoolList();
     List<Map.Entry<String, String>> indexList = Lists.newArrayList();
     ObjectMapper objectMapper = mapperUtils.getSharedContentObjectMapper();
@@ -138,10 +146,9 @@ class SchoolIndexer {
               .valueOf(schoolArray[fieldNameMapping.get(Constants.SCHOOL_DATA_SOURCE_FIELDNAME)]);
 
           School schoolToSave = new School(schoolArray[fieldNameMapping.get(Constants.SCHOOL_URN_FIELDNAME)],
-              schoolArray[fieldNameMapping.get(Constants.SCHOOL_ESTABLISHMENT_NAME_FIELDNAME)],
+              schoolArray[fieldNameMapping.get(Constants.SCHOOL_NAME_FIELDNAME)],
               schoolArray[fieldNameMapping.get(Constants.SCHOOL_POSTCODE_FIELDNAME)],
-              // CSV file contains string "t" and "f" values to denote true and false, but need a boolean:
-              "t".equals(schoolArray[fieldNameMapping.get(Constants.SCHOOL_CLOSED_FIELDNAME)]),
+              Boolean.valueOf(schoolArray[fieldNameMapping.get(Constants.SCHOOL_CLOSED_FIELDNAME)]),
               source);
 
           if (null == schoolToSave.getPostcode() || schoolToSave.getPostcode().isEmpty()) {
@@ -152,6 +159,14 @@ class SchoolIndexer {
         } catch (IndexOutOfBoundsException e) {
           // This happens when the school does not have the required data
           log.warn("Unable to load the following school into the school list due to missing required fields. {}",
+              Arrays.toString(schoolArray));
+        } catch (IllegalArgumentException e) {
+          // This happens when data_source field is missing, empty, or has an invalid value
+          log.warn("Unable to load the following school into the school list due to invalid data_source value. "
+                  + "URN: {}, Error: {}, Row: {}",
+              schoolArray.length > fieldNameMapping.get(Constants.SCHOOL_URN_FIELDNAME) 
+                  ? schoolArray[fieldNameMapping.get(Constants.SCHOOL_URN_FIELDNAME)] : "unknown",
+              e.getMessage(),
               Arrays.toString(schoolArray));
         }
       }
