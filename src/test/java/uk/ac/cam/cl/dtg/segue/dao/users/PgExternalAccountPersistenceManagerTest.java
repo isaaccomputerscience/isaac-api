@@ -1,28 +1,28 @@
 package uk.ac.cam.cl.dtg.segue.dao.users;
 
+import static org.easymock.EasyMock.anyString;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserExternalAccountChanges;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
-import org.junit.jupiter.api.Nested;
-
-import java.sql.*;
-import java.util.List;
-
-import static org.easymock.EasyMock.*;
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.sql.*;
 
 class PgExternalAccountPersistenceManagerTest {
 
