@@ -101,7 +101,6 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
     } catch (SQLException e) {
       String errorMsg = "Database error while fetching recently changed records";
-      log.error("{} {}", MAILJET, errorMsg, e);
       throw new SegueDatabaseException(errorMsg + ": " + e.getMessage(), e);
     }
   }
@@ -356,7 +355,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       }
     } else {
       log.warn("{} User ID {} has registered_contexts but no 'stage' key found: {}. Stage: {}",
-          MAILJET, userId, truncateForLog(trimmed), STAGE_UNKNOWN);
+          MAILJET, userId, trimmed, STAGE_UNKNOWN);
     }
     return fallbackStage;
   }
