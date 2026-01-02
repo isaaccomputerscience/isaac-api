@@ -298,8 +298,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
       // Search through array for 'stage' key
       for (int i = 0; i < array.length(); i++) {
         Object item = array.get(i);
-        if (item instanceof JSONObject) {
-          JSONObject obj = (JSONObject) item;
+        if (item instanceof JSONObject obj) {
           if (obj.has("stage")) {
             String stage = obj.getString("stage");
             String normalized = normalizeStage(stage);
@@ -364,28 +363,18 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
 
     String normalized = stage.trim().toLowerCase();
 
-    switch (normalized) {
-      case "gcse":
-        return "GCSE";
-      case "a_level":
-      case "a level":
-      case "alevel":
-      case "a-level":
-        return "A Level";
-      case "gcse_and_a_level":
-      case "gcse and a level":
-      case "both":
-      case "gcse,a_level":
-      case "gcse, a level":
-        return "GCSE and A Level";
-      case "all":
-        return "ALL";
-      default:
+    return switch (normalized) {
+      case "gcse" -> "GCSE";
+      case "a_level", "a level", "alevel", "a-level" -> "A Level";
+      case "gcse_and_a_level", "gcse and a level", "both", "gcse,a_level", "gcse, a level" -> "GCSE and A Level";
+      case "all" -> "ALL";
+      default -> {
         // Warn about unexpected stage values
         log.warn("MAILJET - Unexpected stage value '{}' encountered. Returning '{}'. "
             + "Expected values: gcse, a_level, gcse_and_a_level, both", stage, STAGE_UNKNOWN);
-        return STAGE_UNKNOWN;
-    }
+        yield STAGE_UNKNOWN;
+      }
+    };
   }
 
   /**
