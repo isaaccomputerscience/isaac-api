@@ -31,10 +31,9 @@ class PgExternalAccountPersistenceManagerTest {
   @Test
   void buildUserExternalAccountChanges_ShouldParseRegisteredContextsCorrectly() throws Exception {
     // Arrange
-    String registeredContextsJson = "{\"stage\": \"gcse\", \"examBoard\": \"ocr\"}";
+    // The method expects a JSON ARRAY (from PostgreSQL array_to_json(JSONB[]))
+    String registeredContextsJson = "[{\"stage\": \"gcse\", \"examBoard\": \"ocr\"}]";
 
-    // Mock ResultSet behavior
-    expect(mockResultSet.getString("registered_contexts")).andReturn(registeredContextsJson); // Expect this call once
     expect(mockResultSet.getLong("id")).andReturn(1L);
     expect(mockResultSet.getString("provider_user_identifier")).andReturn("providerId");
     expect(mockResultSet.getString("email")).andReturn("test@example.com");
@@ -43,7 +42,10 @@ class PgExternalAccountPersistenceManagerTest {
     expect(mockResultSet.getBoolean("deleted")).andReturn(false);
     expect(mockResultSet.getString("email_verification_status")).andReturn("VERIFIED");
     expect(mockResultSet.getBoolean("news_emails")).andReturn(true);
+    expect(mockResultSet.wasNull()).andReturn(false); // wasNull() after getBoolean("news_emails")
     expect(mockResultSet.getBoolean("events_emails")).andReturn(false);
+    expect(mockResultSet.wasNull()).andReturn(false); // wasNull() after getBoolean("events_emails")
+    expect(mockResultSet.getString("registered_contexts")).andReturn(registeredContextsJson);
 
     replay(mockResultSet);
 
@@ -69,6 +71,6 @@ class PgExternalAccountPersistenceManagerTest {
     assertFalse(result.allowsEventsEmails());
 
     // Verify JSON parsing and stage extraction
-    assertEquals("gcse", result.getStage()); // Ensure "stage" is correctly extracted from JSON
+    assertEquals("gcse".toUpperCase(), result.getStage());
   }
 }

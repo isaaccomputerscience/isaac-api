@@ -45,6 +45,9 @@ class MailJetApiClientWrapperTest {
     mockData.put(mockAccount);
 
     expect(mockMailjetClient.get(anyObject(MailjetRequest.class))).andReturn(mockResponse);
+    // The code checks getStatus() twice: once for 404, once for 200
+    expect(mockResponse.getStatus()).andReturn(200);
+    expect(mockResponse.getStatus()).andReturn(200);
     expect(mockResponse.getTotal()).andReturn(1);
     expect(mockResponse.getData()).andReturn(mockData);
 
@@ -70,6 +73,8 @@ class MailJetApiClientWrapperTest {
     mockData.put(mockUser);
 
     expect(mockMailjetClient.post(anyObject(MailjetRequest.class))).andReturn(mockResponse);
+    // The code checks getStatus() first, then getData()
+    expect(mockResponse.getStatus()).andReturn(201);
     expect(mockResponse.getData()).andReturn(mockData);
 
     replay(mockMailjetClient, mockResponse);

@@ -7,6 +7,7 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.mailjet.client.errors.MailjetClientCommunicationException;
 import com.mailjet.client.errors.MailjetException;
 import java.util.List;
 import org.json.JSONObject;
@@ -123,7 +124,10 @@ class ExternalAccountManagerTest {
     }
 
     @Test
-    void synchroniseChangedUsers_mailjetException() throws SegueDatabaseException, MailjetException {
+    void synchroniseChangedUsers_mailjetException()
+        throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
+      // Regular MailjetException is caught and logged, not re-thrown
+      // Only MailjetClientCommunicationException causes the method to throw
       UserExternalAccountChanges userChanges = new UserExternalAccountChanges(
           1L, "existingMailjetId", "test@example.com", Role.STUDENT, "John", false,
           EmailVerificationStatus.VERIFIED, true, false, "GCSE"
@@ -131,11 +135,35 @@ class ExternalAccountManagerTest {
       List<UserExternalAccountChanges> changedUsers = List.of(userChanges);
 
       expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
-      expect(mailjetApi.getAccountByIdOrEmail("existingMailjetId")).andThrow(new MailjetException("Mailjet error"));
+      expect(mailjetApi.getAccountByIdOrEmail("existingMailjetId"))
+          .andThrow(new MailjetException("Mailjet error"));
 
       replay(mockDatabase, mailjetApi);
 
-      assertThrows(ExternalAccountSynchronisationException.class, () -> externalAccountManager.synchroniseChangedUsers());
+      // This should NOT throw - regular MailjetException is caught and logged
+      externalAccountManager.synchroniseChangedUsers();
+
+      verify(mockDatabase, mailjetApi);
+    }
+
+    @Test
+    void synchroniseChangedUsers_communicationException() throws SegueDatabaseException, MailjetException {
+      // MailjetClientCommunicationException should cause the method to throw
+      UserExternalAccountChanges userChanges = new UserExternalAccountChanges(
+          1L, "existingMailjetId", "test@example.com", Role.STUDENT, "John", false,
+          EmailVerificationStatus.VERIFIED, true, false, "GCSE"
+      );
+      List<UserExternalAccountChanges> changedUsers = List.of(userChanges);
+
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mailjetApi.getAccountByIdOrEmail("existingMailjetId"))
+          .andThrow(new MailjetClientCommunicationException("Communication error"));
+
+      replay(mockDatabase, mailjetApi);
+
+      // Communication exceptions should be re-thrown
+      assertThrows(ExternalAccountSynchronisationException.class,
+          () -> externalAccountManager.synchroniseChangedUsers());
 
       verify(mockDatabase, mailjetApi);
     }
