@@ -66,7 +66,8 @@ public class ExternalAccountManager implements IExternalAccountManager {
       log.info("Found {} users to synchronize with Mailjet", userRecordsToUpdate.size());
     } catch (SegueDatabaseException e) {
       log.error("Database error whilst collecting users whose details have changed", e);
-      throw new ExternalAccountSynchronisationException("Failed to retrieve users for synchronization" + e);
+      throw new ExternalAccountSynchronisationException("Failed to retrieve users for synchronization"
+              + e.getMessage());
     }
 
     if (userRecordsToUpdate.isEmpty()) {
@@ -91,7 +92,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
       } catch (MailjetClientCommunicationException e) {
         metrics.incrementCommunicationError();
         log.error("Failed to communicate with Mailjet while processing user ID: {}", userId, e);
-        throw new ExternalAccountSynchronisationException("Failed to connect to Mailjet" + e);
+        throw new ExternalAccountSynchronisationException("Failed to connect to Mailjet: " + e.getMessage());
 
       } catch (MailjetRateLimitException e) {
         metrics.incrementRateLimitError();
