@@ -39,6 +39,8 @@ public class MailJetApiClientWrapper {
 
   private static final Logger log = LoggerFactory.getLogger(MailJetApiClientWrapper.class);
 
+  private static final String PROPERTY_VALUE_KEY = "value";
+
   private final MailjetClient mailjetClient;
   private final String newsListId;
   private final String eventsListId;
@@ -109,11 +111,12 @@ public class MailJetApiClientWrapper {
       }
 
       if (isCommunicationException(e)) {
-        log.error("Communication error fetching Mailjet account", e);
-        throw new MailjetClientCommunicationException("Failed to communicate with Mailjet", e);
+        String errorMsg = String.format("Communication error fetching Mailjet account: %s", mailjetIdOrEmail);
+        log.error(errorMsg, e);
+        throw new MailjetClientCommunicationException(errorMsg, e);
       }
 
-      log.error("Error fetching Mailjet account", e);
+      log.error("Error fetching Mailjet account: {}. Error: {}", mailjetIdOrEmail, e.getMessage(), e);
       throw e;
     }
   }
@@ -149,11 +152,12 @@ public class MailJetApiClientWrapper {
       }
 
       if (isCommunicationException(e)) {
-        log.error("Communication error deleting Mailjet account: {}", mailjetId, e);
-        throw new MailjetClientCommunicationException("Failed to communicate with Mailjet", e);
+        String errorMsg = String.format("Communication error deleting Mailjet account: %s", mailjetId);
+        log.error(errorMsg, e);
+        throw new MailjetClientCommunicationException(errorMsg, e);
       }
 
-      log.error("Error deleting Mailjet account: {}", mailjetId, e);
+      log.error("Error deleting Mailjet account: {}. Error: {}", mailjetId, e.getMessage(), e);
       throw e;
     }
   }
@@ -176,55 +180,86 @@ public class MailJetApiClientWrapper {
     String normalizedEmail = email.trim().toLowerCase();
 
     try {
-      MailjetRequest request = new MailjetRequest(Contact.resource).property(Contact.EMAIL, normalizedEmail);
-      MailjetResponse response = mailjetClient.post(request);
-
-      if (response.getStatus() == 201 || response.getStatus() == 200) {
-        JSONObject responseData = response.getData().getJSONObject(0);
-        String mailjetId = String.valueOf(responseData.get("ID"));
-        log.info("Successfully created Mailjet account: {}", mailjetId);
-        return mailjetId;
-      }
-
-      log.error("Unexpected response status {} when creating Mailjet account", response.getStatus());
-      throw new MailjetException("Failed to create account. Status: " + response.getStatus());
+      return createNewMailjetAccount(normalizedEmail);
 
     } catch (MailjetClientRequestException e) {
-      if (e.getMessage() != null && e.getMessage().toLowerCase().contains("already exists")) {
-        log.debug("User already exists in Mailjet, fetching existing account");
-
-        try {
-          JSONObject existingAccount = getAccountByIdOrEmail(normalizedEmail);
-          if (existingAccount != null) {
-            String mailjetId = String.valueOf(existingAccount.get("ID"));
-            log.info("Retrieved existing Mailjet account: {}", mailjetId);
-            return mailjetId;
-          } else {
-            log.error("User reported as existing but couldn't fetch account");
-            throw new MailjetException("Account exists but couldn't be retrieved");
-          }
-        } catch (JSONException je) {
-          log.error("JSON parsing error when retrieving existing account", je);
-          throw new MailjetException("Failed to parse existing account data", je);
-        }
-      } else {
-        log.error("Failed to create Mailjet account: {}", e.getMessage(), e);
-        throw new MailjetException("Failed to create account: " + e.getMessage(), e);
-      }
+      return handleUserAlreadyExists(e, normalizedEmail);
 
     } catch (MailjetException e) {
-      if (isCommunicationException(e)) {
-        log.error("Communication error creating Mailjet account", e);
-        throw new MailjetClientCommunicationException("Failed to communicate with Mailjet", e);
-      }
-
-      log.error("Error creating Mailjet account", e);
-      throw e;
+      return handleMailjetException(e, normalizedEmail);
 
     } catch (JSONException e) {
-      log.error("JSON parsing error when creating account", e);
-      throw new MailjetException("Failed to parse Mailjet response", e);
+      String errorMsg = String.format("JSON parsing error when creating account for email: %s", normalizedEmail);
+      log.error(errorMsg, e);
+      throw new MailjetException(errorMsg, e);
     }
+  }
+
+  /**
+   * Create a new Mailjet account for the given email.
+   * Extracted to reduce cognitive complexity.
+   */
+  private String createNewMailjetAccount(String normalizedEmail) throws MailjetException, JSONException {
+    MailjetRequest request = new MailjetRequest(Contact.resource).property(Contact.EMAIL, normalizedEmail);
+    MailjetResponse response = mailjetClient.post(request);
+
+    if (response.getStatus() == 201 || response.getStatus() == 200) {
+      JSONObject responseData = response.getData().getJSONObject(0);
+      String mailjetId = String.valueOf(responseData.get("ID"));
+      log.info("Successfully created Mailjet account: {}", mailjetId);
+      return mailjetId;
+    }
+
+    log.error("Unexpected response status {} when creating Mailjet account", response.getStatus());
+    throw new MailjetException("Failed to create account. Status: " + response.getStatus());
+  }
+
+  /**
+   * Handle the case where user already exists in Mailjet.
+   * Extracted to reduce cognitive complexity.
+   */
+  private String handleUserAlreadyExists(MailjetClientRequestException e, String normalizedEmail)
+      throws MailjetException {
+    if (e.getMessage() != null && e.getMessage().toLowerCase().contains("already exists")) {
+      log.debug("User already exists in Mailjet, fetching existing account");
+
+      try {
+        JSONObject existingAccount = getAccountByIdOrEmail(normalizedEmail);
+        if (existingAccount != null) {
+          String mailjetId = String.valueOf(existingAccount.get("ID"));
+          log.info("Retrieved existing Mailjet account: {}", mailjetId);
+          return mailjetId;
+        } else {
+          String errorMsg = String.format("User reported as existing but couldn't fetch account: %s", normalizedEmail);
+          log.error(errorMsg);
+          throw new MailjetException(errorMsg);
+        }
+      } catch (JSONException je) {
+        String errorMsg = String.format("JSON parsing error when retrieving existing account: %s", normalizedEmail);
+        log.error(errorMsg, je);
+        throw new MailjetException(errorMsg, je);
+      }
+    } else {
+      String errorMsg = String.format("Failed to create Mailjet account for email: %s. Error: %s",
+          normalizedEmail, e.getMessage());
+      log.error(errorMsg, e);
+      throw new MailjetException(errorMsg, e);
+    }
+  }
+
+  /**
+   * Handle general Mailjet exceptions.
+   * Extracted to reduce cognitive complexity.
+   */
+  private String handleMailjetException(MailjetException e, String normalizedEmail) throws MailjetException {
+    if (isCommunicationException(e)) {
+      String errorMsg = String.format("Communication error creating Mailjet account for email: %s", normalizedEmail);
+      log.error(errorMsg, e);
+      throw new MailjetClientCommunicationException(errorMsg, e);
+    }
+
+    log.error("Error creating Mailjet account for email: {}. Error: {}", normalizedEmail, e.getMessage(), e);
+    throw e;
   }
 
   /**
@@ -246,11 +281,11 @@ public class MailJetApiClientWrapper {
     try {
       MailjetRequest request = new MailjetRequest(Contactdata.resource, mailjetId).property(Contactdata.DATA,
           new JSONArray().put(
-                  new JSONObject().put("Name", "firstname").put("value", firstName != null ? firstName : ""))
-              .put(new JSONObject().put("Name", "role").put("value", role != null ? role : "")).put(
+                  new JSONObject().put("Name", "firstname").put(PROPERTY_VALUE_KEY, firstName != null ? firstName : ""))
+              .put(new JSONObject().put("Name", "role").put(PROPERTY_VALUE_KEY, role != null ? role : "")).put(
                   new JSONObject().put("Name", "verification_status")
-                      .put("value", emailVerificationStatus != null ? emailVerificationStatus : ""))
-              .put(new JSONObject().put("Name", "stage").put("value", stage != null ? stage : "unknown")));
+                      .put(PROPERTY_VALUE_KEY, emailVerificationStatus != null ? emailVerificationStatus : ""))
+              .put(new JSONObject().put("Name", "stage").put(PROPERTY_VALUE_KEY, stage != null ? stage : "unknown")));
 
       MailjetResponse response = mailjetClient.put(request);
 
@@ -266,16 +301,19 @@ public class MailJetApiClientWrapper {
 
     } catch (MailjetException e) {
       if (isNotFoundException(e)) {
-        log.error("Mailjet contact not found when updating properties: {}. Contact may have been deleted", mailjetId);
-        throw new MailjetException("Contact not found (404) when updating properties: " + mailjetId, e);
+        String errorMsg = String.format("Mailjet contact not found when updating properties: %s. "
+            + "Contact may have been deleted", mailjetId);
+        log.error(errorMsg);
+        throw new MailjetException(errorMsg, e);
       }
 
       if (isCommunicationException(e)) {
-        log.error("Communication error updating properties for Mailjet account: {}", mailjetId, e);
-        throw new MailjetClientCommunicationException("Failed to communicate with Mailjet", e);
+        String errorMsg = String.format("Communication error updating properties for Mailjet account: %s", mailjetId);
+        log.error(errorMsg, e);
+        throw new MailjetClientCommunicationException(errorMsg, e);
       }
 
-      log.error("Error updating properties for Mailjet account: {}", mailjetId, e);
+      log.error("Error updating properties for Mailjet account: {}. Error: {}", mailjetId, e.getMessage(), e);
       throw e;
     }
   }
@@ -323,17 +361,20 @@ public class MailJetApiClientWrapper {
 
     } catch (MailjetException e) {
       if (isNotFoundException(e)) {
-        log.error("Mailjet contact not found when updating subscriptions: {}. Contact may have been deleted",
-            mailjetId);
-        throw new MailjetException("Contact not found (404) when updating subscriptions: " + mailjetId, e);
+        String errorMsg = String.format("Mailjet contact not found when updating subscriptions: %s. "
+            + "Contact may have been deleted", mailjetId);
+        log.error(errorMsg);
+        throw new MailjetException(errorMsg, e);
       }
 
       if (isCommunicationException(e)) {
-        log.error("Communication error updating subscriptions for Mailjet account: {}", mailjetId, e);
-        throw new MailjetClientCommunicationException("Failed to communicate with Mailjet", e);
+        String errorMsg = String.format("Communication error updating subscriptions for Mailjet account: %s",
+            mailjetId);
+        log.error(errorMsg, e);
+        throw new MailjetClientCommunicationException(errorMsg, e);
       }
 
-      log.error("Error updating subscriptions for Mailjet account: {}", mailjetId, e);
+      log.error("Error updating subscriptions for Mailjet account: {}. Error: {}", mailjetId, e.getMessage(), e);
       throw e;
     }
   }
