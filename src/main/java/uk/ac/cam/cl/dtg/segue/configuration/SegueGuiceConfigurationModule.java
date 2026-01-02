@@ -230,7 +230,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * previously been set.
    *
    * @param globalProperties PropertiesLoader object to be used for loading properties
-   *                             (if it has not previously been set).
+   *                         (if it has not previously been set).
    */
   public static void setGlobalPropertiesIfNotSet(final PropertiesLoader globalProperties) {
     if (SegueGuiceConfigurationModule.globalProperties == null) {
@@ -366,8 +366,6 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * Configure user security related classes.
    */
   private void configureAuthenticationProviders() {
-    MapBinder<AuthenticationProvider, IAuthenticator> mapBinder = MapBinder.newMapBinder(binder(),
-        AuthenticationProvider.class, IAuthenticator.class);
 
     this.bindConstantToProperty(Constants.HMAC_SALT, globalProperties);
     //Google reCAPTCHA
@@ -378,6 +376,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
     this.bindConstantToProperty(Constants.GOOGLE_CLIENT_SECRET_LOCATION, globalProperties);
     this.bindConstantToProperty(Constants.GOOGLE_CALLBACK_URI, globalProperties);
     this.bindConstantToProperty(Constants.GOOGLE_OAUTH_SCOPES, globalProperties);
+
+    MapBinder<AuthenticationProvider, IAuthenticator> mapBinder = MapBinder.newMapBinder(binder(),
+        AuthenticationProvider.class, IAuthenticator.class);
+
+
     mapBinder.addBinding(AuthenticationProvider.GOOGLE).to(GoogleAuthenticator.class);
 
     // Facebook
