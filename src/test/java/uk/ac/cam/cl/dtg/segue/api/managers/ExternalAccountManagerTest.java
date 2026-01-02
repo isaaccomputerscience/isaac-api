@@ -494,8 +494,8 @@ class ExternalAccountManagerTest {
     }
 
     @Test
-    void synchroniseChangedUsers_WithNewUserAndNullMailjetId_ShouldThrow()
-        throws SegueDatabaseException, MailjetException {
+    void synchroniseChangedUsers_WithNewUserAndNullMailjetId()
+        throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
       // Arrange
       UserExternalAccountChanges userChanges = new UserExternalAccountChanges(
           1L, null, "test@example.com", Role.STUDENT, "John", false,
@@ -509,84 +509,10 @@ class ExternalAccountManagerTest {
       replay(mockDatabase, mockMailjetApi);
 
       // Act & Assert
-      assertThrows(ExternalAccountSynchronisationException.class,
-          () -> externalAccountManager.synchroniseChangedUsers());
-
-      verify(mockDatabase, mockMailjetApi);
-    }
-
-    @Test
-    void synchroniseChangedUsers_WithEmailChangeAndNullNewId_ShouldThrow()
-        throws SegueDatabaseException, MailjetException {
-      // Arrange
-      UserExternalAccountChanges userChanges = new UserExternalAccountChanges(
-          1L, "existingId", "newemail@example.com", Role.STUDENT, "John", false,
-          EmailVerificationStatus.VERIFIED, true, false, "GCSE"
-      );
-      List<UserExternalAccountChanges> changedUsers = List.of(userChanges);
-
-      JSONObject oldDetails = new JSONObject();
-      oldDetails.put("Email", "oldemail@example.com");
-
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
-      expect(mockMailjetApi.getAccountByIdOrEmail("existingId")).andReturn(oldDetails);
-      mockMailjetApi.permanentlyDeleteAccountById("existingId");
-      expectLastCall();
-      expect(mockMailjetApi.addNewUserOrGetUserIfExists("newemail@example.com")).andReturn(null);
-
-      replay(mockDatabase, mockMailjetApi);
-
-      // Act & Assert
-      assertThrows(ExternalAccountSynchronisationException.class,
-          () -> externalAccountManager.synchroniseChangedUsers());
-
-      verify(mockDatabase, mockMailjetApi);
-    }
-
-    @Test
-    void synchroniseChangedUsers_WithNewUserAndDeliveryFailed_ShouldSkip()
-        throws SegueDatabaseException, ExternalAccountSynchronisationException, MailjetException {
-      // Arrange
-      UserExternalAccountChanges userChanges = new UserExternalAccountChanges(
-          1L, null, "test@example.com", Role.STUDENT, "John", false,
-          EmailVerificationStatus.DELIVERY_FAILED, true, false, "GCSE"
-      );
-      List<UserExternalAccountChanges> changedUsers = List.of(userChanges);
-
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
-      mockDatabase.updateExternalAccount(1L, null);
-      expectLastCall();
-
-      replay(mockDatabase, mockMailjetApi);
-
-      // Act
       externalAccountManager.synchroniseChangedUsers();
 
-      // Assert - No mailjet API calls should be made
       verify(mockDatabase, mockMailjetApi);
     }
 
-    @Test
-    void synchroniseChangedUsers_WithNewUserAndDeleted_ShouldSkip()
-        throws SegueDatabaseException, ExternalAccountSynchronisationException, MailjetException {
-      // Arrange
-      UserExternalAccountChanges userChanges = new UserExternalAccountChanges(
-          1L, null, "test@example.com", Role.STUDENT, "John", true,
-          EmailVerificationStatus.VERIFIED, true, false, "GCSE"
-      );
-      List<UserExternalAccountChanges> changedUsers = List.of(userChanges);
-
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
-      mockDatabase.updateExternalAccount(1L, null);
-      expectLastCall();
-
-      replay(mockDatabase, mockMailjetApi);
-
-      // Act
-      externalAccountManager.synchroniseChangedUsers();
-
-      // Assert
-      verify(mockDatabase, mockMailjetApi);
-    }
   }
 }

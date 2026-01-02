@@ -257,7 +257,6 @@ class MailJetApiClientWrapperTest {
       expect(mockResponse.getStatus()).andReturn(500);
       expect(mockResponse.getStatus()).andReturn(500);
       expect(mockResponse.getStatus()).andReturn(500);
-      expect(mockResponse.getStatus()).andReturn(500);
 
       replay(mockMailjetClient, mockResponse);
 
@@ -407,7 +406,6 @@ class MailJetApiClientWrapperTest {
       expect(mockResponse.getStatus()).andReturn(500);
       expect(mockResponse.getStatus()).andReturn(500);
       expect(mockResponse.getStatus()).andReturn(500);
-      expect(mockResponse.getStatus()).andReturn(500);
 
       replay(mockMailjetClient, mockResponse);
 
@@ -533,8 +531,6 @@ class MailJetApiClientWrapperTest {
       expect(mockMailjetClient.put(anyObject(MailjetRequest.class))).andReturn(mockResponse);
       expect(mockResponse.getStatus()).andReturn(500);
       expect(mockResponse.getStatus()).andReturn(500);
-      expect(mockResponse.getStatus()).andReturn(500);
-      expect(mockResponse.getTotal()).andReturn(0);
       expect(mockResponse.getTotal()).andReturn(0);
 
       replay(mockMailjetClient, mockResponse);
@@ -643,8 +639,6 @@ class MailJetApiClientWrapperTest {
       expect(mockMailjetClient.post(anyObject(MailjetRequest.class))).andReturn(mockResponse);
       expect(mockResponse.getStatus()).andReturn(500);
       expect(mockResponse.getStatus()).andReturn(500);
-      expect(mockResponse.getStatus()).andReturn(500);
-      expect(mockResponse.getTotal()).andReturn(500);
       expect(mockResponse.getTotal()).andReturn(500);
       replay(mockMailjetClient, mockResponse);
 

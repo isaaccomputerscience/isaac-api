@@ -65,7 +65,6 @@ public class ExternalAccountManager implements IExternalAccountManager {
       userRecordsToUpdate = database.getRecentlyChangedRecords();
       log.info("Found {} users to synchronize with Mailjet", userRecordsToUpdate.size());
     } catch (SegueDatabaseException e) {
-      log.error("Database error whilst collecting users whose details have changed", e);
       throw new ExternalAccountSynchronisationException("Failed to retrieve users for synchronization"
               + e.getMessage());
     }
@@ -87,13 +86,9 @@ public class ExternalAccountManager implements IExternalAccountManager {
       } catch (SegueDatabaseException e) {
         metrics.incrementDatabaseError();
         log.error("Database error storing Mailjet update for user ID: {}", userId, e);
-        // Continue processing other users
-
       } catch (MailjetClientCommunicationException e) {
         metrics.incrementCommunicationError();
-        log.error("Failed to communicate with Mailjet while processing user ID: {}", userId, e);
         throw new ExternalAccountSynchronisationException("Failed to connect to Mailjet: " + e.getMessage());
-
       } catch (MailjetRateLimitException e) {
         metrics.incrementRateLimitError();
         log.warn("Mailjet rate limit exceeded while processing user ID: {}. Processed {} users before limit",
@@ -104,7 +99,6 @@ public class ExternalAccountManager implements IExternalAccountManager {
       } catch (MailjetException e) {
         metrics.incrementMailjetError();
         log.error("Mailjet API error while processing user ID: {}. Continuing with next user", userId, e);
-
       } catch (Exception e) {
         metrics.incrementUnexpectedError();
         log.error("Unexpected error processing user ID: {}", userId, e);
@@ -203,7 +197,6 @@ public class ExternalAccountManager implements IExternalAccountManager {
       String mailjetId = mailjetApi.addNewUserOrGetUserIfExists(accountEmail);
 
       if (mailjetId == null) {
-        log.error("Failed to create Mailjet account for user ID {}. Mailjet returned null ID", userId);
         throw new MailjetException("Mailjet returned null ID when creating account for user: " + userId);
       }
 
