@@ -60,12 +60,8 @@ class SchoolIndexer {
       Instant indexLastModified = Instant.ofEpochMilli(
           Long.parseLong(schoolsReader.getDataLastModifiedDate())
       );
-      log.info("Timestamp of last modified CSV School list file: " + f + "{}",
-          " Madhura " + fileLastModified
-      );
-      log.info("Timestamp of last modified School list file: " + schoolsReader + "{}",
-          " Madhura " + indexLastModified
-      );
+      log.info("Timestamp of last modified CSV School list file: {} Madhura {}", f, fileLastModified);
+      log.info("Timestamp of last modified School list file: {} Madhura2 {}", schoolsReader, indexLastModified);
       if (indexLastModified.isAfter(fileLastModified) || indexLastModified.equals(fileLastModified)) {
         log.info("Schools index is up to date");
         return;
