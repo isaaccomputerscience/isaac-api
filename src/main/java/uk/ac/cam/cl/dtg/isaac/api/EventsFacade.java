@@ -88,6 +88,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.jboss.resteasy.annotations.GZIP;
@@ -1205,7 +1206,23 @@ public class EventsFacade extends AbstractIsaacFacade {
     info.put("teacherEmail", teacher.getEmail());
     info.put("teacherId", teacher.getId().toString());
     info.put("teacherSchoolId", teacher.getSchoolId() != null ? teacher.getSchoolId() : "");
-    info.put("teacherSchoolName", teacher.getSchoolOther() != null ? teacher.getSchoolOther() : "");
+    info.put("teacherSchoolName", findUsersSchoolName(teacher));
+  }
+
+  private String findUsersSchoolName(RegisteredUserDTO user) {
+    return Optional.ofNullable(user.getSchoolOther())
+        .or(() -> Optional.ofNullable(user.getSchoolId())
+            .flatMap(this::findSchoolNameById))
+        .orElse("");
+  }
+
+  private Optional<String> findSchoolNameById(String schoolId) {
+    try {
+      return Optional.ofNullable(schoolListReader.findSchoolById(schoolId).getName());
+    } catch (Exception e) {
+      log.warn("Failed to find school with ID: {}", schoolId, e);
+      return Optional.empty();
+    }
   }
 
   private void addStudentInformation(final Map<String, String> info, final RegisteredUserDTO student) {
@@ -1213,7 +1230,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     info.put("student_given_name", student.getGivenName() != null ? student.getGivenName() : "");
     info.put("student_family_name", student.getFamilyName() != null ? student.getFamilyName() : "");
     info.put("student_email", student.getEmail() != null ? student.getEmail() : "");
-    info.put("student_school_name", student.getSchoolOther() != null ? student.getSchoolOther() : "");
+    info.put("student_school_name", findUsersSchoolName(student));
     info.put("student_school_urn", student.getSchoolId() != null ? student.getSchoolId() : "");
 
     addStudentContextInformation(info, student);

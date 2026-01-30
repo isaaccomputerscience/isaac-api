@@ -157,6 +157,7 @@ import uk.ac.cam.cl.dtg.segue.dao.associations.IAssociationDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.associations.PgAssociationDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
+import uk.ac.cam.cl.dtg.segue.dao.schools.PgSchoolLookup;
 import uk.ac.cam.cl.dtg.segue.dao.schools.SchoolListReader;
 import uk.ac.cam.cl.dtg.segue.dao.userbadges.IUserBadgePersistenceManager;
 import uk.ac.cam.cl.dtg.segue.dao.userbadges.PgUserBadgePersistenceManager;
@@ -1214,14 +1215,16 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
    * We want this to be a singleton as otherwise it may not be threadsafe for loading into same SearchProvider.
    *
    * @param provider The search provider.
+   * @param schoolFallbackLookup Fallback lookup for schools not in search index.
    * @return schoolList reader
    */
   @Inject
   @Provides
   @Singleton
-  private SchoolListReader getSchoolListReader(final ISearchProvider provider) {
+  private SchoolListReader getSchoolListReader(final ISearchProvider provider,
+                                               final PgSchoolLookup schoolFallbackLookup) {
     if (null == schoolListReader) {
-      schoolListReader = new SchoolListReader(provider);
+      schoolListReader = new SchoolListReader(provider, schoolFallbackLookup);
       log.info("Creating singleton of SchoolListReader");
     }
     return schoolListReader;

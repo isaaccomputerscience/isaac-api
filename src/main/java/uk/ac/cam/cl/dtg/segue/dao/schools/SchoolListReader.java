@@ -32,12 +32,14 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.google.inject.Inject;
+import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.users.School;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.search.BasicSearchParameters;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
@@ -53,19 +55,23 @@ public class SchoolListReader {
   private static final Logger log = LoggerFactory.getLogger(SchoolListReader.class);
 
   private final ISearchProvider searchProvider;
+  private final PgSchoolLookup schoolFallbackLookup;
 
   private final ObjectMapper mapper = getSharedBasicObjectMapper();
 
   private final String dataSourceModificationDate;
 
   /**
-   * SchoolListReader constructor.
+   * SchoolListReader constructor with database fallback for missing schools.
    *
    * @param searchProvider - search provider that can be used to put and retrieve school data.
+   * @param schoolFallbackLookup - optional fallback for schools not found in search index (can be null).
    */
   @Inject
-  public SchoolListReader(final ISearchProvider searchProvider) {
+  public SchoolListReader(final ISearchProvider searchProvider,
+                          @Nullable final PgSchoolLookup schoolFallbackLookup) {
     this.searchProvider = searchProvider;
+    this.schoolFallbackLookup = schoolFallbackLookup;
 
     String modificationDate;
     try {
@@ -77,6 +83,16 @@ public class SchoolListReader {
       modificationDate = "unknown";
     }
     dataSourceModificationDate = modificationDate;
+  }
+
+  /**
+   * SchoolListReader constructor without database fallback.
+   * Used by ETL module where database access is not available.
+   *
+   * @param searchProvider - search provider that can be used to put and retrieve school data.
+   */
+  public SchoolListReader(final ISearchProvider searchProvider) {
+    this(searchProvider, null);
   }
 
   /**
@@ -146,7 +162,8 @@ public class SchoolListReader {
         SCHOOL_URN_FIELDNAME.toLowerCase() + "." + UNPROCESSED_SEARCH_FIELD_SUFFIX, schoolURN, null).getResults();
 
     if (matchingSchoolList.isEmpty()) {
-      return null;
+      // Fallback to database lookup for schools that are no longer in the current index
+      return findSchoolByIdFromFallback(schoolURN);
     }
 
     if (matchingSchoolList.size() > 1) {
@@ -155,6 +172,34 @@ public class SchoolListReader {
     }
 
     return mapper.readValue(matchingSchoolList.get(0), School.class);
+  }
+
+  /**
+   * Fallback lookup for schools not found in Elasticsearch.
+   * This queries the schools_2022 database table for schools that have been
+   * removed from the current school list but are still referenced by user accounts.
+   *
+   * @param schoolURN - the URN of the school to look up
+   * @return the School if found in the fallback, or null if not found
+   */
+  private School findSchoolByIdFromFallback(final String schoolURN) {
+    if (schoolFallbackLookup == null) {
+      log.debug("No fallback lookup configured, returning null for school URN: {}",
+          sanitiseExternalLogValue(schoolURN));
+      return null;
+    }
+
+    try {
+      School fallbackSchool = schoolFallbackLookup.findSchoolById(schoolURN);
+      if (fallbackSchool != null) {
+        log.info("Found school {} in fallback database table (not in current Elasticsearch index)",
+            sanitiseExternalLogValue(schoolURN));
+      }
+      return fallbackSchool;
+    } catch (SegueDatabaseException e) {
+      log.error("Error looking up school {} from fallback database", sanitiseExternalLogValue(schoolURN), e);
+      return null;
+    }
   }
 
 
