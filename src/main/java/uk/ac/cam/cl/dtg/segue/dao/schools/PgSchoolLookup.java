@@ -16,6 +16,8 @@
 
 package uk.ac.cam.cl.dtg.segue.dao.schools;
 
+import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
+
 import com.google.inject.Inject;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -74,17 +76,20 @@ public class PgSchoolLookup {
           school.setName(results.getString("school_name"));
           school.setClosed(true);
           school.setDataSource(School.SchoolDataSource.GOVERNMENT_UK);
-          log.debug("Found school {} in fallback database table schools_2022", schoolUrn);
+          log.debug("Found school {} in fallback database table schools_2022",
+              sanitiseExternalLogValue(schoolUrn));
           return school;
         }
       }
     } catch (SQLException e) {
-      String errorMsg = String.format("Error looking up school with URN %s from schools_2022 table", schoolUrn);
+      String errorMsg = String.format("Error looking up school with URN %s from schools_2022 table",
+          sanitiseExternalLogValue(schoolUrn));
       log.error(errorMsg, e);
       throw new SegueDatabaseException(errorMsg, e);
     }
 
-    log.debug("School with URN {} not found in fallback database table schools_2022", schoolUrn);
+    log.debug("School with URN {} not found in fallback database table schools_2022",
+        sanitiseExternalLogValue(schoolUrn));
     return null;
   }
 }
