@@ -68,6 +68,7 @@ public class SchoolListReader {
    */
   @Inject
   public SchoolListReader(final ISearchProvider searchProvider) {
+    log.info("Initializing SchoolListReader");
     this.searchProvider = searchProvider;
 
     String modificationDate;
@@ -75,11 +76,13 @@ public class SchoolListReader {
       modificationDate = searchProvider.getById(
               SCHOOLS_INDEX_BASE, SchoolsIndexType.METADATA.toString(), "sourceFile").getSource().get("lastModified")
           .toString();
+      log.info("School list data source modification date: {}", modificationDate);
     } catch (SegueSearchException | ElasticsearchStatusException e) {
       log.error("Failed to retrieve school list modification date", e);
       modificationDate = "unknown";
     }
     dataSourceModificationDate = modificationDate;
+    log.info("SchoolListReader initialized successfully");
   }
 
   /**
@@ -91,11 +94,14 @@ public class SchoolListReader {
    */
   public List<School> findSchoolByNameOrPostCode(final String searchQuery)
       throws UnableToIndexSchoolsException, SegueSearchException {
+    log.info("School search initiated with query: {}", sanitiseExternalLogValue(searchQuery));
+
     if (!this.ensureSchoolList()) {
       log.error("Unable to ensure school search cache.");
       throw new UnableToIndexSchoolsException("unable to ensure the cache has been populated");
     }
 
+    log.info("Executing fuzzy search with closed=false filter");
     List<String> schoolSearchResults = searchProvider.fuzzySearch(
         new BasicSearchParameters(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString(), 0,
             DEFAULT_RESULTS_LIMIT),
@@ -105,16 +111,25 @@ public class SchoolListReader {
         SCHOOL_URN_FIELDNAME_POJO, SCHOOL_NAME_FIELDNAME_POJO, SCHOOL_POSTCODE_FIELDNAME_POJO
     ).getResults();
 
+    log.info("Elasticsearch returned {} results for query: {}", schoolSearchResults.size(),
+        sanitiseExternalLogValue(searchQuery));
+
     List<School> resultList = Lists.newArrayList();
+    int parseErrors = 0;
     for (String schoolString : schoolSearchResults) {
       try {
         resultList.add(mapper.readValue(schoolString, School.class));
       } catch (JsonParseException | JsonMappingException e) {
         log.error("Unable to parse the school {}", schoolString, e);
+        parseErrors++;
       } catch (IOException e) {
         log.error("IOException {}", schoolString, e);
+        parseErrors++;
       }
     }
+
+    log.info("School search completed. Query: {}, Results: {}, Parse errors: {}",
+        sanitiseExternalLogValue(searchQuery), resultList.size(), parseErrors);
     return resultList;
   }
 
@@ -130,12 +145,14 @@ public class SchoolListReader {
    */
   public School findSchoolById(final String schoolURN) throws UnableToIndexSchoolsException, JsonParseException,
       JsonMappingException, IOException, SegueSearchException {
+    log.info("School lookup by URN initiated: {}", sanitiseExternalLogValue(schoolURN));
 
     if (!this.ensureSchoolList()) {
       log.error("Unable to ensure school search cache.");
       throw new UnableToIndexSchoolsException("unable to ensure the cache has been populated");
     }
 
+    log.info("Executing exact match search for URN: {}", sanitiseExternalLogValue(schoolURN));
     List<String> matchingSchoolList;
 
     matchingSchoolList = searchProvider.findByExactMatch(
@@ -144,6 +161,7 @@ public class SchoolListReader {
         SCHOOL_URN_FIELDNAME.toLowerCase() + "." + UNPROCESSED_SEARCH_FIELD_SUFFIX, schoolURN, null).getResults();
 
     if (matchingSchoolList.isEmpty()) {
+      log.info("School lookup completed. URN: {} not found in index", sanitiseExternalLogValue(schoolURN));
       return null;
     }
 
@@ -152,7 +170,10 @@ public class SchoolListReader {
           + sanitiseExternalLogValue(schoolURN) + " results: " + matchingSchoolList);
     }
 
-    return mapper.readValue(matchingSchoolList.get(0), School.class);
+    School school = mapper.readValue(matchingSchoolList.get(0), School.class);
+    log.info("School lookup completed. URN: {}, Found: {}, Closed: {}",
+        sanitiseExternalLogValue(schoolURN), school.getName(), school.isClosed());
+    return school;
   }
 
 
@@ -162,7 +183,11 @@ public class SchoolListReader {
    * @return true if we have an index or false if not. If false we cannot guarantee a response.
    */
   private boolean ensureSchoolList() {
-    return searchProvider.hasIndex(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString());
+    boolean indexExists = searchProvider.hasIndex(SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH.toString());
+    if (!indexExists) {
+      log.warn("School index not found: {}/{}", SCHOOLS_INDEX_BASE, SchoolsIndexType.SCHOOL_SEARCH);
+    }
+    return indexExists;
   }
 
 
