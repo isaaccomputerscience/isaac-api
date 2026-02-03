@@ -547,7 +547,7 @@ public final class Constants {
   public static final String ESCAPED_ID_SEPARATOR = "\\" + ID_SEPARATOR;
   public static final Integer ESCAPED_ID_SPLIT_LIMIT = 3;
 
-  // School List loading - raw data
+  // School List loading - raw data (must match CSV column headers exactly)
   public static final String SCHOOL_URN_FIELDNAME = "urn";
   public static final String SCHOOL_NAME_FIELDNAME = "school_name";
   public static final String SCHOOL_POSTCODE_FIELDNAME = "postcode";
