@@ -1,19 +1,3 @@
-/**
- * Copyright 2025 Raspberry Pi Foundation
- * <br>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * <br>
- * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * <br>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package uk.ac.cam.cl.dtg.segue.dao.schools;
 
 import static org.easymock.EasyMock.anyObject;
@@ -44,13 +28,6 @@ import uk.ac.cam.cl.dtg.segue.search.BasicSearchParameters;
 import uk.ac.cam.cl.dtg.segue.search.ISearchProvider;
 import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 
-/**
- * Tests for SchoolListReader.
- * <br>
- * Verifies that:
- * - findSchoolByNameOrPostCode filters out closed schools at the Elasticsearch query level
- * - findSchoolById returns schools regardless of closed status (for existing user profiles)
- */
 class SchoolListReaderTest {
 
   private ISearchProvider mockSearchProvider;
@@ -66,15 +43,12 @@ class SchoolListReaderTest {
     mockSearchProvider = createNiceMock(ISearchProvider.class);
     objectMapper = new ObjectMapper();
 
-    // Create test schools
     openSchool = new School("100001", "Open Academy", "AB1 2CD", false, School.SchoolDataSource.GOVERNMENT_UK);
     closedSchool = new School("100002", "Closed Grammar School", "XY9 8ZZ", true, School.SchoolDataSource.GOVERNMENT_UK);
 
     openSchoolJson = objectMapper.writeValueAsString(openSchool);
     closedSchoolJson = objectMapper.writeValueAsString(closedSchool);
 
-    // Constructor calls getById - make it throw an exception which is caught and handled
-    // (sets dataSourceModificationDate to "unknown")
     expect(mockSearchProvider.getById(anyString(), anyString(), anyString()))
         .andThrow(new SegueSearchException("Test - metadata not available")).anyTimes();
     expect(mockSearchProvider.hasIndex(anyString(), anyString()))
@@ -83,7 +57,7 @@ class SchoolListReaderTest {
 
   @Test
   void findSchoolByNameOrPostCode_shouldFilterClosedSchools() throws Exception {
-    // Arrange - expect fuzzySearch to be called with closed=false filter
+    // Expect fuzzySearch to be called with closed=false filter
     Map<String, List<String>> expectedFilter = ImmutableMap.of(SCHOOL_CLOSED_FIELDNAME, ImmutableList.of("false"));
 
     expect(mockSearchProvider.fuzzySearch(
@@ -96,11 +70,9 @@ class SchoolListReaderTest {
 
     replay(mockSearchProvider);
 
-    // Act
     SchoolListReader reader = new SchoolListReader(mockSearchProvider);
     List<School> results = reader.findSchoolByNameOrPostCode("test query");
 
-    // Assert
     verify(mockSearchProvider);
     assertEquals(1, results.size());
     assertEquals("100001", results.get(0).getUrn());
@@ -110,7 +82,7 @@ class SchoolListReaderTest {
 
   @Test
   void findSchoolByNameOrPostCode_shouldReturnEmptyListWhenNoOpenSchoolsMatch() throws Exception {
-    // Arrange - Elasticsearch already filters, so empty results returned
+    // Elasticsearch already filters, so empty results returned
     Map<String, List<String>> expectedFilter = ImmutableMap.of(SCHOOL_CLOSED_FIELDNAME, ImmutableList.of("false"));
 
     expect(mockSearchProvider.fuzzySearch(
@@ -123,18 +95,16 @@ class SchoolListReaderTest {
 
     replay(mockSearchProvider);
 
-    // Act
     SchoolListReader reader = new SchoolListReader(mockSearchProvider);
     List<School> results = reader.findSchoolByNameOrPostCode("closed school query");
 
-    // Assert
     verify(mockSearchProvider);
     assertTrue(results.isEmpty());
   }
 
   @Test
   void findSchoolById_shouldReturnClosedSchool() throws Exception {
-    // Arrange - findByExactMatch should NOT filter by closed status
+    // findByExactMatch should NOT filter by closed status
     expect(mockSearchProvider.findByExactMatch(
         anyObject(BasicSearchParameters.class),
         anyString(),
@@ -144,11 +114,9 @@ class SchoolListReaderTest {
 
     replay(mockSearchProvider);
 
-    // Act
     SchoolListReader reader = new SchoolListReader(mockSearchProvider);
     School result = reader.findSchoolById("100002");
 
-    // Assert
     verify(mockSearchProvider);
     assertNotNull(result);
     assertEquals("100002", result.getUrn());
@@ -158,7 +126,6 @@ class SchoolListReaderTest {
 
   @Test
   void findSchoolById_shouldReturnOpenSchool() throws Exception {
-    // Arrange
     expect(mockSearchProvider.findByExactMatch(
         anyObject(BasicSearchParameters.class),
         anyString(),
@@ -168,11 +135,9 @@ class SchoolListReaderTest {
 
     replay(mockSearchProvider);
 
-    // Act
     SchoolListReader reader = new SchoolListReader(mockSearchProvider);
     School result = reader.findSchoolById("100001");
 
-    // Assert
     verify(mockSearchProvider);
     assertNotNull(result);
     assertEquals("100001", result.getUrn());
@@ -182,7 +147,6 @@ class SchoolListReaderTest {
 
   @Test
   void findSchoolById_shouldReturnNullWhenSchoolNotFound() throws Exception {
-    // Arrange
     expect(mockSearchProvider.findByExactMatch(
         anyObject(BasicSearchParameters.class),
         anyString(),
@@ -192,11 +156,9 @@ class SchoolListReaderTest {
 
     replay(mockSearchProvider);
 
-    // Act
     SchoolListReader reader = new SchoolListReader(mockSearchProvider);
     School result = reader.findSchoolById("999999");
 
-    // Assert
     verify(mockSearchProvider);
     assertNull(result);
   }
