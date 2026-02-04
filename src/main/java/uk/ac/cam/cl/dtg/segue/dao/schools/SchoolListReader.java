@@ -94,7 +94,9 @@ public class SchoolListReader {
    */
   public List<School> findSchoolByNameOrPostCode(final String searchQuery)
       throws UnableToIndexSchoolsException, SegueSearchException {
-    log.info("School search initiated with query: {}", sanitiseExternalLogValue(searchQuery));
+    if (log.isInfoEnabled()) {
+      log.info("School search initiated with query: {}", sanitiseExternalLogValue(searchQuery));
+    }
 
     if (!this.ensureSchoolList()) {
       log.error("Unable to ensure school search cache.");
@@ -111,8 +113,10 @@ public class SchoolListReader {
         SCHOOL_URN_FIELDNAME_POJO, SCHOOL_NAME_FIELDNAME_POJO, SCHOOL_POSTCODE_FIELDNAME_POJO
     ).getResults();
 
-    log.info("Elasticsearch returned {} results for query: {}", schoolSearchResults.size(),
-        sanitiseExternalLogValue(searchQuery));
+    if (log.isInfoEnabled()) {
+      log.info("Elasticsearch returned {} results for query: {}", schoolSearchResults.size(),
+          sanitiseExternalLogValue(searchQuery));
+    }
 
     List<School> resultList = Lists.newArrayList();
     int parseErrors = 0;
@@ -128,8 +132,10 @@ public class SchoolListReader {
       }
     }
 
-    log.info("School search completed. Query: {}, Results: {}, Parse errors: {}",
-        sanitiseExternalLogValue(searchQuery), resultList.size(), parseErrors);
+    if (log.isInfoEnabled()) {
+      log.info("School search completed. Query: {}, Results: {}, Parse errors: {}",
+          sanitiseExternalLogValue(searchQuery), resultList.size(), parseErrors);
+    }
     return resultList;
   }
 
@@ -145,14 +151,18 @@ public class SchoolListReader {
    */
   public School findSchoolById(final String schoolURN) throws UnableToIndexSchoolsException, JsonParseException,
       JsonMappingException, IOException, SegueSearchException {
-    log.info("School lookup by URN initiated: {}", sanitiseExternalLogValue(schoolURN));
+    if (log.isInfoEnabled()) {
+      log.info("School lookup by URN initiated: {}", sanitiseExternalLogValue(schoolURN));
+    }
 
     if (!this.ensureSchoolList()) {
       log.error("Unable to ensure school search cache.");
       throw new UnableToIndexSchoolsException("unable to ensure the cache has been populated");
     }
 
-    log.info("Executing exact match search for URN: {}", sanitiseExternalLogValue(schoolURN));
+    if (log.isInfoEnabled()) {
+      log.info("Executing exact match search for URN: {}", sanitiseExternalLogValue(schoolURN));
+    }
     List<String> matchingSchoolList;
 
     matchingSchoolList = searchProvider.findByExactMatch(
@@ -161,7 +171,9 @@ public class SchoolListReader {
         SCHOOL_URN_FIELDNAME.toLowerCase() + "." + UNPROCESSED_SEARCH_FIELD_SUFFIX, schoolURN, null).getResults();
 
     if (matchingSchoolList.isEmpty()) {
-      log.info("School lookup completed. URN: {} not found in index", sanitiseExternalLogValue(schoolURN));
+      if (log.isInfoEnabled()) {
+        log.info("School lookup completed. URN: {} not found in index", sanitiseExternalLogValue(schoolURN));
+      }
       return null;
     }
 
@@ -171,8 +183,10 @@ public class SchoolListReader {
     }
 
     School school = mapper.readValue(matchingSchoolList.get(0), School.class);
-    log.info("School lookup completed. URN: {}, Found: {}, Closed: {}",
-        sanitiseExternalLogValue(schoolURN), school.getName(), school.isClosed());
+    if (log.isInfoEnabled()) {
+      log.info("School lookup completed. URN: {}, Found: {}, Closed: {}",
+          sanitiseExternalLogValue(schoolURN), school.getName(), school.isClosed());
+    }
     return school;
   }
 
