@@ -148,6 +148,7 @@ public final class Constants {
   /**
    * Enum to describe types of server environment / profile.
    */
+
   public enum EnvironmentType {
     PROD, DEV
   }
