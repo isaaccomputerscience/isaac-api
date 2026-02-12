@@ -1580,14 +1580,22 @@ class EventBookingManagerTest {
           eq(BookingStatus.WAITING_LIST),
           EasyMock.anyBoolean())).andReturn(allWaitingListBookings);
 
+      // Mock getUserDTOById to simulate user 3 being deleted
+      expect(dummyUserAccountManager.getUserDTOById(3L))
+          .andThrow(new NoUserException("User deleted"));
+
+      // Mock getUserDTOById for valid user 4
+      expect(dummyUserAccountManager.getUserDTOById(4L))
+          .andReturn(promotedUser)
+          .times(2);  // Once during selection, once for post-promotion operations
+
+      // Now expect updateBookingStatus to be called with user 4's ID
       expect(dummyEventBookingPersistenceManager.updateBookingStatus(dummyTransaction, testEvent.getId(),
-          deletedWaitingListUser.getUserBooked().getId(), BookingStatus.CONFIRMED,
-          deletedWaitingListUser.getAdditionalInformation())).andReturn(updatedValidWaitingListBooking);
+          validWaitingListUser.getUserBooked().getId(), BookingStatus.CONFIRMED,
+          validWaitingListUser.getAdditionalInformation())).andReturn(updatedValidWaitingListBooking);
 
       prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
           confirmedUser);
-
-      expect(dummyUserAccountManager.getUserDTOById(3L)).andReturn(promotedUser);
       EmailTemplateDTO bookingPromotionNotificationTemplate = new EmailTemplateDTO();
       expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andReturn(
           bookingPromotionNotificationTemplate);
