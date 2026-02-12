@@ -945,11 +945,19 @@ public class EventBookingManager {
     if (isStudentEvent) {
       // For Student events we only limit the number of students, other roles do not count against the capacity
       Integer studentCount = roleCounts.getOrDefault(Role.STUDENT, 0);
-      return Math.max(0, numberOfPlaces - studentCount);
+      Integer placesAvailable = Math.max(0, numberOfPlaces - studentCount);
+
+      log.info("Event {} capacity: total={}, studentBooked={}, available={}, includeDeleted={}",
+            event.getId(), numberOfPlaces, studentCount, placesAvailable, includeDeletedUsersInCounts);
+      return placesAvailable;
     } else {
       // For other events, count all roles
       Integer totalBooked = roleCounts.values().stream().reduce(0, Integer::sum);
-      return Math.max(0, numberOfPlaces - totalBooked);
+      Integer placesAvailable = Math.max(0, numberOfPlaces - totalBooked);
+      log.info("Event {} capacity: total={}, totalBooked={}, available={}, includeDeleted={}",
+          event.getId(), numberOfPlaces, totalBooked, placesAvailable, includeDeletedUsersInCounts);
+
+      return placesAvailable;
     }
   }
 
@@ -1070,16 +1078,28 @@ public class EventBookingManager {
       // If the status was CONFIRMED or RESERVED then promote the oldest booking from the waiting list, if one exists
       // WAITING_LIST bookings can also be cancelled but do not trigger promotion
       if (previousBookingStatus == BookingStatus.CONFIRMED || previousBookingStatus == BookingStatus.RESERVED) {
+        // Use same logic as capacity calculation for consistency: include deleted users only if event is in the past
+        boolean includeDeletedUsersInWaitingList = event.getDate() != null && event.getDate().isBefore(Instant.now());
+
         List<DetailedEventBookingDTO> waitingListBookings =
             this.bookingPersistenceManager.adminGetBookingsByEventIdAndStatus(event.getId(),
-                BookingStatus.WAITING_LIST);
+                BookingStatus.WAITING_LIST, includeDeletedUsersInWaitingList);
         if (!waitingListBookings.isEmpty()) {
+          log.info("Event {} has {} users on waiting list after cancellation. Attempting auto-promotion.",
+              event.getId(), waitingListBookings.size());
+
           DetailedEventBookingDTO oldestWaitingListBooking =
               Collections.min(waitingListBookings, Comparator.comparing(EventBookingDTO::getBookingDate));
+
+          log.info("Promoting user {} from waiting list for event {}",
+              oldestWaitingListBooking.getUserBooked().getId(), event.getId());
+
           updatedWaitingListBooking = this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(),
               oldestWaitingListBooking.getUserBooked().getId(), BookingStatus.CONFIRMED,
               oldestWaitingListBooking.getAdditionalInformation());
         } else {
+          log.info("Event {} has no eligible waiting list users to promote after cancellation (includeDeleted={})",
+              event.getId(), includeDeletedUsersInWaitingList);
           updatedWaitingListBooking = null;
         }
       } else {

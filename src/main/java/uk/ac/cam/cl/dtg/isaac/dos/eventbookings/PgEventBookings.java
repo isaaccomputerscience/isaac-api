@@ -634,11 +634,34 @@ public class PgEventBookings implements EventBookings {
   @Override
   public Iterable<EventBooking> findAllByEventIdAndStatus(final String eventId, @Nullable final BookingStatus status)
       throws SegueDatabaseException {
+    return findAllByEventIdAndStatus(eventId, status, false);
+  }
+
+  /**
+   * Find all bookings for a given event with a given status.
+   * <br>
+   * Useful for finding all on a waiting list or confirmed.
+   *
+   * @param eventId the event of interest.
+   * @param status  The event status that should match in the bookings returned. Can be null
+   * @param includeDeletedUsers if true, include bookings from deleted users; if false, exclude them
+   * @return an iterable with all the events matching the criteria.
+   * @throws SegueDatabaseException if an error occurs.
+   */
+  @Override
+  public Iterable<EventBooking> findAllByEventIdAndStatus(
+      final String eventId,
+      @Nullable final BookingStatus status,
+      final boolean includeDeletedUsers)
+      throws SegueDatabaseException {
     Validate.notBlank(eventId);
 
     StringBuilder sb = new StringBuilder();
-    sb.append("SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id=?"
-        + " AND NOT users.deleted");
+    sb.append("SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id=?");
+
+    if (!includeDeletedUsers) {
+      sb.append(" AND NOT users.deleted");
+    }
 
     if (status != null) {
       sb.append(" AND status = ?");

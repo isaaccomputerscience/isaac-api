@@ -216,6 +216,23 @@ public class EventBookingPersistenceManager {
   public List<DetailedEventBookingDTO> adminGetBookingsByEventIdAndStatus(final String eventId,
                                                                           final BookingStatus status)
       throws SegueDatabaseException {
+    return adminGetBookingsByEventIdAndStatus(eventId, status, false);
+  }
+
+  /**
+   * Get event bookings by an event id and status with control over deleted user inclusion.
+   * WARNING: This pulls PII such as dietary info, email, and other stuff that should not (always) make it to end users.
+   *
+   * @param eventId of interest
+   * @param status of interest
+   * @param includeDeletedUsers if true, include bookings from deleted users; if false, exclude them
+   * @return event bookings
+   * @throws SegueDatabaseException if an error occurs.
+   */
+  public List<DetailedEventBookingDTO> adminGetBookingsByEventIdAndStatus(final String eventId,
+                                                                          final BookingStatus status,
+                                                                          final boolean includeDeletedUsers)
+      throws SegueDatabaseException {
     try {
       ContentDTO c = this.contentManager.getContentById(eventId);
 
@@ -224,7 +241,8 @@ public class EventBookingPersistenceManager {
       }
 
       if (c instanceof IsaacEventPageDTO eventPageDTO) {
-        return this.convertToDTO(Lists.newArrayList(dao.findAllByEventIdAndStatus(eventId, status)), eventPageDTO);
+        return this.convertToDTO(Lists.newArrayList(dao
+                .findAllByEventIdAndStatus(eventId, status, includeDeletedUsers)), eventPageDTO);
       } else {
         log.error(EXCEPTION_MESSAGE_NOT_EVENT);
         throw new SegueDatabaseException(EXCEPTION_MESSAGE_NOT_EVENT);

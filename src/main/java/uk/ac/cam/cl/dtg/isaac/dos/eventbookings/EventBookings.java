@@ -147,6 +147,19 @@ public interface EventBookings {
       throws SegueDatabaseException;
 
   /**
+   * Find all bookings for a given event with a given status, with control over deleted user inclusion.
+   *
+   * @param eventId the event of interest.
+   * @param status  - The event status that should match in the bookings returned.
+   * @param includeDeletedUsers if true, include bookings from deleted users; if false, exclude them.
+   * @return an iterable with all the events matching the criteria.
+   * @throws SegueDatabaseException - if an error occurs.
+   */
+  Iterable<EventBooking> findAllByEventIdAndStatus(String eventId, @Nullable BookingStatus status,
+                                                   boolean includeDeletedUsers)
+      throws SegueDatabaseException;
+
+  /**
    * Find all bookings for a given event.
    *
    * @param userId - the user of interest.
