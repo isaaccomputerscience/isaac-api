@@ -299,7 +299,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         if (null != currentUser) {
           findByFieldNames = getEventsBookedByUser(request, fieldsToMatch.get(TAGS_FIELDNAME), currentUser);
         } else {
-          SegueErrorResponse.getNotLoggedInResponse();
+          return SegueErrorResponse.getNotLoggedInResponse();
         }
       } else if (null != showReservationsOnly && showReservationsOnly) {
         RegisteredUserDTO currentUser = null;
@@ -311,7 +311,7 @@ public class EventsFacade extends AbstractIsaacFacade {
         if (null != currentUser) {
           findByFieldNames = getEventsReservedByUser(request, currentUser);
         } else {
-          SegueErrorResponse.getNotLoggedInResponse();
+          return SegueErrorResponse.getNotLoggedInResponse();
         }
       } else {
         if (filterInstructions == null) {

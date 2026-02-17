@@ -370,10 +370,12 @@ public class EmailFacade extends AbstractSegueFacade {
       SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
           "An unknown type of role was supplied.");
       log.debug(error.getErrorMessage());
+      return error.toResponse();
     } catch (ContentManagerException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
           "There was an error retrieving content.");
       log.debug(error.getErrorMessage());
+      return error.toResponse();
     } catch (NoUserLoggedInException e2) {
       return SegueErrorResponse.getNotLoggedInResponse();
     }
@@ -461,10 +463,12 @@ public class EmailFacade extends AbstractSegueFacade {
       SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
           "An unknown type of user was supplied.");
       log.debug(error.getErrorMessage());
+      return error.toResponse();
     } catch (ContentManagerException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
           "There was an error retrieving content.");
       log.debug(error.getErrorMessage());
+      return error.toResponse();
     } catch (NoUserLoggedInException e2) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueResourceMisuseException e) {
@@ -565,10 +569,12 @@ public class EmailFacade extends AbstractSegueFacade {
       SegueErrorResponse error = new SegueErrorResponse(Status.BAD_REQUEST,
           "An unknown type of user was supplied.");
       log.debug(error.getErrorMessage());
+      return error.toResponse();
     } catch (ContentManagerException e) {
       SegueErrorResponse error = new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
           "There was an error retrieving content.");
       log.debug(error.getErrorMessage());
+      return error.toResponse();
     } catch (NoUserLoggedInException e2) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (SegueResourceMisuseException e) {
