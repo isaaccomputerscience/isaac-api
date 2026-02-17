@@ -320,6 +320,7 @@ public class GroupsFacade extends AbstractSegueFacade {
         SegueErrorResponse.getIncorrectRoleResponse();
       }
 
+
       RegisteredUserDTO userOfInterest = userManager.getUserDTOById(userId);
 
       List<UserGroupDTO> groups = groupManager.getGroupsByOwner(userOfInterest);
