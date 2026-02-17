@@ -25,7 +25,6 @@ public class LocalAuthDTO {
   private String randomPadding;
   private String email;
   private String password;
-  private Boolean rememberMe;
 
   /**
    * Default constructor.
@@ -47,14 +46,6 @@ public class LocalAuthDTO {
 
   public void setPassword(final String password) {
     this.password = password;
-  }
-
-  public Boolean getRememberMe() {
-    return rememberMe;
-  }
-
-  public void setRememberMe(final Boolean rememberMe) {
-    this.rememberMe = rememberMe;
   }
 
   @JsonProperty("_randomPadding")
