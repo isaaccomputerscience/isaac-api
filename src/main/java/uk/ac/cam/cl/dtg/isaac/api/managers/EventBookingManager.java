@@ -94,6 +94,7 @@ import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.associations.InvalidUserAssociationTokenException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
+import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -115,6 +116,7 @@ public class EventBookingManager {
   private final GroupManager groupManager;
   private final IUserAccountManager userAccountManager;
   private final ITransactionManager transactionManager;
+  private final GitContentManager contentManager;
 
   /**
    * EventBookingManager.
@@ -127,6 +129,7 @@ public class EventBookingManager {
    * @param userAccountManager        Instance of User Account Manager, for retrieving users
    * @param transactionManager        Instance of Transaction Manager, used for locking database while managing
    *                                        bookings
+   * @param contentManager            Instance of Content Manager, for retrieving event content
    */
   @Inject
   public EventBookingManager(final EventBookingPersistenceManager bookingPersistenceManager,
@@ -135,7 +138,8 @@ public class EventBookingManager {
                              final PropertiesLoader propertiesLoader,
                              final GroupManager groupManager,
                              final IUserAccountManager userAccountManager,
-                             final ITransactionManager transactionManager) {
+                             final ITransactionManager transactionManager,
+                             final GitContentManager contentManager) {
     this.bookingPersistenceManager = bookingPersistenceManager;
     this.emailManager = emailManager;
     this.userAssociationManager = userAssociationManager;
@@ -143,6 +147,7 @@ public class EventBookingManager {
     this.groupManager = groupManager;
     this.userAccountManager = userAccountManager;
     this.transactionManager = transactionManager;
+    this.contentManager = contentManager;
   }
 
   /**
@@ -1652,6 +1657,57 @@ public class EventBookingManager {
         .map(EventBookingDTO::getProjectTitle)
         .filter(title -> title != null && !title.trim().isEmpty())
         .collect(Collectors.toSet());
+  }
+
+  /**
+   * Cancel all expired RESERVED bookings, triggering waiting list promotion for each.
+   * This method is called by the scheduled job to handle reservations that haven't been confirmed within the timeout.
+   *
+   * @throws SegueDatabaseException if an error occurs.
+   */
+  public void cancelExpiredReservations() throws SegueDatabaseException {
+    try {
+      List<DetailedEventBookingDTO> expiredReservations = bookingPersistenceManager.getExpiredReservations();
+
+      if (expiredReservations.isEmpty()) {
+        log.debug("No expired reservations found to cancel");
+        return;
+      }
+
+      log.info("Found {} expired reservations to cancel", expiredReservations.size());
+
+      for (DetailedEventBookingDTO booking : expiredReservations) {
+        try {
+          IsaacEventPageDTO event = (IsaacEventPageDTO) contentManager.getContentById(booking.getEventId());
+          if (event == null) {
+            log.warn("Event {} for expired reservation not found, skipping", booking.getEventId());
+            continue;
+          }
+
+          RegisteredUserDTO user = (RegisteredUserDTO) userAccountManager.getUserDTOById(
+              booking.getUserBooked().getId());
+
+          cancelBooking(event, user);
+          log.debug("Successfully cancelled expired reservation for user {} on event {}",
+              booking.getUserBooked().getId(), booking.getEventId());
+        } catch (NoUserException e) {
+          log.warn("User {} for expired reservation not found, skipping: {}",
+              booking.getUserBooked().getId(), e.getMessage());
+          // Continue processing remaining expired reservations
+        } catch (ContentManagerException e) {
+          log.warn("Content manager error processing expired reservation for user {} on event {}: {}",
+              booking.getUserBooked().getId(), booking.getEventId(), e.getMessage(), e);
+          // Continue processing remaining expired reservations
+        } catch (Exception e) {
+          log.warn("Failed to cancel expired reservation for user {} on event {}: {}",
+              booking.getUserBooked().getId(), booking.getEventId(), e.getMessage(), e);
+          // Continue processing remaining expired reservations
+        }
+      }
+    } catch (SegueDatabaseException e) {
+      log.error("Error retrieving expired reservations", e);
+      throw e;
+    }
   }
 
 }

@@ -509,4 +509,14 @@ public class EventBookingPersistenceManager {
       throws SegueDatabaseException {
     return this.getBookingByEventIdAndUsersId(competitionId, userIds);
   }
+
+  /**
+   * Get all RESERVED bookings that have expired.
+   *
+   * @return list of expired reservations
+   * @throws SegueDatabaseException if an error occurs.
+   */
+  public List<DetailedEventBookingDTO> getExpiredReservations() throws SegueDatabaseException {
+    return convertToDTO(Lists.newArrayList(dao.findExpiredReservations()));
+  }
 }

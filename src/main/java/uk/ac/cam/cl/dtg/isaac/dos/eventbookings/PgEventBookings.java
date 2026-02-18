@@ -790,6 +790,35 @@ public class PgEventBookings implements EventBookings {
    * @return a new PgEventBooking
    * @throws SQLException if an error occurs.
    */
+  /**
+   * Find all bookings that are RESERVED and have expired reservation close dates.
+   *
+   * @return an iterable with all expired reservations.
+   * @throws SegueDatabaseException if an error occurs.
+   */
+  @Override
+  public Iterable<EventBooking> findExpiredReservations() throws SegueDatabaseException {
+    String query = "SELECT event_bookings.* FROM event_bookings "
+        + "WHERE status = ? "
+        + "AND (additional_booking_information->>'reservationCloseDate')::timestamptz < NOW()";
+
+    try (Connection conn = ds.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(query)
+    ) {
+      pst.setString(1, BookingStatus.RESERVED.name());
+
+      try (ResultSet results = pst.executeQuery()) {
+        List<EventBooking> returnResult = Lists.newArrayList();
+        while (results.next()) {
+          returnResult.add(buildPgEventBooking(results));
+        }
+        return returnResult;
+      }
+    } catch (SQLException e) {
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
+    }
+  }
+
   private PgEventBooking buildPgEventBooking(final ResultSet results) throws SQLException, SegueDatabaseException {
     return new PgEventBooking(
         results.getLong("id"),

@@ -75,6 +75,7 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailMustBeVerifiedException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
+import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -95,6 +96,7 @@ class EventBookingManagerTest {
   private IUserAccountManager dummyUserAccountManager;
   private ITransactionManager dummyTransactionManager;
   private ITransaction dummyTransaction;
+  private GitContentManager dummyContentManager;
   private Object[] mockedObjects;
 
   /**
@@ -110,10 +112,11 @@ class EventBookingManagerTest {
     this.dummyUserAccountManager = createMock(IUserAccountManager.class);
     this.dummyTransactionManager = createMock(ITransactionManager.class);
     this.dummyTransaction = createMock(ITransaction.class);
+    this.dummyContentManager = createMock(GitContentManager.class);
     // Replay and Verify this collection of mocks each test to be sure of catching all behaviour!
     this.mockedObjects = new Object[] {
         dummyEmailManager, dummyEventBookingPersistenceManager, dummyUserAssociationManager, dummyGroupManager,
-        dummyPropertiesLoader, dummyUserAccountManager, dummyTransactionManager, dummyTransaction
+        dummyPropertiesLoader, dummyUserAccountManager, dummyTransactionManager, dummyTransaction, dummyContentManager
     };
 
     expect(this.dummyPropertiesLoader.getProperty(HOST_NAME)).andReturn("hostname.com").anyTimes();
@@ -1882,7 +1885,8 @@ class EventBookingManagerTest {
   private EventBookingManager buildEventBookingManager() {
     return new EventBookingManager(
         dummyEventBookingPersistenceManager, dummyEmailManager, dummyUserAssociationManager,
-        dummyPropertiesLoader, dummyGroupManager, dummyUserAccountManager, dummyTransactionManager);
+        dummyPropertiesLoader, dummyGroupManager, dummyUserAccountManager, dummyTransactionManager,
+        dummyContentManager);
   }
 
   private void prepareCommonTransactionExpectations(IsaacEventPageDTO testEvent) throws SegueDatabaseException {
