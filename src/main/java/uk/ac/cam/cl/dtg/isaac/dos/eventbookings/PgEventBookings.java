@@ -54,6 +54,7 @@ import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
  * <br>
  * Postgres aware EventBookings.
  */
+@SuppressWarnings("checkstyle:InvalidJavadocPosition")
 public class PgEventBookings implements EventBookings {
   private static final Logger log = LoggerFactory.getLogger(PgEventBookings.class);
 
