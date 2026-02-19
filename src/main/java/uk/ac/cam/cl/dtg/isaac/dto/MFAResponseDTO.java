@@ -21,20 +21,10 @@ package uk.ac.cam.cl.dtg.isaac.dto;
  */
 public class MFAResponseDTO {
   private String mfaVerificationCode;
-  private boolean rememberMe;
-
   /**
    * Default constructor.
    */
   public MFAResponseDTO() {
-  }
-
-  public Boolean getRememberMe() {
-    return rememberMe;
-  }
-
-  public void setRememberMe(final Boolean rememberMe) {
-    this.rememberMe = rememberMe;
   }
 
   public String getMfaVerificationCode() {
