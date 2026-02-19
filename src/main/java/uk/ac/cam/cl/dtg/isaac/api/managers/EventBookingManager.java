@@ -94,6 +94,7 @@ import uk.ac.cam.cl.dtg.segue.dao.ResourceNotFoundException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.associations.InvalidUserAssociationTokenException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
+import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -115,6 +116,7 @@ public class EventBookingManager {
   private final GroupManager groupManager;
   private final IUserAccountManager userAccountManager;
   private final ITransactionManager transactionManager;
+  private final GitContentManager contentManager;
 
   /**
    * EventBookingManager.
@@ -127,6 +129,7 @@ public class EventBookingManager {
    * @param userAccountManager        Instance of User Account Manager, for retrieving users
    * @param transactionManager        Instance of Transaction Manager, used for locking database while managing
    *                                        bookings
+   * @param contentManager            Instance of Content Manager, for retrieving event content
    */
   @Inject
   public EventBookingManager(final EventBookingPersistenceManager bookingPersistenceManager,
@@ -135,7 +138,8 @@ public class EventBookingManager {
                              final PropertiesLoader propertiesLoader,
                              final GroupManager groupManager,
                              final IUserAccountManager userAccountManager,
-                             final ITransactionManager transactionManager) {
+                             final ITransactionManager transactionManager,
+                             final GitContentManager contentManager) {
     this.bookingPersistenceManager = bookingPersistenceManager;
     this.emailManager = emailManager;
     this.userAssociationManager = userAssociationManager;
@@ -143,6 +147,7 @@ public class EventBookingManager {
     this.groupManager = groupManager;
     this.userAccountManager = userAccountManager;
     this.transactionManager = transactionManager;
+    this.contentManager = contentManager;
   }
 
   /**
@@ -945,11 +950,19 @@ public class EventBookingManager {
     if (isStudentEvent) {
       // For Student events we only limit the number of students, other roles do not count against the capacity
       Integer studentCount = roleCounts.getOrDefault(Role.STUDENT, 0);
-      return Math.max(0, numberOfPlaces - studentCount);
+      Integer placesAvailable = Math.max(0, numberOfPlaces - studentCount);
+
+      log.info("Event {} capacity: total={}, studentBooked={}, available={}, includeDeleted={}",
+            event.getId(), numberOfPlaces, studentCount, placesAvailable, includeDeletedUsersInCounts);
+      return placesAvailable;
     } else {
       // For other events, count all roles
       Integer totalBooked = roleCounts.values().stream().reduce(0, Integer::sum);
-      return Math.max(0, numberOfPlaces - totalBooked);
+      Integer placesAvailable = Math.max(0, numberOfPlaces - totalBooked);
+      log.info("Event {} capacity: total={}, totalBooked={}, available={}, includeDeleted={}",
+          event.getId(), numberOfPlaces, totalBooked, placesAvailable, includeDeletedUsersInCounts);
+
+      return placesAvailable;
     }
   }
 
@@ -1055,6 +1068,7 @@ public class EventBookingManager {
 
     Long reservedById;
     BookingStatus previousBookingStatus;
+    DetailedEventBookingDTO oldestValidWaitingListBooking = null;
     EventBookingDTO updatedWaitingListBooking;
     try (ITransaction transaction = transactionManager.getTransaction()) {
       // Obtain an exclusive database lock to lock the booking
@@ -1070,16 +1084,49 @@ public class EventBookingManager {
       // If the status was CONFIRMED or RESERVED then promote the oldest booking from the waiting list, if one exists
       // WAITING_LIST bookings can also be cancelled but do not trigger promotion
       if (previousBookingStatus == BookingStatus.CONFIRMED || previousBookingStatus == BookingStatus.RESERVED) {
+        // Use same logic as capacity calculation for consistency: include deleted users only if event is in the past
+        boolean includeDeletedUsersInWaitingList = event.getDate() != null && event.getDate().isBefore(Instant.now());
+
         List<DetailedEventBookingDTO> waitingListBookings =
             this.bookingPersistenceManager.adminGetBookingsByEventIdAndStatus(event.getId(),
-                BookingStatus.WAITING_LIST);
+                BookingStatus.WAITING_LIST, includeDeletedUsersInWaitingList);
         if (!waitingListBookings.isEmpty()) {
-          DetailedEventBookingDTO oldestWaitingListBooking =
-              Collections.min(waitingListBookings, Comparator.comparing(EventBookingDTO::getBookingDate));
-          updatedWaitingListBooking = this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(),
-              oldestWaitingListBooking.getUserBooked().getId(), BookingStatus.CONFIRMED,
-              oldestWaitingListBooking.getAdditionalInformation());
+          log.info("Event {} has {} users on waiting list after cancellation. Attempting auto-promotion.",
+              event.getId(), waitingListBookings.size());
+
+          // Filter out deleted users - try to get each user's details
+          // If getUserDTOById throws NoUserException, the user is deleted/not found
+          for (DetailedEventBookingDTO booking : waitingListBookings.stream()
+              .sorted(Comparator.comparing(EventBookingDTO::getBookingDate))
+              .toList()) {
+            try {
+              userAccountManager.getUserDTOById(booking.getUserBooked().getId());
+              // User exists and is not deleted - this is our candidate
+              oldestValidWaitingListBooking = booking;
+              break;
+            } catch (NoUserException e) {
+              // User deleted or not found - skip to next
+              log.debug("Skipping deleted/not found user {} on waiting list for event {}",
+                  booking.getUserBooked().getId(), event.getId());
+            }
+          }
+
+          if (oldestValidWaitingListBooking != null) {
+            log.info("Promoting user {} from waiting list for event {}",
+                oldestValidWaitingListBooking.getUserBooked().getId(), event.getId());
+
+            updatedWaitingListBooking = this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(),
+                oldestValidWaitingListBooking.getUserBooked().getId(), BookingStatus.CONFIRMED,
+                oldestValidWaitingListBooking.getAdditionalInformation());
+          } else {
+            log.info(
+                "Event {} has no eligible waiting list users to promote after cancellation (all deleted/not found)",
+                event.getId());
+            updatedWaitingListBooking = null;
+          }
         } else {
+          log.info("Event {} has no eligible waiting list users to promote after cancellation (includeDeleted={})",
+              event.getId(), includeDeletedUsersInWaitingList);
           updatedWaitingListBooking = null;
         }
       } else {
@@ -1102,8 +1149,8 @@ public class EventBookingManager {
           + "student cancellation email was not sent", reservedById);
     }
 
-    if (updatedWaitingListBooking != null) {
-      Long promotedBookingUserId = updatedWaitingListBooking.getUserBooked().getId();
+    if (updatedWaitingListBooking != null && oldestValidWaitingListBooking != null) {
+      Long promotedBookingUserId = oldestValidWaitingListBooking.getUserBooked().getId();
       try {
         RegisteredUserDTO promotedBookingUser =
             userAccountManager.getUserDTOById(promotedBookingUserId);
@@ -1610,6 +1657,57 @@ public class EventBookingManager {
         .map(EventBookingDTO::getProjectTitle)
         .filter(title -> title != null && !title.trim().isEmpty())
         .collect(Collectors.toSet());
+  }
+
+  /**
+   * Cancel all expired RESERVED bookings, triggering waiting list promotion for each.
+   * This method is called by the scheduled job to handle reservations that haven't been confirmed within the timeout.
+   *
+   * @throws SegueDatabaseException if an error occurs.
+   */
+  public void cancelExpiredReservations() throws SegueDatabaseException {
+    try {
+      List<DetailedEventBookingDTO> expiredReservations = bookingPersistenceManager.getExpiredReservations();
+
+      if (expiredReservations.isEmpty()) {
+        log.debug("No expired reservations found to cancel");
+        return;
+      }
+
+      log.info("Found {} expired reservations to cancel", expiredReservations.size());
+
+      for (DetailedEventBookingDTO booking : expiredReservations) {
+        try {
+          IsaacEventPageDTO event = (IsaacEventPageDTO) contentManager.getContentById(booking.getEventId());
+          if (event == null) {
+            log.warn("Event {} for expired reservation not found, skipping", booking.getEventId());
+            continue;
+          }
+
+          RegisteredUserDTO user = (RegisteredUserDTO) userAccountManager.getUserDTOById(
+              booking.getUserBooked().getId());
+
+          cancelBooking(event, user);
+          log.debug("Successfully cancelled expired reservation for user {} on event {}",
+              booking.getUserBooked().getId(), booking.getEventId());
+        } catch (NoUserException e) {
+          log.warn("User {} for expired reservation not found, skipping: {}",
+              booking.getUserBooked().getId(), e.getMessage());
+          // Continue processing remaining expired reservations
+        } catch (ContentManagerException e) {
+          log.warn("Content manager error processing expired reservation for user {} on event {}: {}",
+              booking.getUserBooked().getId(), booking.getEventId(), e.getMessage(), e);
+          // Continue processing remaining expired reservations
+        } catch (Exception e) {
+          log.warn("Failed to cancel expired reservation for user {} on event {}: {}",
+              booking.getUserBooked().getId(), booking.getEventId(), e.getMessage(), e);
+          // Continue processing remaining expired reservations
+        }
+      }
+    } catch (SegueDatabaseException e) {
+      log.error("Error retrieving expired reservations", e);
+      throw e;
+    }
   }
 
 }

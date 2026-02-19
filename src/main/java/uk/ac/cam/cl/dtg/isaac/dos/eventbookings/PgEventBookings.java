@@ -54,6 +54,7 @@ import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
  * <br>
  * Postgres aware EventBookings.
  */
+@SuppressWarnings("checkstyle:InvalidJavadocPosition")
 public class PgEventBookings implements EventBookings {
   private static final Logger log = LoggerFactory.getLogger(PgEventBookings.class);
 
@@ -634,11 +635,34 @@ public class PgEventBookings implements EventBookings {
   @Override
   public Iterable<EventBooking> findAllByEventIdAndStatus(final String eventId, @Nullable final BookingStatus status)
       throws SegueDatabaseException {
+    return findAllByEventIdAndStatus(eventId, status, false);
+  }
+
+  /**
+   * Find all bookings for a given event with a given status.
+   * <br>
+   * Useful for finding all on a waiting list or confirmed.
+   *
+   * @param eventId the event of interest.
+   * @param status  The event status that should match in the bookings returned. Can be null
+   * @param includeDeletedUsers if true, include bookings from deleted users; if false, exclude them
+   * @return an iterable with all the events matching the criteria.
+   * @throws SegueDatabaseException if an error occurs.
+   */
+  @Override
+  public Iterable<EventBooking> findAllByEventIdAndStatus(
+      final String eventId,
+      @Nullable final BookingStatus status,
+      final boolean includeDeletedUsers)
+      throws SegueDatabaseException {
     Validate.notBlank(eventId);
 
     StringBuilder sb = new StringBuilder();
-    sb.append("SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id=?"
-        + " AND NOT users.deleted");
+    sb.append("SELECT event_bookings.* FROM event_bookings JOIN users ON users.id=user_id WHERE event_id=?");
+
+    if (!includeDeletedUsers) {
+      sb.append(" AND NOT users.deleted");
+    }
 
     if (status != null) {
       sb.append(" AND status = ?");
@@ -767,6 +791,35 @@ public class PgEventBookings implements EventBookings {
    * @return a new PgEventBooking
    * @throws SQLException if an error occurs.
    */
+  /**
+   * Find all bookings that are RESERVED and have expired reservation close dates.
+   *
+   * @return an iterable with all expired reservations.
+   * @throws SegueDatabaseException if an error occurs.
+   */
+  @Override
+  public Iterable<EventBooking> findExpiredReservations() throws SegueDatabaseException {
+    String query = "SELECT event_bookings.* FROM event_bookings "
+        + "WHERE status = ? "
+        + "AND (additional_booking_information->>'reservationCloseDate')::timestamptz < NOW()";
+
+    try (Connection conn = ds.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(query)
+    ) {
+      pst.setString(1, BookingStatus.RESERVED.name());
+
+      try (ResultSet results = pst.executeQuery()) {
+        List<EventBooking> returnResult = Lists.newArrayList();
+        while (results.next()) {
+          returnResult.add(buildPgEventBooking(results));
+        }
+        return returnResult;
+      }
+    } catch (SQLException e) {
+      throw new SegueDatabaseException(EXCEPTION_MESSAGE_POSTGRES_ERROR, e);
+    }
+  }
+
   private PgEventBooking buildPgEventBooking(final ResultSet results) throws SQLException, SegueDatabaseException {
     return new PgEventBooking(
         results.getLong("id"),

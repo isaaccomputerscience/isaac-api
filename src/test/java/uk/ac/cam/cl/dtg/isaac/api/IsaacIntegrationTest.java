@@ -330,7 +330,7 @@ public abstract class IsaacIntegrationTest {
     PgTransactionManager pgTransactionManager = new PgTransactionManager(postgresSqlDb);
     eventBookingManager =
         new EventBookingManager(bookingPersistanceManager, emailManager, userAssociationManager, properties,
-            groupManager, userAccountManager, pgTransactionManager);
+            groupManager, userAccountManager, pgTransactionManager, contentManager);
     userBadgeManager = createNiceMock(UserBadgeManager.class);
     replay(userBadgeManager);
     assignmentManager = new AssignmentManager(assignmentPersistenceManager, groupManager,
