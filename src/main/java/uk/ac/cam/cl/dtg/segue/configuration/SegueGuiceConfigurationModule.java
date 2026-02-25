@@ -177,11 +177,11 @@ import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 import uk.ac.cam.cl.dtg.segue.scheduler.SegueJobService;
 import uk.ac.cam.cl.dtg.segue.scheduler.SegueScheduledDatabaseScriptJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.SegueScheduledJob;
+import uk.ac.cam.cl.dtg.segue.scheduler.jobs.CancelExpiredReservationsJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.DeleteEventAdditionalBookingInformationJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.DeleteEventAdditionalBookingInformationOneYearJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.EventFeedbackEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.EventReminderEmailJob;
-import uk.ac.cam.cl.dtg.segue.scheduler.jobs.ExpiredReservationsCleanUpJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.ScheduledAssignmentsEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.SegueScheduledSyncMailjetUsersJob;
 import uk.ac.cam.cl.dtg.segue.search.ElasticSearchProvider;
@@ -1009,7 +1009,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
           "Clean up expired RESERVED event bookings and trigger auto-promotion of waiting list users",
           CRON_STRING_0700_DAILY,
           Maps.newHashMap(),
-          new ExpiredReservationsCleanUpJob()
+          new CancelExpiredReservationsJob()
       );
 
       SegueScheduledJob deleteEventAdditionalBookingInformation = SegueScheduledJob.createCustomJob(
