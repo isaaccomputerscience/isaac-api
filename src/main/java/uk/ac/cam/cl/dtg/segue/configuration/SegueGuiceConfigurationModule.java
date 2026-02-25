@@ -181,6 +181,7 @@ import uk.ac.cam.cl.dtg.segue.scheduler.jobs.DeleteEventAdditionalBookingInforma
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.DeleteEventAdditionalBookingInformationOneYearJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.EventFeedbackEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.EventReminderEmailJob;
+import uk.ac.cam.cl.dtg.segue.scheduler.jobs.ExpiredReservationsCleanUpJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.ScheduledAssignmentsEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.SegueScheduledSyncMailjetUsersJob;
 import uk.ac.cam.cl.dtg.segue.search.ElasticSearchProvider;
@@ -1002,11 +1003,14 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
           "SQL scheduled job that deletes old AnonymousUsers",
           CRON_STRING_0230_DAILY, "db_scripts/scheduled/anonymous-user-clean-up.sql");
 
-      SegueScheduledJob cleanUpExpiredReservations = new SegueScheduledDatabaseScriptJob(
+      SegueScheduledJob cleanUpExpiredReservations = SegueScheduledJob.createCustomJob(
           "cleanUpExpiredReservations",
-          CRON_GROUP_NAME_SQL_MAINTENANCE,
-          "SQL scheduled job that deletes expired reservations for the event booking system",
-          CRON_STRING_0700_DAILY, "db_scripts/scheduled/expired-reservations-clean-up.sql");
+          CRON_GROUP_NAME_JAVA_JOB,
+          "Clean up expired RESERVED event bookings and trigger auto-promotion of waiting list users",
+          CRON_STRING_0700_DAILY,
+          Maps.newHashMap(),
+          new ExpiredReservationsCleanUpJob()
+      );
 
       SegueScheduledJob deleteEventAdditionalBookingInformation = SegueScheduledJob.createCustomJob(
           "deleteEventAdditionalBookingInformation",

@@ -491,4 +491,31 @@ public class EventBookingPersistenceManager {
       throws SegueDatabaseException {
     return this.getBookingByEventIdAndUsersId(competitionId, userIds);
   }
+
+  /**
+   * Get all RESERVED bookings that have expired based on their reservationCloseDate.
+   *
+   * @return list of expired RESERVED bookings
+   * @throws SegueDatabaseException if an error occurs
+   */
+  public List<DetailedEventBookingDTO> getExpiredReservedBookings() throws SegueDatabaseException {
+    try {
+      Iterable<EventBooking> expiredBookings = dao.findExpiredReservedBookings();
+      List<DetailedEventBookingDTO> result = new ArrayList<>();
+      for (EventBooking booking : expiredBookings) {
+        try {
+          DetailedEventBookingDTO dto = convertToDTO(booking);
+          if (dto != null) {
+            result.add(dto);
+          }
+        } catch (SegueDatabaseException e) {
+          log.error("Error converting expired booking to DTO for booking id {}", booking.getId(), e);
+        }
+      }
+      return result;
+    } catch (SegueDatabaseException e) {
+      log.error("Error retrieving expired reserved bookings from database", e);
+      throw e;
+    }
+  }
 }
