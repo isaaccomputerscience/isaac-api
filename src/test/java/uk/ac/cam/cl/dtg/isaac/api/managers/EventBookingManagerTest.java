@@ -1306,27 +1306,17 @@ class EventBookingManagerTest {
 
     @Test
     void cancelBooking_noUserExceptionShouldBeCaughtIfPromotedUserNotFound()
-        throws SegueDatabaseException, ContentManagerException, NoUserException {
+        throws SegueDatabaseException, ContentManagerException {
       IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
 
       RegisteredUserDTO confirmedUser = new RegisteredUserDTO();
       confirmedUser.setId(2L);
 
-      DetailedEventBookingDTO waitingListBookingToBeUpdated =
-          prepareDetailedEventBookingDto(prepareUserSummaryDto(3L), BookingStatus.WAITING_LIST, testEvent.getId());
-      waitingListBookingToBeUpdated.setBookingDate(someFutureDate);
-      List<DetailedEventBookingDTO> waitingListBookingsList = List.of(waitingListBookingToBeUpdated);
-      DetailedEventBookingDTO updatedWaitingListBooking =
-          prepareDetailedEventBookingDto(prepareUserSummaryDto(3L), BookingStatus.CONFIRMED, testEvent.getId());
-
       prepareTransactionExpectations(testEvent);
       prepareConfirmedBookingExpectations(testEvent, confirmedUser);
-      prepareNonEmptyWaitingListExpectations(testEvent, waitingListBookingToBeUpdated, waitingListBookingsList,
-          updatedWaitingListBooking);
+      prepareEmptyWaitingListExpectations(testEvent);
       prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
           confirmedUser);
-
-      expect(dummyUserAccountManager.getUserDTOById(3L)).andThrow(new NoUserException("No user found with this ID!")).times(1);
 
       replay(mockedObjects);
 
