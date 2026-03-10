@@ -204,6 +204,11 @@ public class ContentIndexer {
       }
 
       TreeWalk treeWalk = database.getTreeWalk(sha, ".json");
+
+      if (null == treeWalk) {
+        throw new ContentManagerException("Failed to buildGitIndex - Unable to get tree walk for SHA: " + sha);
+      }
+
       log.info("Populating git content cache based on sha " + sanitiseInternalLogValue(sha) + " ...");
 
       // Traverse the git repository looking for the .json files
@@ -475,7 +480,7 @@ public class ContentIndexer {
       media.setSrc(fixMediaSrc(canonicalSourceFile, media.getSrc()));
 
       // for tracking purposes we want to generate an id for all image content objects.
-      if (media.getId() == null && media.getSrc() != null) {
+      if (media.getId() == null && media.getSrc() != null && parentId != null) {
         media.setId(parentId + Constants.ID_SEPARATOR
             + Base64.encodeBase64String(media.getSrc().getBytes()));
       }
