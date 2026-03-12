@@ -213,43 +213,52 @@ public class ContentIndexer {
 
       // Traverse the git repository looking for the .json files
       while (treeWalk.next()) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ObjectLoader loader = repository.open(treeWalk.getObjectId(0));
-        loader.copyTo(out);
-
-        // setup object mapper to use preconfigured deserializer
-        // module. Required to deal with type polymorphism
-        ObjectMapper objectMapper = mapperUtils.getSharedContentObjectMapper();
-
-        Content content;
         try {
-          content = (Content) objectMapper.readValue(out.toString(), ContentBase.class);
+          ByteArrayOutputStream out = new ByteArrayOutputStream();
+          ObjectLoader loader = repository.open(treeWalk.getObjectId(0));
+          loader.copyTo(out);
 
-          // check if we only want to index published content
-          if (!includeUnpublished && !content.getPublished()) {
-            log.debug("Skipping unpublished content: {}", content.getId());
-            continue;
+          // setup object mapper to use preconfigured deserializer
+          // module. Required to deal with type polymorphism
+          ObjectMapper objectMapper = mapperUtils.getSharedContentObjectMapper();
+
+          Content content;
+          try {
+            content = (Content) objectMapper.readValue(out.toString(), ContentBase.class);
+
+            // check if we only want to index published content
+            if (!includeUnpublished && !content.getPublished()) {
+              log.debug("Skipping unpublished content: {}", content.getId());
+              continue;
+            }
+
+            content = this.augmentChildContent(content, treeWalk.getPathString(), null, content.getPublished());
+
+            if (null != content) {
+              indexContentObject(contentCache, tagsList, allUnits, publishedUnits, indexProblemCache,
+                  treeWalk.getPathString(), content);
+            }
+          } catch (JsonMappingException e) {
+            log.debug(String.format("Unable to parse the json file found %s as a content object. "
+                + "Skipping file due to error: \n %s", treeWalk.getPathString(), e.getMessage()));
+            Content dummyContent = new Content();
+            dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
+            this.registerContentProblem(dummyContent, "Index failure - Unable to parse json file found - "
+                + treeWalk.getPathString() + ". The following error occurred: " + e.getMessage(), indexProblemCache);
+          } catch (IOException e) {
+            log.error("IOException while trying to parse {}", treeWalk.getPathString(), e);
+            Content dummyContent = new Content();
+            dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
+            this.registerContentProblem(dummyContent,
+                "Index failure - Unable to read the json file found - " + treeWalk.getPathString()
+                    + ". The following error occurred: " + e.getMessage(), indexProblemCache);
           }
-
-          content = this.augmentChildContent(content, treeWalk.getPathString(), null, content.getPublished());
-
-          if (null != content) {
-            indexContentObject(contentCache, tagsList, allUnits, publishedUnits, indexProblemCache,
-                treeWalk.getPathString(), content);
-          }
-        } catch (JsonMappingException e) {
-          log.debug(String.format("Unable to parse the json file found %s as a content object. "
-              + "Skipping file due to error: \n %s", treeWalk.getPathString(), e.getMessage()));
-          Content dummyContent = new Content();
-          dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
-          this.registerContentProblem(dummyContent, "Index failure - Unable to parse json file found - "
-              + treeWalk.getPathString() + ". The following error occurred: " + e.getMessage(), indexProblemCache);
-        } catch (IOException e) {
-          log.error("IOException while trying to parse {}", treeWalk.getPathString(), e);
+        } catch (Exception e) {
+          log.error("Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
           Content dummyContent = new Content();
           dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
           this.registerContentProblem(dummyContent,
-              "Index failure - Unable to read the json file found - " + treeWalk.getPathString()
+              "Index failure - Unexpected error while processing file - " + treeWalk.getPathString()
                   + ". The following error occurred: " + e.getMessage(), indexProblemCache);
         }
       }
