@@ -78,7 +78,27 @@ public class ContentIndexer {
 
   private static final int MEDIA_FILE_SIZE_LIMIT = 300 * 1024; // Bytes
   private static final int NANOSECONDS_IN_A_MILLISECOND = 1000000;
-  private static final String ERROR_OCCURRED_SUFFIX = "+ ERROR_OCCURRED_SUFFIX +";
+  private static final String ERROR_OCCURRED_SUFFIX = ". The following error occurred: ";
+
+  private static class IndexingContext {
+    final Map<String, Content> contentCache;
+    final Set<String> tagsList;
+    final Map<String, String> allUnits;
+    final Map<String, String> publishedUnits;
+    final Map<Content, List<String>> indexProblemCache;
+    final boolean includeUnpublished;
+
+    IndexingContext(final Map<String, Content> contentCache, final Set<String> tagsList,
+        final Map<String, String> allUnits, final Map<String, String> publishedUnits,
+        final Map<Content, List<String>> indexProblemCache, final boolean includeUnpublished) {
+      this.contentCache = contentCache;
+      this.tagsList = tagsList;
+      this.allUnits = allUnits;
+      this.publishedUnits = publishedUnits;
+      this.indexProblemCache = indexProblemCache;
+      this.includeUnpublished = includeUnpublished;
+    }
+  }
 
   @Inject
   public ContentIndexer(final GitDb database, final ElasticSearchIndexer es, final ContentMapperUtils mapperUtils) {
@@ -213,9 +233,10 @@ public class ContentIndexer {
       log.info("Populating git content cache based on sha " + sanitiseInternalLogValue(sha) + " ...");
 
       // Traverse the git repository looking for the .json files
+      IndexingContext context = new IndexingContext(contentCache, tagsList, allUnits, publishedUnits,
+          indexProblemCache, includeUnpublished);
       while (treeWalk.next()) {
-        processJsonFile(treeWalk, repository, includeUnpublished, contentCache, tagsList, allUnits,
-            publishedUnits, indexProblemCache);
+        processJsonFile(treeWalk, repository, context);
       }
 
       repository.close();
@@ -230,9 +251,7 @@ public class ContentIndexer {
   }
 
   private void processJsonFile(final TreeWalk treeWalk, final Repository repository,
-      final boolean includeUnpublished, final Map<String, Content> contentCache,
-      final Set<String> tagsList, final Map<String, String> allUnits,
-      final Map<String, String> publishedUnits, final Map<Content, List<String>> indexProblemCache) {
+      final IndexingContext context) {
     try {
       ByteArrayOutputStream out = new ByteArrayOutputStream();
       ObjectLoader loader = repository.open(treeWalk.getObjectId(0));
@@ -243,7 +262,7 @@ public class ContentIndexer {
       try {
         Content content = (Content) objectMapper.readValue(out.toString(), ContentBase.class);
 
-        if (!includeUnpublished && !content.getPublished()) {
+        if (!context.includeUnpublished && !content.getPublished()) {
           log.debug("Skipping unpublished content: {}", content.getId());
           return;
         }
@@ -251,8 +270,8 @@ public class ContentIndexer {
         content = this.augmentChildContent(content, treeWalk.getPathString(), null, content.getPublished());
 
         if (null != content) {
-          indexContentObject(contentCache, tagsList, allUnits, publishedUnits, indexProblemCache,
-              treeWalk.getPathString(), content);
+          indexContentObject(context.contentCache, context.tagsList, context.allUnits, context.publishedUnits,
+              context.indexProblemCache, treeWalk.getPathString(), content);
         }
       } catch (JsonMappingException e) {
         log.debug(String.format("Unable to parse the json file found %s as a content object. "
@@ -260,14 +279,14 @@ public class ContentIndexer {
         Content dummyContent = new Content();
         dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
         this.registerContentProblem(dummyContent, "Index failure - Unable to parse json file found - "
-            + treeWalk.getPathString() + ERROR_OCCURRED_SUFFIX + e.getMessage(), indexProblemCache);
+            + treeWalk.getPathString() + ERROR_OCCURRED_SUFFIX + e.getMessage(), context.indexProblemCache);
       } catch (IOException e) {
         log.error("IOException while trying to parse {}", treeWalk.getPathString(), e);
         Content dummyContent = new Content();
         dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
         this.registerContentProblem(dummyContent,
             "Index failure - Unable to read the json file found - " + treeWalk.getPathString()
-                + ERROR_OCCURRED_SUFFIX + e.getMessage(), indexProblemCache);
+                + ERROR_OCCURRED_SUFFIX + e.getMessage(), context.indexProblemCache);
       }
     } catch (Exception e) {
       log.error("Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
@@ -275,7 +294,7 @@ public class ContentIndexer {
       dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
       this.registerContentProblem(dummyContent,
           "Index failure - Unexpected error while processing file - " + treeWalk.getPathString()
-              + ERROR_OCCURRED_SUFFIX + e.getMessage(), indexProblemCache);
+              + ERROR_OCCURRED_SUFFIX + e.getMessage(), context.indexProblemCache);
     }
   }
 
@@ -292,81 +311,67 @@ public class ContentIndexer {
     // add children (and parent) from flattened Set to
     // cache if they have ids
     for (Content flattenedContent : this.flattenContentObjects(content)) {
-      if (flattenedContent.getId() == null) {
-        continue;
-      }
-
-      // Prevents ETL indexing of quizzes that contain anything that is not an IsaacQuizSection
-      // in the top-level children array.
-      // NOTE: I'm not sure if this is the right place for this but I couldn't find a better one.
-      // This also seems to be the only time we can prevent a file from being indexed entirely.
-      if (flattenedContent instanceof IsaacQuiz) {
-        List<ContentBase> children = flattenedContent.getChildren();
-        if (children.stream().anyMatch(c -> !(c instanceof IsaacQuizSection))) {
-          log.debug("IsaacQuiz ({}) contains top-level non-quiz sections. Skipping.", flattenedContent.getId());
-          this.registerContentProblem(flattenedContent, "Index failure - Invalid "
-              + "content type among quiz sections. Quizzes can only contain quiz sections "
-              + "in the top-level children array.", indexProblemCache);
-          continue;
-        }
-      }
-
-      if (flattenedContent.getId().length() > MAXIMUM_CONTENT_ID_LENGTH) {
-        log.debug("Content ID too long: {}", flattenedContent.getId());
-        this.registerContentProblem(flattenedContent, "Content ID too long: " + flattenedContent.getId(),
-            indexProblemCache);
-        continue;
-      }
-
-      if (flattenedContent.getId().contains(".")) {
-        // Otherwise, duplicate IDs with different content,
-        // therefore log an error
-        log.debug("Resource with invalid ID ({}) detected in cache. Skipping {}", content.getId(), treeWalkPath);
-
-        this.registerContentProblem(flattenedContent, "Index failure - Invalid ID "
-            + flattenedContent.getId() + " found in file " + treeWalkPath
-            + ". Must not contain restricted characters.", indexProblemCache);
-        continue;
-      }
-
-      // check if we have seen this key before if
-      // we have then we don't want to add it
-      // again
-      if (!contentCache.containsKey(flattenedContent.getId())) {
-        // It must be new so we can add it
-        log.debug("Loading into cache: {} ({}) from {}", flattenedContent.getId(), flattenedContent.getType(),
-            treeWalkPath);
-        contentCache.put(flattenedContent.getId(), flattenedContent);
-        registerTags(flattenedContent.getTags(), tagsList);
-
-        // If this is a numeric question, extract any
-        // units from its answers.
-
-        if (flattenedContent instanceof IsaacNumericQuestion) {
-          registerUnits((IsaacNumericQuestion) flattenedContent, allUnits, publishedUnits);
-        }
-
-        continue; // our work here is done
-      }
-
-      // shaCache contains key already, compare the
-      // content
-      if (contentCache.get(flattenedContent.getId()).equals(flattenedContent)) {
-        // content is the same therefore it is just
-        // reuse of a content object so that is
-        // fine.
-        log.debug("Resource ({}) already seen in cache. Skipping {}", content.getId(), treeWalkPath);
-        continue;
-      }
-
-      // Otherwise, duplicate IDs with different content,
-      // therefore log an error
-      log.debug("Resource with duplicate ID ({}) detected in cache. Skipping {}", content.getId(), treeWalkPath);
-      this.registerContentProblem(flattenedContent, String.format(
-              "Index failure - Duplicate ID (%s) found in files (%s) and (%s): only one will be available.",
-              content.getId(), treeWalkPath, contentCache.get(flattenedContent.getId()).getCanonicalSourceFile()),
-          indexProblemCache);
+      validateAndCacheContent(flattenedContent, content, treeWalkPath, contentCache, tagsList, allUnits,
+          publishedUnits, indexProblemCache);
     }
+  }
+
+  private void validateAndCacheContent(final Content flattenedContent, final Content parentContent,
+      final String treeWalkPath, final Map<String, Content> contentCache, final Set<String> tagsList,
+      final Map<String, String> allUnits, final Map<String, String> publishedUnits,
+      final Map<Content, List<String>> indexProblemCache) {
+    if (flattenedContent.getId() == null) {
+      return;
+    }
+
+    if (flattenedContent instanceof IsaacQuiz) {
+      List<ContentBase> children = flattenedContent.getChildren();
+      if (children.stream().anyMatch(c -> !(c instanceof IsaacQuizSection))) {
+        log.debug("IsaacQuiz ({}) contains top-level non-quiz sections. Skipping.", flattenedContent.getId());
+        this.registerContentProblem(flattenedContent, "Index failure - Invalid "
+            + "content type among quiz sections. Quizzes can only contain quiz sections "
+            + "in the top-level children array.", indexProblemCache);
+        return;
+      }
+    }
+
+    if (flattenedContent.getId().length() > MAXIMUM_CONTENT_ID_LENGTH) {
+      log.debug("Content ID too long: {}", flattenedContent.getId());
+      this.registerContentProblem(flattenedContent, "Content ID too long: " + flattenedContent.getId(),
+          indexProblemCache);
+      return;
+    }
+
+    if (flattenedContent.getId().contains(".")) {
+      log.debug("Resource with invalid ID ({}) detected in cache. Skipping {}", parentContent.getId(), treeWalkPath);
+      this.registerContentProblem(flattenedContent, "Index failure - Invalid ID "
+          + flattenedContent.getId() + " found in file " + treeWalkPath
+          + ". Must not contain restricted characters.", indexProblemCache);
+      return;
+    }
+
+    if (!contentCache.containsKey(flattenedContent.getId())) {
+      log.debug("Loading into cache: {} ({}) from {}", flattenedContent.getId(), flattenedContent.getType(),
+          treeWalkPath);
+      contentCache.put(flattenedContent.getId(), flattenedContent);
+      registerTags(flattenedContent.getTags(), tagsList);
+
+      if (flattenedContent instanceof IsaacNumericQuestion) {
+        registerUnits((IsaacNumericQuestion) flattenedContent, allUnits, publishedUnits);
+      }
+      return;
+    }
+
+    if (contentCache.get(flattenedContent.getId()).equals(flattenedContent)) {
+      log.debug("Resource ({}) already seen in cache. Skipping {}", parentContent.getId(), treeWalkPath);
+      return;
+    }
+
+    log.debug("Resource with duplicate ID ({}) detected in cache. Skipping {}", parentContent.getId(), treeWalkPath);
+    this.registerContentProblem(flattenedContent, String.format(
+            "Index failure - Duplicate ID (%s) found in files (%s) and (%s): only one will be available.",
+            parentContent.getId(), treeWalkPath, contentCache.get(flattenedContent.getId()).getCanonicalSourceFile()),
+        indexProblemCache);
   }
 
   /**
