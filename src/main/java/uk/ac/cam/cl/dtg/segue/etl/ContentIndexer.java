@@ -78,6 +78,7 @@ public class ContentIndexer {
 
   private static final int MEDIA_FILE_SIZE_LIMIT = 300 * 1024; // Bytes
   private static final int NANOSECONDS_IN_A_MILLISECOND = 1000000;
+  private static final String ERROR_OCCURRED_SUFFIX = "+ ERROR_OCCURRED_SUFFIX +";
 
   @Inject
   public ContentIndexer(final GitDb database, final ElasticSearchIndexer es, final ContentMapperUtils mapperUtils) {
@@ -213,54 +214,8 @@ public class ContentIndexer {
 
       // Traverse the git repository looking for the .json files
       while (treeWalk.next()) {
-        try {
-          ByteArrayOutputStream out = new ByteArrayOutputStream();
-          ObjectLoader loader = repository.open(treeWalk.getObjectId(0));
-          loader.copyTo(out);
-
-          // setup object mapper to use preconfigured deserializer
-          // module. Required to deal with type polymorphism
-          ObjectMapper objectMapper = mapperUtils.getSharedContentObjectMapper();
-
-          Content content;
-          try {
-            content = (Content) objectMapper.readValue(out.toString(), ContentBase.class);
-
-            // check if we only want to index published content
-            if (!includeUnpublished && !content.getPublished()) {
-              log.debug("Skipping unpublished content: {}", content.getId());
-              continue;
-            }
-
-            content = this.augmentChildContent(content, treeWalk.getPathString(), null, content.getPublished());
-
-            if (null != content) {
-              indexContentObject(contentCache, tagsList, allUnits, publishedUnits, indexProblemCache,
-                  treeWalk.getPathString(), content);
-            }
-          } catch (JsonMappingException e) {
-            log.debug(String.format("Unable to parse the json file found %s as a content object. "
-                + "Skipping file due to error: \n %s", treeWalk.getPathString(), e.getMessage()));
-            Content dummyContent = new Content();
-            dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
-            this.registerContentProblem(dummyContent, "Index failure - Unable to parse json file found - "
-                + treeWalk.getPathString() + ". The following error occurred: " + e.getMessage(), indexProblemCache);
-          } catch (IOException e) {
-            log.error("IOException while trying to parse {}", treeWalk.getPathString(), e);
-            Content dummyContent = new Content();
-            dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
-            this.registerContentProblem(dummyContent,
-                "Index failure - Unable to read the json file found - " + treeWalk.getPathString()
-                    + ". The following error occurred: " + e.getMessage(), indexProblemCache);
-          }
-        } catch (Exception e) {
-          log.error("Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
-          Content dummyContent = new Content();
-          dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
-          this.registerContentProblem(dummyContent,
-              "Index failure - Unexpected error while processing file - " + treeWalk.getPathString()
-                  + ". The following error occurred: " + e.getMessage(), indexProblemCache);
-        }
+        processJsonFile(treeWalk, repository, includeUnpublished, contentCache, tagsList, allUnits,
+            publishedUnits, indexProblemCache);
       }
 
       repository.close();
@@ -271,6 +226,56 @@ public class ContentIndexer {
     } catch (IOException e) {
       log.error("IOException while trying to access git repository. ", e);
       throw new ContentManagerException("Unable to index content, due to an IOException.");
+    }
+  }
+
+  private void processJsonFile(final TreeWalk treeWalk, final Repository repository,
+      final boolean includeUnpublished, final Map<String, Content> contentCache,
+      final Set<String> tagsList, final Map<String, String> allUnits,
+      final Map<String, String> publishedUnits, final Map<Content, List<String>> indexProblemCache) {
+    try {
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      ObjectLoader loader = repository.open(treeWalk.getObjectId(0));
+      loader.copyTo(out);
+
+      ObjectMapper objectMapper = mapperUtils.getSharedContentObjectMapper();
+
+      try {
+        Content content = (Content) objectMapper.readValue(out.toString(), ContentBase.class);
+
+        if (!includeUnpublished && !content.getPublished()) {
+          log.debug("Skipping unpublished content: {}", content.getId());
+          return;
+        }
+
+        content = this.augmentChildContent(content, treeWalk.getPathString(), null, content.getPublished());
+
+        if (null != content) {
+          indexContentObject(contentCache, tagsList, allUnits, publishedUnits, indexProblemCache,
+              treeWalk.getPathString(), content);
+        }
+      } catch (JsonMappingException e) {
+        log.debug(String.format("Unable to parse the json file found %s as a content object. "
+            + "Skipping file due to error: \n %s", treeWalk.getPathString(), e.getMessage()));
+        Content dummyContent = new Content();
+        dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
+        this.registerContentProblem(dummyContent, "Index failure - Unable to parse json file found - "
+            + treeWalk.getPathString() + ERROR_OCCURRED_SUFFIX + e.getMessage(), indexProblemCache);
+      } catch (IOException e) {
+        log.error("IOException while trying to parse {}", treeWalk.getPathString(), e);
+        Content dummyContent = new Content();
+        dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
+        this.registerContentProblem(dummyContent,
+            "Index failure - Unable to read the json file found - " + treeWalk.getPathString()
+                + ERROR_OCCURRED_SUFFIX + e.getMessage(), indexProblemCache);
+      }
+    } catch (Exception e) {
+      log.error("Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
+      Content dummyContent = new Content();
+      dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
+      this.registerContentProblem(dummyContent,
+          "Index failure - Unexpected error while processing file - " + treeWalk.getPathString()
+              + ERROR_OCCURRED_SUFFIX + e.getMessage(), indexProblemCache);
     }
   }
 
@@ -428,44 +433,7 @@ public class ContentIndexer {
     }
 
     if (content instanceof Question) {
-      Question question = (Question) content;
-      if (question.getHints() != null) {
-        for (ContentBase cb : question.getHints()) {
-          Content c = (Content) cb;
-          this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished);
-        }
-      }
-
-      // Augment question answers
-      if (question.getAnswer() != null) {
-        Content answer = (Content) question.getAnswer();
-        if (answer.getChildren() != null) {
-          for (ContentBase cb : answer.getChildren()) {
-            Content c = (Content) cb;
-            this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished);
-          }
-        }
-      }
-
-      if (question.getDefaultFeedback() != null) {
-        Content defaultFeedback = question.getDefaultFeedback();
-        if (defaultFeedback.getChildren() != null) {
-          for (ContentBase cb : defaultFeedback.getChildren()) {
-            Content c = (Content) cb;
-            this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished);
-          }
-        }
-      }
-
-      if (content instanceof ChoiceQuestion) {
-        ChoiceQuestion choiceQuestion = (ChoiceQuestion) content;
-        if (choiceQuestion.getChoices() != null) {
-          for (ContentBase cb : choiceQuestion.getChoices()) {
-            Content c = (Content) cb;
-            this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished);
-          }
-        }
-      }
+      augmentQuestionContent((Question) content, canonicalSourceFile, newParentId, parentPublished);
     }
 
     // try to determine if we have media as fields to deal with in this class
@@ -530,10 +498,49 @@ public class ContentIndexer {
   /**
    * Concatenate the source of a media content object with its parent source file.
    *
-   * @param canonicalSourceFile the canonical path to use for concat operations.
-   * @param originalSrc         to modify
+   * @param canonicalSourceFile the canonical path to use for concat operations
    * @return src with relative paths fixed.
    */
+  private void augmentQuestionContent(final Question question, final String canonicalSourceFile,
+      final String newParentId, final boolean parentPublished) {
+    if (question.getHints() != null) {
+      for (ContentBase cb : question.getHints()) {
+        Content c = (Content) cb;
+        this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished);
+      }
+    }
+
+    if (question.getAnswer() != null) {
+      Content answer = (Content) question.getAnswer();
+      if (answer.getChildren() != null) {
+        for (ContentBase cb : answer.getChildren()) {
+          Content c = (Content) cb;
+          this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished);
+        }
+      }
+    }
+
+    if (question.getDefaultFeedback() != null) {
+      Content defaultFeedback = question.getDefaultFeedback();
+      if (defaultFeedback.getChildren() != null) {
+        for (ContentBase cb : defaultFeedback.getChildren()) {
+          Content c = (Content) cb;
+          this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished);
+        }
+      }
+    }
+
+    if (question instanceof ChoiceQuestion) {
+      ChoiceQuestion choiceQuestion = (ChoiceQuestion) question;
+      if (choiceQuestion.getChoices() != null) {
+        for (ContentBase cb : choiceQuestion.getChoices()) {
+          Content c = (Content) cb;
+          this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished);
+        }
+      }
+    }
+  }
+
   private String fixMediaSrc(final String canonicalSourceFile, final String originalSrc) {
     if (originalSrc != null && !(originalSrc.startsWith("http://") || originalSrc.startsWith("https://")
         || originalSrc.startsWith("/assets/"))) {
