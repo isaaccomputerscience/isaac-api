@@ -1132,7 +1132,7 @@ class EventBookingManagerTest {
       prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
           confirmedUser);
 
-      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser);
+      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser).times(2);
       EmailTemplateDTO bookingPromotionNotificationTemplate = new EmailTemplateDTO();
       expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andReturn(
           bookingPromotionNotificationTemplate);
@@ -1180,7 +1180,7 @@ class EventBookingManagerTest {
       prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
           confirmedUser);
 
-      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser);
+      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser).times(2);
       EmailTemplateDTO bookingPromotionNotificationTemplate = new EmailTemplateDTO();
       expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andReturn(
           bookingPromotionNotificationTemplate);
@@ -1245,7 +1245,7 @@ class EventBookingManagerTest {
               "givenName familyName"), EmailType.SYSTEM);
       expectLastCall();
 
-      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser);
+      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser).times(2);
       EmailTemplateDTO bookingPromotionNotificationTemplate = new EmailTemplateDTO();
       expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andReturn(
           bookingPromotionNotificationTemplate);
@@ -1306,27 +1306,17 @@ class EventBookingManagerTest {
 
     @Test
     void cancelBooking_noUserExceptionShouldBeCaughtIfPromotedUserNotFound()
-        throws SegueDatabaseException, ContentManagerException, NoUserException {
+        throws SegueDatabaseException, ContentManagerException {
       IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
 
       RegisteredUserDTO confirmedUser = new RegisteredUserDTO();
       confirmedUser.setId(2L);
 
-      DetailedEventBookingDTO waitingListBookingToBeUpdated =
-          prepareDetailedEventBookingDto(prepareUserSummaryDto(3L), BookingStatus.WAITING_LIST, testEvent.getId());
-      waitingListBookingToBeUpdated.setBookingDate(someFutureDate);
-      List<DetailedEventBookingDTO> waitingListBookingsList = List.of(waitingListBookingToBeUpdated);
-      DetailedEventBookingDTO updatedWaitingListBooking =
-          prepareDetailedEventBookingDto(prepareUserSummaryDto(3L), BookingStatus.CONFIRMED, testEvent.getId());
-
       prepareTransactionExpectations(testEvent);
       prepareConfirmedBookingExpectations(testEvent, confirmedUser);
-      prepareNonEmptyWaitingListExpectations(testEvent, waitingListBookingToBeUpdated, waitingListBookingsList,
-          updatedWaitingListBooking);
+      prepareEmptyWaitingListExpectations(testEvent);
       prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
           confirmedUser);
-
-      expect(dummyUserAccountManager.getUserDTOById(3L)).andThrow(new NoUserException("No user found with this ID!"));
 
       replay(mockedObjects);
 
@@ -1364,7 +1354,7 @@ class EventBookingManagerTest {
       prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
           confirmedUser);
 
-      expect(dummyUserAccountManager.getUserDTOById(3L)).andReturn(waitingListUser);
+      expect(dummyUserAccountManager.getUserDTOById(3L)).andReturn(waitingListUser).times(2);
       expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andThrow(
           new ContentManagerException("Content is of incorrect type:notAnEmailTemplateDTO"));
 

@@ -1055,6 +1055,7 @@ public class EventBookingManager {
 
     Long reservedById;
     BookingStatus previousBookingStatus;
+    DetailedEventBookingDTO oldestValidWaitingListBooking = null;
     EventBookingDTO updatedWaitingListBooking;
     try (ITransaction transaction = transactionManager.getTransaction()) {
       // Obtain an exclusive database lock to lock the booking
@@ -1074,11 +1075,39 @@ public class EventBookingManager {
             this.bookingPersistenceManager.adminGetBookingsByEventIdAndStatus(event.getId(),
                 BookingStatus.WAITING_LIST);
         if (!waitingListBookings.isEmpty()) {
-          DetailedEventBookingDTO oldestWaitingListBooking =
-              Collections.min(waitingListBookings, Comparator.comparing(EventBookingDTO::getBookingDate));
-          updatedWaitingListBooking = this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(),
-              oldestWaitingListBooking.getUserBooked().getId(), BookingStatus.CONFIRMED,
-              oldestWaitingListBooking.getAdditionalInformation());
+          log.info("Event {} has {} users on waiting list after cancellation. Attempting auto-promotion.",
+              event.getId(), waitingListBookings.size());
+
+          // Filter out deleted users - try to get each user's details
+          // If getUserDTOById throws NoUserException, the user is deleted/not found
+          for (DetailedEventBookingDTO booking : waitingListBookings.stream()
+              .sorted(Comparator.comparing(EventBookingDTO::getBookingDate))
+              .toList()) {
+            try {
+              userAccountManager.getUserDTOById(booking.getUserBooked().getId());
+              // User exists and is not deleted - this is our candidate
+              oldestValidWaitingListBooking = booking;
+              break;
+            } catch (NoUserException e) {
+              // User deleted or not found - skip to next
+              log.debug("Skipping deleted/not found user {} on waiting list for event {}",
+                  booking.getUserBooked().getId(), event.getId());
+            }
+          }
+
+          if (oldestValidWaitingListBooking != null) {
+            log.info("Promoting user {} from waiting list for event {}",
+                oldestValidWaitingListBooking.getUserBooked().getId(), event.getId());
+
+            updatedWaitingListBooking = this.bookingPersistenceManager.updateBookingStatus(transaction, event.getId(),
+                oldestValidWaitingListBooking.getUserBooked().getId(), BookingStatus.CONFIRMED,
+                oldestValidWaitingListBooking.getAdditionalInformation());
+          } else {
+            log.info(
+                "Event {} has no eligible waiting list users to promote after cancellation (all deleted/not found)",
+                event.getId());
+            updatedWaitingListBooking = null;
+          }
         } else {
           updatedWaitingListBooking = null;
         }
@@ -1102,8 +1131,8 @@ public class EventBookingManager {
           + "student cancellation email was not sent", reservedById);
     }
 
-    if (updatedWaitingListBooking != null) {
-      Long promotedBookingUserId = updatedWaitingListBooking.getUserBooked().getId();
+    if (updatedWaitingListBooking != null && oldestValidWaitingListBooking != null) {
+      Long promotedBookingUserId = oldestValidWaitingListBooking.getUserBooked().getId();
       try {
         RegisteredUserDTO promotedBookingUser =
             userAccountManager.getUserDTOById(promotedBookingUserId);
