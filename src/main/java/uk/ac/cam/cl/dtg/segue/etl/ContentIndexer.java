@@ -98,6 +98,10 @@ public class ContentIndexer {
       this.indexProblemCache = indexProblemCache;
       this.includeUnpublished = includeUnpublished;
     }
+
+    boolean shouldSkipUnpublished(final Content content) {
+      return !includeUnpublished && !content.getPublished();
+    }
   }
 
   @Inject
@@ -262,7 +266,7 @@ public class ContentIndexer {
       try {
         Content content = (Content) objectMapper.readValue(out.toString(), ContentBase.class);
 
-        if (!context.includeUnpublished && !content.getPublished()) {
+        if (context.shouldSkipUnpublished(content)) {
           log.debug("Skipping unpublished content: {}", content.getId());
           return;
         }
@@ -310,16 +314,15 @@ public class ContentIndexer {
 
     // add children (and parent) from flattened Set to
     // cache if they have ids
+    IndexingContext context = new IndexingContext(contentCache, tagsList, allUnits, publishedUnits,
+        indexProblemCache, true);
     for (Content flattenedContent : this.flattenContentObjects(content)) {
-      validateAndCacheContent(flattenedContent, content, treeWalkPath, contentCache, tagsList, allUnits,
-          publishedUnits, indexProblemCache);
+      validateAndCacheContent(flattenedContent, content, treeWalkPath, context);
     }
   }
 
   private void validateAndCacheContent(final Content flattenedContent, final Content parentContent,
-      final String treeWalkPath, final Map<String, Content> contentCache, final Set<String> tagsList,
-      final Map<String, String> allUnits, final Map<String, String> publishedUnits,
-      final Map<Content, List<String>> indexProblemCache) {
+      final String treeWalkPath, final IndexingContext context) {
     if (flattenedContent.getId() == null) {
       return;
     }
@@ -330,7 +333,7 @@ public class ContentIndexer {
         log.debug("IsaacQuiz ({}) contains top-level non-quiz sections. Skipping.", flattenedContent.getId());
         this.registerContentProblem(flattenedContent, "Index failure - Invalid "
             + "content type among quiz sections. Quizzes can only contain quiz sections "
-            + "in the top-level children array.", indexProblemCache);
+            + "in the top-level children array.", context.indexProblemCache);
         return;
       }
     }
@@ -338,7 +341,7 @@ public class ContentIndexer {
     if (flattenedContent.getId().length() > MAXIMUM_CONTENT_ID_LENGTH) {
       log.debug("Content ID too long: {}", flattenedContent.getId());
       this.registerContentProblem(flattenedContent, "Content ID too long: " + flattenedContent.getId(),
-          indexProblemCache);
+          context.indexProblemCache);
       return;
     }
 
@@ -346,23 +349,23 @@ public class ContentIndexer {
       log.debug("Resource with invalid ID ({}) detected in cache. Skipping {}", parentContent.getId(), treeWalkPath);
       this.registerContentProblem(flattenedContent, "Index failure - Invalid ID "
           + flattenedContent.getId() + " found in file " + treeWalkPath
-          + ". Must not contain restricted characters.", indexProblemCache);
+          + ". Must not contain restricted characters.", context.indexProblemCache);
       return;
     }
 
-    if (!contentCache.containsKey(flattenedContent.getId())) {
+    if (!context.contentCache.containsKey(flattenedContent.getId())) {
       log.debug("Loading into cache: {} ({}) from {}", flattenedContent.getId(), flattenedContent.getType(),
           treeWalkPath);
-      contentCache.put(flattenedContent.getId(), flattenedContent);
-      registerTags(flattenedContent.getTags(), tagsList);
+      context.contentCache.put(flattenedContent.getId(), flattenedContent);
+      registerTags(flattenedContent.getTags(), context.tagsList);
 
       if (flattenedContent instanceof IsaacNumericQuestion) {
-        registerUnits((IsaacNumericQuestion) flattenedContent, allUnits, publishedUnits);
+        registerUnits((IsaacNumericQuestion) flattenedContent, context.allUnits, context.publishedUnits);
       }
       return;
     }
 
-    if (contentCache.get(flattenedContent.getId()).equals(flattenedContent)) {
+    if (context.contentCache.get(flattenedContent.getId()).equals(flattenedContent)) {
       log.debug("Resource ({}) already seen in cache. Skipping {}", parentContent.getId(), treeWalkPath);
       return;
     }
@@ -370,8 +373,10 @@ public class ContentIndexer {
     log.debug("Resource with duplicate ID ({}) detected in cache. Skipping {}", parentContent.getId(), treeWalkPath);
     this.registerContentProblem(flattenedContent, String.format(
             "Index failure - Duplicate ID (%s) found in files (%s) and (%s): only one will be available.",
-            parentContent.getId(), treeWalkPath, contentCache.get(flattenedContent.getId()).getCanonicalSourceFile()),
-        indexProblemCache);
+            parentContent.getId(),
+            treeWalkPath,
+            context.contentCache.get(flattenedContent.getId()).getCanonicalSourceFile()),
+        context.indexProblemCache);
   }
 
   /**
@@ -508,13 +513,24 @@ public class ContentIndexer {
    */
   private void augmentQuestionContent(final Question question, final String canonicalSourceFile,
       final String newParentId, final boolean parentPublished) {
+    augmentHints(question, canonicalSourceFile, newParentId, parentPublished);
+    augmentAnswerContent(question, canonicalSourceFile, newParentId, parentPublished);
+    augmentFeedbackContent(question, canonicalSourceFile, newParentId, parentPublished);
+    augmentChoiceQuestionContent(question, canonicalSourceFile, newParentId, parentPublished);
+  }
+
+  private void augmentHints(final Question question, final String canonicalSourceFile, final String newParentId,
+      final boolean parentPublished) {
     if (question.getHints() != null) {
       for (ContentBase cb : question.getHints()) {
         Content c = (Content) cb;
         this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished);
       }
     }
+  }
 
+  private void augmentAnswerContent(final Question question, final String canonicalSourceFile, final String newParentId,
+      final boolean parentPublished) {
     if (question.getAnswer() != null) {
       Content answer = (Content) question.getAnswer();
       if (answer.getChildren() != null) {
@@ -524,7 +540,12 @@ public class ContentIndexer {
         }
       }
     }
+  }
 
+  private void augmentFeedbackContent(final Question question,
+                                      final String canonicalSourceFile,
+                                      final String newParentId,
+      final boolean parentPublished) {
     if (question.getDefaultFeedback() != null) {
       Content defaultFeedback = question.getDefaultFeedback();
       if (defaultFeedback.getChildren() != null) {
@@ -534,7 +555,10 @@ public class ContentIndexer {
         }
       }
     }
+  }
 
+  private void augmentChoiceQuestionContent(final Question question, final String canonicalSourceFile,
+      final String newParentId, final boolean parentPublished) {
     if (question instanceof ChoiceQuestion) {
       ChoiceQuestion choiceQuestion = (ChoiceQuestion) question;
       if (choiceQuestion.getChoices() != null) {
