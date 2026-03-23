@@ -165,16 +165,6 @@ public class ContentIndexer {
 
       log.info("Finished recording content errors, took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
 
-      if (!indexProblemCache.isEmpty()) {
-        log.info("Found {} files with content problems:", indexProblemCache.size());
-        for (Content content : indexProblemCache.keySet()) {
-          log.info("  - {}", content.getCanonicalSourceFile());
-          for (String problem : indexProblemCache.get(content)) {
-            log.info("      {}", problem);
-          }
-        }
-      }
-
       startTime = System.nanoTime();
       buildElasticSearchIndex(version, contentCache, tagsList, allUnits, publishedUnits, indexProblemCache);
       endTime = System.nanoTime();
@@ -885,6 +875,16 @@ public class ContentIndexer {
 
     log.info(String.format("Validation processing (%s) complete. There are %s files with content problems",
         sanitiseInternalLogValue(sha), indexProblemCache.size()));
+
+    if (!indexProblemCache.isEmpty()) {
+      log.info("Found {} files with content problems:", indexProblemCache.size());
+      for (Content content : indexProblemCache.keySet()) {
+        log.info("FILE:  - {}", content.getCanonicalSourceFile());
+        for (String problem : indexProblemCache.get(content)) {
+          log.info("PROBLEM:      {}", problem);
+        }
+      }
+    }
 
     if (indexProblemCache.isEmpty()) {
       // Register a no-op style error to simplify application logic by ensuring there is always a content errors index
