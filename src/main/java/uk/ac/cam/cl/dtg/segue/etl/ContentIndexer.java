@@ -165,6 +165,16 @@ public class ContentIndexer {
 
       log.info("Finished recording content errors, took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
 
+      if (!indexProblemCache.isEmpty()) {
+        log.info("Found {} files with content problems:", indexProblemCache.size());
+        for (Content content : indexProblemCache.keySet()) {
+          log.info("  - {}", content.getCanonicalSourceFile());
+          for (String problem : indexProblemCache.get(content)) {
+            log.info("      {}", problem);
+          }
+        }
+      }
+
       startTime = System.nanoTime();
       buildElasticSearchIndex(version, contentCache, tagsList, allUnits, publishedUnits, indexProblemCache);
       endTime = System.nanoTime();
