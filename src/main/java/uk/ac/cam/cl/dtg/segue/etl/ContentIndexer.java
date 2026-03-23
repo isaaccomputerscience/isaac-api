@@ -437,8 +437,11 @@ public class ContentIndexer {
 
     // hack to get cards to count as children:
     if (content instanceof IsaacCardDeck) {
-      for (IsaacCard card : ((IsaacCardDeck) content).getCards()) {
-        this.augmentChildContent(card, canonicalSourceFile, newParentId, parentPublished);
+      List<IsaacCard> cards = ((IsaacCardDeck) content).getCards();
+      if (cards != null) {
+        for (IsaacCard card : cards) {
+          this.augmentChildContent(card, canonicalSourceFile, newParentId, parentPublished);
+        }
       }
     }
 
@@ -662,17 +665,19 @@ public class ContentIndexer {
 
     HashMap<String, String> newUnits = Maps.newHashMap();
 
-    for (Choice c : q.getChoices()) {
-      if (c instanceof Quantity) {
-        Quantity quantity = (Quantity) c;
+    if (q.getChoices() != null) {
+      for (Choice c : q.getChoices()) {
+        if (c instanceof Quantity) {
+          Quantity quantity = (Quantity) c;
 
-        if (quantity.getUnits() != null && !quantity.getUnits().isEmpty()) {
-          String units = quantity.getUnits();
-          String cleanKey = units.replace("\t", "").replace("\n", "").replace(" ", "");
+          if (quantity.getUnits() != null && !quantity.getUnits().isEmpty()) {
+            String units = quantity.getUnits();
+            String cleanKey = units.replace("\t", "").replace("\n", "").replace(" ", "");
 
-          // May overwrite previous entry, doesn't matter as there is
-          // no mechanism by which to choose a winner
-          newUnits.put(cleanKey, units);
+            // May overwrite previous entry, doesn't matter as there is
+            // no mechanism by which to choose a winner
+            newUnits.put(cleanKey, units);
+          }
         }
       }
     }
@@ -977,22 +982,24 @@ public class ContentIndexer {
     if (content instanceof IsaacClozeQuestion) {
       IsaacClozeQuestion q = (IsaacClozeQuestion) content;
       Integer numberItems = null;
-      for (Choice choice : q.getChoices()) {
-        if (choice instanceof ItemChoice) {
-          ItemChoice c = (ItemChoice) choice;
-          if (null == c.getItems() || c.getItems().isEmpty()) {
-            this.registerContentProblem(content, "Cloze Question: " + q.getId() + " has choice with missing items!",
-                indexProblemCache);
-            continue;
+      if (q.getChoices() != null) {
+        for (Choice choice : q.getChoices()) {
+          if (choice instanceof ItemChoice) {
+            ItemChoice c = (ItemChoice) choice;
+            if (null == c.getItems() || c.getItems().isEmpty()) {
+              this.registerContentProblem(content, "Cloze Question: " + q.getId() + " has choice with missing items!",
+                  indexProblemCache);
+              continue;
+            }
+            int items = c.getItems().size();
+            if (numberItems != null && items != numberItems) {
+              this.registerContentProblem(content,
+                  "Cloze Question: " + q.getId() + " has choice with incorrect number of items!"
+                      + " (Expected " + numberItems + ", got " + items + "!)", indexProblemCache);
+              continue;
+            }
+            numberItems = items;
           }
-          int items = c.getItems().size();
-          if (numberItems != null && items != numberItems) {
-            this.registerContentProblem(content,
-                "Cloze Question: " + q.getId() + " has choice with incorrect number of items!"
-                    + " (Expected " + numberItems + ", got " + items + "!)", indexProblemCache);
-            continue;
-          }
-          numberItems = items;
         }
       }
     }
@@ -1001,19 +1008,23 @@ public class ContentIndexer {
   private void registerContentProblemsSymbolicQuestionInvalidProperties(
       final Content content, final Map<Content, List<String>> indexProblemCache) {
     IsaacSymbolicQuestion question = (IsaacSymbolicQuestion) content;
-    for (String sym : question.getAvailableSymbols()) {
-      registerContentProblemQuestionSymbolContainsBackslash(content, indexProblemCache, question, sym);
+    if (question.getAvailableSymbols() != null) {
+      for (String sym : question.getAvailableSymbols()) {
+        registerContentProblemQuestionSymbolContainsBackslash(content, indexProblemCache, question, sym);
+      }
     }
-    for (Choice choice : question.getChoices()) {
-      if (choice instanceof Formula) {
-        Formula f = (Formula) choice;
-        if (f.getPythonExpression().contains("\\")) {
-          registerContentProblemQuestionFormulaContainsBackslash(content, indexProblemCache, question, choice);
-        } else if (f.getPythonExpression() == null || f.getPythonExpression().isEmpty()) {
-          registerContentProblemQuestionFormulaIsEmpty(content, indexProblemCache, question, choice);
+    if (question.getChoices() != null) {
+      for (Choice choice : question.getChoices()) {
+        if (choice instanceof Formula) {
+          Formula f = (Formula) choice;
+          if (f.getPythonExpression().contains("\\")) {
+            registerContentProblemQuestionFormulaContainsBackslash(content, indexProblemCache, question, choice);
+          } else if (f.getPythonExpression() == null || f.getPythonExpression().isEmpty()) {
+            registerContentProblemQuestionFormulaIsEmpty(content, indexProblemCache, question, choice);
+          }
+        } else {
+          registerContentProblemSymbolicQuestionChoiceIsNotFormula(content, indexProblemCache, question, choice);
         }
-      } else {
-        registerContentProblemSymbolicQuestionChoiceIsNotFormula(content, indexProblemCache, question, choice);
       }
     }
   }
@@ -1052,17 +1063,19 @@ public class ContentIndexer {
       final Content content, final Map<Content, List<String>> indexProblemCache) {
     if (content instanceof IsaacNumericQuestion) {
       IsaacNumericQuestion question = (IsaacNumericQuestion) content;
-      for (Choice choice : question.getChoices()) {
-        if (choice instanceof Quantity) {
-          Quantity quantity = (Quantity) choice;
+      if (question.getChoices() != null) {
+        for (Choice choice : question.getChoices()) {
+          if (choice instanceof Quantity) {
+            Quantity quantity = (Quantity) choice;
 
-          registerContentProblemCannotParseQuantityChoiceAsNumber(content, indexProblemCache, question, quantity);
+            registerContentProblemCannotParseQuantityChoiceAsNumber(content, indexProblemCache, question, quantity);
 
-          registerContentProblemUnnecessaryQuantityChoiceUnits(content, indexProblemCache, question, quantity);
+            registerContentProblemUnnecessaryQuantityChoiceUnits(content, indexProblemCache, question, quantity);
 
 
-        } else {
-          registerContentProblemNumericQuestionChoiceIsNotQuantity(content, indexProblemCache, question, choice);
+          } else {
+            registerContentProblemNumericQuestionChoiceIsNotQuantity(content, indexProblemCache, question, choice);
+          }
         }
       }
       registerContentProblemConflictingUnitSettings(content, indexProblemCache, question);
@@ -1143,9 +1156,11 @@ public class ContentIndexer {
   private void registerContentProblemChoiceQuestionMissingAnswer(
       final Map<Content, List<String>> indexProblemCache, final ChoiceQuestion question) {
     boolean correctOptionFound = false;
-    for (Choice choice : question.getChoices()) {
-      if (choice.isCorrect()) {
-        correctOptionFound = true;
+    if (question.getChoices() != null) {
+      for (Choice choice : question.getChoices()) {
+        if (choice.isCorrect()) {
+          correctOptionFound = true;
+        }
       }
     }
     if (!correctOptionFound) {
