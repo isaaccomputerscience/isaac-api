@@ -878,10 +878,10 @@ public class ContentIndexer {
 
     if (!indexProblemCache.isEmpty()) {
       log.info("Found {} files with content problems:", indexProblemCache.size());
-      for (Content content : indexProblemCache.keySet()) {
-        log.info("FILE:  - {}", content.getCanonicalSourceFile());
-        for (String problem : indexProblemCache.get(content)) {
-          log.info("PROBLEM:      {}", problem);
+      for (var entry : indexProblemCache.entrySet()) {
+        log.info("FILE: - {}", entry.getKey().getCanonicalSourceFile());
+        for (String problem : entry.getValue()) {
+          log.info("PROBLEM: - {}", problem);
         }
       }
     }
@@ -1023,6 +1023,11 @@ public class ContentIndexer {
         registerContentProblemQuestionSymbolContainsBackslash(content, indexProblemCache, question, sym);
       }
     }
+    validateSymbolicQuestionChoices(content, indexProblemCache, question);
+  }
+
+  private void validateSymbolicQuestionChoices(final Content content,
+      final Map<Content, List<String>> indexProblemCache, final IsaacSymbolicQuestion question) {
     if (question.getChoices() != null) {
       for (Choice choice : question.getChoices()) {
         if (choice instanceof Formula) {
