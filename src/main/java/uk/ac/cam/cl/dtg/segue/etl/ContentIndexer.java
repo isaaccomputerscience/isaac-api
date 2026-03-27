@@ -437,8 +437,11 @@ public class ContentIndexer {
 
     // hack to get cards to count as children:
     if (content instanceof IsaacCardDeck) {
-      for (IsaacCard card : ((IsaacCardDeck) content).getCards()) {
-        this.augmentChildContent(card, canonicalSourceFile, newParentId, parentPublished);
+      List<IsaacCard> cards = ((IsaacCardDeck) content).getCards();
+      if (cards != null) {
+        for (IsaacCard card : cards) {
+          this.augmentChildContent(card, canonicalSourceFile, newParentId, parentPublished);
+        }
       }
     }
 
