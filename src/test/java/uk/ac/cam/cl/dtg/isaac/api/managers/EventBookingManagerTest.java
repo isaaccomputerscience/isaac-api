@@ -75,6 +75,7 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailMustBeVerifiedException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
+import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
@@ -95,6 +96,7 @@ class EventBookingManagerTest {
   private IUserAccountManager dummyUserAccountManager;
   private ITransactionManager dummyTransactionManager;
   private ITransaction dummyTransaction;
+  private GitContentManager dummyContentManager;
   private Object[] mockedObjects;
 
   /**
@@ -110,10 +112,11 @@ class EventBookingManagerTest {
     this.dummyUserAccountManager = createMock(IUserAccountManager.class);
     this.dummyTransactionManager = createMock(ITransactionManager.class);
     this.dummyTransaction = createMock(ITransaction.class);
+    this.dummyContentManager = createMock(GitContentManager.class);
     // Replay and Verify this collection of mocks each test to be sure of catching all behaviour!
     this.mockedObjects = new Object[] {
         dummyEmailManager, dummyEventBookingPersistenceManager, dummyUserAssociationManager, dummyGroupManager,
-        dummyPropertiesLoader, dummyUserAccountManager, dummyTransactionManager, dummyTransaction
+        dummyPropertiesLoader, dummyUserAccountManager, dummyTransactionManager, dummyTransaction, dummyContentManager
     };
 
     expect(this.dummyPropertiesLoader.getProperty(HOST_NAME)).andReturn("hostname.com").anyTimes();
@@ -1132,7 +1135,9 @@ class EventBookingManagerTest {
       prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
           confirmedUser);
 
-      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser);
+      // User 4 is the oldest (someLessFutureDate), so it will be selected first during filtering
+      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser).times(2);  // During filtering and post-promotion
+
       EmailTemplateDTO bookingPromotionNotificationTemplate = new EmailTemplateDTO();
       expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andReturn(
           bookingPromotionNotificationTemplate);
@@ -1180,7 +1185,7 @@ class EventBookingManagerTest {
       prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
           confirmedUser);
 
-      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser);
+      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser).times(2);  // Once during selection, once for post-promotion
       EmailTemplateDTO bookingPromotionNotificationTemplate = new EmailTemplateDTO();
       expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andReturn(
           bookingPromotionNotificationTemplate);
@@ -1245,7 +1250,7 @@ class EventBookingManagerTest {
               "givenName familyName"), EmailType.SYSTEM);
       expectLastCall();
 
-      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser);
+      expect(dummyUserAccountManager.getUserDTOById(4L)).andReturn(waitingListUser).times(2);  // Once during selection, once for post-promotion
       EmailTemplateDTO bookingPromotionNotificationTemplate = new EmailTemplateDTO();
       expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andReturn(
           bookingPromotionNotificationTemplate);
@@ -1312,20 +1317,24 @@ class EventBookingManagerTest {
       RegisteredUserDTO confirmedUser = new RegisteredUserDTO();
       confirmedUser.setId(2L);
 
-      DetailedEventBookingDTO waitingListBookingToBeUpdated =
+      // Test that when the waiting list user is deleted, promotion is skipped
+      DetailedEventBookingDTO deletedWaitingListBooking =
           prepareDetailedEventBookingDto(prepareUserSummaryDto(3L), BookingStatus.WAITING_LIST, testEvent.getId());
-      waitingListBookingToBeUpdated.setBookingDate(someFutureDate);
-      List<DetailedEventBookingDTO> waitingListBookingsList = List.of(waitingListBookingToBeUpdated);
-      DetailedEventBookingDTO updatedWaitingListBooking =
-          prepareDetailedEventBookingDto(prepareUserSummaryDto(3L), BookingStatus.CONFIRMED, testEvent.getId());
+      deletedWaitingListBooking.setBookingDate(someFutureDate);
+      List<DetailedEventBookingDTO> waitingListBookingsList = List.of(deletedWaitingListBooking);
 
       prepareTransactionExpectations(testEvent);
       prepareConfirmedBookingExpectations(testEvent, confirmedUser);
-      prepareNonEmptyWaitingListExpectations(testEvent, waitingListBookingToBeUpdated, waitingListBookingsList,
-          updatedWaitingListBooking);
+      // Mock the waiting list query to return the booking
+      expect(dummyEventBookingPersistenceManager.adminGetBookingsByEventIdAndStatus(
+          eq(testEvent.getId()),
+          eq(BookingStatus.WAITING_LIST),
+          EasyMock.anyBoolean())).andReturn(waitingListBookingsList);
+      // Don't expect updateBookingStatus to be called since user is deleted
       prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
           confirmedUser);
 
+      // Mock getUserDTOById to throw NoUserException for the deleted user
       expect(dummyUserAccountManager.getUserDTOById(3L)).andThrow(new NoUserException("No user found with this ID!"));
 
       replay(mockedObjects);
@@ -1364,7 +1373,7 @@ class EventBookingManagerTest {
       prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
           confirmedUser);
 
-      expect(dummyUserAccountManager.getUserDTOById(3L)).andReturn(waitingListUser);
+      expect(dummyUserAccountManager.getUserDTOById(3L)).andReturn(waitingListUser).times(2);  // Once during selection, once for post-promotion
       expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andThrow(
           new ContentManagerException("Content is of incorrect type:notAnEmailTemplateDTO"));
 
@@ -1515,8 +1524,10 @@ class EventBookingManagerTest {
     private void prepareNonEmptyWaitingListExpectations(IsaacEventPageDTO testEvent, DetailedEventBookingDTO waitingListBookingToBeUpdated,
                                                         List<DetailedEventBookingDTO> waitingListBookingsList,
                                                         DetailedEventBookingDTO updatedWaitingListBooking) throws SegueDatabaseException {
-      expect(dummyEventBookingPersistenceManager.adminGetBookingsByEventIdAndStatus(testEvent.getId(),
-          BookingStatus.WAITING_LIST)).andReturn(waitingListBookingsList);
+      expect(dummyEventBookingPersistenceManager.adminGetBookingsByEventIdAndStatus(
+          eq(testEvent.getId()),
+          eq(BookingStatus.WAITING_LIST),
+          EasyMock.anyBoolean())).andReturn(waitingListBookingsList);
       expect(dummyEventBookingPersistenceManager.updateBookingStatus(dummyTransaction, testEvent.getId(),
           waitingListBookingToBeUpdated.getUserBooked().getId(), BookingStatus.CONFIRMED,
           waitingListBookingToBeUpdated.getAdditionalInformation())).andReturn(updatedWaitingListBooking);
@@ -1524,8 +1535,10 @@ class EventBookingManagerTest {
 
     private void prepareEmptyWaitingListExpectations(IsaacEventPageDTO testEvent) throws SegueDatabaseException {
       List<DetailedEventBookingDTO> waitingListBookingsList = List.of();
-      expect(dummyEventBookingPersistenceManager.adminGetBookingsByEventIdAndStatus(testEvent.getId(),
-          BookingStatus.WAITING_LIST)).andReturn(waitingListBookingsList);
+      expect(dummyEventBookingPersistenceManager.adminGetBookingsByEventIdAndStatus(
+          eq(testEvent.getId()),
+          eq(BookingStatus.WAITING_LIST),
+          EasyMock.anyBoolean())).andReturn(waitingListBookingsList);
     }
 
     private void prepareCancellationEmailExpectations(String emailTemplateId, IsaacEventPageDTO testEvent,
@@ -1538,6 +1551,110 @@ class EventBookingManagerTest {
               String.format("https://hostname.com/contact?subject=Event+-++-+%s", urlDate),
               EMAIL_TEMPLATE_TOKEN_EVENT_DETAILS, "", EMAIL_TEMPLATE_TOKEN_EVENT, testEvent), EmailType.SYSTEM);
       expectLastCall();
+    }
+
+    @Test
+    void cancelConfirmedBooking_skipsDeletedWaitingListUsers_promotesNextValidUser()
+        throws SegueDatabaseException, ContentManagerException, NoUserException {
+      // Test that when the oldest waiting list user is deleted, promotion skips to the next valid user
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
+
+      RegisteredUserDTO confirmedUser = new RegisteredUserDTO();
+      confirmedUser.setId(2L);
+
+      // Create waiting list users: first one is "deleted", second is valid
+      DetailedEventBookingDTO deletedWaitingListUser =
+          prepareDetailedEventBookingDto(prepareUserSummaryDto(3L), BookingStatus.WAITING_LIST, testEvent.getId());
+      deletedWaitingListUser.setBookingDate(someLessFutureDate);
+
+      DetailedEventBookingDTO validWaitingListUser =
+          prepareDetailedEventBookingDto(prepareUserSummaryDto(4L), BookingStatus.WAITING_LIST, testEvent.getId());
+      validWaitingListUser.setBookingDate(someFutureDate);
+
+      List<DetailedEventBookingDTO> allWaitingListBookings =
+          List.of(deletedWaitingListUser, validWaitingListUser);
+
+      DetailedEventBookingDTO updatedValidWaitingListBooking =
+          prepareDetailedEventBookingDto(prepareUserSummaryDto(4L), BookingStatus.CONFIRMED, testEvent.getId());
+
+      RegisteredUserDTO promotedUser = new RegisteredUserDTO();
+      promotedUser.setId(4L);
+
+      prepareTransactionExpectations(testEvent);
+      prepareConfirmedBookingExpectations(testEvent, confirmedUser);
+
+      // Mock the waiting list query to return both users (includeDeleted might be true for past events)
+      expect(dummyEventBookingPersistenceManager.adminGetBookingsByEventIdAndStatus(
+          eq(testEvent.getId()),
+          eq(BookingStatus.WAITING_LIST),
+          EasyMock.anyBoolean())).andReturn(allWaitingListBookings);
+
+      // Mock getUserDTOById to simulate user 3 being deleted
+      expect(dummyUserAccountManager.getUserDTOById(3L))
+          .andThrow(new NoUserException("User deleted"));
+
+      // Mock getUserDTOById for valid user 4
+      expect(dummyUserAccountManager.getUserDTOById(4L))
+          .andReturn(promotedUser)
+          .times(2);  // Once during selection, once for post-promotion operations
+
+      // Now expect updateBookingStatus to be called with user 4's ID
+      expect(dummyEventBookingPersistenceManager.updateBookingStatus(dummyTransaction, testEvent.getId(),
+          validWaitingListUser.getUserBooked().getId(), BookingStatus.CONFIRMED,
+          validWaitingListUser.getAdditionalInformation())).andReturn(updatedValidWaitingListBooking);
+
+      prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
+          confirmedUser);
+      EmailTemplateDTO bookingPromotionNotificationTemplate = new EmailTemplateDTO();
+      expect(dummyEmailManager.getEmailTemplateDTO("email-event-booking-waiting-list-promotion-confirmed")).andReturn(
+          bookingPromotionNotificationTemplate);
+      dummyEmailManager.sendTemplatedEmailToUser(eq(promotedUser), eq(bookingPromotionNotificationTemplate),
+          EasyMock.anyObject(), eq(EmailType.SYSTEM), EasyMock.<List<EmailAttachment>>anyObject());
+      expectLastCall();
+
+      replay(mockedObjects);
+
+      EventBookingManager ebm = buildEventBookingManager();
+      try {
+        ebm.cancelBooking(testEvent, confirmedUser);
+      } catch (SegueDatabaseException | ContentManagerException e) {
+        fail("No exception is expected for this test");
+      }
+
+      verify(mockedObjects);
+    }
+
+    @Test
+    void cancelConfirmedBooking_noWaitingListUsersToPromote_whenAllDeleted()
+        throws SegueDatabaseException, ContentManagerException, NoUserException {
+      // Test that when all waiting list users are deleted on a future event, none are promoted
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
+
+      RegisteredUserDTO confirmedUser = new RegisteredUserDTO();
+      confirmedUser.setId(2L);
+
+      prepareTransactionExpectations(testEvent);
+      prepareConfirmedBookingExpectations(testEvent, confirmedUser);
+
+      // Mock the waiting list query to return empty list (all deleted users, future event)
+      expect(dummyEventBookingPersistenceManager.adminGetBookingsByEventIdAndStatus(
+          eq(testEvent.getId()),
+          eq(BookingStatus.WAITING_LIST),
+          eq(false))).andReturn(List.of()); // includeDeleted=false for future events
+
+      prepareCancellationEmailExpectations("email-event-booking-cancellation-confirmed", testEvent,
+          confirmedUser);
+
+      replay(mockedObjects);
+
+      EventBookingManager ebm = buildEventBookingManager();
+      try {
+        ebm.cancelBooking(testEvent, confirmedUser);
+      } catch (SegueDatabaseException | ContentManagerException e) {
+        fail("No exception is expected for this test");
+      }
+
+      verify(mockedObjects);
     }
   }
 
@@ -1768,7 +1885,8 @@ class EventBookingManagerTest {
   private EventBookingManager buildEventBookingManager() {
     return new EventBookingManager(
         dummyEventBookingPersistenceManager, dummyEmailManager, dummyUserAssociationManager,
-        dummyPropertiesLoader, dummyGroupManager, dummyUserAccountManager, dummyTransactionManager);
+        dummyPropertiesLoader, dummyGroupManager, dummyUserAccountManager, dummyTransactionManager,
+        dummyContentManager);
   }
 
   private void prepareCommonTransactionExpectations(IsaacEventPageDTO testEvent) throws SegueDatabaseException {
