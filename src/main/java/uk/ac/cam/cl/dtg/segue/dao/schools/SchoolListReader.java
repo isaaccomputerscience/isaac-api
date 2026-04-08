@@ -68,7 +68,7 @@ public class SchoolListReader {
    */
   @Inject
   public SchoolListReader(final ISearchProvider searchProvider) {
-    log.info("Initializing SchoolListReader");
+    log.debug("Initializing SchoolListReader");
     this.searchProvider = searchProvider;
 
     String modificationDate;
@@ -76,13 +76,13 @@ public class SchoolListReader {
       modificationDate = searchProvider.getById(
               SCHOOLS_INDEX_BASE, SchoolsIndexType.METADATA.toString(), "sourceFile").getSource().get("lastModified")
           .toString();
-      log.info("School list data source modification date: {}", modificationDate);
+      log.debug("School list data source modification date: {}", modificationDate);
     } catch (SegueSearchException | ElasticsearchStatusException e) {
       log.error("Failed to retrieve school list modification date", e);
       modificationDate = "unknown";
     }
     dataSourceModificationDate = modificationDate;
-    log.info("SchoolListReader initialized successfully");
+    log.debug("SchoolListReader initialized successfully");
   }
 
   /**

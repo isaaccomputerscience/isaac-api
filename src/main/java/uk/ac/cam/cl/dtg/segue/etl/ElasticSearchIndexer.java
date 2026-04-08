@@ -191,6 +191,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
                               final List<String> indexTypeTargets) {
     String indexWithPrevious = null; // This is the index that has the <alias>_previous alias
     String indexWithCurrent = null; // This is the index that has the <alias> alias.
+    int alreadyCorrectCount = 0; // Count of aliases that don't need moving (reduces log noise)
 
     for (String indexTypeTarget : indexTypeTargets) {
       String typedAlias = ElasticSearchProvider.produceTypedIndexName(aliasBase, indexTypeTarget);
@@ -242,8 +243,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       }
 
       if (indexWithCurrent != null && indexWithCurrent.equals(typedIndexTarget)) {
-        log.info("Not moving alias '" + sanitiseInternalLogValue(typedAlias)
-            + "' - it already points to the right index.");
+        alreadyCorrectCount++;
       } else {
         IndicesAliasesRequest request = new IndicesAliasesRequest();
 
@@ -284,6 +284,7 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       }
 
     }
+    log.debug("{}/{} aliases already correct, no moves needed.", alreadyCorrectCount, indexTypeTargets.size());
     this.expungeOldIndices();
     return true;
   }

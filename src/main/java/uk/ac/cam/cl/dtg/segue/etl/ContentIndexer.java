@@ -121,7 +121,7 @@ public class ContentIndexer {
       throw new VersionLockedException(version);
     }
 
-    log.info("Acquired lock for version " + sanitiseInternalLogValue(version) + ". Indexing.");
+    log.debug("Acquired lock for version " + sanitiseInternalLogValue(version) + ". Indexing.");
 
     try {
 
@@ -131,7 +131,7 @@ public class ContentIndexer {
       // The case where only some of the content types have been successfully indexed for this version, should
       // never happen but is covered by an expunge at the start of #buildElasticSearchIndex(...).
       if (allContentTypesAreIndexedForVersion(version)) {
-        log.info("Content already indexed: " + sanitiseInternalLogValue(version));
+        log.debug("Content already indexed: " + sanitiseInternalLogValue(version));
         return;
       }
 
