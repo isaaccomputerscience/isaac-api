@@ -55,10 +55,10 @@ class ETLManager {
   }
 
   void setNamedVersion(final String alias, final String version) throws Exception {
-    log.info("Requested aliased version: {} - {}", alias, version);
+    log.debug("Requested aliased version: {} - {}", alias, version);
     indexer.loadAndIndexContent(version);
     indexer.setNamedVersion(alias, version);
-    log.info("Version {} with alias '{}' is successfully indexed.", version, alias);
+    log.debug("Version {} with alias '{}' is successfully indexed.", version, alias);
   }
 
   // Indexes all content in idempotent fashion. If the content is already indexed no action is taken.
@@ -95,13 +95,13 @@ class ETLManager {
 
     @Override
     public void run() {
-      log.info("Starting content indexer thread.");
+      log.debug("Starting content indexer thread.");
       try {
         indexContent();
       } catch (Exception e) {
         log.error("ContentIndexerTask failed.", e);
       }
-      log.info("Content indexer thread complete, waiting for next scheduled run.");
+      log.debug("Content indexer thread complete, waiting for next scheduled run.");
     }
   }
 }
