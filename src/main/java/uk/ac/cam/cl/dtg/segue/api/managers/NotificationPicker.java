@@ -68,7 +68,6 @@ public class NotificationPicker {
 
   /**
    * getAvailableNotificationsForUser.
-   *q
    * @param user to select notifications for.
    * @return the list of content to show to the user.
    * @throws ContentManagerException if something goes wrong looking up the content.

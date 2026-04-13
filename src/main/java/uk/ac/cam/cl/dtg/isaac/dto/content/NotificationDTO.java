@@ -87,7 +87,7 @@ public class NotificationDTO extends ContentDTO {
  *
  * @return the startDate
  */
-public Instant getStartDate() {
+  public Instant getStartDate() {
   return startDate;
 }
 
@@ -96,7 +96,7 @@ public Instant getStartDate() {
  *
  * @param startDate the startDate to set
  */
-public void setStartDate(final Instant startDate) {
+  public void setStartDate(final Instant startDate) {
   this.startDate = startDate;
 }
 }
