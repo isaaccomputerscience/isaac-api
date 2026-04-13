@@ -68,7 +68,7 @@ public class NotificationPicker {
 
   /**
    * getAvailableNotificationsForUser.
-   *
+   *q
    * @param user to select notifications for.
    * @return the list of content to show to the user.
    * @throws ContentManagerException if something goes wrong looking up the content.
@@ -97,6 +97,11 @@ public class NotificationPicker {
 
       if (notification.getExpiry() != null && Instant.now().isAfter(notification.getExpiry())) {
         // skip expired notifications
+        continue;
+      }
+
+      if (notification.getStartDate() != null && Instant.now().isBefore(notification.getStartDate())) {
+        // skip showing this notification yet
         continue;
       }
 

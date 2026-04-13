@@ -27,6 +27,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.ExternalReference;
 public class NotificationDTO extends ContentDTO {
   private ExternalReference externalReference;
   private Instant expiry;
+  private Instant startDate;
 
   /**
    * Notification object constructor taking a string value for the notification content.
@@ -79,4 +80,23 @@ public class NotificationDTO extends ContentDTO {
   public void setExpiry(final Instant expiry) {
     this.expiry = expiry;
   }
+
+
+/**
+ * Gets the startDate.
+ *
+ * @return the startDate
+ */
+public Instant getStartDate() {
+  return startDate;
+}
+
+/**
+ * Sets the startDate.
+ *
+ * @param startDate the startDate to set
+ */
+public void setStartDate(final Instant startDate) {
+  this.startDate = startDate;
+}
 }
