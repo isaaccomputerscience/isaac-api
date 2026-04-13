@@ -97,7 +97,6 @@ public class Notification extends Content {
    * @param startDate the startDate to set
    */
   public void setStartDate(final Instant startDate) {
-
     this.startDate = startDate;
   }
 }
