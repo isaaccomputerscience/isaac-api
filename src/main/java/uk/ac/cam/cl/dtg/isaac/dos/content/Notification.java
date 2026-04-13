@@ -100,6 +100,6 @@ public class Notification extends Content {
 
     this.startDate = startDate;
   }
-  }
+}
 
 
