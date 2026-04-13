@@ -82,23 +82,24 @@ public class Notification extends Content {
   }
 
 
-/**
- * Gets the startDate.
- *
- * @return the startDate
- */
-public Instant getStartDate() {
-  return startDate;
-}
+  /**
+   * Gets the startDate.
+   *
+   * @return the startDate
+   */
+  public Instant getStartDate() {
+    return startDate;
+  }
 
-/**
- * Sets the startDate.
- *
- * @param startDate the startDate to set
- */
-public void setStartDate(final Instant startDate) {
-  this.startDate = startDate;
-}
-}
+  /**
+   * Sets the startDate.
+   *
+   * @param startDate the startDate to set
+   */
+  public void setStartDate(final Instant startDate) {
+
+    this.startDate = startDate;
+  }
+  }
 
 
