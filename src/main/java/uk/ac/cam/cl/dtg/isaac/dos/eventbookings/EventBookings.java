@@ -200,4 +200,12 @@ public interface EventBookings {
    * @param userId - user id
    */
   void deleteAdditionalInformation(Long userId) throws SegueDatabaseException;
+
+  /**
+   * Find all RESERVED bookings that have expired based on their reservationCloseDate.
+   *
+   * @return an iterable with all expired RESERVED bookings
+   * @throws SegueDatabaseException - if an error occurs
+   */
+  Iterable<EventBooking> findExpiredReservedBookings() throws SegueDatabaseException;
 }
