@@ -443,7 +443,11 @@ public class MailJetApiClientWrapper {
       throw new MailjetException(errorMsg, e);
 
     } catch (MailjetException e) {
-      handleBulkSyncException(e, users);
+      if (isCommunicationException(e)) {
+        String errorMsg = "{}Communication error during bulk sync of {} users"
+            .replace("{}", MAILJET).replace("{}", String.valueOf(users.size()));
+        throw new MailjetClientCommunicationException(errorMsg, e);
+      }
       throw e;
     }
   }
@@ -494,8 +498,9 @@ public class MailJetApiClientWrapper {
                                         final java.util.List<UserExternalAccountChanges> users)
       throws MailjetException {
     MailjetResponse response = mailjetClient.post(request);
+    int status = response.getStatus();
 
-    if (response.getStatus() == 200 || response.getStatus() == 201) {
+    if (status == 200 || status == 201) {
       JSONObject responseData = response.getData().getJSONObject(0);
       String jobId = responseData.optString("JobID", null);
       log.info("{}Bulk sync submitted for {} users (job ID: {})", MAILJET, users.size(), jobId);
@@ -504,20 +509,7 @@ public class MailJetApiClientWrapper {
 
     throw new MailjetException(
         "{}Failed to submit bulk sync. Status: {}".replace("{}", MAILJET)
-            .replace("{}", String.valueOf(response.getStatus())));
+            .replace("{}", String.valueOf(status)));
   }
 
-  /**
-   * Handle exceptions during bulk sync.
-   * Extracted to reduce cognitive complexity.
-   */
-  private void handleBulkSyncException(final MailjetException e,
-                                        final java.util.List<UserExternalAccountChanges> users)
-      throws MailjetException {
-    if (isCommunicationException(e)) {
-      String errorMsg = "{}Communication error during bulk sync of {} users"
-          .replace("{}", MAILJET).replace("{}", String.valueOf(users.size()));
-      throw new MailjetClientCommunicationException(errorMsg, e);
-    }
-  }
 }
