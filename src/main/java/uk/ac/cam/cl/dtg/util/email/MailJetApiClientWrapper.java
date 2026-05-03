@@ -44,6 +44,8 @@ public class MailJetApiClientWrapper {
   private static final String MAILJET = "MAILJET - ";
   private static final String PROPERTY_VALUE_KEY = "value";
   private static final int BULK_BATCH_SIZE = 1000;
+  private static final String ACTION = "Action";
+  private static final String LIST_ID = "ListID";
 
   private final MailjetClient mailjetClient;
   private final String newsListId;
@@ -426,46 +428,14 @@ public class MailJetApiClientWrapper {
     }
 
     try {
-      JSONArray contactsArray = new JSONArray();
-      for (UserExternalAccountChanges user : users) {
-        JSONObject contactObj = new JSONObject()
-            .put("Email", user.getAccountEmail())
-            .put("Name", user.getGivenName() != null ? user.getGivenName() : "")
-            .put("Properties", new JSONObject()
-                .put("firstname", user.getGivenName() != null ? user.getGivenName() : "")
-                .put("role", user.getRole().toString())
-                .put("verification_status", user.getEmailVerificationStatus().toString())
-                .put("stage", user.getStage() != null ? user.getStage() : "unknown"));
-        contactsArray.put(contactObj);
-      }
-
-      JSONArray listsArray = new JSONArray()
-          .put(new JSONObject()
-              .put("ListID", legalListId)
-              .put("Action", MailJetSubscriptionAction.FORCE_SUBSCRIBE.getValue()))
-          .put(new JSONObject()
-              .put("ListID", newsListId)
-              .put("Action", newsAction.getValue()))
-          .put(new JSONObject()
-              .put("ListID", eventsListId)
-              .put("Action", eventsAction.getValue()));
+      JSONArray contactsArray = buildContactsArray(users);
+      JSONArray listsArray = buildListsArray(newsAction, eventsAction);
 
       MailjetRequest request = new MailjetRequest(ContactManagemanycontacts.resource)
           .property(ContactManagemanycontacts.CONTACTS, contactsArray)
           .property(ContactManagemanycontacts.CONTACTSLISTS, listsArray);
 
-      MailjetResponse response = mailjetClient.post(request);
-
-      if (response.getStatus() == 200 || response.getStatus() == 201) {
-        JSONObject responseData = response.getData().getJSONObject(0);
-        String jobId = responseData.optString("JobID", null);
-        log.info("{}Bulk sync submitted for {} users (job ID: {})", MAILJET, users.size(), jobId);
-        return jobId;
-      }
-
-      throw new MailjetException(
-          "{}Failed to submit bulk sync. Status: {}".replace("{}", MAILJET)
-              .replace("{}", String.valueOf(response.getStatus())));
+      return submitBulkSyncRequest(request, users);
 
     } catch (JSONException e) {
       String errorMsg = "{}JSON parsing error during bulk sync of {} users".replace("{}", MAILJET)
@@ -473,12 +443,81 @@ public class MailJetApiClientWrapper {
       throw new MailjetException(errorMsg, e);
 
     } catch (MailjetException e) {
-      if (isCommunicationException(e)) {
-        String errorMsg = "{}Communication error during bulk sync of {} users"
-            .replace("{}", MAILJET).replace("{}", String.valueOf(users.size()));
-        throw new MailjetClientCommunicationException(errorMsg, e);
-      }
+      handleBulkSyncException(e, users);
       throw e;
+    }
+  }
+
+  /**
+   * Build contacts array for bulk sync request.
+   * Extracted to reduce cognitive complexity.
+   */
+  private JSONArray buildContactsArray(final java.util.List<UserExternalAccountChanges> users) {
+    JSONArray contactsArray = new JSONArray();
+    for (UserExternalAccountChanges user : users) {
+      JSONObject contactObj = new JSONObject()
+          .put("Email", user.getAccountEmail())
+          .put("Name", user.getGivenName() != null ? user.getGivenName() : "")
+          .put("Properties", new JSONObject()
+              .put("firstname", user.getGivenName() != null ? user.getGivenName() : "")
+              .put("role", user.getRole().toString())
+              .put("verification_status", user.getEmailVerificationStatus().toString())
+              .put("stage", user.getStage() != null ? user.getStage() : "unknown"));
+      contactsArray.put(contactObj);
+    }
+    return contactsArray;
+  }
+
+  /**
+   * Build lists array for bulk sync request.
+   * Extracted to reduce cognitive complexity.
+   */
+  private JSONArray buildListsArray(final MailJetSubscriptionAction newsAction,
+                                     final MailJetSubscriptionAction eventsAction) {
+    return new JSONArray()
+        .put(new JSONObject()
+            .put(LIST_ID, legalListId)
+            .put(ACTION, MailJetSubscriptionAction.FORCE_SUBSCRIBE.getValue()))
+        .put(new JSONObject()
+            .put(LIST_ID, newsListId)
+            .put(ACTION, newsAction.getValue()))
+        .put(new JSONObject()
+            .put(LIST_ID, eventsListId)
+            .put(ACTION, eventsAction.getValue()));
+  }
+
+  /**
+   * Submit the bulk sync request and handle the response.
+   * Extracted to reduce cognitive complexity.
+   */
+  private String submitBulkSyncRequest(final MailjetRequest request,
+                                        final java.util.List<UserExternalAccountChanges> users)
+      throws MailjetException {
+    MailjetResponse response = mailjetClient.post(request);
+
+    if (response.getStatus() == 200 || response.getStatus() == 201) {
+      JSONObject responseData = response.getData().getJSONObject(0);
+      String jobId = responseData.optString("JobID", null);
+      log.info("{}Bulk sync submitted for {} users (job ID: {})", MAILJET, users.size(), jobId);
+      return jobId;
+    }
+
+    throw new MailjetException(
+        "{}Failed to submit bulk sync. Status: {}".replace("{}", MAILJET)
+            .replace("{}", String.valueOf(response.getStatus())));
+  }
+
+  /**
+   * Handle exceptions during bulk sync.
+   * Extracted to reduce cognitive complexity.
+   */
+  private void handleBulkSyncException(final MailjetException e,
+                                        final java.util.List<UserExternalAccountChanges> users)
+      throws MailjetException {
+    if (isCommunicationException(e)) {
+      String errorMsg = "{}Communication error during bulk sync of {} users"
+          .replace("{}", MAILJET).replace("{}", String.valueOf(users.size()));
+      throw new MailjetClientCommunicationException(errorMsg, e);
     }
   }
 }

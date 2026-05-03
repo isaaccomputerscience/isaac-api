@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
@@ -66,15 +65,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
   public synchronized void synchroniseChangedUsers() throws ExternalAccountSynchronisationException {
     log.info("{}Starting Mailjet synchronization process", MAILJET);
 
-    List<UserExternalAccountChanges> userRecordsToUpdate;
-    try {
-      userRecordsToUpdate = database.getRecentlyChangedRecords();
-      log.info("{}Found {} users to synchronize with Mailjet", MAILJET, userRecordsToUpdate.size());
-    } catch (SegueDatabaseException e) {
-      throw new ExternalAccountSynchronisationException("Failed to retrieve users for synchronization"
-              + e.getMessage());
-    }
-
+    List<UserExternalAccountChanges> userRecordsToUpdate = getRecentlyChangedUsersOrThrow();
     if (userRecordsToUpdate.isEmpty()) {
       log.info("{}No users to synchronize", MAILJET);
       return;
@@ -83,19 +74,56 @@ public class ExternalAccountManager implements IExternalAccountManager {
     SyncMetrics metrics = new SyncMetrics();
     List<Long> successfullyProcessedUserIds = new ArrayList<>();
 
-    // Separate users into deletions and syncs
     List<UserExternalAccountChanges> usersToDelete = new ArrayList<>();
     List<UserExternalAccountChanges> usersToSync = new ArrayList<>();
+    partitionUsersByType(userRecordsToUpdate, usersToDelete, usersToSync);
 
-    for (UserExternalAccountChanges userRecord : userRecordsToUpdate) {
-      if (userRecord.isDeleted() && userRecord.getProviderUserId() != null) {
+    processDeletions(usersToDelete, metrics, successfullyProcessedUserIds);
+    processBulkSyncs(usersToSync, metrics, successfullyProcessedUserIds);
+    markSuccessfullyProcessedAsSynced(successfullyProcessedUserIds, metrics);
+
+    logSyncSummary(metrics, userRecordsToUpdate.size());
+  }
+
+  /**
+   * Retrieve recently changed users from database.
+   * Extracted to reduce cognitive complexity.
+   */
+  private List<UserExternalAccountChanges> getRecentlyChangedUsersOrThrow()
+      throws ExternalAccountSynchronisationException {
+    try {
+      List<UserExternalAccountChanges> users = database.getRecentlyChangedRecords();
+      log.info("{}Found {} users to synchronize with Mailjet", MAILJET, users.size());
+      return users;
+    } catch (SegueDatabaseException e) {
+      throw new ExternalAccountSynchronisationException("Failed to retrieve users for synchronization"
+              + e.getMessage());
+    }
+  }
+
+  /**
+   * Partition users into deletions and syncs.
+   * Extracted to reduce cognitive complexity.
+   */
+  private void partitionUsersByType(final List<UserExternalAccountChanges> userRecords,
+                                     final List<UserExternalAccountChanges> usersToDelete,
+                                     final List<UserExternalAccountChanges> usersToSync) {
+    for (UserExternalAccountChanges userRecord : userRecords) {
+      if (Boolean.TRUE.equals(userRecord.isDeleted()) && userRecord.getProviderUserId() != null) {
         usersToDelete.add(userRecord);
       } else {
         usersToSync.add(userRecord);
       }
     }
+  }
 
-    // Process deletions individually with backoff
+  /**
+   * Process user deletions with error handling and backoff.
+   * Extracted to reduce cognitive complexity.
+   */
+  private void processDeletions(final List<UserExternalAccountChanges> usersToDelete, final SyncMetrics metrics,
+                                 final List<Long> successfullyProcessedUserIds)
+      throws ExternalAccountSynchronisationException {
     for (UserExternalAccountChanges userRecord : usersToDelete) {
       try {
         deleteUserFromMailJetWithBackoff(userRecord.getProviderUserId(), userRecord);
@@ -114,38 +142,21 @@ public class ExternalAccountManager implements IExternalAccountManager {
             MAILJET, userRecord.getUserId(), e);
       }
     }
+  }
 
-    // Process syncs via bulk API grouped by subscription state
+  /**
+   * Process bulk syncs grouped by subscription state.
+   * Extracted to reduce cognitive complexity.
+   */
+  private void processBulkSyncs(final List<UserExternalAccountChanges> usersToSync, final SyncMetrics metrics,
+                                 final List<Long> successfullyProcessedUserIds)
+      throws ExternalAccountSynchronisationException {
     try {
       Map<SubscriptionGroup, List<UserExternalAccountChanges>> groupedUsers =
           groupUsersBySubscriptionState(usersToSync);
 
       for (Map.Entry<SubscriptionGroup, List<UserExternalAccountChanges>> entry : groupedUsers.entrySet()) {
-        SubscriptionGroup group = entry.getKey();
-        List<UserExternalAccountChanges> groupUsers = entry.getValue();
-
-        for (int i = 0; i < groupUsers.size(); i += BULK_BATCH_SIZE) {
-          int endIndex = Math.min(i + BULK_BATCH_SIZE, groupUsers.size());
-          List<UserExternalAccountChanges> batch = groupUsers.subList(i, endIndex);
-
-          try {
-            mailjetApi.bulkSyncUsers(batch, group.newsAction, group.eventsAction);
-            for (UserExternalAccountChanges user : batch) {
-              metrics.incrementSuccess();
-              successfullyProcessedUserIds.add(user.getUserId());
-            }
-          } catch (MailjetRateLimitException e) {
-            metrics.incrementRateLimitError();
-            log.warn("{}Mailjet rate limit exceeded during bulk sync. Processed {} users so far.",
-                MAILJET, metrics.getSuccessCount());
-            throw new ExternalAccountSynchronisationException(
-                "Mailjet API rate limits exceeded after processing " + metrics.getSuccessCount() + " users");
-          } catch (MailjetException e) {
-            metrics.incrementMailjetError();
-            log.error("{}Mailjet API error during bulk sync of {} users. Continuing with next batch.",
-                MAILJET, batch.size(), e);
-          }
-        }
+        processBatchesForGroup(entry.getKey(), entry.getValue(), metrics, successfullyProcessedUserIds);
       }
     } catch (ExternalAccountSynchronisationException e) {
       throw e;
@@ -153,8 +164,47 @@ public class ExternalAccountManager implements IExternalAccountManager {
       metrics.incrementUnexpectedError();
       log.error("{}Unexpected error during bulk sync", MAILJET, e);
     }
+  }
 
-    // Batch mark all successfully processed users as synced
+  /**
+   * Process batches for a subscription group.
+   * Extracted to reduce cognitive complexity.
+   */
+  private void processBatchesForGroup(final SubscriptionGroup group,
+                                       final List<UserExternalAccountChanges> groupUsers,
+                                       final SyncMetrics metrics,
+                                       final List<Long> successfullyProcessedUserIds)
+      throws ExternalAccountSynchronisationException {
+    for (int i = 0; i < groupUsers.size(); i += BULK_BATCH_SIZE) {
+      int endIndex = Math.min(i + BULK_BATCH_SIZE, groupUsers.size());
+      List<UserExternalAccountChanges> batch = groupUsers.subList(i, endIndex);
+
+      try {
+        mailjetApi.bulkSyncUsers(batch, group.newsAction, group.eventsAction);
+        for (UserExternalAccountChanges user : batch) {
+          metrics.incrementSuccess();
+          successfullyProcessedUserIds.add(user.getUserId());
+        }
+      } catch (MailjetRateLimitException e) {
+        metrics.incrementRateLimitError();
+        log.warn("{}Mailjet rate limit exceeded during bulk sync. Processed {} users so far.",
+            MAILJET, metrics.getSuccessCount());
+        throw new ExternalAccountSynchronisationException(
+            "Mailjet API rate limits exceeded after processing " + metrics.getSuccessCount() + " users");
+      } catch (MailjetException e) {
+        metrics.incrementMailjetError();
+        log.error("{}Mailjet API error during bulk sync of {} users. Continuing with next batch.",
+            MAILJET, batch.size(), e);
+      }
+    }
+  }
+
+  /**
+   * Mark successfully processed users as synced in database.
+   * Extracted to reduce cognitive complexity.
+   */
+  private void markSuccessfullyProcessedAsSynced(final List<Long> successfullyProcessedUserIds,
+                                                  final SyncMetrics metrics) {
     try {
       if (!successfullyProcessedUserIds.isEmpty()) {
         database.batchMarkAsSynced(successfullyProcessedUserIds);
@@ -163,8 +213,6 @@ public class ExternalAccountManager implements IExternalAccountManager {
       metrics.incrementDatabaseError();
       log.error("{}Database error marking {} users as synced", MAILJET, successfullyProcessedUserIds.size(), e);
     }
-
-    logSyncSummary(metrics, userRecordsToUpdate.size());
   }
 
   /**
