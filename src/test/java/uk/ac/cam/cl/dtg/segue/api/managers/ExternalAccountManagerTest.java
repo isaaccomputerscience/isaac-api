@@ -1,6 +1,8 @@
 package uk.ac.cam.cl.dtg.segue.api.managers;
 
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
@@ -43,6 +45,142 @@ class ExternalAccountManagerTest {
 
   @Nested
   class SynchroniseChangedUsersTests {
+
+    @Test
+    void synchroniseChangedUsers_WithBulkUsers_ShouldUseBulkApi()
+        throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
+      // Arrange - users with same subscription preferences should be batched
+      List<UserExternalAccountChanges> changedUsers = List.of(
+          new UserExternalAccountChanges(
+              1L, null, "test1@example.com", Role.STUDENT, "John", false,
+              EmailVerificationStatus.VERIFIED, true, true, "GCSE"
+          ),
+          new UserExternalAccountChanges(
+              2L, null, "test2@example.com", Role.STUDENT, "Jane", false,
+              EmailVerificationStatus.VERIFIED, true, true, "GCSE"
+          )
+      );
+
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE),
+          eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE))).andReturn("job123");
+      mockDatabase.batchMarkAsSynced(anyObject(List.class));
+      expectLastCall();
+
+      replay(mockDatabase, mockMailjetApi);
+
+      // Act
+      externalAccountManager.synchroniseChangedUsers();
+
+      // Assert
+      verify(mockDatabase, mockMailjetApi);
+    }
+
+    @Test
+    void synchroniseChangedUsers_WithMixedSubscriptionPreferences_ShouldGroupByPreferences()
+        throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
+      // Arrange - users with different subscription preferences should be in different groups
+      List<UserExternalAccountChanges> changedUsers = List.of(
+          new UserExternalAccountChanges(
+              1L, null, "test1@example.com", Role.STUDENT, "John", false,
+              EmailVerificationStatus.VERIFIED, true, true, "GCSE"
+          ),
+          new UserExternalAccountChanges(
+              2L, null, "test2@example.com", Role.STUDENT, "Jane", false,
+              EmailVerificationStatus.VERIFIED, true, false, "GCSE"
+          )
+      );
+
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      // First bulk call for group (FORCE_SUBSCRIBE, FORCE_SUBSCRIBE)
+      expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE),
+          eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE))).andReturn("job123");
+      // Second bulk call for group (FORCE_SUBSCRIBE, UNSUBSCRIBE)
+      expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE),
+          eq(MailJetSubscriptionAction.UNSUBSCRIBE))).andReturn("job124");
+      mockDatabase.batchMarkAsSynced(anyObject(List.class));
+      expectLastCall();
+
+      replay(mockDatabase, mockMailjetApi);
+
+      // Act
+      externalAccountManager.synchroniseChangedUsers();
+
+      // Assert
+      verify(mockDatabase, mockMailjetApi);
+    }
+
+    @Test
+    void synchroniseChangedUsers_WithDeletedUser_ShouldDeleteIndividually()
+        throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
+      // Arrange
+      List<UserExternalAccountChanges> changedUsers = List.of(
+          new UserExternalAccountChanges(
+              1L, "mailjetId123", "test@example.com", Role.STUDENT, "John", true,
+              EmailVerificationStatus.VERIFIED, true, true, "GCSE"
+          )
+      );
+
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      mockMailjetApi.permanentlyDeleteAccountById("mailjetId123");
+      expectLastCall();
+      mockDatabase.updateExternalAccount(1L, null);
+      expectLastCall();
+      mockDatabase.updateProviderLastUpdated(1L);
+      expectLastCall();
+      mockDatabase.batchMarkAsSynced(anyObject(List.class));
+      expectLastCall();
+
+      replay(mockDatabase, mockMailjetApi);
+
+      // Act
+      externalAccountManager.synchroniseChangedUsers();
+
+      // Assert
+      verify(mockDatabase, mockMailjetApi);
+    }
+
+    @Test
+    void synchroniseChangedUsers_WithDeliveryFailedUser_ShouldGroupAsRemove()
+        throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
+      // Arrange
+      List<UserExternalAccountChanges> changedUsers = List.of(
+          new UserExternalAccountChanges(
+              1L, null, "test@example.com", Role.STUDENT, "John", false,
+              EmailVerificationStatus.DELIVERY_FAILED, true, true, "GCSE"
+          )
+      );
+
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      // Delivery failed users should call with REMOVE for both news and events
+      expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.REMOVE),
+          eq(MailJetSubscriptionAction.REMOVE))).andReturn("job123");
+      mockDatabase.batchMarkAsSynced(anyObject(List.class));
+      expectLastCall();
+
+      replay(mockDatabase, mockMailjetApi);
+
+      // Act
+      externalAccountManager.synchroniseChangedUsers();
+
+      // Assert
+      verify(mockDatabase, mockMailjetApi);
+    }
+
+    @Test
+    void synchroniseChangedUsers_WithEmptyUserList_ShouldReturnWithoutError()
+        throws SegueDatabaseException, ExternalAccountSynchronisationException {
+      // Arrange
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(new ArrayList<>());
+
+      replay(mockDatabase, mockMailjetApi);
+
+      // Act
+      externalAccountManager.synchroniseChangedUsers();
+
+      // Assert
+      verify(mockDatabase, mockMailjetApi);
+    }
 
     @Test
     void synchroniseChangedUsers_WithNewUser_ShouldCreateAccount()

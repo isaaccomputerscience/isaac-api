@@ -35,6 +35,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 public class SyncMailjetUsersJob implements Job {
   private static final Logger log = LoggerFactory.getLogger(SyncMailjetUsersJob.class);
+  private static final String MAILJET = "MAILJET - ";
 
   private final IExternalAccountManager externalAccountManager;
   private final EmailManager emailManager;
@@ -55,7 +56,7 @@ public class SyncMailjetUsersJob implements Job {
   public void execute(final JobExecutionContext context) throws JobExecutionException {
     try {
       externalAccountManager.synchroniseChangedUsers();
-      log.info("Success: synchronised users");
+      log.info("{}Success: synchronised users", MAILJET);
     } catch (ExternalAccountSynchronisationException e) {
       final String subject = "Failed to execute SyncMailjetUsersJob";
       StringWriter stringWriter = new StringWriter();
@@ -66,7 +67,7 @@ public class SyncMailjetUsersJob implements Job {
           new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
               subject, exception, exception, EmailType.ADMIN);
       emailManager.addSystemEmailToQueue(email);
-      log.error("Failed to synchronise users");
+      log.error("{}Failed to synchronise users", MAILJET);
     }
 
   }

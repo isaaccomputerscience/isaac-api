@@ -26,6 +26,7 @@ import com.mailjet.client.errors.MailjetClientRequestException;
 import com.mailjet.client.errors.MailjetException;
 import com.mailjet.client.resource.Contact;
 import com.mailjet.client.resource.ContactManagecontactslists;
+import com.mailjet.client.resource.ContactManagemanycontacts;
 import com.mailjet.client.resource.Contactdata;
 import com.mailjet.client.resource.Contacts;
 import com.mailjet.client.resource.ContactslistImportList;
@@ -34,12 +35,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserExternalAccountChanges;
 
 public class MailJetApiClientWrapper {
 
   private static final Logger log = LoggerFactory.getLogger(MailJetApiClientWrapper.class);
 
+  private static final String MAILJET = "MAILJET - ";
   private static final String PROPERTY_VALUE_KEY = "value";
+  private static final int BULK_BATCH_SIZE = 1000;
 
   private final MailjetClient mailjetClient;
   private final String newsListId;
@@ -81,7 +85,7 @@ public class MailJetApiClientWrapper {
    */
   public JSONObject getAccountByIdOrEmail(final String mailjetIdOrEmail) throws MailjetException {
     if (mailjetIdOrEmail == null || mailjetIdOrEmail.trim().isEmpty()) {
-      log.debug("Attempted to get account with null/empty identifier");
+      log.debug("{}Attempted to get account with null/empty identifier", MAILJET);
       return null;
     }
 
@@ -94,7 +98,7 @@ public class MailJetApiClientWrapper {
       }
 
       if (response.getStatus() != 200) {
-        log.warn("Unexpected Mailjet response status {} when fetching account", response.getStatus());
+        log.warn("{}Unexpected Mailjet response status {} when fetching account", MAILJET, response.getStatus());
         throw new MailjetException("Unexpected response status: " + response.getStatus());
       }
 
@@ -135,9 +139,9 @@ public class MailJetApiClientWrapper {
       MailjetResponse response = mailjetClient.delete(request);
 
       if (response.getStatus() == 204 || response.getStatus() == 200) {
-        log.info("Successfully deleted Mailjet account: {}", mailjetId);
+        log.info("{}Successfully deleted Mailjet account: {}", MAILJET, mailjetId);
       } else if (response.getStatus() == 404) {
-        log.debug("Attempted to delete non-existent Mailjet account: {}", mailjetId);
+        log.debug("{}Attempted to delete non-existent Mailjet account: {}", MAILJET, mailjetId);
       } else {
         throw new MailjetException("Failed to delete account. Status: " + response.getStatus());
       }
@@ -168,7 +172,7 @@ public class MailJetApiClientWrapper {
    */
   public String addNewUserOrGetUserIfExists(final String email) throws MailjetException {
     if (email == null || email.trim().isEmpty()) {
-      log.warn("Attempted to create Mailjet account with null/empty email");
+      log.warn("{}Attempted to create Mailjet account with null/empty email", MAILJET);
       return null;
     }
 
@@ -201,7 +205,7 @@ public class MailJetApiClientWrapper {
       if (response.getStatus() == 201 || response.getStatus() == 200) {
         JSONObject responseData = response.getData().getJSONObject(0);
         String mailjetId = String.valueOf(responseData.get("ID"));
-        log.info("Successfully created Mailjet account: {}", mailjetId);
+        log.info("{}Successfully created Mailjet account: {}", MAILJET, mailjetId);
         return mailjetId;
       }
 
@@ -220,13 +224,13 @@ public class MailJetApiClientWrapper {
   private String handleUserAlreadyExists(MailjetClientRequestException e, String normalizedEmail)
       throws MailjetException {
     if (e.getMessage() != null && e.getMessage().toLowerCase().contains("already exists")) {
-      log.debug("User already exists in Mailjet, fetching existing account");
+      log.debug("{}User already exists in Mailjet, fetching existing account", MAILJET);
 
       try {
         JSONObject existingAccount = getAccountByIdOrEmail(normalizedEmail);
         if (existingAccount != null) {
           String mailjetId = String.valueOf(existingAccount.get("ID"));
-          log.info("Retrieved existing Mailjet account: {}", mailjetId);
+          log.info("{}Retrieved existing Mailjet account: {}", MAILJET, mailjetId);
           return mailjetId;
         } else {
           String errorMsg = String.format("User reported as existing but couldn't fetch account: %s", normalizedEmail);
@@ -284,7 +288,7 @@ public class MailJetApiClientWrapper {
       MailjetResponse response = mailjetClient.put(request);
 
       if (response.getStatus() == 200 && response.getTotal() == 1) {
-        log.debug("Successfully updated properties for Mailjet account: {}", mailjetId);
+        log.debug("{}Successfully updated properties for Mailjet account: {}", MAILJET, mailjetId);
       } else {
         throw new MailjetException(
             String.format("Failed to update user properties. Status: %d, Total: %d", response.getStatus(),
@@ -343,7 +347,7 @@ public class MailJetApiClientWrapper {
       MailjetResponse response = mailjetClient.post(request);
 
       if (response.getStatus() == 201 && response.getTotal() == 1) {
-        log.debug("Successfully updated subscriptions for Mailjet account: {}", mailjetId);
+        log.debug("{}Successfully updated subscriptions for Mailjet account: {}", MAILJET, mailjetId);
       } else {
         throw new MailjetException(
             String.format("Failed to update user subscriptions. Status: %d, Total: %d", response.getStatus(),
@@ -392,5 +396,89 @@ public class MailJetApiClientWrapper {
     }
     String msg = e.getMessage().toLowerCase();
     return msg.contains("timeout") || msg.contains("connection");
+  }
+
+  /**
+   * Bulk create or update contacts with properties and list subscriptions.
+   * <br>
+   * Uses the asynchronous ContactManagemanycontacts endpoint to handle up to BULK_BATCH_SIZE
+   * contacts in a single API call. All contacts in the batch share the same list subscription
+   * actions. The caller must partition users by subscription state before calling this method.
+   *
+   * @param users - list of users to sync (caller must ensure size <= BULK_BATCH_SIZE)
+   * @param newsAction - subscription action for NEWS_AND_UPDATES list
+   * @param eventsAction - subscription action for EVENTS list
+   * @return Mailjet job ID for async tracking (or null if request fails)
+   * @throws MailjetException - if underlying MailjetClient throws an exception
+   */
+  public String bulkSyncUsers(final java.util.List<UserExternalAccountChanges> users,
+                               final MailJetSubscriptionAction newsAction,
+                               final MailJetSubscriptionAction eventsAction) throws MailjetException {
+    if (users == null || users.isEmpty()) {
+      log.warn("{}Attempted to bulk sync empty user list", MAILJET);
+      return null;
+    }
+
+    if (users.size() > BULK_BATCH_SIZE) {
+      throw new IllegalArgumentException("{}Bulk sync batch size ({}) exceeds limit ({})"
+          .replace("{}", MAILJET).replace("{}", String.valueOf(users.size()))
+          .replace("{}", String.valueOf(BULK_BATCH_SIZE)));
+    }
+
+    try {
+      JSONArray contactsArray = new JSONArray();
+      for (UserExternalAccountChanges user : users) {
+        JSONObject contactObj = new JSONObject()
+            .put("Email", user.getAccountEmail())
+            .put("Name", user.getGivenName() != null ? user.getGivenName() : "")
+            .put("Properties", new JSONObject()
+                .put("firstname", user.getGivenName() != null ? user.getGivenName() : "")
+                .put("role", user.getRole().toString())
+                .put("verification_status", user.getEmailVerificationStatus().toString())
+                .put("stage", user.getStage() != null ? user.getStage() : "unknown"));
+        contactsArray.put(contactObj);
+      }
+
+      JSONArray listsArray = new JSONArray()
+          .put(new JSONObject()
+              .put("ListID", legalListId)
+              .put("Action", MailJetSubscriptionAction.FORCE_SUBSCRIBE.getValue()))
+          .put(new JSONObject()
+              .put("ListID", newsListId)
+              .put("Action", newsAction.getValue()))
+          .put(new JSONObject()
+              .put("ListID", eventsListId)
+              .put("Action", eventsAction.getValue()));
+
+      MailjetRequest request = new MailjetRequest(ContactManagemanycontacts.resource)
+          .property(ContactManagemanycontacts.CONTACTS, contactsArray)
+          .property(ContactManagemanycontacts.CONTACTSLISTS, listsArray);
+
+      MailjetResponse response = mailjetClient.post(request);
+
+      if (response.getStatus() == 200 || response.getStatus() == 201) {
+        JSONObject responseData = response.getData().getJSONObject(0);
+        String jobId = responseData.optString("JobID", null);
+        log.info("{}Bulk sync submitted for {} users (job ID: {})", MAILJET, users.size(), jobId);
+        return jobId;
+      }
+
+      throw new MailjetException(
+          "{}Failed to submit bulk sync. Status: {}".replace("{}", MAILJET)
+              .replace("{}", String.valueOf(response.getStatus())));
+
+    } catch (JSONException e) {
+      String errorMsg = "{}JSON parsing error during bulk sync of {} users".replace("{}", MAILJET)
+          .replace("{}", String.valueOf(users.size()));
+      throw new MailjetException(errorMsg, e);
+
+    } catch (MailjetException e) {
+      if (isCommunicationException(e)) {
+        String errorMsg = "{}Communication error during bulk sync of {} users"
+            .replace("{}", MAILJET).replace("{}", String.valueOf(users.size()));
+        throw new MailjetClientCommunicationException(errorMsg, e);
+      }
+      throw e;
+    }
   }
 }
