@@ -191,6 +191,9 @@ public class ExternalAccountManager implements IExternalAccountManager {
             MAILJET, metrics.getSuccessCount());
         throw new ExternalAccountSynchronisationException(
             "Mailjet API rate limits exceeded after processing " + metrics.getSuccessCount() + " users");
+      } catch (MailjetClientCommunicationException e) {
+        metrics.incrementCommunicationError();
+        throw new ExternalAccountSynchronisationException("Failed to connect to Mailjet: " + e.getMessage());
       } catch (MailjetException e) {
         metrics.incrementMailjetError();
         log.error("{}Mailjet API error during bulk sync of {} users. Continuing with next batch.",
