@@ -79,6 +79,7 @@ public class ContentIndexer {
   private static final int MEDIA_FILE_SIZE_LIMIT = 300 * 1024; // Bytes
   private static final int NANOSECONDS_IN_A_MILLISECOND = 1000000;
   private static final String ERROR_OCCURRED_SUFFIX = ". The following error occurred: ";
+  private static final String CONTENT_LOG_PREFIX = "CONTENT - ";
 
   private static class IndexingContext {
     final Map<String, Content> contentCache;
@@ -246,7 +247,8 @@ public class ContentIndexer {
       repository.close();
       log.debug("Tags available {}", tagsList);
       log.debug("All units: {}", allUnits);
-      log.info("Git content cache population for " + sanitiseInternalLogValue(sha) + " completed!");
+      log.info(CONTENT_LOG_PREFIX + "Git content cache population for " + sanitiseInternalLogValue(sha) + " completed! Cached {} total objects", contentCache.size());
+      log.info(CONTENT_LOG_PREFIX + "Git content cache for {} completed: {} total objects loaded", sanitiseInternalLogValue(sha), contentCache.size());
 
     } catch (IOException e) {
       log.error("IOException while trying to access git repository. ", e);
@@ -274,11 +276,12 @@ public class ContentIndexer {
         content = this.augmentChildContent(content, treeWalk.getPathString(), null, content.getPublished());
 
         if (null != content) {
+          log.info(CONTENT_LOG_PREFIX + "Successfully loaded page/content: {} from {}", content.getId(), treeWalk.getPathString());
           indexContentObject(context.contentCache, context.tagsList, context.allUnits, context.publishedUnits,
               context.indexProblemCache, treeWalk.getPathString(), content);
         }
       } catch (JsonMappingException e) {
-        log.debug(String.format("Unable to parse the json file found %s as a content object. "
+        log.warn(String.format(CONTENT_LOG_PREFIX + "Unable to parse the json file found %s as a content object. "
             + "Skipping file due to error: \n %s", treeWalk.getPathString(), e.getMessage()));
         Content dummyContent = new Content();
         dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
@@ -354,7 +357,7 @@ public class ContentIndexer {
     }
 
     if (!context.contentCache.containsKey(flattenedContent.getId())) {
-      log.debug("Loading into cache: {} ({}) from {}", flattenedContent.getId(), flattenedContent.getType(),
+      log.info(CONTENT_LOG_PREFIX + "Loading into cache: {} ({}) from {}", flattenedContent.getId(), flattenedContent.getType(),
           treeWalkPath);
       context.contentCache.put(flattenedContent.getId(), flattenedContent);
       registerTags(flattenedContent.getTags(), context.tagsList);
@@ -623,7 +626,7 @@ public class ContentIndexer {
       indexProblemCache.put(c, new ArrayList<>());
     }
 
-    log.debug(message);
+    log.warn(CONTENT_LOG_PREFIX + message);
     indexProblemCache.get(c).add(message); //.replace("_", "\\_"));
   }
 
@@ -781,8 +784,10 @@ public class ContentIndexer {
       startTime = System.nanoTime();
       es.bulkIndexWithIds(sha, ContentIndextype.CONTENT.toString(), contentToIndex);
       endTime = System.nanoTime();
-      log.info("Bulk indexing content took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
-      log.info("Search index request sent for: " + sanitiseInternalLogValue(sha));
+      log.info(CONTENT_LOG_PREFIX + "Bulk indexed {} content objects to Elasticsearch for version {}", contentToIndex.size(), sanitiseInternalLogValue(sha));
+      log.info(
+          CONTENT_LOG_PREFIX + "Bulk indexing content took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX + "Search index request sent for: {}", sanitiseInternalLogValue(sha)); // -- Delete
     } catch (SegueSearchException e) {
       log.error("Error whilst trying to perform bulk index operation.", e);
     } catch (ActionRequestValidationException e) {
@@ -851,8 +856,8 @@ public class ContentIndexer {
       }
     }
     if (!missingContent.isEmpty()) {
-      log.debug("Referential integrity broken for ({}) related Content items. "
-          + "The following ids are referenced but do not exist: {}", missingContent.size(), expectedIds);
+      log.warn(CONTENT_LOG_PREFIX + "Referential integrity broken for ({}) related Content items. "
+          + "The following ids are referenced but do not exist: {}", missingContent.size(), missingContent);
     }
 
     // Find all references from published content to unpublished content.
