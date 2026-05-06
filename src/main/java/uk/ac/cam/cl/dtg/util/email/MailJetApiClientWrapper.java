@@ -43,7 +43,7 @@ public class MailJetApiClientWrapper {
 
   private static final String MAILJET = "MAILJET - ";
   private static final String PROPERTY_VALUE_KEY = "value";
-  private static final int BULK_BATCH_SIZE = 1000;
+  private static final int BULK_BATCH_SIZE = 100;
   private static final String ACTION = "Action";
   private static final String LIST_ID = "ListID";
 
@@ -510,6 +510,71 @@ public class MailJetApiClientWrapper {
     throw new MailjetException(
         "{}Failed to submit bulk sync. Status: {}".replace("{}", MAILJET)
             .replace("{}", String.valueOf(status)));
+  }
+
+  /**
+   * Get the status of an async bulk sync job.
+   *
+   * @param jobId - the job ID returned from bulkSyncUsers
+   * @return a JobStatus record with job status details
+   * @throws MailjetException - if the API call fails
+   */
+  public JobStatus getBulkJobStatus(final String jobId) throws MailjetException {
+    if (jobId == null || jobId.trim().isEmpty()) {
+      throw new IllegalArgumentException("Job ID cannot be null or empty");
+    }
+
+    try {
+      MailjetRequest request = new MailjetRequest(ContactManagemanycontacts.resource, Long.parseLong(jobId));
+      MailjetResponse response = mailjetClient.get(request);
+
+      if (response.getStatus() != 200) {
+        throw new MailjetException("Failed to fetch job status. Status: " + response.getStatus());
+      }
+
+      JSONObject jobData = response.getData().getJSONObject(0);
+      String status = jobData.optString("Status", "Unknown");
+      int processed = jobData.optInt("Processed", 0);
+      int inserted = jobData.optInt("Inserted", 0);
+      int updated = jobData.optInt("Updated", 0);
+      int unchanged = jobData.optInt("Unchanged", 0);
+      int errors = jobData.optInt("Error", 0);
+
+      return new JobStatus(status, processed, inserted, updated, unchanged, errors);
+
+    } catch (NumberFormatException e) {
+      throw new MailjetException("Invalid job ID format: " + jobId, e);
+
+    } catch (JSONException e) {
+      throw new MailjetException("JSON parsing error when fetching job status for job ID: " + jobId, e);
+
+    } catch (MailjetException e) {
+      if (isCommunicationException(e)) {
+        String errorMsg = "Communication error fetching job status for job ID: " + jobId;
+        throw new MailjetClientCommunicationException(errorMsg, e);
+      }
+      throw e;
+    }
+  }
+
+  /**
+   * Record representing the status of a bulk sync job.
+   */
+  public record JobStatus(
+      String status,
+      int processed,
+      int inserted,
+      int updated,
+      int unchanged,
+      int errors
+  ) {
+    public boolean isComplete() {
+      return "Completed".equalsIgnoreCase(status);
+    }
+
+    public boolean hasFailed() {
+      return "Error".equalsIgnoreCase(status);
+    }
   }
 
 }

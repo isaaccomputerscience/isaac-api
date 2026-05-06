@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
@@ -30,13 +33,16 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.UserExternalAccountChanges;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IExternalAccountDataManager;
 import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper;
+import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper.JobStatus;
 import uk.ac.cam.cl.dtg.util.email.MailJetSubscriptionAction;
 
 public class ExternalAccountManager implements IExternalAccountManager {
   private static final Logger log = LoggerFactory.getLogger(ExternalAccountManager.class);
   private static final String MAILJET = "MAILJET - ";
-  private static final int BULK_BATCH_SIZE = 1000;
+  private static final int BULK_BATCH_SIZE = 100;
   private static final int RATE_LIMIT_RETRY_SLEEP_MS = 10000; // 10 seconds
+  private static final int JOB_POLL_INTERVAL_MS = 5000;  // 5 seconds between polls
+  private static final int JOB_POLL_MAX_ATTEMPTS = 60;   // max 5 minutes (60 × 5s)
 
   private final IExternalAccountDataManager database;
   private final MailJetApiClientWrapper mailjetApi;
@@ -73,14 +79,16 @@ public class ExternalAccountManager implements IExternalAccountManager {
 
     SyncMetrics metrics = new SyncMetrics();
     List<Long> successfullyProcessedUserIds = new ArrayList<>();
+    List<UserExternalAccountChanges> failedUsers = new ArrayList<>();
 
     List<UserExternalAccountChanges> usersToDelete = new ArrayList<>();
     List<UserExternalAccountChanges> usersToSync = new ArrayList<>();
     partitionUsersByType(userRecordsToUpdate, usersToDelete, usersToSync);
 
     processDeletions(usersToDelete, metrics, successfullyProcessedUserIds);
-    processBulkSyncs(usersToSync, metrics, successfullyProcessedUserIds);
+    processBulkSyncsWithJobTracking(usersToSync, metrics, successfullyProcessedUserIds, failedUsers);
     markSuccessfullyProcessedAsSynced(successfullyProcessedUserIds, metrics);
+    logFailedUsers(failedUsers);
 
     logSyncSummary(metrics, userRecordsToUpdate.size());
   }
@@ -145,18 +153,34 @@ public class ExternalAccountManager implements IExternalAccountManager {
   }
 
   /**
-   * Process bulk syncs grouped by subscription state.
-   * Extracted to reduce cognitive complexity.
+   * Process bulk syncs with job tracking, polling, and per-user recovery.
+   * Groups users by subscription state, submits batches, polls for completion,
+   * and handles errors by verifying users individually at Mailjet.
    */
-  private void processBulkSyncs(final List<UserExternalAccountChanges> usersToSync, final SyncMetrics metrics,
-                                 final List<Long> successfullyProcessedUserIds)
+  private void processBulkSyncsWithJobTracking(final List<UserExternalAccountChanges> usersToSync,
+                                                final SyncMetrics metrics,
+                                                final List<Long> successfullyProcessedUserIds,
+                                                final List<UserExternalAccountChanges> failedUsers)
       throws ExternalAccountSynchronisationException {
     try {
       Map<SubscriptionGroup, List<UserExternalAccountChanges>> groupedUsers =
           groupUsersBySubscriptionState(usersToSync);
 
+      List<BatchJob> submittedJobs = new ArrayList<>();
       for (Map.Entry<SubscriptionGroup, List<UserExternalAccountChanges>> entry : groupedUsers.entrySet()) {
-        processBatchesForGroup(entry.getKey(), entry.getValue(), metrics, successfullyProcessedUserIds);
+        List<BatchJob> groupJobs = submitBatchesForGroup(entry.getKey(), entry.getValue());
+        submittedJobs.addAll(groupJobs);
+      }
+
+      for (BatchJob batch : submittedJobs) {
+        Optional<JobStatus> status = pollJobToCompletion(batch.jobId());
+        if (status.isEmpty()) {
+          log.warn("{}Job {} timed out. Treating all {} users as failed.", MAILJET, batch.jobId(), batch.users().size());
+          failedUsers.addAll(batch.users());
+          metrics.incrementUnexpectedError(batch.users().size());
+          continue;
+        }
+        processCompletedJob(batch, status.get(), successfullyProcessedUserIds, failedUsers, metrics);
       }
     } catch (ExternalAccountSynchronisationException e) {
       throw e;
@@ -167,38 +191,179 @@ public class ExternalAccountManager implements IExternalAccountManager {
   }
 
   /**
-   * Process batches for a subscription group.
-   * Extracted to reduce cognitive complexity.
+   * Submit batches for a subscription group and return list of submitted jobs.
    */
-  private void processBatchesForGroup(final SubscriptionGroup group,
-                                       final List<UserExternalAccountChanges> groupUsers,
-                                       final SyncMetrics metrics,
-                                       final List<Long> successfullyProcessedUserIds)
+  private List<BatchJob> submitBatchesForGroup(final SubscriptionGroup group,
+                                                final List<UserExternalAccountChanges> groupUsers)
       throws ExternalAccountSynchronisationException {
+    List<BatchJob> submittedJobs = new ArrayList<>();
+
     for (int i = 0; i < groupUsers.size(); i += BULK_BATCH_SIZE) {
       int endIndex = Math.min(i + BULK_BATCH_SIZE, groupUsers.size());
       List<UserExternalAccountChanges> batch = groupUsers.subList(i, endIndex);
 
       try {
-        mailjetApi.bulkSyncUsers(batch, group.newsAction, group.eventsAction);
-        for (UserExternalAccountChanges user : batch) {
-          metrics.incrementSuccess();
-          successfullyProcessedUserIds.add(user.getUserId());
+        String jobId = mailjetApi.bulkSyncUsers(batch, group.newsAction, group.eventsAction);
+        if (jobId != null && !jobId.trim().isEmpty()) {
+          submittedJobs.add(new BatchJob(jobId, group, new ArrayList<>(batch)));
+        } else {
+          log.warn("{}Bulk sync returned null/empty job ID for {} users. Continuing.", MAILJET, batch.size());
         }
       } catch (MailjetRateLimitException e) {
-        metrics.incrementRateLimitError();
-        log.warn("{}Mailjet rate limit exceeded during bulk sync. Processed {} users so far.",
-            MAILJET, metrics.getSuccessCount());
-        throw new ExternalAccountSynchronisationException(
-            "Mailjet API rate limits exceeded after processing " + metrics.getSuccessCount() + " users");
+        log.warn("{}Mailjet rate limit exceeded during batch submission.", MAILJET);
+        throw new ExternalAccountSynchronisationException("Mailjet API rate limits exceeded: " + e.getMessage());
       } catch (MailjetClientCommunicationException e) {
-        metrics.incrementCommunicationError();
+        log.error("{}Communication error during batch submission for {} users.", MAILJET, batch.size(), e);
         throw new ExternalAccountSynchronisationException("Failed to connect to Mailjet: " + e.getMessage());
       } catch (MailjetException e) {
-        metrics.incrementMailjetError();
-        log.error("{}Mailjet API error during bulk sync of {} users. Continuing with next batch.",
+        log.error("{}Mailjet API error during batch submission of {} users. Continuing with next batch.",
             MAILJET, batch.size(), e);
       }
+    }
+
+    return submittedJobs;
+  }
+
+  /**
+   * Poll a job until it completes or times out.
+   * Returns Optional.empty() if job times out; otherwise returns the final JobStatus.
+   */
+  private Optional<JobStatus> pollJobToCompletion(final String jobId) {
+    for (int attempt = 0; attempt < JOB_POLL_MAX_ATTEMPTS; attempt++) {
+      try {
+        JobStatus status = mailjetApi.getBulkJobStatus(jobId);
+        if (status.isComplete() || status.hasFailed()) {
+          log.debug("{}Job {} completed with status: {}", MAILJET, jobId, status.status());
+          return Optional.of(status);
+        }
+        log.debug("{}Job {} in progress (attempt {}/{}). Processed: {}, Errors: {}",
+            MAILJET, jobId, attempt + 1, JOB_POLL_MAX_ATTEMPTS, status.processed(), status.errors());
+
+        Thread.sleep(JOB_POLL_INTERVAL_MS);
+      } catch (MailjetException e) {
+        log.warn("{}Error polling job {}: {}. Continuing with next attempt.", MAILJET, jobId, e.getMessage());
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        log.warn("{}Polling interrupted for job {}.", MAILJET, jobId);
+        return Optional.empty();
+      }
+    }
+
+    log.warn("{}Job {} timed out after {} attempts.", MAILJET, jobId, JOB_POLL_MAX_ATTEMPTS);
+    return Optional.empty();
+  }
+
+  /**
+   * Process a completed job: happy path (0 errors) or error path (recover per-user).
+   */
+  private void processCompletedJob(final BatchJob batch, final JobStatus status,
+                                    final List<Long> successfullyProcessedUserIds,
+                                    final List<UserExternalAccountChanges> failedUsers,
+                                    final SyncMetrics metrics) {
+    if (status.errors() == 0) {
+      log.info("{}Job {} completed successfully with {} users (inserted: {}, updated: {}, unchanged: {})",
+          MAILJET, batch.jobId(), batch.users().size(), status.inserted(), status.updated(), status.unchanged());
+      for (UserExternalAccountChanges user : batch.users()) {
+        successfullyProcessedUserIds.add(user.getUserId());
+        metrics.incrementSuccess();
+      }
+    } else {
+      log.warn("{}Job {} completed with {} errors. Recovering per-user.",
+          MAILJET, batch.jobId(), status.errors());
+      recoverUsersFromFailedJob(batch, successfullyProcessedUserIds, failedUsers, metrics);
+    }
+  }
+
+  /**
+   * Recover users from a failed job by querying each user individually at Mailjet.
+   * Verifies that user data (name, role, verification status, stage) was correctly synced.
+   */
+  private void recoverUsersFromFailedJob(final BatchJob batch,
+                                          final List<Long> successfullyProcessedUserIds,
+                                          final List<UserExternalAccountChanges> failedUsers,
+                                          final SyncMetrics metrics) {
+    for (UserExternalAccountChanges user : batch.users()) {
+      try {
+        JSONObject mailjetContact = mailjetApi.getAccountByIdOrEmail(user.getAccountEmail());
+        if (mailjetContact != null && isUserDataCorrectInMailjet(mailjetContact, user)) {
+          log.debug("{}User ID {} verified in Mailjet after job error.", MAILJET, user.getUserId());
+          successfullyProcessedUserIds.add(user.getUserId());
+          metrics.incrementSuccess();
+        } else {
+          log.warn("{}User ID {} ({}) data mismatch or not found in Mailjet after job error.",
+              MAILJET, user.getUserId(), user.getAccountEmail());
+          failedUsers.add(user);
+          metrics.incrementMailjetError();
+        }
+      } catch (MailjetException e) {
+        log.warn("{}Failed to verify user ID {} ({}) at Mailjet: {}",
+            MAILJET, user.getUserId(), user.getAccountEmail(), e.getMessage());
+        failedUsers.add(user);
+        metrics.incrementMailjetError();
+      }
+    }
+  }
+
+  /**
+   * Verify that user data in Mailjet matches what we expect.
+   * Checks: givenName, role, emailVerificationStatus, stage.
+   */
+  private boolean isUserDataCorrectInMailjet(final JSONObject mailjetContact,
+                                              final UserExternalAccountChanges user) {
+    try {
+      String mailjetName = mailjetContact.optString("Name", "");
+      String expectedName = user.getGivenName() != null ? user.getGivenName() : "";
+
+      JSONObject properties = mailjetContact.optJSONObject("Properties");
+      if (properties == null) {
+        log.debug("{}No properties found in Mailjet contact for user ID {}.", MAILJET, user.getUserId());
+        return false;
+      }
+
+      String mailjetRole = properties.optString("role", "");
+      String expectedRole = user.getRole().toString();
+
+      String mailjetVerification = properties.optString("verification_status", "");
+      String expectedVerification = user.getEmailVerificationStatus().toString();
+
+      String mailjetStage = properties.optString("stage", "");
+      String expectedStage = user.getStage() != null ? user.getStage() : "unknown";
+
+      boolean nameMatches = mailjetName.equals(expectedName);
+      boolean roleMatches = mailjetRole.equals(expectedRole);
+      boolean verificationMatches = mailjetVerification.equals(expectedVerification);
+      boolean stageMatches = mailjetStage.equals(expectedStage);
+
+      if (!nameMatches || !roleMatches || !verificationMatches || !stageMatches) {
+        if (log.isDebugEnabled()) {
+          log.debug("{}User ID {} data mismatch: name ({}/{}) role ({}/{}) verification ({}/{}) stage ({}/{})",
+              MAILJET, user.getUserId(),
+              mailjetName, expectedName,
+              mailjetRole, expectedRole,
+              mailjetVerification, expectedVerification,
+              mailjetStage, expectedStage);
+        }
+        return false;
+      }
+
+      return true;
+
+    } catch (JSONException e) {
+      log.warn("{}JSON error checking user data for user ID {}: {}", MAILJET, user.getUserId(), e.getMessage());
+      return false;
+    }
+  }
+
+  /**
+   * Log failed users that could not be synced to Mailjet.
+   */
+  private void logFailedUsers(final List<UserExternalAccountChanges> failedUsers) {
+    if (failedUsers.isEmpty()) {
+      return;
+    }
+    log.warn("{}=== {} users failed Mailjet sync ===", MAILJET, failedUsers.size());
+    for (UserExternalAccountChanges user : failedUsers) {
+      log.warn("{}Failed user - ID: {}, email: {}", MAILJET, user.getUserId(), user.getAccountEmail());
     }
   }
 
@@ -381,6 +546,10 @@ public class ExternalAccountManager implements IExternalAccountManager {
       unexpectedErrorCount++;
     }
 
+    void incrementUnexpectedError(int count) {
+      unexpectedErrorCount += count;
+    }
+
     int getSuccessCount() {
       return successCount;
     }
@@ -460,4 +629,13 @@ public class ExternalAccountManager implements IExternalAccountManager {
       return java.util.Objects.hash(newsAction, eventsAction);
     }
   }
+
+  /**
+   * Record representing a submitted batch job with its users.
+   */
+  private record BatchJob(
+      String jobId,
+      SubscriptionGroup group,
+      List<UserExternalAccountChanges> users
+  ) {}
 }

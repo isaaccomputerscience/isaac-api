@@ -23,6 +23,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.UserExternalAccountChanges;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.users.IExternalAccountDataManager;
 import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper;
+import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper.JobStatus;
 import uk.ac.cam.cl.dtg.util.email.MailJetSubscriptionAction;
 
 class ExternalAccountManagerTest {
@@ -42,7 +43,7 @@ class ExternalAccountManagerTest {
   class SynchroniseChangedUsersTests {
 
     @Test
-    void synchroniseChangedUsers_WithBulkUsers_ShouldUseBulkApi()
+    void synchroniseChangedUsers_WithBulkUsers_ShouldSubmitAndPoll()
         throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
       // Arrange - users with same subscription preferences should be batched
       List<UserExternalAccountChanges> changedUsers = List.of(
@@ -59,6 +60,9 @@ class ExternalAccountManagerTest {
       expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE),
           eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE))).andReturn("job123");
+      // Job completes successfully with no errors
+      expect(mockMailjetApi.getBulkJobStatus("job123"))
+          .andReturn(new JobStatus("Completed", 2, 2, 0, 0, 0));
       mockDatabase.batchMarkAsSynced(anyObject(List.class));
       expectLastCall();
 
@@ -90,9 +94,15 @@ class ExternalAccountManagerTest {
       // First bulk call for group (FORCE_SUBSCRIBE, FORCE_SUBSCRIBE)
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE),
           eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE))).andReturn("job123");
+      expect(mockMailjetApi.getBulkJobStatus("job123"))
+          .andReturn(new JobStatus("Completed", 1, 1, 0, 0, 0));
+
       // Second bulk call for group (FORCE_SUBSCRIBE, UNSUBSCRIBE)
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE),
           eq(MailJetSubscriptionAction.UNSUBSCRIBE))).andReturn("job124");
+      expect(mockMailjetApi.getBulkJobStatus("job124"))
+          .andReturn(new JobStatus("Completed", 1, 0, 1, 0, 0));
+
       mockDatabase.batchMarkAsSynced(anyObject(List.class));
       expectLastCall();
 
@@ -150,6 +160,8 @@ class ExternalAccountManagerTest {
       // Delivery failed users should call with REMOVE for both news and events
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.REMOVE),
           eq(MailJetSubscriptionAction.REMOVE))).andReturn("job123");
+      expect(mockMailjetApi.getBulkJobStatus("job123"))
+          .andReturn(new JobStatus("Completed", 1, 0, 0, 1, 0));
       mockDatabase.batchMarkAsSynced(anyObject(List.class));
       expectLastCall();
 
@@ -177,7 +189,6 @@ class ExternalAccountManagerTest {
       verify(mockDatabase, mockMailjetApi);
     }
 
-
     @Test
     void synchroniseChangedUsers_WithDatabaseException_ShouldThrow() throws SegueDatabaseException {
       // Arrange
@@ -191,6 +202,38 @@ class ExternalAccountManagerTest {
           () -> externalAccountManager.synchroniseChangedUsers());
 
       verify(mockDatabase);
+    }
+
+    @Test
+    void synchroniseChangedUsers_WithJobErrors_ShouldRecoverPerUser()
+        throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
+      // Arrange - job completes but has errors
+      List<UserExternalAccountChanges> changedUsers = List.of(
+          new UserExternalAccountChanges(
+              1L, null, "test@example.com", Role.STUDENT, "John", false,
+              EmailVerificationStatus.VERIFIED, true, false, "GCSE"
+          )
+      );
+
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
+          .andReturn("job123");
+      // Job has 1 error
+      expect(mockMailjetApi.getBulkJobStatus("job123"))
+          .andReturn(new JobStatus("Completed", 1, 0, 0, 0, 1));
+      // Recovery: user not found in Mailjet after error
+      expect(mockMailjetApi.getAccountByIdOrEmail("test@example.com"))
+          .andReturn(null);
+      mockDatabase.batchMarkAsSynced(anyObject(List.class));
+      expectLastCall();
+
+      replay(mockDatabase, mockMailjetApi);
+
+      // Act
+      externalAccountManager.synchroniseChangedUsers();
+
+      // Assert
+      verify(mockDatabase, mockMailjetApi);
     }
 
     @Test
@@ -267,7 +310,5 @@ class ExternalAccountManagerTest {
 
       verify(mockDatabase, mockMailjetApi);
     }
-
-
   }
 }
