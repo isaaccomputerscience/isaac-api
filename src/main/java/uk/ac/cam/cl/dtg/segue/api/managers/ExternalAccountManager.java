@@ -173,14 +173,19 @@ public class ExternalAccountManager implements IExternalAccountManager {
       }
 
       for (BatchJob batch : submittedJobs) {
-        Optional<JobStatus> status = pollJobToCompletion(batch.jobId());
-        if (status.isEmpty()) {
-          log.warn("{}Job {} timed out. Treating all {} users as failed.", MAILJET, batch.jobId(), batch.users().size());
-          failedUsers.addAll(batch.users());
-          metrics.incrementUnexpectedError(batch.users().size());
-          continue;
+        try {
+          Optional<JobStatus> status = pollJobToCompletion(batch.jobId());
+          if (status.isEmpty()) {
+            log.warn("{}Job {} timed out. Treating all {} users as failed.", MAILJET, batch.jobId(), batch.users().size());
+            failedUsers.addAll(batch.users());
+            metrics.incrementUnexpectedError(batch.users().size());
+            continue;
+          }
+          processCompletedJob(batch, status.get(), successfullyProcessedUserIds, failedUsers, metrics);
+        } catch (ExternalAccountSynchronisationException e) {
+          log.error("{}Job {} polling failed: {}", MAILJET, batch.jobId(), e.getMessage());
+          throw e;
         }
-        processCompletedJob(batch, status.get(), successfullyProcessedUserIds, failedUsers, metrics);
       }
     } catch (ExternalAccountSynchronisationException e) {
       throw e;
@@ -227,11 +232,17 @@ public class ExternalAccountManager implements IExternalAccountManager {
   /**
    * Poll a job until it completes or times out.
    * Returns Optional.empty() if job times out; otherwise returns the final JobStatus.
+   * Fails fast on repeated rate limiting (2+ consecutive rate limits).
    */
-  private Optional<JobStatus> pollJobToCompletion(final String jobId) {
+  private Optional<JobStatus> pollJobToCompletion(final String jobId)
+      throws ExternalAccountSynchronisationException {
+    int consecutiveRateLimits = 0;
+
     for (int attempt = 0; attempt < JOB_POLL_MAX_ATTEMPTS; attempt++) {
       try {
         JobStatus status = mailjetApi.getBulkJobStatus(jobId);
+        consecutiveRateLimits = 0;  // Reset on successful poll
+
         if (status.isComplete() || status.hasFailed()) {
           log.debug("{}Job {} completed with status: {}", MAILJET, jobId, status.status());
           return Optional.of(status);
@@ -240,7 +251,19 @@ public class ExternalAccountManager implements IExternalAccountManager {
             MAILJET, jobId, attempt + 1, JOB_POLL_MAX_ATTEMPTS, status.processed(), status.errors());
 
         Thread.sleep(JOB_POLL_INTERVAL_MS);
+      } catch (MailjetRateLimitException e) {
+        consecutiveRateLimits++;
+        log.warn("{}Rate limit during job {} polling (attempt {}). Consecutive limits: {}",
+            MAILJET, jobId, attempt + 1, consecutiveRateLimits);
+
+        if (consecutiveRateLimits >= 2) {
+          log.error("{}Job {} hit rate limit {} times. Failing fast to respect API limits.",
+              MAILJET, jobId, consecutiveRateLimits);
+          throw new ExternalAccountSynchronisationException(
+              "Mailjet API rate limit exceeded during job polling for job " + jobId);
+        }
       } catch (MailjetException e) {
+        consecutiveRateLimits = 0;  // Reset on non-rate-limit errors
         log.warn("{}Error polling job {}: {}. Continuing with next attempt.", MAILJET, jobId, e.getMessage());
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();

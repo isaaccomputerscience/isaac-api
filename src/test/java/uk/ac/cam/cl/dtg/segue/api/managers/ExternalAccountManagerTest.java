@@ -310,5 +310,67 @@ class ExternalAccountManagerTest {
 
       verify(mockDatabase, mockMailjetApi);
     }
+
+    @Test
+    void synchroniseChangedUsers_WithSingleRateLimitDuringPolling_ShouldContinuePolling()
+        throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
+      // Arrange - single rate limit should be tolerated
+      List<UserExternalAccountChanges> changedUsers = List.of(
+          new UserExternalAccountChanges(
+              1L, null, "test@example.com", Role.STUDENT, "John", false,
+              EmailVerificationStatus.VERIFIED, true, false, "GCSE"
+          )
+      );
+
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
+          .andReturn("job123");
+      // First poll hits rate limit, second succeeds
+      expect(mockMailjetApi.getBulkJobStatus("job123"))
+          .andThrow(new MailjetRateLimitException("Rate limit"));
+      expect(mockMailjetApi.getBulkJobStatus("job123"))
+          .andReturn(new JobStatus("Completed", 1, 0, 1, 0, 0));
+      mockDatabase.batchMarkAsSynced(anyObject(List.class));
+      expectLastCall();
+
+      replay(mockDatabase, mockMailjetApi);
+
+      // Act
+      externalAccountManager.synchroniseChangedUsers();
+
+      // Assert
+      verify(mockDatabase, mockMailjetApi);
+    }
+
+    @Test
+    void synchroniseChangedUsers_WithRepeatedRateLimitDuringPolling_ShouldFailFast()
+        throws SegueDatabaseException, MailjetException {
+      // Arrange - 2+ consecutive rate limits should fail fast
+      List<UserExternalAccountChanges> changedUsers = List.of(
+          new UserExternalAccountChanges(
+              1L, null, "test@example.com", Role.STUDENT, "John", false,
+              EmailVerificationStatus.VERIFIED, true, false, "GCSE"
+          )
+      );
+
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
+          .andReturn("job123");
+      // Both polls hit rate limit
+      expect(mockMailjetApi.getBulkJobStatus("job123"))
+          .andThrow(new MailjetRateLimitException("Rate limit"))
+          .times(2);
+
+      replay(mockDatabase, mockMailjetApi);
+
+      // Act & Assert - should throw on 2nd consecutive rate limit
+      ExternalAccountSynchronisationException exception = assertThrows(
+          ExternalAccountSynchronisationException.class,
+          () -> externalAccountManager.synchroniseChangedUsers());
+
+      assertTrue(exception.getMessage().contains("rate limit"));
+
+      verify(mockDatabase, mockMailjetApi);
+    }
   }
 }
