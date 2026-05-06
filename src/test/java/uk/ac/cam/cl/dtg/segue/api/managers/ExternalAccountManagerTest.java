@@ -14,6 +14,7 @@ import com.mailjet.client.errors.MailjetClientCommunicationException;
 import com.mailjet.client.errors.MailjetException;
 import com.mailjet.client.errors.MailjetRateLimitException;
 import java.util.List;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -205,9 +206,9 @@ class ExternalAccountManagerTest {
     }
 
     @Test
-    void synchroniseChangedUsers_WithJobErrors_ShouldRecoverPerUser()
+    void synchroniseChangedUsers_WithJobErrorsButUserDataCorrect_ShouldMarkAsSynced()
         throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
-      // Arrange - job completes but has errors
+      // Arrange - job completes but has errors, but user data is correct at Mailjet
       List<UserExternalAccountChanges> changedUsers = List.of(
           new UserExternalAccountChanges(
               1L, null, "test@example.com", Role.STUDENT, "John", false,
@@ -221,11 +222,48 @@ class ExternalAccountManagerTest {
       // Job has 1 error
       expect(mockMailjetApi.getBulkJobStatus("job123"))
           .andReturn(new JobStatus("Completed", 1, 0, 0, 0, 1));
-      // Recovery: user not found in Mailjet after error
+      // Recovery: user data is correct in Mailjet despite job error
+      JSONObject mailjetContact = new JSONObject()
+          .put("Name", "John")
+          .put("Properties", new JSONObject()
+              .put("role", "STUDENT")
+              .put("verification_status", "VERIFIED")
+              .put("stage", "GCSE"));
       expect(mockMailjetApi.getAccountByIdOrEmail("test@example.com"))
-          .andReturn(null);
+          .andReturn(mailjetContact);
       mockDatabase.batchMarkAsSynced(anyObject(List.class));
       expectLastCall();
+
+      replay(mockDatabase, mockMailjetApi);
+
+      // Act
+      externalAccountManager.synchroniseChangedUsers();
+
+      // Assert
+      verify(mockDatabase, mockMailjetApi);
+    }
+
+    @Test
+    void synchroniseChangedUsers_WithJobErrorsAndUserNotFound_ShouldNotSyncUser()
+        throws SegueDatabaseException, MailjetException, ExternalAccountSynchronisationException {
+      // Arrange - job completes with errors and user not found in Mailjet
+      List<UserExternalAccountChanges> changedUsers = List.of(
+          new UserExternalAccountChanges(
+              1L, null, "test@example.com", Role.STUDENT, "John", false,
+              EmailVerificationStatus.VERIFIED, true, false, "GCSE"
+          )
+      );
+
+      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
+          .andReturn("job123");
+      // Job has 1 error
+      expect(mockMailjetApi.getBulkJobStatus("job123"))
+          .andReturn(new JobStatus("Completed", 1, 0, 0, 0, 1));
+      // Recovery: user not found in Mailjet after error - treated as failed
+      expect(mockMailjetApi.getAccountByIdOrEmail("test@example.com"))
+          .andReturn(null);
+      // batchMarkAsSynced not called since user failed recovery (empty list)
 
       replay(mockDatabase, mockMailjetApi);
 
