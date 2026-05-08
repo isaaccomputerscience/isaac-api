@@ -70,9 +70,11 @@ class ExternalAccountManagerTest {
       replay(mockDatabase, mockMailjetApi);
 
       // Act
-      externalAccountManager.synchroniseChangedUsers();
+      SyncResult result = externalAccountManager.synchroniseChangedUsers();
 
       // Assert
+      assertTrue(result.successCount() > 0);
+      assertTrue(!result.hasFailures());
       verify(mockDatabase, mockMailjetApi);
     }
 
@@ -110,9 +112,10 @@ class ExternalAccountManagerTest {
       replay(mockDatabase, mockMailjetApi);
 
       // Act
-      externalAccountManager.synchroniseChangedUsers();
+      SyncResult result = externalAccountManager.synchroniseChangedUsers();
 
       // Assert
+      assertTrue(!result.hasFailures());
       verify(mockDatabase, mockMailjetApi);
     }
 
@@ -140,9 +143,10 @@ class ExternalAccountManagerTest {
       replay(mockDatabase, mockMailjetApi);
 
       // Act
-      externalAccountManager.synchroniseChangedUsers();
+      SyncResult result = externalAccountManager.synchroniseChangedUsers();
 
       // Assert
+      assertTrue(!result.hasFailures());
       verify(mockDatabase, mockMailjetApi);
     }
 
@@ -169,9 +173,10 @@ class ExternalAccountManagerTest {
       replay(mockDatabase, mockMailjetApi);
 
       // Act
-      externalAccountManager.synchroniseChangedUsers();
+      SyncResult result = externalAccountManager.synchroniseChangedUsers();
 
       // Assert
+      assertTrue(!result.hasFailures());
       verify(mockDatabase, mockMailjetApi);
     }
 
@@ -184,9 +189,10 @@ class ExternalAccountManagerTest {
       replay(mockDatabase, mockMailjetApi);
 
       // Act
-      externalAccountManager.synchroniseChangedUsers();
+      SyncResult result = externalAccountManager.synchroniseChangedUsers();
 
       // Assert
+      assertTrue(!result.hasFailures());
       verify(mockDatabase, mockMailjetApi);
     }
 
@@ -237,9 +243,10 @@ class ExternalAccountManagerTest {
       replay(mockDatabase, mockMailjetApi);
 
       // Act
-      externalAccountManager.synchroniseChangedUsers();
+      SyncResult result = externalAccountManager.synchroniseChangedUsers();
 
       // Assert
+      assertTrue(!result.hasFailures());
       verify(mockDatabase, mockMailjetApi);
     }
 
@@ -268,9 +275,10 @@ class ExternalAccountManagerTest {
       replay(mockDatabase, mockMailjetApi);
 
       // Act
-      externalAccountManager.synchroniseChangedUsers();
+      SyncResult result = externalAccountManager.synchroniseChangedUsers();
 
       // Assert
+      assertTrue(!result.hasFailures());
       verify(mockDatabase, mockMailjetApi);
     }
 
@@ -374,9 +382,10 @@ class ExternalAccountManagerTest {
       replay(mockDatabase, mockMailjetApi);
 
       // Act
-      externalAccountManager.synchroniseChangedUsers();
+      SyncResult result = externalAccountManager.synchroniseChangedUsers();
 
       // Assert
+      assertTrue(!result.hasFailures());
       verify(mockDatabase, mockMailjetApi);
     }
 

@@ -68,13 +68,13 @@ public class ExternalAccountManager implements IExternalAccountManager {
    * @throws ExternalAccountSynchronisationException on unrecoverable errors with external providers.
    */
   @Override
-  public synchronized void synchroniseChangedUsers() throws ExternalAccountSynchronisationException {
+  public synchronized SyncResult synchroniseChangedUsers() throws ExternalAccountSynchronisationException {
     log.info("{}Starting Mailjet synchronization process", MAILJET);
 
     List<UserExternalAccountChanges> userRecordsToUpdate = getRecentlyChangedUsersOrThrow();
     if (userRecordsToUpdate.isEmpty()) {
       log.info("{}No users to synchronize", MAILJET);
-      return;
+      return new SyncResult(List.of(), 0, 0);
     }
 
     SyncMetrics metrics = new SyncMetrics();
@@ -91,6 +91,12 @@ public class ExternalAccountManager implements IExternalAccountManager {
     logFailedUsers(failedUsers);
 
     logSyncSummary(metrics, userRecordsToUpdate.size());
+
+    // Build sync result with list of failed users
+    List<String> failedUserDetails = failedUsers.stream()
+        .map(u -> "ID: " + u.getUserId() + ", email: " + u.getAccountEmail())
+        .toList();
+    return new SyncResult(failedUserDetails, metrics.getSuccessCount(), userRecordsToUpdate.size());
   }
 
   /**

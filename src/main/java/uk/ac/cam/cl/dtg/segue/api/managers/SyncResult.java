@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 James Sharkey
+ * Copyright 2026 Isaac Computer Science
  * <br>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 
 import java.util.List;
 
-/**
- * A stub external account manager for local development or staging environments where synchronisation is not desired.
- */
-public class StubExternalAccountManager implements IExternalAccountManager {
-
-  @Override
-  public SyncResult synchroniseChangedUsers() throws ExternalAccountSynchronisationException {
-    // Do not fail silently:
-    throw new ExternalAccountSynchronisationException("No external account details configured!");
+public record SyncResult(
+    List<String> failedUserDetails,
+    int successCount,
+    int totalCount
+) {
+  public boolean hasFailures() {
+    return !failedUserDetails.isEmpty();
   }
 }
