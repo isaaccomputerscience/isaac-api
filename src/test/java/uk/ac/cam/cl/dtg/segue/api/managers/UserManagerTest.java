@@ -351,7 +351,7 @@ class UserManagerTest {
     expect(request.getSession()).andReturn(dummySession).atLeastOnce();
 
     Cookie oauthStateCookie = new Cookie(Constants.OAUTH_STATE_COOKIE, CSRF_TEST_VALUE);
-    expect(request.getCookies()).andReturn(new Cookie[]{oauthStateCookie}).anyTimes();
+    expect(request.getCookies()).andReturn(new Cookie[]{oauthStateCookie}).times(2);
 
     expect(dummySession.getAttribute(Constants.ANONYMOUS_USER)).andReturn(someSegueAnonymousUserId)
         .atLeastOnce(); // session
@@ -460,7 +460,7 @@ class UserManagerTest {
     String someInvalidCSRFValue = "FRAUDHASHAPPENED";
     String validOAuthProvider = "test";
 
-    expect(request.getSession()).andReturn(dummySession).atLeastOnce();
+    expect(request.getSession()).andReturn(dummySession).anyTimes();
     expect(dummySession.getAttribute(Constants.SESSION_USER_ID)).andReturn(null).anyTimes();
 
     // Mock URL params extract stuff
@@ -502,7 +502,7 @@ class UserManagerTest {
 
     String validOAuthProvider = "test";
 
-    expect(request.getSession()).andReturn(dummySession).atLeastOnce();
+    expect(request.getSession()).andReturn(dummySession).anyTimes();
     expect(dummySession.getAttribute(Constants.SESSION_USER_ID)).andReturn(null).anyTimes();
 
     // Mock URL params extract stuff
