@@ -277,8 +277,8 @@ class ExternalAccountManagerTest {
       // Act
       SyncResult result = externalAccountManager.synchroniseChangedUsers();
 
-      // Assert
-      assertTrue(!result.hasFailures());
+      // Assert — user not found in Mailjet after job error is treated as a sync failure
+      assertTrue(result.hasFailures());
       verify(mockDatabase, mockMailjetApi);
     }
 

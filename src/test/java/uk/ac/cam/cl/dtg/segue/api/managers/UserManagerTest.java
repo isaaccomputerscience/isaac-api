@@ -350,15 +350,14 @@ class UserManagerTest {
 
     expect(request.getSession()).andReturn(dummySession).atLeastOnce();
 
-    Cookie[] cookieWithoutSessionInfo = {}; // empty as not logged in.
-    expect(request.getCookies()).andReturn(cookieWithoutSessionInfo).times(2);
+    Cookie oauthStateCookie = new Cookie(Constants.OAUTH_STATE_COOKIE, CSRF_TEST_VALUE);
+    expect(request.getCookies()).andReturn(new Cookie[]{oauthStateCookie}).anyTimes();
 
     expect(dummySession.getAttribute(Constants.ANONYMOUS_USER)).andReturn(someSegueAnonymousUserId)
         .atLeastOnce(); // session
     // id
 
-    // Mock CSRF checks
-    expect(dummySession.getAttribute(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).atLeastOnce();
+    // Mock CSRF checks — OAuth2 reads from cookie, not session
     expect(request.getParameter(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).atLeastOnce();
 
     // Mock URL params extract stuff
@@ -469,9 +468,8 @@ class UserManagerTest {
     String queryString = Constants.STATE_PARAM_NAME + "=" + someInvalidCSRFValue;
     expect(request.getQueryString()).andReturn(queryString).once();
 
-    // Mock CSRF checks
-    expect(dummySession.getAttribute(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).atLeastOnce();
-
+    // Mock CSRF checks — OAuth2 reads state from cookie; cookie has valid token but provider sends wrong one
+    expect(request.getCookies()).andReturn(new Cookie[]{new Cookie(Constants.OAUTH_STATE_COOKIE, CSRF_TEST_VALUE)}).anyTimes();
     expect(request.getParameter(Constants.STATE_PARAM_NAME)).andReturn(someInvalidCSRFValue).atLeastOnce();
 
     replay(dummySession, request, dummyQuestionDatabase);
@@ -510,8 +508,8 @@ class UserManagerTest {
     // Mock URL params extract stuff
     expect(request.getQueryString()).andReturn("").atLeastOnce();
 
-    // Mock CSRF checks
-    expect(dummySession.getAttribute(Constants.STATE_PARAM_NAME)).andReturn(null).atLeastOnce();
+    // Mock CSRF checks — OAuth2 reads state from cookie; no cookie present → null → CSRF fails
+    expect(request.getCookies()).andReturn(new Cookie[]{}).anyTimes();
     expect(request.getParameter(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).atLeastOnce();
 
     replay(dummySession);
