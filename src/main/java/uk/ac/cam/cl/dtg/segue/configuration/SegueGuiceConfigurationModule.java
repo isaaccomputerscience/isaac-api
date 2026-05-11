@@ -1057,7 +1057,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
           "syncMailjetUsersJob",
           CRON_GROUP_NAME_JAVA_JOB,
           "Sync users to mailjet",
-          CRON_STRING_HOURLY);
+          CRON_STRING_EVERY_FOUR_HOURS);
 
       List<SegueScheduledJob> configuredScheduledJobs = new ArrayList<>(Arrays.asList(
           piiSqlJob,
