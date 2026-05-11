@@ -237,21 +237,23 @@ class UserManagerTest {
     UserAccountManager userManager = buildTestUserManager();
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
+    HttpServletResponse response = createMock(HttpServletResponse.class);
 
     String someInvalidProvider = "BAD_PROVIDER!!";
 
     replay(request);
+    replay(response);
     replay(dummyQuestionDatabase);
 
     // Act
     try {
-      userManager.authenticate(request, someInvalidProvider);
+      userManager.authenticate(request, response, someInvalidProvider);
       fail("Exception expected");
     } catch (AuthenticationProviderMappingException e) {
       // pass
     }
 
-    verify(dummyQuestionDatabase, request);
+    verify(dummyQuestionDatabase, request, response);
   }
 
   /**
@@ -269,6 +271,7 @@ class UserManagerTest {
 
     HttpSession dummySession = createMock(HttpSession.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
+    HttpServletResponse response = createMock(HttpServletResponse.class);
     String exampleRedirectUrl = "https://accounts.google.com/o/oauth2/auth?"
         + "client_id=267566420063-jalcbiffcpmteh42cib5hmgb16upspc0.apps.googleusercontent.com&"
         + "redirect_uri=http://localhost:8080/rutherford-server/segue/api/auth/google/callback&"
@@ -280,9 +283,12 @@ class UserManagerTest {
     expect(request.getSession()).andReturn(dummySession).atLeastOnce();
     dummySession.setAttribute(EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
     expectLastCall().atLeastOnce();
+    response.addCookie(anyObject());
+    expectLastCall().once();
 
     replay(dummySession);
     replay(request);
+    replay(response);
     replay(dummyQuestionDatabase);
 
     String someAntiForgeryToken = "someAntiForgeryToken";
@@ -291,10 +297,10 @@ class UserManagerTest {
     replay(dummyAuth);
 
     // Act
-    URI redirectURI = userManager.authenticate(request, someValidProviderString);
+    URI redirectURI = userManager.authenticate(request, response, someValidProviderString);
 
     // Assert
-    verify(dummyQuestionDatabase, request);
+    verify(dummyQuestionDatabase, request, response);
 
     assertEquals(exampleRedirectUrl, redirectURI.toString());
   }

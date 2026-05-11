@@ -615,6 +615,8 @@ public final class Constants {
 
   public static final String SEGUE_AUTH_COOKIE = "SEGUE_AUTH_COOKIE";
   public static final String JSESSION_COOOKIE = "JSESSIONID";
+  public static final String OAUTH_STATE_COOKIE = "OAUTH_STATE";
+  public static final int OAUTH_STATE_COOKIE_TTL_SECONDS = 600;
 
   public static final String DEFAULT_DATE_FORMAT = "EEE MMM dd HH:mm:ss Z yyyy";
 

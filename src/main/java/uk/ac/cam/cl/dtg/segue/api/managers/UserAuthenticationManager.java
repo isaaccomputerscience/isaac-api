@@ -37,6 +37,8 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_EXPIRY_SECONDS_FALLBA
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_TOKEN;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_USER_ID;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.STATE_PARAM_NAME;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_STATE_COOKIE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_STATE_COOKIE_TTL_SECONDS;
 import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getSharedBasicObjectMapper;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
@@ -113,6 +115,7 @@ public class UserAuthenticationManager {
   private static final Logger log = LoggerFactory.getLogger(UserAuthenticationManager.class);
   private static final String HMAC_SHA_ALGORITHM = "HmacSHA256";
   private static final String SAME_SITE_LAX_COMMENT = "__SAME_SITE_LAX__";
+  private static final String SAME_SITE_NONE_COMMENT = "__SAME_SITE_NONE__";
 
   private final PropertiesLoader properties;
   private final IUserDataManager database;
@@ -193,7 +196,7 @@ public class UserAuthenticationManager {
    * @throws IOException                            if there is an error when contacting the OAuth server
    * @throws AuthenticationProviderMappingException as per exception description.
    */
-  public URI getThirdPartyAuthURI(final HttpServletRequest request, final String provider)
+  public URI getThirdPartyAuthURI(final HttpServletRequest request, final HttpServletResponse response, final String provider)
       throws IOException, AuthenticationProviderMappingException {
     IAuthenticator federatedAuthenticator = mapToProvider(provider);
 
@@ -206,6 +209,8 @@ public class UserAuthenticationManager {
 
       // Store antiForgeryToken in the users session.
       request.getSession().setAttribute(STATE_PARAM_NAME, antiForgeryTokenFromProvider);
+      // Also store in a short-lived, SameSite=None cookie for cross-site OAuth redirects
+      response.addCookie(createOAuthStateCookie(antiForgeryTokenFromProvider));
 
       redirectLink = URI.create(oauth2Provider.getAuthorizationUrl(antiForgeryTokenFromProvider));
     } else if (federatedAuthenticator instanceof IOAuth1Authenticator) {
@@ -827,16 +832,24 @@ public class UserAuthenticationManager {
     }
 
     // to deal with cross site request forgery
-    String csrfTokenFromUser = (String) request.getSession().getAttribute(key);
+    String csrfTokenFromUser;
+    if (oauthProvider instanceof IOAuth2Authenticator) {
+      // Read from the dedicated short-lived cookie (SameSite=None; Secure)
+      csrfTokenFromUser = getOAuthStateCookieFromRequest(request);
+    } else {
+      // OAuth1: keep session-based approach unchanged
+      csrfTokenFromUser = (String) request.getSession().getAttribute(key);
+    }
     String csrfTokenFromProvider = request.getParameter(key);
 
     if (null == csrfTokenFromUser || !csrfTokenFromUser.equals(csrfTokenFromProvider)) {
-      log.error("Invalid state parameter - Provider said: " + request.getParameter(STATE_PARAM_NAME)
-          + " Session said: " + request.getSession().getAttribute(STATE_PARAM_NAME));
+      log.error("Invalid state parameter - Provider said: {} Cookie/Session said: {}",
+          sanitiseExternalLogValue(request.getParameter(STATE_PARAM_NAME)),
+          csrfTokenFromUser != null ? "[present but mismatched]" : "[absent]");
       return false;
     } else {
-      log.debug("State parameter matches - Provider said: " + request.getParameter(STATE_PARAM_NAME)
-          + " Session said: " + request.getSession().getAttribute(STATE_PARAM_NAME));
+      log.debug("State parameter matches - Provider said: {}",
+          sanitiseExternalLogValue(request.getParameter(STATE_PARAM_NAME)));
       return true;
     }
   }
@@ -1218,5 +1231,27 @@ public class UserAuthenticationManager {
         .comment(SAME_SITE_LAX_COMMENT)
         .build();
     return logoutCookie;
+  }
+
+  public Cookie createOAuthStateCookie(final String state) {
+    Cookie stateCookie = new Cookie(OAUTH_STATE_COOKIE, state);
+    stateCookie.setMaxAge(OAUTH_STATE_COOKIE_TTL_SECONDS);
+    stateCookie.setPath("/");
+    stateCookie.setHttpOnly(true);
+    stateCookie.setSecure(true); // SameSite=None always requires Secure
+    stateCookie.setComment(SAME_SITE_NONE_COMMENT);
+    return stateCookie;
+  }
+
+  private String getOAuthStateCookieFromRequest(final HttpServletRequest request) {
+    if (request.getCookies() == null) {
+      return null;
+    }
+    for (Cookie c : request.getCookies()) {
+      if (OAUTH_STATE_COOKIE.equals(c.getName())) {
+        return c.getValue();
+      }
+    }
+    return null;
   }
 }

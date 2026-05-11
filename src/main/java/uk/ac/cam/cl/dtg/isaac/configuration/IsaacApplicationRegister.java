@@ -50,6 +50,7 @@ import uk.ac.cam.cl.dtg.segue.api.ContactFacade;
 import uk.ac.cam.cl.dtg.segue.api.CorsFilter;
 import uk.ac.cam.cl.dtg.segue.api.EmailFacade;
 import uk.ac.cam.cl.dtg.segue.api.ExceptionSanitiser;
+import uk.ac.cam.cl.dtg.segue.api.SameSiteCookieFilter;
 import uk.ac.cam.cl.dtg.segue.api.GlossaryFacade;
 import uk.ac.cam.cl.dtg.segue.api.GroupsFacade;
 import uk.ac.cam.cl.dtg.segue.api.InfoFacade;
@@ -132,6 +133,7 @@ public class IsaacApplicationRegister extends Application {
       this.singletons.add(injector.getInstance(PerformanceMonitor.class));
       this.singletons.add(injector.getInstance(SessionValidator.class));
       this.singletons.add(injector.getInstance(ExceptionSanitiser.class));
+      this.singletons.add(injector.getInstance(SameSiteCookieFilter.class));
 
       // initialise observers
       this.singletons.add(injector.getInstance(IGroupObserver.class));
