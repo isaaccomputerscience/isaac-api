@@ -350,8 +350,11 @@ class UserManagerTest {
 
     expect(request.getSession()).andReturn(dummySession).atLeastOnce();
 
+    // getCookies() is called twice per method (null-check + for-loop):
+    //   2 calls from getOAuthStateCookieFromRequest (CSRF check)
+    //   2 calls from getSegueSessionFromRequest (session check before login)
     Cookie oauthStateCookie = new Cookie(Constants.OAUTH_STATE_COOKIE, CSRF_TEST_VALUE);
-    expect(request.getCookies()).andReturn(new Cookie[]{oauthStateCookie}).times(2);
+    expect(request.getCookies()).andReturn(new Cookie[]{oauthStateCookie}).times(4);
 
     expect(dummySession.getAttribute(Constants.ANONYMOUS_USER)).andReturn(someSegueAnonymousUserId)
         .atLeastOnce(); // session
