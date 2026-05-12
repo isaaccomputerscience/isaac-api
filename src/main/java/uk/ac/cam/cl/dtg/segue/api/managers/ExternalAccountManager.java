@@ -168,36 +168,42 @@ public class ExternalAccountManager implements IExternalAccountManager {
                                                 final List<Long> successfullyProcessedUserIds,
                                                 final List<UserExternalAccountChanges> failedUsers)
       throws ExternalAccountSynchronisationException {
+    Map<SubscriptionGroup, List<UserExternalAccountChanges>> groupedUsers =
+        groupUsersBySubscriptionState(usersToSync);
+
+    List<BatchJob> submittedJobs = new ArrayList<>();
+    for (Map.Entry<SubscriptionGroup, List<UserExternalAccountChanges>> entry : groupedUsers.entrySet()) {
+      List<BatchJob> groupJobs = submitBatchesForGroup(entry.getKey(), entry.getValue());
+      submittedJobs.addAll(groupJobs);
+    }
+
     try {
-      Map<SubscriptionGroup, List<UserExternalAccountChanges>> groupedUsers =
-          groupUsersBySubscriptionState(usersToSync);
-
-      List<BatchJob> submittedJobs = new ArrayList<>();
-      for (Map.Entry<SubscriptionGroup, List<UserExternalAccountChanges>> entry : groupedUsers.entrySet()) {
-        List<BatchJob> groupJobs = submitBatchesForGroup(entry.getKey(), entry.getValue());
-        submittedJobs.addAll(groupJobs);
-      }
-
-      for (BatchJob batch : submittedJobs) {
-        try {
-          Optional<JobStatus> status = pollJobToCompletion(batch.jobId());
-          if (status.isEmpty()) {
-            log.warn("{}Job {} timed out. Treating all {} users as failed.", MAILJET, batch.jobId(), batch.users().size());
-            failedUsers.addAll(batch.users());
-            metrics.incrementUnexpectedError(batch.users().size());
-            continue;
-          }
-          processCompletedJob(batch, status.get(), successfullyProcessedUserIds, failedUsers, metrics);
-        } catch (ExternalAccountSynchronisationException e) {
-          log.error("{}Job {} polling failed: {}", MAILJET, batch.jobId(), e.getMessage());
-          throw e;
-        }
-      }
+      processAllBatches(submittedJobs, successfullyProcessedUserIds, failedUsers, metrics);
     } catch (ExternalAccountSynchronisationException e) {
       throw e;
     } catch (Exception e) {
       metrics.incrementUnexpectedError();
       log.error("{}Unexpected error during bulk sync", MAILJET, e);
+    }
+  }
+
+  /**
+   * Poll and process completed batch jobs, tracking successes and failures.
+   */
+  private void processAllBatches(final List<BatchJob> submittedJobs,
+                                 final List<Long> successfullyProcessedUserIds,
+                                 final List<UserExternalAccountChanges> failedUsers,
+                                 final SyncMetrics metrics)
+      throws ExternalAccountSynchronisationException {
+    for (BatchJob batch : submittedJobs) {
+      Optional<JobStatus> status = pollJobToCompletion(batch.jobId());
+      if (status.isEmpty()) {
+        log.warn("{}Job {} timed out. Treating all {} users as failed.", MAILJET, batch.jobId(), batch.users().size());
+        failedUsers.addAll(batch.users());
+        metrics.incrementUnexpectedError(batch.users().size());
+        continue;
+      }
+      processCompletedJob(batch, status.get(), successfullyProcessedUserIds, failedUsers, metrics);
     }
   }
 
