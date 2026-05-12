@@ -212,6 +212,7 @@ public class UserAuthenticationManager {
 
       // Also send as SameSite=None cookie so it survives cross-site redirect to OAuth provider
       Cookie oauthStateCookie = createOAuthStateCookie(antiForgeryTokenFromProvider, request);
+      oauthStateCookie.setSecure(true);
       response.addCookie(oauthStateCookie);
 
       redirectLink = URI.create(oauth2Provider.getAuthorizationUrl(antiForgeryTokenFromProvider));
