@@ -8,6 +8,8 @@ import com.mailjet.client.errors.MailjetException;
 import com.mailjet.client.errors.MailjetClientCommunicationException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -727,13 +729,10 @@ class MailJetApiClientWrapperTest {
     @Test
     void bulkSyncUsers_WithOversizedBatch_ShouldThrowException() {
       // Arrange
-      List<UserExternalAccountChanges> users = new ArrayList<>();
-      for (int i = 0; i < 1001; i++) {
-        users.add(new UserExternalAccountChanges(
-            (long) i, null, "test" + i + "@example.com", Role.STUDENT, "User" + i, false,
-            EmailVerificationStatus.VERIFIED, true, false, "GCSE"
-        ));
-      }
+      List<UserExternalAccountChanges> users = IntStream.range(0, 1001).mapToObj(i -> new UserExternalAccountChanges(
+          (long) i, null, "test" + i + "@example.com", Role.STUDENT, "User" + i, false,
+          EmailVerificationStatus.VERIFIED, true, false, "GCSE"
+      )).toList();
 
       // Act & Assert
       assertThrows(IllegalArgumentException.class, () ->

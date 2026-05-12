@@ -9,12 +9,14 @@ import java.util.List;
 
 @Provider
 public class SameSiteCookieFilter implements ContainerResponseFilter {
+
   private static final String SAME_SITE_NONE = "__SAME_SITE_NONE__";
   private static final String SAME_SITE_LAX = "__SAME_SITE_LAX__";
 
   @Override
   public void filter(final ContainerRequestContext requestContext,
                      final ContainerResponseContext responseContext) {
+
     @SuppressWarnings("unchecked")
     List<String> setCookieHeaders = (List<String>) (List<?>) responseContext.getHeaders().get("Set-Cookie");
     if (setCookieHeaders == null || setCookieHeaders.isEmpty()) {
@@ -31,10 +33,10 @@ public class SameSiteCookieFilter implements ContainerResponseFilter {
   }
 
   private String addSameSiteAttribute(final String cookieHeader) {
-    if (cookieHeader.contains("__SAME_SITE_NONE__")) {
-      return cookieHeader.replace("__SAME_SITE_NONE__", "").trim() + "; SameSite=None";
-    } else if (cookieHeader.contains("__SAME_SITE_LAX__")) {
-      return cookieHeader.replace("__SAME_SITE_LAX__", "").trim() + "; SameSite=Lax";
+    if (cookieHeader.contains(SAME_SITE_NONE)) {
+      return cookieHeader.replace(SAME_SITE_NONE, "").trim() + "; SameSite=None";
+    } else if (cookieHeader.contains(SAME_SITE_LAX)) {
+      return cookieHeader.replace(SAME_SITE_LAX, "").trim() + "; SameSite=Lax";
     }
     return cookieHeader;
   }

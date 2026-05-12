@@ -16,8 +16,6 @@
 
 package uk.ac.cam.cl.dtg.segue.api.managers;
 
-import java.util.List;
-
 /**
  * A stub external account manager for local development or staging environments where synchronisation is not desired.
  */
