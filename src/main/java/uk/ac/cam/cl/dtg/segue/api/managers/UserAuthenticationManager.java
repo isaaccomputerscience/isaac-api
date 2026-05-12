@@ -214,9 +214,6 @@ public class UserAuthenticationManager {
       Cookie oauthStateCookie = createOAuthStateCookie(antiForgeryTokenFromProvider, request);
       response.addCookie(oauthStateCookie);
 
-      log.warn("MMM - Auth start: provider={}, sessionId={}, stateToken={}",
-          provider, request.getSession().getId(), antiForgeryTokenFromProvider);
-
       redirectLink = URI.create(oauth2Provider.getAuthorizationUrl(antiForgeryTokenFromProvider));
     } else if (federatedAuthenticator instanceof IOAuth1Authenticator) {
       IOAuth1Authenticator oauth1Provider = (IOAuth1Authenticator) federatedAuthenticator;
@@ -794,13 +791,9 @@ public class UserAuthenticationManager {
   private String getOauthInternalRefCode(final IOAuthAuthenticator oauthProvider, final HttpServletRequest request)
       throws AuthenticationCodeException, CodeExchangeException,
       CrossSiteRequestForgeryException {
-    log.warn("MMM - Callback received: sessionId={}, queryStringPresent={}",
-        request.getSession().getId(), request.getQueryString() != null);
     // verify there is no cross site request forgery going on.
     if (request.getQueryString() == null || !ensureNoCSRF(request, oauthProvider)) {
-      log.warn("MMM - CSRF check failed: queryStringNull={}, sessionId={}",
-          request.getQueryString() == null, request.getSession().getId());
-
+      throw new CrossSiteRequestForgeryException("CSRF check failed");
     }
 
     // this will have our authorization code within it.
@@ -851,21 +844,7 @@ public class UserAuthenticationManager {
     }
     String csrfTokenFromProvider = request.getParameter(key);
 
-    log.warn("MMM - CSRF check: sessionId={}, sessionTokenPresent={}, providerTokenPresent={}, tokensMatch={}",
-        request.getSession().getId(),
-        csrfTokenFromUser != null,
-        csrfTokenFromProvider != null,
-        csrfTokenFromUser != null && csrfTokenFromUser.equals(csrfTokenFromProvider));
-
-    if (null == csrfTokenFromUser || !csrfTokenFromUser.equals(csrfTokenFromProvider)) {
-      log.error("MMM - CSRF mismatch: provider sent [{}], session had [{}]",
-          sanitiseExternalLogValue(csrfTokenFromProvider),
-          csrfTokenFromUser != null ? "[present but mismatched]" : "[absent]");
-      return false;
-    } else {
-      log.warn("MMM - CSRF passed: sessionId={}", request.getSession().getId());
-      return true;
-    }
+    return csrfTokenFromUser != null && csrfTokenFromUser.equals(csrfTokenFromProvider);
   }
 
   /**
