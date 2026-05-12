@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import jakarta.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
@@ -41,7 +40,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.elasticsearch.action.ActionRequestValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.cam.cl.dtg.isaac.dos.IsaacCard;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacCardDeck;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacClozeQuestion;
 import uk.ac.cam.cl.dtg.isaac.dos.IsaacEventPage;
@@ -56,6 +54,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
 import uk.ac.cam.cl.dtg.isaac.dos.content.EmailTemplate;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Formula;
+import uk.ac.cam.cl.dtg.isaac.dos.content.Item;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ItemChoice;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Media;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Quantity;
@@ -491,10 +490,10 @@ public class ContentIndexer {
   /**
    * Augments question content by recursively processing hints, answers, feedback, and choices.
    *
-   * @param question the question to augment
+   * @param question            the question to augment
    * @param canonicalSourceFile the canonical path for child content
-   * @param newParentId the parent ID for nested content IDs
-   * @param parentPublished the published state for nested content
+   * @param newParentId         the parent ID for nested content IDs
+   * @param parentPublished     the published state for nested content
    */
   private void augmentQuestionContent(final Question question, final String canonicalSourceFile,
                                       final String newParentId, final boolean parentPublished) {
@@ -612,15 +611,8 @@ public class ContentIndexer {
       // don't do anything.
       return;
     }
-
-    Set<String> newTagSet = Sets.newHashSet();
-
     // sanity check that tags are trimmed.
-    for (String tag : tags) {
-      newTagSet.add(tag.trim());
-    }
-
-    tagsList.addAll(newTagSet);
+    tagsList.addAll(tags.stream().map(String::trim).collect(Collectors.toSet()));
   }
 
   /**
@@ -636,16 +628,13 @@ public class ContentIndexer {
     HashMap<String, String> newUnits = Maps.newHashMap();
 
     for (Choice c : q.getChoices()) {
-      if (c instanceof Quantity quantity) {
+      if (c instanceof Quantity quantity && quantity.getUnits() != null && !quantity.getUnits().isEmpty()) {
+        String units = quantity.getUnits();
+        String cleanKey = units.replace("\t", "").replace("\n", "").replace(" ", "");
 
-        if (quantity.getUnits() != null && !quantity.getUnits().isEmpty()) {
-          String units = quantity.getUnits();
-          String cleanKey = units.replace("\t", "").replace("\n", "").replace(" ", "");
-
-          // May overwrite previous entry, doesn't matter as there is
-          // no mechanism by which to choose a winner
-          newUnits.put(cleanKey, units);
-        }
+        // May overwrite previous entry, doesn't matter as there is
+        // no mechanism by which to choose a winner
+        newUnits.put(cleanKey, units);
       }
     }
 
@@ -655,7 +644,7 @@ public class ContentIndexer {
     }
 
     allUnits.putAll(newUnits);
-    if (q.getPublished()) {
+    if (Boolean.TRUE.equals(q.getPublished())) {
       publishedUnits.putAll(newUnits);
     }
   }
@@ -680,13 +669,13 @@ public class ContentIndexer {
       expungeAnyContentTypeIndicesRelatedToVersion(sha);
     }
 
-    log.info("Building search indexes for: " + sanitiseInternalLogValue(sha));
+    log.info("Building search indexes for: {}", sanitiseInternalLogValue(sha));
 
     // setup object mapper to use pre-configured deserializer module.
     // Required to deal with type polymorphism
     List<Map.Entry<String, String>> contentToIndex = Lists.newArrayList();
     ObjectMapper objectMapper = mapperUtils.getSharedContentObjectMapper();
-    for (Content content : gitCache.values()) {
+    gitCache.values().forEach(content -> {
       try {
         contentToIndex.add(immutableEntry(content.getId(), objectMapper.writeValueAsString(content)));
       } catch (JsonProcessingException e) {
@@ -694,7 +683,7 @@ public class ContentIndexer {
         this.registerContentProblem(content, "Search Index Error: " + content.getId()
             + content.getCanonicalSourceFile() + " Exception: " + e, indexProblemCache);
       }
-    }
+    });
 
     long startTime;
     long endTime;
@@ -759,8 +748,8 @@ public class ContentIndexer {
     recordMissingContentProblems(refMap.expectedIds(), contentById, refMap.incomingReferences(), indexProblemCache);
     recordPublishedToUnpublishedReferenceProblems(refMap.incomingReferences(), contentById, indexProblemCache);
 
-    log.info(String.format("Validation processing (%s) complete. There are %s files with content problems",
-        sanitiseInternalLogValue(sha), indexProblemCache.size()));
+    log.info("Validation processing ({}) complete. There are {} files with content problems",
+        sanitiseInternalLogValue(sha), indexProblemCache.size());
 
     if (indexProblemCache.isEmpty()) {
       // Register a no-op style error to simplify application logic by ensuring there is always a content errors index
@@ -780,10 +769,9 @@ public class ContentIndexer {
    * @param version the commit sha of the content that we are interested in.
    */
   private void expungeAnyContentTypeIndicesRelatedToVersion(final String version) {
-    log.info("Deleting existing indexes for version " + sanitiseInternalLogValue(version));
-    for (ContentIndextype contentIndexType : ContentIndextype.values()) {
-      es.expungeIndexFromSearchCache(version, contentIndexType.toString());
-    }
+    log.info("Deleting existing indexes for version {}", sanitiseInternalLogValue(version));
+    Arrays.stream(ContentIndextype.values())
+        .forEach(contentIndexType -> es.expungeIndexFromSearchCache(version, contentIndexType.toString()));
   }
 
   /**
@@ -811,11 +799,9 @@ public class ContentIndexer {
 
   private String collateExpandableChildren(final Content content) {
     StringBuilder ret = new StringBuilder();
-    for (Content child : flattenContentObjects(content)) {
-      if (child != content && null != child.getExpandable() && child.getExpandable()) {
-        ret.append(null != child.getType() ? child.getType() : "undefined").append(",");
-      }
-    }
+    flattenContentObjects(content).stream().filter(
+            child -> child != content && null != child.getExpandable() && Boolean.TRUE.equals(child.getExpandable()))
+        .forEach(child -> ret.append(null != child.getType() ? child.getType() : "undefined").append(","));
     if (!ret.isEmpty()) {
       ret.deleteCharAt(ret.length() - 1);
     }
@@ -858,10 +844,10 @@ public class ContentIndexer {
       registerContentProblemsSymbolicQuestionInvalidProperties(content, indexProblemCache);
     }
 
-    registerContentProblemsClozeQuestionChoicesHaveWrongNumberOFItems(content, indexProblemCache);
+    registerContentProblemsClozeQuestionChoicesHaveWrongNumberOfItems(content, indexProblemCache);
   }
 
-  private void registerContentProblemsClozeQuestionChoicesHaveWrongNumberOFItems(
+  private void registerContentProblemsClozeQuestionChoicesHaveWrongNumberOfItems(
       final Content content, final Map<Content, List<String>> indexProblemCache) {
     if (content instanceof IsaacClozeQuestion q) {
       validateClozeQuestionChoiceItems(q, content, indexProblemCache);
@@ -880,21 +866,30 @@ public class ContentIndexer {
         continue;
       }
 
-      if (c.getItems() == null || c.getItems().isEmpty()) {
-        this.registerContentProblem(content, "Cloze Question: " + q.getId() + " has choice with missing items!",
-            indexProblemCache);
+      List<Item> items = c.getItems();
+      if (items == null || items.isEmpty()) {
+        this.registerContentProblem(content, buildClozeQuestionMissingItemsMessage(q), indexProblemCache);
         continue;
       }
 
-      int itemCount = c.getItems().size();
-      if (expectedItemCount != null && itemCount != expectedItemCount) {
+      int itemCount = items.size();
+      if (expectedItemCount == null) {
+        expectedItemCount = itemCount;
+      } else if (itemCount != expectedItemCount) {
         this.registerContentProblem(content,
-            "Cloze Question: " + q.getId() + " has choice with incorrect number of items!"
-                + " (Expected " + expectedItemCount + ", got " + itemCount + "!)", indexProblemCache);
-        continue;
+            buildClozeQuestionIncorrectItemCountMessage(q, expectedItemCount, itemCount), indexProblemCache);
       }
-      expectedItemCount = itemCount;
     }
+  }
+
+  private String buildClozeQuestionMissingItemsMessage(final IsaacClozeQuestion q) {
+    return "Cloze Question: " + q.getId() + " has choice with missing items!";
+  }
+
+  private String buildClozeQuestionIncorrectItemCountMessage(final IsaacClozeQuestion q, final int expected,
+                                                             final int actual) {
+    return "Cloze Question: " + q.getId() + " has choice with incorrect number of items!"
+        + " (Expected " + expected + ", got " + actual + "!)";
   }
 
   private void registerContentProblemsSymbolicQuestionInvalidProperties(
@@ -958,18 +953,14 @@ public class ContentIndexer {
       final Content content, final Map<Content, List<String>> indexProblemCache) {
     if (content instanceof IsaacNumericQuestion question) {
       if (question.getChoices() != null) {
-        for (Choice choice : question.getChoices()) {
+        question.getChoices().forEach(choice -> {
           if (choice instanceof Quantity quantity) {
-
             registerContentProblemCannotParseQuantityChoiceAsNumber(content, indexProblemCache, question, quantity);
-
             registerContentProblemUnnecessaryQuantityChoiceUnits(content, indexProblemCache, question, quantity);
-
-
           } else {
             registerContentProblemNumericQuestionChoiceIsNotQuantity(content, indexProblemCache, question, choice);
           }
-        }
+        });
       }
       registerContentProblemConflictingUnitSettings(content, indexProblemCache, question);
     }
@@ -1090,8 +1081,8 @@ public class ContentIndexer {
 
   private void registerContentProblemMediaMissingAltText(
       final Content content, final Map<Content, List<String>> indexProblemCache, final Media media) {
-    if ((media.getAltText() == null || media.getAltText().isEmpty()) && !(media instanceof Video) &&
-        !media.getId().equals("eventThumbnail")) {
+    if ((media.getAltText() == null || media.getAltText().isEmpty()) && !(media instanceof Video)
+        && !media.getId().equals("eventThumbnail")) {
       this.registerContentProblem(content, "No altText attribute set for media element: " + media.getSrc()
           + " in Git source file " + content.getCanonicalSourceFile(), indexProblemCache);
     }
