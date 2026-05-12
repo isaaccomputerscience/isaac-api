@@ -8,7 +8,6 @@ import com.mailjet.client.errors.MailjetException;
 import com.mailjet.client.errors.MailjetClientCommunicationException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.json.JSONArray;
 import org.json.JSONObject;

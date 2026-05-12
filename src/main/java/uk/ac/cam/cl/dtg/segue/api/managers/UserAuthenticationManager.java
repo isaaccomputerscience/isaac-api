@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
@@ -192,11 +193,12 @@ public class UserAuthenticationManager {
    * @param request  http request that we can attach the session to and that already has a redirect url attached.
    * @param provider the provider the user wishes to authenticate with.
    * @return A json response containing a URI to the authentication provider if authorization / login is required.
-   *     Alternatively a SegueErrorResponse could be returned.
+   * Alternatively a SegueErrorResponse could be returned.
    * @throws IOException                            if there is an error when contacting the OAuth server
    * @throws AuthenticationProviderMappingException as per exception description.
    */
-  public URI getThirdPartyAuthURI(final HttpServletRequest request, final HttpServletResponse response, final String provider)
+  public URI getThirdPartyAuthURI(final HttpServletRequest request, final HttpServletResponse response,
+                                  final String provider)
       throws IOException, AuthenticationProviderMappingException {
     IAuthenticator federatedAuthenticator = mapToProvider(provider);
 
@@ -343,8 +345,8 @@ public class UserAuthenticationManager {
    *
    * @param request                           containing session information
    * @param allowIncompleteLoginsToReturnUser boolean if true will allow users that haven't completed MFA to be
-   *                                              returned, false will be stricter and return null if user hasn't
-   *                                              completed MFA.
+   *                                          returned, false will be stricter and return null if user hasn't
+   *                                          completed MFA.
    * @return either a user or null if we couldn't find the user for whatever reason.
    */
   public RegisteredUser getUserFromSession(final HttpServletRequest request,
@@ -391,7 +393,7 @@ public class UserAuthenticationManager {
    * @param request request to get the session and therefore user from
    * @return the current User
    * @see #getUserFromSession(HttpServletRequest, boolean) - the two types of "request" have identical methods but are
-   *     not related by interfaces or inheritance and so require duplicated methods!
+   * not related by interfaces or inheritance and so require duplicated methods!
    */
   public RegisteredUser getUserFromSession(final UpgradeRequest request) {
     // WARNING: There are two public getUserFromSession methods: ensure you check both!
@@ -446,11 +448,11 @@ public class UserAuthenticationManager {
    *
    * @param currentSessionInformation         the session information map extracted from the cookie.
    * @param allowIncompleteLoginsToReturnUser boolean if true will allow users that haven't completed MFA to be
-   *                                                returned, false will be stricter and return null if user hasn't
-   *                                                completed MFA.
+   *                                          returned, false will be stricter and return null if user hasn't
+   *                                          completed MFA.
    * @return either the valid user from the cookie, or null if no valid user
    * @see #getUserFromSession(HttpServletRequest, boolean) there are two types of "request" and they have identical
-   *     methods
+   * methods
    * @see #getUserFromSession(UpgradeRequest)     but unrelated by interfaces/inheritance, so require duplication!
    */
   private RegisteredUser getUserFromSessionInformationMap(final Map<String, String> currentSessionInformation,
@@ -746,14 +748,14 @@ public class UserAuthenticationManager {
       providersString = providerNames.get(0);
     } else {
       StringBuilder providersBuilder = new StringBuilder();
-      for (int i = 0; i < providerNames.size(); i++) {
+      IntStream.range(0, providerNames.size()).forEach(i -> {
         if (i == providerNames.size() - 1) {
           providersBuilder.append(" and ");
         } else if (i > 1) {
           providersBuilder.append(", ");
         }
         providersBuilder.append(providerNames.get(i));
-      }
+      });
       providersString = providersBuilder.toString();
     }
 
@@ -804,12 +806,10 @@ public class UserAuthenticationManager {
     // extract auth code from string buffer
     String authCode = oauthProvider.extractAuthCode(fullUrlBuf.toString());
 
-    if (authCode != null) {
-      String internalReference = oauthProvider.exchangeCode(authCode);
-      return internalReference;
-    } else {
+    if (authCode == null) {
       throw new AuthenticationCodeException("User denied access to our app.");
     }
+    return oauthProvider.exchangeCode(authCode);
   }
 
 
@@ -854,7 +854,7 @@ public class UserAuthenticationManager {
    * @param response         to store the session in our own segue cookie.
    * @param user             account to associate the session with.
    * @param partialLoginFlag Boolean to indicate whether or not this cookie represents a partial login (true) or full
-   *                             (false)
+   *                         (false)
    */
   private void createSession(
       final HttpServletResponse response,
@@ -882,7 +882,7 @@ public class UserAuthenticationManager {
    * @param user                       account to associate the session with.
    * @param sessionExpiryTimeInSeconds max age of the cookie.
    * @param partialLoginFlagString     either null if this is a full login cookie or a string value of true if this is
-   *                                       a partial login cookie
+   *                                   a partial login cookie
    */
   private void createSession(final HttpServletResponse response, final RegisteredUser user,
                              final int sessionExpiryTimeInSeconds,
@@ -915,12 +915,12 @@ public class UserAuthenticationManager {
    * Verifies the HMAC for userId, expiry date, session token and partial login status; but DOES NOT enforce
    * partial login as invalid! I.e. this method will return true for partial logins.
    *
-   * @param sessionInformation map containing session information retrieved from the cookie
+   * @param sessionInformation       map containing session information retrieved from the cookie
    * @param sessionTokenFromDatabase the real session token to validate this cookie against
    * @return true if it is still valid, false if not.
    */
   public boolean isValidUsersSession(final Map<String, String> sessionInformation,
-                                      final Integer sessionTokenFromDatabase) {
+                                     final Integer sessionTokenFromDatabase) {
     requireNonNull(sessionInformation);
     requireNonNull(sessionTokenFromDatabase);
 
@@ -977,8 +977,8 @@ public class UserAuthenticationManager {
    * @return HMAC signature.
    */
   public String calculateSessionHMAC(final String key, final String userId, final String currentDate,
-                                      final String sessionToken,
-                                      @Nullable final String partialLoginFlag) {
+                                     final String sessionToken,
+                                     @Nullable final String partialLoginFlag) {
     StringBuilder sb = new StringBuilder();
     sb.append(userId);
     sb.append("|").append(currentDate);
@@ -1071,8 +1071,8 @@ public class UserAuthenticationManager {
    * @param request request to get the session cookie from
    * @return a Map of session information
    * @see #getSegueSessionFromRequest(HttpServletRequest) except for some reason a WebSocket UpgradeRrequest is not
-   *     an HttpServletRequest. Worse, the cookies from an HttpServletRequest are Cookie objects, but those from the
-   *     WebSocket UpgradeRequest are HttpCookies!
+   * an HttpServletRequest. Worse, the cookies from an HttpServletRequest are Cookie objects, but those from the
+   * WebSocket UpgradeRequest are HttpCookies!
    */
   private Map<String, String> getSegueSessionFromRequest(final UpgradeRequest request) throws IOException,
       InvalidSessionException {
