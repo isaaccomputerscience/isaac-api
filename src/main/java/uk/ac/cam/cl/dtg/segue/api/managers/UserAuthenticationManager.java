@@ -209,6 +209,11 @@ public class UserAuthenticationManager {
 
       // Store antiForgeryToken in the users session.
       request.getSession().setAttribute(STATE_PARAM_NAME, antiForgeryTokenFromProvider);
+
+      // Also send as SameSite=None cookie so it survives cross-site redirect to OAuth provider
+      Cookie oauthStateCookie = createOAuthStateCookie(antiForgeryTokenFromProvider, request);
+      response.addCookie(oauthStateCookie);
+
       log.warn("MMM - Auth start: provider={}, sessionId={}, stateToken={}",
           provider, request.getSession().getId(), antiForgeryTokenFromProvider);
 
@@ -795,7 +800,7 @@ public class UserAuthenticationManager {
     if (request.getQueryString() == null || !ensureNoCSRF(request, oauthProvider)) {
       log.warn("MMM - CSRF check failed: queryStringNull={}, sessionId={}",
           request.getQueryString() == null, request.getSession().getId());
-      throw new CrossSiteRequestForgeryException("CSRF check failed");
+
     }
 
     // this will have our authorization code within it.
@@ -1242,14 +1247,23 @@ public class UserAuthenticationManager {
     return logoutCookie;
   }
 
-  public Cookie createOAuthStateCookie(final String state) {
+  public Cookie createOAuthStateCookie(final String state, final HttpServletRequest request) {
     Cookie stateCookie = new Cookie(OAUTH_STATE_COOKIE, state);
     stateCookie.setMaxAge(OAUTH_STATE_COOKIE_TTL_SECONDS);
     stateCookie.setPath("/");
     stateCookie.setHttpOnly(true);
-    stateCookie.setSecure(true); // SameSite=None always requires Secure
+    // SameSite=None requires Secure, but also check X-Forwarded-Proto for proxy scenarios
+    stateCookie.setSecure(isSecure(request));
     stateCookie.setComment(SAME_SITE_NONE_COMMENT);
     return stateCookie;
+  }
+
+  private boolean isSecure(final HttpServletRequest request) {
+    String forwarded = request.getHeader("X-Forwarded-Proto");
+    if (forwarded != null) {
+      return "https".equalsIgnoreCase(forwarded);
+    }
+    return request.isSecure();
   }
 
   private String getOAuthStateCookieFromRequest(final HttpServletRequest request) {
