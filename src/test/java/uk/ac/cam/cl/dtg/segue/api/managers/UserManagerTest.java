@@ -281,6 +281,7 @@ class UserManagerTest {
 
     // for CSRF state information
     expect(request.getSession()).andReturn(dummySession).atLeastOnce();
+    expect(request.getHeader("X-Forwarded-Proto")).andReturn(null).atLeastOnce();
     dummySession.setAttribute(EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
     expectLastCall().atLeastOnce();
     response.addCookie(anyObject());
