@@ -195,7 +195,7 @@ public abstract class IsaacIntegrationTest {
         );
 
     elasticsearch = new ElasticsearchContainer(
-        DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:8.13.0"))
+        DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.17.6"))
         .withCopyFileToContainer(
             MountableFile.forClasspathResource("isaac-test-es-data.tar.gz"),
             "/usr/share/elasticsearch/isaac-test-es-data.tar.gz"
@@ -211,7 +211,8 @@ public abstract class IsaacIntegrationTest {
         .withEnv("xpack.security.enabled", "true")
         .withEnv("ELASTIC_PASSWORD", "elastic")
         .withEnv("ingest.geoip.downloader.enabled", "false")
-        .withEnv("ES_JAVA_OPTS", "-Dcom.sun.management.jmxremote=false -XX:+IgnoreUnrecognizedVMOptions")
+        .withEnv("ES_JAVA_OPTS", "-XX:+IgnoreUnrecognizedVMOptions -XX:-UseCGroupMemoryLimitForHeap -Djdk.internal.platform.cgroups.enabled=false")
+        .withEnv("JAVA_TOOL_OPTIONS", "-Dcom.sun.management.jmxremote=false")
         .withStartupTimeout(Duration.ofSeconds(120));
 
     postgres.start();
