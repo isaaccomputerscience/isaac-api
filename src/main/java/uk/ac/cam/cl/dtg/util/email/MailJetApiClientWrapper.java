@@ -435,7 +435,7 @@ public class MailJetApiClientWrapper {
           .property(ContactManagemanycontacts.CONTACTS, contactsArray)
           .property(ContactManagemanycontacts.CONTACTSLISTS, listsArray);
 
-      return submitBulkSyncRequest(request, users);
+      return submitBulkSyncRequest(request, users, newsAction, eventsAction);
 
     } catch (JSONException e) {
       String errorMsg = "{}JSON parsing error during bulk sync of {} users".replace("{}", MAILJET)
@@ -495,7 +495,9 @@ public class MailJetApiClientWrapper {
    * Extracted to reduce cognitive complexity.
    */
   private String submitBulkSyncRequest(final MailjetRequest request,
-                                        final java.util.List<UserExternalAccountChanges> users)
+                                        final java.util.List<UserExternalAccountChanges> users,
+                                        final MailJetSubscriptionAction newsAction,
+                                        final MailJetSubscriptionAction eventsAction)
       throws MailjetException {
     MailjetResponse response = mailjetClient.post(request);
     int status = response.getStatus();
@@ -503,7 +505,8 @@ public class MailJetApiClientWrapper {
     if (status == 200 || status == 201) {
       JSONObject responseData = response.getData().getJSONObject(0);
       String jobId = responseData.optString("JobID", null);
-      log.info("{}Bulk sync submitted for {} users (job ID: {})", MAILJET, users.size(), jobId);
+      log.info("{}Bulk sync submitted: news={}, events={} for {} users (job ID: {})",
+          MAILJET, newsAction, eventsAction, users.size(), jobId);
       return jobId;
     }
 
@@ -533,12 +536,17 @@ public class MailJetApiClientWrapper {
       }
 
       JSONObject jobData = response.getData().getJSONObject(0);
+      log.info("{}Raw Mailjet job response for job {}: {}", MAILJET, jobId, jobData.toString());
+
       String status = jobData.optString("Status", "Unknown");
       int processed = jobData.optInt("Processed", 0);
       int inserted = jobData.optInt("Inserted", 0);
       int updated = jobData.optInt("Updated", 0);
       int unchanged = jobData.optInt("Unchanged", 0);
       int errors = jobData.optInt("Error", 0);
+
+      log.info("{}Parsed job status - Status: {}, Processed: {}, Inserted: {}, Updated: {}, Unchanged: {}, Errors: {}",
+          MAILJET, status, processed, inserted, updated, unchanged, errors);
 
       return new JobStatus(status, processed, inserted, updated, unchanged, errors);
 

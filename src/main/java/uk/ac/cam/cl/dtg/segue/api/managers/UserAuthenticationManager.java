@@ -18,7 +18,6 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.requireNonNull;
-
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DATE_EXPIRES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_DATE_FORMAT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EnvironmentType;
@@ -28,6 +27,8 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.JSESSION_COOOKIE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.LOGOUT_SESSION_ALREADY_INVALIDATED_MESSAGE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NO_SESSION_TOKEN_RESERVED_VALUE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_STATE_COOKIE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_STATE_COOKIE_TTL_SECONDS;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_TOKEN_PARAM_NAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.PARTIAL_LOGIN_FLAG;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.PARTIAL_LOGIN_SESSION_EXPIRY_SECONDS;
@@ -37,8 +38,6 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_EXPIRY_SECONDS_FALLBA
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_TOKEN;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_USER_ID;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.STATE_PARAM_NAME;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_STATE_COOKIE;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_STATE_COOKIE_TTL_SECONDS;
 import static uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils.getSharedBasicObjectMapper;
 import static uk.ac.cam.cl.dtg.util.LogUtils.sanitiseExternalLogValue;
 
@@ -193,7 +192,7 @@ public class UserAuthenticationManager {
    * @param request  http request that we can attach the session to and that already has a redirect url attached.
    * @param provider the provider the user wishes to authenticate with.
    * @return A json response containing a URI to the authentication provider if authorization / login is required.
-   * Alternatively a SegueErrorResponse could be returned.
+   *     Alternatively a SegueErrorResponse could be returned.
    * @throws IOException                            if there is an error when contacting the OAuth server
    * @throws AuthenticationProviderMappingException as per exception description.
    */
@@ -261,8 +260,8 @@ public class UserAuthenticationManager {
     String providerSpecificUserLookupReference;
 
     // if we are an OAuth2Provider complete next steps of oauth
-    if (authenticator instanceof IOAuthAuthenticator) {
-      oauthProvider = (IOAuthAuthenticator) authenticator;
+    if (authenticator instanceof IOAuthAuthenticator ioAuthAuthenticator) {
+      oauthProvider = ioAuthAuthenticator;
 
       providerSpecificUserLookupReference = this.getOauthInternalRefCode(oauthProvider, request);
     } else {
@@ -270,8 +269,7 @@ public class UserAuthenticationManager {
           + provider + " is unknown");
     }
 
-    UserFromAuthProvider userFromProvider = oauthProvider.getUserInfo(providerSpecificUserLookupReference);
-    return userFromProvider;
+    return oauthProvider.getUserInfo(providerSpecificUserLookupReference);
   }
 
   /**
@@ -393,7 +391,7 @@ public class UserAuthenticationManager {
    * @param request request to get the session and therefore user from
    * @return the current User
    * @see #getUserFromSession(HttpServletRequest, boolean) - the two types of "request" have identical methods but are
-   * not related by interfaces or inheritance and so require duplicated methods!
+   *     not related by interfaces or inheritance and so require duplicated methods!
    */
   public RegisteredUser getUserFromSession(final UpgradeRequest request) {
     // WARNING: There are two public getUserFromSession methods: ensure you check both!
@@ -452,20 +450,18 @@ public class UserAuthenticationManager {
    *                                          completed MFA.
    * @return either the valid user from the cookie, or null if no valid user
    * @see #getUserFromSession(HttpServletRequest, boolean) there are two types of "request" and they have identical
-   * methods
+   *     methods
    * @see #getUserFromSession(UpgradeRequest)     but unrelated by interfaces/inheritance, so require duplication!
    */
   private RegisteredUser getUserFromSessionInformationMap(final Map<String, String> currentSessionInformation,
                                                           final boolean allowIncompleteLoginsToReturnUser) {
-    if (!allowIncompleteLoginsToReturnUser) {
-      // check if the session has a caveat about incomplete MFA Login
-      if (!Strings.isNullOrEmpty(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))
-          && Boolean.parseBoolean(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))) {
-        // login is incomplete we cannot proceed.
-        log.debug("Incomplete MFA flow - no user object to be provided");
-        return null;
-      }
+    if (!allowIncompleteLoginsToReturnUser && !Strings.isNullOrEmpty(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))
+        && Boolean.parseBoolean(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))) {
+      // login is incomplete we cannot proceed.
+      log.debug("Incomplete MFA flow - no user object to be provided");
+      return null;
     }
+
     // Retrieve the user from database.
     try {
       // Check that the user's session is indeed valid:
@@ -840,7 +836,7 @@ public class UserAuthenticationManager {
       // Read from the dedicated short-lived cookie (SameSite=None; Secure)
       csrfTokenFromUser = getOAuthStateCookieFromRequest(request);
     } else {
-      // OAuth1: keep session-based approach unchanged
+      // Session-based approach
       csrfTokenFromUser = (String) request.getSession().getAttribute(key);
     }
     String csrfTokenFromProvider = request.getParameter(key);
@@ -1071,8 +1067,8 @@ public class UserAuthenticationManager {
    * @param request request to get the session cookie from
    * @return a Map of session information
    * @see #getSegueSessionFromRequest(HttpServletRequest) except for some reason a WebSocket UpgradeRrequest is not
-   * an HttpServletRequest. Worse, the cookies from an HttpServletRequest are Cookie objects, but those from the
-   * WebSocket UpgradeRequest are HttpCookies!
+   *     an HttpServletRequest. Worse, the cookies from an HttpServletRequest are Cookie objects, but those from the
+   *     WebSocket UpgradeRequest are HttpCookies!
    */
   private Map<String, String> getSegueSessionFromRequest(final UpgradeRequest request) throws IOException,
       InvalidSessionException {
@@ -1232,7 +1228,6 @@ public class UserAuthenticationManager {
     stateCookie.setMaxAge(OAUTH_STATE_COOKIE_TTL_SECONDS);
     stateCookie.setPath("/");
     stateCookie.setHttpOnly(true);
-    // SameSite=None requires Secure, but also check X-Forwarded-Proto for proxy scenarios
     stateCookie.setSecure(isSecure(request));
     stateCookie.setComment(SAME_SITE_NONE_COMMENT);
     return stateCookie;

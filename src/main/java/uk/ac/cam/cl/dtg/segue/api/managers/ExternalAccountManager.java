@@ -196,7 +196,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
                                  final SyncMetrics metrics)
       throws ExternalAccountSynchronisationException {
     for (BatchJob batch : submittedJobs) {
-      Optional<JobStatus> status = pollJobToCompletion(batch.jobId());
+      Optional<JobStatus> status = pollJobToCompletion(batch.jobId(), batch.users().size());
       if (status.isEmpty()) {
         log.warn("{}Job {} timed out. Treating all {} users as failed.", MAILJET, batch.jobId(), batch.users().size());
         failedUsers.addAll(batch.users());
@@ -222,6 +222,8 @@ public class ExternalAccountManager implements IExternalAccountManager {
       try {
         String jobId = mailjetApi.bulkSyncUsers(batch, group.newsAction, group.eventsAction);
         if (jobId != null && !jobId.trim().isEmpty()) {
+          log.debug("{}Batch submitted: news={}, events={} for {} users (job ID: {})",
+              MAILJET, group.newsAction, group.eventsAction, batch.size(), jobId);
           submittedJobs.add(new BatchJob(jobId, group, new ArrayList<>(batch)));
         } else {
           log.warn("{}Bulk sync returned null/empty job ID for {} users. Continuing.", MAILJET, batch.size());
@@ -246,7 +248,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
    * Returns Optional.empty() if job times out; otherwise returns the final JobStatus.
    * Fails fast on repeated rate limiting (2+ consecutive rate limits).
    */
-  private Optional<JobStatus> pollJobToCompletion(final String jobId)
+  private Optional<JobStatus> pollJobToCompletion(final String jobId, final int expectedCount)
       throws ExternalAccountSynchronisationException {
     int consecutiveRateLimits = 0;
 
@@ -256,11 +258,29 @@ public class ExternalAccountManager implements IExternalAccountManager {
         consecutiveRateLimits = 0;  // Reset on successful poll
 
         if (status.isComplete() || status.hasFailed()) {
-          log.debug("{}Job {} completed with status: {}", MAILJET, jobId, status.status());
+          log.info("{}Job {} polling complete - "
+                  + "Status: {}, "
+                  + "Processed: {}/{}, "
+                  + "Inserted: {}, "
+                  + "Updated: {}, "
+                  + "Unchanged: {}, "
+                  + "Errors: {}",
+              MAILJET, jobId, status.status(),
+              status.processed(),
+              expectedCount,
+              status.inserted(),
+              status.updated(),
+              status.unchanged(),
+              status.errors());
           return Optional.of(status);
         }
-        log.debug("{}Job {} in progress (attempt {}/{}). Processed: {}, Errors: {}",
-            MAILJET, jobId, attempt + 1, JOB_POLL_MAX_ATTEMPTS, status.processed(), status.errors());
+        log.info("{}Job {} polling (attempt {}/{}). Status: {}, Processed: {}/{}, Errors: {}",
+            MAILJET, jobId, attempt + 1,
+            JOB_POLL_MAX_ATTEMPTS,
+            status.status(),
+            status.processed(),
+            expectedCount,
+            status.errors());
 
         Thread.sleep(JOB_POLL_INTERVAL_MS);
       } catch (MailjetRateLimitException e) {
@@ -302,6 +322,8 @@ public class ExternalAccountManager implements IExternalAccountManager {
         successfullyProcessedUserIds.add(user.getUserId());
         metrics.incrementSuccess();
       }
+      metrics.addCreatedCount(status.inserted());
+      metrics.addUpdatedCount(status.updated());
     } else {
       log.warn("{}Job {} completed with {} errors. Recovering per-user.",
           MAILJET, batch.jobId(), status.errors());
@@ -507,12 +529,19 @@ public class ExternalAccountManager implements IExternalAccountManager {
     log.info("{}  - Email changed: {}", MAILJET, metrics.getEmailChangedCount());
     log.info("{}  - Unsubscribed: {}", MAILJET, metrics.getUnsubscribedCount());
     log.info("{}  - Skipped: {}", MAILJET, metrics.getSkippedCount());
-    log.info("{}Errors:", MAILJET);
-    log.info("{}  - Database errors: {}", MAILJET, metrics.getDatabaseErrorCount());
-    log.info("{}  - Communication errors: {}", MAILJET, metrics.getCommunicationErrorCount());
-    log.info("{}  - Rate limit errors: {}", MAILJET, metrics.getRateLimitErrorCount());
-    log.info("{}  - Mailjet API errors: {}", MAILJET, metrics.getMailjetErrorCount());
-    log.info("{}  - Unexpected errors: {}", MAILJET, metrics.getUnexpectedErrorCount());
+
+    int totalErrors = metrics.getDatabaseErrorCount() + metrics.getCommunicationErrorCount()
+        + metrics.getRateLimitErrorCount() + metrics.getMailjetErrorCount()
+        + metrics.getUnexpectedErrorCount();
+
+    if (totalErrors > 0) {
+      log.info("{}Errors:", MAILJET);
+      log.info("{}  - Database errors: {}", MAILJET, metrics.getDatabaseErrorCount());
+      log.info("{}  - Communication errors: {}", MAILJET, metrics.getCommunicationErrorCount());
+      log.info("{}  - Rate limit errors: {}", MAILJET, metrics.getRateLimitErrorCount());
+      log.info("{}  - Mailjet API errors: {}", MAILJET, metrics.getMailjetErrorCount());
+      log.info("{}  - Unexpected errors: {}", MAILJET, metrics.getUnexpectedErrorCount());
+    }
     log.info("{}========================================", MAILJET);
   }
 
@@ -541,8 +570,16 @@ public class ExternalAccountManager implements IExternalAccountManager {
       createdCount++;
     }
 
+    void addCreatedCount(int count) {
+      createdCount += count;
+    }
+
     void incrementUpdated() {
       updatedCount++;
+    }
+
+    void addUpdatedCount(int count) {
+      updatedCount += count;
     }
 
     void incrementDeleted() {

@@ -9,9 +9,6 @@ import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 /**
  * CORS Filter for ALB migration.
@@ -22,17 +19,13 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 @PreMatching
 public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-  private static final Logger log = LoggerFactory.getLogger(CorsFilter.class);
-
-  private static final String ALLOWED_ORIGINS_PROPERTY = "CORS_ALLOWED_ORIGINS";
   private static final String DEFAULT_ALLOWED_ORIGINS = "https://*.isaaccomputerscience.org";
 
   private final String allowedOrigins;
 
   @Inject
-  public CorsFilter(final PropertiesLoader properties) {
-    String configuredOrigins = properties.getProperty(ALLOWED_ORIGINS_PROPERTY);
-    this.allowedOrigins = configuredOrigins != null ? configuredOrigins : DEFAULT_ALLOWED_ORIGINS;
+  public CorsFilter() {
+    this.allowedOrigins = DEFAULT_ALLOWED_ORIGINS;
   }
 
   @Override
@@ -65,7 +58,6 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
   /**
    * Validate and return the allowed origin from the request.
    * Currently, allows all requests from Isaac domains (*.isaaccomputerscience.org).
-   * More sophisticated --- MMM ???
    *
    * @param requestContext the request context
    * @return the allowed origin, or * if validation fails
@@ -77,7 +69,6 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
       return allowedOrigins;
     }
 
-    // For simplicity, allow any Isaac domain --- MMM ???
     // The allowedOrigins property can be configured as a regex or comma-separated list if needed.
     if (origin.contains("isaaccomputerscience.org") || origin.contains("localhost")) {
       return origin;
