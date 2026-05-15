@@ -56,7 +56,6 @@ import uk.ac.cam.cl.dtg.isaac.api.managers.QuizManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.QuizQuestionManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.URIManager;
 import uk.ac.cam.cl.dtg.isaac.api.services.AssignmentService;
-import uk.ac.cam.cl.dtg.isaac.api.services.CompetitionEntryService;
 import uk.ac.cam.cl.dtg.isaac.api.services.ContentSummarizerService;
 import uk.ac.cam.cl.dtg.isaac.api.services.EmailService;
 import uk.ac.cam.cl.dtg.isaac.dao.EventBookingPersistenceManager;
@@ -167,8 +166,6 @@ public abstract class IsaacIntegrationTest {
   protected static PgAnonymousUsers pgAnonymousUsers;
   protected static ContentMapperUtils contentMapperUtils;
 
-  protected static CompetitionEntryService competitionEntryService;
-
   // Services
   protected static AssignmentService assignmentService;
 
@@ -177,43 +174,35 @@ public abstract class IsaacIntegrationTest {
     postgres = new PostgreSQLContainer<>("postgres:14-alpine")
         .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust")
         .withUsername("rutherford")
-        .withCopyFileToContainer(
-            MountableFile.forClasspathResource("db_scripts/postgres-rutherford-create-script.sql"),
-            "/docker-entrypoint-initdb.d/00-isaac-create.sql"
-        )
-        .withCopyFileToContainer(
-            MountableFile.forClasspathResource("db_scripts/postgres-rutherford-functions.sql"),
-            "/docker-entrypoint-initdb.d/01-isaac-functions.sql"
-        )
-        .withCopyFileToContainer(
-            MountableFile.forClasspathResource("db_scripts/quartz_scheduler_create_script.sql"),
-            "/docker-entrypoint-initdb.d/02-isaac-quartz.sql"
-        )
-        .withCopyFileToContainer(
-            MountableFile.forClasspathResource("test-postgres-rutherford-data-dump.sql"),
-            "/docker-entrypoint-initdb.d/03-data-dump.sql"
-        );
+        .withFileSystemBind(
+            IsaacIntegrationTest.class.getClassLoader().getResource("db_scripts/postgres-rutherford-create-script.sql")
+                .getPath(), "/docker-entrypoint-initdb.d/00-isaac-create.sql")
+        .withFileSystemBind(
+            IsaacIntegrationTest.class.getClassLoader().getResource("db_scripts/postgres-rutherford-functions.sql")
+                .getPath(), "/docker-entrypoint-initdb.d/01-isaac-functions.sql")
+        .withFileSystemBind(
+            IsaacIntegrationTest.class.getClassLoader().getResource("db_scripts/quartz_scheduler_create_script.sql")
+                .getPath(), "/docker-entrypoint-initdb.d/02-isaac-quartz.sql")
+        .withFileSystemBind(
+            IsaacIntegrationTest.class.getClassLoader().getResource("test-postgres-rutherford-data-dump.sql").getPath(),
+            "/docker-entrypoint-initdb.d/03-data-dump.sql")
+    ;
 
-    elasticsearch = new ElasticsearchContainer(
-        DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.17.6"))
-        .withCopyFileToContainer(
-            MountableFile.forClasspathResource("isaac-test-es-data.tar.gz"),
-            "/usr/share/elasticsearch/isaac-test-es-data.tar.gz"
-        )
-        .withCopyFileToContainer(
-            MountableFile.forClasspathResource("isaac-test-es-docker-entrypoint.sh", 0100775),
-            "/usr/local/bin/docker-entrypoint.sh"
-        )
-        .withExposedPorts(9200, 9300)
-        .withEnv("cluster.name", "isaac")
-        .withEnv("node.name", "localhost")
-        .withEnv("http.max_content_length", "512mb")
-        .withEnv("xpack.security.enabled", "true")
-        .withEnv("ELASTIC_PASSWORD", "elastic")
-        .withEnv("ingest.geoip.downloader.enabled", "false")
-        .withEnv("ES_JAVA_OPTS", "-XX:+IgnoreUnrecognizedVMOptions -XX:-UseCGroupMemoryLimitForHeap -Djdk.internal.platform.cgroups.enabled=false")
-        .withEnv("JAVA_TOOL_OPTIONS", "-Dcom.sun.management.jmxremote=false")
-        .withStartupTimeout(Duration.ofSeconds(120));
+    // TODO It would be nice if we could pull the version from pom.xml
+    elasticsearch =
+        new ElasticsearchContainer(DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.17.6"))
+            .withCopyFileToContainer(MountableFile.forClasspathResource("isaac-test-es-data.tar.gz"),
+                "/usr/share/elasticsearch/isaac-test-es-data.tar.gz")
+            .withCopyFileToContainer(MountableFile.forClasspathResource("isaac-test-es-docker-entrypoint.sh", 0100775),
+                "/usr/local/bin/docker-entrypoint.sh")
+            .withExposedPorts(9200, 9300)
+            .withEnv("cluster.name", "isaac")
+            .withEnv("node.name", "localhost")
+            .withEnv("http.max_content_length", "512mb")
+            .withEnv("xpack.security.enabled", "true")
+            .withEnv("ELASTIC_PASSWORD", "elastic")
+            .withEnv("ingest.geoip.downloader.enabled", "false")
+            .withStartupTimeout(Duration.ofSeconds(120));
 
     postgres.start();
     elasticsearch.start();
