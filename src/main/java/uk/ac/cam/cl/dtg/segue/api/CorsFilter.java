@@ -38,6 +38,7 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
                   "GET, POST, PUT, DELETE, OPTIONS, PATCH")
               .header("Access-Control-Allow-Headers",
                   "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Api-Token")
+              .header("Access-Control-Allow-Credentials", "true")
               .header("Access-Control-Max-Age", "3600")
               .build());
     }
