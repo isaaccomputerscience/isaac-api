@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -41,12 +40,7 @@ import java.util.Map;
 import org.apache.commons.lang3.SystemUtils;
 import org.easymock.Capture;
 import org.eclipse.jgit.api.Git;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.utility.MountableFile;
 import uk.ac.cam.cl.dtg.isaac.api.managers.AssignmentManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.EventBookingManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.GameManager;
@@ -56,6 +50,7 @@ import uk.ac.cam.cl.dtg.isaac.api.managers.QuizManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.QuizQuestionManager;
 import uk.ac.cam.cl.dtg.isaac.api.managers.URIManager;
 import uk.ac.cam.cl.dtg.isaac.api.services.AssignmentService;
+import uk.ac.cam.cl.dtg.isaac.api.services.CompetitionEntryService;
 import uk.ac.cam.cl.dtg.isaac.api.services.ContentSummarizerService;
 import uk.ac.cam.cl.dtg.isaac.api.services.EmailService;
 import uk.ac.cam.cl.dtg.isaac.dao.EventBookingPersistenceManager;
@@ -126,8 +121,6 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 public abstract class IsaacIntegrationTest {
 
   protected static HttpSession httpSession;
-  protected static PostgreSQLContainer<?> postgres;
-  protected static ElasticsearchContainer elasticsearch;
   protected static PropertiesLoader properties;
   protected static Map<String, String> globalTokens;
   protected static PostgresSqlDb postgresSqlDb;
@@ -151,6 +144,7 @@ public abstract class IsaacIntegrationTest {
   protected static GitContentManager contentManager;
   protected static UserBadgeManager userBadgeManager;
   protected static UserAssociationManager userAssociationManager;
+  protected static CompetitionEntryService competitionEntryService;
   protected static AssignmentManager assignmentManager;
   protected static QuestionManager questionManager;
   protected static QuizManager quizManager;
@@ -171,44 +165,8 @@ public abstract class IsaacIntegrationTest {
 
   @BeforeAll
   public static void setUpClass() {
-    postgres = new PostgreSQLContainer<>("postgres:14-alpine")
-        .withEnv("POSTGRES_HOST_AUTH_METHOD", "trust")
-        .withUsername("rutherford")
-        .withFileSystemBind(
-            IsaacIntegrationTest.class.getClassLoader().getResource("db_scripts/postgres-rutherford-create-script.sql")
-                .getPath(), "/docker-entrypoint-initdb.d/00-isaac-create.sql")
-        .withFileSystemBind(
-            IsaacIntegrationTest.class.getClassLoader().getResource("db_scripts/postgres-rutherford-functions.sql")
-                .getPath(), "/docker-entrypoint-initdb.d/01-isaac-functions.sql")
-        .withFileSystemBind(
-            IsaacIntegrationTest.class.getClassLoader().getResource("db_scripts/quartz_scheduler_create_script.sql")
-                .getPath(), "/docker-entrypoint-initdb.d/02-isaac-quartz.sql")
-        .withFileSystemBind(
-            IsaacIntegrationTest.class.getClassLoader().getResource("test-postgres-rutherford-data-dump.sql").getPath(),
-            "/docker-entrypoint-initdb.d/03-data-dump.sql")
-    ;
-
-    // TODO It would be nice if we could pull the version from pom.xml
-    elasticsearch =
-        new ElasticsearchContainer(DockerImageName.parse("docker.elastic.co/elasticsearch/elasticsearch:7.17.6"))
-            .withCopyFileToContainer(MountableFile.forClasspathResource("isaac-test-es-data.tar.gz"),
-                "/usr/share/elasticsearch/isaac-test-es-data.tar.gz")
-            .withCopyFileToContainer(MountableFile.forClasspathResource("isaac-test-es-docker-entrypoint.sh", 0100775),
-                "/usr/local/bin/docker-entrypoint.sh")
-            .withExposedPorts(9200, 9300)
-            .withEnv("cluster.name", "isaac")
-            .withEnv("node.name", "localhost")
-            .withEnv("http.max_content_length", "512mb")
-            .withEnv("xpack.security.enabled", "true")
-            .withEnv("ELASTIC_PASSWORD", "elastic")
-            .withEnv("ingest.geoip.downloader.enabled", "false")
-            .withStartupTimeout(Duration.ofSeconds(120));
-
-    postgres.start();
-    elasticsearch.start();
-
     postgresSqlDb = new PostgresSqlDb(
-        postgres.getJdbcUrl(),
+        "jdbc:postgresql://localhost:5432/rutherford",
         "rutherford",
         "somerandompassword"
     ); // user/pass are irrelevant because POSTGRES_HOST_AUTH_METHOD is set to "trust"
@@ -217,7 +175,7 @@ public abstract class IsaacIntegrationTest {
       elasticSearchProvider =
           new ElasticSearchProvider(ElasticSearchProvider.getClient(
               "localhost",
-              elasticsearch.getMappedPort(9200),
+              9200,
               "elastic",
               "elastic"
           )
@@ -369,11 +327,6 @@ public abstract class IsaacIntegrationTest {
      */
   }
 
-  @AfterAll
-  static void tearDownClass() {
-    postgres.stop();
-    elasticsearch.stop();
-  }
 
   protected LoginResult loginAs(final HttpSession httpSession, final String username, final String password)
       throws NoCredentialsAvailableException, SegueDatabaseException, AuthenticationProviderMappingException,
