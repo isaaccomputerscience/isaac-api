@@ -20,6 +20,9 @@ RUN chown jetty /var/lib/jetty/webapps/*
 
 ADD resources/start.d/ $JETTY_BASE/start.d/
 
+# Set JVM options for URI compliance (allow legacy characters like pipe '|' in question IDs)
+ENV JAVA_TOOL_OPTIONS="-Dorg.eclipse.jetty.http.UriCompliance=LEGACY"
+
 # prepare things so that jetty runs in the docker entrypoint
 USER jetty
 WORKDIR $JETTY_BASE

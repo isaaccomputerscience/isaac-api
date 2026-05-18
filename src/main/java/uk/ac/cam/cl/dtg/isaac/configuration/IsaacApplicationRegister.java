@@ -95,8 +95,11 @@ public class IsaacApplicationRegister extends Application {
     injector = SegueGuiceConfigurationModule.getGuiceInjector();
 
     PropertiesLoader propsLoader = injector.getInstance(PropertiesLoader.class);
-    String uriCompliance = System.getProperty("jetty.httpConfig.uriCompliance", "not set");
-    log.info("MMM_STARTUP jetty.httpConfig.uriCompliance={}", uriCompliance);
+    String uriCompliance1 = System.getProperty("jetty.httpConfig.uriCompliance", "not set");
+    String uriCompliance2 = System.getProperty("org.eclipse.jetty.http.UriCompliance", "not set");
+    String uriCompliance3 = System.getProperty("jetty.http.UriCompliance", "not set");
+    log.info("MMM_STARTUP jetty.httpConfig.uriCompliance={} org.eclipse.jetty.http.UriCompliance={} jetty.http.UriCompliance={}",
+        uriCompliance1, uriCompliance2, uriCompliance3);
 
     setupSwaggerApiAdvertiser(servletConfig);
 
