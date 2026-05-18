@@ -1,0 +1,34 @@
+version: '2'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: rutherford
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./src/test/resources/db_scripts/postgres-rutherford-create-script.sql:/docker-entrypoint-initdb.d/00-isaac-create.sql
+      - ./src/test/resources/db_scripts/postgres-rutherford-functions.sql:/docker-entrypoint-initdb.d/01-isaac-functions.sql
+      - ./src/test/resources/db_scripts/quartz_scheduler_create_script.sql:/docker-entrypoint-initdb.d/02-isaac-quartz.sql
+      - ./src/test/resources/test-postgres-rutherford-data-dump.sql:/docker-entrypoint-initdb.d/03-data-dump.sql
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.6
+    environment:
+      - cluster.name=isaac
+      - node.name=localhost
+      - http.max_content_length=512mb
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=elastic
+      - ingest.geoip.downloader.enabled=false
+      - ES_JAVA_OPTS=-XX:+IgnoreUnrecognizedVMOptions -XX:-UseCGroupMemoryLimitForHeap -Djdk.internal.platform.cgroups.enabled=false
+      - JAVA_TOOL_OPTIONS=-Dcom.sun.management.jmxremote=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
+    volumes:
+      - ./src/test/resources/isaac-test-es-docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh:ro
+      - ./src/test/resources/isaac-test-es-data.tar.gz:/usr/share/elasticsearch/isaac-test-es-data.tar.gz
