@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_12_0.dtd">
+
+<!-- Configure HttpConfiguration for URI Compliance -->
+<Configure id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+  <!-- Allow legacy characters in URIs (including pipe '|' used as ID separator) -->
+  <Set name="uriCompliance" class="org.eclipse.jetty.http.UriCompliance"><Arg>LEGACY</Arg></Set>
+</Configure>
