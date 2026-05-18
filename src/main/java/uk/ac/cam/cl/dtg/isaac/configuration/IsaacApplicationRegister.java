@@ -37,6 +37,8 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.api.AssignmentFacade;
 import uk.ac.cam.cl.dtg.isaac.api.EventsFacade;
 import uk.ac.cam.cl.dtg.isaac.api.GameboardsFacade;
@@ -50,13 +52,14 @@ import uk.ac.cam.cl.dtg.segue.api.ContactFacade;
 import uk.ac.cam.cl.dtg.segue.api.CorsFilter;
 import uk.ac.cam.cl.dtg.segue.api.EmailFacade;
 import uk.ac.cam.cl.dtg.segue.api.ExceptionSanitiser;
-import uk.ac.cam.cl.dtg.segue.api.SameSiteCookieFilter;
 import uk.ac.cam.cl.dtg.segue.api.GlossaryFacade;
 import uk.ac.cam.cl.dtg.segue.api.GroupsFacade;
 import uk.ac.cam.cl.dtg.segue.api.InfoFacade;
 import uk.ac.cam.cl.dtg.segue.api.LogEventFacade;
 import uk.ac.cam.cl.dtg.segue.api.NotificationFacade;
 import uk.ac.cam.cl.dtg.segue.api.QuestionFacade;
+import uk.ac.cam.cl.dtg.segue.api.RequestLoggingFilter;
+import uk.ac.cam.cl.dtg.segue.api.SameSiteCookieFilter;
 import uk.ac.cam.cl.dtg.segue.api.SchoolLookupServiceFacade;
 import uk.ac.cam.cl.dtg.segue.api.SegueContentFacade;
 import uk.ac.cam.cl.dtg.segue.api.SegueDefaultFacade;
@@ -80,6 +83,8 @@ public class IsaacApplicationRegister extends Application {
 
   private static Injector injector;
 
+  private static final Logger log = LoggerFactory.getLogger(IsaacApplicationRegister.class);
+
   /**
    * Constructor for IsaacApplicationRegister.
    *
@@ -88,6 +93,10 @@ public class IsaacApplicationRegister extends Application {
   public IsaacApplicationRegister(@Context final ServletConfig servletConfig) {
     singletons = new HashSet<>();
     injector = SegueGuiceConfigurationModule.getGuiceInjector();
+
+    PropertiesLoader propsLoader = injector.getInstance(PropertiesLoader.class);
+    String uriCompliance = System.getProperty("jetty.httpConfig.uriCompliance", "not set");
+    log.info("MMM_STARTUP jetty.httpConfig.uriCompliance={}", uriCompliance);
 
     setupSwaggerApiAdvertiser(servletConfig);
 
@@ -129,6 +138,7 @@ public class IsaacApplicationRegister extends Application {
       this.singletons.add(injector.getInstance(QuizFacade.class));
 
       // initialise filters
+      this.singletons.add(injector.getInstance(RequestLoggingFilter.class));
       this.singletons.add(injector.getInstance(CorsFilter.class));
       this.singletons.add(injector.getInstance(PerformanceMonitor.class));
       this.singletons.add(injector.getInstance(SessionValidator.class));

@@ -292,6 +292,9 @@ public class QuestionFacade extends AbstractSegueFacade {
       description = "The answer must be the correct Choice subclass for the question with the provided ID.")
   public Response answerQuestion(@Context final HttpServletRequest request,
                                  @PathParam("question_id") final String questionId, final String jsonAnswer) {
+    log.info("MMM_ANSWER_QUESTION questionId={} answerLength={}", questionId,
+        jsonAnswer != null ? jsonAnswer.length() : 0);
+
     if (null == jsonAnswer || jsonAnswer.isEmpty()) {
       return new SegueErrorResponse(Status.BAD_REQUEST, "No answer received.").toResponse();
     }
