@@ -47,6 +47,11 @@ public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilt
   @Override
   public void filter(final ContainerRequestContext requestContext,
                      final ContainerResponseContext responseContext) throws IOException {
+    if (requestContext.getMethod().equalsIgnoreCase("OPTIONS")) {
+      // Request filter already set all headers via abortWith(). Running here too would duplicate them,
+      // which causes Safari/mobile to fail the CORS preflight check.
+      return;
+    }
     String allowedOrigin = getAllowedOrigin(requestContext);
     responseContext.getHeaders().add("Access-Control-Allow-Origin", allowedOrigin);
     responseContext.getHeaders().add("Access-Control-Allow-Methods",
