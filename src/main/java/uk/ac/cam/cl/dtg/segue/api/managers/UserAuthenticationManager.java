@@ -833,13 +833,27 @@ public class UserAuthenticationManager {
     // to deal with cross site request forgery
     String csrfTokenFromUser;
     if (oauthProvider instanceof IOAuth2Authenticator) {
-      // Read from the dedicated short-lived cookie (SameSite=None; Secure)
+      // Prefer the dedicated short-lived cookie (SameSite=None; Secure).
+      // Fall back to the session in case the cookie was blocked by the browser
+      // (the state is stored in both places during the authenticate step).
       csrfTokenFromUser = getOAuthStateCookieFromRequest(request);
+      if (csrfTokenFromUser == null) {
+        log.warn("CSRF: oauth state cookie missing, falling back to session (sessionId={})",
+            request.getSession().getId());
+        csrfTokenFromUser = (String) request.getSession().getAttribute(key);
+      }
     } else {
       // Session-based approach
       csrfTokenFromUser = (String) request.getSession().getAttribute(key);
     }
     String csrfTokenFromProvider = request.getParameter(key);
+
+    if (csrfTokenFromUser == null) {
+      log.warn("CSRF: no state token found in cookie or session (sessionId={})", request.getSession().getId());
+    } else if (!csrfTokenFromUser.equals(csrfTokenFromProvider)) {
+      log.warn("CSRF: token mismatch — from user: {}, from provider: {} (sessionId={})",
+          csrfTokenFromUser, csrfTokenFromProvider, request.getSession().getId());
+    }
 
     return csrfTokenFromUser != null && csrfTokenFromUser.equals(csrfTokenFromProvider);
   }
