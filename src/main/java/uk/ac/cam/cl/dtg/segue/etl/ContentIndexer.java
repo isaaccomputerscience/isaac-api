@@ -451,7 +451,7 @@ public class ContentIndexer {
 
   private void updateContentIdentifier(final Content content, final String parentId, final boolean parentPublished) {
     if (content.getId() != null && parentId != null) {
-      content.setId(parentId + Constants.ID_SEPARATOR + content.getId());
+      content.setId(parentId);
       content.setPublished(parentPublished);
     }
   }
