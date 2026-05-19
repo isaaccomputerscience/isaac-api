@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_12_0.dtd">
-
-<!-- Set URI compliance for HTTP connectors to allow legacy characters like pipe '|' -->
-<Configure class="org.eclipse.jetty.http.HttpConnectionFactory">
-  <Set name="uriCompliance"><Arg type="org.eclipse.jetty.http.UriCompliance$Preset">LEGACY</Arg></Set>
-</Configure>

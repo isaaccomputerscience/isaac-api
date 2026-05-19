@@ -37,8 +37,6 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import java.util.HashSet;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.api.AssignmentFacade;
 import uk.ac.cam.cl.dtg.isaac.api.EventsFacade;
 import uk.ac.cam.cl.dtg.isaac.api.GameboardsFacade;
@@ -58,7 +56,6 @@ import uk.ac.cam.cl.dtg.segue.api.InfoFacade;
 import uk.ac.cam.cl.dtg.segue.api.LogEventFacade;
 import uk.ac.cam.cl.dtg.segue.api.NotificationFacade;
 import uk.ac.cam.cl.dtg.segue.api.QuestionFacade;
-import uk.ac.cam.cl.dtg.segue.api.RequestLoggingFilter;
 import uk.ac.cam.cl.dtg.segue.api.SameSiteCookieFilter;
 import uk.ac.cam.cl.dtg.segue.api.SchoolLookupServiceFacade;
 import uk.ac.cam.cl.dtg.segue.api.SegueContentFacade;
@@ -83,8 +80,6 @@ public class IsaacApplicationRegister extends Application {
 
   private static Injector injector;
 
-  private static final Logger log = LoggerFactory.getLogger(IsaacApplicationRegister.class);
-
   /**
    * Constructor for IsaacApplicationRegister.
    *
@@ -94,12 +89,6 @@ public class IsaacApplicationRegister extends Application {
     singletons = new HashSet<>();
     injector = SegueGuiceConfigurationModule.getGuiceInjector();
 
-    PropertiesLoader propsLoader = injector.getInstance(PropertiesLoader.class);
-    String uriCompliance1 = System.getProperty("jetty.httpConfig.uriCompliance", "not set");
-    String uriCompliance2 = System.getProperty("org.eclipse.jetty.http.UriCompliance", "not set");
-    String uriCompliance3 = System.getProperty("jetty.http.UriCompliance", "not set");
-    log.info("MMM_STARTUP jetty.httpConfig.uriCompliance={} org.eclipse.jetty.http.UriCompliance={} jetty.http.UriCompliance={}",
-        uriCompliance1, uriCompliance2, uriCompliance3);
 
     setupSwaggerApiAdvertiser(servletConfig);
 
@@ -141,7 +130,6 @@ public class IsaacApplicationRegister extends Application {
       this.singletons.add(injector.getInstance(QuizFacade.class));
 
       // initialise filters
-      this.singletons.add(injector.getInstance(RequestLoggingFilter.class));
       this.singletons.add(injector.getInstance(CorsFilter.class));
       this.singletons.add(injector.getInstance(PerformanceMonitor.class));
       this.singletons.add(injector.getInstance(SessionValidator.class));
