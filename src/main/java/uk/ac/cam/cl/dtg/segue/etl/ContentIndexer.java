@@ -287,7 +287,7 @@ public class ContentIndexer {
                 + ERROR_OCCURRED_SUFFIX + e.getMessage(), context.indexProblemCache);
       }
     } catch (Exception e) {
-      log.error("Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
+      log.error(CONTENT_LOG_PREFIX + "Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
       Content dummyContent = new Content();
       dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
       this.registerContentProblem(dummyContent,
@@ -575,10 +575,16 @@ public class ContentIndexer {
    */
   public Set<Content> flattenContentObjects(final Content content) {
     Set<Content> setOfContentObjects = new HashSet<>();
-    if (!content.getChildren().isEmpty()) {
+    if (content.getChildren() != null && !content.getChildren().isEmpty()) {
       content.getChildren().forEach(child -> {
         setOfContentObjects.add((Content) child);
         setOfContentObjects.addAll(flattenContentObjects((Content) child));
+      });
+    }
+    if (content instanceof IsaacCardDeck isaacCardDeck && isaacCardDeck.getCards() != null) {
+      isaacCardDeck.getCards().forEach(card -> {
+        setOfContentObjects.add(card);
+        setOfContentObjects.addAll(flattenContentObjects(card));
       });
     }
     setOfContentObjects.add(content);
