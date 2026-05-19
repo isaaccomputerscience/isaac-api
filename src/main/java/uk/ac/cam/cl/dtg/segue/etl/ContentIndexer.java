@@ -112,20 +112,21 @@ public class ContentIndexer {
       throw new VersionLockedException(version);
     }
 
-    log.debug("Acquired lock for version {}. Indexing.", sanitiseInternalLogValue(version));
+    log.info(CONTENT_LOG_PREFIX + "Acquired lock for version {}. Starting indexing.",
+        sanitiseInternalLogValue(version));
 
     try {
       database.fetchLatestFromRemote();
 
       // Now we have acquired the lock check in case someone else has already indexed this version.
-      // The case where only some of the content types have been successfully indexed for this version, should
-      // never happen but is covered by an expunge at the start of #buildElasticSearchIndex(...).
+      // The case where only some of the content types have been successfully indexed for this version,
+      // should never happen but is covered by an expunge at the start of #buildElasticSearchIndex(...).
       if (allContentTypesAreIndexedForVersion(version)) {
-        log.debug("Content already indexed: {}", sanitiseInternalLogValue(version));
+        log.info(CONTENT_LOG_PREFIX + "Content already indexed: {}", sanitiseInternalLogValue(version));
         return;
       }
 
-      log.info("Rebuilding content index as sha ({}) does not exist in search provider.",
+      log.info(CONTENT_LOG_PREFIX + "Rebuilding content index for sha: {}",
           sanitiseInternalLogValue(version));
 
       Map<String, Content> contentCache = new HashMap<>();
@@ -139,25 +140,27 @@ public class ContentIndexer {
       long endTime;
 
       totalStartTime = System.nanoTime();
-      buildGitContentIndex(version, true, contentCache, tagsList, allUnits, publishedUnits, indexProblemCache);
+      buildGitContentIndex(version, true, contentCache, tagsList, allUnits, publishedUnits,
+          indexProblemCache);
       endTime = System.nanoTime();
 
-      log.info(
-          "Finished populating Git content cache, took: {}ms",
-          (endTime - totalStartTime) / NANOSECONDS_IN_A_MILLISECOND
-      );
-      log.info("Beginning to record content errors");
+      log.info(CONTENT_LOG_PREFIX + "Finished populating Git content cache, took: {}ms",
+          (endTime - totalStartTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX + "Beginning to record content errors");
 
       startTime = System.nanoTime();
       recordContentErrors(version, contentCache, indexProblemCache);
       endTime = System.nanoTime();
 
-      log.info("Finished recording content errors, took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX + "Finished recording content errors, took: {}ms",
+          (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
 
       startTime = System.nanoTime();
-      buildElasticSearchIndex(version, contentCache, tagsList, allUnits, publishedUnits, indexProblemCache);
+      buildElasticSearchIndex(version, contentCache, tagsList, allUnits, publishedUnits,
+          indexProblemCache);
       endTime = System.nanoTime();
-      log.info("Finished indexing git content cache, took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      long buildTime = (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND;
+      log.info(CONTENT_LOG_PREFIX + "Finished building ElasticSearch index, took: {}ms", buildTime);
 
       // Verify the version requested is now available
       if (!allContentTypesAreIndexedForVersion(version)) {
@@ -165,9 +168,9 @@ public class ContentIndexer {
         throw new Exception(String.format("Failed to index version %s. Don't know why.", version));
       }
 
-      log.info("Finished indexing version {}, took: {}",
-          sanitiseInternalLogValue(version),
-          ((endTime - totalStartTime) / NANOSECONDS_IN_A_MILLISECOND) + "ms");
+      long totalTime = (endTime - totalStartTime) / NANOSECONDS_IN_A_MILLISECOND;
+      log.info(CONTENT_LOG_PREFIX + "Finished indexing version {}, total time: {}ms",
+          sanitiseInternalLogValue(version), totalTime);
 
     } finally {
       VERSION_LOCKS.remove(version);
@@ -234,8 +237,8 @@ public class ContentIndexer {
       }
 
       repository.close();
-      log.debug("Tags available {}", tagsList);
-      log.debug("All units: {}", allUnits);
+      log.info("Tags available {}", tagsList);
+      log.info("All units: {}", allUnits);
 
     } catch (IOException e) {
       log.error("IOException while trying to access git repository. ", e);
@@ -256,7 +259,7 @@ public class ContentIndexer {
         Content content = (Content) objectMapper.readValue(out.toString(), ContentBase.class);
 
         if (context.shouldSkipUnpublished(content)) {
-          log.debug("Skipping unpublished content: {}", content.getId());
+          log.info("Skipping unpublished content: {}", content.getId());
           return;
         }
 
@@ -319,7 +322,7 @@ public class ContentIndexer {
     if (flattenedContent instanceof IsaacQuiz) {
       List<ContentBase> children = flattenedContent.getChildren();
       if (children.stream().anyMatch(c -> !(c instanceof IsaacQuizSection))) {
-        log.debug("IsaacQuiz ({}) contains top-level non-quiz sections. Skipping.", flattenedContent.getId());
+        log.info("IsaacQuiz ({}) contains top-level non-quiz sections. Skipping.", flattenedContent.getId());
         this.registerContentProblem(flattenedContent, "Index failure - Invalid "
             + "content type among quiz sections. Quizzes can only contain quiz sections "
             + "in the top-level children array.", context.indexProblemCache);
@@ -328,14 +331,14 @@ public class ContentIndexer {
     }
 
     if (flattenedContent.getId().length() > MAXIMUM_CONTENT_ID_LENGTH) {
-      log.debug("Content ID too long: {}", flattenedContent.getId());
+      log.info("Content ID too long: {}", flattenedContent.getId());
       this.registerContentProblem(flattenedContent, "Content ID too long: " + flattenedContent.getId(),
           context.indexProblemCache);
       return;
     }
 
     if (flattenedContent.getId().contains(".")) {
-      log.debug("Resource with invalid ID ({}) detected in cache. Skipping {}", parentContent.getId(), treeWalkPath);
+      log.info("Resource with invalid ID ({}) detected in cache. Skipping {}", parentContent.getId(), treeWalkPath);
       this.registerContentProblem(flattenedContent, "Index failure - Invalid ID "
           + flattenedContent.getId() + " found in file " + treeWalkPath
           + ". Must not contain restricted characters.", context.indexProblemCache);
@@ -353,11 +356,11 @@ public class ContentIndexer {
     }
 
     if (context.contentCache.get(flattenedContent.getId()).equals(flattenedContent)) {
-      log.debug("Resource ({}) already seen in cache. Skipping {}", parentContent.getId(), treeWalkPath);
+      log.info("Resource ({}) already seen in cache. Skipping {}", parentContent.getId(), treeWalkPath);
       return;
     }
 
-    log.debug("Resource with duplicate ID ({}) detected in cache. Skipping {}", parentContent.getId(), treeWalkPath);
+    log.info("Resource with duplicate ID ({}) detected in cache. Skipping {}", parentContent.getId(), treeWalkPath);
     this.registerContentProblem(flattenedContent, String.format(
             "Index failure - Duplicate ID (%s) found in files (%s) and (%s): only one will be available.",
             parentContent.getId(),
@@ -399,7 +402,7 @@ public class ContentIndexer {
     // If this object is of type question then we need to give it a random
     // id if it doesn't have one.
     if (content instanceof Question && content.getId() == null) {
-      log.debug("Found question without id {} {}", content.getTitle(), canonicalSourceFile);
+      log.info("Found question without id {} {}", content.getTitle(), canonicalSourceFile);
     }
 
     String newParentId = computeParentId(parentId, content.getId());
@@ -669,7 +672,9 @@ public class ContentIndexer {
       expungeAnyContentTypeIndicesRelatedToVersion(sha);
     }
 
-    log.info("Building search indexes for: {}", sanitiseInternalLogValue(sha));
+    log.info(CONTENT_LOG_PREFIX + "Building search indexes for version: {}", sanitiseInternalLogValue(sha));
+    log.info(CONTENT_LOG_PREFIX + "Content cache size: {} items", gitCache.size());
+    log.info(CONTENT_LOG_PREFIX + "Units to index: {} total, {} published", allUnits.size(), publishedUnits.size());
 
     // setup object mapper to use pre-configured deserializer module.
     // Required to deal with type polymorphism
@@ -679,7 +684,8 @@ public class ContentIndexer {
       try {
         contentToIndex.add(immutableEntry(content.getId(), objectMapper.writeValueAsString(content)));
       } catch (JsonProcessingException e) {
-        log.error("Unable to serialize content object: {} for indexing with the search provider.", content.getId(), e);
+        log.error(CONTENT_LOG_PREFIX + "Unable to serialize content object: {} for indexing.",
+            content.getId(), e);
         this.registerContentProblem(content, "Search Index Error: " + content.getId()
             + content.getCanonicalSourceFile() + " Exception: " + e, indexProblemCache);
       }
@@ -693,22 +699,23 @@ public class ContentIndexer {
           objectMapper.writeValueAsString(Map.of("version", sha, "created", Instant.now().toString())), "general");
       es.indexObject(sha, ContentIndextype.METADATA.toString(),
           objectMapper.writeValueAsString(Map.of("tags", tagsList)), "tags");
+      log.info(CONTENT_LOG_PREFIX + "Indexed metadata with {} tags", tagsList.size());
 
       startTime = System.nanoTime();
       es.bulkIndex(sha, ContentIndextype.UNIT.toString(), serializeUnits(allUnits, objectMapper));
       es.bulkIndex(sha, ContentIndextype.PUBLISHED_UNIT.toString(), serializeUnits(publishedUnits, objectMapper));
       endTime = System.nanoTime();
-      log.info("Bulk unit indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX + "Bulk unit indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
 
       startTime = System.nanoTime();
       es.bulkIndex(sha, ContentIndextype.CONTENT_ERROR.toString(),
           serializeContentErrors(indexProblemCache, objectMapper));
       endTime = System.nanoTime();
-      log.info("Bulk content error indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX + "Bulk content error indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
     } catch (JsonProcessingException e) {
-      log.error("Unable to serialise sha or tags");
+      log.error(CONTENT_LOG_PREFIX + "Unable to serialise sha or tags");
     } catch (SegueSearchException e) {
-      log.error("Unable to index sha, tags, units or content errors.");
+      log.error(CONTENT_LOG_PREFIX + "Unable to index sha, tags, units or content errors.");
     }
 
 
@@ -716,12 +723,13 @@ public class ContentIndexer {
       startTime = System.nanoTime();
       es.bulkIndexWithIds(sha, ContentIndextype.CONTENT.toString(), contentToIndex);
       endTime = System.nanoTime();
-      log.debug(CONTENT_LOG_PREFIX + "Indexing completed in {}ms",
+      log.info(CONTENT_LOG_PREFIX + "Bulk content indexing completed: {} items in {}ms",
+          contentToIndex.size(),
           (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
     } catch (SegueSearchException e) {
-      log.error("Error whilst trying to perform bulk index operation.", e);
+      log.error(CONTENT_LOG_PREFIX + "Error during bulk index operation.", e);
     } catch (ActionRequestValidationException e) {
-      log.error("Error validating content during index", e);
+      log.error(CONTENT_LOG_PREFIX + "Error validating content during index", e);
     }
   }
 
