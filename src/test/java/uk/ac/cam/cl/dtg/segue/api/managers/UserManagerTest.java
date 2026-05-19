@@ -467,6 +467,7 @@ class UserManagerTest {
 
     expect(request.getSession()).andReturn(dummySession).anyTimes();
     expect(dummySession.getAttribute(Constants.SESSION_USER_ID)).andReturn(null).anyTimes();
+    expect(dummySession.getId()).andReturn("test-session-id").anyTimes();
 
     // Mock URL params extract stuff
     // Return any non-null string
@@ -509,6 +510,7 @@ class UserManagerTest {
 
     expect(request.getSession()).andReturn(dummySession).anyTimes();
     expect(dummySession.getAttribute(Constants.SESSION_USER_ID)).andReturn(null).anyTimes();
+    expect(dummySession.getId()).andReturn("test-session-id").anyTimes();
 
     // Mock URL params extract stuff
     expect(request.getQueryString()).andReturn("").atLeastOnce();
