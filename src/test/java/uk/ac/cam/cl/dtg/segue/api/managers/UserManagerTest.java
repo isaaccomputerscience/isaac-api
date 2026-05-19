@@ -510,6 +510,7 @@ class UserManagerTest {
 
     expect(request.getSession()).andReturn(dummySession).anyTimes();
     expect(dummySession.getAttribute(Constants.SESSION_USER_ID)).andReturn(null).anyTimes();
+    expect(dummySession.getAttribute(Constants.STATE_PARAM_NAME)).andReturn(null).anyTimes();
     expect(dummySession.getId()).andReturn("test-session-id").anyTimes();
 
     // Mock URL params extract stuff
