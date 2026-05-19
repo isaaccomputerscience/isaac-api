@@ -517,8 +517,9 @@ class UserManagerTest {
     expect(request.getQueryString()).andReturn("").atLeastOnce();
 
     // Mock CSRF checks — OAuth2 reads state from cookie; no cookie present → null → CSRF fails
+    // When both cookie and session are null, getParameter is not called due to short-circuit AND
     expect(request.getCookies()).andReturn(new Cookie[]{}).anyTimes();
-    expect(request.getParameter(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).atLeastOnce();
+    expect(request.getParameter(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).anyTimes();
 
     replay(dummySession);
     replay(request);
