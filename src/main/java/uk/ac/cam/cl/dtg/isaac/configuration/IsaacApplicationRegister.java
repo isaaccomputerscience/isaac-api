@@ -89,7 +89,6 @@ public class IsaacApplicationRegister extends Application {
     singletons = new HashSet<>();
     injector = SegueGuiceConfigurationModule.getGuiceInjector();
 
-
     setupSwaggerApiAdvertiser(servletConfig);
 
     // create instance to get it up and running - it is not a rest facade though

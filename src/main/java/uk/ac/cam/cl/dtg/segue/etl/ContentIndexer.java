@@ -266,6 +266,8 @@ public class ContentIndexer {
         content = this.augmentChildContent(content, treeWalk.getPathString(), null, content.getPublished());
 
         if (null != content) {
+          log.info(CONTENT_LOG_PREFIX + "Processing file: {} (type: {}, id: {})", treeWalk.getPathString(),
+              content.getType(), content.getId());
           indexContentObject(context.contentCache, context.tagsList, context.allUnits, context.publishedUnits,
               context.indexProblemCache, treeWalk.getPathString(), content);
         }
@@ -347,6 +349,8 @@ public class ContentIndexer {
 
     if (!context.contentCache.containsKey(flattenedContent.getId())) {
       context.contentCache.put(flattenedContent.getId(), flattenedContent);
+      log.info(CONTENT_LOG_PREFIX + "Cached content: {} (type: {})", flattenedContent.getId(),
+          flattenedContent.getType());
       registerTags(flattenedContent.getTags(), context.tagsList);
 
       if (flattenedContent instanceof IsaacNumericQuestion isaacNumericQuestion) {

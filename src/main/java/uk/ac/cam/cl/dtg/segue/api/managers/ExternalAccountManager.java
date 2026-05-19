@@ -101,7 +101,6 @@ public class ExternalAccountManager implements IExternalAccountManager {
 
   /**
    * Retrieve recently changed users from database.
-   * Extracted to reduce cognitive complexity.
    */
   private List<UserExternalAccountChanges> getRecentlyChangedUsersOrThrow()
       throws ExternalAccountSynchronisationException {
@@ -117,7 +116,6 @@ public class ExternalAccountManager implements IExternalAccountManager {
 
   /**
    * Partition users into deletions and syncs.
-   * Extracted to reduce cognitive complexity.
    */
   private void partitionUsersByType(final List<UserExternalAccountChanges> userRecords,
                                      final List<UserExternalAccountChanges> usersToDelete,
@@ -133,7 +131,6 @@ public class ExternalAccountManager implements IExternalAccountManager {
 
   /**
    * Process user deletions with error handling and backoff.
-   * Extracted to reduce cognitive complexity.
    */
   private void processDeletions(final List<UserExternalAccountChanges> usersToDelete, final SyncMetrics metrics,
                                  final List<Long> successfullyProcessedUserIds)
@@ -426,7 +423,6 @@ public class ExternalAccountManager implements IExternalAccountManager {
 
   /**
    * Mark successfully processed users as synced in database.
-   * Extracted to reduce cognitive complexity.
    */
   private void markSuccessfullyProcessedAsSynced(final List<Long> successfullyProcessedUserIds,
                                                   final SyncMetrics metrics) {
