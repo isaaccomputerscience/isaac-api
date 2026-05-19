@@ -58,6 +58,7 @@ import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -575,8 +576,7 @@ public class UserAuthenticationManager {
           + " has not been registered / implemented yet: " + provider);
     }
 
-    log.debug("Mapping provider: " + sanitiseExternalLogValue(provider) + " to " + enumProvider);
-
+    log.debug("Mapping provider: {} to {}", sanitiseExternalLogValue(provider), enumProvider);
     return this.registeredAuthProviders.get(enumProvider);
   }
 
@@ -846,16 +846,7 @@ public class UserAuthenticationManager {
       // Session-based approach
       csrfTokenFromUser = (String) request.getSession().getAttribute(key);
     }
-    String csrfTokenFromProvider = request.getParameter(key);
-
-    if (csrfTokenFromUser == null) {
-      log.warn("CSRF: no state token found in cookie or session (sessionId={})", request.getSession().getId());
-    } else if (!csrfTokenFromUser.equals(csrfTokenFromProvider)) {
-      log.warn("CSRF: token mismatch — from user: {}, from provider: {} (sessionId={})",
-          csrfTokenFromUser, csrfTokenFromProvider, request.getSession().getId());
-    }
-
-    return csrfTokenFromUser != null && csrfTokenFromUser.equals(csrfTokenFromProvider);
+    return csrfTokenFromUser != null && csrfTokenFromUser.equals(request.getParameter(key));
   }
 
   /**
