@@ -189,6 +189,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @Operation(summary = "Get the SSO login redirect URL for an authentication provider.")
   public final Response authenticate(@Context final HttpServletRequest request,
+                                     @Context final HttpServletResponse response,
                                      @PathParam("provider") final String signinProvider) {
 
     if (userManager.isRegisteredUserLoggedIn(request)) {
@@ -200,7 +201,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
 
     try {
       Map<String, URI> redirectResponse = new ImmutableMap.Builder<String, URI>()
-          .put(REDIRECT_URL, userManager.authenticate(request, signinProvider)).build();
+          .put(REDIRECT_URL, userManager.authenticate(request, response, signinProvider)).build();
 
       return Response.ok(redirectResponse).build();
     } catch (IOException e) {
@@ -232,6 +233,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
       description = "Very similar to the login case, but records this is a link request not an account creation"
           + " request.")
   public final Response linkExistingUserToProvider(@Context final HttpServletRequest request,
+                                                   @Context final HttpServletResponse response,
                                                    @PathParam("provider") final String authProviderAsString) {
     if (!this.userManager.isRegisteredUserLoggedIn(request)) {
       return SegueErrorResponse.getNotLoggedInResponse();
@@ -239,7 +241,7 @@ public class AuthenticationFacade extends AbstractSegueFacade {
 
     try {
       Map<String, URI> redirectResponse = new ImmutableMap.Builder<String, URI>()
-          .put(REDIRECT_URL, this.userManager.initiateLinkAccountToUserFlow(request, authProviderAsString))
+          .put(REDIRECT_URL, this.userManager.initiateLinkAccountToUserFlow(request, response, authProviderAsString))
           .build();
 
       return Response.ok(redirectResponse).build();

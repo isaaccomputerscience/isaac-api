@@ -67,6 +67,7 @@
     <session-config>
         <cookie-config>
             <secure>true</secure>
+            <same-site>None</same-site>
         </cookie-config>
     </session-config>
 

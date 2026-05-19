@@ -184,6 +184,41 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
     }
   }
 
+  @Override
+  public void batchMarkAsSynced(final List<Long> userIds) throws SegueDatabaseException {
+    if (userIds == null || userIds.isEmpty()) {
+      log.debug("{} Batch mark as synced called with empty list", MAILJET);
+      return;
+    }
+
+    StringBuilder queryBuilder = new StringBuilder(
+        "INSERT INTO external_accounts (user_id, provider_name, provider_last_updated) VALUES ");
+
+    for (int i = 0; i < userIds.size(); i++) {
+      if (i > 0) {
+        queryBuilder.append(", ");
+      }
+      queryBuilder.append("(?, 'MailJet', NOW())");
+    }
+
+    queryBuilder.append(" ON CONFLICT (user_id, provider_name) DO UPDATE SET provider_last_updated = NOW()");
+
+    try (Connection conn = database.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(queryBuilder.toString())
+    ) {
+      for (int i = 0; i < userIds.size(); i++) {
+        pst.setLong(i + 1, userIds.get(i));
+      }
+
+      int rowsAffected = pst.executeUpdate();
+      log.debug("{} Batch marked {} users as synced ({} rows affected)", MAILJET, userIds.size(), rowsAffected);
+
+    } catch (SQLException e) {
+      String errorMsg = String.format("Database error marking %d users as synced", userIds.size());
+      throw new SegueDatabaseException(errorMsg + ": " + e.getMessage(), e);
+    }
+  }
+
   /**
    * Build UserExternalAccountChanges object from database result set.
    * Extracts stage information from registered_contexts JSONB[] field.

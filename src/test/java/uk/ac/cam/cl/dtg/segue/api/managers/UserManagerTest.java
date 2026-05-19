@@ -237,21 +237,23 @@ class UserManagerTest {
     UserAccountManager userManager = buildTestUserManager();
 
     HttpServletRequest request = createMock(HttpServletRequest.class);
+    HttpServletResponse response = createMock(HttpServletResponse.class);
 
     String someInvalidProvider = "BAD_PROVIDER!!";
 
     replay(request);
+    replay(response);
     replay(dummyQuestionDatabase);
 
     // Act
     try {
-      userManager.authenticate(request, someInvalidProvider);
+      userManager.authenticate(request, response, someInvalidProvider);
       fail("Exception expected");
     } catch (AuthenticationProviderMappingException e) {
       // pass
     }
 
-    verify(dummyQuestionDatabase, request);
+    verify(dummyQuestionDatabase, request, response);
   }
 
   /**
@@ -269,6 +271,7 @@ class UserManagerTest {
 
     HttpSession dummySession = createMock(HttpSession.class);
     HttpServletRequest request = createMock(HttpServletRequest.class);
+    HttpServletResponse response = createMock(HttpServletResponse.class);
     String exampleRedirectUrl = "https://accounts.google.com/o/oauth2/auth?"
         + "client_id=267566420063-jalcbiffcpmteh42cib5hmgb16upspc0.apps.googleusercontent.com&"
         + "redirect_uri=http://localhost:8080/rutherford-server/segue/api/auth/google/callback&"
@@ -278,11 +281,16 @@ class UserManagerTest {
 
     // for CSRF state information
     expect(request.getSession()).andReturn(dummySession).atLeastOnce();
+    expect(request.getHeader("X-Forwarded-Proto")).andReturn(null).atLeastOnce();
+    expect(request.isSecure()).andReturn(true).atLeastOnce();
     dummySession.setAttribute(EasyMock.<String>anyObject(), EasyMock.<String>anyObject());
     expectLastCall().atLeastOnce();
+    response.addCookie(anyObject());
+    expectLastCall().once();
 
     replay(dummySession);
     replay(request);
+    replay(response);
     replay(dummyQuestionDatabase);
 
     String someAntiForgeryToken = "someAntiForgeryToken";
@@ -291,10 +299,10 @@ class UserManagerTest {
     replay(dummyAuth);
 
     // Act
-    URI redirectURI = userManager.authenticate(request, someValidProviderString);
+    URI redirectURI = userManager.authenticate(request, response, someValidProviderString);
 
     // Assert
-    verify(dummyQuestionDatabase, request);
+    verify(dummyQuestionDatabase, request, response);
 
     assertEquals(exampleRedirectUrl, redirectURI.toString());
   }
@@ -344,15 +352,17 @@ class UserManagerTest {
 
     expect(request.getSession()).andReturn(dummySession).atLeastOnce();
 
-    Cookie[] cookieWithoutSessionInfo = {}; // empty as not logged in.
-    expect(request.getCookies()).andReturn(cookieWithoutSessionInfo).times(2);
+    // getCookies() is called twice per method (null-check + for-loop):
+    //   2 calls from getOAuthStateCookieFromRequest (CSRF check)
+    //   2 calls from getSegueSessionFromRequest (session check before login)
+    Cookie oauthStateCookie = new Cookie(Constants.OAUTH_STATE_COOKIE, CSRF_TEST_VALUE);
+    expect(request.getCookies()).andReturn(new Cookie[]{oauthStateCookie}).times(4);
 
     expect(dummySession.getAttribute(Constants.ANONYMOUS_USER)).andReturn(someSegueAnonymousUserId)
         .atLeastOnce(); // session
     // id
 
-    // Mock CSRF checks
-    expect(dummySession.getAttribute(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).atLeastOnce();
+    // Mock CSRF checks — OAuth2 reads from cookie, not session
     expect(request.getParameter(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).atLeastOnce();
 
     // Mock URL params extract stuff
@@ -455,17 +465,17 @@ class UserManagerTest {
     String someInvalidCSRFValue = "FRAUDHASHAPPENED";
     String validOAuthProvider = "test";
 
-    expect(request.getSession()).andReturn(dummySession).atLeastOnce();
+    expect(request.getSession()).andReturn(dummySession).anyTimes();
     expect(dummySession.getAttribute(Constants.SESSION_USER_ID)).andReturn(null).anyTimes();
+    expect(dummySession.getId()).andReturn("test-session-id").anyTimes();
 
     // Mock URL params extract stuff
     // Return any non-null string
     String queryString = Constants.STATE_PARAM_NAME + "=" + someInvalidCSRFValue;
     expect(request.getQueryString()).andReturn(queryString).once();
 
-    // Mock CSRF checks
-    expect(dummySession.getAttribute(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).atLeastOnce();
-
+    // Mock CSRF checks — OAuth2 reads state from cookie; cookie has valid token but provider sends wrong one
+    expect(request.getCookies()).andReturn(new Cookie[]{new Cookie(Constants.OAUTH_STATE_COOKIE, CSRF_TEST_VALUE)}).anyTimes();
     expect(request.getParameter(Constants.STATE_PARAM_NAME)).andReturn(someInvalidCSRFValue).atLeastOnce();
 
     replay(dummySession, request, dummyQuestionDatabase);
@@ -498,15 +508,18 @@ class UserManagerTest {
 
     String validOAuthProvider = "test";
 
-    expect(request.getSession()).andReturn(dummySession).atLeastOnce();
+    expect(request.getSession()).andReturn(dummySession).anyTimes();
     expect(dummySession.getAttribute(Constants.SESSION_USER_ID)).andReturn(null).anyTimes();
+    expect(dummySession.getAttribute(Constants.STATE_PARAM_NAME)).andReturn(null).anyTimes();
+    expect(dummySession.getId()).andReturn("test-session-id").anyTimes();
 
     // Mock URL params extract stuff
     expect(request.getQueryString()).andReturn("").atLeastOnce();
 
-    // Mock CSRF checks
-    expect(dummySession.getAttribute(Constants.STATE_PARAM_NAME)).andReturn(null).atLeastOnce();
-    expect(request.getParameter(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).atLeastOnce();
+    // Mock CSRF checks — OAuth2 reads state from cookie; no cookie present → null → CSRF fails
+    // When both cookie and session are null, getParameter is not called due to short-circuit AND
+    expect(request.getCookies()).andReturn(new Cookie[]{}).anyTimes();
+    expect(request.getParameter(Constants.STATE_PARAM_NAME)).andReturn(CSRF_TEST_VALUE).anyTimes();
 
     replay(dummySession);
     replay(request);

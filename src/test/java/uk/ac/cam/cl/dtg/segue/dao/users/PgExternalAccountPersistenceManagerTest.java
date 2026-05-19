@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -123,6 +124,115 @@ class PgExternalAccountPersistenceManagerTest {
           () -> persistenceManager.getRecentlyChangedRecords());
 
       verify(mockDatabase);
+    }
+  }
+
+  @Nested
+  class BatchMarkAsSyncedTests {
+
+    @Test
+    void batchMarkAsSynced_WithValidUserIds_ShouldUpdateDatabase() throws Exception {
+      // Arrange
+      List<Long> userIds = List.of(1L, 2L, 3L);
+
+      expect(mockDatabase.getDatabaseConnection()).andReturn(mockConnection);
+      expect(mockConnection.prepareStatement(anyString())).andReturn(mockPreparedStatement);
+
+      mockPreparedStatement.setLong(1, 1L);
+      expectLastCall();
+      mockPreparedStatement.setLong(2, 2L);
+      expectLastCall();
+      mockPreparedStatement.setLong(3, 3L);
+      expectLastCall();
+
+      expect(mockPreparedStatement.executeUpdate()).andReturn(3);
+
+      mockPreparedStatement.close();
+      expectLastCall();
+      mockConnection.close();
+      expectLastCall();
+
+      replay(mockDatabase, mockConnection, mockPreparedStatement);
+
+      // Act
+      persistenceManager.batchMarkAsSynced(userIds);
+
+      // Assert
+      verify(mockDatabase, mockConnection, mockPreparedStatement);
+    }
+
+    @Test
+    void batchMarkAsSynced_WithEmptyList_ShouldDoNothing() throws Exception {
+      // Arrange - no expectations set, method should return early
+
+      replay(mockDatabase, mockConnection, mockPreparedStatement);
+
+      // Act
+      persistenceManager.batchMarkAsSynced(new ArrayList<>());
+
+      // Assert
+      verify(mockDatabase, mockConnection, mockPreparedStatement);
+    }
+
+    @Test
+    void batchMarkAsSynced_WithLargeUserList_ShouldBatchInsert() throws Exception {
+      // Arrange
+      List<Long> userIds = new ArrayList<>();
+      for (long i = 1; i <= 100; i++) {
+        userIds.add(i);
+      }
+
+      expect(mockDatabase.getDatabaseConnection()).andReturn(mockConnection);
+      expect(mockConnection.prepareStatement(anyString())).andReturn(mockPreparedStatement);
+
+      for (long i = 1; i <= 100; i++) {
+        mockPreparedStatement.setLong((int) i, i);
+        expectLastCall();
+      }
+
+      expect(mockPreparedStatement.executeUpdate()).andReturn(100);
+
+      mockPreparedStatement.close();
+      expectLastCall();
+      mockConnection.close();
+      expectLastCall();
+
+      replay(mockDatabase, mockConnection, mockPreparedStatement);
+
+      // Act
+      persistenceManager.batchMarkAsSynced(userIds);
+
+      // Assert
+      verify(mockDatabase, mockConnection, mockPreparedStatement);
+    }
+
+    @Test
+    void batchMarkAsSynced_WithDatabaseError_ShouldThrowException() throws Exception {
+      // Arrange
+      List<Long> userIds = List.of(1L, 2L);
+
+      expect(mockDatabase.getDatabaseConnection()).andReturn(mockConnection);
+      expect(mockConnection.prepareStatement(anyString())).andReturn(mockPreparedStatement);
+
+      mockPreparedStatement.setLong(1, 1L);
+      expectLastCall();
+      mockPreparedStatement.setLong(2, 2L);
+      expectLastCall();
+
+      expect(mockPreparedStatement.executeUpdate()).andThrow(new SQLException("Database error"));
+
+      mockPreparedStatement.close();
+      expectLastCall();
+      mockConnection.close();
+      expectLastCall();
+
+      replay(mockDatabase, mockConnection, mockPreparedStatement);
+
+      // Act & Assert
+      assertThrows(SegueDatabaseException.class,
+          () -> persistenceManager.batchMarkAsSynced(userIds));
+
+      verify(mockDatabase, mockConnection, mockPreparedStatement);
     }
   }
 
