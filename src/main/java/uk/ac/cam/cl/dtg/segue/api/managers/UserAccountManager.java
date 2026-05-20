@@ -232,9 +232,9 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws IOException                            if there is an error when contacting the OAuth server
    * @throws AuthenticationProviderMappingException as per exception description.
    */
-  public URI authenticate(final HttpServletRequest request, final String provider)
+  public URI authenticate(final HttpServletRequest request, final HttpServletResponse response, final String provider)
       throws IOException, AuthenticationProviderMappingException {
-    return this.userAuthenticationManager.getThirdPartyAuthURI(request, provider);
+    return this.userAuthenticationManager.getThirdPartyAuthURI(request, response, provider);
   }
 
   /**
@@ -251,12 +251,12 @@ public class UserAccountManager implements IUserAccountManager {
    * @throws IOException                            if there is an error when contacting the OAuth server
    * @throws AuthenticationProviderMappingException as per exception description.
    */
-  public URI initiateLinkAccountToUserFlow(final HttpServletRequest request, final String provider)
+  public URI initiateLinkAccountToUserFlow(final HttpServletRequest request, final HttpServletResponse response, final String provider)
       throws IOException, AuthenticationProviderMappingException {
     // record our intention to link an account.
     request.getSession().setAttribute(LINK_ACCOUNT_PARAM_NAME, Boolean.TRUE);
 
-    return this.userAuthenticationManager.getThirdPartyAuthURI(request, provider);
+    return this.userAuthenticationManager.getThirdPartyAuthURI(request, response, provider);
   }
 
   /**

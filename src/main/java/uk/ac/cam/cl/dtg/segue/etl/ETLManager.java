@@ -20,6 +20,7 @@ class ETLManager {
   private static final String LATEST_INDEX_ALIAS = "latest";
   private static final String TASK_PERIOD_SECONDS = "TASK_PERIOD_SECONDS";
   private static final long TASK_PERIOD_SECONDS_FALLBACK = 300;
+  private static final String CONTENT_LOG_PREFIX = "CONTENT - ";
 
   private final ContentIndexer indexer;
   private final SchoolIndexer schoolIndexer;
@@ -55,10 +56,10 @@ class ETLManager {
   }
 
   void setNamedVersion(final String alias, final String version) throws Exception {
-    log.debug("Requested aliased version: {} - {}", alias, version);
+    log.info(CONTENT_LOG_PREFIX + "Requested aliased version: {} - {}", alias, version);
     indexer.loadAndIndexContent(version);
     indexer.setNamedVersion(alias, version);
-    log.debug("Version {} with alias '{}' is successfully indexed.", version, alias);
+    log.info(CONTENT_LOG_PREFIX + "Version {} with alias '{}' is successfully indexed.", version, alias);
   }
 
   // Indexes all content in idempotent fashion. If the content is already indexed no action is taken.
@@ -95,13 +96,13 @@ class ETLManager {
 
     @Override
     public void run() {
-      log.debug("Starting content indexer thread.");
+      log.info(CONTENT_LOG_PREFIX + "Starting content indexer thread.");
       try {
         indexContent();
       } catch (Exception e) {
-        log.error("ContentIndexerTask failed.", e);
+        log.error(CONTENT_LOG_PREFIX + "ContentIndexerTask failed.", e);
       }
-      log.debug("Content indexer thread complete, waiting for next scheduled run.");
+      log.info(CONTENT_LOG_PREFIX + "Content indexer thread complete, waiting for next scheduled run.");
     }
   }
 }

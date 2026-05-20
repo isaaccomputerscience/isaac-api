@@ -22,7 +22,7 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 public class StubExternalAccountManager implements IExternalAccountManager {
 
   @Override
-  public void synchroniseChangedUsers() throws ExternalAccountSynchronisationException {
+  public SyncResult synchroniseChangedUsers() throws ExternalAccountSynchronisationException {
     // Do not fail silently:
     throw new ExternalAccountSynchronisationException("No external account details configured!");
   }
