@@ -18,7 +18,6 @@ package uk.ac.cam.cl.dtg.segue.api.managers;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.requireNonNull;
-
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DATE_EXPIRES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_DATE_FORMAT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EnvironmentType;
@@ -28,6 +27,8 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.JSESSION_COOOKIE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.LOGOUT_SESSION_ALREADY_INVALIDATED_MESSAGE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NO_SESSION_TOKEN_RESERVED_VALUE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_STATE_COOKIE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_STATE_COOKIE_TTL_SECONDS;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_TOKEN_PARAM_NAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.PARTIAL_LOGIN_FLAG;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.PARTIAL_LOGIN_SESSION_EXPIRY_SECONDS;
@@ -57,6 +58,7 @@ import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -64,6 +66,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
@@ -113,6 +116,7 @@ public class UserAuthenticationManager {
   private static final Logger log = LoggerFactory.getLogger(UserAuthenticationManager.class);
   private static final String HMAC_SHA_ALGORITHM = "HmacSHA256";
   private static final String SAME_SITE_LAX_COMMENT = "__SAME_SITE_LAX__";
+  private static final String SAME_SITE_NONE_COMMENT = "__SAME_SITE_NONE__";
 
   private final PropertiesLoader properties;
   private final IUserDataManager database;
@@ -193,7 +197,8 @@ public class UserAuthenticationManager {
    * @throws IOException                            if there is an error when contacting the OAuth server
    * @throws AuthenticationProviderMappingException as per exception description.
    */
-  public URI getThirdPartyAuthURI(final HttpServletRequest request, final String provider)
+  public URI getThirdPartyAuthURI(final HttpServletRequest request, final HttpServletResponse response,
+                                  final String provider)
       throws IOException, AuthenticationProviderMappingException {
     IAuthenticator federatedAuthenticator = mapToProvider(provider);
 
@@ -206,6 +211,11 @@ public class UserAuthenticationManager {
 
       // Store antiForgeryToken in the users session.
       request.getSession().setAttribute(STATE_PARAM_NAME, antiForgeryTokenFromProvider);
+
+      // Also send as SameSite=None cookie so it survives cross-site redirect to OAuth provider
+      Cookie oauthStateCookie = createOAuthStateCookie(antiForgeryTokenFromProvider, request);
+      oauthStateCookie.setSecure(true);
+      response.addCookie(oauthStateCookie);
 
       redirectLink = URI.create(oauth2Provider.getAuthorizationUrl(antiForgeryTokenFromProvider));
     } else if (federatedAuthenticator instanceof IOAuth1Authenticator) {
@@ -251,8 +261,8 @@ public class UserAuthenticationManager {
     String providerSpecificUserLookupReference;
 
     // if we are an OAuth2Provider complete next steps of oauth
-    if (authenticator instanceof IOAuthAuthenticator) {
-      oauthProvider = (IOAuthAuthenticator) authenticator;
+    if (authenticator instanceof IOAuthAuthenticator ioAuthAuthenticator) {
+      oauthProvider = ioAuthAuthenticator;
 
       providerSpecificUserLookupReference = this.getOauthInternalRefCode(oauthProvider, request);
     } else {
@@ -260,8 +270,7 @@ public class UserAuthenticationManager {
           + provider + " is unknown");
     }
 
-    UserFromAuthProvider userFromProvider = oauthProvider.getUserInfo(providerSpecificUserLookupReference);
-    return userFromProvider;
+    return oauthProvider.getUserInfo(providerSpecificUserLookupReference);
   }
 
   /**
@@ -335,8 +344,8 @@ public class UserAuthenticationManager {
    *
    * @param request                           containing session information
    * @param allowIncompleteLoginsToReturnUser boolean if true will allow users that haven't completed MFA to be
-   *                                              returned, false will be stricter and return null if user hasn't
-   *                                              completed MFA.
+   *                                          returned, false will be stricter and return null if user hasn't
+   *                                          completed MFA.
    * @return either a user or null if we couldn't find the user for whatever reason.
    */
   public RegisteredUser getUserFromSession(final HttpServletRequest request,
@@ -438,8 +447,8 @@ public class UserAuthenticationManager {
    *
    * @param currentSessionInformation         the session information map extracted from the cookie.
    * @param allowIncompleteLoginsToReturnUser boolean if true will allow users that haven't completed MFA to be
-   *                                                returned, false will be stricter and return null if user hasn't
-   *                                                completed MFA.
+   *                                          returned, false will be stricter and return null if user hasn't
+   *                                          completed MFA.
    * @return either the valid user from the cookie, or null if no valid user
    * @see #getUserFromSession(HttpServletRequest, boolean) there are two types of "request" and they have identical
    *     methods
@@ -447,15 +456,13 @@ public class UserAuthenticationManager {
    */
   private RegisteredUser getUserFromSessionInformationMap(final Map<String, String> currentSessionInformation,
                                                           final boolean allowIncompleteLoginsToReturnUser) {
-    if (!allowIncompleteLoginsToReturnUser) {
-      // check if the session has a caveat about incomplete MFA Login
-      if (!Strings.isNullOrEmpty(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))
-          && Boolean.parseBoolean(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))) {
-        // login is incomplete we cannot proceed.
-        log.debug("Incomplete MFA flow - no user object to be provided");
-        return null;
-      }
+    if (!allowIncompleteLoginsToReturnUser && !Strings.isNullOrEmpty(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))
+        && Boolean.parseBoolean(currentSessionInformation.get(PARTIAL_LOGIN_FLAG))) {
+      // login is incomplete we cannot proceed.
+      log.debug("Incomplete MFA flow - no user object to be provided");
+      return null;
     }
+
     // Retrieve the user from database.
     try {
       // Check that the user's session is indeed valid:
@@ -569,8 +576,7 @@ public class UserAuthenticationManager {
           + " has not been registered / implemented yet: " + provider);
     }
 
-    log.debug("Mapping provider: " + sanitiseExternalLogValue(provider) + " to " + enumProvider);
-
+    log.debug("Mapping provider: {} to {}", sanitiseExternalLogValue(provider), enumProvider);
     return this.registeredAuthProviders.get(enumProvider);
   }
 
@@ -738,14 +744,14 @@ public class UserAuthenticationManager {
       providersString = providerNames.get(0);
     } else {
       StringBuilder providersBuilder = new StringBuilder();
-      for (int i = 0; i < providerNames.size(); i++) {
+      IntStream.range(0, providerNames.size()).forEach(i -> {
         if (i == providerNames.size() - 1) {
           providersBuilder.append(" and ");
         } else if (i > 1) {
           providersBuilder.append(", ");
         }
         providersBuilder.append(providerNames.get(i));
-      }
+      });
       providersString = providersBuilder.toString();
     }
 
@@ -796,12 +802,10 @@ public class UserAuthenticationManager {
     // extract auth code from string buffer
     String authCode = oauthProvider.extractAuthCode(fullUrlBuf.toString());
 
-    if (authCode != null) {
-      String internalReference = oauthProvider.exchangeCode(authCode);
-      return internalReference;
-    } else {
+    if (authCode == null) {
       throw new AuthenticationCodeException("User denied access to our app.");
     }
+    return oauthProvider.exchangeCode(authCode);
   }
 
 
@@ -827,18 +831,22 @@ public class UserAuthenticationManager {
     }
 
     // to deal with cross site request forgery
-    String csrfTokenFromUser = (String) request.getSession().getAttribute(key);
-    String csrfTokenFromProvider = request.getParameter(key);
-
-    if (null == csrfTokenFromUser || !csrfTokenFromUser.equals(csrfTokenFromProvider)) {
-      log.error("Invalid state parameter - Provider said: " + request.getParameter(STATE_PARAM_NAME)
-          + " Session said: " + request.getSession().getAttribute(STATE_PARAM_NAME));
-      return false;
+    String csrfTokenFromUser;
+    if (oauthProvider instanceof IOAuth2Authenticator) {
+      // Prefer the dedicated short-lived cookie (SameSite=None; Secure).
+      // Fall back to the session in case the cookie was blocked by the browser
+      // (the state is stored in both places during the authenticate step).
+      csrfTokenFromUser = getOAuthStateCookieFromRequest(request);
+      if (csrfTokenFromUser == null) {
+        log.warn("CSRF: oauth state cookie missing, falling back to session (sessionId={})",
+            request.getSession().getId());
+        csrfTokenFromUser = (String) request.getSession().getAttribute(key);
+      }
     } else {
-      log.debug("State parameter matches - Provider said: " + request.getParameter(STATE_PARAM_NAME)
-          + " Session said: " + request.getSession().getAttribute(STATE_PARAM_NAME));
-      return true;
+      // Session-based approach
+      csrfTokenFromUser = (String) request.getSession().getAttribute(key);
     }
+    return csrfTokenFromUser != null && csrfTokenFromUser.equals(request.getParameter(key));
   }
 
   /**
@@ -847,7 +855,7 @@ public class UserAuthenticationManager {
    * @param response         to store the session in our own segue cookie.
    * @param user             account to associate the session with.
    * @param partialLoginFlag Boolean to indicate whether or not this cookie represents a partial login (true) or full
-   *                             (false)
+   *                         (false)
    */
   private void createSession(
       final HttpServletResponse response,
@@ -875,7 +883,7 @@ public class UserAuthenticationManager {
    * @param user                       account to associate the session with.
    * @param sessionExpiryTimeInSeconds max age of the cookie.
    * @param partialLoginFlagString     either null if this is a full login cookie or a string value of true if this is
-   *                                       a partial login cookie
+   *                                   a partial login cookie
    */
   private void createSession(final HttpServletResponse response, final RegisteredUser user,
                              final int sessionExpiryTimeInSeconds,
@@ -908,12 +916,12 @@ public class UserAuthenticationManager {
    * Verifies the HMAC for userId, expiry date, session token and partial login status; but DOES NOT enforce
    * partial login as invalid! I.e. this method will return true for partial logins.
    *
-   * @param sessionInformation map containing session information retrieved from the cookie
+   * @param sessionInformation       map containing session information retrieved from the cookie
    * @param sessionTokenFromDatabase the real session token to validate this cookie against
    * @return true if it is still valid, false if not.
    */
   public boolean isValidUsersSession(final Map<String, String> sessionInformation,
-                                      final Integer sessionTokenFromDatabase) {
+                                     final Integer sessionTokenFromDatabase) {
     requireNonNull(sessionInformation);
     requireNonNull(sessionTokenFromDatabase);
 
@@ -970,8 +978,8 @@ public class UserAuthenticationManager {
    * @return HMAC signature.
    */
   public String calculateSessionHMAC(final String key, final String userId, final String currentDate,
-                                      final String sessionToken,
-                                      @Nullable final String partialLoginFlag) {
+                                     final String sessionToken,
+                                     @Nullable final String partialLoginFlag) {
     StringBuilder sb = new StringBuilder();
     sb.append(userId);
     sb.append("|").append(currentDate);
@@ -1218,5 +1226,35 @@ public class UserAuthenticationManager {
         .comment(SAME_SITE_LAX_COMMENT)
         .build();
     return logoutCookie;
+  }
+
+  public Cookie createOAuthStateCookie(final String state, final HttpServletRequest request) {
+    Cookie stateCookie = new Cookie(OAUTH_STATE_COOKIE, state);
+    stateCookie.setMaxAge(OAUTH_STATE_COOKIE_TTL_SECONDS);
+    stateCookie.setPath("/");
+    stateCookie.setHttpOnly(true);
+    stateCookie.setSecure(isSecure(request));
+    stateCookie.setComment(SAME_SITE_NONE_COMMENT);
+    return stateCookie;
+  }
+
+  private boolean isSecure(final HttpServletRequest request) {
+    String forwarded = request.getHeader("X-Forwarded-Proto");
+    if (forwarded != null) {
+      return "https".equalsIgnoreCase(forwarded);
+    }
+    return request.isSecure();
+  }
+
+  private String getOAuthStateCookieFromRequest(final HttpServletRequest request) {
+    if (request.getCookies() == null) {
+      return null;
+    }
+    for (Cookie c : request.getCookies()) {
+      if (OAUTH_STATE_COOKIE.equals(c.getName())) {
+        return c.getValue();
+      }
+    }
+    return null;
   }
 }

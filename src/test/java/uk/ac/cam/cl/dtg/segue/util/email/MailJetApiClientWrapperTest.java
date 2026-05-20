@@ -6,6 +6,9 @@ import com.mailjet.client.MailjetResponse;
 import com.mailjet.client.errors.MailjetClientRequestException;
 import com.mailjet.client.errors.MailjetException;
 import com.mailjet.client.errors.MailjetClientCommunicationException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
+import uk.ac.cam.cl.dtg.isaac.dos.users.UserExternalAccountChanges;
 import uk.ac.cam.cl.dtg.util.email.MailJetApiClientWrapper;
 import uk.ac.cam.cl.dtg.util.email.MailJetSubscriptionAction;
 
@@ -668,6 +674,120 @@ class MailJetApiClientWrapperTest {
               MailJetSubscriptionAction.UNSUBSCRIBE));
 
       verify(mockMailjetClient);
+    }
+  }
+
+  @Nested
+  class BulkSyncUsersTests {
+
+    @Test
+    void bulkSyncUsers_WithValidUsers_ShouldReturnJobId() throws MailjetException {
+      // Arrange
+      List<UserExternalAccountChanges> users = List.of(
+          new UserExternalAccountChanges(
+              1L, null, "test1@example.com", Role.STUDENT, "John", false,
+              EmailVerificationStatus.VERIFIED, true, true, "GCSE"
+          ),
+          new UserExternalAccountChanges(
+              2L, null, "test2@example.com", Role.TEACHER, "Jane", false,
+              EmailVerificationStatus.VERIFIED, false, true, "A_LEVEL"
+          )
+      );
+
+      MailjetResponse mockResponse = createMock(MailjetResponse.class);
+      JSONArray mockData = new JSONArray();
+      JSONObject mockResult = new JSONObject();
+      mockResult.put("JobID", "job123");
+      mockData.put(mockResult);
+
+      expect(mockMailjetClient.post(anyObject(MailjetRequest.class))).andReturn(mockResponse);
+      expect(mockResponse.getStatus()).andReturn(200);
+      expect(mockResponse.getData()).andReturn(mockData);
+
+      replay(mockMailjetClient, mockResponse);
+
+      // Act
+      String jobId = mailJetApiClientWrapper.bulkSyncUsers(users,
+          MailJetSubscriptionAction.FORCE_SUBSCRIBE, MailJetSubscriptionAction.FORCE_SUBSCRIBE);
+
+      // Assert
+      verify(mockMailjetClient, mockResponse);
+      assertEquals("job123", jobId);
+    }
+
+    @Test
+    void bulkSyncUsers_WithEmptyList_ShouldReturnNull() throws MailjetException {
+      // Act
+      String result = mailJetApiClientWrapper.bulkSyncUsers(new ArrayList<>(),
+          MailJetSubscriptionAction.FORCE_SUBSCRIBE, MailJetSubscriptionAction.FORCE_SUBSCRIBE);
+
+      // Assert
+      assertNull(result);
+    }
+
+    @Test
+    void bulkSyncUsers_WithOversizedBatch_ShouldThrowException() {
+      // Arrange
+      List<UserExternalAccountChanges> users = IntStream.range(0, 1001).mapToObj(i -> new UserExternalAccountChanges(
+          (long) i, null, "test" + i + "@example.com", Role.STUDENT, "User" + i, false,
+          EmailVerificationStatus.VERIFIED, true, false, "GCSE"
+      )).toList();
+
+      // Act & Assert
+      assertThrows(IllegalArgumentException.class, () ->
+          mailJetApiClientWrapper.bulkSyncUsers(users,
+              MailJetSubscriptionAction.FORCE_SUBSCRIBE, MailJetSubscriptionAction.FORCE_SUBSCRIBE)
+      );
+    }
+
+    @Test
+    void bulkSyncUsers_WithApiError_ShouldThrowException() throws MailjetException {
+      // Arrange
+      List<UserExternalAccountChanges> users = List.of(
+          new UserExternalAccountChanges(
+              1L, null, "test@example.com", Role.STUDENT, "John", false,
+              EmailVerificationStatus.VERIFIED, true, true, "GCSE"
+          )
+      );
+
+      MailjetResponse mockResponse = createMock(MailjetResponse.class);
+
+      expect(mockMailjetClient.post(anyObject(MailjetRequest.class))).andReturn(mockResponse);
+      expect(mockResponse.getStatus()).andReturn(500);
+
+      replay(mockMailjetClient, mockResponse);
+
+      // Act & Assert
+      assertThrows(MailjetException.class, () ->
+          mailJetApiClientWrapper.bulkSyncUsers(users,
+              MailJetSubscriptionAction.FORCE_SUBSCRIBE, MailJetSubscriptionAction.FORCE_SUBSCRIBE)
+      );
+    }
+
+    @Test
+    void bulkSyncUsers_WithCommunicationError_ShouldThrowCommunicationException()
+        throws MailjetException {
+      // Arrange
+      List<UserExternalAccountChanges> users = List.of(
+          new UserExternalAccountChanges(
+              1L, null, "test@example.com", Role.STUDENT, "John", false,
+              EmailVerificationStatus.VERIFIED, true, true, "GCSE"
+          )
+      );
+
+      MailjetClientCommunicationException commException =
+          new MailjetClientCommunicationException("Connection timeout");
+
+      expect(mockMailjetClient.post(anyObject(MailjetRequest.class)))
+          .andThrow(commException);
+
+      replay(mockMailjetClient);
+
+      // Act & Assert
+      assertThrows(MailjetClientCommunicationException.class, () ->
+          mailJetApiClientWrapper.bulkSyncUsers(users,
+              MailJetSubscriptionAction.FORCE_SUBSCRIBE, MailJetSubscriptionAction.FORCE_SUBSCRIBE)
+      );
     }
   }
 

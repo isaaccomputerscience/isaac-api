@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.managers.ExternalAccountSynchronisationException;
 import uk.ac.cam.cl.dtg.segue.api.managers.IExternalAccountManager;
+import uk.ac.cam.cl.dtg.segue.api.managers.SyncResult;
 import uk.ac.cam.cl.dtg.segue.comm.EmailCommunicationMessage;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailType;
@@ -35,6 +36,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 
 public class SyncMailjetUsersJob implements Job {
   private static final Logger log = LoggerFactory.getLogger(SyncMailjetUsersJob.class);
+  private static final String MAILJET = "MAILJET - ";
 
   private final IExternalAccountManager externalAccountManager;
   private final EmailManager emailManager;
@@ -54,20 +56,32 @@ public class SyncMailjetUsersJob implements Job {
   @Override
   public void execute(final JobExecutionContext context) throws JobExecutionException {
     try {
-      externalAccountManager.synchroniseChangedUsers();
-      log.info("Success: synchronised users");
+      SyncResult result = externalAccountManager.synchroniseChangedUsers();
+      log.info("{}Complete: {} synced, {} failed", MAILJET,
+          result.successCount(), result.failedUserDetails().size());
+
+      if (result.hasFailures()) {
+        String body = result.failedUserDetails().size() + " user(s) failed to sync:\n"
+            + String.join("\n", result.failedUserDetails());
+        sendAdminEmail("SyncMailjetUsersJob completed with failures", body);
+      }
     } catch (ExternalAccountSynchronisationException e) {
-      final String subject = "Failed to execute SyncMailjetUsersJob";
       StringWriter stringWriter = new StringWriter();
       PrintWriter printWriter = new PrintWriter(stringWriter);
       e.printStackTrace(printWriter);
       String exception = stringWriter.toString();
-      EmailCommunicationMessage email =
-          new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
-              subject, exception, exception, EmailType.ADMIN);
-      emailManager.addSystemEmailToQueue(email);
-      log.error("Failed to synchronise users");
+      sendAdminEmail("Failed to execute SyncMailjetUsersJob", exception);
+      log.error("{}Failed to synchronise users", MAILJET, e);
     }
+  }
 
+  /**
+   * Send email to server admin with given subject and body.
+   */
+  private void sendAdminEmail(final String subject, final String body) {
+    EmailCommunicationMessage email =
+        new EmailCommunicationMessage(properties.getProperty(Constants.SERVER_ADMIN_ADDRESS),
+            subject, body, body, EmailType.ADMIN);
+    emailManager.addSystemEmailToQueue(email);
   }
 }

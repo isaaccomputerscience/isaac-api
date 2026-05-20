@@ -27,4 +27,6 @@ public interface IExternalAccountDataManager {
   void updateProviderLastUpdated(Long userId) throws SegueDatabaseException;
 
   void updateExternalAccount(Long userId, String providerUserIdentifier) throws SegueDatabaseException;
+
+  void batchMarkAsSynced(List<Long> userIds) throws SegueDatabaseException;
 }
