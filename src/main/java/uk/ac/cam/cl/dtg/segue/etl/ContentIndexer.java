@@ -287,7 +287,8 @@ public class ContentIndexer {
                 + ERROR_OCCURRED_SUFFIX + e.getMessage(), context.indexProblemCache);
       }
     } catch (Exception e) {
-      log.error(CONTENT_LOG_PREFIX + "Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
+      log.error(CONTENT_LOG_PREFIX
+          + "Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
       Content dummyContent = new Content();
       dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
       this.registerContentProblem(dummyContent,
@@ -323,7 +324,7 @@ public class ContentIndexer {
 
     if (flattenedContent instanceof IsaacQuiz) {
       List<ContentBase> children = flattenedContent.getChildren();
-      if (children.stream().anyMatch(c -> !(c instanceof IsaacQuizSection))) {
+      if (children != null && children.stream().anyMatch(c -> !(c instanceof IsaacQuizSection))) {
         log.info("IsaacQuiz ({}) contains top-level non-quiz sections. Skipping.", flattenedContent.getId());
         this.registerContentProblem(flattenedContent, "Index failure - Invalid "
             + "content type among quiz sections. Quizzes can only contain quiz sections "
@@ -528,14 +529,6 @@ public class ContentIndexer {
             .forEach(c -> this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished));
       }
     }
-
-    if (question.getDefaultFeedback() != null) {
-      Content defaultFeedback = question.getDefaultFeedback();
-      if (defaultFeedback.getChildren() != null) {
-        defaultFeedback.getChildren().stream().map(cb -> (Content) cb)
-            .forEach(c -> this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished));
-      }
-    }
   }
 
   private void augmentFeedbackContent(final Question question,
@@ -715,13 +708,15 @@ public class ContentIndexer {
       es.bulkIndex(sha, ContentIndextype.UNIT.toString(), serializeUnits(allUnits, objectMapper));
       es.bulkIndex(sha, ContentIndextype.PUBLISHED_UNIT.toString(), serializeUnits(publishedUnits, objectMapper));
       endTime = System.nanoTime();
-      log.info(CONTENT_LOG_PREFIX + "Bulk unit indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX
+          + "Bulk unit indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
 
       startTime = System.nanoTime();
       es.bulkIndex(sha, ContentIndextype.CONTENT_ERROR.toString(),
           serializeContentErrors(indexProblemCache, objectMapper));
       endTime = System.nanoTime();
-      log.info(CONTENT_LOG_PREFIX + "Bulk content error indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX
+          + "Bulk content error indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
     } catch (JsonProcessingException e) {
       log.error(CONTENT_LOG_PREFIX + "Unable to serialise sha or tags");
     } catch (SegueSearchException e) {
@@ -927,7 +922,7 @@ public class ContentIndexer {
                                                final Choice choice,
                                                final Map<Content, List<String>> indexProblemCache) {
     if (choice instanceof Formula f) {
-      if (f.getPythonExpression().contains("\\")) {
+      if (f.getPythonExpression() != null && f.getPythonExpression().contains("\\")) {
         registerContentProblemQuestionFormulaContainsBackslash(content, indexProblemCache, question, choice);
       } else if (f.getPythonExpression() == null || f.getPythonExpression().isEmpty()) {
         registerContentProblemQuestionFormulaIsEmpty(content, indexProblemCache, question, choice);
@@ -1028,7 +1023,7 @@ public class ContentIndexer {
     if (content instanceof IsaacEventPage eventPage) {
       if (eventPage.getEndDate() == null) {
         this.registerContentProblem(content, "Event has no end date", indexProblemCache);
-      } else if (eventPage.getEndDate().isBefore(eventPage.getDate())) {
+      } else if (eventPage.getDate() != null && eventPage.getEndDate().isBefore(eventPage.getDate())) {
         this.registerContentProblem(content, "Event has end date before start date", indexProblemCache);
       }
     }
@@ -1045,7 +1040,7 @@ public class ContentIndexer {
 
   private void registerContentProblemsChoiceQuestionMissingChoicesOrAnswer(
       final Content content, final Map<Content, List<String>> indexProblemCache) {
-    if (content instanceof ChoiceQuestion question && !(content.getType().equals("isaacQuestion"))) {
+    if (content instanceof ChoiceQuestion question && !"isaacQuestion".equals(content.getType())) {
 
       if (question.getChoices() == null || question.getChoices().isEmpty()) {
         registerContentProblemChoiceQuestionMissingChoices(indexProblemCache, question);
@@ -1159,7 +1154,7 @@ public class ContentIndexer {
 
   private void registerContentProblemValueWithChildren(
       final Content content, final Map<Content, List<String>> indexProblemCache) {
-    if (content.getValue() != null && !content.getChildren().isEmpty()) {
+    if (content.getValue() != null && content.getChildren() != null && !content.getChildren().isEmpty()) {
       String id = content.getId();
       String firstLine = "Content";
       if (id != null) {
@@ -1221,9 +1216,18 @@ public class ContentIndexer {
 
     for (String id : missingContent) {
       for (Content src : incomingReferences.get(id)) {
+        // Diagnose: is the ID present in the cache but as an augmented child ID?
+        List<String> augmentedMatches = contentById.keySet().stream()
+            .filter(k -> k.endsWith(Constants.ID_SEPARATOR + id))
+            .toList();
+
+        String diagnosis = augmentedMatches.isEmpty() ? ""
+            : " (Note: Found augmented forms in index: " + augmentedMatches
+              + " — the reference may use a bare ID but the content was indexed as a child)";
+
         this.registerContentProblem(src, "The id '" + id + "' was referenced by "
             + src.getCanonicalSourceFile() + " but the content with that "
-            + "ID cannot be found.", indexProblemCache);
+            + "ID cannot be found." + diagnosis, indexProblemCache);
       }
     }
     if (!missingContent.isEmpty()) {
