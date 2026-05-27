@@ -342,7 +342,7 @@ public class ContentIndexer {
     }
 
     if (context.contentCache().get(flattenedContent.getId()).equals(flattenedContent)) {
-      log.info("Resource ({}) already seen in cache. Skipping {}", parentContent.getId(), treeWalkPath);
+      log.info("Resource ({}) already seen in cache. Skipping {}", flattenedContent.getId(), treeWalkPath);
       return;
     }
 
