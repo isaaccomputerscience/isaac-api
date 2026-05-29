@@ -426,7 +426,7 @@ public class ContentIndexer {
 
     augmentMediaFieldsViaReflection(content, canonicalSourceFile);
     augmentMediaContent(content, canonicalSourceFile, parentId);
-    updateContentIdentifier(content, newParentId, parentPublished);
+    updateContentIdentifier(content, parentPublished);
 
     return content;
   }
@@ -442,11 +442,8 @@ public class ContentIndexer {
     }
   }
 
-  private void updateContentIdentifier(final Content content, final String parentId, final boolean parentPublished) {
-    if (content.getId() == null && parentId != null) {
-      content.setId(parentId);
-      content.setPublished(parentPublished);
-    }
+  private void updateContentIdentifier(final Content content, final boolean parentPublished) {
+    content.setPublished(parentPublished);
   }
 
   private void collateSearchableContent(final Content content, final StringBuilder searchableContentBuilder) {
