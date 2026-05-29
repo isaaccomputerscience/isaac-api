@@ -399,7 +399,11 @@ public class ContentIndexer {
 
     if (content.getChildren() != null && !content.getChildren().isEmpty()) {
       content.getChildren().stream().filter(Content.class::isInstance).map(cb -> (Content) cb)
-          .forEach(c -> this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished));
+          .forEach(c -> {
+            if (c != null) {
+              this.augmentChildContent(c, canonicalSourceFile, newParentId, parentPublished);
+            }
+          });
     }
 
     if (content instanceof Choice choice) {
@@ -407,9 +411,13 @@ public class ContentIndexer {
           newParentId, parentPublished);
     }
 
-    if (content instanceof IsaacCardDeck isaacCardDeck && isaacCardDeck.getCards() != null) {
-      isaacCardDeck.getCards().forEach(card -> this.augmentChildContent(card, canonicalSourceFile,
-          newParentId, parentPublished));
+    if (content instanceof IsaacCardDeck isaacCardDeck && isaacCardDeck.getCards() != null
+        && !isaacCardDeck.getCards().isEmpty()) {
+      isaacCardDeck.getCards().forEach(card -> {
+        if (card != null) {
+          this.augmentChildContent(card, canonicalSourceFile, newParentId, parentPublished);
+        }
+      });
     }
 
     if (content instanceof Question question) {
@@ -553,8 +561,12 @@ public class ContentIndexer {
           .forEach(child -> result.addAll(flattenContentObjects(child)));
     }
 
-    if (content instanceof IsaacCardDeck deck && deck.getCards() != null) {
-      deck.getCards().forEach(card -> result.addAll(flattenContentObjects(card)));
+    if (content instanceof IsaacCardDeck deck && deck.getCards() != null && !deck.getCards().isEmpty()) {
+      deck.getCards().forEach(card -> {
+        if (card != null) {
+          result.addAll(flattenContentObjects(card));
+        }
+      });
     }
 
     return result;
