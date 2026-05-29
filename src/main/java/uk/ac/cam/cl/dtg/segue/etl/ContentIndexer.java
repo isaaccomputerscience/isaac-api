@@ -443,7 +443,7 @@ public class ContentIndexer {
   }
 
   private void updateContentIdentifier(final Content content, final String parentId, final boolean parentPublished) {
-    if (content.getId() != null && parentId != null) {
+    if (content.getId() == null && parentId != null) {
       content.setId(parentId);
       content.setPublished(parentPublished);
     }
