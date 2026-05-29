@@ -346,15 +346,12 @@ public class ContentIndexer {
       return;
     }
 
-    log.warn("Resource with duplicate ID ({}) detected in cache. Re-indexing with latest version from {}",
-        flattenedContent.getId(), treeWalkPath);
-    context.contentCache().put(flattenedContent.getId(), flattenedContent);
+    log.info("Resource with duplicate ID ({}) detected in cache. Skipping {}", flattenedContent.getId(), treeWalkPath);
     this.registerContentProblem(flattenedContent, String.format(
-            "Duplicate ID (%s) found in files (%s) and (%s): using latest version (%s).",
+            "Index failure - Duplicate ID (%s) found in files (%s) and (%s): only one will be available.",
             flattenedContent.getId(),
-            context.contentCache().get(flattenedContent.getId()).getCanonicalSourceFile(),
             treeWalkPath,
-            treeWalkPath),
+            context.contentCache().get(flattenedContent.getId()).getCanonicalSourceFile()),
         context.indexProblemCache());
   }
 
