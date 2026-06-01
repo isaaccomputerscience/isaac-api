@@ -260,7 +260,8 @@ public class ContentIndexer {
       ObjectMapper objectMapper = mapperUtils.getSharedContentObjectMapper();
       parseAndIndexJsonContent(objectMapper, out.toString(), treeWalk.getPathString(), context);
     } catch (Exception e) {
-      log.error(CONTENT_LOG_PREFIX + "Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
+      log.error(CONTENT_LOG_PREFIX
+          + "Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
       Content dummyContent = new Content();
       dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
       this.registerContentProblem(dummyContent,
@@ -723,13 +724,15 @@ public class ContentIndexer {
       es.bulkIndex(sha, ContentIndextype.UNIT.toString(), serializeUnits(allUnits, objectMapper));
       es.bulkIndex(sha, ContentIndextype.PUBLISHED_UNIT.toString(), serializeUnits(publishedUnits, objectMapper));
       endTime = System.nanoTime();
-      log.info(CONTENT_LOG_PREFIX + "Bulk unit indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX
+          + "Bulk unit indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
 
       startTime = System.nanoTime();
       es.bulkIndex(sha, ContentIndextype.CONTENT_ERROR.toString(),
           serializeContentErrors(indexProblemCache, objectMapper));
       endTime = System.nanoTime();
-      log.info(CONTENT_LOG_PREFIX + "Bulk content error indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX
+          + "Bulk content error indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
     } catch (JsonProcessingException e) {
       log.error(CONTENT_LOG_PREFIX + "Unable to serialise sha or tags");
     } catch (SegueSearchException e) {
@@ -991,7 +994,9 @@ public class ContentIndexer {
 
   private void registerContentProblemConflictingUnitSettings(
       final Content content, final Map<Content, List<String>> indexProblemCache, final IsaacNumericQuestion question) {
-    if (Boolean.TRUE.equals(question.getRequireUnits()) && null != question.getDisplayUnit() && !question.getDisplayUnit().isEmpty()) {
+    if (Boolean.TRUE.equals(question.getRequireUnits())
+        && null != question.getDisplayUnit()
+        && !question.getDisplayUnit().isEmpty()) {
       this.registerContentProblem(content,
           NUMERIC_QUESTION + question.getId() + " has a displayUnit set but also requiresUnits!"
               + " Units will be ignored for this question!", indexProblemCache);
@@ -1008,7 +1013,9 @@ public class ContentIndexer {
   private void registerContentProblemUnnecessaryQuantityChoiceUnits(
       final Content content, final Map<Content, List<String>> indexProblemCache, final IsaacNumericQuestion question,
       final Quantity quantity) {
-    if (!Boolean.TRUE.equals(question.getRequireUnits()) && null != quantity.getUnits() && !quantity.getUnits().isEmpty()) {
+    if (!Boolean.TRUE.equals(question.getRequireUnits())
+        && null != quantity.getUnits()
+        && !quantity.getUnits().isEmpty()) {
       this.registerContentProblem(content, NUMERIC_QUESTION + question.getId()
           + " has a Quantity with units but does not require units!", indexProblemCache);
     }
@@ -1050,7 +1057,8 @@ public class ContentIndexer {
 
   private void registerContentProblemsChoiceQuestionMissingChoicesOrAnswer(
       final Content content, final Map<Content, List<String>> indexProblemCache) {
-    if (content instanceof ChoiceQuestion question && (content.getType() == null || !content.getType().equals("isaacQuestion"))) {
+    if (content instanceof ChoiceQuestion question
+        && (content.getType() == null || !content.getType().equals("isaacQuestion"))) {
 
       if (question.getChoices() == null || question.getChoices().isEmpty()) {
         registerContentProblemChoiceQuestionMissingChoices(indexProblemCache, question);
