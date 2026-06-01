@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -171,6 +172,9 @@ public class ContentIndexer {
       long totalTime = (endTime - totalStartTime) / NANOSECONDS_IN_A_MILLISECOND;
       log.info(CONTENT_LOG_PREFIX + "Finished indexing version {}, total time: {}ms",
           sanitiseInternalLogValue(version), totalTime);
+
+      // Generate and log indexing failure report
+      generateIndexingReport(version, contentCache, indexProblemCache);
 
     } finally {
       VERSION_LOCKS.remove(version);
@@ -1274,5 +1278,163 @@ public class ContentIndexer {
         return null;
       }
     }).filter(Objects::nonNull).toList();
+  }
+
+  /**
+   * Generate and log a comprehensive indexing failure report showing which content failed
+   * to index and the reasons for each failure.
+   *
+   * @param version              the content version that was indexed
+   * @param contentCache         the cache of successfully indexed content
+   * @param indexProblemCache    the cache of content with validation problems
+   */
+  private void generateIndexingReport(final String version, final Map<String, Content> contentCache,
+                                      final Map<Content, List<String>> indexProblemCache) {
+    if (indexProblemCache.isEmpty()) {
+      log.info(CONTENT_LOG_PREFIX + "✓ Indexing completed successfully with NO validation errors or warnings");
+      return;
+    }
+
+    // Filter out dummy "no errors" record (line 776)
+    List<Map.Entry<Content, List<String>>> realProblems = indexProblemCache.entrySet().stream()
+        .filter(e -> !e.getKey().getCanonicalSourceFile().equals("😎"))
+        .toList();
+
+    if (realProblems.isEmpty()) {
+      log.info(CONTENT_LOG_PREFIX + "✓ Indexing completed successfully with NO validation errors or warnings");
+      return;
+    }
+
+    // Build report
+    StringBuilder reportBuilder = new StringBuilder();
+    reportBuilder.append("\n");
+    reportBuilder.append("=".repeat(100)).append("\n");
+    reportBuilder.append(CONTENT_LOG_PREFIX).append("INDEXING FAILURE REPORT\n");
+    reportBuilder.append("=".repeat(100)).append("\n");
+    reportBuilder.append(String.format("Version: %s\n", sanitiseInternalLogValue(version)));
+    reportBuilder.append(String.format("Successfully Indexed: %d items\n", contentCache.size()));
+    reportBuilder.append(String.format("Items with Problems: %d items\n", realProblems.size()));
+    reportBuilder.append("-".repeat(100)).append("\n\n");
+
+    // Group problems by error type and file
+    Map<String, List<Map.Entry<Content, List<String>>>> problemsByType = groupProblems(realProblems);
+
+    // Report each problem with details
+    int problemIndex = 1;
+    for (Map.Entry<String, List<Map.Entry<Content, List<String>>>> typeGroup : problemsByType.entrySet()) {
+      reportBuilder.append(String.format("\n[%s]\n", typeGroup.getKey()));
+      for (Map.Entry<Content, List<String>> problem : typeGroup.getValue()) {
+        Content content = problem.getKey();
+        List<String> errors = problem.getValue();
+
+        reportBuilder.append(String.format("\n  %d. %s\n", problemIndex, content.getCanonicalSourceFile()));
+        if (content.getId() != null) {
+          reportBuilder.append(String.format("     ID: %s\n", content.getId()));
+        }
+        if (content.getTitle() != null) {
+          reportBuilder.append(String.format("     Title: %s\n", content.getTitle()));
+        }
+        reportBuilder.append(String.format("     Type: %s\n", content.getType()));
+        reportBuilder.append(String.format("     Published: %s\n", content.getPublished()));
+        reportBuilder.append("     Issues:\n");
+
+        for (String error : errors) {
+          reportBuilder.append(String.format("       • %s\n", error));
+        }
+
+        problemIndex++;
+      }
+    }
+
+    // Summary by type
+    reportBuilder.append("\n").append("-".repeat(100)).append("\n");
+    reportBuilder.append("SUMMARY BY ERROR TYPE:\n");
+    reportBuilder.append("-".repeat(100)).append("\n");
+
+    for (Map.Entry<String, List<Map.Entry<Content, List<String>>>> typeGroup : problemsByType.entrySet()) {
+      int totalIssues = typeGroup.getValue().stream()
+          .mapToInt(e -> e.getValue().size())
+          .sum();
+      reportBuilder.append(String.format("  %-30s: %3d files, %3d total issues\n",
+          typeGroup.getKey(), typeGroup.getValue().size(), totalIssues));
+    }
+
+    reportBuilder.append("-".repeat(100)).append("\n\n");
+
+    // Log the report
+    log.warn(reportBuilder.toString());
+  }
+
+  /**
+   * Group problems by error type for organized reporting.
+   *
+   * @param problems the list of content with problems
+   * @return a map of error type to list of problems
+   */
+  private Map<String, List<Map.Entry<Content, List<String>>>> groupProblems(
+      final List<Map.Entry<Content, List<String>>> problems) {
+    Map<String, List<Map.Entry<Content, List<String>>>> grouped = new LinkedHashMap<>();
+
+    for (Map.Entry<Content, List<String>> problem : problems) {
+      String errorType = identifyErrorType(problem.getValue());
+
+      grouped.computeIfAbsent(errorType, k -> new ArrayList<>()).add(problem);
+    }
+
+    return grouped;
+  }
+
+  /**
+   * Identify the primary error type based on error messages.
+   *
+   * @param errors  the list of error messages
+   * @return a string describing the error type
+   */
+  private String identifyErrorType(final List<String> errors) {
+    if (errors.isEmpty()) {
+      return "Unknown Error";
+    }
+
+    String firstError = errors.get(0).toLowerCase();
+
+    // Check error patterns
+    if (firstError.contains("duplicate")) {
+      return "ID Collision";
+    } else if (firstError.contains("invalid id")
+        || firstError.contains("restricted character")) {
+      return "Invalid ID Format";
+    } else if (firstError.contains("too long")) {
+      return "ID Too Long";
+    } else if (firstError.contains("question") && firstError.contains("without")) {
+      return "Question Configuration";
+    } else if (firstError.contains("choice") || firstError.contains("answer")) {
+      return "Choice/Answer Issue";
+    } else if (firstError.contains("numeric")
+        || firstError.contains("quantity")
+        || firstError.contains("unit")) {
+      return "Numeric Question";
+    } else if (firstError.contains("symbolic")
+        || firstError.contains("formula")
+        || firstError.contains("python")) {
+      return "Symbolic Question";
+    } else if (firstError.contains("event")) {
+      return "Event Configuration";
+    } else if (firstError.contains("media")
+        || firstError.contains("image")
+        || firstError.contains("alt")) {
+      return "Media Issue";
+    } else if (firstError.contains("reference")
+        || firstError.contains("missing")
+        || firstError.contains("found")) {
+      return "Content Reference";
+    } else if (firstError.contains("published")) {
+      return "Publishing Issue";
+    } else if (firstError.contains("expandable")) {
+      return "Content Structure";
+    } else if (firstError.contains("index failure")) {
+      return "Indexing Error";
+    } else {
+      return "Other Issue";
+    }
   }
 }
