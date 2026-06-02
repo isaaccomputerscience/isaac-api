@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -172,6 +173,9 @@ public class ContentIndexer {
       log.info(CONTENT_LOG_PREFIX + "Finished indexing version {}, total time: {}ms",
           sanitiseInternalLogValue(version), totalTime);
 
+      // Generate and log indexing failure report
+      generateIndexingReport(version, contentCache, indexProblemCache);
+
     } finally {
       VERSION_LOCKS.remove(version);
     }
@@ -180,7 +184,7 @@ public class ContentIndexer {
 
   void setNamedVersion(final String alias, final String version) {
     List<String> allContentTypes = Arrays.stream(ContentIndextype.values())
-        .map(ContentIndextype::toString).collect(Collectors.toList());
+        .map(ContentIndextype::toString).toList();
     es.addOrMoveIndexAlias(alias, version, allContentTypes);
   }
 
@@ -254,44 +258,49 @@ public class ContentIndexer {
       loader.copyTo(out);
 
       ObjectMapper objectMapper = mapperUtils.getSharedContentObjectMapper();
-
-      try {
-        Content content = (Content) objectMapper.readValue(out.toString(), ContentBase.class);
-
-        if (context.shouldSkipUnpublished(content)) {
-          log.info("Skipping unpublished content: {}", content.getId());
-          return;
-        }
-
-        content = this.augmentChildContent(content, treeWalk.getPathString(), null, content.getPublished());
-
-        if (null != content) {
-          log.info(CONTENT_LOG_PREFIX + "Processing file: {} (type: {}, id: {})", treeWalk.getPathString(),
-              content.getType(), content.getId());
-          indexContentObject(context.contentCache, context.tagsList, context.allUnits, context.publishedUnits,
-              context.indexProblemCache, treeWalk.getPathString(), content);
-        }
-      } catch (JsonMappingException e) {
-        log.warn(CONTENT_LOG_PREFIX + "Unable to parse the json file found {} as a content object. "
-            + "Skipping file due to error: \n {}", treeWalk.getPathString(), e.getMessage());
-        Content dummyContent = new Content();
-        dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
-        this.registerContentProblem(dummyContent, "Index failure - Unable to parse json file found - "
-            + treeWalk.getPathString() + ERROR_OCCURRED_SUFFIX + e.getMessage(), context.indexProblemCache);
-      } catch (IOException e) {
-        log.error("IOException while trying to parse {}", treeWalk.getPathString(), e);
-        Content dummyContent = new Content();
-        dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
-        this.registerContentProblem(dummyContent,
-            "Index failure - Unable to read the json file found - " + treeWalk.getPathString()
-                + ERROR_OCCURRED_SUFFIX + e.getMessage(), context.indexProblemCache);
-      }
+      parseAndIndexJsonContent(objectMapper, out.toString(), treeWalk.getPathString(), context);
     } catch (Exception e) {
-      log.error(CONTENT_LOG_PREFIX + "Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
+      log.error(CONTENT_LOG_PREFIX
+          + "Unexpected error while processing file {}: {}", treeWalk.getPathString(), e.getMessage(), e);
       Content dummyContent = new Content();
       dummyContent.setCanonicalSourceFile(treeWalk.getPathString());
       this.registerContentProblem(dummyContent,
           "Index failure - Unexpected error while processing file - " + treeWalk.getPathString()
+              + ERROR_OCCURRED_SUFFIX + e.getMessage(), context.indexProblemCache);
+    }
+  }
+
+  private void parseAndIndexJsonContent(final ObjectMapper objectMapper, final String jsonContent,
+                                        final String filePath, final IndexingContext context) {
+    try {
+      Content content = (Content) objectMapper.readValue(jsonContent, ContentBase.class);
+
+      if (context.shouldSkipUnpublished(content)) {
+        log.info("Skipping unpublished content: {}", content.getId());
+        return;
+      }
+
+      content = this.augmentChildContent(content, filePath, null, content.getPublished());
+
+      if (null != content) {
+        log.info(CONTENT_LOG_PREFIX + "Processing file: {} (type: {}, id: {})", filePath,
+            content.getType(), content.getId());
+        indexContentObject(context.contentCache, context.tagsList, context.allUnits, context.publishedUnits,
+            context.indexProblemCache, filePath, content);
+      }
+    } catch (JsonMappingException e) {
+      log.warn(CONTENT_LOG_PREFIX + "Unable to parse the json file found {} as a content object. "
+          + "Skipping file due to error: \n {}", filePath, e.getMessage());
+      Content dummyContent = new Content();
+      dummyContent.setCanonicalSourceFile(filePath);
+      this.registerContentProblem(dummyContent, "Index failure - Unable to parse json file found - "
+          + filePath + ERROR_OCCURRED_SUFFIX + e.getMessage(), context.indexProblemCache);
+    } catch (IOException e) {
+      log.error("IOException while trying to parse {}", filePath, e);
+      Content dummyContent = new Content();
+      dummyContent.setCanonicalSourceFile(filePath);
+      this.registerContentProblem(dummyContent,
+          "Index failure - Unable to read the json file found - " + filePath
               + ERROR_OCCURRED_SUFFIX + e.getMessage(), context.indexProblemCache);
     }
   }
@@ -323,7 +332,7 @@ public class ContentIndexer {
 
     if (flattenedContent instanceof IsaacQuiz) {
       List<ContentBase> children = flattenedContent.getChildren();
-      if (children.stream().anyMatch(c -> !(c instanceof IsaacQuizSection))) {
+      if (children != null && children.stream().anyMatch(c -> !(c instanceof IsaacQuizSection))) {
         log.info("IsaacQuiz ({}) contains top-level non-quiz sections. Skipping.", flattenedContent.getId());
         this.registerContentProblem(flattenedContent, "Index failure - Invalid "
             + "content type among quiz sections. Quizzes can only contain quiz sections "
@@ -715,13 +724,15 @@ public class ContentIndexer {
       es.bulkIndex(sha, ContentIndextype.UNIT.toString(), serializeUnits(allUnits, objectMapper));
       es.bulkIndex(sha, ContentIndextype.PUBLISHED_UNIT.toString(), serializeUnits(publishedUnits, objectMapper));
       endTime = System.nanoTime();
-      log.info(CONTENT_LOG_PREFIX + "Bulk unit indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX
+          + "Bulk unit indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
 
       startTime = System.nanoTime();
       es.bulkIndex(sha, ContentIndextype.CONTENT_ERROR.toString(),
           serializeContentErrors(indexProblemCache, objectMapper));
       endTime = System.nanoTime();
-      log.info(CONTENT_LOG_PREFIX + "Bulk content error indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
+      log.info(CONTENT_LOG_PREFIX
+          + "Bulk content error indexing took: {}ms", (endTime - startTime) / NANOSECONDS_IN_A_MILLISECOND);
     } catch (JsonProcessingException e) {
       log.error(CONTENT_LOG_PREFIX + "Unable to serialise sha or tags");
     } catch (SegueSearchException e) {
@@ -880,22 +891,19 @@ public class ContentIndexer {
 
     Integer expectedItemCount = null;
     for (Choice choice : q.getChoices()) {
-      if (!(choice instanceof ItemChoice c)) {
-        continue;
-      }
-
-      List<Item> items = c.getItems();
-      if (items == null || items.isEmpty()) {
-        this.registerContentProblem(content, buildClozeQuestionMissingItemsMessage(q), indexProblemCache);
-        continue;
-      }
-
-      int itemCount = items.size();
-      if (expectedItemCount == null) {
-        expectedItemCount = itemCount;
-      } else if (itemCount != expectedItemCount) {
-        this.registerContentProblem(content,
-            buildClozeQuestionIncorrectItemCountMessage(q, expectedItemCount, itemCount), indexProblemCache);
+      if (choice instanceof ItemChoice c) {
+        List<Item> items = c.getItems();
+        if (items == null || items.isEmpty()) {
+          this.registerContentProblem(content, buildClozeQuestionMissingItemsMessage(q), indexProblemCache);
+        } else {
+          int itemCount = items.size();
+          if (expectedItemCount == null) {
+            expectedItemCount = itemCount;
+          } else if (itemCount != expectedItemCount) {
+            this.registerContentProblem(content,
+                buildClozeQuestionIncorrectItemCountMessage(q, expectedItemCount, itemCount), indexProblemCache);
+          }
+        }
       }
     }
   }
@@ -927,7 +935,7 @@ public class ContentIndexer {
                                                final Choice choice,
                                                final Map<Content, List<String>> indexProblemCache) {
     if (choice instanceof Formula f) {
-      if (f.getPythonExpression().contains("\\")) {
+      if (f.getPythonExpression() != null && f.getPythonExpression().contains("\\")) {
         registerContentProblemQuestionFormulaContainsBackslash(content, indexProblemCache, question, choice);
       } else if (f.getPythonExpression() == null || f.getPythonExpression().isEmpty()) {
         registerContentProblemQuestionFormulaIsEmpty(content, indexProblemCache, question, choice);
@@ -986,7 +994,9 @@ public class ContentIndexer {
 
   private void registerContentProblemConflictingUnitSettings(
       final Content content, final Map<Content, List<String>> indexProblemCache, final IsaacNumericQuestion question) {
-    if (question.getRequireUnits() && null != question.getDisplayUnit() && !question.getDisplayUnit().isEmpty()) {
+    if (Boolean.TRUE.equals(question.getRequireUnits())
+        && null != question.getDisplayUnit()
+        && !question.getDisplayUnit().isEmpty()) {
       this.registerContentProblem(content,
           NUMERIC_QUESTION + question.getId() + " has a displayUnit set but also requiresUnits!"
               + " Units will be ignored for this question!", indexProblemCache);
@@ -1003,7 +1013,9 @@ public class ContentIndexer {
   private void registerContentProblemUnnecessaryQuantityChoiceUnits(
       final Content content, final Map<Content, List<String>> indexProblemCache, final IsaacNumericQuestion question,
       final Quantity quantity) {
-    if (!question.getRequireUnits() && null != quantity.getUnits() && !quantity.getUnits().isEmpty()) {
+    if (!Boolean.TRUE.equals(question.getRequireUnits())
+        && null != quantity.getUnits()
+        && !quantity.getUnits().isEmpty()) {
       this.registerContentProblem(content, NUMERIC_QUESTION + question.getId()
           + " has a Quantity with units but does not require units!", indexProblemCache);
     }
@@ -1028,7 +1040,7 @@ public class ContentIndexer {
     if (content instanceof IsaacEventPage eventPage) {
       if (eventPage.getEndDate() == null) {
         this.registerContentProblem(content, "Event has no end date", indexProblemCache);
-      } else if (eventPage.getEndDate().isBefore(eventPage.getDate())) {
+      } else if (eventPage.getDate() != null && eventPage.getEndDate().isBefore(eventPage.getDate())) {
         this.registerContentProblem(content, "Event has end date before start date", indexProblemCache);
       }
     }
@@ -1045,7 +1057,8 @@ public class ContentIndexer {
 
   private void registerContentProblemsChoiceQuestionMissingChoicesOrAnswer(
       final Content content, final Map<Content, List<String>> indexProblemCache) {
-    if (content instanceof ChoiceQuestion question && !(content.getType().equals("isaacQuestion"))) {
+    if (content instanceof ChoiceQuestion question
+        && (content.getType() == null || !content.getType().equals("isaacQuestion"))) {
 
       if (question.getChoices() == null || question.getChoices().isEmpty()) {
         registerContentProblemChoiceQuestionMissingChoices(indexProblemCache, question);
@@ -1159,7 +1172,7 @@ public class ContentIndexer {
 
   private void registerContentProblemValueWithChildren(
       final Content content, final Map<Content, List<String>> indexProblemCache) {
-    if (content.getValue() != null && !content.getChildren().isEmpty()) {
+    if (content.getValue() != null && content.getChildren() != null && !content.getChildren().isEmpty()) {
       String id = content.getId();
       String firstLine = "Content";
       if (id != null) {
@@ -1196,10 +1209,7 @@ public class ContentIndexer {
       if (c.getRelatedContent() != null) {
         expectedIds.addAll(c.getRelatedContent());
         for (String id : c.getRelatedContent()) {
-          if (!incomingReferences.containsKey(id)) {
-            incomingReferences.put(id, new HashSet<>());
-          }
-          incomingReferences.get(id).add(c);
+          incomingReferences.computeIfAbsent(id, k -> new HashSet<>()).add(c);
         }
       }
 
@@ -1235,11 +1245,12 @@ public class ContentIndexer {
   private void recordPublishedToUnpublishedReferenceProblems(final Map<String, Set<Content>> incomingReferences,
                                                              final Map<String, Content> contentById,
                                                              final Map<Content, List<String>> indexProblemCache) {
-    for (String refTargetId : incomingReferences.keySet()) {
+    for (Map.Entry<String, Set<Content>> entry : incomingReferences.entrySet()) {
+      String refTargetId = entry.getKey();
       Content refTarget = contentById.get(refTargetId);
       if (refTarget != null) {
-        for (Content refSrc : incomingReferences.get(refTargetId)) {
-          if (refSrc.getPublished() && !refTarget.getPublished()) {
+        for (Content refSrc : entry.getValue()) {
+          if (Boolean.TRUE.equals(refSrc.getPublished()) && !Boolean.TRUE.equals(refTarget.getPublished())) {
             this.registerContentProblem(refSrc, "Content is published, "
                 + "but references unpublished content '" + refTargetId + "'.", indexProblemCache);
           }
@@ -1274,5 +1285,107 @@ public class ContentIndexer {
         return null;
       }
     }).filter(Objects::nonNull).toList();
+  }
+
+  /**
+   * Generate and log a comprehensive indexing failure report showing which content failed
+   * to index and the reasons for each failure.
+   *
+   * @param version              the content version that was indexed
+   * @param contentCache         the cache of successfully indexed content
+   * @param indexProblemCache    the cache of content with validation problems
+   */
+  private void generateIndexingReport(final String version, final Map<String, Content> contentCache,
+                                      final Map<Content, List<String>> indexProblemCache) {
+    if (indexProblemCache.isEmpty()) {
+      log.info(CONTENT_LOG_PREFIX + "✓ Indexing completed successfully with NO validation errors or warnings");
+      return;
+    }
+
+    // Filter out dummy "no errors" record (line 776)
+    List<Map.Entry<Content, List<String>>> realProblems = indexProblemCache.entrySet().stream()
+        .filter(e -> !e.getKey().getCanonicalSourceFile().equals("😎"))
+        .toList();
+
+    if (realProblems.isEmpty()) {
+      log.info(CONTENT_LOG_PREFIX + "✓ Indexing completed successfully with NO validation errors or warnings");
+      return;
+    }
+
+    // Build report
+    StringBuilder reportBuilder = new StringBuilder();
+    reportBuilder.append("\n");
+    reportBuilder.append("=".repeat(100)).append("\n");
+    reportBuilder.append(CONTENT_LOG_PREFIX).append("INDEXING FAILURE REPORT\n");
+    reportBuilder.append("=".repeat(100)).append("\n");
+    reportBuilder.append(String.format("Version: %s%n", sanitiseInternalLogValue(version)));
+    reportBuilder.append(String.format("Successfully Indexed: %d items%n", contentCache.size()));
+    reportBuilder.append(String.format("Items with Problems: %d items%n", realProblems.size()));
+    reportBuilder.append("-".repeat(100)).append("\n\n");
+
+    // Group problems by error type and file
+    Map<String, List<Map.Entry<Content, List<String>>>> problemsByType = groupProblems(realProblems);
+
+    // Report each problem with details
+    int problemIndex = 1;
+    for (Map.Entry<String, List<Map.Entry<Content, List<String>>>> typeGroup : problemsByType.entrySet()) {
+      reportBuilder.append(String.format("%n[%s]%n", typeGroup.getKey()));
+      for (Map.Entry<Content, List<String>> problem : typeGroup.getValue()) {
+        Content content = problem.getKey();
+        List<String> errors = problem.getValue();
+
+        reportBuilder.append(String.format("%n  %d. %s%n", problemIndex, content.getCanonicalSourceFile()));
+        if (content.getId() != null) {
+          reportBuilder.append(String.format("     ID: %s%n", content.getId()));
+        }
+        if (content.getTitle() != null) {
+          reportBuilder.append(String.format("     Title: %s%n", content.getTitle()));
+        }
+        reportBuilder.append(String.format("     Type: %s%n", content.getType()));
+        reportBuilder.append(String.format("     Published: %s%n", content.getPublished()));
+        reportBuilder.append("     Issues:\n");
+
+        for (String error : errors) {
+          reportBuilder.append(String.format("       • %s%n", error));
+        }
+
+        problemIndex++;
+      }
+    }
+
+    // Summary by type
+    reportBuilder.append("\n").append("-".repeat(100)).append("\n");
+    reportBuilder.append("SUMMARY BY ERROR TYPE:\n");
+    reportBuilder.append("-".repeat(100)).append("\n");
+
+    for (Map.Entry<String, List<Map.Entry<Content, List<String>>>> typeGroup : problemsByType.entrySet()) {
+      int totalIssues = typeGroup.getValue().stream()
+          .mapToInt(e -> e.getValue().size())
+          .sum();
+      reportBuilder.append(String.format("  %-30s: %3d files, %3d total issues%n",
+          typeGroup.getKey(), typeGroup.getValue().size(), totalIssues));
+    }
+
+    reportBuilder.append("-".repeat(100)).append("\n\n");
+
+    // Log the report
+    log.warn(reportBuilder.toString());
+  }
+
+  /**
+   * Group problems by error type for organized reporting.
+   *
+   * @param problems the list of content with problems
+   * @return a map of error type to list of problems
+   */
+  private Map<String, List<Map.Entry<Content, List<String>>>> groupProblems(
+      final List<Map.Entry<Content, List<String>>> problems) {
+    Map<String, List<Map.Entry<Content, List<String>>>> grouped = new LinkedHashMap<>();
+
+    for (Map.Entry<Content, List<String>> problem : problems) {
+      grouped.computeIfAbsent("Validation Failures", k -> new ArrayList<>()).add(problem);
+    }
+
+    return grouped;
   }
 }
