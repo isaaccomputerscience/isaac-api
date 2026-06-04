@@ -1320,41 +1320,30 @@ public class ContentIndexer {
       return;
     }
 
-    // Build report
-    StringBuilder reportBuilder = new StringBuilder();
-    reportBuilder.append("\n");
-    reportBuilder.append("=".repeat(100)).append("\n");
-    reportBuilder.append(CONTENT_LOG_PREFIX).append("INDEXING FAILURE REPORT\n");
-    reportBuilder.append("=".repeat(100)).append("\n");
-    reportBuilder.append(String.format("Version: %s%n", sanitiseInternalLogValue(version)));
-    reportBuilder.append(String.format("Successfully Indexed: %d items%n", contentCache.size()));
-    reportBuilder.append(String.format("Items with Problems: %d items%n", realProblems.size()));
-    reportBuilder.append("-".repeat(100)).append("\n\n");
+    // Emit the report as individual single-line log events (each prefixed with CONTENT_LOG_PREFIX) so
+    // that CloudWatch renders each line as its own readable, searchable entry rather than one large
+    // multi-line blob with escaped newlines.
+    log.warn(CONTENT_LOG_PREFIX + "===== INDEXING FAILURE REPORT START =====");
+    log.warn(CONTENT_LOG_PREFIX + "Version: {}", sanitiseInternalLogValue(version));
+    log.warn(CONTENT_LOG_PREFIX + "Successfully indexed: {} items", contentCache.size());
+    log.warn(CONTENT_LOG_PREFIX + "Items with problems: {} items", realProblems.size());
 
     // Group problems by error type and file
     Map<String, List<Map.Entry<Content, List<String>>>> problemsByType = groupProblems(realProblems);
 
-    // Report each problem with details
+    // Report each problem with details, one log event per line
     int problemIndex = 1;
     for (Map.Entry<String, List<Map.Entry<Content, List<String>>>> typeGroup : problemsByType.entrySet()) {
-      reportBuilder.append(String.format("%n[%s]%n", typeGroup.getKey()));
+      log.warn(CONTENT_LOG_PREFIX + "[{}]", typeGroup.getKey());
       for (Map.Entry<Content, List<String>> problem : typeGroup.getValue()) {
         Content content = problem.getKey();
-        List<String> errors = problem.getValue();
 
-        reportBuilder.append(String.format("%n  %d. %s%n", problemIndex, content.getCanonicalSourceFile()));
-        if (content.getId() != null) {
-          reportBuilder.append(String.format("     ID: %s%n", content.getId()));
-        }
-        if (content.getTitle() != null) {
-          reportBuilder.append(String.format("     Title: %s%n", content.getTitle()));
-        }
-        reportBuilder.append(String.format("     Type: %s%n", content.getType()));
-        reportBuilder.append(String.format("     Published: %s%n", content.getPublished()));
-        reportBuilder.append("     Issues:\n");
+        log.warn(CONTENT_LOG_PREFIX + "{}. {} | id={} | title={} | type={} | published={}",
+            problemIndex, content.getCanonicalSourceFile(), content.getId(), content.getTitle(),
+            content.getType(), content.getPublished());
 
-        for (String error : errors) {
-          reportBuilder.append(String.format("       • %s%n", error));
+        for (String error : problem.getValue()) {
+          log.warn(CONTENT_LOG_PREFIX + "    - {}", error);
         }
 
         problemIndex++;
@@ -1362,22 +1351,16 @@ public class ContentIndexer {
     }
 
     // Summary by type
-    reportBuilder.append("\n").append("-".repeat(100)).append("\n");
-    reportBuilder.append("SUMMARY BY ERROR TYPE:\n");
-    reportBuilder.append("-".repeat(100)).append("\n");
-
+    log.warn(CONTENT_LOG_PREFIX + "SUMMARY BY ERROR TYPE:");
     for (Map.Entry<String, List<Map.Entry<Content, List<String>>>> typeGroup : problemsByType.entrySet()) {
       int totalIssues = typeGroup.getValue().stream()
           .mapToInt(e -> e.getValue().size())
           .sum();
-      reportBuilder.append(String.format("  %-30s: %3d files, %3d total issues%n",
-          typeGroup.getKey(), typeGroup.getValue().size(), totalIssues));
+      log.warn(CONTENT_LOG_PREFIX + "  {}: {} files, {} total issues",
+          typeGroup.getKey(), typeGroup.getValue().size(), totalIssues);
     }
 
-    reportBuilder.append("-".repeat(100)).append("\n\n");
-
-    // Log the report
-    log.warn(reportBuilder.toString());
+    log.warn(CONTENT_LOG_PREFIX + "===== INDEXING FAILURE REPORT END =====");
   }
 
   /**
