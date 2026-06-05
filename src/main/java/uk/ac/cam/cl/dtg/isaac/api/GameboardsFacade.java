@@ -529,6 +529,16 @@ public class GameboardsFacade extends AbstractIsaacFacade {
           e1);
       log.error(error.getErrorMessage(), e1);
       return error.toResponse();
+    } catch (RuntimeException e) {
+      // Catch-all so an unexpected error (e.g. malformed content/data for a single board) is logged with full
+      // context here rather than only surfacing as an opaque "unhandled error" id from the generic mapper.
+      String message = String.format(
+          "GAMEBOARD: Unexpected error building my-boards for user %s "
+              + "(start_index=%s, limit=%s, sort=%s, show_only=%s)",
+          currentUser.getId(), startIndex, limit, sortInstructions, showCriteria);
+      log.error(message, e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
+          "Error whilst trying to access your gameboards.").toResponse();
     }
 
     getLogManager().logEvent(

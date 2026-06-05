@@ -21,24 +21,33 @@ import static org.easymock.EasyMock.anyLong;
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.easymock.Capture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dao.GameboardPersistenceManager;
+import uk.ac.cam.cl.dtg.isaac.dos.LightweightQuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.GameFilter;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardItem;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardListDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuestionPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
@@ -181,5 +190,48 @@ class GameManagerTest {
     assertNotNull(tagsFilter);
     assertEquals(Constants.BooleanOperator.NOT, tagsFilter.getOperator());
     assertEquals(Collections.singletonList("regression_test"), tagsFilter.getValues());
+  }
+
+  @Test
+  void getUsersGameboards_doesNotThrowWhenQuestionIdResolvesToNonQuestionContent() throws Exception {
+    // Regression test: a saved gameboard can reference an id which - e.g. after a content reindex - no longer
+    // resolves to an IsaacQuestionPageDTO. The augmentation code used to do an unchecked cast which threw a
+    // ClassCastException and 500'd the whole my-boards request. It should now treat that id as an unavailable
+    // question and still return the board.
+    RegisteredUserDTO user = new RegisteredUserDTO();
+    user.setId(123L);
+
+    GameboardItem brokenItem = new GameboardItem();
+    brokenItem.setId("q1");
+
+    GameboardDTO board = new GameboardDTO();
+    board.setId("board-1");
+    board.setContents(new ArrayList<>(List.of(brokenItem)));
+    board.setCreationDate(Instant.now());
+    board.setLastVisited(Instant.now());
+
+    List<GameboardDTO> boards = new ArrayList<>(List.of(board));
+
+    expect(dummyGameboardPersistenceManager.getGameboardsByUserId(user)).andReturn(boards);
+
+    Map<String, Map<String, List<LightweightQuestionValidationResponse>>> noAttempts = new HashMap<>();
+    expect(dummyQuestionManager.getMatchingQuestionAttempts(eq(user), anyObject())).andReturn(noAttempts);
+
+    // The id resolves to a plain ContentDTO rather than an IsaacQuestionPageDTO - the previous bug trigger.
+    ContentDTO notAQuestionPage = new ContentDTO();
+    notAQuestionPage.setId("q1");
+    expect(dummyContentManager.getContentById("q1")).andStubReturn(notAQuestionPage);
+
+    expect(dummyGameboardPersistenceManager.augmentGameboardItems(anyObject())).andStubReturn(boards);
+
+    replay(dummyContentManager, dummyGameboardPersistenceManager, dummyQuestionManager);
+
+    // Act - should not throw
+    GameboardListDTO result =
+        gameManager.getUsersGameboards(user, 0, null, null, null);
+
+    // Assert - the board is still returned despite the unresolvable question
+    assertNotNull(result);
+    assertEquals(1, result.getResults().size());
   }
 }
