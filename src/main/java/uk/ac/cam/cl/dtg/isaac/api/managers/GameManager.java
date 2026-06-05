@@ -61,6 +61,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.commons.collections4.comparators.ComparatorChain;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -1197,17 +1198,15 @@ public class GameManager {
 
     // NOTE: getContentById returns the base ContentDTO; the id stored on a gameboard is expected to resolve to an
     // IsaacQuestionPageDTO. If a content reindex retypes or replaces that id (or the id collides with non-question
-    // content) the cast below would throw an uncaught ClassCastException and 500 the whole my-boards request. Guard
-    // it and treat a wrong/missing type as an unavailable question (handled gracefully by the caller).
+    // content) the cast below would throw an uncaught ClassCastException and return 500.
     ContentDTO contentForQuestionPage = this.contentManager.getContentById(questionPageId);
-    if (!(contentForQuestionPage instanceof IsaacQuestionPageDTO)) {
+    if (!(contentForQuestionPage instanceof IsaacQuestionPageDTO questionPage)) {
       String actualType = contentForQuestionPage == null ? "null" : contentForQuestionPage.getClass().getSimpleName();
       log.warn("GAMEBOARD: question page id '{}' did not resolve to an IsaacQuestionPageDTO (was '{}'). "
           + "Treating it as an unavailable question.", questionPageId, actualType);
       throw new ResourceNotFoundException(String.format(
           "Content id '%s' is not an IsaacQuestionPageDTO (was %s)", questionPageId, actualType));
     }
-    IsaacQuestionPageDTO questionPage = (IsaacQuestionPageDTO) contentForQuestionPage;
     // get all question parts in the question page: depends on each question
     // having an id that starts with the question page id.
     Collection<QuestionDTO> listOfQuestionParts = getAllMarkableQuestionPartsDFSOrder(questionPage);
@@ -1220,14 +1219,10 @@ public class GameManager {
         if (questionPartAttempts != null) {
           // Go through the attempts in reverse chronological order for this question part to determine if
           // there is a correct answer somewhere.
-          boolean foundCorrectForThisQuestion = false;
-          for (int i = questionPartAttempts.size() - 1; i >= 0; i--) {
-            if (questionPartAttempts.get(i).isCorrect() != null
-                && questionPartAttempts.get(i).isCorrect()) {
-              foundCorrectForThisQuestion = true;
-              break;
-            }
-          }
+          boolean foundCorrectForThisQuestion =
+              IntStream.iterate(questionPartAttempts.size() - 1, i -> i >= 0, i -> i - 1)
+                  .anyMatch(i -> questionPartAttempts.get(i).isCorrect() != null
+                      && questionPartAttempts.get(i).isCorrect());
           if (foundCorrectForThisQuestion) {
             questionPartStates.add(QuestionPartState.CORRECT);
             questionPartsCorrect++;
@@ -1246,7 +1241,7 @@ public class GameManager {
           .map(questionPart -> QuestionPartState.NOT_ATTEMPTED).collect(Collectors.toList());
     }
 
-    // Get the pass mark for the question page (questionPage is guaranteed non-null by the instanceof guard above).
+    // Get the pass mark for the question page (already checked for null above).
     float passMark = questionPage.getPassMark() != null ? questionPage.getPassMark() : DEFAULT_QUESTION_PASS_MARK;
     gameItem.setPassMark(passMark);
     gameItem.setQuestionPartsCorrect(questionPartsCorrect);

@@ -194,10 +194,6 @@ class GameManagerTest {
 
   @Test
   void getUsersGameboards_doesNotThrowWhenQuestionIdResolvesToNonQuestionContent() throws Exception {
-    // Regression test: a saved gameboard can reference an id which - e.g. after a content reindex - no longer
-    // resolves to an IsaacQuestionPageDTO. The augmentation code used to do an unchecked cast which threw a
-    // ClassCastException and 500'd the whole my-boards request. It should now treat that id as an unavailable
-    // question and still return the board.
     RegisteredUserDTO user = new RegisteredUserDTO();
     user.setId(123L);
 
@@ -217,7 +213,6 @@ class GameManagerTest {
     Map<String, Map<String, List<LightweightQuestionValidationResponse>>> noAttempts = new HashMap<>();
     expect(dummyQuestionManager.getMatchingQuestionAttempts(eq(user), anyObject())).andReturn(noAttempts);
 
-    // The id resolves to a plain ContentDTO rather than an IsaacQuestionPageDTO - the previous bug trigger.
     ContentDTO notAQuestionPage = new ContentDTO();
     notAQuestionPage.setId("q1");
     expect(dummyContentManager.getContentById("q1")).andStubReturn(notAQuestionPage);
@@ -226,11 +221,9 @@ class GameManagerTest {
 
     replay(dummyContentManager, dummyGameboardPersistenceManager, dummyQuestionManager);
 
-    // Act - should not throw
     GameboardListDTO result =
         gameManager.getUsersGameboards(user, 0, null, null, null);
 
-    // Assert - the board is still returned despite the unresolvable question
     assertNotNull(result);
     assertEquals(1, result.getResults().size());
   }
