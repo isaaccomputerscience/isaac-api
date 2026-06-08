@@ -61,6 +61,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.commons.collections4.comparators.ComparatorChain;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -633,12 +634,8 @@ public class GameManager {
     }
 
     ComparatorChain<GameboardDTO> comparatorForSorting = new ComparatorChain<GameboardDTO>();
-    Comparator<GameboardDTO> defaultComparator = new Comparator<GameboardDTO>() {
-      @Override
-      public int compare(final GameboardDTO o1, final GameboardDTO o2) {
-        return o1.getLastVisited().compareTo(o2.getLastVisited());
-      }
-    };
+    Comparator<GameboardDTO> defaultComparator =
+        Comparator.comparing(GameboardDTO::getLastVisited, Comparator.nullsLast(Comparator.naturalOrder()));
 
     // assume we want reverse date order for visited date for now.
     if (null == sortInstructions || sortInstructions.isEmpty()) {
@@ -653,9 +650,11 @@ public class GameManager {
         }
 
         if (sortInstruction.getKey().equals(CREATED_DATE_FIELDNAME)) {
-          comparatorForSorting.addComparator(Comparator.comparing(GameboardDTO::getCreationDate), reverseOrder);
+          comparatorForSorting.addComparator(Comparator.comparing(GameboardDTO::getCreationDate,
+              Comparator.nullsLast(Comparator.naturalOrder())), reverseOrder);
         } else if (sortInstruction.getKey().equals(VISITED_DATE_FIELDNAME)) {
-          comparatorForSorting.addComparator(Comparator.comparing(GameboardDTO::getLastVisited), reverseOrder);
+          comparatorForSorting.addComparator(Comparator.comparing(GameboardDTO::getLastVisited,
+              Comparator.nullsLast(Comparator.naturalOrder())), reverseOrder);
         } else if (sortInstruction.getKey().equals(TITLE_FIELDNAME)) {
           comparatorForSorting.addComparator((o1, o2) -> {
             if (o1.getTitle() == null && o2.getTitle() == null) {
@@ -928,10 +927,9 @@ public class GameManager {
       try {
         this.augmentGameItemWithAttemptInformation(gameItem, questionAttemptsFromUser);
       } catch (ResourceNotFoundException e) {
-        log.info(String.format(
-            "The gameboard '%s' references an unavailable question '%s'"
-                + " - treating it as if it never existed for marking!",
-            gameboardDTO.getId(), gameItem.getId()));
+        log.warn("GAMEBOARD: gameboard '{}' references an unavailable question '{}' "
+                + "- treating it as if it never existed for marking! Reason: {}",
+            gameboardDTO.getId(), gameItem.getId(), e.getMessage());
         continue;
       }
 
@@ -1198,7 +1196,17 @@ public class GameManager {
     int questionPartsNotAttempted = 0;
     String questionPageId = gameItem.getId();
 
-    IsaacQuestionPageDTO questionPage = (IsaacQuestionPageDTO) this.contentManager.getContentById(questionPageId);
+    // NOTE: getContentById returns the base ContentDTO; the id stored on a gameboard is expected to resolve to an
+    // IsaacQuestionPageDTO. If a content reindex retypes or replaces that id (or the id collides with non-question
+    // content) the cast below would throw an uncaught ClassCastException and return 500.
+    ContentDTO contentForQuestionPage = this.contentManager.getContentById(questionPageId);
+    if (!(contentForQuestionPage instanceof IsaacQuestionPageDTO questionPage)) {
+      String actualType = contentForQuestionPage == null ? "null" : contentForQuestionPage.getClass().getSimpleName();
+      log.warn("GAMEBOARD: question page id '{}' did not resolve to an IsaacQuestionPageDTO (was '{}'). "
+          + "Treating it as an unavailable question.", questionPageId, actualType);
+      throw new ResourceNotFoundException(String.format(
+          "Content id '%s' is not an IsaacQuestionPageDTO (was %s)", questionPageId, actualType));
+    }
     // get all question parts in the question page: depends on each question
     // having an id that starts with the question page id.
     Collection<QuestionDTO> listOfQuestionParts = getAllMarkableQuestionPartsDFSOrder(questionPage);
@@ -1211,14 +1219,10 @@ public class GameManager {
         if (questionPartAttempts != null) {
           // Go through the attempts in reverse chronological order for this question part to determine if
           // there is a correct answer somewhere.
-          boolean foundCorrectForThisQuestion = false;
-          for (int i = questionPartAttempts.size() - 1; i >= 0; i--) {
-            if (questionPartAttempts.get(i).isCorrect() != null
-                && questionPartAttempts.get(i).isCorrect()) {
-              foundCorrectForThisQuestion = true;
-              break;
-            }
-          }
+          boolean foundCorrectForThisQuestion =
+              IntStream.iterate(questionPartAttempts.size() - 1, i -> i >= 0, i -> i - 1)
+                  .anyMatch(i -> questionPartAttempts.get(i).isCorrect() != null
+                      && questionPartAttempts.get(i).isCorrect());
           if (foundCorrectForThisQuestion) {
             questionPartStates.add(QuestionPartState.CORRECT);
             questionPartsCorrect++;
@@ -1237,11 +1241,7 @@ public class GameManager {
           .map(questionPart -> QuestionPartState.NOT_ATTEMPTED).collect(Collectors.toList());
     }
 
-    // Get the pass mark for the question page
-    if (questionPage == null) {
-      throw new ResourceNotFoundException(String.format("Unable to locate the question: %s for augmenting",
-          questionPageId));
-    }
+    // Get the pass mark for the question page (already checked for null above).
     float passMark = questionPage.getPassMark() != null ? questionPage.getPassMark() : DEFAULT_QUESTION_PASS_MARK;
     gameItem.setPassMark(passMark);
     gameItem.setQuestionPartsCorrect(questionPartsCorrect);

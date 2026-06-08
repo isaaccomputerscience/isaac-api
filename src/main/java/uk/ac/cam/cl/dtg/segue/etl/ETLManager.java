@@ -78,9 +78,9 @@ class ETLManager {
       try {
         this.setNamedVersion(entry.getKey(), entry.getValue());
       } catch (VersionLockedException e) {
-        log.warn("Could not index new version, lock is already held by another thread.");
+        log.warn(CONTENT_LOG_PREFIX + "Could not index new version, lock is already held by another thread.");
       } catch (Exception e) {
-        log.error("Indexing version {} failed.", entry.getKey(), e);
+        log.error(CONTENT_LOG_PREFIX + "Indexing version {} failed.", entry.getKey(), e);
       }
     }
 

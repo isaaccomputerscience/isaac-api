@@ -21,24 +21,32 @@ import static org.easymock.EasyMock.anyLong;
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import org.easymock.Capture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dao.GameboardPersistenceManager;
+import uk.ac.cam.cl.dtg.isaac.dos.LightweightQuestionValidationResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.GameFilter;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardItem;
+import uk.ac.cam.cl.dtg.isaac.dto.GameboardListDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacQuestionPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
 import uk.ac.cam.cl.dtg.isaac.mappers.ContentMapper;
 import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.api.managers.QuestionManager;
@@ -46,10 +54,10 @@ import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager.BooleanSearchClause;
 
+@SuppressWarnings("java:S8692")
 class GameManagerTest {
   private GitContentManager dummyContentManager;
   private GameboardPersistenceManager dummyGameboardPersistenceManager;
-  private ContentMapper dummyMapper;
   private QuestionManager dummyQuestionManager;
   private GameManager gameManager;
 
@@ -57,12 +65,12 @@ class GameManagerTest {
   public void setUp() {
     this.dummyContentManager = createMock(GitContentManager.class);
     this.dummyGameboardPersistenceManager = createMock(GameboardPersistenceManager.class);
-    this.dummyMapper = createMock(ContentMapper.class);
+    ContentMapper dummyMapper = createMock(ContentMapper.class);
     this.dummyQuestionManager = createMock(QuestionManager.class);
     this.gameManager = new GameManager(
         this.dummyContentManager,
         this.dummyGameboardPersistenceManager,
-        this.dummyMapper,
+        dummyMapper,
         this.dummyQuestionManager
     );
   }
@@ -88,7 +96,7 @@ class GameManagerTest {
     // check that one of the filters sent to GitContentManager was the deprecated question exclusion filter
     List<BooleanSearchClause> filters = capturedFilters.getValues().get(0);
     BooleanSearchClause deprecatedFilter = filters.stream()
-        .filter(f -> Objects.equals(f.getField(), "deprecated")).collect(Collectors.toList()).get(0);
+        .filter(f -> Objects.equals(f.getField(), "deprecated")).toList().get(0);
 
     assertNotNull(deprecatedFilter);
     assertEquals(Constants.BooleanOperator.NOT, deprecatedFilter.getOperator());
@@ -149,7 +157,7 @@ class GameManagerTest {
     // check that one of the filters sent to GitContentManager was the deprecated question exclusion filter
     List<BooleanSearchClause> filters = capturedFilters.getValues().get(0);
     BooleanSearchClause deprecatedFilter = filters.stream()
-        .filter(f -> Objects.equals(f.getField(), "deprecated")).collect(Collectors.toList()).get(0);
+        .filter(f -> Objects.equals(f.getField(), "deprecated")).toList().get(0);
 
     assertNotNull(deprecatedFilter);
     assertEquals(Constants.BooleanOperator.NOT, deprecatedFilter.getOperator());
@@ -181,5 +189,41 @@ class GameManagerTest {
     assertNotNull(tagsFilter);
     assertEquals(Constants.BooleanOperator.NOT, tagsFilter.getOperator());
     assertEquals(Collections.singletonList("regression_test"), tagsFilter.getValues());
+  }
+
+  @Test
+  void getUsersGameboards_doesNotThrowWhenQuestionIdResolvesToNonQuestionContent() throws Exception {
+    RegisteredUserDTO user = new RegisteredUserDTO();
+    user.setId(123L);
+
+    GameboardItem brokenItem = new GameboardItem();
+    brokenItem.setId("q1");
+
+    GameboardDTO board = new GameboardDTO();
+    board.setId("board-1");
+    board.setContents(new ArrayList<>(List.of(brokenItem)));
+    board.setCreationDate(Instant.now());
+    board.setLastVisited(Instant.now());
+
+    List<GameboardDTO> boards = new ArrayList<>(List.of(board));
+
+    expect(dummyGameboardPersistenceManager.getGameboardsByUserId(user)).andReturn(boards);
+
+    Map<String, Map<String, List<LightweightQuestionValidationResponse>>> noAttempts = new HashMap<>();
+    expect(dummyQuestionManager.getMatchingQuestionAttempts(eq(user), anyObject())).andReturn(noAttempts);
+
+    ContentDTO notAQuestionPage = new ContentDTO();
+    notAQuestionPage.setId("q1");
+    expect(dummyContentManager.getContentById("q1")).andStubReturn(notAQuestionPage);
+
+    expect(dummyGameboardPersistenceManager.augmentGameboardItems(anyObject())).andStubReturn(boards);
+
+    replay(dummyContentManager, dummyGameboardPersistenceManager, dummyQuestionManager);
+
+    GameboardListDTO result =
+        gameManager.getUsersGameboards(user, 0, null, null, null);
+
+    assertNotNull(result);
+    assertEquals(1, result.getResults().size());
   }
 }

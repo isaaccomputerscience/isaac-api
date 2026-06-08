@@ -437,6 +437,13 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "List all gameboards linked to the current user.")
+  private String sanitiseForLog(final String input) {
+    if (input == null) {
+      return "null";
+    }
+    return input.replace('\r', '_').replace('\n', '_');
+  }
+
   public final Response getGameboardsByCurrentUser(@Context final HttpServletRequest request,
                                                    @QueryParam("start_index") final String startIndex,
                                                    @QueryParam("limit") final String limit,
@@ -529,6 +536,21 @@ public class GameboardsFacade extends AbstractIsaacFacade {
           e1);
       log.error(error.getErrorMessage(), e1);
       return error.toResponse();
+    } catch (RuntimeException e) {
+      // Catch-all so an unexpected error (e.g. malformed content/data for a single board) is logged with full
+      // context here rather than only surfacing as an opaque "unhandled error" id from the generic mapper.
+      String safeStartIndex = sanitiseForLog(startIndex);
+      String safeLimit = sanitiseForLog(limit);
+      String safeSortInstructions = sanitiseForLog(sortInstructions);
+      String safeShowCriteria = sanitiseForLog(showCriteria);
+
+      String message = String.format(
+          "GAMEBOARD: Unexpected error building my-boards for user %s "
+              + "(start_index=%s, limit=%s, sort=%s, show_only=%s)",
+          currentUser.getId(), safeStartIndex, safeLimit, safeSortInstructions, safeShowCriteria);
+      log.error(message, e);
+      return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
+          "Error whilst trying to access your gameboards.").toResponse();
     }
 
     getLogManager().logEvent(
