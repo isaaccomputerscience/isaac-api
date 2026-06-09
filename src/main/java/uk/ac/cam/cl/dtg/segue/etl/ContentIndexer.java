@@ -448,12 +448,6 @@ public class ContentIndexer {
     }
 
     augmentMediaFieldsViaReflection(content, canonicalSourceFile);
-    // Re-key this node to its fully-qualified id BEFORE generating an id for id-less media.
-    // An id-less figure has newParentId == bare parentId (no suffix added). If augmentMediaContent
-    // assigns it a generated id first, updateContentIdentifier's "id != null" guard then passes and
-    // clobbers that id with the bare parent id - colliding with the parent page's own id and pushing
-    // the real page out of the index (issue #869). Running the re-key first leaves id-less media null
-    // here (guard skips it), so augmentMediaContent can give it a unique id that survives.
     updateContentIdentifier(content, newParentId, parentPublished);
     augmentMediaContent(content, canonicalSourceFile, parentId);
 
