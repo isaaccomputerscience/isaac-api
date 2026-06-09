@@ -380,10 +380,10 @@ public class ContentIndexer {
     }
 
     log.info(CONTENT_LOG_PREFIX + "Resource with duplicate ID ({}) detected in cache. Skipping {}",
-        parentContent.getId(), treeWalkPath);
+        flattenedContent.getId(), treeWalkPath);
     this.registerContentProblem(flattenedContent, String.format(
             "Index failure - Duplicate ID (%s) found in files (%s) and (%s): only one will be available.",
-            parentContent.getId(),
+            flattenedContent.getId(),
             treeWalkPath,
             context.contentCache.get(flattenedContent.getId()).getCanonicalSourceFile()),
         context.indexProblemCache);
@@ -448,8 +448,14 @@ public class ContentIndexer {
     }
 
     augmentMediaFieldsViaReflection(content, canonicalSourceFile);
-    augmentMediaContent(content, canonicalSourceFile, parentId);
+    // Re-key this node to its fully-qualified id BEFORE generating an id for id-less media.
+    // An id-less figure has newParentId == bare parentId (no suffix added). If augmentMediaContent
+    // assigns it a generated id first, updateContentIdentifier's "id != null" guard then passes and
+    // clobbers that id with the bare parent id - colliding with the parent page's own id and pushing
+    // the real page out of the index (issue #869). Running the re-key first leaves id-less media null
+    // here (guard skips it), so augmentMediaContent can give it a unique id that survives.
     updateContentIdentifier(content, newParentId, parentPublished);
+    augmentMediaContent(content, canonicalSourceFile, parentId);
 
     return content;
   }
