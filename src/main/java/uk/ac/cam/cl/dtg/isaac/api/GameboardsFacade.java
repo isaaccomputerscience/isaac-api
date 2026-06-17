@@ -437,13 +437,6 @@ public class GameboardsFacade extends AbstractIsaacFacade {
   @Produces(MediaType.APPLICATION_JSON)
   @GZIP
   @Operation(summary = "List all gameboards linked to the current user.")
-  private String sanitiseForLog(final String input) {
-    if (input == null) {
-      return "null";
-    }
-    return input.replace('\r', '_').replace('\n', '_');
-  }
-
   public final Response getGameboardsByCurrentUser(@Context final HttpServletRequest request,
                                                    @QueryParam("start_index") final String startIndex,
                                                    @QueryParam("limit") final String limit,
@@ -563,6 +556,13 @@ public class GameboardsFacade extends AbstractIsaacFacade {
             .put("inProgressTotal", gameboards.getTotalInProgress()).build());
 
     return Response.ok(gameboards).cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+  }
+
+  private String sanitiseForLog(final String input) {
+    if (input == null) {
+      return "null";
+    }
+    return input.replace('\r', '_').replace('\n', '_');
   }
 
   /**

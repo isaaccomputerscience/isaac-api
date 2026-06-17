@@ -380,10 +380,10 @@ public class ContentIndexer {
     }
 
     log.info(CONTENT_LOG_PREFIX + "Resource with duplicate ID ({}) detected in cache. Skipping {}",
-        parentContent.getId(), treeWalkPath);
+        flattenedContent.getId(), treeWalkPath);
     this.registerContentProblem(flattenedContent, String.format(
             "Index failure - Duplicate ID (%s) found in files (%s) and (%s): only one will be available.",
-            parentContent.getId(),
+            flattenedContent.getId(),
             treeWalkPath,
             context.contentCache.get(flattenedContent.getId()).getCanonicalSourceFile()),
         context.indexProblemCache);
@@ -448,8 +448,8 @@ public class ContentIndexer {
     }
 
     augmentMediaFieldsViaReflection(content, canonicalSourceFile);
-    augmentMediaContent(content, canonicalSourceFile, parentId);
     updateContentIdentifier(content, newParentId, parentPublished);
+    augmentMediaContent(content, canonicalSourceFile, parentId);
 
     return content;
   }
