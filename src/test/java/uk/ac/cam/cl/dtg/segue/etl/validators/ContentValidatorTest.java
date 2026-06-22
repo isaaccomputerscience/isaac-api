@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
+import uk.ac.cam.cl.dtg.isaac.dos.content.Question;
 import uk.ac.cam.cl.dtg.segue.etl.ContentAugmenter;
 import uk.ac.cam.cl.dtg.segue.etl.IndexingContext;
 
@@ -123,8 +124,9 @@ class ContentValidatorTest {
     // Execute - should handle null ID gracefully
     assertDoesNotThrow(() -> validator.recordContentErrors("test-sha", context));
 
-    // Verify - null ID was detected as a problem
-    assertTrue(problems.containsKey(content));
+    // Verify - a plain id-less content block is NOT flagged (most content legitimately has no ID; the
+    // structural ID gate lives in ContentGitLoader). The only entry added is the "no errors" placeholder.
+    assertFalse(problems.containsKey(content));
   }
 
   @Test
@@ -132,10 +134,12 @@ class ContentValidatorTest {
     ContentAugmenter augmenter = new ContentAugmenter();
     ContentValidator validator = new ContentValidator(null, augmenter);
 
-    // Create a question without an ID (will trigger validation error)
-    Content question = new Content(null, "question", "Question: ", "test", "test", "test", "test", "test",
-        new LinkedList<>(), "test", "test", new LinkedList<>(), false, false, new HashSet<>(), 1);
-    question.setType("IsaacQuestion");
+    // A Question without an ID must be flagged by QuestionContentValidator. Use a real Question instance,
+    // not a base Content, so the instanceof check in the validator matches.
+    Question question = new Question();
+    question.setType("question");
+    question.setTitle("Question: ");
+    question.setId(null);
 
     Map<String, Content> cache = new HashMap<>();
     cache.put("question-key", question);
@@ -147,7 +151,7 @@ class ContentValidatorTest {
     // Execute
     assertDoesNotThrow(() -> validator.recordContentErrors("test-sha", context));
 
-    // Verify - null ID problem was registered
+    // Verify - missing-ID problem was registered against the question
     assertTrue(problems.containsKey(question));
     assertFalse(problems.get(question).isEmpty());
   }

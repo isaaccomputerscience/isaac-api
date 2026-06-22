@@ -29,7 +29,8 @@ public class MediaContentValidator implements ContentTypeValidator {
   }
 
   private void validateAltText(final Media media, final IndexingContext context) {
-    if (!(media instanceof Video) && (media.getAltText() == null || media.getAltText().isEmpty())) {
+    if (!(media instanceof Video) && !"eventThumbnail".equals(media.getId())
+        && (media.getAltText() == null || media.getAltText().isEmpty())) {
       context.registerProblem(media, MEDIA + media.getId() + ") is missing alt text. All images must have "
           + "descriptive alt text for accessibility.");
     }

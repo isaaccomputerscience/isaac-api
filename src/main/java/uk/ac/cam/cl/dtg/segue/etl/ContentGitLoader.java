@@ -54,8 +54,17 @@ public class ContentGitLoader {
    * @param context indexing context containing cache and related collections
    */
   public synchronized void buildGitContentIndex(final String version, final IndexingContext context) {
-    try (TreeWalk treeWalk = database.getTreeWalk(version, ".json")) {
-      Repository repository = database.getGitRepository();
+    if (version == null) {
+      throw new ContentIndexingException("SHA is null. Cannot index.");
+    }
+
+    try (Repository repository = database.getGitRepository();
+         TreeWalk treeWalk = database.getTreeWalk(version, ".json")) {
+      // getTreeWalk returns null when the SHA cannot be resolved; guard rather than NPE on next().
+      if (treeWalk == null) {
+        throw new ContentIndexingException(
+            "Failed to buildGitIndex - Unable to get tree walk for SHA: " + version);
+      }
       while (treeWalk.next()) {
         processJsonFile(treeWalk, repository, context);
       }
@@ -134,6 +143,12 @@ public class ContentGitLoader {
    * Indexes a content object and its children into the cache.
    */
   private void indexContentObject(final IndexingContext context, final String treeWalkPath, final Content content) {
+    // Collate the searchable text (title/value across the whole tree) onto the top-level object before
+    // caching, so the searchableContent field is populated for the site-wide body-text search.
+    StringBuilder searchableContentBuilder = new StringBuilder();
+    augmenter.collateSearchableContent(content, searchableContentBuilder);
+    content.setSearchableContent(searchableContentBuilder.toString());
+
     for (Content flattenedContent : augmenter.flattenContentObjects(content)) {
       validateAndCacheContent(flattenedContent, content, treeWalkPath, context);
     }
@@ -222,9 +237,13 @@ public class ContentGitLoader {
         if (choice instanceof Quantity quantity
             && quantity.getUnits() != null
             && !quantity.getUnits().isEmpty()) {
-          allUnits.put(quantity.getUnits(), quantity.getUnits());
+          String units = quantity.getUnits();
+          // Key on a whitespace-normalised form so units differing only by tabs/newlines/spaces collapse
+          // to a single entry (mirrors the original indexer's cleanKey behaviour).
+          String cleanKey = units.replace("\t", "").replace("\n", "").replace(" ", "");
+          allUnits.put(cleanKey, units);
           if (question.getPublished() != null && question.getPublished()) {
-            publishedUnits.put(quantity.getUnits(), quantity.getUnits());
+            publishedUnits.put(cleanKey, units);
           }
         }
       }

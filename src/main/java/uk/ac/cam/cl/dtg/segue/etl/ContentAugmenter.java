@@ -167,7 +167,9 @@ public class ContentAugmenter {
   }
 
   /**
-   * Collates all searchable text content (title, value, explanation).
+   * Collates all searchable text content (title and value), recursing through the child hierarchy so
+   * that body text is captured. The result populates {@code searchableContent}, which backs the
+   * site-wide body-text search.
    *
    * @param content the content to process
    * @param builder the StringBuilder to append to
@@ -178,11 +180,18 @@ public class ContentAugmenter {
     }
 
     if (content.getTitle() != null && !content.getTitle().isEmpty()) {
-      builder.append(content.getTitle()).append(" ");
+      builder.append(content.getTitle()).append("\n");
     }
 
     if (content.getValue() != null && !content.getValue().isEmpty()) {
-      builder.append(content.getValue()).append(" ");
+      builder.append(content.getValue()).append("\n");
+    }
+
+    if (content.getChildren() != null) {
+      content.getChildren().stream()
+          .filter(Content.class::isInstance)
+          .map(Content.class::cast)
+          .forEach(child -> this.collateSearchableContent(child, builder));
     }
   }
 

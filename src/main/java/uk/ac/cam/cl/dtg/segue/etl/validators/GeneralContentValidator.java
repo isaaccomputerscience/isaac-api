@@ -3,7 +3,6 @@ package uk.ac.cam.cl.dtg.segue.etl.validators;
 import java.util.stream.Collectors;
 import uk.ac.cam.cl.dtg.isaac.dos.content.CodeSnippet;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
-import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.etl.ContentAugmenter;
 import uk.ac.cam.cl.dtg.segue.etl.IndexingContext;
 
@@ -14,25 +13,11 @@ public class GeneralContentValidator implements ContentTypeValidator {
 
   @Override
   public void validate(final String sha, final Content content, final IndexingContext context) {
-    validateContentId(content, context);
+    // Content ID structural rules (null/empty skipped, illegal '.' chars, max length) are enforced as hard
+    // gates at cache time in ContentGitLoader#validateAndCacheContent, so they are not re-checked here.
+    // In particular, most content blocks legitimately have no ID, so flagging that would flood the report.
     validateValueWithChildren(content, context);
     validateExpandableContent(content, context);
-  }
-
-  private void validateContentId(final Content content, final IndexingContext context) {
-    if (content.getId() == null || content.getId().isEmpty()) {
-      context.registerProblem(content, "Content has no ID assigned.");
-      return;
-    }
-
-    if (content.getId().contains(".")) {
-      context.registerProblem(content, "Content ID contains invalid character '.': " + content.getId());
-    }
-
-    if (content.getId().length() > Constants.MAXIMUM_CONTENT_ID_LENGTH) {
-      context.registerProblem(content,
-          "Content ID is too long (length: " + content.getId().length() + "): " + content.getId());
-    }
   }
 
   private void validateValueWithChildren(final Content content, final IndexingContext context) {

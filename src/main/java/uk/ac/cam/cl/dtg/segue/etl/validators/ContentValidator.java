@@ -89,9 +89,22 @@ public class ContentValidator {
 
   /**
    * Validates a single content object using all registered validators.
+   *
+   * <p>Each validator is isolated: an unexpected failure on one malformed content item (or one
+   * validator) must not abort validation — and therefore indexing — of the entire version. The
+   * failure is both logged and recorded as a content problem so it surfaces in the indexing report.
    */
   private void validateContent(final String sha, final Content content, final IndexingContext context) {
-    validators.forEach(validator -> validator.validate(sha, content, context));
+    validators.forEach(validator -> {
+      try {
+        validator.validate(sha, content, context);
+      } catch (RuntimeException e) {
+        log.warn(CONTENT_LOG_PREFIX + "Validator {} failed for content in file {}: {}",
+            validator.getClass().getSimpleName(), content.getCanonicalSourceFile(), e.getMessage());
+        context.registerProblem(content, "Validation could not be completed by "
+            + validator.getClass().getSimpleName() + ". The following error occurred: " + e.getMessage());
+      }
+    });
   }
 
   /**

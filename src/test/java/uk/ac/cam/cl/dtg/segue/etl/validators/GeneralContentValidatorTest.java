@@ -32,8 +32,12 @@ class GeneralContentValidatorTest {
     assertTrue(problems.isEmpty());
   }
 
+  // Content ID structural rules (null/empty, illegal '.' chars, max length) are enforced as hard gates at
+  // cache time in ContentGitLoader#validateAndCacheContent, NOT by this validator. The validator must not
+  // flag them, in particular it must not flag the many content blocks that legitimately have no ID.
+
   @Test
-  void validate_withNullId_registersEmptyIdProblem() {
+  void validate_withNullId_registersNoIdProblem() {
     GeneralContentValidator validator = new GeneralContentValidator();
     Content content = new Content(null, "paragraph", "test", "test", "test", "test", "test", "test",
         new LinkedList<>(), "test", "test", new LinkedList<>(), false, false, new HashSet<>(), 1);
@@ -44,12 +48,11 @@ class GeneralContentValidatorTest {
 
     validator.validate("test-sha", content, context);
 
-    assertTrue(problems.containsKey(content));
+    assertTrue(problems.isEmpty());
   }
 
   @Test
-  void validate_withIdContainingDot_registersProblem() {
-    
+  void validate_withIdContainingDot_registersNoProblem() {
     GeneralContentValidator validator = new GeneralContentValidator();
     Content content = new Content("test.id", "paragraph", "test", "test", "test", "test", "test", "test",
         new LinkedList<>(), "test", "test", new LinkedList<>(), false, false, new HashSet<>(), 1);
@@ -60,11 +63,11 @@ class GeneralContentValidatorTest {
 
     validator.validate("test-sha", content, context);
 
-    assertTrue(problems.containsKey(content));
+    assertTrue(problems.isEmpty());
   }
 
   @Test
-  void validate_withIdTooLong_registersProblem() {
+  void validate_withIdTooLong_registersNoProblem() {
     GeneralContentValidator validator = new GeneralContentValidator();
     String longId = "a".repeat(600); // Exceeds MAXIMUM_CONTENT_ID_LENGTH (512)
     Content content = new Content(longId, "paragraph", "test", "test", "test", "test", "test", "test",
@@ -76,7 +79,7 @@ class GeneralContentValidatorTest {
 
     validator.validate("test-sha", content, context);
 
-    assertTrue(problems.containsKey(content));
+    assertTrue(problems.isEmpty());
   }
 
   @Test

@@ -4,6 +4,7 @@ import static com.google.common.collect.Maps.immutableEntry;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,8 +43,30 @@ public class ContentElasticSearchSubmitter {
     expungeExistingIndexes(sha);
 
     ObjectMapper objectMapper = mapperUtils.getSharedContentObjectMapper();
+    submitMetadata(sha, context, objectMapper);
     submitUnitsAndErrors(sha, context, objectMapper);
     submitContent(sha, context, objectMapper);
+  }
+
+  /**
+   * Submits the METADATA index documents (version SHA + collated tags).
+   *
+   * <p>This index is mandatory: the orchestrator's success check requires an index for every
+   * {@link Constants.ContentIndextype}, and {@code GitContentManager#getCurrentContentSHA()} and
+   * {@code getTagsList()} read the {@code general} and {@code tags} documents respectively.
+   */
+  private void submitMetadata(final String sha, final IndexingContext context, final ObjectMapper objectMapper) {
+    try {
+      es.indexObject(sha, Constants.ContentIndextype.METADATA.toString(),
+          objectMapper.writeValueAsString(Map.of("version", sha, "created", Instant.now().toString())), "general");
+      es.indexObject(sha, Constants.ContentIndextype.METADATA.toString(),
+          objectMapper.writeValueAsString(Map.of("tags", context.tagsList())), "tags");
+      log.info(CONTENT_LOG_PREFIX + "Indexed metadata with {} tags", context.tagsList().size());
+    } catch (JsonProcessingException e) {
+      log.error(CONTENT_LOG_PREFIX + "Unable to serialise version metadata or tags.", e);
+    } catch (SegueSearchException e) {
+      log.error(CONTENT_LOG_PREFIX + "Unable to index version metadata or tags.", e);
+    }
   }
 
   /**
@@ -149,10 +172,15 @@ public class ContentElasticSearchSubmitter {
     try {
       indexProblemCache.forEach((content, errors) -> {
         try {
+          // Field set must match GitContentManager#getProblemMap(), which reads
+          // canonicalSourceFile, id, title, published and errors to render the admin problem report.
           String json = objectMapper.writeValueAsString(
               java.util.Map.of(
+                  "canonicalSourceFile",
+                  content.getCanonicalSourceFile() != null ? content.getCanonicalSourceFile() : "",
                   "id", content.getId() != null ? content.getId() : "",
-                  "type", content.getType() != null ? content.getType() : "",
+                  "title", content.getTitle() != null ? content.getTitle() : "",
+                  "published", content.getPublished() != null ? content.getPublished() : "",
                   "errors", errors
               ));
           result.add(json);
