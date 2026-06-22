@@ -44,7 +44,7 @@ import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 /**
  * Created by Ian on 17/10/2016.
  */
-class ElasticSearchIndexer extends ElasticSearchProvider {
+public class ElasticSearchIndexer extends ElasticSearchProvider {
   private static final Logger log = LoggerFactory.getLogger(ElasticSearchIndexer.class);
   private final Map<String, List<String>> rawFieldsListByType = new HashMap<>();
   private final Map<String, List<String>> nestedFieldsByType = new HashMap<>();

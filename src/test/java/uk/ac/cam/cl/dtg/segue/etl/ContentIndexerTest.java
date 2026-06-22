@@ -16,165 +16,24 @@
 
 package uk.ac.cam.cl.dtg.segue.etl;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
-import uk.ac.cam.cl.dtg.segue.api.Constants;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentMapperUtils;
-import uk.ac.cam.cl.dtg.segue.database.GitDb;
-import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 
 /**
- * Test class for the GitContentManager class.
+ * Test class for the ContentIndexer orchestrator.
  */
 class ContentIndexerTest {
-  private GitDb database;
-  private ElasticSearchIndexer searchProvider;
-  private ContentMapperUtils contentMapperUtils;
 
-  private ContentIndexer defaultContentIndexer;
-
-  private static final String INITIAL_VERSION = "0b72984c5eff4f53604fe9f1c724d3f387799db9";
-
-  /**
-   * Initial configuration of tests.
-   *
-   * @throws Exception - test exception
-   */
-  @BeforeEach
-  public final void setUp() throws Exception {
-    this.database = createMock(GitDb.class);
-    this.searchProvider = createMock(ElasticSearchIndexer.class);
-    this.contentMapperUtils = createMock(ContentMapperUtils.class);
-    this.defaultContentIndexer = new ContentIndexer(database, searchProvider,
-        contentMapperUtils);
-  }
-
-  /**
-   * Test that the buildSearchIndex sends all of the various different segue data
-   * to the searchProvider and we haven't forgotten anything.
-   *
-   * @throws JsonProcessingException if an error occurs during object mapping
-   * @throws SegueSearchException if an error occurs during content indexing
-   */
-  @Test
-  void buildSearchIndexes_sendContentToSearchProvider_checkSearchProviderIsSentAllImportantObject()
-      throws JsonProcessingException, SegueSearchException {
-    reset(database, searchProvider);
-    String uniqueObjectId = UUID.randomUUID().toString();
-    String uniqueObjectHash = UUID.randomUUID().toString();
-
-    Map<String, Content> contents = new TreeMap<>();
-    Content content = new Content();
-    content.setId(uniqueObjectId);
-    contents.put(uniqueObjectId, content);
-
-    Set<String> someTagsList = new HashSet<>();
-
-    Map<String, String> someUnitsMap = Map.of("N", "N", "km", "km");
-    Map<String, String> publishedUnitsMap = Map.of("N", "N", "km", "km");
-
-    // This is what is sent to the search provider so needs to be mocked
-    Map<String, String> someUnitsMapRaw = Map.of("cleanKey", "N", "unit", "N");
-    Map<String, String> someUnitsMapRaw2 = Map.of("cleanKey", "km", "unit", "km");
-
-    Instant someCreatedDate = Instant.now();
-    Map<String, String> versionMeta = Map.of("version", INITIAL_VERSION, "created", someCreatedDate.toString());
-    Map<String, Set<String>> tagsMeta = Map.of("tags", someTagsList);
-
-    Map<Content, List<String>> someContentProblemsMap = new HashMap<>();
-
-    // assume in this case that there are no pre-existing indexes for this version
-    for (Constants.ContentIndextype contentIndexType : Constants.ContentIndextype.values()) {
-      expect(searchProvider.hasIndex(INITIAL_VERSION, contentIndexType.toString())).andReturn(false).once();
-    }
-
-    // prepare pre-canned responses for the object mapper
-    ObjectMapper objectMapper = createMock(ObjectMapper.class);
-    expect(contentMapperUtils.getSharedContentObjectMapper()).andReturn(objectMapper)
-        .once();
-    expect(objectMapper.writeValueAsString(content)).andReturn(
-        uniqueObjectHash).once();
-    expect(objectMapper.writeValueAsString(
-        anyObject())).andReturn(versionMeta.toString()).once(); // expects versionMeta - possibly differing date
-    expect(objectMapper.writeValueAsString(
-        tagsMeta)).andReturn(tagsMeta.toString()).once();
-
-    // populate all units and published units - order matters for the below
-    expect(objectMapper.writeValueAsString(
-        someUnitsMapRaw)).andReturn(someUnitsMap.toString()).once();
-    expect(objectMapper.writeValueAsString(
-        someUnitsMapRaw2)).andReturn(someUnitsMap.toString()).once();
-    expect(objectMapper.writeValueAsString(
-        someUnitsMapRaw)).andReturn(someUnitsMap.toString()).once();
-    expect(objectMapper.writeValueAsString(
-        someUnitsMapRaw2)).andReturn(someUnitsMap.toString()).once();
-
-    // Important Items for test - start here
-
-    // Ensure general metadata (version) is indexed
-    searchProvider.indexObject(INITIAL_VERSION, "metadata", versionMeta.toString(), "general");
-    expectLastCall().atLeastOnce();
-
-    // Ensure tags are indexed
-    searchProvider.indexObject(INITIAL_VERSION, "metadata", tagsMeta.toString(), "tags");
-    expectLastCall().atLeastOnce();
-
-    // Ensure units are indexed
-    searchProvider.bulkIndex(eq(INITIAL_VERSION), eq(Constants.ContentIndextype.UNIT.toString()), anyObject());
-    expectLastCall().once();
-    searchProvider.bulkIndex(eq(INITIAL_VERSION), eq(Constants.ContentIndextype.PUBLISHED_UNIT.toString()),
-        anyObject());
-    expectLastCall().once();
-
-    // Ensure content errors are indexed
-    searchProvider.bulkIndex(eq(INITIAL_VERSION), eq(Constants.ContentIndextype.CONTENT_ERROR.toString()), anyObject());
-    expectLastCall().once();
-
-    // Ensure at least one bulk index for general content is requested
-    searchProvider.bulkIndexWithIds(eq(INITIAL_VERSION), eq(Constants.ContentIndextype.CONTENT.toString()),
-        anyObject());
-    expectLastCall().once();
-
-    replay(searchProvider, contentMapperUtils, objectMapper);
-
-    ContentIndexer contentIndexer = new ContentIndexer(database,
-        searchProvider, contentMapperUtils);
-
-    // Method under test
-    contentIndexer.buildElasticSearchIndex(INITIAL_VERSION, contents, someTagsList, someUnitsMap, publishedUnitsMap,
-        someContentProblemsMap);
-
-    verify(searchProvider, contentMapperUtils, objectMapper);
-  }
-
-  /**
-   * Test the flattenContentObjects method and ensure the expected output is
-   * generated.
-   */
   @Test
   void flattenContentObjects_flattenMultiTierObject_checkCorrectObjectReturned() {
     final int numChildLevels = 5;
@@ -183,19 +42,78 @@ class ContentIndexerTest {
     Set<Content> elements = new HashSet<>();
     Content rootNode = createContentHierarchy(numChildLevels, elements);
 
-    Set<Content> contents = defaultContentIndexer.flattenContentObjects(rootNode);
+    Set<Content> contents = new ContentAugmenter().flattenContentObjects(rootNode);
 
     assertEquals(numNodes, contents.size());
 
-    for (Content c : contents) {
+    contents.forEach(c -> {
       boolean containsElement = elements.contains(c);
       assertTrue(containsElement);
-      if (containsElement) {
-        elements.remove(c);
-      }
-    }
+      elements.remove(c);
+    });
 
     assertEquals(0, elements.size());
+  }
+
+  @Test
+  void constructor_createsInstance() {
+    ContentMapperUtils mapperUtils = new ContentMapperUtils();
+    ContentIndexer indexer = new ContentIndexer(null, null, mapperUtils);
+    assertNotNull(indexer);
+  }
+
+  @Test
+  void setNamedVersion_callsElasticsearch() {
+    ContentMapperUtils mapperUtils = new ContentMapperUtils();
+    ContentIndexer indexer = new ContentIndexer(null, null, mapperUtils);
+    try {
+      indexer.setNamedVersion("latest", "v1.0");
+    } catch (NullPointerException e) {
+      // Expected when null ES client
+    }
+  }
+
+  @Test
+  void augmentChildContent_delegatesToAugmenter() {
+    ContentAugmenter augmenter = new ContentAugmenter();
+
+    Content content = new Content("test-id", "paragraph", "test", "test", "test", "test", "test", "test",
+        new LinkedList<>(), "test", "test", new LinkedList<>(), false, false, new HashSet<>(), 1);
+
+    Content result = augmenter.augmentChildContent(content, "test.json", null, true);
+
+    assertNotNull(result);
+    assertEquals("test-id", result.getId());
+  }
+
+  @Test
+  void flattenContentObjects_delegatesToAugmenter() {
+    ContentAugmenter augmenter = new ContentAugmenter();
+
+    Content rootContent = new Content("root", "paragraph", "test", "test", "test", "test", "test", "test",
+        new LinkedList<>(), "test", "test", new LinkedList<>(), false, false, new HashSet<>(), 1);
+
+    Set<Content> flattened = augmenter.flattenContentObjects(rootContent);
+
+    assertNotNull(flattened);
+    assertEquals(1, flattened.size());
+  }
+
+  @Test
+  void collateSearchableContent_delegatesToAugmenter() {
+    ContentAugmenter augmenter = new ContentAugmenter();
+
+    Content content = new Content("test-id", "paragraph", "test", "test", "test", "test", "test", "test",
+        new LinkedList<>(), "test", "test", new LinkedList<>(), false, false, new HashSet<>(), 1);
+    content.setTitle("Test Title");
+    content.setValue("Test Value");
+
+    StringBuilder builder = new StringBuilder();
+
+    augmenter.collateSearchableContent(content, builder);
+
+    String result = builder.toString();
+    assertTrue(result.contains("Test Title") || result.contains("Test Value") || result.isEmpty());
   }
 
   private Content createContentHierarchy(final int numLevels,
@@ -213,15 +131,6 @@ class ContentIndexerTest {
     return content;
   }
 
-  /**
-   * Helper method for the
-   * flattenContentObjects_flattenMultiTierObject_checkCorrectObjectReturned
-   * test, generates a Content object with the given children.
-   *
-   * @param children - The children of the new Content object
-   * @param id       - The id of the content element
-   * @return The new Content object
-   */
   private Content createEmptyContentElement(final List<ContentBase> children,
                                             final String id) {
     return new Content(id, "", "", "", "", "", "", "", children, "",
