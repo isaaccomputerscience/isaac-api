@@ -67,6 +67,15 @@ public class ContentValidator {
     ContentReferenceMap referenceMap = buildReferenceMap(flattenedSet);
     recordMissingContentProblems(referenceMap.expectedIds(), contentById, referenceMap.incomingReferences(), context);
     recordPublishedToUnpublishedReferenceProblems(referenceMap.incomingReferences(), contentById, context);
+
+    if (context.indexProblemCache().isEmpty()) {
+      // Register a no-op style error to simplify application logic by ensuring there is always a content errors
+      // index. Without at least one document the CONTENT_ERROR index is never created, so the orchestrator's
+      // allContentTypesAreIndexedForVersion verification fails and a problem-free version is wrongly rejected.
+      Content dummyContentRecord = new Content();
+      dummyContentRecord.setCanonicalSourceFile("😎");
+      context.registerProblem(dummyContentRecord, "No content errors!");
+    }
   }
 
   /**
