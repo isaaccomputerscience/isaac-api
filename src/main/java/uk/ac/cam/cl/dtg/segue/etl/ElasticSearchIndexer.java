@@ -112,6 +112,16 @@ public class ElasticSearchIndexer extends ElasticSearchProvider {
     // execute bulk request builder function
     BulkRequest bulkRequest = buildBulkRequest.apply(typedIndex);
 
+    if (bulkRequest.numberOfActions() == 0) {
+      // Nothing to index for this type — e.g. a version with no published units gives an empty
+      // PUBLISHED_UNIT bulk. Sending an empty bulk throws ActionRequestValidationException ("no requests
+      // added"), which is NOT an ElasticsearchException and so escapes uncaught, aborting the whole index
+      // (and leaving the version half-built after the pre-index expunge). Instead, just ensure the index
+      // exists so the post-index verification — which requires an index for every content type — passes.
+      ensureIndexExists(typedIndex);
+      return;
+    }
+
     try {
       // increase default timeouts
       RequestConfig requestConfig = RequestConfig.custom()
@@ -135,6 +145,24 @@ public class ElasticSearchIndexer extends ElasticSearchProvider {
       }
     } catch (ElasticsearchException | IOException e) {
       throw new SegueSearchException("Error during bulk index operation.", e);
+    }
+  }
+
+  /**
+   * Ensures an index exists, creating it empty if necessary. Used when there are no documents to bulk
+   * index for a content type, so the index is still present for the post-index verification.
+   *
+   * @param typedIndex the fully-qualified (type-suffixed) index name
+   */
+  private void ensureIndexExists(final String typedIndex) {
+    try {
+      if (!getClient().indices().exists(new GetIndexRequest(typedIndex), RequestOptions.DEFAULT)) {
+        getClient().indices().create(new CreateIndexRequest(typedIndex), RequestOptions.DEFAULT);
+        log.info("Created empty index {} (no documents to index for this type).",
+            sanitiseInternalLogValue(typedIndex));
+      }
+    } catch (ElasticsearchException | IOException e) {
+      log.error("Failed to ensure empty index {} exists", sanitiseInternalLogValue(typedIndex), e);
     }
   }
 

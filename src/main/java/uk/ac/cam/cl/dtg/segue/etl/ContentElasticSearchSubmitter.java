@@ -103,9 +103,8 @@ public class ContentElasticSearchSubmitter {
   private void submitContent(final String sha, final IndexingContext context, final ObjectMapper objectMapper) {
     try {
       List<Map.Entry<String, String>> contentToIndex = serializeContent(context.contentCache().values(), objectMapper);
-      if (contentToIndex.isEmpty()) {
-        return;
-      }
+      // Note: an empty list is fine here — bulkIndexWithIds creates the (empty) CONTENT index so the
+      // post-index verification still passes, rather than skipping it.
       es.bulkIndexWithIds(sha, Constants.ContentIndextype.CONTENT.toString(), contentToIndex);
       log.info(CONTENT_LOG_PREFIX + "Bulk content indexing completed: {} items", contentToIndex.size());
     } catch (SegueSearchException e) {
