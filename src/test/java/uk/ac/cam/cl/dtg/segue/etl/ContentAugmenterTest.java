@@ -11,6 +11,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.content.Content;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ContentBase;
+import uk.ac.cam.cl.dtg.isaac.dos.content.Image;
 
 class ContentAugmenterTest {
 
@@ -89,6 +90,42 @@ class ContentAugmenterTest {
 
     String result = builder.toString();
     assertFalse(result.isEmpty());
+  }
+
+  @Test
+  void augmentChildContent_withRelativeMediaChild_prefixesSrcExactlyOnce() {
+    // Regression: a Media child of a plain Content node must have its src prefixed exactly once.
+    // The reflection-based fixer used to also process the `children` list (declared on Content), so the
+    // src was prefixed a second time by the recursion, producing doubled paths like content/x/content/x/...
+    Image image = new Image();
+    image.setSrc("figures/diagram.svg");
+
+    List<ContentBase> children = new LinkedList<>();
+    children.add(image);
+    Content page = createEmptyContentElement(children, "page");
+
+    augmenter.augmentChildContent(page, "content/topic/sub/page.json", null, true);
+
+    assertEquals("content/topic/sub/figures/diagram.svg", image.getSrc());
+  }
+
+  @Test
+  void augmentChildContent_withNestedRelativeMediaChild_prefixesSrcExactlyOnce() {
+    // Same guarantee one level deeper, where a wrapper Content node sits between the page and the image.
+    Image image = new Image();
+    image.setSrc("figures/diagram.svg");
+
+    List<ContentBase> figureChildren = new LinkedList<>();
+    figureChildren.add(image);
+    Content figure = createEmptyContentElement(figureChildren, "figure");
+
+    List<ContentBase> pageChildren = new LinkedList<>();
+    pageChildren.add(figure);
+    Content page = createEmptyContentElement(pageChildren, "page");
+
+    augmenter.augmentChildContent(page, "content/topic/sub/page.json", null, true);
+
+    assertEquals("content/topic/sub/figures/diagram.svg", image.getSrc());
   }
 
   private Content createContentHierarchy(final int numLevels, final Set<Content> flatSet) {

@@ -1,7 +1,6 @@
 package uk.ac.cam.cl.dtg.segue.etl;
 
 import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
@@ -196,7 +195,14 @@ public class ContentAugmenter {
   }
 
   /**
-   * Augments media fields via reflection to fix paths on Media objects stored in other fields.
+   * Fixes media paths on Media held in single (non-collection) fields of this node — e.g. an event's
+   * {@code eventThumbnail} or a question's figure — which are NOT reached by the normal child recursion.
+   *
+   * <p>Collection fields (notably {@code children}, which is declared on {@link Content} and so is
+   * returned by {@code getDeclaredFields()} for plain content nodes) are deliberately skipped: every
+   * Media inside them is already path-fixed exactly once when the recursion descends into it. Fixing
+   * them here as well prefixed the src a second time, producing doubled paths like
+   * {@code content/x/content/x/figures/y.svg} and 800+ spurious "file does not exist" errors.
    *
    * @param content             the content object
    * @param canonicalSourceFile source file path
@@ -220,13 +226,10 @@ public class ContentAugmenter {
   }
 
   private void processFieldValue(final Object fieldValue, final String canonicalSourceFile) {
+    // Only single Media-typed fields. Collections (children/cards/etc.) are handled by the recursion;
+    // fixing their Media here too would double-apply fixMediaSrc. See augmentMediaFieldsViaReflection.
     if (fieldValue instanceof Media media) {
       fixMediaPath(media, canonicalSourceFile);
-    } else if (fieldValue instanceof List<?> list) {
-      list.stream()
-          .filter(Media.class::isInstance)
-          .map(Media.class::cast)
-          .forEach(media -> fixMediaPath(media, canonicalSourceFile));
     }
   }
 

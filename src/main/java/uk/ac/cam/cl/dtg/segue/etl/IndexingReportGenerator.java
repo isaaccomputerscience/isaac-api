@@ -45,9 +45,9 @@ public class IndexingReportGenerator {
     // that CloudWatch renders each line as its own readable, searchable entry rather than one large
     // multi-line blob with escaped newlines.
     log.warn(CONTENT_LOG_PREFIX + "===== INDEXING FAILURE REPORT START =====");
-    log.warn(CONTENT_LOG_PREFIX + "Version: {}", sanitiseInternalLogValue(version));
-    log.warn(CONTENT_LOG_PREFIX + "Successfully indexed: {} items", contentCache.size());
-    log.warn(CONTENT_LOG_PREFIX + "Items with problems: {} items", realProblems.size());
+    log.warn(CONTENT_LOG_PREFIX + "RESULT - Version: {}", sanitiseInternalLogValue(version));
+    log.warn(CONTENT_LOG_PREFIX + "RESULT - Successfully indexed: {} items", contentCache.size());
+    log.warn(CONTENT_LOG_PREFIX + "RESULT - Items with problems: {} items", realProblems.size());
 
     // Group problems by error type and file
     Map<String, List<Map.Entry<Content, List<String>>>> problemsByType = groupProblems(realProblems);
@@ -64,7 +64,7 @@ public class IndexingReportGenerator {
             content.getType(), content.getPublished());
 
         for (String error : problem.getValue()) {
-          log.warn(CONTENT_LOG_PREFIX + "    - {}", error);
+          log.warn(CONTENT_LOG_PREFIX + "RESULT - {}", error);
         }
 
         problemIndex++;

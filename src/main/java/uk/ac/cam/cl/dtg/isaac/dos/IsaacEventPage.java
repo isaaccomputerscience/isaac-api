@@ -19,7 +19,6 @@ package uk.ac.cam.cl.dtg.isaac.dos;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_GROUP_RESERVATION_DEFAULT_LIMIT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.List;
@@ -77,6 +76,8 @@ public class IsaacEventPage extends Content {
   private Hub hub;
 
   private String meetingUrl;
+
+  private Boolean competitionEvent;
 
   /**
    * Constructor for IsaacEventPageDTO, taking event-specific properties in addition to those from parent ContentDTO.
@@ -585,5 +586,23 @@ public class IsaacEventPage extends Content {
 
   public void setMeetingUrl(String meetingUrl) {
     this.meetingUrl = meetingUrl;
+  }
+
+  /**
+   * Gets whether this event is a competition event.
+   *
+   * @return true if this is a competition event
+   */
+  public Boolean getCompetitionEvent() {
+    return competitionEvent;
+  }
+
+  /**
+   * Sets whether this event is a competition event.
+   *
+   * @param competitionEvent whether this is a competition event
+   */
+  public void setCompetitionEvent(final Boolean competitionEvent) {
+    this.competitionEvent = competitionEvent;
   }
 }
