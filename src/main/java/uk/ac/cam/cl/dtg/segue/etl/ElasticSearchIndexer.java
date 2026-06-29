@@ -198,12 +198,9 @@ public class ElasticSearchIndexer extends ElasticSearchProvider {
       String typedIndexTarget = ElasticSearchProvider.produceTypedIndexName(indexBaseTarget, indexTypeTarget);
 
       // First, find where <alias>_previous points.
-      ImmutableMap<String, Set<AliasMetadata>> returnedPreviousAliases = null;
+      ImmutableMap<String, Set<AliasMetadata>> returnedPreviousAliases;
       try {
-        returnedPreviousAliases = ImmutableMap.copyOf(
-            getClient().indices()
-                .getAlias(new GetAliasesRequest().aliases(typedAlias + "_previous"), RequestOptions.DEFAULT)
-                .getAliases());
+        returnedPreviousAliases = getIndicesForAlias(typedAlias + "_previous");
       } catch (IOException e) {
         log.error(String.format("Failed to retrieve existing previous alias %s, not moving alias!",
             sanitiseInternalLogValue(typedAlias) + "_previous"));
@@ -221,11 +218,9 @@ public class ElasticSearchIndexer extends ElasticSearchProvider {
       }
 
       // Now find where <alias> points
-      ImmutableMap<String, Set<AliasMetadata>> returnedAliases = null;
+      ImmutableMap<String, Set<AliasMetadata>> returnedAliases;
       try {
-        returnedAliases = ImmutableMap.copyOf(
-            getClient().indices().getAlias(new GetAliasesRequest().aliases(typedAlias), RequestOptions.DEFAULT)
-                .getAliases());
+        returnedAliases = getIndicesForAlias(typedAlias);
       } catch (IOException e) {
         log.error(String.format("Failed to retrieve existing alias %s, not moving alias!",
             sanitiseInternalLogValue(typedAlias)));
@@ -287,6 +282,31 @@ public class ElasticSearchIndexer extends ElasticSearchProvider {
     log.debug("{}/{} aliases already correct, no moves needed.", alreadyCorrectCount, indexTypeTargets.size());
     this.expungeOldIndices();
     return true;
+  }
+
+  /**
+   * Returns which indices a given alias points to, tolerating the alias not existing yet.
+   *
+   * <p>The REST client raises an index_not_found {@link ElasticsearchException} (HTTP 404) when the alias
+   * has never been created — e.g. the first-ever successful index, or a freshly wiped cluster. That is not
+   * a failure: we treat it as "no such alias" and return an empty map so the caller goes on to create the
+   * alias, instead of letting the exception abort the whole indexing run. Any other status is rethrown.
+   *
+   * @param alias the (typed) alias to look up
+   * @return map of index name to alias metadata, empty if the alias does not exist
+   * @throws IOException if the search client cannot be reached
+   */
+  private ImmutableMap<String, Set<AliasMetadata>> getIndicesForAlias(final String alias) throws IOException {
+    try {
+      return ImmutableMap.copyOf(
+          getClient().indices().getAlias(new GetAliasesRequest().aliases(alias), RequestOptions.DEFAULT)
+              .getAliases());
+    } catch (ElasticsearchException e) {
+      if (e.status() != null && e.status().getStatus() == 404) {
+        return ImmutableMap.of();
+      }
+      throw e;
+    }
   }
 
   private boolean expungeOldIndices() {

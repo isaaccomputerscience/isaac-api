@@ -80,7 +80,9 @@ class ETLManager {
       } catch (VersionLockedException e) {
         log.warn(CONTENT_LOG_PREFIX + "Could not index new version, lock is already held by another thread.");
       } catch (Exception e) {
-        log.error(CONTENT_LOG_PREFIX + "Indexing version {} failed.", entry.getKey(), e);
+        // Put the exception message on the prefixed line so the cause is visible even when log queries
+        // filter by the CONTENT prefix; the trailing throwable still emits the full stack trace.
+        log.error(CONTENT_LOG_PREFIX + "Indexing version {} failed: {}", entry.getKey(), e.getMessage(), e);
       }
     }
 
