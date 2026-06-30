@@ -174,6 +174,27 @@ public class PgLogManager implements ILogManager {
   }
 
   @Override
+  public boolean userHasLoggedEventWithDetail(final String userId, final String eventType, final String detailKey,
+                                              final String detailValue) throws SegueDatabaseException {
+    String query = "SELECT 1 FROM logged_events WHERE user_id = ? AND event_type = ?"
+        + " AND event_details->>? = ? LIMIT 1;";
+    try (Connection conn = database.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(query)
+    ) {
+      pst.setString(FIELD_USER_HAS_LOGGED_EVENT_USER_ID, userId);
+      pst.setString(FIELD_USER_HAS_LOGGED_EVENT_EVENT_TYPE, eventType);
+      pst.setString(FIELD_USER_HAS_LOGGED_EVENT_DETAIL_KEY, detailKey);
+      pst.setString(FIELD_USER_HAS_LOGGED_EVENT_DETAIL_VALUE, detailValue);
+
+      try (ResultSet results = pst.executeQuery()) {
+        return results.next();
+      }
+    } catch (SQLException e) {
+      throw new SegueDatabaseException("Postgres exception: Unable to check for existing log event", e);
+    }
+  }
+
+  @Override
   public Long getLogCountByType(final String type) throws SegueDatabaseException {
     String query = "SELECT COUNT(*) AS TOTAL FROM logged_events WHERE event_type = ?";
     try (Connection conn = database.getDatabaseConnection();
@@ -212,7 +233,7 @@ public class PgLogManager implements ILogManager {
           usersIdsList);
 
       if (!result.containsKey(typeOfInterest)) {
-        result.put(typeOfInterest, new HashMap<LocalDate, Long>());
+        result.put(typeOfInterest, new HashMap<>());
       }
 
       for (Entry<Instant, Long> le : rs.entrySet()) {
@@ -330,13 +351,10 @@ public class PgLogManager implements ILogManager {
     StringBuilder queryToBuild = new StringBuilder();
     queryToBuild.append("WITH filtered_logs AS (SELECT * FROM logged_events WHERE event_type=?");
     if (userIds != null && !userIds.isEmpty()) {
-      StringBuilder inParams = new StringBuilder();
-      inParams.append("?");
-      for (int i = 1; i < userIds.size(); i++) {
-        inParams.append(",?");
-      }
+      String inParams = "?" +
+          ",?".repeat(userIds.size() - 1);
 
-      queryToBuild.append(String.format(" AND user_id IN (%s)", inParams.toString()));
+      queryToBuild.append(String.format(" AND user_id IN (%s)", inParams));
 
     }
     queryToBuild.append(") ");
@@ -411,11 +429,9 @@ public class PgLogManager implements ILogManager {
     if (userIds != null && !userIds.isEmpty()) {
       StringBuilder inParams = new StringBuilder();
       inParams.append("?");
-      for (int i = 1; i < userIds.size(); i++) {
-        inParams.append(",?");
-      }
+      inParams.append(",?".repeat(userIds.size() - 1));
 
-      query += String.format(" AND user_id IN (%s)", inParams.toString());
+      query += String.format(" AND user_id IN (%s)", inParams);
 
     }
 
@@ -558,6 +574,12 @@ public class PgLogManager implements ILogManager {
 
   // getLogCountByType
   private static final int FIELD_GET_LOG_COUNT_EVENT_TYPE = 1;
+
+  // userHasLoggedEventWithDetail
+  private static final int FIELD_USER_HAS_LOGGED_EVENT_USER_ID = 1;
+  private static final int FIELD_USER_HAS_LOGGED_EVENT_EVENT_TYPE = 2;
+  private static final int FIELD_USER_HAS_LOGGED_EVENT_DETAIL_KEY = 3;
+  private static final int FIELD_USER_HAS_LOGGED_EVENT_DETAIL_VALUE = 4;
 
   // getLastLogDateForAllUsers
   private static final int FIELD_GET_LOG_DATE_EVENT_TYPE = 1;
