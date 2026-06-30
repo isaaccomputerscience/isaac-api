@@ -131,9 +131,7 @@ public class ContentAugmenter {
     if (content.getId() != null && parentId != null) {
       content.setId(parentId);
     }
-    if (!parentPublished) {
-      content.setPublished(false);
-    }
+    content.setPublished(parentPublished);
   }
 
   /**

@@ -128,6 +128,27 @@ class ContentAugmenterTest {
     assertEquals("content/topic/sub/figures/diagram.svg", image.getSrc());
   }
 
+  @Test
+  void augmentChildContent_childWithoutPublishedUnderPublishedParent_inheritsPublishedTrue() {
+    Content child = createEmptyContentElement(new LinkedList<>(), "childId");
+    child.setPublished(null);
+
+    augmenter.augmentChildContent(child, "test.json", "page", true);
+
+    assertTrue(child.getPublished());
+  }
+
+  @Test
+  void augmentChildContent_publishedChildUnderUnpublishedParent_isDemotedToUnpublished() {
+    // The inverse must still hold: an unpublished page must hide its children regardless of their own flag.
+    Content child = createEmptyContentElement(new LinkedList<>(), "childId");
+    child.setPublished(true);
+
+    augmenter.augmentChildContent(child, "test.json", "page", false);
+
+    assertFalse(child.getPublished());
+  }
+
   private Content createContentHierarchy(final int numLevels, final Set<Content> flatSet) {
     List<ContentBase> children = new LinkedList<>();
 
