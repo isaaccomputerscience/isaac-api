@@ -44,7 +44,7 @@ import uk.ac.cam.cl.dtg.segue.search.SegueSearchException;
 /**
  * Created by Ian on 17/10/2016.
  */
-class ElasticSearchIndexer extends ElasticSearchProvider {
+public class ElasticSearchIndexer extends ElasticSearchProvider {
   private static final Logger log = LoggerFactory.getLogger(ElasticSearchIndexer.class);
   private final Map<String, List<String>> rawFieldsListByType = new HashMap<>();
   private final Map<String, List<String>> nestedFieldsByType = new HashMap<>();
@@ -112,6 +112,16 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
     // execute bulk request builder function
     BulkRequest bulkRequest = buildBulkRequest.apply(typedIndex);
 
+    if (bulkRequest.numberOfActions() == 0) {
+      // Nothing to index for this type — e.g. a version with no published units gives an empty
+      // PUBLISHED_UNIT bulk. Sending an empty bulk throws ActionRequestValidationException ("no requests
+      // added"), which is NOT an ElasticsearchException and so escapes uncaught, aborting the whole index
+      // (and leaving the version half-built after the pre-index expunge). Instead, just ensure the index
+      // exists so the post-index verification — which requires an index for every content type — passes.
+      ensureIndexExists(typedIndex);
+      return;
+    }
+
     try {
       // increase default timeouts
       RequestConfig requestConfig = RequestConfig.custom()
@@ -135,6 +145,24 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       }
     } catch (ElasticsearchException | IOException e) {
       throw new SegueSearchException("Error during bulk index operation.", e);
+    }
+  }
+
+  /**
+   * Ensures an index exists, creating it empty if necessary. Used when there are no documents to bulk
+   * index for a content type, so the index is still present for the post-index verification.
+   *
+   * @param typedIndex the fully-qualified (type-suffixed) index name
+   */
+  private void ensureIndexExists(final String typedIndex) {
+    try {
+      if (!getClient().indices().exists(new GetIndexRequest(typedIndex), RequestOptions.DEFAULT)) {
+        getClient().indices().create(new CreateIndexRequest(typedIndex), RequestOptions.DEFAULT);
+        log.info("Created empty index {} (no documents to index for this type).",
+            sanitiseInternalLogValue(typedIndex));
+      }
+    } catch (ElasticsearchException | IOException e) {
+      log.error("Failed to ensure empty index {} exists", sanitiseInternalLogValue(typedIndex), e);
     }
   }
 
@@ -198,12 +226,9 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       String typedIndexTarget = ElasticSearchProvider.produceTypedIndexName(indexBaseTarget, indexTypeTarget);
 
       // First, find where <alias>_previous points.
-      ImmutableMap<String, Set<AliasMetadata>> returnedPreviousAliases = null;
+      ImmutableMap<String, Set<AliasMetadata>> returnedPreviousAliases;
       try {
-        returnedPreviousAliases = ImmutableMap.copyOf(
-            getClient().indices()
-                .getAlias(new GetAliasesRequest().aliases(typedAlias + "_previous"), RequestOptions.DEFAULT)
-                .getAliases());
+        returnedPreviousAliases = getIndicesForAlias(typedAlias + "_previous");
       } catch (IOException e) {
         log.error(String.format("Failed to retrieve existing previous alias %s, not moving alias!",
             sanitiseInternalLogValue(typedAlias) + "_previous"));
@@ -221,11 +246,9 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
       }
 
       // Now find where <alias> points
-      ImmutableMap<String, Set<AliasMetadata>> returnedAliases = null;
+      ImmutableMap<String, Set<AliasMetadata>> returnedAliases;
       try {
-        returnedAliases = ImmutableMap.copyOf(
-            getClient().indices().getAlias(new GetAliasesRequest().aliases(typedAlias), RequestOptions.DEFAULT)
-                .getAliases());
+        returnedAliases = getIndicesForAlias(typedAlias);
       } catch (IOException e) {
         log.error(String.format("Failed to retrieve existing alias %s, not moving alias!",
             sanitiseInternalLogValue(typedAlias)));
@@ -287,6 +310,31 @@ class ElasticSearchIndexer extends ElasticSearchProvider {
     log.debug("{}/{} aliases already correct, no moves needed.", alreadyCorrectCount, indexTypeTargets.size());
     this.expungeOldIndices();
     return true;
+  }
+
+  /**
+   * Returns which indices a given alias points to, tolerating the alias not existing yet.
+   *
+   * <p>The REST client raises an index_not_found {@link ElasticsearchException} (HTTP 404) when the alias
+   * has never been created — e.g. the first-ever successful index, or a freshly wiped cluster. That is not
+   * a failure: we treat it as "no such alias" and return an empty map so the caller goes on to create the
+   * alias, instead of letting the exception abort the whole indexing run. Any other status is rethrown.
+   *
+   * @param alias the (typed) alias to look up
+   * @return map of index name to alias metadata, empty if the alias does not exist
+   * @throws IOException if the search client cannot be reached
+   */
+  private ImmutableMap<String, Set<AliasMetadata>> getIndicesForAlias(final String alias) throws IOException {
+    try {
+      return ImmutableMap.copyOf(
+          getClient().indices().getAlias(new GetAliasesRequest().aliases(alias), RequestOptions.DEFAULT)
+              .getAliases());
+    } catch (ElasticsearchException e) {
+      if (e.status() != null && e.status().getStatus() == 404) {
+        return ImmutableMap.of();
+      }
+      throw e;
+    }
   }
 
   private boolean expungeOldIndices() {

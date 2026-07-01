@@ -721,6 +721,14 @@ public class ElasticSearchProvider implements ISearchProvider {
     try {
       return client.get(new GetRequest(typedIndex, id).fetchSourceContext(FetchSourceContext.FETCH_SOURCE),
           RequestOptions.DEFAULT);
+    } catch (ElasticsearchException e) {
+      // A missing index is a RuntimeException (HTTP 404), not an IOException; convert it to a checked
+      // SegueSearchException so callers degrade gracefully instead of letting it escape as a 500.
+      if (e.status() != null && e.status().getStatus() == 404) {
+        throw new SegueSearchException(
+            String.format("Failed to get content with ID %s: index %s does not exist", id, typedIndex), e);
+      }
+      throw e;
     } catch (IOException e) {
       throw new SegueSearchException(String.format("Failed to get content with ID %s from index %s", id, typedIndex),
           e);
@@ -733,6 +741,14 @@ public class ElasticSearchProvider implements ISearchProvider {
     SearchSourceBuilder sourceBuilder = new SearchSourceBuilder().size(DEFAULT_MAX_WINDOW_SIZE).fetchSource(true);
     try {
       return client.search(new SearchRequest(typedIndex).source(sourceBuilder), RequestOptions.DEFAULT);
+    } catch (ElasticsearchException e) {
+      // A missing index is a RuntimeException (HTTP 404), not an IOException; convert it to a checked
+      // SegueSearchException so callers degrade gracefully instead of letting it escape as a 500.
+      if (e.status() != null && e.status().getStatus() == 404) {
+        throw new SegueSearchException(
+            String.format("Failed to retrieve all data: index %s does not exist", typedIndex), e);
+      }
+      throw e;
     } catch (IOException e) {
       throw new SegueSearchException(String.format("Failed to retrieve all data from index %s", typedIndex), e);
     }
