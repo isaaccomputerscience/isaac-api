@@ -144,13 +144,20 @@ public class LogEventFacade extends AbstractSegueFacade {
 
       // The video engagement event requires a logged-in user, a validated payload and is deduplicated per video.
       if (VIDEO_ENGAGEMENT_EVENT_TYPE.equals(eventType)) {
+        // TODO(#855) diagnostic logging: remove once the end-to-end video KPI flow is confirmed on staging.
+        log.info("VIDEO_60_PERCENT_WATCHED received: uid={}, registered={}, videoId={}", uid,
+            currentUser instanceof RegisteredUserDTO,
+            sanitiseExternalLogValue(String.valueOf(eventJSON.get(VIDEO_ID_FIELDNAME))));
+
         if (!(currentUser instanceof RegisteredUserDTO)) {
+          log.info("VIDEO_60_PERCENT_WATCHED rejected: user is not logged in (401), uid={}", uid);
           return new SegueErrorResponse(Status.UNAUTHORIZED,
               "You must be logged in to record a " + VIDEO_ENGAGEMENT_EVENT_TYPE + " event.").toResponse();
         }
 
         SegueErrorResponse validationError = validateVideoEngagementEvent(eventJSON);
         if (validationError != null) {
+          // validateVideoEngagementEvent already warn-logs the specific reason.
           return validationError.toResponse();
         }
 
@@ -158,8 +165,13 @@ public class LogEventFacade extends AbstractSegueFacade {
         if (this.getLogManager().userHasLoggedEventWithDetail(uid, VIDEO_ENGAGEMENT_EVENT_TYPE,
             VIDEO_ID_FIELDNAME, videoId)) {
           // Already recorded for this user + video; treat as a successful no-op so the client need not special-case it.
+          log.info("VIDEO_60_PERCENT_WATCHED duplicate ignored (200 no-op): uid={}, videoId={}", uid,
+              sanitiseExternalLogValue(videoId));
           return Response.ok().cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
         }
+
+        log.info("VIDEO_60_PERCENT_WATCHED accepted, recording new event: uid={}, videoId={}", uid,
+            sanitiseExternalLogValue(videoId));
       }
 
       // remove the type information as we don't need it.
