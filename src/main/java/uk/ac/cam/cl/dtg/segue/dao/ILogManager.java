@@ -154,4 +154,18 @@ public interface ILogManager {
    * @throws SegueDatabaseException if there is a problem contacting the underlying database
    */
   Set<String> getAllEventTypes() throws SegueDatabaseException;
+
+  /**
+   * Checks whether a given registered user has already logged an event of a particular type containing a specific
+   * value at a top-level key in its event_details JSONB. Used to deduplicate idempotent client events.
+   *
+   * @param userId      the registered user id to check for.
+   * @param eventType   the event type to match.
+   * @param detailKey   the top-level key within event_details to match against.
+   * @param detailValue the value the event_details key must equal.
+   * @return true if at least one matching event already exists, false otherwise.
+   * @throws SegueDatabaseException if there is a problem contacting the underlying database
+   */
+  boolean userHasLoggedEventWithDetail(String userId, String eventType, String detailKey, String detailValue)
+      throws SegueDatabaseException;
 }

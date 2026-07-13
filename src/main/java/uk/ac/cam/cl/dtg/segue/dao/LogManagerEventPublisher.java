@@ -177,4 +177,12 @@ public abstract class LogManagerEventPublisher implements ILogManager {
     return this.logManager.getAllEventTypes();
 
   }
+
+  @Override
+  public boolean userHasLoggedEventWithDetail(final String userId, final String eventType, final String detailKey,
+                                              final String detailValue) throws SegueDatabaseException {
+
+    return this.logManager.userHasLoggedEventWithDetail(userId, eventType, detailKey, detailValue);
+
+  }
 }
