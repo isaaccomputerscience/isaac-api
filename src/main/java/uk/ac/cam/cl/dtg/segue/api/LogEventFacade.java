@@ -37,6 +37,7 @@ import jakarta.ws.rs.core.Response.Status;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.cam.cl.dtg.isaac.api.Constants.IsaacClientLogType;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AbstractSegueUserDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.AnonymousUserDTO;
@@ -57,6 +58,13 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 @Tag(name = "/log")
 public class LogEventFacade extends AbstractSegueFacade {
   private static final Logger log = LoggerFactory.getLogger(LogEventFacade.class);
+
+  private static final String VIDEO_ENGAGEMENT_EVENT_TYPE = IsaacClientLogType.VIDEO_60_PERCENT_WATCHED.name();
+  private static final String VIDEO_ID_FIELDNAME = "videoId";
+  private static final String VIDEO_DURATION_SECONDS_FIELDNAME = "videoDurationSeconds";
+  private static final String WATCHED_SECONDS_FIELDNAME = "watchedSeconds";
+  private static final String WATCH_PERCENT_FIELDNAME = "watchPercent";
+  private static final double VIDEO_WATCH_THRESHOLD = 0.6;
 
   private final IMisuseMonitor misuseMonitor;
 
@@ -92,7 +100,10 @@ public class LogEventFacade extends AbstractSegueFacade {
       description = "The 'type' field must be provided and must not be a reserved value.")
   public Response postLog(@Context final HttpServletRequest httpRequest, final Map<String, Object> eventJSON) {
     if (null == eventJSON || eventJSON.get(TYPE_FIELDNAME) == null) {
-      log.error("Error during log operation, no event type specified. Event: " + sanitiseExternalLogValue(eventJSON));
+      if (log.isErrorEnabled()) {
+        log.error("Error during log operation, no event type specified. Event: {}",
+            sanitiseExternalLogValue(eventJSON));
+      }
       return new SegueErrorResponse(Status.BAD_REQUEST, "Unable to record log message as the log has no "
           + TYPE_FIELDNAME + " property.").toResponse();
     }
@@ -107,21 +118,19 @@ public class LogEventFacade extends AbstractSegueFacade {
 
     // Temporarily log log event types which are not included in our accepted list of client log types.
     // After a few weeks we should fail on the case where it is an unknown type.
-    if (!ISAAC_CLIENT_LOG_TYPES.contains(eventType)) {
-      log.error(String.format("Warning: Log Event '%s' is not included in ISAAC_CLIENT_LOG_TYPES",
-          sanitiseExternalLogValue(eventType)));
+    if (!ISAAC_CLIENT_LOG_TYPES.contains(eventType) && log.isErrorEnabled()) {
+      log.error("Warning: Log Event '{}' is not included in ISAAC_CLIENT_LOG_TYPES",
+          sanitiseExternalLogValue(eventType));
     }
 
     try {
       // implement arbitrary log size limit.
       AbstractSegueUserDTO currentUser = userManager.getCurrentUser(httpRequest);
-      String uid;
-      if (currentUser instanceof AnonymousUserDTO) {
-        uid = ((AnonymousUserDTO) currentUser).getSessionId();
-      } else {
-        uid = ((RegisteredUserDTO) currentUser).getId().toString();
-      }
+      String uid = currentUser instanceof AnonymousUserDTO anonymousUser
+          ? anonymousUser.getSessionId()
+          : ((RegisteredUserDTO) currentUser).getId().toString();
 
+      // Rate-limit every request (including video engagement events) before doing any further per-event work.
       try {
         misuseMonitor.notifyEvent(uid, LogEventMisuseHandler.class.getSimpleName(), httpRequest.getContentLength());
       } catch (SegueResourceMisuseException e) {
@@ -131,6 +140,14 @@ public class LogEventFacade extends AbstractSegueFacade {
         return SegueErrorResponse.getRateThrottledResponse(String.format(
             "Log event request (%s bytes) would exceed limit for this endpoint.",
             httpRequest.getContentLength()));
+      }
+
+      // The video engagement event requires a logged-in user, a validated payload and is deduplicated per video.
+      if (VIDEO_ENGAGEMENT_EVENT_TYPE.equals(eventType)) {
+        Response earlyVideoEventResponse = handleVideoEngagementEvent(eventJSON, currentUser, uid);
+        if (earlyVideoEventResponse != null) {
+          return earlyVideoEventResponse;
+        }
       }
 
       // remove the type information as we don't need it.
@@ -146,5 +163,96 @@ public class LogEventFacade extends AbstractSegueFacade {
       log.error(error.getErrorMessage(), e);
       return error.toResponse();
     }
+  }
+
+  /**
+   * Apply the extra rules for a video engagement event: the user must be logged in, the payload must be valid and
+   * the event is deduplicated per user and video.
+   *
+   * @param eventJSON   the client supplied event details.
+   * @param currentUser the user making the request.
+   * @param uid         the identifier used to attribute log events to the current user.
+   * @return an early {@link Response} (error, or a successful no-op for a duplicate), or null if the event should be
+   *     logged as normal.
+   * @throws SegueDatabaseException if the deduplication lookup fails.
+   */
+  private Response handleVideoEngagementEvent(final Map<String, Object> eventJSON,
+      final AbstractSegueUserDTO currentUser, final String uid) throws SegueDatabaseException {
+    if (!(currentUser instanceof RegisteredUserDTO)) {
+      return new SegueErrorResponse(Status.UNAUTHORIZED,
+          "You must be logged in to record a " + VIDEO_ENGAGEMENT_EVENT_TYPE + " event.").toResponse();
+    }
+
+    SegueErrorResponse validationError = validateVideoEngagementEvent(eventJSON);
+    if (validationError != null) {
+      // validateVideoEngagementEvent already warn-logs the specific reason.
+      return validationError.toResponse();
+    }
+
+    String videoId = (String) eventJSON.get(VIDEO_ID_FIELDNAME);
+    if (this.getLogManager().userHasLoggedEventWithDetail(uid, VIDEO_ENGAGEMENT_EVENT_TYPE,
+        VIDEO_ID_FIELDNAME, videoId)) {
+      // Already recorded for this user + video; treat as a successful no-op so the client need not special-case it.
+      return Response.ok().cacheControl(getCacheControl(NEVER_CACHE_WITHOUT_ETAG_CHECK, false)).build();
+    }
+
+    return null;
+  }
+
+  private SegueErrorResponse validateVideoEngagementEvent(final Map<String, Object> eventJSON) {
+    Object videoIdValue = eventJSON.get(VIDEO_ID_FIELDNAME);
+    if (!(videoIdValue instanceof String videoId) || videoId.isBlank()) {
+      return videoEventValidationError("<missing>", "missing or empty " + VIDEO_ID_FIELDNAME);
+    }
+
+    Double videoDurationSeconds = getNumericField(eventJSON, VIDEO_DURATION_SECONDS_FIELDNAME);
+    if (videoDurationSeconds == null || videoDurationSeconds <= 0) {
+      return videoEventValidationError(videoId, VIDEO_DURATION_SECONDS_FIELDNAME + " must be greater than 0");
+    }
+
+    Double watchedSeconds = getNumericField(eventJSON, WATCHED_SECONDS_FIELDNAME);
+    if (watchedSeconds == null || watchedSeconds < 0) {
+      return videoEventValidationError(videoId, WATCHED_SECONDS_FIELDNAME + " must be greater than or equal to 0");
+    }
+
+    Double watchPercent = getNumericField(eventJSON, WATCH_PERCENT_FIELDNAME);
+    if (watchPercent == null || watchPercent < VIDEO_WATCH_THRESHOLD) {
+      return videoEventValidationError(videoId,
+          WATCH_PERCENT_FIELDNAME + " must be greater than or equal to " + VIDEO_WATCH_THRESHOLD);
+    }
+
+    return null;
+  }
+
+  /**
+   * Build a bad-request response for an invalid video engagement event and log a sanitised warning for observability.
+   *
+   * @param videoId the videoId the event referred to (or a placeholder if absent).
+   * @param reason  a human-readable explanation of the validation failure.
+   * @return a {@link SegueErrorResponse} with {@link Status#BAD_REQUEST}.
+   */
+  private SegueErrorResponse videoEventValidationError(final String videoId, final String reason) {
+    if (log.isWarnEnabled()) {
+      log.warn("Rejecting {} event (videoId: {}): {}", VIDEO_ENGAGEMENT_EVENT_TYPE,
+          sanitiseExternalLogValue(videoId), reason);
+    }
+    return new SegueErrorResponse(Status.BAD_REQUEST,
+        "Invalid " + VIDEO_ENGAGEMENT_EVENT_TYPE + " event: " + reason);
+  }
+
+  /**
+   * Read a numeric field from a client supplied event payload. JSON numbers are deserialized as {@link Integer} or
+   * {@link Double}, so this normalises any {@link Number} to a {@link Double}.
+   *
+   * @param eventJSON the client supplied event details.
+   * @param fieldName the field to read.
+   * @return the value as a Double, or null if the field is absent or not a number.
+   */
+  private static Double getNumericField(final Map<String, Object> eventJSON, final String fieldName) {
+    Object value = eventJSON.get(fieldName);
+    if (value instanceof Number) {
+      return ((Number) value).doubleValue();
+    }
+    return null;
   }
 }
