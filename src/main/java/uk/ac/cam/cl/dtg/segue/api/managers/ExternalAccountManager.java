@@ -40,6 +40,7 @@ public class ExternalAccountManager implements IExternalAccountManager {
   private static final Logger log = LoggerFactory.getLogger(ExternalAccountManager.class);
   private static final String MAILJET = "MAILJET - ";
   private static final int BULK_BATCH_SIZE = 100;
+  private static final int MAX_USERS_PER_SYNC = 5000;
   private static final int RATE_LIMIT_RETRY_SLEEP_MS = 10000; // 10 seconds
   private static final int JOB_POLL_INTERVAL_MS = 5000;  // 5 seconds between polls
   private static final int JOB_POLL_MAX_ATTEMPTS = 60;   // max 5 minutes (60 × 5s)
@@ -105,8 +106,9 @@ public class ExternalAccountManager implements IExternalAccountManager {
   private List<UserExternalAccountChanges> getRecentlyChangedUsersOrThrow()
       throws ExternalAccountSynchronisationException {
     try {
-      List<UserExternalAccountChanges> users = database.getRecentlyChangedRecords();
-      log.info("{}Found {} users to synchronize with Mailjet", MAILJET, users.size());
+      List<UserExternalAccountChanges> users = database.getRecentlyChangedRecords(MAX_USERS_PER_SYNC);
+      log.info("{}Found {} users to synchronize with Mailjet (capped at {} per run)",
+          MAILJET, users.size(), MAX_USERS_PER_SYNC);
       return users;
     } catch (SegueDatabaseException e) {
       throw new ExternalAccountSynchronisationException("Failed to retrieve users for synchronization"

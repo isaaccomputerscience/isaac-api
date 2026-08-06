@@ -46,6 +46,7 @@ public class MailJetApiClientWrapper {
   private static final int BULK_BATCH_SIZE = 100;
   private static final String ACTION = "Action";
   private static final String LIST_ID = "ListID";
+  private static final int API_CALL_DELAY_MS = 500;
 
   private final MailjetClient mailjetClient;
   private final String newsListId;
@@ -93,6 +94,7 @@ public class MailJetApiClientWrapper {
 
     try {
       MailjetRequest request = new MailjetRequest(Contact.resource, mailjetIdOrEmail);
+      rateLimitDelay();
       MailjetResponse response = mailjetClient.get(request);
 
       if (response.getStatus() == 404) {
@@ -138,6 +140,7 @@ public class MailJetApiClientWrapper {
 
     try {
       MailjetRequest request = new MailjetRequest(Contacts.resource, mailjetId);
+      rateLimitDelay();
       MailjetResponse response = mailjetClient.delete(request);
 
       if (response.getStatus() == 204 || response.getStatus() == 200) {
@@ -202,6 +205,7 @@ public class MailJetApiClientWrapper {
   private String createNewMailjetAccount(String normalizedEmail) throws MailjetException, JSONException {
     try {
       MailjetRequest request = new MailjetRequest(Contact.resource).property(Contact.EMAIL, normalizedEmail);
+      rateLimitDelay();
       MailjetResponse response = mailjetClient.post(request);
 
       if (response.getStatus() == 201 || response.getStatus() == 200) {
@@ -287,6 +291,7 @@ public class MailJetApiClientWrapper {
                       .put(PROPERTY_VALUE_KEY, emailVerificationStatus != null ? emailVerificationStatus : ""))
               .put(new JSONObject().put("Name", "stage").put(PROPERTY_VALUE_KEY, stage != null ? stage : "unknown")));
 
+      rateLimitDelay();
       MailjetResponse response = mailjetClient.put(request);
 
       if (response.getStatus() == 200 && response.getTotal() == 1) {
@@ -346,6 +351,7 @@ public class MailJetApiClientWrapper {
                     new JSONObject().put(ContactslistImportList.LISTID, eventsListId)
                   .put(ContactslistImportList.ACTION, eventsEmails.getValue())));
 
+      rateLimitDelay();
       MailjetResponse response = mailjetClient.post(request);
 
       if (response.getStatus() == 201 && response.getTotal() == 1) {
@@ -375,6 +381,17 @@ public class MailJetApiClientWrapper {
       }
 
       throw e;
+    }
+  }
+
+  /**
+   * Pause before an outgoing Mailjet API call to stay under their rate limit.
+   */
+  private void rateLimitDelay() {
+    try {
+      Thread.sleep(API_CALL_DELAY_MS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
     }
   }
 
@@ -499,6 +516,7 @@ public class MailJetApiClientWrapper {
                                         final MailJetSubscriptionAction newsAction,
                                         final MailJetSubscriptionAction eventsAction)
       throws MailjetException {
+    rateLimitDelay();
     MailjetResponse response = mailjetClient.post(request);
     int status = response.getStatus();
 
@@ -529,6 +547,7 @@ public class MailJetApiClientWrapper {
 
     try {
       MailjetRequest request = new MailjetRequest(ContactManagemanycontacts.resource, Long.parseLong(jobId));
+      rateLimitDelay();
       MailjetResponse response = mailjetClient.get(request);
 
       if (response.getStatus() != 200) {

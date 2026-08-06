@@ -22,7 +22,7 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 public interface IExternalAccountDataManager {
 
-  List<UserExternalAccountChanges> getRecentlyChangedRecords() throws SegueDatabaseException;
+  List<UserExternalAccountChanges> getRecentlyChangedRecords(int limit) throws SegueDatabaseException;
 
   void updateProviderLastUpdated(Long userId) throws SegueDatabaseException;
 

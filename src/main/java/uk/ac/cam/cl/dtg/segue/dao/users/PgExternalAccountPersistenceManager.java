@@ -42,7 +42,7 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
   }
 
   @Override
-  public List<UserExternalAccountChanges> getRecentlyChangedRecords() throws SegueDatabaseException {
+  public List<UserExternalAccountChanges> getRecentlyChangedRecords(final int limit) throws SegueDatabaseException {
     // IMPORTANT: registered_contexts is JSONB[] (array of JSONB objects) in PostgreSQL
     // We use array_to_json() to convert it to proper JSON that Java can parse
     String query = "SELECT users.id, "
@@ -72,7 +72,8 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
         + "       OR news_prefs.last_updated >= external_accounts.provider_last_updated "
         + "       OR events_prefs.last_updated >= external_accounts.provider_last_updated "
         + "       OR external_accounts.provider_last_updated IS NULL) "
-        + "ORDER BY users.id";
+        + "ORDER BY users.id "
+        + "LIMIT " + limit;
 
     return executeQueryAndBuildUserRecords(query);
   }

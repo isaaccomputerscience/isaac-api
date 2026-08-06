@@ -75,7 +75,7 @@ class PgExternalAccountPersistenceManagerTest {
       replay(mockDatabase, mockConnection, mockPreparedStatement, mockResultSet);
 
       // Act
-      List<UserExternalAccountChanges> result = persistenceManager.getRecentlyChangedRecords();
+      List<UserExternalAccountChanges> result = persistenceManager.getRecentlyChangedRecords(5000);
 
       // Assert
       verify(mockDatabase, mockConnection, mockPreparedStatement, mockResultSet);
@@ -105,7 +105,7 @@ class PgExternalAccountPersistenceManagerTest {
       replay(mockDatabase, mockConnection, mockPreparedStatement, mockResultSet);
 
       // Act
-      List<UserExternalAccountChanges> result = persistenceManager.getRecentlyChangedRecords();
+      List<UserExternalAccountChanges> result = persistenceManager.getRecentlyChangedRecords(5000);
 
       // Assert
       verify(mockDatabase, mockConnection, mockPreparedStatement, mockResultSet);
@@ -121,7 +121,7 @@ class PgExternalAccountPersistenceManagerTest {
 
       // Act & Assert
       assertThrows(SegueDatabaseException.class,
-          () -> persistenceManager.getRecentlyChangedRecords());
+          () -> persistenceManager.getRecentlyChangedRecords(5000));
 
       verify(mockDatabase);
     }
