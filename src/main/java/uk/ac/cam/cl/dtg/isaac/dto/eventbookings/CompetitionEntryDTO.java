@@ -14,6 +14,7 @@ public class CompetitionEntryDTO {
   private String submissionURL;
   private String groupName;
   private String projectTitle;
+  private String yearGroup;
 
   public List<Long> getEntrantIds() {
     return entrantIds;
@@ -45,5 +46,13 @@ public class CompetitionEntryDTO {
 
   public void setProjectTitle(String projectTitle) {
     this.projectTitle = projectTitle;
+  }
+
+  public String getYearGroup() {
+    return yearGroup;
+  }
+
+  public void setYearGroup(String yearGroup) {
+    this.yearGroup = yearGroup;
   }
 }

@@ -1197,6 +1197,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     info.put("submissionURL", entryDTO.getSubmissionURL() != null ? entryDTO.getSubmissionURL() : "");
     info.put("groupName", entryDTO.getGroupName() != null ? entryDTO.getGroupName() : "");
     info.put("project_title", entryDTO.getProjectTitle() != null ? entryDTO.getProjectTitle() : "");
+    info.put("yearGroup", entryDTO.getYearGroup() != null ? entryDTO.getYearGroup() : "");
     info.put("student_count", String.valueOf(entryDTO.getEntrantIds().size()));
   }
 
