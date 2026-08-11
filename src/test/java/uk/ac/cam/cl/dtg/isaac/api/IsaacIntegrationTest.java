@@ -211,6 +211,7 @@ public abstract class IsaacIntegrationTest {
         .withEnv("xpack.security.enabled", "true")
         .withEnv("ELASTIC_PASSWORD", "elastic")
         .withEnv("ingest.geoip.downloader.enabled", "false")
+        .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m -Des.cgroup.v2.enabled=true")
         .withStartupTimeout(Duration.ofSeconds(120));
 
     postgres.start();
