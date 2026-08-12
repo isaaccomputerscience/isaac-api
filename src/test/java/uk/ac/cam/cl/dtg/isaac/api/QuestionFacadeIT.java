@@ -8,11 +8,13 @@ import static uk.ac.cam.cl.dtg.isaac.api.ITConstants.QUIZ_TEST_HIDDEN_FROM_TUTOR
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.IUserStreaksManager;
 import uk.ac.cam.cl.dtg.isaac.dos.PgUserStreakManager;
 import uk.ac.cam.cl.dtg.segue.api.QuestionFacade;
 
+@Disabled("Elasticsearch testcontainer fails to start in CI (GH Actions) - tracking container startup fix separately")
 class QuestionFacadeIT extends IsaacIntegrationTest {
 
   private QuestionFacade questionFacade;

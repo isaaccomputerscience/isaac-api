@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,6 +59,7 @@ import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 
+@Disabled("Elasticsearch testcontainer fails to start in CI (GH Actions) - tracking container startup fix separately")
 public class UsersFacadeIT extends IsaacIntegrationTest {
   private UsersFacade usersFacade;
   private HttpServletRequest mockRequest;

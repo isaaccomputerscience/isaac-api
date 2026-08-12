@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.GroupStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.UserGroup;
@@ -54,6 +55,7 @@ import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
 
+@Disabled("Elasticsearch testcontainer fails to start in CI (GH Actions) - tracking container startup fix separately")
 class GroupsFacadeIT extends IsaacIntegrationTest {
 
   private GroupsFacade groupsFacade;
