@@ -52,6 +52,7 @@ import java.util.stream.Stream;
 import org.easymock.Capture;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -69,6 +70,7 @@ import uk.ac.cam.cl.dtg.segue.api.monitors.SegueLoginByIPMisuseHandler;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 
+@Disabled("Elasticsearch testcontainer fails to start in CI (GH Actions) - tracking container startup fix separately")
 public class AuthenticationFacadeIT extends IsaacIntegrationTest {
   private AuthenticationFacade authenticationFacade;
   private HttpServletRequest mockRequest;

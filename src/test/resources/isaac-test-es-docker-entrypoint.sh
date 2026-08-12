@@ -95,4 +95,8 @@ if [[ "$(id -u)" == "0" ]]; then
   fi
 fi
 
+# Ensure ES_JAVA_OPTS is exported before the chroot user switch below, since chroot
+# does not reliably inherit env vars set via testcontainers' .withEnv().
+export ES_JAVA_OPTS="${ES_JAVA_OPTS:--Xms512m -Xmx512m}"
+
 run_as_other_user_if_needed /usr/share/elasticsearch/bin/elasticsearch <<<"$KEYSTORE_PASSWORD"

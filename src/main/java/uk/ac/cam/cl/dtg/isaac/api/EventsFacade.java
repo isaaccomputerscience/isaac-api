@@ -148,6 +148,7 @@ import uk.ac.cam.cl.dtg.util.PropertiesLoader;
 @Tag(name = "/events")
 public class EventsFacade extends AbstractIsaacFacade {
   private static final Logger log = LoggerFactory.getLogger(EventsFacade.class);
+  private static final String NO_EVENT_FOUND_WITH_THIS_ID = "No event found with this ID.";
 
   private final EventBookingManager bookingManager;
 
@@ -681,7 +682,7 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       IsaacEventPageDTO eventPageDTO = getRawEventDTOById(eventId);
       if (null == eventPageDTO) {
-        return new SegueErrorResponse(Status.BAD_REQUEST, "No event found with this ID.").toResponse();
+        return new SegueErrorResponse(Status.BAD_REQUEST, NO_EVENT_FOUND_WITH_THIS_ID).toResponse();
       }
       if (!EventBookingManager.eventAllowsGroupBookings(eventPageDTO)) {
         return new SegueErrorResponse(Status.FORBIDDEN, "This event does not accept group bookings.").toResponse();
@@ -975,7 +976,7 @@ public class EventsFacade extends AbstractIsaacFacade {
       event = null;
     }
     if (null == event) {
-      return new SegueErrorResponse(Status.BAD_REQUEST, "No event found with this ID.").toResponse();
+      return new SegueErrorResponse(Status.BAD_REQUEST, NO_EVENT_FOUND_WITH_THIS_ID).toResponse();
     }
     if (!EventBookingManager.eventAllowsGroupBookings(event)) {
       return new SegueErrorResponse(Status.FORBIDDEN, "This event does not accept group bookings.").toResponse();
@@ -1094,7 +1095,7 @@ public class EventsFacade extends AbstractIsaacFacade {
     try {
       IsaacEventPageDTO event = this.getRawEventDTOById(eventId);
       if (event == null) {
-        throw new IllegalArgumentException("No event found with this ID.");
+        throw new IllegalArgumentException(NO_EVENT_FOUND_WITH_THIS_ID);
       }
 
       if (!EventBookingManager.eventAllowsGroupBookings(event)) {
@@ -1103,7 +1104,7 @@ public class EventsFacade extends AbstractIsaacFacade {
 
       return event;
     } catch (SegueDatabaseException | ContentManagerException e) {
-      throw new IllegalArgumentException("No event found with this ID.");
+      throw new IllegalArgumentException(NO_EVENT_FOUND_WITH_THIS_ID);
     }
   }
 
@@ -1197,6 +1198,9 @@ public class EventsFacade extends AbstractIsaacFacade {
     info.put("submissionURL", entryDTO.getSubmissionURL() != null ? entryDTO.getSubmissionURL() : "");
     info.put("groupName", entryDTO.getGroupName() != null ? entryDTO.getGroupName() : "");
     info.put("project_title", entryDTO.getProjectTitle() != null ? entryDTO.getProjectTitle() : "");
+    info.put("yearGroup", entryDTO.getYearGroup() != null ? entryDTO.getYearGroup() : "");
+    info.put("projectDescription",
+        entryDTO.getProjectDescription() != null ? entryDTO.getProjectDescription() : "");
     info.put("student_count", String.valueOf(entryDTO.getEntrantIds().size()));
   }
 
@@ -1284,6 +1288,9 @@ public class EventsFacade extends AbstractIsaacFacade {
                                            final List<Long> userIds) {
     try {
       IsaacEventPageDTO event = getRawEventDTOById(eventId);
+      if (null == event) {
+        return new SegueErrorResponse(Status.BAD_REQUEST, NO_EVENT_FOUND_WITH_THIS_ID).toResponse();
+      }
       RegisteredUserDTO userLoggedIn = this.userManager.getCurrentRegisteredUser(request);
 
       if (event.getDate() != null && Instant.now().isAfter(event.getDate())) {
@@ -1520,6 +1527,9 @@ public class EventsFacade extends AbstractIsaacFacade {
                                       @PathParam("user_id") final Long userId) {
     try {
       IsaacEventPageDTO event = getRawEventDTOById(eventId);
+      if (null == event) {
+        return new SegueErrorResponse(Status.BAD_REQUEST, NO_EVENT_FOUND_WITH_THIS_ID).toResponse();
+      }
 
       RegisteredUserDTO userLoggedIn = this.userManager.getCurrentRegisteredUser(request);
       RegisteredUserDTO userOwningBooking;

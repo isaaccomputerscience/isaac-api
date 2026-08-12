@@ -9,11 +9,13 @@ import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.segue.api.InfoFacade;
 import uk.ac.cam.cl.dtg.segue.scheduler.SegueJobService;
 
 // NOTE: This was a proof of concept but I'm not too sure we actually need this entire test suite.
+@Disabled("Elasticsearch testcontainer fails to start in CI (GH Actions) - tracking container startup fix separately")
 class InfoFacadeIT extends IsaacIntegrationTest {
 
   public InfoFacade infoFacade;

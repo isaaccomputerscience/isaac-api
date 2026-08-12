@@ -211,6 +211,13 @@ public abstract class IsaacIntegrationTest {
         .withEnv("xpack.security.enabled", "true")
         .withEnv("ELASTIC_PASSWORD", "elastic")
         .withEnv("ingest.geoip.downloader.enabled", "false")
+        .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
+        // Works around a JDK bug where cgroup v2 memory auto-detection throws a fatal NPE
+        // (CgroupV2Subsystem: "anyController is null") on GitHub Actions' runner cgroup layout.
+        // JAVA_TOOL_OPTIONS is picked up by every `java` invocation in the container, including
+        // Elasticsearch's own JvmOptionsParser bootstrap process, which is where the crash happens.
+        .withEnv("JAVA_TOOL_OPTIONS", "-XX:-UseContainerSupport")
+        .withLogConsumer(outputFrame -> System.out.print(outputFrame.getUtf8String()))
         .withStartupTimeout(Duration.ofSeconds(120));
 
     postgres.start();
