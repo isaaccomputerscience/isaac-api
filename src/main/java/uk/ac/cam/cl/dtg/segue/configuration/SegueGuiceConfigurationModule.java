@@ -1053,12 +1053,11 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
           new ScheduledAssignmentsEmailJob()
       );
 
-      // TODO - TEMPORARY: bumped from CRON_STRING_EVERY_FOUR_HOURS to CRON_STRING_HOURLY
       SegueScheduledJob syncMailjetUsers = new SegueScheduledSyncMailjetUsersJob(
           "syncMailjetUsersJob",
           CRON_GROUP_NAME_JAVA_JOB,
           "Sync users to mailjet",
-          CRON_STRING_HOURLY);
+          CRON_STRING_EVERY_FOUR_HOURS);
 
       List<SegueScheduledJob> configuredScheduledJobs = new ArrayList<>(Arrays.asList(
           piiSqlJob,
