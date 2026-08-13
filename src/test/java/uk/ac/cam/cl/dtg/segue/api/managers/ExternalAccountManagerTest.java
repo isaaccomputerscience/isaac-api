@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.dtg.segue.api.managers;
 
+import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
@@ -58,7 +59,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE),
           eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE))).andReturn("job123");
       // Job completes successfully with no errors
@@ -93,7 +94,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       // First bulk call for group (FORCE_SUBSCRIBE, FORCE_SUBSCRIBE)
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE),
           eq(MailJetSubscriptionAction.FORCE_SUBSCRIBE))).andReturn("job123");
@@ -130,7 +131,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       mockMailjetApi.permanentlyDeleteAccountById("mailjetId123");
       expectLastCall();
       mockDatabase.updateExternalAccount(1L, null);
@@ -161,7 +162,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       // Delivery failed users should call with REMOVE for both news and events
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), eq(MailJetSubscriptionAction.REMOVE),
           eq(MailJetSubscriptionAction.REMOVE))).andReturn("job123");
@@ -184,7 +185,7 @@ class ExternalAccountManagerTest {
     void synchroniseChangedUsers_WithEmptyUserList_ShouldReturnWithoutError()
         throws SegueDatabaseException, ExternalAccountSynchronisationException {
       // Arrange
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(List.of());
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(List.of());
 
       replay(mockDatabase, mockMailjetApi);
 
@@ -199,7 +200,7 @@ class ExternalAccountManagerTest {
     @Test
     void synchroniseChangedUsers_WithDatabaseException_ShouldThrow() throws SegueDatabaseException {
       // Arrange
-      expect(mockDatabase.getRecentlyChangedRecords())
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt()))
           .andThrow(new SegueDatabaseException("Database error"));
 
       replay(mockDatabase);
@@ -222,7 +223,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
           .andReturn("job123");
       // Job has 1 error
@@ -261,7 +262,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
           .andReturn("job123");
       // Job has 1 error
@@ -293,7 +294,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
           .andThrow(new MailjetException("Mailjet error"));
 
@@ -317,7 +318,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
           .andThrow(new MailjetClientCommunicationException("Communication error"));
 
@@ -341,7 +342,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
           .andThrow(new MailjetRateLimitException("Rate limit exceeded"));
 
@@ -368,7 +369,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
           .andReturn("job123");
       // First poll hits rate limit, second succeeds
@@ -400,7 +401,7 @@ class ExternalAccountManagerTest {
           )
       );
 
-      expect(mockDatabase.getRecentlyChangedRecords()).andReturn(changedUsers);
+      expect(mockDatabase.getRecentlyChangedRecords(anyInt())).andReturn(changedUsers);
       expect(mockMailjetApi.bulkSyncUsers(anyObject(), anyObject(), anyObject()))
           .andReturn("job123");
       // Both polls hit rate limit

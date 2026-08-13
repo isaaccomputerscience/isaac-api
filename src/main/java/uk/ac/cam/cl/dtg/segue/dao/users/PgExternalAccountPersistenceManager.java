@@ -41,10 +41,28 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
     this.database = database;
   }
 
+  // IMPORTANT: registered_contexts is JSONB[] (array of JSONB objects) in PostgreSQL
+  // We use array_to_json() to convert it to proper JSON that Java can parse
+  private static final String RECENTLY_CHANGED_USERS_FROM_WHERE_CLAUSE =
+      "FROM users "
+          + "    LEFT OUTER JOIN user_preferences AS news_prefs "
+          + "        ON users.id = news_prefs.user_id "
+          + "        AND news_prefs.preference_type = 'EMAIL_PREFERENCE' "
+          + "        AND news_prefs.preference_name = 'NEWS_AND_UPDATES' "
+          + "    LEFT OUTER JOIN user_preferences AS events_prefs "
+          + "        ON users.id = events_prefs.user_id "
+          + "        AND events_prefs.preference_type = 'EMAIL_PREFERENCE' "
+          + "        AND events_prefs.preference_name = 'EVENTS' "
+          + "    LEFT OUTER JOIN external_accounts "
+          + "        ON users.id = external_accounts.user_id "
+          + "        AND external_accounts.provider_name = 'MailJet' "
+          + "WHERE (users.last_updated >= external_accounts.provider_last_updated "
+          + "       OR news_prefs.last_updated >= external_accounts.provider_last_updated "
+          + "       OR events_prefs.last_updated >= external_accounts.provider_last_updated "
+          + "       OR external_accounts.provider_last_updated IS NULL) ";
+
   @Override
-  public List<UserExternalAccountChanges> getRecentlyChangedRecords() throws SegueDatabaseException {
-    // IMPORTANT: registered_contexts is JSONB[] (array of JSONB objects) in PostgreSQL
-    // We use array_to_json() to convert it to proper JSON that Java can parse
+  public List<UserExternalAccountChanges> getRecentlyChangedRecords(final int limit) throws SegueDatabaseException {
     String query = "SELECT users.id, "
         + "       external_accounts.provider_user_identifier, "
         + "       users.email, "
@@ -56,25 +74,26 @@ public class PgExternalAccountPersistenceManager implements IExternalAccountData
         + "       news_prefs.preference_value AS news_emails, "
         + "       events_prefs.preference_value AS events_emails, "
         + "       external_accounts.provider_last_updated "
-        + "FROM users "
-        + "    LEFT OUTER JOIN user_preferences AS news_prefs "
-        + "        ON users.id = news_prefs.user_id "
-        + "        AND news_prefs.preference_type = 'EMAIL_PREFERENCE' "
-        + "        AND news_prefs.preference_name = 'NEWS_AND_UPDATES' "
-        + "    LEFT OUTER JOIN user_preferences AS events_prefs "
-        + "        ON users.id = events_prefs.user_id "
-        + "        AND events_prefs.preference_type = 'EMAIL_PREFERENCE' "
-        + "        AND events_prefs.preference_name = 'EVENTS' "
-        + "    LEFT OUTER JOIN external_accounts "
-        + "        ON users.id = external_accounts.user_id "
-        + "        AND external_accounts.provider_name = 'MailJet' "
-        + "WHERE (users.last_updated >= external_accounts.provider_last_updated "
-        + "       OR news_prefs.last_updated >= external_accounts.provider_last_updated "
-        + "       OR events_prefs.last_updated >= external_accounts.provider_last_updated "
-        + "       OR external_accounts.provider_last_updated IS NULL) "
-        + "ORDER BY users.id";
+        + RECENTLY_CHANGED_USERS_FROM_WHERE_CLAUSE
+        + "ORDER BY users.id "
+        + "LIMIT " + limit;
 
     return executeQueryAndBuildUserRecords(query);
+  }
+
+  @Override
+  public int countRecentlyChangedRecords() throws SegueDatabaseException {
+    String query = "SELECT COUNT(*) " + RECENTLY_CHANGED_USERS_FROM_WHERE_CLAUSE;
+
+    try (Connection conn = database.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(query);
+         ResultSet results = pst.executeQuery()
+    ) {
+      return results.next() ? results.getInt(1) : 0;
+    } catch (SQLException e) {
+      throw new SegueDatabaseException("Database error while counting recently changed records: "
+          + e.getMessage(), e);
+    }
   }
 
   /**
