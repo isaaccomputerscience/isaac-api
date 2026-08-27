@@ -4,6 +4,7 @@ import static java.time.ZoneOffset.UTC;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DATE_EXPIRES;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_DATE_FORMAT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.LOGOUT_SESSION_ALREADY_INVALIDATED_MESSAGE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.PARTIAL_LOGIN_FLAG;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SEGUE_AUTH_COOKIE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_EXPIRY_SECONDS_DEFAULT;
@@ -87,7 +88,11 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
   }
 
   private void invalidateSession() {
-    httpServletRequest.getSession().invalidate();
+    try {
+      httpServletRequest.getSession().invalidate();
+    } catch (IllegalStateException e) {
+      log.info(LOGOUT_SESSION_ALREADY_INVALIDATED_MESSAGE, e);
+    }
     try {
       userAuthenticationManager.invalidateSessionToken(httpServletRequest);
     } catch (NoUserLoggedInException e) {
