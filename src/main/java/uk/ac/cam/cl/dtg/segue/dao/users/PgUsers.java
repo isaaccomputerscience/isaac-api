@@ -50,6 +50,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Gender;
 import uk.ac.cam.cl.dtg.isaac.dos.users.RegisteredUser;
@@ -62,6 +64,8 @@ import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
 
 public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
+  private static final Logger log = LoggerFactory.getLogger(PgUsers.class);
+
   private static final String POSTGRES_EXCEPTION_MESSAGE = "Postgres exception";
   private static final String JSONB_PROCESSING_ERROR_MESSAGE = "Postgres JSONb processing exception";
 
@@ -1015,9 +1019,9 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     u.setFamilyName(results.getString("family_name"));
     u.setGivenName(results.getString("given_name"));
     u.setEmail(results.getString("email"));
-    u.setRole(results.getString("role") != null ? Role.valueOf(results.getString("role")) : null);
+    u.setRole(safeEnumValueOf(Role.class, results.getString("role"), "role", u.getId()));
     u.setDateOfBirth(getInstantFromDate(results, "date_of_birth"));
-    u.setGender(results.getString("gender") != null ? Gender.valueOf(results.getString("gender")) : null);
+    u.setGender(safeEnumValueOf(Gender.class, results.getString("gender"), "gender", u.getId()));
     u.setRegistrationDate(getInstantFromTimestamp(results, "registration_date"));
 
     u.setSchoolId(results.getString("school_id"));
@@ -1039,12 +1043,39 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
     u.setLastSeen(getInstantFromTimestamp(results, "last_seen"));
     u.setEmailToVerify(results.getString("email_to_verify"));
     u.setEmailVerificationToken(results.getString("email_verification_token"));
-    u.setEmailVerificationStatus(results.getString("email_verification_status") != null ? EmailVerificationStatus
-        .valueOf(results.getString("email_verification_status")) : null);
+    u.setEmailVerificationStatus(safeEnumValueOf(EmailVerificationStatus.class,
+        results.getString("email_verification_status"), "email_verification_status", u.getId()));
     u.setTeacherPending(results.getBoolean("teacher_pending"));
     u.setPrivacyPolicyAcceptedTime(getInstantFromTimestamp(results, "updated_privacy_policy_accepted"));
 
     return u;
+  }
+
+  /**
+   * Safely parse a database-stored enum value, tolerating stale/unrecognised values instead of throwing.
+   * <br>
+   * A raw {@code Enum.valueOf(...)} on a column value that no longer matches any enum constant (e.g. left over
+   * from old data) throws an unchecked {@link IllegalArgumentException} that nothing upstream catches, which
+   * previously crashed every request for the affected user (e.g. {@code GET /users/current_user}) with a 500.
+   *
+   * @param enumType  the enum class to parse into
+   * @param value     the raw string value from the database column, or null
+   * @param fieldName the column/field name, for logging only
+   * @param userId    the user id the row belongs to, for logging only
+   * @return the parsed enum constant, or null if the value was null or did not match any constant
+   */
+  private static <T extends Enum<T>> T safeEnumValueOf(final Class<T> enumType, final String value,
+                                                       final String fieldName, final Long userId) {
+    if (null == value) {
+      return null;
+    }
+    try {
+      return Enum.valueOf(enumType, value);
+    } catch (IllegalArgumentException e) {
+      log.error("Invalid {} value '{}' found in database for user id {}; treating as unset.",
+          fieldName, value, userId, e);
+      return null;
+    }
   }
 
   /**
