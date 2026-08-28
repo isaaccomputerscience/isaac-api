@@ -41,6 +41,8 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
 
   private static final Logger log = LoggerFactory.getLogger(SessionValidator.class);
 
+  private static final String INVALID_AUTH_COOKIE_PROPERTY = "segue.invalidAuthCookie";
+
   private final UserAuthenticationManager userAuthenticationManager;
   private final Integer sessionExpirySeconds;
   @Context
@@ -62,28 +64,34 @@ public class SessionValidator implements ContainerRequestFilter, ContainerRespon
     if (authCookie != null && !userAuthenticationManager.isSessionValid(httpServletRequest)) {
       log.warn("Request made with invalid segue auth cookie - closing session");
       invalidateSession();
-      containerRequestContext.abortWith(Response
-          .status(Response.Status.BAD_REQUEST)
-          .entity("Authentication cookie is invalid")
-          .cookie(userAuthenticationManager.createAuthLogoutNewCookie())
-          .build()
-      );
+      // Don't abort the request: a stale/invalid auth cookie just means this user isn't logged in, which is
+      // no different to having no cookie at all. Aborting broke every endpoint hit during the brief window
+      // after logout (including ones that don't require a user, e.g. public content endpoints) with a 400,
+      // rather than letting them serve their normal anonymous response. Endpoints that do require a logged-in
+      // user already handle that case correctly (NoUserLoggedInException -> 401) with no cookie present.
+      // We still need to clear the stale cookie from the browser, so flag it for the response filter below.
+      containerRequestContext.setProperty(INVALID_AUTH_COOKIE_PROPERTY, true);
     }
   }
 
   @Override
   public void filter(final ContainerRequestContext containerRequestContext,
                      final ContainerResponseContext containerResponseContext) {
-    if (!isLogoutCookiePresent(httpServletResponse)) {
-      Cookie authCookie = containerRequestContext.getCookies().get(SEGUE_AUTH_COOKIE);
-      try {
-        if (authCookie != null && !isPartialLoginCookie(authCookie) && wasRequestValid(containerResponseContext)) {
-          jakarta.servlet.http.Cookie newAuthCookie = generateRefreshedSegueAuthCookie(authCookie);
-          httpServletResponse.addCookie(newAuthCookie);
-        }
-      } catch (IOException e) {
-        log.error("Failed to parse an auth cookie for refresh", e);
+    if (isLogoutCookiePresent(httpServletResponse)) {
+      return;
+    }
+    if (Boolean.TRUE.equals(containerRequestContext.getProperty(INVALID_AUTH_COOKIE_PROPERTY))) {
+      httpServletResponse.addCookie(userAuthenticationManager.createAuthLogoutCookie());
+      return;
+    }
+    Cookie authCookie = containerRequestContext.getCookies().get(SEGUE_AUTH_COOKIE);
+    try {
+      if (authCookie != null && !isPartialLoginCookie(authCookie) && wasRequestValid(containerResponseContext)) {
+        jakarta.servlet.http.Cookie newAuthCookie = generateRefreshedSegueAuthCookie(authCookie);
+        httpServletResponse.addCookie(newAuthCookie);
       }
+    } catch (IOException e) {
+      log.error("Failed to parse an auth cookie for refresh", e);
     }
   }
 
