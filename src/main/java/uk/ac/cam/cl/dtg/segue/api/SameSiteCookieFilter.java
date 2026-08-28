@@ -17,8 +17,10 @@ public class SameSiteCookieFilter implements ContainerResponseFilter {
   public void filter(final ContainerRequestContext requestContext,
                      final ContainerResponseContext responseContext) {
 
-    @SuppressWarnings("unchecked")
-    List<String> setCookieHeaders = (List<String>) (List<?>) responseContext.getHeaders().get("Set-Cookie");
+    // Use getStringHeaders() rather than getHeaders(): entries here may still be raw NewCookie/Cookie
+    // objects (e.g. attached via Response.cookie(...)) rather than Strings, and getStringHeaders()
+    // reliably converts every entry to its canonical header string via the JAX-RS HeaderDelegate.
+    List<String> setCookieHeaders = responseContext.getStringHeaders().get("Set-Cookie");
     if (setCookieHeaders == null || setCookieHeaders.isEmpty()) {
       return;
     }
@@ -29,7 +31,9 @@ public class SameSiteCookieFilter implements ContainerResponseFilter {
       updatedHeaders.add(updatedHeader);
     }
 
-    responseContext.getHeaders().put("Set-Cookie", (List<Object>) (List<?>) updatedHeaders);
+    @SuppressWarnings("unchecked")
+    List<Object> replacementHeaders = (List<Object>) (List<?>) updatedHeaders;
+    responseContext.getHeaders().put("Set-Cookie", replacementHeaders);
   }
 
   private String addSameSiteAttribute(final String cookieHeader) {
