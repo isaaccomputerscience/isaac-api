@@ -20,6 +20,7 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.CONFIG_LOCATION_SYSTEM_PROPER
 import static uk.ac.cam.cl.dtg.segue.api.Constants.CONTENT_INDEX;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.DEFAULT_LINUX_CONFIG_LOCATION;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EMAIL_SIGNATURE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_ONE_HOUR_REMINDER_EMAIL;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EVENT_PRE_POST_EMAILS;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.EnvironmentType.DEV;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
@@ -180,6 +181,7 @@ import uk.ac.cam.cl.dtg.segue.scheduler.SegueScheduledJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.DeleteEventAdditionalBookingInformationJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.DeleteEventAdditionalBookingInformationOneYearJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.EventFeedbackEmailJob;
+import uk.ac.cam.cl.dtg.segue.scheduler.jobs.EventOneHourReminderEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.EventReminderEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.ScheduledAssignmentsEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.SegueScheduledSyncMailjetUsersJob;
@@ -975,6 +977,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
   static final String CRON_STRING_0700_DAILY = "0 0 7 * * ?";
   static final String CRON_STRING_2000_DAILY = "0 0 20 * * ?";
   static final String CRON_STRING_HOURLY = "0 0 * ? * * *";
+  static final String CRON_STRING_EVERY_TEN_MINUTES = "0 0/10 * * * ?";
   static final String CRON_STRING_EVERY_FOUR_HOURS = "0 0 0/4 ? * * *";
   static final String CRON_GROUP_NAME_SQL_MAINTENANCE = "SQLMaintenance";
   static final String CRON_GROUP_NAME_JAVA_JOB = "JavaJob";
@@ -989,6 +992,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
       String eventPrePostEmails = properties.getProperty(EVENT_PRE_POST_EMAILS);
       boolean eventPrePostEmailsEnabled =
           null != eventPrePostEmails && !eventPrePostEmails.isEmpty() && Boolean.parseBoolean(eventPrePostEmails);
+      String eventOneHourReminderEmailProperty = properties.getProperty(EVENT_ONE_HOUR_REMINDER_EMAIL);
+      boolean eventOneHourReminderEmailEnabled =
+          null != eventOneHourReminderEmailProperty && !eventOneHourReminderEmailProperty.isEmpty()
+              && Boolean.parseBoolean(eventOneHourReminderEmailProperty);
 
       SegueScheduledJob piiSqlJob = new SegueScheduledDatabaseScriptJob(
           "PIIDeleteScheduledJob",
@@ -1044,6 +1051,15 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
           new EventFeedbackEmailJob()
       );
 
+      SegueScheduledJob eventOneHourReminderEmail = SegueScheduledJob.createCustomJob(
+          "eventOneHourReminderEmail",
+          CRON_GROUP_NAME_JAVA_JOB,
+          "Send scheduled one-hour-before-start reminder emails for online events",
+          CRON_STRING_EVERY_TEN_MINUTES,
+          Maps.newHashMap(),
+          new EventOneHourReminderEmailJob()
+      );
+
       SegueScheduledJob scheduledAssignmentsEmail = SegueScheduledJob.createCustomJob(
           "scheduledAssignmentsEmail",
           CRON_GROUP_NAME_JAVA_JOB,
@@ -1084,6 +1100,12 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
       } else {
         scheduledJobsToRemove.add(eventReminderEmail);
         scheduledJobsToRemove.add(eventFeedbackEmail);
+      }
+
+      if (eventOneHourReminderEmailEnabled) {
+        configuredScheduledJobs.add(eventOneHourReminderEmail);
+      } else {
+        scheduledJobsToRemove.add(eventOneHourReminderEmail);
       }
       segueJobService = new SegueJobService(database, configuredScheduledJobs, scheduledJobsToRemove);
 
