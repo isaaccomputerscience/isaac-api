@@ -17,19 +17,19 @@ public class SameSiteCookieFilter implements ContainerResponseFilter {
   public void filter(final ContainerRequestContext requestContext,
                      final ContainerResponseContext responseContext) {
 
-    @SuppressWarnings("unchecked")
-    List<String> setCookieHeaders = (List<String>) (List<?>) responseContext.getHeaders().get("Set-Cookie");
+    List<Object> setCookieHeaders = responseContext.getHeaders().get("Set-Cookie");
     if (setCookieHeaders == null || setCookieHeaders.isEmpty()) {
       return;
     }
 
-    List<String> updatedHeaders = new ArrayList<>();
-    for (String cookieHeader : setCookieHeaders) {
-      String updatedHeader = addSameSiteAttribute(cookieHeader);
-      updatedHeaders.add(updatedHeader);
+    // Entries may be raw header Strings or typed objects (e.g. NewCookie, added via
+    // Response.cookie(...)) - toString() renders either as a valid Set-Cookie header value.
+    List<Object> updatedHeaders = new ArrayList<>();
+    for (Object cookieHeader : setCookieHeaders) {
+      updatedHeaders.add(addSameSiteAttribute(cookieHeader.toString()));
     }
 
-    responseContext.getHeaders().put("Set-Cookie", (List<Object>) (List<?>) updatedHeaders);
+    responseContext.getHeaders().put("Set-Cookie", updatedHeaders);
   }
 
   private String addSameSiteAttribute(final String cookieHeader) {
