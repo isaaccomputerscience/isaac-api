@@ -231,7 +231,12 @@ public class EventNotificationEmailManager {
     String emailKey = String.format("%s@%s", event.getId(), emailKeyPostfix);
     List<BookingStatus> bookingStatuses = List.of(BookingStatus.CONFIRMED);
     if (pgScheduledEmailManager.commitToSchedulingEmail(emailKey)) {
+      log.info("Committed to sending one-hour-before reminder for event ID {} (key: {}); dispatching now.",
+          event.getId(), emailKey);
       this.sendBookingStatusFilteredEmailForEvent(event, templateId, bookingStatuses);
+    } else {
+      log.info("Skipping one-hour-before reminder for event ID {} (key: {}): already committed/sent previously"
+          + " (scheduled_emails dedup).", event.getId(), emailKey);
     }
   }
 
@@ -249,20 +254,38 @@ public class EventNotificationEmailManager {
         Instant.now().plus(EMAIL_EVENT_ONE_HOUR_REMINDER_WINDOW_END_MINUTES, ChronoUnit.MINUTES);
     filterInstructions.put(DATE_FIELDNAME, new DateRangeFilterInstruction(windowStart, windowEnd));
 
+    log.info("Running one-hour-before event reminder sweep. Window: [{}, {}]", windowStart, windowEnd);
+
     try {
       ResultsWrapper<ContentDTO> findByFieldNames = this.contentManager.findByFieldNames(
           ContentService.generateDefaultFieldToMatch(fieldsToMatch), startIndex, DEFAULT_MAX_WINDOW_SIZE,
           sortInstructions, filterInstructions);
-      for (ContentDTO contentResult : findByFieldNames.getResults()) {
-        if (contentResult instanceof IsaacEventPageDTO event) {
-          if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
-            continue;
-          }
-          if (!isOnlineEvent(event)) {
-            continue;
-          }
-          commitAndSendOneHourReminderEmail(event, "1hr", "email_event_reminder_one_hour_before");
+
+      List<ContentDTO> results = findByFieldNames.getResults();
+      log.info("One-hour-before reminder sweep found {} event page(s) with a start date in the window.",
+          results.size());
+
+      for (ContentDTO contentResult : results) {
+        if (!(contentResult instanceof IsaacEventPageDTO event)) {
+          log.warn("One-hour-before reminder sweep: content result {} was not an IsaacEventPageDTO ({}); skipping.",
+              contentResult.getId(), contentResult.getClass().getSimpleName());
+          continue;
         }
+
+        log.info("One-hour-before reminder sweep: considering event ID {} ('{}'), status={}, date={},"
+                + " meetingUrl='{}'.",
+            event.getId(), event.getTitle(), event.getEventStatus(), event.getDate(), event.getMeetingUrl());
+
+        if (EventStatus.CANCELLED.equals(event.getEventStatus())) {
+          log.info("Skipping one-hour-before reminder for event ID {}: event is CANCELLED.", event.getId());
+          continue;
+        }
+        if (!isOnlineEvent(event)) {
+          log.info("Skipping one-hour-before reminder for event ID {}: event has no meetingUrl set,"
+              + " treating as in-person.", event.getId());
+          continue;
+        }
+        commitAndSendOneHourReminderEmail(event, "1hr", "email_event_reminder_one_hour_before");
       }
     } catch (ContentManagerException | SegueDatabaseException e) {
       log.error("Failed to send scheduled one-hour-before event reminder emails: ", e);

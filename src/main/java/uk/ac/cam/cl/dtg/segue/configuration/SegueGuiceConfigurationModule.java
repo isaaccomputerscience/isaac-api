@@ -993,9 +993,10 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
       boolean eventPrePostEmailsEnabled =
           null != eventPrePostEmails && !eventPrePostEmails.isEmpty() && Boolean.parseBoolean(eventPrePostEmails);
       String eventOneHourReminderEmailProperty = properties.getProperty(EVENT_ONE_HOUR_REMINDER_EMAIL);
+      // Enabled by default: only an explicit "false" disables this job, unlike the other event-email flags above.
       boolean eventOneHourReminderEmailEnabled =
-          null != eventOneHourReminderEmailProperty && !eventOneHourReminderEmailProperty.isEmpty()
-              && Boolean.parseBoolean(eventOneHourReminderEmailProperty);
+          null == eventOneHourReminderEmailProperty || eventOneHourReminderEmailProperty.isEmpty()
+              || Boolean.parseBoolean(eventOneHourReminderEmailProperty);
 
       SegueScheduledJob piiSqlJob = new SegueScheduledDatabaseScriptJob(
           "PIIDeleteScheduledJob",
