@@ -300,8 +300,11 @@ public final class Constants {
   // Federated Authentication Stuff
   /**
    * This constant will be used to determine if we are expecting a link account request or not.
+   * Carried via a dedicated short-lived cookie (not HttpSession) so it survives the OAuth redirect
+   * round trip regardless of any path rewriting done by upstream infrastructure (e.g. the ALB).
    */
-  public static final String LINK_ACCOUNT_PARAM_NAME = "LINK_ACCOUNT_PARAM_NAME";
+  public static final String LINK_ACCOUNT_COOKIE = "LINK_ACCOUNT_INTENT";
+  public static final int LINK_ACCOUNT_COOKIE_TTL_SECONDS = 600;
 
   public static final String STATE_PARAM_NAME = "state";
   public static final String CLIENT_ID_PARAM_NAME = "client_id";
