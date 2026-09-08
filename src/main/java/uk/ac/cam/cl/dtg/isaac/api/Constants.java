@@ -188,6 +188,8 @@ public final class Constants {
 
   public static final Integer EMAIL_EVENT_REMINDER_DAYS_AHEAD = 3;
   public static final Integer EMAIL_EVENT_FEEDBACK_DAYS_AGO = 60;
+  public static final Integer EMAIL_EVENT_ONE_HOUR_REMINDER_WINDOW_START_MINUTES = 50;
+  public static final Integer EMAIL_EVENT_ONE_HOUR_REMINDER_WINDOW_END_MINUTES = 70;
 
   // Response messages
   public static final String EMPTY_ASSIGNMENT_GAMEBOARD =
