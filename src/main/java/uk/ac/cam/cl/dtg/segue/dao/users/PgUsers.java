@@ -57,6 +57,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserAuthenticationSettings;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
 import uk.ac.cam.cl.dtg.segue.auth.AuthenticationProvider;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.AccountAlreadyLinkedException;
 import uk.ac.cam.cl.dtg.segue.dao.AbstractPgDataManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.database.PostgresSqlDb;
@@ -277,6 +278,13 @@ public class PgUsers extends AbstractPgDataManager implements IUserDataManager {
       return true;
 
     } catch (SQLException e) {
+      // SQLState 23505 is the SQL standard code for a unique-constraint violation. Here that means the
+      // "provider and user id" constraint on linked_accounts, i.e. this provider account is already linked
+      // to a different user.
+      if ("23505".equals(e.getSQLState())) {
+        throw new AccountAlreadyLinkedException(
+            "The provider account you are trying to link is already attached to a user of this system.", e);
+      }
       throw new SegueDatabaseException(POSTGRES_EXCEPTION_MESSAGE, e);
     }
   }
