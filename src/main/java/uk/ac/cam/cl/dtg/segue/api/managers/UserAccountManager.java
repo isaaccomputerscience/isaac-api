@@ -25,7 +25,6 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.EMAIL_SIGNATURE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.LAST_SEEN_UPDATE_FREQUENCY_MINUTES;
-import static uk.ac.cam.cl.dtg.segue.api.Constants.LINK_ACCOUNT_PARAM_NAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.LOGIN_2FA_REQUIRED_MESSAGE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.RESTRICTED_SIGNUP_EMAIL_REGEX;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.SESSION_EXPIRY_SECONDS_DEFAULT;
@@ -41,7 +40,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
@@ -254,12 +252,8 @@ public class UserAccountManager implements IUserAccountManager {
    */
   public URI initiateLinkAccountToUserFlow(final HttpServletRequest request, final HttpServletResponse response, final String provider)
       throws IOException, AuthenticationProviderMappingException {
-    // record our intention to link an account.
-    HttpSession session = request.getSession();
-    session.setAttribute(LINK_ACCOUNT_PARAM_NAME, Boolean.TRUE);
-    // TEMP DIAGNOSTIC LOGGING - #google-link-500 - remove once cross-pod session theory is confirmed/refuted
-    log.info("DIAG link-init: pod={} sessionId={} sessionIsNew={} provider={}",
-        System.getenv("HOSTNAME"), session.getId(), session.isNew(), provider);
+    // record our intention to link an account via a dedicated cookie (see createLinkAccountCookie).
+    response.addCookie(this.userAuthenticationManager.createLinkAccountCookie(request));
 
     return this.userAuthenticationManager.getThirdPartyAuthURI(request, response, provider);
   }
@@ -304,12 +298,9 @@ public class UserAccountManager implements IUserAccountManager {
     RegisteredUser currentUser = getCurrentRegisteredUserDO(request);
     // if the user is currently logged in and this is a request for a linked account, then create the new link.
     if (null != currentUser) {
-      HttpSession session = request.getSession();
-      Boolean intentionToLinkRegistered = (Boolean) session.getAttribute(LINK_ACCOUNT_PARAM_NAME);
-      // TEMP DIAGNOSTIC LOGGING - #google-link-500 - remove once cross-pod session theory is confirmed/refuted
-      log.info("DIAG link-callback: pod={} sessionId={} sessionIsNew={} intentionToLinkRegistered={} provider={}",
-          System.getenv("HOSTNAME"), session.getId(), session.isNew(), intentionToLinkRegistered, provider);
-      if (intentionToLinkRegistered == null || !intentionToLinkRegistered) {
+      // consuming the cookie also expires it, so it cannot be reused for a later callback.
+      boolean intentionToLinkRegistered = this.userAuthenticationManager.consumeLinkAccountCookie(request, response);
+      if (!intentionToLinkRegistered) {
         throw new SegueDatabaseException("User is already authenticated - "
             + "expected request to link accounts but none was found.");
       }
@@ -319,8 +310,6 @@ public class UserAccountManager implements IUserAccountManager {
         // create linked account
         this.userAuthenticationManager.linkProviderToExistingAccount(currentUser,
             authenticator.getAuthenticationProvider(), providerUserDO);
-        // clear link accounts intention until next time
-        request.removeAttribute(LINK_ACCOUNT_PARAM_NAME);
       }
 
       return this.convertUserDOToUserDTO(getCurrentRegisteredUserDO(request));

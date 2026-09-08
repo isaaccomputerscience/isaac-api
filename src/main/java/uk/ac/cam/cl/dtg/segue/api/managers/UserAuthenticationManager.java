@@ -25,6 +25,8 @@ import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HMAC_SALT;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.HOST_NAME;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.JSESSION_COOOKIE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.LINK_ACCOUNT_COOKIE;
+import static uk.ac.cam.cl.dtg.segue.api.Constants.LINK_ACCOUNT_COOKIE_TTL_SECONDS;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.LOGOUT_SESSION_ALREADY_INVALIDATED_MESSAGE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.NO_SESSION_TOKEN_RESERVED_VALUE;
 import static uk.ac.cam.cl.dtg.segue.api.Constants.OAUTH_STATE_COOKIE;
@@ -1256,5 +1258,52 @@ public class UserAuthenticationManager {
       }
     }
     return null;
+  }
+
+  /**
+   * Record the user's intention to link a 3rd party provider to their existing account via a dedicated
+   * short-lived cookie. This deliberately avoids HttpSession: the OAuth callback can be rewritten onto a
+   * different path by upstream infrastructure (e.g. an ALB path rewrite) to which the servlet container's
+   * default session cookie Path does not apply, meaning a session attribute set here would not reliably be
+   * visible when the callback request lands - the same reason the OAuth CSRF state is also cookie-backed.
+   *
+   * @param request the current http request, used to detect if the connection is secure.
+   * @return a cookie to be added to the response.
+   */
+  public Cookie createLinkAccountCookie(final HttpServletRequest request) {
+    Cookie linkAccountCookie = new Cookie(LINK_ACCOUNT_COOKIE, Boolean.TRUE.toString());
+    linkAccountCookie.setMaxAge(LINK_ACCOUNT_COOKIE_TTL_SECONDS);
+    linkAccountCookie.setPath("/");
+    linkAccountCookie.setHttpOnly(true);
+    linkAccountCookie.setSecure(isSecure(request));
+    linkAccountCookie.setComment(SAME_SITE_NONE_COMMENT);
+    return linkAccountCookie;
+  }
+
+  /**
+   * Check whether the request carries a link-account-intent cookie, and if so consume it (expire it on the
+   * response) so it cannot be reused for a subsequent callback.
+   *
+   * @param request  the current http request.
+   * @param response the response to expire the cookie on, if present.
+   * @return true if the link-account-intent cookie was present.
+   */
+  public boolean consumeLinkAccountCookie(final HttpServletRequest request, final HttpServletResponse response) {
+    if (request.getCookies() == null) {
+      return false;
+    }
+    for (Cookie c : request.getCookies()) {
+      if (LINK_ACCOUNT_COOKIE.equals(c.getName())) {
+        Cookie expiredCookie = new Cookie(LINK_ACCOUNT_COOKIE, "");
+        expiredCookie.setMaxAge(0);
+        expiredCookie.setPath("/");
+        expiredCookie.setHttpOnly(true);
+        expiredCookie.setSecure(isSecure(request));
+        expiredCookie.setComment(SAME_SITE_NONE_COMMENT);
+        response.addCookie(expiredCookie);
+        return Boolean.parseBoolean(c.getValue());
+      }
+    }
+    return false;
   }
 }
