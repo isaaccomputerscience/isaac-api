@@ -85,7 +85,13 @@ public class EventNotificationEmailManager {
     this.pgScheduledEmailManager = pgScheduledEmailManager;
   }
 
-  public void sendBookingStatusFilteredEmailForEvent(final IsaacEventPageDTO event, final String templateId,
+  /**
+   * @return true if the event's bookings and email template were resolved and delivery was attempted (regardless
+   *     of individual per-user outcomes); false if nothing could be attempted at all, e.g. because the bookings or
+   *     the email template could not be retrieved. Callers use this to decide whether the scheduled_emails dedup
+   *     commit for this send should be rolled back so a later sweep can retry it.
+   */
+  public boolean sendBookingStatusFilteredEmailForEvent(final IsaacEventPageDTO event, final String templateId,
                                                      final List<BookingStatus> bookingStatuses) {
 
     if (event == null || templateId == null || templateId.trim().isEmpty()) {
@@ -97,12 +103,12 @@ public class EventNotificationEmailManager {
       eventBookings = bookingManager.adminGetBookingsByEventId(event.getId());
     } catch (SegueDatabaseException e) {
       log.error("Failed to retrieve bookings for event ID {}: ", event.getId(), e);
-      return;
+      return false;
     }
 
     if (eventBookings.isEmpty()) {
       log.info("No bookings found for event ID {}", event.getId());
-      return;
+      return false;
     }
 
     final Map<String, Object> emailContext = Map.of(
@@ -120,7 +126,7 @@ public class EventNotificationEmailManager {
 
     if (userIds.isEmpty()) {
       log.error("No users match the specified booking statuses for event ID {}", event.getId());
-      return;
+      return false;
     }
 
     final EmailTemplateDTO emailTemplate;
@@ -128,7 +134,7 @@ public class EventNotificationEmailManager {
       emailTemplate = emailManager.getEmailTemplateDTO(templateId);
     } catch (ContentManagerException | ResourceNotFoundException e) {
       log.error("Failed to retrieve email template with ID {} : {}", templateId, e);
-      return;
+      return false;
     }
 
     final AtomicInteger successCount = new AtomicInteger(0);
@@ -145,6 +151,8 @@ public class EventNotificationEmailManager {
     if (!failedUserIds.isEmpty()) {
       log.warn("Failed to send emails to user IDs: {}", failedUserIds);
     }
+
+    return true;
   }
 
   private void processUser(final Long userId, final EmailTemplateDTO emailTemplate,
@@ -184,7 +192,10 @@ public class EventNotificationEmailManager {
      */
     List<BookingStatus> bookingStatuses = Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.ATTENDED);
     if (pgScheduledEmailManager.commitToSchedulingEmail(emailKey)) {
-      this.sendBookingStatusFilteredEmailForEvent(event, templateId, bookingStatuses);
+      boolean dispatched = this.sendBookingStatusFilteredEmailForEvent(event, templateId, bookingStatuses);
+      if (!dispatched) {
+        pgScheduledEmailManager.rollbackScheduledEmail(emailKey);
+      }
     }
   }
 
@@ -233,7 +244,12 @@ public class EventNotificationEmailManager {
     if (pgScheduledEmailManager.commitToSchedulingEmail(emailKey)) {
       log.info("Committed to sending one-hour-before reminder for event ID {} (key: {}); dispatching now.",
           event.getId(), emailKey);
-      this.sendBookingStatusFilteredEmailForEvent(event, templateId, bookingStatuses);
+      boolean dispatched = this.sendBookingStatusFilteredEmailForEvent(event, templateId, bookingStatuses);
+      if (!dispatched) {
+        log.warn("One-hour-before reminder for event ID {} (key: {}) could not be dispatched; rolling back"
+            + " dedup commit so a later sweep can retry.", event.getId(), emailKey);
+        pgScheduledEmailManager.rollbackScheduledEmail(emailKey);
+      }
     } else {
       log.info("Skipping one-hour-before reminder for event ID {} (key: {}): already committed/sent previously"
           + " (scheduled_emails dedup).", event.getId(), emailKey);
@@ -305,7 +321,10 @@ public class EventNotificationEmailManager {
      */
     List<BookingStatus> bookingStatuses = List.of(BookingStatus.ATTENDED);
     if (pgScheduledEmailManager.commitToSchedulingEmail(emailKey)) {
-      this.sendBookingStatusFilteredEmailForEvent(event, templateId, bookingStatuses);
+      boolean dispatched = this.sendBookingStatusFilteredEmailForEvent(event, templateId, bookingStatuses);
+      if (!dispatched) {
+        pgScheduledEmailManager.rollbackScheduledEmail(emailKey);
+      }
     }
   }
 

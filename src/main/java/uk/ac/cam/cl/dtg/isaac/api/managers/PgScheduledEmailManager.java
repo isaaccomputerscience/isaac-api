@@ -43,4 +43,22 @@ public class PgScheduledEmailManager {
     }
     return false;
   }
+
+  /**
+   * Undo a previous commitToSchedulingEmail call for an email that was claimed but never actually dispatched
+   * (e.g. because the email template could not be found), so that a later sweep can retry it.
+   *
+   * @param emailKey - the dedup key previously passed to commitToSchedulingEmail.
+   */
+  public void rollbackScheduledEmail(final String emailKey) {
+    String query = "DELETE FROM scheduled_emails WHERE email_id = ?";
+    try (Connection conn = database.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(query)
+    ) {
+      pst.setString(1, emailKey);
+      pst.executeUpdate();
+    } catch (SQLException e) {
+      log.error("Failed to roll back scheduled email commit for key {}: ", emailKey, e);
+    }
+  }
 }
