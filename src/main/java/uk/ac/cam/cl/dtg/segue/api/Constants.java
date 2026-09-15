@@ -234,6 +234,7 @@ public final class Constants {
   public static final String MAILJET_LEGAL_LIST_ID = "MAILJET_LEGAL_LIST_ID";
 
   public static final String EVENT_PRE_POST_EMAILS = "EVENT_PRE_POST_EMAILS";
+  public static final String EVENT_ONE_HOUR_REMINDER_EMAIL = "EVENT_ONE_HOUR_REMINDER_EMAIL";
 
   // MailGun Key
   public static final String MAILGUN_SECRET_KEY = "MAILGUN_SECRET_KEY";

@@ -2,18 +2,24 @@ package uk.ac.cam.cl.dtg.isaac.api.managers;
 
 import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.ac.cam.cl.dtg.isaac.api.Constants.DATE_FIELDNAME;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockExtension;
 import org.easymock.Mock;
@@ -32,6 +38,8 @@ import uk.ac.cam.cl.dtg.isaac.utils.TestDataFactory;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
+import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
+import uk.ac.cam.cl.dtg.segue.search.DateRangeFilterInstruction;
 
 @ExtendWith(EasyMockExtension.class)
 class EventNotificationEmailManagerTest {
@@ -123,7 +131,7 @@ class EventNotificationEmailManagerTest {
           eq("event_feedback"),
           eq(List.of(BookingStatus.ATTENDED))
       );
-      expectLastCall().atLeastOnce();
+      expectLastCall().andReturn(true).atLeastOnce();
 
       replay(contentManager, resultsWrapper, pgScheduledEmailManager, partialMock);
 
@@ -161,7 +169,7 @@ class EventNotificationEmailManagerTest {
           eq("event_feedback"),
           eq(List.of(BookingStatus.ATTENDED))
       );
-      expectLastCall().atLeastOnce();
+      expectLastCall().andReturn(true).atLeastOnce();
 
       replay(contentManager, resultsWrapper, pgScheduledEmailManager, partialMock);
 
@@ -218,7 +226,7 @@ class EventNotificationEmailManagerTest {
           eq("event_feedback"),
           eq(List.of(BookingStatus.ATTENDED))
       );
-      expectLastCall().atLeastOnce();
+      expectLastCall().andReturn(true).atLeastOnce();
 
       replay(contentManager, resultsWrapper, pgScheduledEmailManager, partialMock);
 
@@ -256,7 +264,7 @@ class EventNotificationEmailManagerTest {
           eq("event_feedback"),
           eq(List.of(BookingStatus.ATTENDED))
       );
-      expectLastCall().atLeastOnce();
+      expectLastCall().andReturn(true).atLeastOnce();
 
       replay(contentManager, resultsWrapper, pgScheduledEmailManager, partialMock);
 
@@ -332,7 +340,7 @@ class EventNotificationEmailManagerTest {
             eq("event_feedback"),
             eq(List.of(BookingStatus.ATTENDED))
         );
-        expectLastCall().atLeastOnce();
+        expectLastCall().andReturn(true).atLeastOnce();
 
         replay(contentManager, resultsWrapper, pgScheduledEmailManager, partialMock);
 
@@ -340,6 +348,158 @@ class EventNotificationEmailManagerTest {
 
         verify(pgScheduledEmailManager, partialMock);
       }
+    }
+  }
+
+  @Nested
+  @DisplayName("One Hour Before Start Trigger Tests")
+  class OneHourBeforeStartTriggerTests {
+
+    private EventNotificationEmailManager buildPartialMockExpectingSend() {
+      EventNotificationEmailManager partialMock = EasyMock.partialMockBuilder(EventNotificationEmailManager.class)
+          .withConstructor(
+              GitContentManager.class,
+              EventBookingManager.class,
+              UserAccountManager.class,
+              EmailManager.class,
+              PgScheduledEmailManager.class
+          )
+          .withArgs(contentManager, eventBookingManager, userAccountManager, emailManager, pgScheduledEmailManager)
+          .addMockedMethod("sendBookingStatusFilteredEmailForEvent")
+          .createMock();
+
+      partialMock.sendBookingStatusFilteredEmailForEvent(
+          anyObject(IsaacEventPageDTO.class),
+          eq("email_event_reminder_one_hour_before"),
+          eq(List.of(BookingStatus.CONFIRMED))
+      );
+      expectLastCall().andReturn(true).atLeastOnce();
+      return partialMock;
+    }
+
+    @Test
+    @DisplayName("Should send one-hour reminder for CONFIRMED booking on online event within window")
+    void shouldSendForOnlineEventWithinWindow() throws Exception {
+      testEvent.setDate(Instant.now().plus(60, ChronoUnit.MINUTES));
+      testEvent.setMeetingUrl("https://meet.example.com/room");
+
+      setupMockContentManager(Collections.singletonList(testEvent));
+      expect(pgScheduledEmailManager.commitToSchedulingEmail("test-event-1@1hr")).andReturn(true).atLeastOnce();
+
+      EventNotificationEmailManager partialMock = buildPartialMockExpectingSend();
+      replay(contentManager, resultsWrapper, pgScheduledEmailManager, partialMock);
+
+      partialMock.sendOneHourReminderEmails();
+
+      verify(pgScheduledEmailManager, partialMock);
+    }
+
+    @Test
+    @DisplayName("Should roll back the dedup commit when the send could not be dispatched"
+        + " (e.g. missing email template), so a later sweep can retry")
+    void shouldRollBackCommitWhenSendCannotBeDispatched() throws Exception {
+      testEvent.setDate(Instant.now().plus(60, ChronoUnit.MINUTES));
+      testEvent.setMeetingUrl("https://meet.example.com/room");
+
+      setupMockContentManager(Collections.singletonList(testEvent));
+      expect(pgScheduledEmailManager.commitToSchedulingEmail("test-event-1@1hr")).andReturn(true).atLeastOnce();
+      pgScheduledEmailManager.rollbackScheduledEmail("test-event-1@1hr");
+      expectLastCall().atLeastOnce();
+
+      EventNotificationEmailManager partialMock = EasyMock.partialMockBuilder(EventNotificationEmailManager.class)
+          .withConstructor(
+              GitContentManager.class,
+              EventBookingManager.class,
+              UserAccountManager.class,
+              EmailManager.class,
+              PgScheduledEmailManager.class
+          )
+          .withArgs(contentManager, eventBookingManager, userAccountManager, emailManager, pgScheduledEmailManager)
+          .addMockedMethod("sendBookingStatusFilteredEmailForEvent")
+          .createMock();
+
+      partialMock.sendBookingStatusFilteredEmailForEvent(
+          anyObject(IsaacEventPageDTO.class),
+          eq("email_event_reminder_one_hour_before"),
+          eq(List.of(BookingStatus.CONFIRMED))
+      );
+      expectLastCall().andReturn(false).atLeastOnce();
+
+      replay(contentManager, resultsWrapper, pgScheduledEmailManager, partialMock);
+
+      partialMock.sendOneHourReminderEmails();
+
+      verify(pgScheduledEmailManager, partialMock);
+    }
+
+    @Test
+    @DisplayName("Should NOT send for in-person event (no meetingUrl) even within window")
+    void shouldNotSendForInPersonEvent() throws Exception {
+      testEvent.setDate(Instant.now().plus(60, ChronoUnit.MINUTES));
+      testEvent.setMeetingUrl(null);
+
+      setupMockContentManager(Collections.singletonList(testEvent));
+      replay(contentManager, resultsWrapper, pgScheduledEmailManager);
+
+      eventNotificationEmailManager.sendOneHourReminderEmails();
+
+      verify(contentManager, resultsWrapper, pgScheduledEmailManager);
+    }
+
+    @Test
+    @DisplayName("Should NOT send for blank meetingUrl (in-person event)")
+    void shouldNotSendForBlankMeetingUrl() throws Exception {
+      testEvent.setDate(Instant.now().plus(60, ChronoUnit.MINUTES));
+      testEvent.setMeetingUrl("   ");
+
+      setupMockContentManager(Collections.singletonList(testEvent));
+      replay(contentManager, resultsWrapper, pgScheduledEmailManager);
+
+      eventNotificationEmailManager.sendOneHourReminderEmails();
+
+      verify(contentManager, resultsWrapper, pgScheduledEmailManager);
+    }
+
+    @Test
+    @DisplayName("Should NOT send for cancelled online event")
+    void shouldNotSendForCancelledEvent() throws Exception {
+      testEvent.setDate(Instant.now().plus(60, ChronoUnit.MINUTES));
+      testEvent.setMeetingUrl("https://meet.example.com/room");
+      testEvent.setEventStatus(EventStatus.CANCELLED);
+
+      setupMockContentManager(Collections.singletonList(testEvent));
+      replay(contentManager, resultsWrapper, pgScheduledEmailManager);
+
+      eventNotificationEmailManager.sendOneHourReminderEmails();
+
+      verify(contentManager, resultsWrapper, pgScheduledEmailManager);
+    }
+
+    @Test
+    @DisplayName("Should build a 50-70 minute lookahead window when searching for events")
+    void shouldBuildFiftyToSeventyMinuteWindow() throws Exception {
+      testEvent.setDate(Instant.now().plus(60, ChronoUnit.MINUTES));
+      testEvent.setMeetingUrl("https://meet.example.com/room");
+
+      Capture<Map<String, AbstractFilterInstruction>> filterCapture = Capture.newInstance();
+      List<ContentDTO> contentResults = new ArrayList<>(Collections.singletonList(testEvent));
+      expect(resultsWrapper.getResults()).andReturn(contentResults).anyTimes();
+      expect(contentManager.findByFieldNames(anyObject(), anyInt(), anyInt(), anyObject(), capture(filterCapture)))
+          .andReturn(resultsWrapper).anyTimes();
+      expect(pgScheduledEmailManager.commitToSchedulingEmail("test-event-1@1hr")).andReturn(true).atLeastOnce();
+
+      EventNotificationEmailManager partialMock = buildPartialMockExpectingSend();
+      replay(contentManager, resultsWrapper, pgScheduledEmailManager, partialMock);
+
+      partialMock.sendOneHourReminderEmails();
+
+      verify(pgScheduledEmailManager, partialMock);
+
+      DateRangeFilterInstruction dateRange =
+          (DateRangeFilterInstruction) filterCapture.getValue().get(DATE_FIELDNAME);
+      Instant now = Instant.now();
+      assertTrue(Duration.between(now.plus(50, ChronoUnit.MINUTES), dateRange.getFromDate()).abs().toMinutes() < 1);
+      assertTrue(Duration.between(now.plus(70, ChronoUnit.MINUTES), dateRange.getToDate()).abs().toMinutes() < 1);
     }
   }
 }
