@@ -80,6 +80,8 @@ class CompetitionEntryServiceTest {
     dto.setProjectTitle("Amazing AI Project");
     dto.setSubmissionURL("https://github.com/team/project");
     dto.setGroupName("Team Alpha");
+    dto.setYearGroup("Year 10");
+    dto.setProjectDescription("An AI project that predicts the weather.");
     return dto;
   }
 
@@ -305,12 +307,134 @@ class CompetitionEntryServiceTest {
   }
 
   @Test
+  void sendCompetitionEntryConfirmation_withNullYearGroup_sendsEmailWithEmptyString()
+      throws Exception {
+    // Arrange
+    mockEntryDTO.setYearGroup(null);
+
+    RegisteredUserDTO student1 = createMockStudent(1001L, "Alice", "Johnson");
+    RegisteredUserDTO student2 = createMockStudent(1002L, "Bob", "Smith");
+    RegisteredUserDTO student3 = createMockStudent(1003L, "Charlie", "Brown");
+
+    expect(emailManager.getEmailTemplateDTO("email_competition_entry_confirmation"))
+        .andReturn(mockEmailTemplate);
+
+    expect(userAccountManager.getUserDTOById(1001L)).andReturn(student1);
+    expect(userAccountManager.getUserDTOById(1002L)).andReturn(student2);
+    expect(userAccountManager.getUserDTOById(1003L)).andReturn(student3);
+
+    emailManager.sendTemplatedEmailToUser(
+        eq(mockTeacher),
+        eq(mockEmailTemplate),
+        anyObject(Map.class),
+        eq(EmailType.SYSTEM)
+    );
+    expectLastCall();
+
+    replay(emailManager, userAccountManager);
+
+    // Act
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        mockEvent,
+        mockEntryDTO,
+        mockTeacher
+    );
+
+    // Assert
+    verify(emailManager, userAccountManager);
+  }
+
+  @Test
+  void sendCompetitionEntryConfirmation_withNullProjectDescription_sendsEmailWithEmptyString()
+      throws Exception {
+    // Arrange
+    mockEntryDTO.setProjectDescription(null);
+
+    RegisteredUserDTO student1 = createMockStudent(1001L, "Alice", "Johnson");
+    RegisteredUserDTO student2 = createMockStudent(1002L, "Bob", "Smith");
+    RegisteredUserDTO student3 = createMockStudent(1003L, "Charlie", "Brown");
+
+    expect(emailManager.getEmailTemplateDTO("email_competition_entry_confirmation"))
+        .andReturn(mockEmailTemplate);
+
+    expect(userAccountManager.getUserDTOById(1001L)).andReturn(student1);
+    expect(userAccountManager.getUserDTOById(1002L)).andReturn(student2);
+    expect(userAccountManager.getUserDTOById(1003L)).andReturn(student3);
+
+    emailManager.sendTemplatedEmailToUser(
+        eq(mockTeacher),
+        eq(mockEmailTemplate),
+        anyObject(Map.class),
+        eq(EmailType.SYSTEM)
+    );
+    expectLastCall();
+
+    replay(emailManager, userAccountManager);
+
+    // Act
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        mockEvent,
+        mockEntryDTO,
+        mockTeacher
+    );
+
+    // Assert
+    verify(emailManager, userAccountManager);
+  }
+
+  @Test
+  void sendCompetitionEntryConfirmation_verifyEmailContextContainsYearGroupAndProjectDescription()
+      throws Exception {
+    // Arrange
+    RegisteredUserDTO student1 = createMockStudent(1001L, "Alice", "Johnson");
+    RegisteredUserDTO student2 = createMockStudent(1002L, "Bob", "Smith");
+    RegisteredUserDTO student3 = createMockStudent(1003L, "Charlie", "Brown");
+
+    expect(emailManager.getEmailTemplateDTO("email_competition_entry_confirmation"))
+        .andReturn(mockEmailTemplate);
+
+    expect(userAccountManager.getUserDTOById(1001L)).andReturn(student1);
+    expect(userAccountManager.getUserDTOById(1002L)).andReturn(student2);
+    expect(userAccountManager.getUserDTOById(1003L)).andReturn(student3);
+
+    Capture<Map<String, Object>> emailContextCapture = newCapture();
+
+    emailManager.sendTemplatedEmailToUser(
+        eq(mockTeacher),
+        eq(mockEmailTemplate),
+        capture(emailContextCapture),
+        eq(EmailType.SYSTEM)
+    );
+    expectLastCall();
+
+    replay(emailManager, userAccountManager);
+
+    // Act
+    competitionEntryService.sendCompetitionEntryConfirmation(
+        mockEvent,
+        mockEntryDTO,
+        mockTeacher
+    );
+
+    // Assert
+    verify(emailManager, userAccountManager);
+
+    Map<String, Object> capturedContext = emailContextCapture.getValue();
+    assertTrue(capturedContext.containsKey("yearGroup"));
+    assertTrue(capturedContext.containsKey("projectDescription"));
+    assertEquals("Year 10", capturedContext.get("yearGroup"));
+    assertEquals("An AI project that predicts the weather.", capturedContext.get("projectDescription"));
+  }
+
+  @Test
   void sendCompetitionEntryConfirmation_withAllNullOptionalFields_sendsEmailSuccessfully()
       throws Exception {
     // Arrange
     mockEntryDTO.setProjectTitle(null);
     mockEntryDTO.setSubmissionURL(null);
     mockEntryDTO.setGroupName(null);
+    mockEntryDTO.setYearGroup(null);
+    mockEntryDTO.setProjectDescription(null);
 
     RegisteredUserDTO student1 = createMockStudent(1001L, "Alice", "Johnson");
     RegisteredUserDTO student2 = createMockStudent(1002L, "Bob", "Smith");

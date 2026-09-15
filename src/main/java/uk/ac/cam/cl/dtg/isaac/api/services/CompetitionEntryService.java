@@ -121,6 +121,9 @@ public class CompetitionEntryService {
     final String projectTitle = entryDTO.getProjectTitle() != null ? entryDTO.getProjectTitle() : "";
     final String projectLink = entryDTO.getSubmissionURL() != null ? entryDTO.getSubmissionURL() : "";
     final String groupName = entryDTO.getGroupName() != null ? entryDTO.getGroupName() : "";
+    final String yearGroup = entryDTO.getYearGroup() != null ? entryDTO.getYearGroup() : "";
+    final String projectDescription =
+        entryDTO.getProjectDescription() != null ? entryDTO.getProjectDescription() : "";
 
     return Map.of(
         "event", event,
@@ -128,6 +131,8 @@ public class CompetitionEntryService {
         "projectTitle", projectTitle,
         "projectLink", projectLink,
         "groupName", groupName,
+        "yearGroup", yearGroup,
+        "projectDescription", projectDescription,
         STUDENTS_LIST, studentsList.get(STUDENTS_LIST),
         STUDENTS_LIST_HTML, studentsList.get(STUDENTS_LIST_HTML),
         "contactUsURL", generateEventContactUsURL(reservingUser.getGivenName(),
