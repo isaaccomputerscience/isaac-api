@@ -13,7 +13,11 @@ USER root
 RUN mkdir /isaac-logs
 RUN chmod 755 /isaac-logs
 RUN chown jetty /isaac-logs
-ADD resources/schools_list_2026_spring.tar.gz /local/data/
+ARG SCHOOLS_LIST=schools_list_2026_summer.tar.gz
+COPY resources/${SCHOOLS_LIST} /tmp/schools_list.tar.gz
+RUN mkdir -p /local/data \
+    && tar -xzf /tmp/schools_list.tar.gz -O > /local/data/schools_list.csv \
+    && rm /tmp/schools_list.tar.gz
 COPY --from=base /isaac-api/target/isaac-api.war /var/lib/jetty/webapps/isaac-api.war
 RUN chmod 755 /var/lib/jetty/webapps/*
 RUN chown jetty /var/lib/jetty/webapps/*
