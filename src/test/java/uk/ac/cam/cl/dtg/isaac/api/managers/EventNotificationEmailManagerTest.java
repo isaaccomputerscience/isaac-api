@@ -40,6 +40,7 @@ import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
 import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
 import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
+import uk.ac.cam.cl.dtg.segue.dao.content.ContentManagerException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.DateRangeFilterInstruction;
@@ -576,6 +577,47 @@ class EventNotificationEmailManagerTest {
       expectLastCall().andThrow(new NoUserException("missing"));
       eventBookingManager.sendExpiredReservationCancellationEmails(testEvent, second);
       expectLastCall().once();
+
+      replay(eventBookingManager, contentManager);
+      eventNotificationEmailManager.cancelExpiredReservations();
+      verify(eventBookingManager, contentManager);
+    }
+
+    @Test
+    @DisplayName("Should not email when the event cannot be loaded")
+    void shouldNotSendEmailsWhenEventLookupFails() throws Exception {
+      expect(eventBookingManager.cancelExpiredReservations())
+          .andReturn(List.of(reservation(Instant.now().minus(1, ChronoUnit.HOURS))));
+      expect(contentManager.getContentById(EVENT_ID)).andThrow(new ContentManagerException("boom"));
+
+      replay(eventBookingManager, contentManager);
+      eventNotificationEmailManager.cancelExpiredReservations();
+      verify(eventBookingManager, contentManager);
+    }
+
+    @Test
+    @DisplayName("Should not email when the content is not an event page")
+    void shouldNotSendEmailsWhenContentIsNotAnEvent() throws Exception {
+      expect(eventBookingManager.cancelExpiredReservations())
+          .andReturn(List.of(reservation(Instant.now().minus(1, ChronoUnit.HOURS))));
+      expect(contentManager.getContentById(EVENT_ID)).andReturn(null);
+
+      replay(eventBookingManager, contentManager);
+      eventNotificationEmailManager.cancelExpiredReservations();
+      verify(eventBookingManager, contentManager);
+    }
+
+    @Test
+    @DisplayName("Should load each event only once for several expired reservations")
+    void shouldLoadEachEventOnce() throws Exception {
+      Instant now = Instant.now();
+      testEvent.setDate(now.plus(10, ChronoUnit.DAYS));
+      ExpiredReservation first = reservation(now.minus(1, ChronoUnit.HOURS));
+      ExpiredReservation second = new ExpiredReservation(EVENT_ID, 3L, 1L, now.minus(1, ChronoUnit.HOURS));
+      expect(eventBookingManager.cancelExpiredReservations()).andReturn(List.of(first, second));
+      expect(contentManager.getContentById(EVENT_ID)).andReturn(testEvent).once();
+      eventBookingManager.sendExpiredReservationCancellationEmails(testEvent, first);
+      eventBookingManager.sendExpiredReservationCancellationEmails(testEvent, second);
 
       replay(eventBookingManager, contentManager);
       eventNotificationEmailManager.cancelExpiredReservations();

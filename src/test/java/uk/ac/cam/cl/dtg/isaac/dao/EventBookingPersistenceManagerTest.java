@@ -1,12 +1,14 @@
 package uk.ac.cam.cl.dtg.isaac.dao;
 
 import static java.time.Instant.now;
+import static org.easymock.EasyMock.anyString;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.ac.cam.cl.dtg.CustomAssertions.assertDeepEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.ExpiredReservation;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.DetailedEventBookingDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
@@ -123,6 +126,61 @@ class EventBookingPersistenceManagerTest {
     expectedBooking1.setProjectTitle("projectTitle");
     expectedBooking1.setLastUpdated(createAndUpdateTime);
     return expectedBooking1;
+  }
+
+  @Test
+  void cancelExpiredReservations_returnsCancelledReservationsWithOptionalReserver()
+      throws SegueDatabaseException, SQLException {
+    String expectedQuery = "UPDATE event_bookings SET status = 'CANCELLED', updated = NOW()"
+        + " WHERE status = 'RESERVED'"
+        + " AND (additional_booking_information->>'reservationCloseDate')::timestamptz < NOW()"
+        + " RETURNING event_id, user_id, reserved_by,"
+        + " (additional_booking_information->>'reservationCloseDate')::timestamptz AS reservation_close_date";
+    Instant closeDate = now();
+    Connection dummyConnection = createMock(Connection.class);
+    PreparedStatement dummyPreparedStatement = createMock(PreparedStatement.class);
+    ResultSet dummyResultSet = createMock(ResultSet.class);
+
+    expect(mockEventsDatabase.getDatabaseConnection()).andReturn(dummyConnection);
+    expect(dummyConnection.prepareStatement(expectedQuery)).andReturn(dummyPreparedStatement);
+    expect(dummyPreparedStatement.executeQuery()).andReturn(dummyResultSet);
+
+    expect(dummyResultSet.next()).andReturn(true);
+    expect(dummyResultSet.getLong("reserved_by")).andReturn(7L);
+    expect(dummyResultSet.getString("event_id")).andReturn("event1");
+    expect(dummyResultSet.getLong("user_id")).andReturn(2L);
+    expect(dummyResultSet.wasNull()).andReturn(false);
+    expect(dummyResultSet.getTimestamp("reservation_close_date")).andReturn(Timestamp.from(closeDate));
+    // A reservation with no recorded reserver
+    expect(dummyResultSet.next()).andReturn(true);
+    expect(dummyResultSet.getLong("reserved_by")).andReturn(0L);
+    expect(dummyResultSet.getString("event_id")).andReturn("event2");
+    expect(dummyResultSet.getLong("user_id")).andReturn(3L);
+    expect(dummyResultSet.wasNull()).andReturn(true);
+    expect(dummyResultSet.getTimestamp("reservation_close_date")).andReturn(Timestamp.from(closeDate));
+    expect(dummyResultSet.next()).andReturn(false);
+    dummyResultSet.close();
+    dummyPreparedStatement.close();
+    dummyConnection.close();
+    replay(mockEventsDatabase, dummyConnection, dummyPreparedStatement, dummyResultSet);
+
+    List<ExpiredReservation> result = eventBookingPersistenceManager.cancelExpiredReservations();
+
+    assertEquals(List.of(new ExpiredReservation("event1", 2L, 7L, closeDate),
+        new ExpiredReservation("event2", 3L, null, closeDate)), result);
+    verify(mockEventsDatabase, dummyConnection, dummyPreparedStatement, dummyResultSet);
+  }
+
+  @Test
+  void cancelExpiredReservations_whenQueryFails_throwsSegueDatabaseException() throws SQLException {
+    Connection dummyConnection = createMock(Connection.class);
+    expect(mockEventsDatabase.getDatabaseConnection()).andReturn(dummyConnection);
+    expect(dummyConnection.prepareStatement(anyString())).andThrow(new SQLException("boom"));
+    dummyConnection.close();
+    replay(mockEventsDatabase, dummyConnection);
+
+    assertThrows(SegueDatabaseException.class, () -> eventBookingPersistenceManager.cancelExpiredReservations());
+    verify(mockEventsDatabase, dummyConnection);
   }
 
   private static void prepareEventBookingResultSet(ResultSet dummyResultSet, long eventId, String event, Instant createAndUpdateTime)
