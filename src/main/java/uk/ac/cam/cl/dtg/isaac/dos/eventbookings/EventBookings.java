@@ -200,4 +200,12 @@ public interface EventBookings {
    * @param userId - user id
    */
   void deleteAdditionalInformation(Long userId) throws SegueDatabaseException;
+
+  /**
+   * Cancel all RESERVED bookings whose reservation close date has passed.
+   *
+   * @return the reservations that were cancelled
+   * @throws SegueDatabaseException if a database error occurs
+   */
+  List<ExpiredReservation> cancelExpiredReservations() throws SegueDatabaseException;
 }

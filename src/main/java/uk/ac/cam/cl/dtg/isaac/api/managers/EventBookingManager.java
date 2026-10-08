@@ -73,6 +73,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.AssociationToken;
 import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.ITransaction;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.ExpiredReservation;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
@@ -1117,6 +1118,56 @@ public class EventBookingManager {
         log.error("An error occurred while promoting the booking for user {} on event {}."
             + "A notification email could not be sent.", promotedBookingUserId, event.getId(), e);
       }
+    }
+  }
+
+  /**
+   * Cancel all reservations whose reservation close date has passed. Called by the daily expiry job.
+   * <br>
+   * No emails are sent here; see {@link #sendExpiredReservationCancellationEmails}.
+   *
+   * @return the reservations that were cancelled
+   * @throws SegueDatabaseException if a database error occurs.
+   */
+  public List<ExpiredReservation> cancelExpiredReservations() throws SegueDatabaseException {
+    return this.bookingPersistenceManager.cancelExpiredReservations();
+  }
+
+  /**
+   * Whether the user should be told that their reservation lapsed. Only reservations that were made with a full
+   * confirmation window before the event (so the close date is before the event start) and which lapsed before the
+   * event began are worth notifying: otherwise the reservation simply ran into the event starting.
+   *
+   * @param event       the event the reservation was for
+   * @param reservation the cancelled reservation
+   * @return true if cancellation emails should be sent
+   */
+  public static boolean shouldNotifyExpiredReservation(final IsaacEventPageDTO event,
+                                                       final ExpiredReservation reservation) {
+    Instant eventStart = event.getDate();
+    return eventStart != null
+        && reservation.reservationCloseDate() != null
+        && reservation.reservationCloseDate().isBefore(eventStart)
+        && Instant.now().isBefore(eventStart);
+  }
+
+  /**
+   * Send the existing reservation cancellation emails to the student and the teacher who reserved their place.
+   *
+   * @param event       the event the reservation was for
+   * @param reservation the cancelled reservation
+   * @throws ContentManagerException if an email template cannot be retrieved
+   * @throws SegueDatabaseException  if a database error occurs
+   * @throws NoUserException         if the student cannot be found
+   */
+  public void sendExpiredReservationCancellationEmails(final IsaacEventPageDTO event,
+                                                       final ExpiredReservation reservation)
+      throws ContentManagerException, SegueDatabaseException, NoUserException {
+    RegisteredUserDTO student = userAccountManager.getUserDTOById(reservation.userId());
+    sendEventReservationCancellationNotificationEmailToAttendee(event, student);
+    if (reservation.reservedById() != null) {
+      RegisteredUserDTO reserver = userAccountManager.getUserDTOById(reservation.reservedById());
+      sendEventReservationCancellationNotificationEmailToReserver(event, student, reserver);
     }
   }
 
