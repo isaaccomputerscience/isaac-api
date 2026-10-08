@@ -31,12 +31,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.content.ExternalReference;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.ExpiredReservation;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.utils.TestDataFactory;
 import uk.ac.cam.cl.dtg.segue.api.managers.UserAccountManager;
+import uk.ac.cam.cl.dtg.segue.auth.exceptions.NoUserException;
 import uk.ac.cam.cl.dtg.segue.comm.EmailManager;
+import uk.ac.cam.cl.dtg.segue.dao.SegueDatabaseException;
 import uk.ac.cam.cl.dtg.segue.dao.content.GitContentManager;
 import uk.ac.cam.cl.dtg.segue.search.AbstractFilterInstruction;
 import uk.ac.cam.cl.dtg.segue.search.DateRangeFilterInstruction;
@@ -500,6 +503,93 @@ class EventNotificationEmailManagerTest {
       Instant now = Instant.now();
       assertTrue(Duration.between(now.plus(50, ChronoUnit.MINUTES), dateRange.getFromDate()).abs().toMinutes() < 1);
       assertTrue(Duration.between(now.plus(70, ChronoUnit.MINUTES), dateRange.getToDate()).abs().toMinutes() < 1);
+    }
+  }
+
+  @Nested
+  @DisplayName("Expired Reservation Cancellation Tests")
+  class ExpiredReservationTests {
+
+    private static final String EVENT_ID = "test-event-1";
+
+    private ExpiredReservation reservation(final Instant closeDate) {
+      return new ExpiredReservation(EVENT_ID, 2L, 1L, closeDate);
+    }
+
+    private void expectEventLookup() throws Exception {
+      expect(contentManager.getContentById(EVENT_ID)).andReturn(testEvent).anyTimes();
+    }
+
+    @Test
+    @DisplayName("Should email student and teacher when a full-window reservation lapses before the event")
+    void shouldSendEmailsForFullWindowReservation() throws Exception {
+      Instant now = Instant.now();
+      testEvent.setDate(now.plus(10, ChronoUnit.DAYS));
+      ExpiredReservation expired = reservation(now.minus(1, ChronoUnit.HOURS));
+      expect(eventBookingManager.cancelExpiredReservations()).andReturn(List.of(expired));
+      expectEventLookup();
+      eventBookingManager.sendExpiredReservationCancellationEmails(testEvent, expired);
+      expectLastCall().once();
+
+      replay(eventBookingManager, contentManager);
+      eventNotificationEmailManager.cancelExpiredReservations();
+      verify(eventBookingManager, contentManager);
+    }
+
+    @Test
+    @DisplayName("Should not email when the reservation was made inside the confirmation window")
+    void shouldNotSendEmailsWhenCloseDateIsEventStart() throws Exception {
+      Instant eventStart = Instant.now().minus(1, ChronoUnit.HOURS);
+      testEvent.setDate(eventStart);
+      expect(eventBookingManager.cancelExpiredReservations()).andReturn(List.of(reservation(eventStart)));
+      expectEventLookup();
+
+      replay(eventBookingManager, contentManager);
+      eventNotificationEmailManager.cancelExpiredReservations();
+      verify(eventBookingManager, contentManager);
+    }
+
+    @Test
+    @DisplayName("Should not email when the event started before the job ran")
+    void shouldNotSendEmailsWhenEventAlreadyStarted() throws Exception {
+      Instant now = Instant.now();
+      testEvent.setDate(now.minus(1, ChronoUnit.HOURS));
+      expect(eventBookingManager.cancelExpiredReservations())
+          .andReturn(List.of(reservation(now.minus(5, ChronoUnit.HOURS))));
+      expectEventLookup();
+
+      replay(eventBookingManager, contentManager);
+      eventNotificationEmailManager.cancelExpiredReservations();
+      verify(eventBookingManager, contentManager);
+    }
+
+    @Test
+    @DisplayName("Should keep processing later reservations when one email fails")
+    void shouldContinueAfterEmailFailure() throws Exception {
+      Instant now = Instant.now();
+      testEvent.setDate(now.plus(10, ChronoUnit.DAYS));
+      ExpiredReservation first = reservation(now.minus(1, ChronoUnit.HOURS));
+      ExpiredReservation second = new ExpiredReservation(EVENT_ID, 3L, 1L, now.minus(1, ChronoUnit.HOURS));
+      expect(eventBookingManager.cancelExpiredReservations()).andReturn(List.of(first, second));
+      expectEventLookup();
+      eventBookingManager.sendExpiredReservationCancellationEmails(testEvent, first);
+      expectLastCall().andThrow(new NoUserException("missing"));
+      eventBookingManager.sendExpiredReservationCancellationEmails(testEvent, second);
+      expectLastCall().once();
+
+      replay(eventBookingManager, contentManager);
+      eventNotificationEmailManager.cancelExpiredReservations();
+      verify(eventBookingManager, contentManager);
+    }
+
+    @Test
+    @DisplayName("Should not look up events or send emails when cancelling fails")
+    void shouldDoNothingWhenCancellationFails() throws Exception {
+      expect(eventBookingManager.cancelExpiredReservations()).andThrow(new SegueDatabaseException("boom"));
+
+      replay(eventBookingManager, contentManager);
+      eventNotificationEmailManager.cancelExpiredReservations();
+      verify(eventBookingManager, contentManager);
     }
   }
 }

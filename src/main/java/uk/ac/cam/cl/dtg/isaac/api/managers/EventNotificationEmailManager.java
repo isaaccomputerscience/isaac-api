@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.ExpiredReservation;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
@@ -83,6 +84,42 @@ public class EventNotificationEmailManager {
     this.userAccountManager = userAccountManager;
     this.emailManager = emailManager;
     this.pgScheduledEmailManager = pgScheduledEmailManager;
+  }
+
+  /**
+   * Cancel all lapsed reservations and, where the student had a full confirmation window and the event has not yet
+   * started, tell the student and the reserving teacher. Run by the daily 7am expiry job.
+   */
+  public void cancelExpiredReservations() {
+    final List<ExpiredReservation> expired;
+    try {
+      expired = bookingManager.cancelExpiredReservations();
+    } catch (SegueDatabaseException e) {
+      log.error("Failed to cancel expired reservations: ", e);
+      return;
+    }
+    log.info("Cancelled {} expired reservations", expired.size());
+
+    Map<String, Optional<IsaacEventPageDTO>> eventCache = new HashMap<>();
+    for (ExpiredReservation reservation : expired) {
+      try {
+        Optional<IsaacEventPageDTO> event = eventCache.computeIfAbsent(reservation.eventId(), id -> {
+          try {
+            return contentManager.getContentById(id) instanceof IsaacEventPageDTO page
+                ? Optional.of(page) : Optional.empty();
+          } catch (ContentManagerException e) {
+            log.error("Unable to load event {} for expired reservation emails: ", id, e);
+            return Optional.empty();
+          }
+        });
+        if (event.isPresent() && EventBookingManager.shouldNotifyExpiredReservation(event.get(), reservation)) {
+          bookingManager.sendExpiredReservationCancellationEmails(event.get(), reservation);
+        }
+      } catch (ContentManagerException | SegueDatabaseException | NoUserException e) {
+        log.error("Unable to send expired reservation emails for user {} on event {}: ",
+            reservation.userId(), reservation.eventId(), e);
+      }
+    }
   }
 
   /**
