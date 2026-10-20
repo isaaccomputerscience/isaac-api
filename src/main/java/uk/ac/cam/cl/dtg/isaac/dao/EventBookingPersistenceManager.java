@@ -17,6 +17,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.ITransaction;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.EventBooking;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.EventBookings;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.ExpiredReservation;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.PgEventBookings;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
@@ -363,6 +364,16 @@ public class EventBookingPersistenceManager {
    */
   public void deleteAdditionalInformation(final Long userId) throws SegueDatabaseException {
     dao.deleteAdditionalInformation(userId);
+  }
+
+  /**
+   * Cancel all RESERVED bookings whose reservation close date has passed.
+   *
+   * @return the reservations that were cancelled
+   * @throws SegueDatabaseException if an error occurs.
+   */
+  public List<ExpiredReservation> cancelExpiredReservations() throws SegueDatabaseException {
+    return dao.cancelExpiredReservations();
   }
 
   /**

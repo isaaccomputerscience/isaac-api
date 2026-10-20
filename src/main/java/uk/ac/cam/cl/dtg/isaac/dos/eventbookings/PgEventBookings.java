@@ -415,6 +415,30 @@ public class PgEventBookings implements EventBookings {
     }
   }
 
+  @Override
+  public List<ExpiredReservation> cancelExpiredReservations() throws SegueDatabaseException {
+    String query = "UPDATE event_bookings SET status = 'CANCELLED', updated = NOW()"
+        + " WHERE status = 'RESERVED'"
+        + " AND (additional_booking_information->>'reservationCloseDate')::timestamptz < NOW()"
+        + " RETURNING event_id, user_id, reserved_by,"
+        + " (additional_booking_information->>'reservationCloseDate')::timestamptz AS reservation_close_date";
+    try (Connection conn = ds.getDatabaseConnection();
+         PreparedStatement pst = conn.prepareStatement(query);
+         ResultSet results = pst.executeQuery()
+    ) {
+      List<ExpiredReservation> expired = new ArrayList<>();
+      while (results.next()) {
+        long reservedBy = results.getLong("reserved_by");
+        expired.add(new ExpiredReservation(results.getString("event_id"), results.getLong("user_id"),
+            results.wasNull() ? null : reservedBy,
+            getInstantFromTimestamp(results, "reservation_close_date")));
+      }
+      return expired;
+    } catch (SQLException e) {
+      throw new SegueDatabaseException("Postgres exception while trying to cancel expired reservations", e);
+    }
+  }
+
   /**
    * Acquire a globally unique lock on an event for the duration of a transaction.
    *

@@ -9,8 +9,10 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_TOKEN_AUTHORIZATION_LINK;
 import static uk.ac.cam.cl.dtg.isaac.api.Constants.EMAIL_TEMPLATE_TOKEN_CONTACT_US_URL;
@@ -55,6 +57,7 @@ import uk.ac.cam.cl.dtg.isaac.dos.AssociationToken;
 import uk.ac.cam.cl.dtg.isaac.dos.EventStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.ITransaction;
 import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.BookingStatus;
+import uk.ac.cam.cl.dtg.isaac.dos.eventbookings.ExpiredReservation;
 import uk.ac.cam.cl.dtg.isaac.dos.users.EmailVerificationStatus;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
@@ -1538,6 +1541,125 @@ class EventBookingManagerTest {
               String.format("https://hostname.com/contact?subject=Event+-++-+%s", urlDate),
               EMAIL_TEMPLATE_TOKEN_EVENT_DETAILS, "", EMAIL_TEMPLATE_TOKEN_EVENT, testEvent), EmailType.SYSTEM);
       expectLastCall();
+    }
+  }
+
+  @Nested
+  class ExpiredReservations {
+    private ExpiredReservation reservation(Long reservedById, Instant closeDate) {
+      return new ExpiredReservation("eventId", 2L, reservedById, closeDate);
+    }
+
+    @Test
+    void cancelExpiredReservations_delegatesToPersistenceManager() throws SegueDatabaseException {
+      List<ExpiredReservation> expired = List.of(reservation(5L, Instant.now()));
+      expect(dummyEventBookingPersistenceManager.cancelExpiredReservations()).andReturn(expired);
+
+      replay(mockedObjects);
+      assertEquals(expired, buildEventBookingManager().cancelExpiredReservations());
+      verify(mockedObjects);
+    }
+
+    @Test
+    void sendExpiredReservationCancellationEmails_emailsStudentAndReserver() throws Exception {
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
+      RegisteredUserDTO student = new RegisteredUserDTO();
+      student.setId(2L);
+      student.setGivenName("givenName");
+      student.setFamilyName("familyName");
+      RegisteredUserDTO reserver = new RegisteredUserDTO();
+      reserver.setId(5L);
+      expect(dummyUserAccountManager.getUserDTOById(2L)).andReturn(student);
+      expect(dummyUserAccountManager.getUserDTOById(5L)).andReturn(reserver);
+
+      EmailTemplateDTO studentTemplate = new EmailTemplateDTO();
+      EmailTemplateDTO reserverTemplate = new EmailTemplateDTO();
+      expect(dummyEmailManager.getEmailTemplateDTO("email-event-reservation-cancellation-confirmed"))
+          .andReturn(studentTemplate);
+      expect(dummyEmailManager.getEmailTemplateDTO("email_event_reservation_cancellation_reserver_notification"))
+          .andReturn(reserverTemplate);
+      dummyEmailManager.sendTemplatedEmailToUser(eq(student), eq(studentTemplate), anyObject(),
+          eq(EmailType.SYSTEM));
+      expectLastCall().once();
+      dummyEmailManager.sendTemplatedEmailToUser(eq(reserver), eq(reserverTemplate),
+          eq(Map.of(EMAIL_TEMPLATE_TOKEN_CONTACT_US_URL,
+              String.format("https://hostname.com/contact?subject=Event+-++-+%s", urlDate),
+              EMAIL_TEMPLATE_TOKEN_EVENT_DETAILS, "", EMAIL_TEMPLATE_TOKEN_EVENT, testEvent,
+              "reservedName", "givenName familyName")), eq(EmailType.SYSTEM));
+      expectLastCall().once();
+
+      replay(mockedObjects);
+      buildEventBookingManager().sendExpiredReservationCancellationEmails(testEvent,
+          reservation(5L, Instant.now().minus(1, ChronoUnit.HOURS)));
+      verify(mockedObjects);
+    }
+
+    @Test
+    void sendExpiredReservationCancellationEmails_withoutReserver_emailsStudentOnly() throws Exception {
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
+      RegisteredUserDTO student = new RegisteredUserDTO();
+      student.setId(2L);
+      expect(dummyUserAccountManager.getUserDTOById(2L)).andReturn(student);
+      EmailTemplateDTO studentTemplate = new EmailTemplateDTO();
+      expect(dummyEmailManager.getEmailTemplateDTO("email-event-reservation-cancellation-confirmed"))
+          .andReturn(studentTemplate);
+      dummyEmailManager.sendTemplatedEmailToUser(eq(student), eq(studentTemplate), anyObject(),
+          eq(EmailType.SYSTEM));
+      expectLastCall().once();
+
+      replay(mockedObjects);
+      buildEventBookingManager().sendExpiredReservationCancellationEmails(testEvent,
+          reservation(null, Instant.now().minus(1, ChronoUnit.HOURS)));
+      verify(mockedObjects);
+    }
+
+    @Test
+    void sendExpiredReservationCancellationEmails_studentNotFound_throwsAndSendsNothing() throws Exception {
+      IsaacEventPageDTO testEvent = prepareIsaacEventPageDto(studentCSTags);
+      expect(dummyUserAccountManager.getUserDTOById(2L)).andThrow(new NoUserException("No user found"));
+
+      replay(mockedObjects);
+      EventBookingManager ebm = buildEventBookingManager();
+      ExpiredReservation expired = reservation(5L, Instant.now().minus(1, ChronoUnit.HOURS));
+      assertThrows(NoUserException.class, () -> ebm.sendExpiredReservationCancellationEmails(testEvent, expired));
+      verify(mockedObjects);
+    }
+
+    @Test
+    void shouldNotifyExpiredReservation_fullWindowAndEventInFuture_returnsTrue() {
+      IsaacEventPageDTO event = new IsaacEventPageDTO();
+      event.setDate(someFutureDate);
+
+      assertTrue(EventBookingManager.shouldNotifyExpiredReservation(event,
+          reservation(5L, Instant.now().minus(1, ChronoUnit.HOURS))));
+    }
+
+    @Test
+    void shouldNotifyExpiredReservation_closeDateIsEventStart_returnsFalse() {
+      IsaacEventPageDTO event = new IsaacEventPageDTO();
+      event.setDate(someFutureDate);
+
+      assertFalse(EventBookingManager.shouldNotifyExpiredReservation(event, reservation(5L, someFutureDate)));
+    }
+
+    @Test
+    void shouldNotifyExpiredReservation_eventAlreadyStarted_returnsFalse() {
+      IsaacEventPageDTO event = new IsaacEventPageDTO();
+      event.setDate(Instant.now().minus(1, ChronoUnit.HOURS));
+
+      assertFalse(EventBookingManager.shouldNotifyExpiredReservation(event,
+          reservation(5L, Instant.now().minus(5, ChronoUnit.HOURS))));
+    }
+
+    @Test
+    void shouldNotifyExpiredReservation_missingDates_returnsFalse() {
+      IsaacEventPageDTO eventWithoutDate = new IsaacEventPageDTO();
+      IsaacEventPageDTO eventWithDate = new IsaacEventPageDTO();
+      eventWithDate.setDate(someFutureDate);
+
+      assertFalse(EventBookingManager.shouldNotifyExpiredReservation(eventWithoutDate,
+          reservation(5L, Instant.now())));
+      assertFalse(EventBookingManager.shouldNotifyExpiredReservation(eventWithDate, reservation(5L, null)));
     }
   }
 

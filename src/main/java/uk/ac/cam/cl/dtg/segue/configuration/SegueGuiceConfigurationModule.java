@@ -183,6 +183,7 @@ import uk.ac.cam.cl.dtg.segue.scheduler.jobs.DeleteEventAdditionalBookingInforma
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.EventFeedbackEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.EventOneHourReminderEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.EventReminderEmailJob;
+import uk.ac.cam.cl.dtg.segue.scheduler.jobs.ExpiredReservationsCleanUpJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.ScheduledAssignmentsEmailJob;
 import uk.ac.cam.cl.dtg.segue.scheduler.jobs.SegueScheduledSyncMailjetUsersJob;
 import uk.ac.cam.cl.dtg.segue.search.ElasticSearchProvider;
@@ -1010,11 +1011,21 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
           "SQL scheduled job that deletes old AnonymousUsers",
           CRON_STRING_0230_DAILY, "db_scripts/scheduled/anonymous-user-clean-up.sql");
 
-      SegueScheduledJob cleanUpExpiredReservations = new SegueScheduledDatabaseScriptJob(
+      // Replaced by the Java job below, which also sends cancellation emails. Listed so the old trigger is removed.
+      SegueScheduledJob legacyCleanUpExpiredReservations = new SegueScheduledDatabaseScriptJob(
           "cleanUpExpiredReservations",
           CRON_GROUP_NAME_SQL_MAINTENANCE,
           "SQL scheduled job that deletes expired reservations for the event booking system",
           CRON_STRING_0700_DAILY, "db_scripts/scheduled/expired-reservations-clean-up.sql");
+
+      SegueScheduledJob cleanUpExpiredReservations = SegueScheduledJob.createCustomJob(
+          "cleanUpExpiredReservationsAndNotify",
+          CRON_GROUP_NAME_JAVA_JOB,
+          "Cancel expired event reservations and email the student and reserving teacher where appropriate",
+          CRON_STRING_0700_DAILY,
+          Maps.newHashMap(),
+          new ExpiredReservationsCleanUpJob()
+      );
 
       SegueScheduledJob deleteEventAdditionalBookingInformation = SegueScheduledJob.createCustomJob(
           "deleteEventAdditionalBookingInformation",
@@ -1088,6 +1099,7 @@ public class SegueGuiceConfigurationModule extends AbstractModule implements Ser
       // Simply removing jobs from configuredScheduledJobs won't de-register them if they
       // are currently configured, so the constructor takes a list of jobs to remove too.
       List<SegueScheduledJob> scheduledJobsToRemove = new ArrayList<>();
+      scheduledJobsToRemove.add(legacyCleanUpExpiredReservations);
 
       if (null != mailjetKey && null != mailjetSecret && !mailjetKey.isEmpty() && !mailjetSecret.isEmpty()) {
         configuredScheduledJobs.add(syncMailjetUsers);
