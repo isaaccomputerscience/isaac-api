@@ -30,7 +30,7 @@
         <ossindex.version>3.2.0</ossindex.version>
         <jgit.version>6.10.0.202406032230-r</jgit.version>
         <maven.surefire-failsafe.version>3.3.1</maven.surefire-failsafe.version>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <mapstruct.version>1.6.0</mapstruct.version>
     </properties>
 
     <dependencies>
