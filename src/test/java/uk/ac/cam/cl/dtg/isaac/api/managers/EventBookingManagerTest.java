@@ -1103,6 +1103,30 @@ class EventBookingManagerTest {
   }
 
   @Nested
+  class GetAllEventStatesForUser {
+    @Test
+    void getAllEventStatesForUser_multipleBookingsForSameEvent_doesNotThrow() throws SegueDatabaseException {
+      EventBookingManager ebm = buildEventBookingManager();
+      String competitionId = "competition_event";
+
+      List<DetailedEventBookingDTO> bookings = List.of(
+          prepareDetailedEventBookingDto(1L, BookingStatus.CANCELLED, competitionId),
+          prepareDetailedEventBookingDto(1L, BookingStatus.CONFIRMED, competitionId),
+          prepareDetailedEventBookingDto(1L, BookingStatus.CANCELLED, competitionId),
+          prepareDetailedEventBookingDto(1L, BookingStatus.CONFIRMED, "other_event"));
+      expect(dummyEventBookingPersistenceManager.getEventsByUserId(1L)).andReturn(bookings);
+      replay(mockedObjects);
+
+      Map<String, BookingStatus> states = ebm.getAllEventStatesForUser(1L);
+
+      assertEquals(2, states.size());
+      assertEquals(BookingStatus.CONFIRMED, states.get(competitionId));
+      assertEquals(BookingStatus.CONFIRMED, states.get("other_event"));
+      verify(mockedObjects);
+    }
+  }
+
+  @Nested
   class CancelBooking {
     @Test
     void cancelBookingPromotesOldestWaitingListEntry()
