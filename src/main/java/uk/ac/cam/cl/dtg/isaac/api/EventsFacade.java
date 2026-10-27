@@ -2061,8 +2061,7 @@ public class EventsFacade extends AbstractIsaacFacade {
   }
 
   /**
-   * As {@link #getAugmentedEventDTOById}, but for listing a user's bookings: an event that no longer exists in the
-   * content (e.g. it was deleted or unpublished after the user booked) is skipped rather than failing the whole list.
+   * An event that no longer exists in the content is skipped rather than failing the whole list.
    *
    * @param request so we can determine if the user is logged in
    * @param eventId the id of the event of interest

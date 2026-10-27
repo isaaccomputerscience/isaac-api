@@ -163,7 +163,6 @@ class EventsFacadeTest {
 
   @Test
   void getEvents_showBookedOnly_skipsBookingsForEventsThatNoLongerExist() throws Exception {
-    // Arrange
     String missingEventId = "deleted_event";
     String nonEventContentId = "not_an_event";
     Map<String, BookingStatus> bookings = new LinkedHashMap<>();
@@ -183,10 +182,8 @@ class EventsFacadeTest {
         userBadgeManager, userAssociationManager, groupManager, schoolListReader,
         competitionEntryService, mapper);
 
-    // Act
     Response response = eventsFacade.getEvents(mockRequest, null, 0, 6, null, false, false, true, false, null);
 
-    // Assert
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     @SuppressWarnings("unchecked")
     ResultsWrapper<ContentDTO> body = (ResultsWrapper<ContentDTO>) response.getEntity();

@@ -156,8 +156,6 @@ public class EventBookingManager {
   public Map<String, BookingStatus> getAllEventStatesForUser(final Long userId) throws SegueDatabaseException {
     final Map<String, BookingStatus> bookingStatuses = new HashMap<>();
 
-    // A user can have several bookings for one event (e.g. one per project for a competition), so keep a
-    // non-cancelled status if there is one.
     for (EventBookingDTO booking : this.bookingPersistenceManager.getEventsByUserId(userId)) {
       bookingStatuses.merge(booking.getEventId(), booking.getBookingStatus(),
           (existing, incoming) -> BookingStatus.CANCELLED.equals(existing) ? incoming : existing);
