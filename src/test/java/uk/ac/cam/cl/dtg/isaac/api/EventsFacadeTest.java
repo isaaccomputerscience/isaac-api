@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +30,9 @@ import uk.ac.cam.cl.dtg.isaac.dos.users.Gender;
 import uk.ac.cam.cl.dtg.isaac.dos.users.Role;
 import uk.ac.cam.cl.dtg.isaac.dos.users.UserContext;
 import uk.ac.cam.cl.dtg.isaac.dto.IsaacEventPageDTO;
+import uk.ac.cam.cl.dtg.isaac.dto.ResultsWrapper;
 import uk.ac.cam.cl.dtg.isaac.dto.SegueErrorResponse;
+import uk.ac.cam.cl.dtg.isaac.dto.content.ContentDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.CompetitionEntryDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.eventbookings.EventBookingDTO;
 import uk.ac.cam.cl.dtg.isaac.dto.users.RegisteredUserDTO;
@@ -156,6 +159,36 @@ class EventsFacadeTest {
     if (event != null) {
       expect(mapper.copy(event)).andReturn(event);
     }
+  }
+
+  @Test
+  void getEvents_showBookedOnly_skipsBookingsForEventsThatNoLongerExist() throws Exception {
+    String missingEventId = "deleted_event";
+    String nonEventContentId = "not_an_event";
+    Map<String, BookingStatus> bookings = new LinkedHashMap<>();
+    bookings.put(missingEventId, BookingStatus.CONFIRMED);
+    bookings.put(nonEventContentId, BookingStatus.CONFIRMED);
+    bookings.put(eventId, BookingStatus.CONFIRMED);
+
+    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockStudent).anyTimes();
+    expect(bookingManager.getAllEventStatesForUser(mockStudent.getId())).andReturn(bookings);
+    expect(contentManager.getContentById(missingEventId)).andReturn(null);
+    expect(contentManager.getContentById(nonEventContentId)).andReturn(new ContentDTO());
+    expectGetRawEventDTOById(eventId, mockEvent);
+    expect(bookingManager.getBookingStatus(eventId, mockStudent.getId())).andReturn(BookingStatus.CONFIRMED);
+    expect(bookingManager.getPlacesAvailable(mockEvent)).andReturn(10);
+
+    replay(properties, logManager, bookingManager, userManager, contentManager,
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
+
+    Response response = eventsFacade.getEvents(mockRequest, null, 0, 6, null, false, false, true, false, null);
+
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    @SuppressWarnings("unchecked")
+    ResultsWrapper<ContentDTO> body = (ResultsWrapper<ContentDTO>) response.getEntity();
+    assertEquals(1, body.getResults().size());
+    assertEquals(eventId, body.getResults().get(0).getId());
   }
 
   @Test

@@ -363,7 +363,10 @@ public class EventsFacade extends AbstractIsaacFacade {
         continue;
       }
 
-      final IsaacEventPageDTO eventDTOById = this.getAugmentedEventDTOById(request, eventId);
+      final IsaacEventPageDTO eventDTOById = this.getAugmentedEventDTOByIdIfPresent(request, eventId);
+      if (null == eventDTOById) {
+        continue;
+      }
 
       if (tags != null) {
         Set<String> tagsList = Sets.newHashSet(tags);
@@ -399,7 +402,10 @@ public class EventsFacade extends AbstractIsaacFacade {
 
     for (EventBookingDTO booking : userReservationList) {
 
-      final IsaacEventPageDTO eventDTOById = this.getAugmentedEventDTOById(request, booking.getEventId());
+      final IsaacEventPageDTO eventDTOById = this.getAugmentedEventDTOByIdIfPresent(request, booking.getEventId());
+      if (null == eventDTOById) {
+        continue;
+      }
 
       filteredResults.add(eventDTOById);
     }
@@ -2051,6 +2057,31 @@ public class EventsFacade extends AbstractIsaacFacade {
   private IsaacEventPageDTO getAugmentedEventDTOById(final HttpServletRequest request, final String eventId)
       throws ContentManagerException, SegueDatabaseException {
     IsaacEventPageDTO event = getRawEventDTOById(eventId);
+    return augmentEventWithBookingInformation(request, event);
+  }
+
+  /**
+   * An event that no longer exists in the content is skipped rather than failing the whole list.
+   *
+   * @param request so we can determine if the user is logged in
+   * @param eventId the id of the event of interest
+   * @return the fully populated event dto with user context information, or null if the event cannot be found.
+   * @throws ContentManagerException if there is a problem finding the event information
+   * @throws SegueDatabaseException  if there is a database error.
+   */
+  private IsaacEventPageDTO getAugmentedEventDTOByIdIfPresent(final HttpServletRequest request, final String eventId)
+      throws ContentManagerException, SegueDatabaseException {
+    final IsaacEventPageDTO event;
+    try {
+      event = getRawEventDTOById(eventId);
+    } catch (ResourceNotFoundException e) {
+      log.warn("Skipping booked event with id {} as it could not be found in the content.", eventId);
+      return null;
+    }
+    if (null == event) {
+      log.warn("Skipping booked event with id {} as the content with this id is not an event.", eventId);
+      return null;
+    }
     return augmentEventWithBookingInformation(request, event);
   }
 
