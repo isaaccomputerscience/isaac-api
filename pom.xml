@@ -335,7 +335,7 @@
         <dependency>
             <groupId>com.mailjet</groupId>
             <artifactId>mailjet-client</artifactId>
-            <version>5.2.5</version>
+            <version>6.2.0</version>
         </dependency>
 
         <dependency>
