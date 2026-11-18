@@ -368,6 +368,11 @@ public class IsaacNumericValidator implements IValidator {
       untrustedDouble = roundStringValueToSigFigs(untrustedParsedValue, significantFiguresRequired);
     }
 
+    // Values too large (or small) to represent as a double overflow to infinity; never treat these as matching.
+    if (!Double.isFinite(trustedDouble) || !Double.isFinite(untrustedDouble)) {
+      return false;
+    }
+
     final double epsilon = 1e-50;
 
     return Math.abs(trustedDouble - untrustedDouble) < max(epsilon * max(trustedDouble, untrustedDouble), epsilon);

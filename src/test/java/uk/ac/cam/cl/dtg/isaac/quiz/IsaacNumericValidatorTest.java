@@ -694,6 +694,15 @@ class IsaacNumericValidatorTest {
     assertTrue(validator.numericValuesMatch("10000", input, 1));
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"1e999", "-1e999", "1x10^400", "1E999999999"})
+  void isaacNumericValidator_numericValuesMatch_overflowingValueNeverMatches(String input) {
+    assertFalse(validator.numericValuesMatch("42", input, 2));
+    assertFalse(validator.numericValuesMatch("42", input, null));
+    // Two overflowing values must not be treated as equal either
+    assertFalse(validator.numericValuesMatch("1e999", input, 2));
+  }
+
   /*
       Test various numbers for significant figure rules.
    */
