@@ -1066,4 +1066,17 @@ class EventsFacadeTest {
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     verify(competitionEntryService);
   }
+
+  @Test
+  void getEventBookingForGivenGroup_nonNumericGroupId_returnsBadRequest() throws Exception {
+    expect(userManager.getCurrentRegisteredUser(mockRequest)).andReturn(mockTeacher);
+
+    replay(properties, logManager, bookingManager, userManager, contentManager,
+        userBadgeManager, userAssociationManager, groupManager, schoolListReader,
+        competitionEntryService, mapper);
+
+    Response response = eventsFacade.getEventBookingForGivenGroup(mockRequest, eventId, "not-a-number");
+
+    assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+  }
 }
