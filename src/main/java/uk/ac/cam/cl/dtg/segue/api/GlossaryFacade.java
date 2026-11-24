@@ -116,6 +116,9 @@ public class GlossaryFacade extends AbstractSegueFacade {
       }
 
       c = this.contentManager.findByFieldNames(fieldsToMatch, startIndexOfResults, resultsLimit);
+    } catch (NumberFormatException e) {
+      return new SegueErrorResponse(Status.BAD_REQUEST,
+          "Unable to parse limit and start_index as integers.").toResponse();
     } catch (ContentManagerException e) {
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR,
           "Content acquisition error.", e).toResponse();

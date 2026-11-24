@@ -714,6 +714,8 @@ public class EventsFacade extends AbstractIsaacFacade {
           sanitiseExternalLogValue(groupId), sanitiseExternalLogValue(eventId));
       log.error(errorMsg, e);
       return new SegueErrorResponse(Status.INTERNAL_SERVER_ERROR, errorMsg).toResponse();
+    } catch (NumberFormatException e) {
+      return new SegueErrorResponse(Status.BAD_REQUEST, "Unable to parse group_id as an integer.").toResponse();
     } catch (NoUserLoggedInException e) {
       return SegueErrorResponse.getNotLoggedInResponse();
     } catch (ContentManagerException e) {
